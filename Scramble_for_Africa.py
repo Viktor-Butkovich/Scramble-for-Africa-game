@@ -1,13 +1,21 @@
 #to do
 #create relevant actors
 #review rules
-#change strategic map to correct size
-#add correct terrain types with corresponding colors and/or images
 #trigger button outlines when clicking, currently only works when pressing
+#add more docstrings and comments
+#make better images for certain resources
+#reduce frequency of global variables
+#move classes and functions to different files
 #
 #done since 6/15
 #remove varision-specific program elements
 #convert old game mode to a strategic game mode, removing other game modes
+#add correct terrain types with corresponding colors and/or images
+#change strategic map to correct size
+#added docstring descriptions of certain classes and functions
+#removed obsolete showing and can_show() variables and functions, respectively
+#added images for all resources
+
 import pygame
 import time
 import random
@@ -24,7 +32,7 @@ class input_manager_template():
         self.send_input_to = ''
         
     def check_for_input(self):
-        if self.old_taking_input == True and self.taking_input == False:
+        if self.old_taking_input == True and self.taking_input == False: 
             return(True)
         else:
             return(False)
@@ -48,15 +56,28 @@ class input_manager_template():
                 print_to_screen("I didn't understand that.")
                 
 class button_class():
-    def __init__(self, coordinates, width, height, color, button_type, showing, keybind_id, modes, image_id):
+    '''
+    A button that will do something when clicked or when the corresponding key is pressed
+    '''
+    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id):
+        '''
+        Inputs:
+            coordinates: tuple of 2 integers for initial coordinate x and y values
+            width: int representing the width in pixels of the button
+            height: int representing the height in pixels of the button
+            color: string representing a color in the color_dict dictionary
+            button_type: string representing a subtype of button, such as a 'move up' button
+            keybind_id: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
+            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
+            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
+        '''
         global color_dict
         global display_height
         global button_list
         self.has_released = True
-        self.modes = modes #game modes in which button is usable
+        self.modes = modes
         self.button_type = button_type
         button_list.append(self)
-        self.showing = True
         if keybind_id == 'none':
             self.has_keybind = False
             self.keybind_id = 'none'
@@ -67,37 +88,32 @@ class button_class():
         self.x, self.y = coordinates
         self.width = width
         self.height = height
-        self.Rect = pygame.Rect(self.x, display_height - (self.y + self.height), self.width, self.height) #(left, top, width, height), bottom left on coordinates
-        self.image = button_image(self, self.width, self.height, image_id, self.showing)
+        self.Rect = pygame.Rect(self.x, display_height - (self.y + self.height), self.width, self.height) #Pygame Rect object to track mouse collision
+        self.image = button_image(self, self.width, self.height, image_id)
         self.color = color_dict[color]
         self.outline_width = 2
         self.showing_outline = False
-        self.outline = pygame.Rect(self.x - self.outline_width, display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.x - self.outline_width, display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
         self.update_tooltip()
         self.confirming = False
-        
-    def can_show(self):
-        global current_game_mode
-        if current_game_mode in self.modes:
-            return(True)
-        else:
-            return(False)
 
     def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Calls the set_tooltip function with a list of strings that will each be a line in this button's tooltip.
+        '''
         global current_game_mode
         if self.button_type == 'move up':
-            message = ['Press to move up']
-            self.set_tooltip(message)
+            self.set_tooltip(['Press to move up'])
         elif self.button_type == 'move down':
-            message = ['Press to move down']
-            self.set_tooltip(message)
+            self.set_tooltip(['Press to move down'])
         elif self.button_type == 'move left':
-            message = ['Press to move left']
-            self.set_tooltip(message)
+            self.set_tooltip(['Press to move left'])
         elif self.button_type == 'move right':
-            message = ['Press to move right']
-            self.set_tooltip(message)
+            self.set_tooltip(['Press to move right'])
         elif self.button_type == 'toggle grid lines':
             self.set_tooltip(['Press to show or hide grid lines'])
         elif self.button_type == 'toggle text box':
@@ -108,7 +124,14 @@ class button_class():
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         else:
             self.set_tooltip(['placeholder'])
+            
     def set_keybind(self, new_keybind):
+        '''
+        Inputs:
+            new_keybind: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
+        Outputs:
+            Sets keybind_name to a string used in the tooltip that describes the key to which this button is bound.
+        '''
         if new_keybind == pygame.K_a:
             self.keybind_name = 'a'
         if new_keybind == pygame.K_b:
@@ -199,13 +222,15 @@ class button_class():
             self.keybind_name = 'escape'
 
     def set_tooltip(self, tooltip_text):
+        '''
+        Inputs:
+            tooltip_text: a list of strings representing the lines of the tooltip message
+        Outputs:
+            Creates a tooltip message and the Pygame Rect objects (background and outline) required to display it.
+        '''
         global font_size
         self.tooltip_text = tooltip_text
         if self.has_keybind:
-        #    if not self.tooltip_text[-1] == ("Press " + self.keybind_name + " to use."): #only add if not already there
-        #        if self.tooltip_text[-1][0] == "P" and self.tooltip_text[-1][1] == "r" and self.tooltip_text[-1][2] == "e" and self.tooltip_text[-1][3] == "s" and self.tooltip_text[-1][4] == "s": #if a different press message, replace it
-        #            self.tooltip_text[-1] = "Press " + self.keybind_name + " to use."
-        #        else:
             self.tooltip_text.append("Press " + self.keybind_name + " to use.")
         tooltip_width = 50
         for text_line in tooltip_text:
@@ -217,12 +242,18 @@ class button_class():
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
     def touching_mouse(self):
-        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing: #if mouse is in button
+        '''
+        Returns whether the button is colliding with the mouse
+        '''
+        if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
         else:
             return(False)
 
     def can_show_tooltip(self):
+        '''
+        Returns whether the button's tooltip should be shown, which is when the button is currently displayed and the mouse is colliding with it.
+        '''
         global current_game_mode
         if self.touching_mouse() and current_game_mode in self.modes:
             return(True)
@@ -230,31 +261,29 @@ class button_class():
             return(False)
         
     def draw(self):
+        '''
+        Draws the button with a description of its keybind if applicable, along with an outline if being pressed
+        '''
         global game_display
         global color_dict
-        if self.showing:
-            if self.button_type == 'do something':
-                global text_box_height
-                self.y = text_box_height
-                self.Rect.y = display_height - (self.y + self.height)
-                if text_box_height > 185: #moves button to the side to not block button on top of screen if text box is expanded high enough
-                    self.x = 105
-                    self.Rect.x = 105
-                else:
-                    self.x = 0
-                    self.Rect.x = 0
-            if self.showing_outline:
-                pygame.draw.rect(game_display, color_dict['light gray'], self.outline)
-            pygame.draw.rect(game_display, self.color, self.Rect)
-            self.image.draw()
-            myfont = pygame.font.SysFont('Times New Roman', 15)
-            if self.has_keybind:
-                message = self.keybind_name
-                color = 'white'
-                textsurface = myfont.render(message, False, color_dict[color])
-                game_display.blit(textsurface, (self.x + 10, (display_height - (self.y + self.height - 5))))
+        if self.showing_outline: 
+            pygame.draw.rect(game_display, color_dict['light gray'], self.outline)
+        pygame.draw.rect(game_display, self.color, self.Rect)
+        self.image.draw()
+        myfont = pygame.font.SysFont('Times New Roman', 15)
+        if self.has_keybind: #The key to which a button is bound will appear on the button's image
+            message = self.keybind_name
+            color = 'white'
+            textsurface = myfont.render(message, False, color_dict[color])
+            game_display.blit(textsurface, (self.x + 10, (display_height - (self.y + self.height - 5))))
 
     def draw_tooltip(self, y_displacement):
+        '''
+        Inputs:
+            y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
+        Outputs:
+            Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
+        '''
         global game_display
         global font_size
         global myfont
@@ -276,44 +305,25 @@ class button_class():
             game_display.blit(text(text_line, myfont), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * font_size)))
 
     def on_rmb_click(self):
-        self.on_click() #change in subclasses that use right clicking
+        '''
+        Controls what the button does when right clicked. All button objects need an on_rmb_click function so that button subclasses that do something different on right click work correctly.
+        '''
+        self.on_click()
 
     def on_click(self):
+        '''
+        Controls what the button does when left clicked. The action taken will depend on button_type's value.
+        '''
         global actor_list
         global controlled_list
-        global enemy_list
         global turn_ended
         global current_game_mode
-        global mob_list
         global strategic_actor_list
         global retreat_time
         self.showing_outline = True
         if self.button_type == 'hi printer':
             print_to_screen('hi')
-        #elif self.button_type == 'move up':
-            #if current_game_mode == 'strategic':
-            #    for strategic_actor in strategic_actor_list:
-            #        if strategic_actor.controllable and strategic_actor.selected:
-            #            strategic_actor.move('up')
-            #else:
-        #elif self.button_type == 'move down':
-            #if current_game_mode == 'strategic':
-            #    for strategic_actor in strategic_actor_list:
-            #        if strategic_actor.controllable and strategic_actor.selected:
-            #            strategic_actor.move('down')
-            #else:
-        #elif self.button_type == 'move right':
-            #if current_game_mode == 'strategic':
-            #    for strategic_actor in strategic_actor_list:
-            #        if strategic_actor.controllable and strategic_actor.selected:
-            #            strategic_actor.move('right')
-            #else:
-        #elif self.button_type == 'move left':
-            #if current_game_mode == 'strategic':
-            #    for strategic_actor in strategic_actor_list:
-            #        if strategic_actor.controllable and strategic_actor.selected:
-            #            strategic_actor.move('left')
-            #else:
+
         elif self.button_type == 'toggle grid lines':
             global show_grid_lines
             if show_grid_lines:
@@ -348,19 +358,41 @@ class button_class():
                 current_instructions_page_index = 0
 
     def on_rmb_release(self):
+        '''
+        Controls what the button does when right clicked and released. All button objects need an on_rmb_release function so that button subclasses that do something different on right click work correctly.
+        '''
         self.on_release() #if any rmb buttons did something different on release, change in subclass
                 
     def on_release(self):
+        '''
+        Controls what the button does when left clicked and released. By default, buttons will stop showing their outlines when released. Currently, buttons do not correctly show outlines when clicked
+        '''
         self.showing_outline = False
 
     def remove(self):
+        '''
+        Function shared by most objects that removes them from all relevant lists and references
+        '''
         global button_list
         global image_list
         button_list = remove_from_list(button_list, self)
         image_list = remove_from_list(image_list, self.image)
 
 class label(button_class):
-    def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message): #message is initially a string
+    '''
+    A button that shares most of a normal button's image and tooltip behaviors but does nothing when clicked. Used to display information
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image_id, message): #message is initially a string
+        '''
+        Inputs:
+            coordinates: tuple of 2 integers for initial coordinate x and y values
+            ideal_width: int representing the width in pixels of the button. Depending on its message, the label may change its width slightly to avoid cutting off words.
+            minimum_height: int representing the minimum height in pixels of the button. For long messages, the height will increase to accomodate the extra words. While this has often not worked correctly, the top of the label should stay in place while the bottom moves down.
+            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
+            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
+            message: string representing the contents of the label. This is converted by format_message to a list of strings, in which each string is a line of text on the label.
+        '''
+        #continue from here
         global label_list
         label_list.append(self)
         self.modes = modes
@@ -377,7 +409,7 @@ class label(button_class):
         self.height = (self.font_size * len(self.message)) + 15
         if self.height < minimum_height:
             self.height = minimum_height
-        super().__init__(coordinates, self.width, self.height, 'green', 'label', showing, 'none', self.modes, image)
+        super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id)
 
     def set_label(self, new_message):
         self.message = new_message
@@ -428,14 +460,11 @@ class label(button_class):
         button_list = remove_from_list(button_list, self)
         image_list = remove_from_list(image_list, self.image)
 
-    def can_show(self):
-        return(True)
-
     def draw(self):
         global game_display
         global color_dict
         global current_game_mode
-        if current_game_mode in self.modes and self.showing:
+        if current_game_mode in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
@@ -465,10 +494,10 @@ class label(button_class):
 class notification(label):
     '''special label with slightly different message and disappears when clicked'''
     
-    def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message):
         global notification_list
         notification_list.append(self)
-        super().__init__(coordinates, ideal_width, minimum_height, showing, modes, image, message)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message)
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length
         new_message = []
@@ -502,37 +531,12 @@ class notification(label):
             notification_queue.pop(0)
         if len(notification_queue) > 0:
             notification_to_front(notification_queue[0])
-''' old code, no current applications in SFA
-class pointer(notification):
-    def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message, direction, arrow_coordinates, remove_condition):
-        super().__init__(coordinates, ideal_width, minimum_height, showing, modes, image, message)
-        global pointer_list
-        pointer_list.append(self)
-        if direction == 'right':
-            image_id = 'misc/right_arrow.png'
-        elif direction == 'left':
-            image_id = 'misc/left_arrow.png'
-        elif direction == 'up':
-            image_id = 'misc/up_arrow.png'
-        elif direction == 'down':
-            image_id = 'misc/down_arrow.png'
-        self.arrow = free_image(image_id, arrow_coordinates, 100, 100, ['tavern']) #image_id, coordinates, width, height, modes
-        self.remove_condition = remove_condition
-        
-    def remove(self):
-        super().remove()
-        self.arrow.remove()
-        self.arrow = 'none'
-        
-    def check_removal(self, event):
-        if event == self.remove_condition:
-            self.remove()
-'''
+
 class instructions_page(label):
     def __init__(self, instruction_text):
         global default_display_width
         global default_display_height
-        super().__init__(scale_coordinates(60, 60), scale_width(default_display_width - 120), scale_height(default_display_height - 120), True, ['strategic'], 'misc/default_instruction.png', instruction_text)
+        super().__init__(scale_coordinates(60, 60), scale_width(default_display_width - 120), scale_height(default_display_height - 120), ['strategic'], 'misc/default_instruction.png', instruction_text)
 
     def on_click(self):
         global current_instructions_page_index
@@ -572,12 +576,11 @@ class instructions_page(label):
         self.set_tooltip(["Click to go to the next instructions page.", "Press the display instructions button on the right side of the screen again to close the instructions."])
 
 class bar():
-    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, showing):
+    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color):
         global bar_list
         bar_list.append(self)
         self.x, self.y = coordinates
         self.y = display_height - self.y
-        self.showing = showing
         self.minimum = minimum
         self.maximum = maximum
         self.current = current
@@ -621,13 +624,13 @@ class bar():
             pygame.draw.rect(game_display, self.empty_color, self.empty_Rect)
 
     def touching_mouse(self):
-        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing: #if mouse is in button
+        if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
         else:
             return(False)
         
 class grid():
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, showing, color, modes):
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes):
         global terrain_list
         grid_list.append(self)
         self.modes = modes
@@ -636,7 +639,6 @@ class grid():
         self.coordinate_height = coordinate_height
         self.pixel_width = pixel_width
         self.pixel_height = pixel_height
-        self.showing = showing
         self.color = color
         self.cell_list = []
         self.create_cells()
@@ -675,7 +677,7 @@ class grid():
                 cell.draw()
 
     def draw_grid_lines(self):
-        if self.showing and show_grid_lines:
+        if show_grid_lines:
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(game_display, color_dict['black'], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)))
             for y in range(0, self.coordinate_height+1):
@@ -952,14 +954,6 @@ class cell():
             
     def draw(self): #eventually add a tutorial message the first time cells or multiple cells are shaded to explain cell shading mechanics
         global game_display
-        global color_dict
-        global controlled_list
-        global enemy_list
-        global my_font
-        global show_range
-        global current_game_mode
-        global current_party
-        global sight_range
         current_color = self.color
         red = current_color[0]
         green = current_color[1]
@@ -994,7 +988,6 @@ class free_image():
     def __init__(self, image_id, coordinates, width, height, modes):
         global image_list
         self.modes = modes
-        self.showing = True
         self.width = width
         self.height = height
         self.set_image(image_id)
@@ -1026,7 +1019,7 @@ class loading_image_class(free_image):
         display_image(self.image, self.x, self.y - self.height)
 
 class actor_image():
-    def __init__(self, actor, width, height, grid, image_description, showing):
+    def __init__(self, actor, width, height, grid, image_description):
         global image_list
         global display_width
         global display_height
@@ -1041,7 +1034,6 @@ class actor_image():
         image_list.append(self)
         self.grid = grid
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
-        self.showing = showing
         self.outline_width = 2
         self.outline = pygame.Rect(self.actor.x - self.outline_width, display_height - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
@@ -1097,7 +1089,7 @@ class actor_image():
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
 class button_image(actor_image):
-    def __init__(self, button, width, height, image_id, showing): #image_type can be free or grid
+    def __init__(self, button, width, height, image_id): #image_type can be free or grid
         global image_list
         global display_width
         global display_height
@@ -1113,7 +1105,6 @@ class button_image(actor_image):
         image_list.append(self)
         self.grid = grid
         self.Rect = self.button.Rect
-        self.showing = showing
         self.outline_width = 2
         self.outline = pygame.Rect(self.x - self.outline_width, display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
 
@@ -1137,7 +1128,7 @@ class button_image(actor_image):
         global display_height
         global current_turn
         global current_game_mode
-        if self.button.can_show() and current_game_mode in self.button.modes:
+        if current_game_mode in self.button.modes:
             self.x = self.button.x
             self.y = display_height - (self.button.y + self.height) + self.height
             display_image(self.image, self.x, self.y - self.height)
@@ -1149,8 +1140,8 @@ class button_image(actor_image):
         i = 0
 
 class obstacle_image(actor_image):
-    def __init(self, actor, width, height, grid, image_description, showing):
-        super().__init__(actor, width, height, grid, image_description, showing)
+    def __init(self, actor, width, height, grid, image_description):
+        super().__init__(actor, width, height, grid, image_description)
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1175,8 +1166,8 @@ class obstacle_image(actor_image):
         display_image(self.image, self.x, self.y - self.height)
 
 class animated_obstacle_image(obstacle_image):
-    def __init__(self, actor, width, height, grid, image_description, showing):
-        super().__init__(actor, width, height, grid, image_description, showing)
+    def __init__(self, actor, width, height, grid, image_description):
+        super().__init__(actor, width, height, grid, image_description)
         self.last_switch = time.time()
         self.image_index = 0
     def draw(self):
@@ -1191,8 +1182,8 @@ class animated_obstacle_image(obstacle_image):
         super().draw()
 
 class actor_bar(bar):
-    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, showing, actor, y_multiplier):
-        super().__init__(coordinates, minimum, maximum, current, width, height, full_color, empty_color, showing)
+    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, actor, y_multiplier):
+        super().__init__(coordinates, minimum, maximum, current, width, height, full_color, empty_color)
         self.actor = actor
         self.modes = self.actor.modes
         self.y_multiplier = y_multiplier
@@ -1204,8 +1195,7 @@ class actor_bar(bar):
         self.y = int(self.actor.image.y - (self.actor.image.height * (0.1 * self.y_multiplier)))
         self.width = int(self.actor.image.width * 0.8)
         self.height = int(self.actor.image.height * 0.075)
-        if current_game_mode == 'tavern' and self.actor.main_character and self.full_color == color_dict['yellow']: #if action bar, don't show in tavern
-            self.showing = False
+        
     def draw(self):
         self.update_status()
         bar.draw(self)
@@ -1214,15 +1204,11 @@ class actor_bar(bar):
         self.update_status()
 
 class actor():
-    def __init__(self, coordinates, grid, showing, modes):
+    def __init__(self, coordinates, grid, modes):
         global color_dict
         global actor_list
-        global enemy_list
-        global controlled_list
         actor_list.append(self)
         self.modes = modes
-        self.controllable = False
-        self.showing = showing
         self.grid = grid
         self.x, self.y = coordinates
         self.name = ''
@@ -1253,13 +1239,9 @@ class actor():
         
     def remove(self):
         global actor_list
-        global enemy_list
-        global controlled_list
         global image_list
-        global bar_list
         actor_list = remove_from_list(actor_list, self)
         image_list = remove_from_list(image_list, self.image)
-        self.showing = False
 
     def interact(self, other):
         if other == None:
@@ -1274,7 +1256,6 @@ class actor():
             return(False)
 
     def can_show_tooltip(self): #moved to actor
-        global targeting_ability
         global current_game_mode
         if self.touching_mouse() and current_game_mode in self.modes: #and not targeting_ability 
             return(True)
@@ -1305,14 +1286,14 @@ class actor():
 class tile_class(actor):
     '''like an obstacle without a tooltip or movement blocking'''
     
-    def __init__(self, coordinates, grid, image, name, showing, modes, show_terrain): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
-        super().__init__(coordinates, grid, showing, modes)
+    def __init__(self, coordinates, grid, image, name, modes, show_terrain): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
+        super().__init__(coordinates, grid, modes)
         global tile_list
         self.set_name(name)
         tile_list.append(self)
         self.image_dict = {'default': image}
-        self.image = tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', showing)
-        self.shader = tile_shader(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', showing)
+        self.image = tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
+        self.shader = tile_shader(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
         self.show_terrain = show_terrain
         self.cell = self.grid.find_cell(self.x, self.y)
         if self.cell.tile == 'none':
@@ -1330,7 +1311,7 @@ class tile_class(actor):
             self.resource_icon = 'none'
         self.resource = new_resource
         if not self.cell.resource == 'none':
-            self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', True, ['strategic'], False)
+            self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
         #self.cell.resource = 'none'#reset resources when setting terrain
@@ -1408,8 +1389,8 @@ class tile_class(actor):
 class overlay_tile(tile_class):
     '''kind of tile, preferably transparent, that appears in front of obstacles. Good for darkness and such'''
     
-    def __init__(self, actor, width, height, grid, image_id, showing, show_terrain):
-        super().__init__(actor, width, height, grid, image_id, showing, show_terrain)
+    def __init__(self, actor, width, height, grid, image_id, show_terrain):
+        super().__init__(actor, width, height, grid, image_id, show_terrain)
         global overlay_tile_list
         overlay_tile_list.append(self)
         
@@ -1419,8 +1400,8 @@ class overlay_tile(tile_class):
         overlay_tile_list = remove_from_list(overlay_tile_list, self)
 
 class tile_image(actor_image):
-    def __init__(self, actor, width, height, grid, image_description, showing):
-        super().__init__(actor, width, height, grid, image_description, showing)
+    def __init__(self, actor, width, height, grid, image_description):
+        super().__init__(actor, width, height, grid, image_description)
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1442,8 +1423,8 @@ class tile_image(actor_image):
         display_image(self.image, self.x, self.y - self.height)
 
 class tile_shader(tile_image):
-    def __init__(self, actor, width, height, grid, image_description, showing):
-        super().__init__(actor, width, height, grid, image_description, showing)
+    def __init__(self, actor, width, height, grid, image_description):
+        super().__init__(actor, width, height, grid, image_description)
         self.shading = False
         self.image = pygame.image.load('graphics/misc/yellow_shader.png')
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -1456,10 +1437,10 @@ class tile_shader(tile_image):
 class strategic_actor(actor):
     '''actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob'''
     
-    def __init__(self, coordinates, grid, image_dict, showing, controllable, modes):
-        super().__init__(coordinates, grid, showing, modes)
+    def __init__(self, coordinates, grid, image_dict, controllable, modes):
+        super().__init__(coordinates, grid, modes)
         self.image_dict = image_dict
-        self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', showing)
+        self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
         self.controllable = controllable
         self.image.set_image('default')
         strategic_actor_list.append(self)
@@ -1477,7 +1458,6 @@ class strategic_actor(actor):
         global strategic_actor_list
         super().remove()
         strategic_actor_list = remove_from_list(strategic_actor_list, self)
-        self.showing = False
     
 def remove_from_list(received_list, item_to_remove):
     output_list = []
@@ -1556,21 +1536,6 @@ def find_coordinate_distance(first, second):
     second_x, second_y = second
     return((((first_x - second_x) ** 2) + ((first_y - second_y) ** 2)) ** 0.5)
 
-def move_group(direction):
-    global mob_list
-    for i in range(10): #loop number is arbitrary
-        moving_list = []
-        for mob in mob_list:
-            if mob.moving:
-                moving_list.append(mob)
-        for mob in moving_list:
-            if mob.can_move(direction):
-                mob.move(direction)
-                mob.moving = False
-    for mob in moving_list:
-        mob.move(direction)
-        mob.moving = False
-
 def set_game_mode(new_game_mode):
     global current_game_mode
     global text_box_height
@@ -1612,7 +1577,7 @@ def create_strategic_map():
     print_to_screen('Creating map...')
     update_display()
     for current_cell in strategic_map_grid.cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
-        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', True, ['strategic'], True) #creates a terrain tile that will be modified to the grid cell's terrain type
+        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True) #creates a terrain tile that will be modified to the grid cell's terrain type
     strategic_map_grid.set_resources()
     
 
@@ -1725,19 +1690,19 @@ def update_display():
         for image in image_list:
             image.has_drawn = False
         for tile in tile_list:
-            if current_game_mode in tile.image.modes and tile.image.showing and not tile in overlay_tile_list:
+            if current_game_mode in tile.image.modes and not tile in overlay_tile_list:
                 tile.image.draw()
                 tile.image.has_drawn = True
         for image in image_list:
             if not image.has_drawn:
-                if current_game_mode in image.modes and image.showing:
+                if current_game_mode in image.modes:
                     image.draw()
                     image.has_drawn = True
         for bar in bar_list:
-            if current_game_mode in bar.modes and bar.showing:
+            if current_game_mode in bar.modes:
                 bar.draw()
         for overlay_tile in overlay_tile_list:
-            if current_game_mode in overlay_tile.image.modes and overlay_tile.image.showing:
+            if current_game_mode in overlay_tile.image.modes:
                 overlay_tile.image.draw()
                 overlay_tile.image.has_drawn = True
                 
@@ -1755,10 +1720,6 @@ def update_display():
                 possible_tooltip_drawers.append(actor) #only one of these will be drawn to prevent overlapping tooltips
 
         for button in button_list:
-            if button.can_show(): #can_show checks game mode
-                button.showing = True
-            else:
-                button.showing = False
             if not button in notification_list: #notifications are drawn later
                 button.draw()
             if button.can_show_tooltip():
@@ -1837,7 +1798,7 @@ def display_notification(message):
 
 def notification_to_front(message):
     '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
-    new_notification = notification(scale_coordinates(610, 236), scale_width(500), scale_height(500), True, ['strategic'], 'misc/default_notification.png', message)#coordinates, ideal_width, minimum_height, showing, modes, image, message
+    new_notification = notification(scale_coordinates(610, 236), scale_width(500), scale_height(500), ['strategic'], 'misc/default_notification.png', message)#coordinates, ideal_width, minimum_height, showing, modes, image, message
 
 def show_tutorial_notifications():
     intro_message = "Placeholder tutorial/opener notification"
@@ -1952,27 +1913,27 @@ location_name_image_dict = {}
 loading_image = loading_image_class('misc/loading.png')
 #strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 64, 60, True, color_dict['dark green'], ['strategic'])
 #strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 32, 30, True, color_dict['dark green'], ['strategic'])
-strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 16, 15, True, color_dict['dark green'], ['strategic'])
+strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 16, 15, color_dict['dark green'], ['strategic'])
 #mouse_follower = mouse_follower_class()
 button_start_x = 600#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 12#tracks current button to move each one farther right
 
-left_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move left', True, pygame.K_a, ['strategic'], 'misc/left_button.png')
+left_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move left', pygame.K_a, ['strategic'], 'misc/left_button.png')
 current_button_number += 1
-down_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move down', True, pygame.K_s, ['strategic'], 'misc/down_button.png')#movement buttons should be usable in any mode with a grid
+down_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move down', pygame.K_s, ['strategic'], 'misc/down_button.png')#movement buttons should be usable in any mode with a grid
 
-up_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 80), scale_width(50), scale_height(50), 'blue', 'move up', True, pygame.K_w, ['strategic'], 'misc/up_button.png')
+up_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 80), scale_width(50), scale_height(50), 'blue', 'move up', pygame.K_w, ['strategic'], 'misc/up_button.png')
 current_button_number += 1
-right_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move right', True, pygame.K_d, ['strategic'], 'misc/right_button.png')
+right_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png')
 current_button_number += 2#move more when switching categories
 
 current_button_number += 1
 
-expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50), scale_width(50), scale_height(50), 'black', 'expand text box', True, pygame.K_j, ['strategic'], 'misc/text_box_size_button.png') #'none' for no keybind
-toggle_grid_lines_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle grid lines', True, pygame.K_g, ['strategic'], 'misc/grid_line_button.png')
-instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170), scale_width(50), scale_height(50), 'blue', 'instructions', True, pygame.K_i, ['strategic'], 'misc/instructions.png')
-toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle text box', True, pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png')
+expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50), scale_width(50), scale_height(50), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png') #'none' for no keybind
+toggle_grid_lines_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png')
+instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170), scale_width(50), scale_height(50), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png')
+toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png')
 
 r_shift = 'up'
 l_shift = 'up'
@@ -2006,7 +1967,7 @@ while not crashed:
             ctrl = False
         if event.type == pygame.KEYDOWN:
             for button in button_list:
-                if button.showing and not typing:
+                if current_game_mode in button.modes and not typing:
                     if button.has_keybind:
                         if event.key == button.keybind_id:
                             if button.has_released:
