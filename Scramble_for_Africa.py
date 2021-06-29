@@ -37,7 +37,7 @@ class input_manager_template():
     def update_input(self):
         self.old_taking_input = self.taking_input
         
-    def receive_input(self, received_input):#to do add do something button for testing
+    def receive_input(self, received_input): #to do: add do something button for testing
         if self.send_input_to == 'do something':
             if received_input == 'done':
                 global crashed
@@ -53,7 +53,7 @@ class button_class():
         global display_height
         global button_list
         self.has_released = True
-        self.modes = modes#game modes in which button is usable
+        self.modes = modes #game modes in which button is usable
         self.button_type = button_type
         button_list.append(self)
         self.showing = True
@@ -67,7 +67,7 @@ class button_class():
         self.x, self.y = coordinates
         self.width = width
         self.height = height
-        self.Rect = pygame.Rect(self.x, display_height - (self.y + self.height), self.width, self.height)#(left, top, width, height), bottom left on coordinates
+        self.Rect = pygame.Rect(self.x, display_height - (self.y + self.height), self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.image = button_image(self, self.width, self.height, image_id, self.showing)
         self.color = color_dict[color]
         self.outline_width = 2
@@ -202,8 +202,8 @@ class button_class():
         global font_size
         self.tooltip_text = tooltip_text
         if self.has_keybind:
-        #    if not self.tooltip_text[-1] == ("Press " + self.keybind_name + " to use."):#only add if not already there
-        #        if self.tooltip_text[-1][0] == "P" and self.tooltip_text[-1][1] == "r" and self.tooltip_text[-1][2] == "e" and self.tooltip_text[-1][3] == "s" and self.tooltip_text[-1][4] == "s":#if a different press message, replace it
+        #    if not self.tooltip_text[-1] == ("Press " + self.keybind_name + " to use."): #only add if not already there
+        #        if self.tooltip_text[-1][0] == "P" and self.tooltip_text[-1][1] == "r" and self.tooltip_text[-1][2] == "e" and self.tooltip_text[-1][3] == "s" and self.tooltip_text[-1][4] == "s": #if a different press message, replace it
         #            self.tooltip_text[-1] = "Press " + self.keybind_name + " to use."
         #        else:
             self.tooltip_text.append("Press " + self.keybind_name + " to use.")
@@ -217,7 +217,7 @@ class button_class():
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
     def touching_mouse(self):
-        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing:#if mouse is in button
+        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing: #if mouse is in button
             return(True)
         else:
             return(False)
@@ -237,7 +237,7 @@ class button_class():
                 global text_box_height
                 self.y = text_box_height
                 self.Rect.y = display_height - (self.y + self.height)
-                if text_box_height > 185:#moves button to the side to not block button on top of screen if text box is expanded high enough
+                if text_box_height > 185: #moves button to the side to not block button on top of screen if text box is expanded high enough
                     self.x = 105
                     self.Rect.x = 105
                 else:
@@ -276,7 +276,7 @@ class button_class():
             game_display.blit(text(text_line, myfont), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * font_size)))
 
     def on_rmb_click(self):
-        self.on_click()#change in subclasses that use right clicking
+        self.on_click() #change in subclasses that use right clicking
 
     def on_click(self):
         global actor_list
@@ -331,7 +331,7 @@ class button_class():
             global default_text_box_height
             global display_height
             if text_box_height == default_text_box_height:
-                text_box_height = default_display_height - 50#self.height
+                text_box_height = default_display_height - 50 #self.height
             else:
                 text_box_height = default_text_box_height
         elif self.button_type == 'do something':
@@ -348,7 +348,7 @@ class button_class():
                 current_instructions_page_index = 0
 
     def on_rmb_release(self):
-        self.on_release()#if any rmb buttons did something different on release, change in subclass
+        self.on_release() #if any rmb buttons did something different on release, change in subclass
                 
     def on_release(self):
         self.showing_outline = False
@@ -360,7 +360,7 @@ class button_class():
         image_list = remove_from_list(image_list, self.image)
 
 class label(button_class):
-    def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message):#message is initially a string
+    def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message): #message is initially a string
         global label_list
         label_list.append(self)
         self.modes = modes
@@ -386,7 +386,7 @@ class label(button_class):
             if message_width(text_line, self.font_size, self.font_name) + 10 > self.ideal_width:
                 self.width = message_width(text_line, self.font_size, self.font_name) + 10
 
-    def format_message(self):#takes a string message and divides it into a list of strings based on length
+    def format_message(self): #takes a string message and divides it into a list of strings based on length
         global level_up_option_list
         new_message = []
         next_line = ""
@@ -399,7 +399,7 @@ class label(button_class):
                     next_line = ""
                 next_line += next_word
                 next_word = ""
-        if message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width and self in level_up_option_list:#normal labels shouldn't go to next line, but level up options should
+        if message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width and self in level_up_option_list: #normal labels shouldn't go to next line, but level up options should
             new_message.append(next_line)
             next_line = next_word
             new_message.append(next_line)
@@ -408,7 +408,7 @@ class label(button_class):
             new_message.append(next_line)
             
         greatest_width = 0
-        for line in new_message:#while formatting, trim each line to something close to ideal width, then set actual width to the longest one
+        for line in new_message: #while formatting, trim each line to something close to ideal width, then set actual width to the longest one
             if message_width(line, self.font_size, self.font_name) > greatest_width:
                 greatest_width = message_width(line, self.font_size, self.font_name)
         self.width = greatest_width + 10
@@ -417,7 +417,7 @@ class label(button_class):
     def update_tooltip(self):
         self.set_tooltip(self.message)
             
-    def on_click(self):#labels are buttons to have tooltip functionality but don't do anything when clicked
+    def on_click(self): #labels are buttons to have tooltip functionality but don't do anything when clicked
         i = 0
 
     def remove(self):
@@ -462,13 +462,15 @@ class label(button_class):
             text_line = self.tooltip_text[text_line_index]
             game_display.blit(text(text_line, myfont), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * font_size)))
 
-class notification(label):#special label with slightly different message and disappears when clicked
+class notification(label):
+    '''special label with slightly different message and disappears when clicked'''
+    
     def __init__(self, coordinates, ideal_width, minimum_height, showing, modes, image, message):
         global notification_list
         notification_list.append(self)
         super().__init__(coordinates, ideal_width, minimum_height, showing, modes, image, message)
 
-    def format_message(self):#takes a string message and divides it into a list of strings based on length
+    def format_message(self): #takes a string message and divides it into a list of strings based on length
         new_message = []
         next_line = ""
         next_word = ""
@@ -514,7 +516,7 @@ class pointer(notification):
             image_id = 'misc/up_arrow.png'
         elif direction == 'down':
             image_id = 'misc/down_arrow.png'
-        self.arrow = free_image(image_id, arrow_coordinates, 100, 100, ['tavern'])#image_id, coordinates, width, height, modes
+        self.arrow = free_image(image_id, arrow_coordinates, 100, 100, ['tavern']) #image_id, coordinates, width, height, modes
         self.remove_condition = remove_condition
         
     def remove(self):
@@ -545,7 +547,8 @@ class instructions_page(label):
             self.remove()
             current_instructions_page = 'none'
             
-    def format_message(self):#takes a string message and divides it into a list of strings based on length
+    def format_message(self):
+        '''takes a string message and divides it into a list of strings based on length'''
         new_message = []
         next_line = ""
         next_word = ""
@@ -559,8 +562,8 @@ class instructions_page(label):
                 next_word = ""
         next_line += next_word
         new_message.append(next_line)
-        new_message.append("Click to go to the next instructions page.")#not in superclass
-        new_message.append("Press the display instructions button on the right side of the screen again to close the instructions.")# not in superclass
+        new_message.append("Click to go to the next instructions page.") #not in superclass
+        new_message.append("Press the display instructions button on the right side of the screen again to close the instructions.") #not in superclass
         global current_instructions_page_index
         new_message.append("Page " + str(current_instructions_page_index + 1))
         
@@ -582,7 +585,7 @@ class bar():
         self.height = height
         self.full_color = full_color
         self.empty_color = empty_color
-        self.full_Rect = pygame.Rect(10, 10, 10, 10)#left top width height
+        self.full_Rect = pygame.Rect(10, 10, 10, 10) #left top width height
         self.empty_Rect = pygame.Rect(10, 10, 10, 10)
         self.Rect = pygame.Rect(10, 10, 10, 10)
 
@@ -618,7 +621,7 @@ class bar():
             pygame.draw.rect(game_display, self.empty_color, self.empty_Rect)
 
     def touching_mouse(self):
-        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing:#if mouse is in button
+        if self.Rect.collidepoint(pygame.mouse.get_pos()) and self.showing: #if mouse is in button
             return(True)
         else:
             return(False)
@@ -641,7 +644,7 @@ class grid():
             area = self.coordinate_width * self.coordinate_height
             num_worms = area // 5
             for i in range(num_worms):
-                self.make_random_terrain_worm(round(area/24), round(area/12), terrain_list)#sand['mountain', 'grass', 'forest']
+                self.make_random_terrain_worm(round(area/24), round(area/12), terrain_list) #sand['mountain', 'grass', 'forest']
             for cell in self.cell_list:
                 if cell.y == 0:
                     cell.set_terrain('water')
@@ -680,11 +683,13 @@ class grid():
 
 
 
-    def find_cell_center(self, coordinates):#converts grid coordinates to pixel coordinates at center of cell
+    def find_cell_center(self, coordinates):
+        '''converts grid coordinates to pixel coordinates at center of cell'''
         x, y = coordinates
         return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x + int(self.get_cell_width()/2)), (display_height - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y + int(self.get_cell_height()/2))))
 
-    def convert_coordinates(self, coordinates):#converts grid coordinates to pixel coordinates
+    def convert_coordinates(self, coordinates):
+        '''converts grid coordinates to pixel coordinates'''
         x, y = coordinates
         return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x), (display_height - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y )))
     
@@ -808,7 +813,7 @@ class grid():
         return(resource_list)
 
     def set_resources(self):
-        global terrain_list#terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
+        global terrain_list #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
         #clear_resources = make_resource_list('clear')
         #mountain_resources = make_resource_list('mountain')
         #hills_resources = make_resource_list('hills')
@@ -834,34 +839,34 @@ class grid():
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
-            direction = random.randrange(1, 5)#1 north 2 east 3 south 4 west
+            direction = random.randrange(1, 5) #1 north 2 east 3 south 4 west
             if not (((current_x == self.coordinate_width - 1) and direction == 2) or ((current_x == 0) and direction == 4) or ((current_y == self.coordinate_height - 1) and direction == 3) or ((current_y == 0) and direction == 1)):
                 if direction == 3:
                     current_y = current_y + 1
                 elif direction == 2:
                     current_x = current_x + 1
                 elif direction == 1:
-                   current_y = current_y - 1
+                    current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
                 self.find_cell(current_x, current_y).set_terrain(terrain)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
         #start_x = random.randrange(0, self.coordinate_width)
-        start_y = 1#random.randrange(0, self.coordinate_height)
+        start_y = 1 #random.randrange(0, self.coordinate_height)
         current_x = start_x
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
-        terrain = 'water'#random.choice(possible_terrains)
+        terrain = 'water' #random.choice(possible_terrains)
         self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
-            direction = random.randrange(1, 7)#1 north 2 east 3 south 4 west
+            direction = random.randrange(1, 7) #1 north 2 east 3 south 4 west
             if direction == 1 or direction == 5 or direction == 6:
-                direction = 3#turns extras and south to north
+                direction = 3 #turns extras and south to north
             if not (((current_x == self.coordinate_width - 1) and direction == 2) or ((current_x == 0) and direction == 4) or ((current_y == self.coordinate_height - 1) and direction == 3) or ((current_y == 0) and direction == 1)):
-                if direction == 3:# or direction == 1:
+                if direction == 3: #or direction == 1:
                     current_y = current_y + 1
                 elif direction == 2:
                     current_x = current_x + 1
@@ -896,7 +901,7 @@ class grid():
         current_x = start_x
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
-        terrain = 'water'#random.choice(possible_terrains)
+        terrain = 'water' #random.choice(possible_terrains)
         self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
         while not counter == worm_length:           
@@ -923,12 +928,12 @@ class cell():
         self.grid = grid
         self.color = color
         self.pixel_x, self.pixel_y = self.grid.convert_coordinates((self.x, self.y))
-        self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height)#(left, top, width, height)
+        self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
         self.occupied = False
         self.grid.cell_list.append(self)
-        self.adjacent_list = []#list of 4 nearby cells, used for movement
-        self.diagonal_adjacent_list = []#list of 8 nearby cells, used for melee attacks of opportunity
+        self.adjacent_list = [] #list of 4 nearby cells, used for movement
+        self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
         self.terrain = 'none'
@@ -945,7 +950,7 @@ class cell():
             self.tile.set_terrain(new_terrain)
         self.color = terrain_colors[new_terrain]
             
-    def draw(self):#eventually add a tutorial message the first time cells or multiple cells are shaded to explain cell shading mechanics
+    def draw(self): #eventually add a tutorial message the first time cells or multiple cells are shaded to explain cell shading mechanics
         global game_display
         global color_dict
         global controlled_list
@@ -1035,7 +1040,7 @@ class actor_image():
         self.image_description == image_description
         image_list.append(self)
         self.grid = grid
-        self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height)#(left, top, width, height), bottom left on coordinates
+        self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.showing = showing
         self.outline_width = 2
         self.outline = pygame.Rect(self.actor.x - self.outline_width, display_height - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
@@ -1052,7 +1057,7 @@ class actor_image():
             self.previous_idle_image = new_image_description
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
-        try:#use if there are any image path issues to help with file troubleshooting
+        try: #use if there are any image path issues to help with file troubleshooting
             self.image = pygame.image.load('graphics/' + self.image_id)
         except:
             print('graphics/' + self.image_id)
@@ -1092,7 +1097,7 @@ class actor_image():
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
 class button_image(actor_image):
-    def __init__(self, button, width, height, image_id, showing):#image_type can be free or grid
+    def __init__(self, button, width, height, image_id, showing): #image_type can be free or grid
         global image_list
         global display_width
         global display_height
@@ -1137,7 +1142,7 @@ class button_image(actor_image):
             self.y = display_height - (self.button.y + self.height) + self.height
             display_image(self.image, self.x, self.y - self.height)
         
-    def draw_tooltip(self):#button has tooltip already, so image doesn't need a new tooltip
+    def draw_tooltip(self): #button has tooltip already, so image doesn't need a new tooltip
         i = 0
         
     def set_tooltip(self, tooltip_text):
@@ -1199,7 +1204,7 @@ class actor_bar(bar):
         self.y = int(self.actor.image.y - (self.actor.image.height * (0.1 * self.y_multiplier)))
         self.width = int(self.actor.image.width * 0.8)
         self.height = int(self.actor.image.height * 0.075)
-        if current_game_mode == 'tavern' and self.actor.main_character and self.full_color == color_dict['yellow']:#if action bar, don't show in tavern
+        if current_game_mode == 'tavern' and self.actor.main_character and self.full_color == color_dict['yellow']: #if action bar, don't show in tavern
             self.showing = False
     def draw(self):
         self.update_status()
@@ -1263,15 +1268,15 @@ class actor():
             print_to_screen(self.name + ' is interacting with ' + other.name)
 
     def touching_mouse(self):
-        if self.image.Rect.collidepoint(pygame.mouse.get_pos()):#if mouse is in button
+        if self.image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
         else:
             return(False)
 
-    def can_show_tooltip(self):#moved to actor
+    def can_show_tooltip(self): #moved to actor
         global targeting_ability
         global current_game_mode
-        if self.touching_mouse() and current_game_mode in self.modes:# and not targeting_ability 
+        if self.touching_mouse() and current_game_mode in self.modes: #and not targeting_ability 
             return(True)
         else:
             return(False)
@@ -1297,8 +1302,10 @@ class actor():
             text_line = self.image.tooltip_text[text_line_index]
             game_display.blit(text(text_line, myfont), (self.image.tooltip_box.x + 10, self.image.tooltip_box.y + (text_line_index * font_size)))
 
-class tile_class(actor):#like an obstacle without a tooltip or movement blocking
-    def __init__(self, coordinates, grid, image, name, showing, modes, show_terrain):#show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
+class tile_class(actor):
+    '''like an obstacle without a tooltip or movement blocking'''
+    
+    def __init__(self, coordinates, grid, image, name, showing, modes, show_terrain): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
         super().__init__(coordinates, grid, showing, modes)
         global tile_list
         self.set_name(name)
@@ -1312,8 +1319,8 @@ class tile_class(actor):#like an obstacle without a tooltip or movement blocking
             self.cell.tile = self
         if self.show_terrain:
             #self.cell.resource = 'none'
-            self.resource_icon = 'none'#the resource icon is appearance, making it a property of the tile rather than the cell
-            self.set_terrain(self.cell.terrain)#terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
+            self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
+            self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
         else:
             self.terrain = 'floor'
             
@@ -1325,15 +1332,15 @@ class tile_class(actor):#like an obstacle without a tooltip or movement blocking
         if not self.cell.resource == 'none':
             self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', True, ['strategic'], False)
             
-    def set_terrain(self, new_terrain):#to do, add variations like grass to all terrains
+    def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
         #self.cell.resource = 'none'#reset resources when setting terrain
         #self.cell.terrain = 'new terrain'
 
             
         if new_terrain == 'clear':
-            random_grass = random.randrange(1, 3)#clear, hills, jungle, water, mountain, swamp, desert
+            random_grass = random.randrange(1, 3) #clear, hills, jungle, water, mountain, swamp, desert
             self.image_dict['default'] = 'scenery/terrain/clear' + str(random_grass) + '.png'
-            #random_resource = random.randrange(1, 3)#1-2
+            #random_resource = random.randrange(1, 3) #1-2
             #if random_resource == 1:
             #    self.cell.resource = 'gold'
             
@@ -1358,7 +1365,7 @@ class tile_class(actor):#like an obstacle without a tooltip or movement blocking
         self.image.set_image('default')
 
     def update_tooltip(self):
-        if self.show_terrain:#if is terrain, show tooltip
+        if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
             tooltip_message.append('This is a ' + self.cell.terrain + ' tile.')
             if not self.cell.resource == 'none':
@@ -1388,17 +1395,19 @@ class tile_class(actor):#like an obstacle without a tooltip or movement blocking
         image_list = remove_from_list(image_list, self.shader)
         self.cell.tile = 'none'
 
-    def can_show_tooltip(self):#tiles don't have tooltips, except for terrain tiles
+    def can_show_tooltip(self): #tiles don't have tooltips, except for terrain tiles
         global current_game_mode
         if self.show_terrain == True:
-            if self.touching_mouse() and current_game_mode in self.modes:# and not targeting_ability 
+            if self.touching_mouse() and current_game_mode in self.modes: #and not targeting_ability 
                 return(True)
             else:
                 return(False)
         else:
             return(False)
 
-class overlay_tile(tile_class):#kind of tile, preferably transparent, that appears in front of obstacles. Good for darkness and such
+class overlay_tile(tile_class):
+    '''kind of tile, preferably transparent, that appears in front of obstacles. Good for darkness and such'''
+    
     def __init__(self, actor, width, height, grid, image_id, showing, show_terrain):
         super().__init__(actor, width, height, grid, image_id, showing, show_terrain)
         global overlay_tile_list
@@ -1444,7 +1453,9 @@ class tile_shader(tile_image):
             super().draw()
         
         
-class strategic_actor(actor):#actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob
+class strategic_actor(actor):
+    '''actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob'''
+    
     def __init__(self, coordinates, grid, image_dict, showing, controllable, modes):
         super().__init__(coordinates, grid, showing, modes)
         self.image_dict = image_dict
@@ -1454,7 +1465,8 @@ class strategic_actor(actor):#actor that operates on the strategic map: able to 
         strategic_actor_list.append(self)
         self.set_name('strategic actor')
 
-    def set_coordinates(self, x, y, able_to_print):#on the strategic map there can be multiple strategic actors on each other, such as the player's party on a location, able to print is an unnecessary parameter from parent kept for inheritance rules
+    def set_coordinates(self, x, y, able_to_print):
+        '''on the strategic map there can be multiple strategic actors on each other, such as the player's party on a location, able to print is an unnecessary parameter from parent kept for inheritance rules'''
         self.x = x
         self.y = y
                 
@@ -1534,17 +1546,19 @@ def toggle(variable):
     elif variable == False:
         return(True)
         
-def find_distance(first, second):#takes objects with x and y attributes
+def find_distance(first, second):
+    '''takes objects with x and y attributes'''
     return((((first.x - second.x) ** 2) + ((first.y - second.y) ** 2)) ** 0.5)
 
-def find_coordinate_distance(first, second):#takes sets of coordinates
+def find_coordinate_distance(first, second):
+    '''takes sets of coordinates'''
     first_x, first_y = first
     second_x, second_y = second
     return((((first_x - second_x) ** 2) + ((first_y - second_y) ** 2)) ** 0.5)
 
 def move_group(direction):
     global mob_list
-    for i in range(10):#loop number is arbitrary
+    for i in range(10): #loop number is arbitrary
         moving_list = []
         for mob in mob_list:
             if mob.moving:
@@ -1597,8 +1611,8 @@ def create_strategic_map():
     global stored_party
     print_to_screen('Creating map...')
     update_display()
-    for current_cell in strategic_map_grid.cell_list:#recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
-        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', True, ['strategic'], True)#creates a terrain tile that will be modified to the grid cell's terrain type
+    for current_cell in strategic_map_grid.cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
+        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', True, ['strategic'], True) #creates a terrain tile that will be modified to the grid cell's terrain type
     strategic_map_grid.set_resources()
     
 
@@ -1634,16 +1648,16 @@ def draw_text_box():
     for text_index in range(len(text_list)):
         if text_index < max_text_box_lines:
             if message_width(text_list[-text_index - 1], font_size, 'Times New Roman') > greatest_width:
-                greatest_width = message_width(text_list[-text_index - 1], font_size, 'Times New Roman')#manages the width of already printed text lines
+                greatest_width = message_width(text_list[-text_index - 1], font_size, 'Times New Roman') #manages the width of already printed text lines
     if input_manager.taking_input:
-        if message_width("Response: " + message, font_size, 'Times New Roman') > greatest_width:#manages width of user input
+        if message_width("Response: " + message, font_size, 'Times New Roman') > greatest_width: #manages width of user input
             greatest_width = message_width("Response: " + message, font_size, 'Times New Roman')
     else:
-        if message_width(message, font_size, 'Times New Roman') > greatest_width:#manages width of user input
+        if message_width(message, font_size, 'Times New Roman') > greatest_width: #manages width of user input
             greatest_width = message_width(message, font_size, 'Times New Roman')
     text_box_width = greatest_width + 10
     x, y = scale_coordinates(0, default_display_height - text_box_height)
-    pygame.draw.rect(game_display, color_dict['white'], (x, y, text_box_width, text_box_height))#draws white rect to prevent overlapping
+    pygame.draw.rect(game_display, color_dict['white'], (x, y, text_box_width, text_box_height)) #draws white rect to prevent overlapping
     if typing:
         x, y = scale_coordinates(0, default_display_height - text_box_height)
         pygame.draw.rect(game_display, color_dict['red'], (x, y, text_box_width, text_box_height), 3)
@@ -1654,7 +1668,7 @@ def draw_text_box():
         #x, y = (0, default_display_height - (font_size))
         pygame.draw.line(game_display, color_dict['black'], (0, display_height - (font_size + 5)), (text_box_width, display_height - (font_size + 5)))
 
-    text_list = manage_text_list(text_list, max_screen_lines)#number of lines
+    text_list = manage_text_list(text_list, max_screen_lines) #number of lines
     myfont = pygame.font.SysFont('Times New Roman', scale_width(15))
     for text_index in range(len(text_list)):
         if text_index < max_text_box_lines:
@@ -1670,7 +1684,7 @@ def update_display():
     global loading
     if loading:
         global loading_start_time
-        loading_start_time -= 1#makes it faster if the program starts repeating this part
+        loading_start_time -= 1 #makes it faster if the program starts repeating this part
         draw_loading_screen()
     else:
         global typing
@@ -1723,7 +1737,7 @@ def update_display():
             if current_game_mode in bar.modes and bar.showing:
                 bar.draw()
         for overlay_tile in overlay_tile_list:
-          if current_game_mode in overlay_tile.image.modes and overlay_tile.image.showing:
+            if current_game_mode in overlay_tile.image.modes and overlay_tile.image.showing:
                 overlay_tile.image.draw()
                 overlay_tile.image.has_drawn = True
                 
@@ -1738,17 +1752,17 @@ def update_display():
             #    elif actor.targeted:
             #        pygame.draw.rect(game_display, color_dict['red'], (actor.image.outline), actor.image.outline_width)
             if actor.can_show_tooltip():
-                possible_tooltip_drawers.append(actor)#only one of these will be drawn to prevent overlapping tooltips
+                possible_tooltip_drawers.append(actor) #only one of these will be drawn to prevent overlapping tooltips
 
         for button in button_list:
-            if button.can_show():#can_show checks game mode
+            if button.can_show(): #can_show checks game mode
                 button.showing = True
             else:
                 button.showing = False
-            if not button in notification_list:#notifications are drawn later
+            if not button in notification_list: #notifications are drawn later
                 button.draw()
             if button.can_show_tooltip():
-                possible_tooltip_drawers.append(button)#only one of these will be drawn to prevent overlapping tooltips
+                possible_tooltip_drawers.append(button) #only one of these will be drawn to prevent overlapping tooltips
         for label in label_list:
             if not label in notification_list:
                 label.draw()
@@ -1805,7 +1819,8 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
                 possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
                 tooltip_index += 1
             
-def create_image_dict(stem):#if stem is a certain value, add extra ones, such as special combat animations: only works for images in graphics/mobs
+def create_image_dict(stem):
+    '''if stem is a certain value, add extra ones, such as special combat animations: only works for images in graphics/mobs'''
     stem = 'mobs/' + stem
     stem += '/'#goes to that folder
     image_dict = {}
@@ -1820,7 +1835,8 @@ def display_notification(message):
     if len(notification_queue) == 1:
         notification_to_front(message)
 
-def notification_to_front(message):#displays a notification from the queue, which is a list of string messages that this formats into notifications
+def notification_to_front(message):
+    '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
     new_notification = notification(scale_coordinates(610, 236), scale_width(500), scale_height(500), True, ['strategic'], 'misc/default_notification.png', message)#coordinates, ideal_width, minimum_height, showing, modes, image, message
 
 def show_tutorial_notifications():
@@ -1953,7 +1969,7 @@ current_button_number += 2#move more when switching categories
 
 current_button_number += 1
 
-expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50), scale_width(50), scale_height(50), 'black', 'expand text box', True, pygame.K_j, ['strategic'], 'misc/text_box_size_button.png')#'none' for no keybind
+expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50), scale_width(50), scale_height(50), 'black', 'expand text box', True, pygame.K_j, ['strategic'], 'misc/text_box_size_button.png') #'none' for no keybind
 toggle_grid_lines_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle grid lines', True, pygame.K_g, ['strategic'], 'misc/grid_line_button.png')
 instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170), scale_width(50), scale_height(50), 'blue', 'instructions', True, pygame.K_i, ['strategic'], 'misc/instructions.png')
 toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle text box', True, pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png')
