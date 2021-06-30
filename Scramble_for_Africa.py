@@ -4,8 +4,8 @@
 #trigger button outlines when clicking, currently only works when pressing
 #add more docstrings and comments
 #make better images for certain resources
-#reduce frequency of global variables
 #move classes and functions to different files
+#add global_manager as input to certain docstrings
 #
 #done since 6/15
 #remove varision-specific program elements
@@ -15,6 +15,7 @@
 #added docstring descriptions of certain classes and functions
 #removed obsolete showing and can_show() variables and functions, respectively
 #added images for all resources
+#remove all global variables
 
 import pygame
 import time
@@ -23,8 +24,19 @@ import math
 pygame.init()
 clock = pygame.time.Clock()
 
+class global_manager_template:
+    def __init__(self, global_dict):
+        self.global_dict = global_dict
+        
+    def get(self, name):
+        return(self.global_dict[name])
+    
+    def set(self, name, value):
+        self.global_dict[name] = value
+
 class input_manager_template():
-    def __init__(self):
+    def __init__(self, global_manager):
+        self.global_manager = global_manager
         self.previous_input = ''
         self.taking_input = False
         self.old_taking_input = self.taking_input
@@ -48,10 +60,7 @@ class input_manager_template():
     def receive_input(self, received_input): #to do: add do something button for testing
         if self.send_input_to == 'do something':
             if received_input == 'done':
-                global crashed
-                crashed = True
-            #elif received_input == 'strategic':
-            #    set_game_mode('strategic')
+                self.global_manager.set('crashed', True)
             else:
                 print_to_screen("I didn't understand that.")
                 
@@ -59,7 +68,7 @@ class button_class():
     '''
     A button that will do something when clicked or when the corresponding key is pressed
     '''
-    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id):
+    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager):
         '''
         Inputs:
             coordinates: tuple of 2 integers for initial coordinate x and y values
@@ -71,13 +80,11 @@ class button_class():
             modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
             image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
         '''
-        global color_dict
-        global display_height
-        global button_list
+        self.global_manager = global_manager
         self.has_released = True
         self.modes = modes
         self.button_type = button_type
-        button_list.append(self)
+        self.global_manager.get('button_list').append(self)
         if keybind_id == 'none':
             self.has_keybind = False
             self.keybind_id = 'none'
@@ -88,12 +95,12 @@ class button_class():
         self.x, self.y = coordinates
         self.width = width
         self.height = height
-        self.Rect = pygame.Rect(self.x, display_height - (self.y + self.height), self.width, self.height) #Pygame Rect object to track mouse collision
-        self.image = button_image(self, self.width, self.height, image_id)
+        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height) #Pygame Rect object to track mouse collision
+        self.image = button_image(self, self.width, self.height, image_id, self.global_manager)
         self.color = color_dict[color]
         self.outline_width = 2
         self.showing_outline = False
-        self.outline = pygame.Rect(self.x - self.outline_width, display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
+        self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
         self.update_tooltip()
         self.confirming = False
@@ -105,7 +112,6 @@ class button_class():
         Outputs:
             Calls the set_tooltip function with a list of strings that will each be a line in this button's tooltip.
         '''
-        global current_game_mode
         if self.button_type == 'move up':
             self.set_tooltip(['Press to move up'])
         elif self.button_type == 'move down':
@@ -228,15 +234,14 @@ class button_class():
         Outputs:
             Creates a tooltip message and the Pygame Rect objects (background and outline) required to display it.
         '''
-        global font_size
         self.tooltip_text = tooltip_text
         if self.has_keybind:
             self.tooltip_text.append("Press " + self.keybind_name + " to use.")
         tooltip_width = 50
         for text_line in tooltip_text:
             if message_width(text_line, font_size, 'Times New Roman') + 10 > tooltip_width:
-                tooltip_width = message_width(text_line, font_size, 'Times New Roman') + 10
-        tooltip_height = (len(self.tooltip_text) * font_size) + 5
+                tooltip_width = message_width(text_line, self.global_manager.get('font_size'), 'Times New Roman') + 10
+        tooltip_height = (len(self.tooltip_text) * self.global_manager.get('font_size')) + 5
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -254,8 +259,7 @@ class button_class():
         '''
         Returns whether the button's tooltip should be shown, which is when the button is currently displayed and the mouse is colliding with it.
         '''
-        global current_game_mode
-        if self.touching_mouse() and current_game_mode in self.modes:
+        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
         else:
             return(False)
@@ -264,8 +268,6 @@ class button_class():
         '''
         Draws the button with a description of its keybind if applicable, along with an outline if being pressed
         '''
-        global game_display
-        global color_dict
         if self.showing_outline: 
             pygame.draw.rect(game_display, color_dict['light gray'], self.outline)
         pygame.draw.rect(game_display, self.color, self.Rect)
@@ -274,8 +276,8 @@ class button_class():
         if self.has_keybind: #The key to which a button is bound will appear on the button's image
             message = self.keybind_name
             color = 'white'
-            textsurface = myfont.render(message, False, color_dict[color])
-            game_display.blit(textsurface, (self.x + 10, (display_height - (self.y + self.height - 5))))
+            textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
+            self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
 
     def draw_tooltip(self, y_displacement):
         '''
@@ -284,25 +286,22 @@ class button_class():
         Outputs:
             Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
         '''
-        global game_display
-        global font_size
-        global myfont
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_y += y_displacement
-        if (mouse_x + self.tooltip_box.width) > display_width:
-            mouse_x = display_width - self.tooltip_box.width
-        if (display_height - mouse_y) - (len(self.tooltip_text) * font_size + 5 + self.tooltip_outline_width) < 0:
-            mouse_y = display_height - self.tooltip_box.height
+        if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+            mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+        if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+            mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
         self.tooltip_box.x = mouse_x
         self.tooltip_box.y = mouse_y
         self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
         self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-        pygame.draw.rect(game_display, color_dict['black'], self.tooltip_outline)
-        pygame.draw.rect(game_display, color_dict['white'], self.tooltip_box)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
         for text_line_index in range(len(self.tooltip_text)):
             text_line = self.tooltip_text[text_line_index]
-            game_display.blit(text(text_line, myfont), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * font_size)))
+            game_display.blit(text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
         '''
@@ -314,48 +313,35 @@ class button_class():
         '''
         Controls what the button does when left clicked. The action taken will depend on button_type's value.
         '''
-        global actor_list
-        global controlled_list
-        global turn_ended
-        global current_game_mode
-        global strategic_actor_list
-        global retreat_time
         self.showing_outline = True
         if self.button_type == 'hi printer':
             print_to_screen('hi')
 
         elif self.button_type == 'toggle grid lines':
-            global show_grid_lines
-            if show_grid_lines:
-                show_grid_lines = False
+            if self.global_manager.get('show_grid_lines'):
+                self.global_manager.set('show_grid_lines', False)
             else:
-                show_grid_lines = True
+                self.global_manager.set('show_grid_lines', True)
         elif self.button_type == 'toggle text box':
-            global show_text_box
-            if show_text_box:
-                show_text_box = False
+            if self.global_manager.get('show_text_box'):
+                self.global_manager.set('show_text_box', False)
             else:
-                show_text_box = True
+                self.global_manager.set('show_text_box', True)
         elif self.button_type == 'expand text box':
-            global text_box_height
-            global default_text_box_height
-            global display_height
-            if text_box_height == default_text_box_height:
-                text_box_height = default_display_height - 50 #self.height
+            if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
+                self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
             else:
-                text_box_height = default_text_box_height
+                self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
         elif self.button_type == 'do something':
             get_input('do something', 'Placeholder do something message')
         elif self.button_type == 'instructions':
-            global current_instructions_page
-            if current_instructions_page == 'none':
-                display_instructions_page(0)
+            if self.global_manager.get('current_instructions_page') == 'none':
+                display_instructions_page(0, self.global_manager)
             else:
-                if not current_instructions_page == 'none':
-                    current_instructions_page.remove()
-                    current_instructions_page = 'none'
-                global current_instructions_page_index
-                current_instructions_page_index = 0
+                if not self.global_manager.get('current_instructions_page') == 'none':
+                    self.global_manager.get('current_instructions_page').remove()
+                    self.global_manager.set('current_instructions_page', 'none')
+                self.global_manager.set('current_instructions_page_index', 0)
 
     def on_rmb_release(self):
         '''
@@ -373,16 +359,14 @@ class button_class():
         '''
         Function shared by most objects that removes them from all relevant lists and references
         '''
-        global button_list
-        global image_list
-        button_list = remove_from_list(button_list, self)
-        image_list = remove_from_list(image_list, self.image)
+        self.global_manager.set('button_list', remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self.image))
 
 class label(button_class):
     '''
     A button that shares most of a normal button's image and tooltip behaviors but does nothing when clicked. Used to display information
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image_id, message): #message is initially a string
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager): #message is initially a string
         '''
         Inputs:
             coordinates: tuple of 2 integers for initial coordinate x and y values
@@ -392,14 +376,13 @@ class label(button_class):
             image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
             message: string representing the contents of the label. This is converted by format_message to a list of strings, in which each string is a line of text on the label.
         '''
-        #continue from here
-        global label_list
-        label_list.append(self)
+        self.global_manager = global_manager
+        self.global_manager.get('label_list').append(self)
         self.modes = modes
         self.message = message
         self.ideal_width = ideal_width
         self.width = ideal_width
-        self.font_size = scale_width(25)
+        self.font_size = scale_width(25, global_manager)
         self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
@@ -409,7 +392,7 @@ class label(button_class):
         self.height = (self.font_size * len(self.message)) + 15
         if self.height < minimum_height:
             self.height = minimum_height
-        super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id)
+        super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id, global_manager)
 
     def set_label(self, new_message):
         self.message = new_message
@@ -419,7 +402,6 @@ class label(button_class):
                 self.width = message_width(text_line, self.font_size, self.font_name) + 10
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length
-        global level_up_option_list
         new_message = []
         next_line = ""
         next_word = ""
@@ -431,13 +413,13 @@ class label(button_class):
                     next_line = ""
                 next_line += next_word
                 next_word = ""
-        if message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width and self in level_up_option_list: #normal labels shouldn't go to next line, but level up options should
-            new_message.append(next_line)
-            next_line = next_word
-            new_message.append(next_line)
-        else:
-            next_line += next_word
-            new_message.append(next_line)
+        #if message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width and self in level_up_option_list: #normal labels shouldn't go to next line, but level up options should
+        #    new_message.append(next_line)
+        #    next_line = next_word
+        #    new_message.append(next_line)
+        #else: #obsolete
+        next_line += next_word
+        new_message.append(next_line)
             
         greatest_width = 0
         for line in new_message: #while formatting, trim each line to something close to ideal width, then set actual width to the longest one
@@ -453,51 +435,42 @@ class label(button_class):
         i = 0
 
     def remove(self):
-        global label_list
-        global button_list
-        global image_list
-        label_list = remove_from_list(label_list, self)
-        button_list = remove_from_list(button_list, self)
-        image_list = remove_from_list(image_list, self.image)
+        self.global_manager.set('label_list', remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('button_list', remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def draw(self):
-        global game_display
-        global color_dict
-        global current_game_mode
-        if current_game_mode in self.modes:
+        if self.global_manager.get('current_game_mode') in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                game_display.blit(text(text_line, self.font), (self.x + 10, display_height -(self.y + self.height - (text_line_index * self.font_size))))
+                self.global_manager.get('game_display').blit(text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
                 
     def draw_tooltip(self, y_displacement):
-        global game_display
-        global font_size
-        global myfont
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_y += y_displacement
-        if (mouse_x + self.tooltip_box.width) > display_width:
-            mouse_x = display_width - self.tooltip_box.width
-        if (display_height - mouse_y) - (len(self.tooltip_text) * font_size + 5 + self.tooltip_outline_width) < 0:
-            mouse_y = display_height - self.tooltip_box.height
+        if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+            mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+        if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+            mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
         self.tooltip_box.x = mouse_x
         self.tooltip_box.y = mouse_y
         self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
         self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-        pygame.draw.rect(game_display, color_dict['black'], self.tooltip_outline)
-        pygame.draw.rect(game_display, color_dict['white'], self.tooltip_box)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
         for text_line_index in range(len(self.tooltip_text)):
             text_line = self.tooltip_text[text_line_index]
-            game_display.blit(text(text_line, myfont), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * font_size)))
+            self.global_manager.get('game_display').blit(text(text_line, self.global_manager.get('myfont'), global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class notification(label):
     '''special label with slightly different message and disappears when clicked'''
     
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message):
-        global notification_list
-        notification_list.append(self)
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message)
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        self.global_manager = global_manager
+        self.global_manager.get('notification_list').append(self)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length
         new_message = []
@@ -524,32 +497,26 @@ class notification(label):
             
     def remove(self):
         super().remove()
-        global notification_list
-        notification_list = remove_from_list(notification_list, self)
-        global notification_queue
-        if len(notification_queue) >= 1:
-            notification_queue.pop(0)
-        if len(notification_queue) > 0:
-            notification_to_front(notification_queue[0])
+        self.global_manager.set('notification_list', remove_from_list(self.global_manager.get('notification_list'), self))
+        if len(self.global_manager.get('notification_queue')) >= 1:
+            self.global_manager.get('notification_queue').pop(0)
+        if len(self.global_manager.get('notification_queue')) > 0:
+            notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
 
 class instructions_page(label):
-    def __init__(self, instruction_text):
-        global default_display_width
-        global default_display_height
-        super().__init__(scale_coordinates(60, 60), scale_width(default_display_width - 120), scale_height(default_display_height - 120), ['strategic'], 'misc/default_instruction.png', instruction_text)
+    def __init__(self, instruction_text, global_manager):
+        self.global_manager = global_manager
+        super().__init__(scale_coordinates(60, 60, self.global_manager), scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager), scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager), ['strategic'], 'misc/default_instruction.png', instruction_text, global_manager)
 
     def on_click(self):
-        global current_instructions_page_index
-        global current_instructions_page
-        global instructions_list
-        if not current_instructions_page_index == len(instructions_list) - 1:
-            current_instructions_page_index += 1
-            current_instructions_page_text = instructions_list[current_instructions_page_index]
-            current_instructions_page = instructions_page(current_instructions_page_text)
+        if not self.global_manager.get('current_instructions_page_index') == len(self.global_manager.get('instructions_list')) - 1:
+            self.global_manager.set('current_instructions_page_index', self.global_manager.get('current_instructions_page_index') + 1)
+            self.global_manager.set('current_instructions_page_text', self.global_manager.get('instructions_list')[self.global_manager.get('current_instructions_page_index')])
+            self.global_manager.set('current_instructions_page', instructions_page(self.global_manager.get('current_instructions_page_text')), self.global_manager) #create a new page and remove this one
             self.remove()
         else:
             self.remove()
-            current_instructions_page = 'none'
+            self.global_manager.set('current_instructions_page', 'none')
             
     def format_message(self):
         '''takes a string message and divides it into a list of strings based on length'''
@@ -568,19 +535,18 @@ class instructions_page(label):
         new_message.append(next_line)
         new_message.append("Click to go to the next instructions page.") #not in superclass
         new_message.append("Press the display instructions button on the right side of the screen again to close the instructions.") #not in superclass
-        global current_instructions_page_index
-        new_message.append("Page " + str(current_instructions_page_index + 1))
+        new_message.append("Page " + str(self.global_manager.get('current_instructions_page_index') + 1))
         
         self.message = new_message
     def update_tooltip(self):
         self.set_tooltip(["Click to go to the next instructions page.", "Press the display instructions button on the right side of the screen again to close the instructions."])
 
 class bar():
-    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color):
-        global bar_list
-        bar_list.append(self)
+    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, global_manager):
+        self.global_manager = global_manager
+        self.global_manager.get('bar_list').append(self)
         self.x, self.y = coordinates
-        self.y = display_height - self.y
+        self.y = self.global_manager.get('display_height') - self.y
         self.minimum = minimum
         self.maximum = maximum
         self.current = current
@@ -630,8 +596,8 @@ class bar():
             return(False)
         
 class grid():
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes):
-        global terrain_list
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, global_manager):
+        self.global_manager = global_manager
         grid_list.append(self)
         self.modes = modes
         self.origin_x, self.origin_y = origin_coordinates
@@ -646,7 +612,7 @@ class grid():
             area = self.coordinate_width * self.coordinate_height
             num_worms = area // 5
             for i in range(num_worms):
-                self.make_random_terrain_worm(round(area/24), round(area/12), terrain_list) #sand['mountain', 'grass', 'forest']
+                self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list')) #sand['mountain', 'grass', 'forest']
             for cell in self.cell_list:
                 if cell.y == 0:
                     cell.set_terrain('water')
@@ -668,16 +634,12 @@ class grid():
                 #self.make_random_river_worm(10, 21, start_x)
                 
     def draw(self):
-        global game_display
-        global color_dict
-        global current_game_mode
-        global show_grid_lines
-        if current_game_mode in self.modes:
+        if self.global_manager.get('current_game_mode') in self.modes:
             for cell in self.cell_list:
                 cell.draw()
 
     def draw_grid_lines(self):
-        if show_grid_lines:
+        if self.global_manager.get('show_grid_lines'):
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(game_display, color_dict['black'], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)))
             for y in range(0, self.coordinate_height+1):
@@ -720,8 +682,7 @@ class grid():
             current_cell.find_adjacent_cells()
                 
     def create_cell(self, x, y, grid):
-        global color_dict
-        new_cell = cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.color)
+        new_cell = cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.color, self.global_manager)
         
     def is_clear(self, x, y):
         if self.find_cell(x, y).occupied == False:
@@ -815,7 +776,7 @@ class grid():
         return(resource_list)
 
     def set_resources(self):
-        global terrain_list #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
+        #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
         #clear_resources = make_resource_list('clear')
         #mountain_resources = make_resource_list('mountain')
         #hills_resources = make_resource_list('hills')
@@ -921,7 +882,8 @@ class grid():
                 self.find_cell(current_x, current_y).set_terrain(terrain)
                 '''
 class cell():
-    def __init__(self, x, y, width, height, grid, color):
+    def __init__(self, x, y, width, height, grid, color, global_manager):
+        self.global_manager = global_manager
         self.move_priority = 99
         self.x = x
         self.y = y
@@ -946,19 +908,17 @@ class cell():
         self.tile.set_resource(new_resource)
 
     def set_terrain(self, new_terrain):
-        global color_dict
         self.terrain = new_terrain
         if (not self.tile == 'none') and self.tile.show_terrain:
             self.tile.set_terrain(new_terrain)
         self.color = terrain_colors[new_terrain]
             
     def draw(self): #eventually add a tutorial message the first time cells or multiple cells are shaded to explain cell shading mechanics
-        global game_display
         current_color = self.color
         red = current_color[0]
         green = current_color[1]
         blue = current_color[2]
-        pygame.draw.rect(game_display, (red, green, blue), self.Rect)
+        pygame.draw.rect(self.global_manager.get('game_display'), (red, green, blue), self.Rect)
         
     def find_adjacent_cells(self):
         adjacent_list = []
@@ -985,24 +945,22 @@ class cell():
         self.adjacent_list = adjacent_list
         
 class free_image():
-    def __init__(self, image_id, coordinates, width, height, modes):
-        global image_list
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+        self.global_manager = global_manager
         self.modes = modes
         self.width = width
         self.height = height
         self.set_image(image_id)
         self.x, self.y = coordinates
         self.y = display_height - self.y
-        image_list.append(self)
+        self.global_manager.get('image_list').append(self)
         
     def draw(self):
-        global current_game_mode
-        if current_game_mode in self.modes:
+        if self.global_manager.get('current_game_mode') in self.modes:
             display_image(self.image, self.x, self.y - self.height)
 
     def remove(self):
-        global image_list
-        image_list.remove(self)
+        self.global_manager.get('image_list').remove(self)
 
     def set_image(self, new_image):
         self.image_id = new_image
@@ -1010,19 +968,16 @@ class free_image():
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
 class loading_image_class(free_image):
-    def __init__(self, image_id):
-        super().__init__(image_id, (0, 0), display_width, display_height, [])
-        global image_list
-        image_list = remove_from_list(image_list, self)
+    def __init__(self, image_id, global_manager):
+        super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self))
 
     def draw(self):
-        display_image(self.image, self.x, self.y - self.height)
+        display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
 class actor_image():
-    def __init__(self, actor, width, height, grid, image_description):
-        global image_list
-        global display_width
-        global display_height
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        self.global_manager = global_manager
         self.last_image_switch = 0
         self.previous_idle_image = 'default'
         self.actor = actor
@@ -1031,11 +986,11 @@ class actor_image():
         self.height = height
         self.set_image(image_description)
         self.image_description == image_description
-        image_list.append(self)
+        self.global_manager.get('image_list').append(self)
         self.grid = grid
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.outline_width = 2
-        self.outline = pygame.Rect(self.actor.x - self.outline_width, display_height - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
 
     def get_center_coordinates(self):
@@ -1057,8 +1012,6 @@ class actor_image():
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):
-        global display_height
-        global current_turn
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1070,43 +1023,40 @@ class actor_image():
         display_image(self.image, self.x, self.y - self.height)
         
     def go_to_cell(self, coordinates):
-        self.x, self.y = self.grid.convert_coordinates(coordinates)
+        self.x, self.y = self.grid.convert_coordinates(coordinates, self.global_manager)
         self.Rect.x = self.x
         self.Rect.y = self.y - self.height
         self.outline.x = self.x - self.outline_width
         self.outline.y = self.y - (self.height + self.outline_width)
                 
     def set_tooltip(self, tooltip_text):
-        global font_size
         self.tooltip_text = tooltip_text
         tooltip_width = 50
         for text_line in tooltip_text:
             if message_width(text_line, font_size, 'Times New Roman') + 10 > tooltip_width:
-                tooltip_width = message_width(text_line, font_size, 'Times New Roman') + 10
-        tooltip_height = (font_size * len(tooltip_text)) + 5
+                tooltip_width = message_width(text_line, self.global_manager.get('font_size'), 'Times New Roman') + 10
+        tooltip_height = (self.global_manager.get('font_size') * len(tooltip_text)) + 5
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
 class button_image(actor_image):
-    def __init__(self, button, width, height, image_id): #image_type can be free or grid
-        global image_list
-        global display_width
-        global display_height
+    def __init__(self, button, width, height, image_id, global_manager): #image_type can be free or grid
+        self.global_manager = global_manager
         self.button = button
         self.width = width
         self.height = height
         self.x = self.button.x
-        self.y = display_height - (self.button.y + self.height) - self.height
+        self.y = self.global_manager.get('display_height') - (self.button.y + self.height) - self.height
         self.last_image_switch = 0
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
-        image_list.append(self)
+        self.global_manager.get('image_list').append(self)
         self.grid = grid
         self.Rect = self.button.Rect
         self.outline_width = 2
-        self.outline = pygame.Rect(self.x - self.outline_width, display_height - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
 
     def update_state(self, new_x, new_y, new_width, new_height):
         self.Rect = self.button.Rect
@@ -1125,13 +1075,10 @@ class button_image(actor_image):
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):
-        global display_height
-        global current_turn
-        global current_game_mode
-        if current_game_mode in self.button.modes:
+        if self.global_manager.get('current_game_mode') in self.button.modes:
             self.x = self.button.x
-            self.y = display_height - (self.button.y + self.height) + self.height
-            display_image(self.image, self.x, self.y - self.height)
+            self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
+            display_image(self.image, self.x, self.y - self.height, self.global_manager)
         
     def draw_tooltip(self): #button has tooltip already, so image doesn't need a new tooltip
         i = 0
@@ -1140,8 +1087,8 @@ class button_image(actor_image):
         i = 0
 
 class obstacle_image(actor_image):
-    def __init(self, actor, width, height, grid, image_description):
-        super().__init__(actor, width, height, grid, image_description)
+    def __init(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1154,9 +1101,6 @@ class obstacle_image(actor_image):
         self.outline.y = self.y - (self.height + self.outline_width)
         
     def draw(self):
-        global display_height
-        global show_selected
-        global current_turn
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1166,8 +1110,8 @@ class obstacle_image(actor_image):
         display_image(self.image, self.x, self.y - self.height)
 
 class animated_obstacle_image(obstacle_image):
-    def __init__(self, actor, width, height, grid, image_description):
-        super().__init__(actor, width, height, grid, image_description)
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
         self.last_switch = time.time()
         self.image_index = 0
     def draw(self):
@@ -1182,15 +1126,13 @@ class animated_obstacle_image(obstacle_image):
         super().draw()
 
 class actor_bar(bar):
-    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, actor, y_multiplier):
-        super().__init__(coordinates, minimum, maximum, current, width, height, full_color, empty_color)
+    def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, actor, y_multiplier, global_manager):
+        super().__init__(coordinates, minimum, maximum, current, width, height, full_color, empty_color, global_manager)
         self.actor = actor
         self.modes = self.actor.modes
         self.y_multiplier = y_multiplier
         
     def update_status(self):
-        global current_game_mode
-        global color_dict
         self.x = int(self.actor.image.x + (self.actor.image.width * 0.1))
         self.y = int(self.actor.image.y - (self.actor.image.height * (0.1 * self.y_multiplier)))
         self.width = int(self.actor.image.width * 0.8)
@@ -1204,10 +1146,9 @@ class actor_bar(bar):
         self.update_status()
 
 class actor():
-    def __init__(self, coordinates, grid, modes):
-        global color_dict
-        global actor_list
-        actor_list.append(self)
+    def __init__(self, coordinates, grid, modes, global_manager):
+        self.global_manager = global_manager
+        global_manager.get('actor_list').append(self)
         self.modes = modes
         self.grid = grid
         self.x, self.y = coordinates
@@ -1238,10 +1179,8 @@ class actor():
         self.set_tooltip(['Name: ' + self.name])
         
     def remove(self):
-        global actor_list
-        global image_list
-        actor_list = remove_from_list(actor_list, self)
-        image_list = remove_from_list(image_list, self.image)
+        self.global_manager.set('actor_list', remove_from_list(self.global_manager.get('actor_list'), self))
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def interact(self, other):
         if other == None:
@@ -1256,50 +1195,44 @@ class actor():
             return(False)
 
     def can_show_tooltip(self): #moved to actor
-        global current_game_mode
-        if self.touching_mouse() and current_game_mode in self.modes: #and not targeting_ability 
+        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability 
             return(True)
         else:
             return(False)
 
     def draw_tooltip(self, y_displacement):
-        global game_display
-        global font_size
-        global myfont
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_y += y_displacement
-        if (mouse_x + self.image.tooltip_box.width) > display_width:
-            mouse_x = display_width - self.image.tooltip_box.width
-        if (display_height - mouse_y) - (len(self.image.tooltip_text) * font_size + 5 + self.image.tooltip_outline_width) < 0:
-            mouse_y = display_height - self.image.tooltip_box.height
+        if (mouse_x + self.image.tooltip_box.width) > self.global_manager.get('display_width'):
+            mouse_x = self.global_manager.get('display_width') - self.image.tooltip_box.width
+        if (self.global_manager.get('display_height') - mouse_y) - (len(self.image.tooltip_text) * self.global_manager.get('font_size') + 5 + self.image.tooltip_outline_width) < 0:
+            mouse_y = self.global_manager.get('display_height') - self.image.tooltip_box.height
         self.image.tooltip_box.x = mouse_x
         self.image.tooltip_box.y = mouse_y
         self.image.tooltip_outline.x = self.image.tooltip_box.x - self.image.tooltip_outline_width
         self.image.tooltip_outline.y = self.image.tooltip_box.y - self.image.tooltip_outline_width
-        pygame.draw.rect(game_display, color_dict['black'], self.image.tooltip_outline)
-        pygame.draw.rect(game_display, color_dict['white'], self.image.tooltip_box)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.image.tooltip_outline)
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.image.tooltip_box)
         for text_line_index in range(len(self.image.tooltip_text)):
             text_line = self.image.tooltip_text[text_line_index]
-            game_display.blit(text(text_line, myfont), (self.image.tooltip_box.x + 10, self.image.tooltip_box.y + (text_line_index * font_size)))
+            self.global_manager.get('game_display').blit(text(text_line, myfont, self.global_manager), (self.image.tooltip_box.x + 10, self.image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class tile_class(actor):
     '''like an obstacle without a tooltip or movement blocking'''
     
-    def __init__(self, coordinates, grid, image, name, modes, show_terrain): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
-        super().__init__(coordinates, grid, modes)
-        global tile_list
+    def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
+        super().__init__(coordinates, grid, modes, global_manager)
         self.set_name(name)
-        tile_list.append(self)
+        self.global_manager.get('tile_list').append(self)
         self.image_dict = {'default': image}
-        self.image = tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
-        self.shader = tile_shader(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
+        self.image = tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
+        self.shader = tile_shader(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
         self.show_terrain = show_terrain
         self.cell = self.grid.find_cell(self.x, self.y)
         if self.cell.tile == 'none':
             self.cell.tile = self
         if self.show_terrain:
-            #self.cell.resource = 'none'
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
         else:
@@ -1311,19 +1244,12 @@ class tile_class(actor):
             self.resource_icon = 'none'
         self.resource = new_resource
         if not self.cell.resource == 'none':
-            self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False)
+            self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False, global_manager)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
-        #self.cell.resource = 'none'#reset resources when setting terrain
-        #self.cell.terrain = 'new terrain'
-
-            
         if new_terrain == 'clear':
             random_grass = random.randrange(1, 3) #clear, hills, jungle, water, mountain, swamp, desert
             self.image_dict['default'] = 'scenery/terrain/clear' + str(random_grass) + '.png'
-            #random_resource = random.randrange(1, 3) #1-2
-            #if random_resource == 1:
-            #    self.cell.resource = 'gold'
             
         elif new_terrain == 'hills':
             self.image_dict['default'] = 'scenery/terrain/hills.png'
@@ -1369,17 +1295,14 @@ class tile_class(actor):
                 
     def remove(self):
         super().remove()
-        global tile_list
-        tile_list = remove_from_list(tile_list, self)
-        global image_list
-        image_list = remove_from_list(image_list, self.image)
-        image_list = remove_from_list(image_list, self.shader)
+        self.global_manager.set('tile_list', remove_from_list(self.global_manager.get('tile_list'), self))
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('image_list', remove_from_list(self.global_manager.get('image_list'), self.shader))
         self.cell.tile = 'none'
 
     def can_show_tooltip(self): #tiles don't have tooltips, except for terrain tiles
-        global current_game_mode
         if self.show_terrain == True:
-            if self.touching_mouse() and current_game_mode in self.modes: #and not targeting_ability 
+            if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability 
                 return(True)
             else:
                 return(False)
@@ -1389,19 +1312,17 @@ class tile_class(actor):
 class overlay_tile(tile_class):
     '''kind of tile, preferably transparent, that appears in front of obstacles. Good for darkness and such'''
     
-    def __init__(self, actor, width, height, grid, image_id, show_terrain):
-        super().__init__(actor, width, height, grid, image_id, show_terrain)
-        global overlay_tile_list
-        overlay_tile_list.append(self)
+    def __init__(self, actor, width, height, grid, image_id, show_terrain, global_manager):
+        super().__init__(actor, width, height, grid, image_id, show_terrain, global_manager)
+        self.global_manager.get('overlay_tile_list').append(self)
         
     def remove(self):
         super().remove()
-        global overlay_tile_list
-        overlay_tile_list = remove_from_list(overlay_tile_list, self)
+        self.global_manager.set('overlay_tile_list', remove_from_list(self.global_manager.get('overlay_tile_list'), self))
 
 class tile_image(actor_image):
-    def __init__(self, actor, width, height, grid, image_description):
-        super().__init__(actor, width, height, grid, image_description)
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
@@ -1414,17 +1335,14 @@ class tile_image(actor_image):
         self.outline.y = self.y - (self.height + self.outline_width)
         
     def draw(self):
-        global current_game_mode
-        global current_party
-        global display_height
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
-        display_image(self.image, self.x, self.y - self.height)
+        display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
 class tile_shader(tile_image):
-    def __init__(self, actor, width, height, grid, image_description):
-        super().__init__(actor, width, height, grid, image_description)
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
         self.shading = False
         self.image = pygame.image.load('graphics/misc/yellow_shader.png')
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -1436,11 +1354,10 @@ class tile_shader(tile_image):
         
 class strategic_actor(actor):
     '''actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob'''
-    
-    def __init__(self, coordinates, grid, image_dict, controllable, modes):
-        super().__init__(coordinates, grid, modes)
+    def __init__(self, coordinates, grid, image_dict, controllable, modes, global_manager):
+        super().__init__(coordinates, grid, modes, global_manager)
         self.image_dict = image_dict
-        self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default')
+        self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
         self.controllable = controllable
         self.image.set_image('default')
         strategic_actor_list.append(self)
@@ -1455,9 +1372,8 @@ class strategic_actor(actor):
         self.set_tooltip(['Strategic actor tooltip'])
         
     def remove(self):
-        global strategic_actor_list
         super().remove()
-        strategic_actor_list = remove_from_list(strategic_actor_list, self)
+        self.global_manager.set('strategic_actor_list', remove_from_list(global_manager.get('strategic_actor_list'), self))
     
 def remove_from_list(received_list, item_to_remove):
     output_list = []
@@ -1474,9 +1390,8 @@ def calculate_distance(coordinate1, coordinate2):
     x2, y2 = coordinate2
     return(((x1 - x2) ** 2) + ((y1 - y2) ** 2)) ** 0.5
 
-def text(message, font):
-    global color_dict
-    return(font.render(message, False, color_dict['black']))
+def text(message, font, global_manager):
+    return(font.render(message, False, global_manager.get('color_dict')['black']))
 
 def rect_to_surface(rect):
     return pygame.Surface((rect.width, rect.height))
@@ -1486,15 +1401,14 @@ def message_width(message, fontsize, font_name):
     text_width, text_height = current_font.size(message)
     return(text_width)
 
-def display_image(image, x, y):
-    global display_height
-    game_display.blit(image, (x, y))
+def display_image(image, x, y, global_manager):
+    global_manager.get('game_display').blit(image, (x, y))
 
-def display_image_angle(image, x, y, angle):
+def display_image_angle(image, x, y, angle, global_manager):
     topleft = (x, y)
     rotated_image = pygame.transform.rotate(image, angle)
     new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
-    game_display.blit(rotated_image, new_rect.topleft)
+    global_manager.get('game_display').blit(rotated_image, new_rect.topleft)
     
 def manage_text_list(text_list, max_length):
     if len(text_list) > max_length:
@@ -1505,20 +1419,14 @@ def manage_text_list(text_list, max_length):
 def add_to_message(message, new):
     return (message + new)
 
-def print_to_screen(input_message):
-    global text_list
-    global message
-    global text_to_write_by_letter
-    global writing_text_by_letter
-    text_list.append(input_message)
+def print_to_screen(input_message, global_manager):
+    global_manager.get('text_list').append(input_message)
 
-def print_to_previous_message(message):
-    global text_list
-    text_list[-1] = text_list[-1] + message
+def print_to_previous_message(message, global_manager):
+    global_manager.get('text_list')[-1] = global_manager.get('text_list')[-1] + message
     
-def clear_message():
-    global message
-    message = ''
+def clear_message(global_manager):
+    global_manager.set('message', '')
     
 def toggle(variable):
     if variable == True:
@@ -1536,181 +1444,111 @@ def find_coordinate_distance(first, second):
     second_x, second_y = second
     return((((first_x - second_x) ** 2) + ((first_y - second_y) ** 2)) ** 0.5)
 
-def set_game_mode(new_game_mode):
-    global current_game_mode
-    global text_box_height
-    global default_text_box_height
-    global stored_party
-    global obstacle_list
-    global tile_list
-    global actor_list
-    global image_list
-    global text_list
-    global loading
+def set_game_mode(new_game_mode, global_manager):
     text_list = []
-    previous_game_mode = current_game_mode
+    previous_game_mode = global_manager.get('current_game_mode')
     if new_game_mode == previous_game_mode:
         return()
     elif new_game_mode == 'strategic':
-        start_loading()
-        global stored_party
-        global controlled_list
-        global enemy_list
-        global current_turn
-        current_game_mode = 'strategic'
-        default_text_box_height = 185
-        text_box_height = default_text_box_height
-        copy_tile_list = tile_list
+        start_loading(global_manager)
+        global_manager.set('current_game_mode', 'strategic')
+        global_manager.set('default_text_box_height', 185)
+        global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
+        copy_tile_list = global_manager.get('tile_list')
         for current_tile in copy_tile_list:
             current_tile.remove()
-        create_strategic_map()
-        print_to_screen("Entering strategic map")
+        create_strategic_map(global_manager)
+        print_to_screen("Entering strategic map", global_manager)
     else:
-        current_game_mode = new_game_mode
-    #to do, spawn in actors
+        global_manager.set('current_game_mode', new_game_mode)
 
-def create_strategic_map():
-    global party_x
-    global party_y
-    global stored_location_list
-    global stored_party
-    print_to_screen('Creating map...')
-    update_display()
-    for current_cell in strategic_map_grid.cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
-        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True) #creates a terrain tile that will be modified to the grid cell's terrain type
+def create_strategic_map(global_manager):
+    print_to_screen('Creating map...', global_manager)
+    update_display(global_manager)
+    for current_cell in global_manager.get('strategic_map_grid').cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
+        new_terrain = tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager) #creates a terrain tile that will be modified to the grid cell's terrain type
     strategic_map_grid.set_resources()
     
 
-def draw_text_box():
-    global typing
-    global ctrl
-    global button_list
-    global grid_list
-    global image_list
-    global display_height
-    global display_width
-    global text_list
-    global message
-    global font_size
-    global making_mouse_box
-    global mouse_origin_x
-    global mouse_origin_y
-    global mouse_destination_x
-    global mouse_destination_y
-    global show_range
-    global current_game_mode
-    global text_box_height
-    global default_text_box_height
-    global current_turn
-    if current_game_mode == 'strategic':
-        greatest_width = 300
-    else:
-        greatest_width = 300
-    greatest_width = scale_width(greatest_width)
-    max_screen_lines = (default_display_height // 15) - 1
-    max_text_box_lines = (text_box_height // 15) - 1
-    text_index = 0
-    for text_index in range(len(text_list)):
+def draw_text_box(global_manager):
+    #if global_manager.get('current_game_mode') == 'strategic': #obsolete, text box width could be different on different game modes
+    #    greatest_width = 300
+    #else:
+    greatest_width = 300
+    greatest_width = scale_width(greatest_width, global_manager)
+    max_screen_lines = (global_manager.get('default_display_height') // 15) - 1
+    max_text_box_lines = (global_manager.get('text_box_height') // 15) - 1
+    text_index = 0 #probably obsolete, to do: verify that this is obsolete
+    for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
-            if message_width(text_list[-text_index - 1], font_size, 'Times New Roman') > greatest_width:
-                greatest_width = message_width(text_list[-text_index - 1], font_size, 'Times New Roman') #manages the width of already printed text lines
-    if input_manager.taking_input:
-        if message_width("Response: " + message, font_size, 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = message_width("Response: " + message, font_size, 'Times New Roman')
+            if message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') > greatest_width:
+                greatest_width = message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') #manages the width of already printed text lines
+    if global_manager.get('input_manager').taking_input:
+        if message_width("Response: " + global_manager.get('message'), font_size, 'Times New Roman') > greatest_width: #manages width of user input
+            greatest_width = message_width("Response: " + global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
     else:
-        if message_width(message, font_size, 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = message_width(message, font_size, 'Times New Roman')
+        if message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman') > greatest_width: #manages width of user input
+            greatest_width = message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
     text_box_width = greatest_width + 10
-    x, y = scale_coordinates(0, default_display_height - text_box_height)
-    pygame.draw.rect(game_display, color_dict['white'], (x, y, text_box_width, text_box_height)) #draws white rect to prevent overlapping
-    if typing:
-        x, y = scale_coordinates(0, default_display_height - text_box_height)
-        pygame.draw.rect(game_display, color_dict['red'], (x, y, text_box_width, text_box_height), 3)
-        pygame.draw.line(game_display, color_dict['red'], (0, display_height - (font_size + 5)), (text_box_width, display_height - (font_size + 5)))
+    x, y = scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
+    if global_manager.get('typing'):
+        x, y = scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+        pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
+        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
     else:
-        x, y = scale_coordinates(0, default_display_height - text_box_height)
-        pygame.draw.rect(game_display, color_dict['black'], (x, y, text_box_width, text_box_height), 3)
+        x, y = scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+        pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
         #x, y = (0, default_display_height - (font_size))
-        pygame.draw.line(game_display, color_dict['black'], (0, display_height - (font_size + 5)), (text_box_width, display_height - (font_size + 5)))
+        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
 
-    text_list = manage_text_list(text_list, max_screen_lines) #number of lines
-    myfont = pygame.font.SysFont('Times New Roman', scale_width(15))
+    global_manager.set('text_list', manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
+    myfont = pygame.font.SysFont('Times New Roman', scale_width(15, global_manager))
     for text_index in range(len(text_list)):
         if text_index < max_text_box_lines:
             textsurface = myfont.render(text_list[(-1 * text_index) - 1], False, (0, 0, 0))
             game_display.blit(textsurface,(10, (-1 * font_size * text_index) + display_height - ((2 * font_size) + 5)))
     if input_manager.taking_input:
-        textsurface = myfont.render('Response: ' + message, False, (0, 0, 0))
+        textsurface = myfont.render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
     else:
-        textsurface = myfont.render(message, False, (0, 0, 0))
+        textsurface = myfont.render(global_manager.get('message'), False, (0, 0, 0))
     game_display.blit(textsurface,(10, display_height - (font_size + 5)))
     
-def update_display():
-    global loading
-    if loading:
-        global loading_start_time
-        loading_start_time -= 1 #makes it faster if the program starts repeating this part
-        draw_loading_screen()
+def update_display(global_manager):
+    if global_manager.get('loading'):
+        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
+        draw_loading_screen(global_manager)
     else:
-        global typing
-        global ctrl
-        global button_list
-        global grid_list
-        global image_list
-        global display_height
-        global display_width
-        global text_list
-        global message
-        global font_size
-        global making_mouse_box
-        global mouse_origin_x
-        global mouse_origin_y
-        global mouse_destination_x
-        global mouse_destination_y
-        global show_range
-        global current_game_mode
-        global text_box_height
-        global default_text_box_height
-        global show_text_box
-        global notification_list
-        global mouse_follower
-        global current_instructions_page
-        global mouse_moved_time
-        global old_mouse_x
-        global old_mouse_y
-        game_display.fill((125, 125, 125))
+        global_manager.get('game_display').fill((125, 125, 125))
         possible_tooltip_drawers = []
-        if not current_game_mode == 'tavern':
-            show_range = True
-
-        for grid in grid_list:
-            if current_game_mode in grid.modes:
+        for grid in global_manager.get('grid_list'):
+            if global_manager.get('current_game_mode') in grid.modes:
                 grid.draw()
 
-        for image in image_list:
+        for image in global_manager.get('image_list'):
             image.has_drawn = False
-        for tile in tile_list:
-            if current_game_mode in tile.image.modes and not tile in overlay_tile_list:
+        for tile in global_manager.get('tile_list'):
+            if global_manager.get('current_game_mode') in tile.image.modes and not tile in global_manager.get('overlay_tile_list'):
                 tile.image.draw()
                 tile.image.has_drawn = True
-        for image in image_list:
+        for image in global_manager.get('image_list'):
             if not image.has_drawn:
-                if current_game_mode in image.modes:
+                if global_manager.get('current_game_mode') in image.modes:
                     image.draw()
                     image.has_drawn = True
-        for bar in bar_list:
-            if current_game_mode in bar.modes:
+        for bar in global_manager.get('bar_list'):
+            if global_manager.get('current_game_mode') in bar.modes:
                 bar.draw()
-        for overlay_tile in overlay_tile_list:
-            if current_game_mode in overlay_tile.image.modes:
+        for overlay_tile in global_manager.get('overlay_tile_list'):
+            if global_manager.get('current_game_mode') in overlay_tile.image.modes:
                 overlay_tile.image.draw()
                 overlay_tile.image.has_drawn = True
                 
-        for grid in grid_list:
-            if current_game_mode in grid.modes:
+        for grid in global_manager.get('grid_list'):
+            if global_manager.get('current_game_mode') in grid.modes:
                 grid.draw_grid_lines()
             
-        for actor in actor_list:
+        for actor in global_manager.get('actor_list'):
             #if show_selected and current_game_mode in actor.image.modes:
             #    if actor.selected:
             #        pygame.draw.rect(game_display, color_dict['light gray'], (actor.image.outline), actor.image.outline_width)
@@ -1719,47 +1557,44 @@ def update_display():
             if actor.can_show_tooltip():
                 possible_tooltip_drawers.append(actor) #only one of these will be drawn to prevent overlapping tooltips
 
-        for button in button_list:
-            if not button in notification_list: #notifications are drawn later
+        for button in global_manager.get('button_list'):
+            if not button in global_manager.get('notification_list'): #notifications are drawn later
                 button.draw()
             if button.can_show_tooltip():
                 possible_tooltip_drawers.append(button) #only one of these will be drawn to prevent overlapping tooltips
-        for label in label_list:
-            if not label in notification_list:
+        for label in global_manager.get('label_list'):
+            if not label in global_manager.get('notification_list'):
                 label.draw()
-        for notification in notification_list:
-            if not notification == current_instructions_page:
+        for notification in global_manager.get('notification_list'):
+            if not notification == global_manager.get('current_instructions_page'):
                 notification.draw()
-        if show_text_box:
-            draw_text_box()
-        if not current_instructions_page == 'none':
-            current_instructions_page.draw()
-        if not (old_mouse_x, old_mouse_y) == pygame.mouse.get_pos():
-            mouse_moved_time = time.time()
+        if global_manager.get('show_text_box'):
+            draw_text_box(global_manager)
+        if not global_manager.get('current_instructions_page') == 'none':
+            global_manager.get('current_instructions_page').draw()
+        if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
+            global_manager.set('mouse_moved_time', time.time())
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
-        if time.time() > mouse_moved_time + 0.15:#show tooltip when mouse is still
-            manage_tooltip_drawing(possible_tooltip_drawers)
+            global_manager.set('old_mouse_x', old_mouse_x)
+            global_manager.set('old_mouse_y', old_mouse_y)
+        if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
+            manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
-        loading_start_time = loading_start_time - 3
+        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
 
-def draw_loading_screen():
-    global loading_start_time
-    global loading
+def draw_loading_screen(global_manager):
     game_display.fill((125, 125, 125))
-    loading_image.draw()
+    global_manager.get('loading_image').draw()
     pygame.display.update()    
-    if loading_start_time + 2 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
-        loading = False
+    if global_manager.get('loading_start_time') + 2 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
+        global_manager.set('loading', False)
 
-def start_loading():
-    global loading_start_time
-    global loading
-    loading = True
-    loading_start_time = time.time()
-    update_display()#draw_loading_screen()
+def start_loading(global_manager):
+    global_manager.set('loading', True)
+    global_manager.set('loading_start_time', time.time())
+    update_display(global_manager)#draw_loading_screen()
 
-def manage_tooltip_drawing(possible_tooltip_drawers):
-    global current_instructions_page
+def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
     if possible_tooltip_drawers_length == 0:
         return()
@@ -1769,10 +1604,10 @@ def manage_tooltip_drawing(possible_tooltip_drawers):
         tooltip_index = 1
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
-            if possible_tooltip_drawer == current_instructions_page:
+            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
                 possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
                 stopping = True
-            if (possible_tooltip_drawer in notification_list) and not stopping:
+            if (possible_tooltip_drawer in global_manager.get('notification_list')) and not stopping:
                 possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
                 stopping = True
         if not stopping:
@@ -1790,19 +1625,18 @@ def create_image_dict(stem):
     image_dict['left'] = stem + 'left.png'
     return(image_dict)
 
-def display_notification(message):
-    global notification_queue
-    notification_queue.append(message)
-    if len(notification_queue) == 1:
-        notification_to_front(message)
+def display_notification(message, global_manager):
+    global_manager.get('notification_queue').append(message)
+    if len(global_manager.get('notification_queue')) == 1:
+        notification_to_front(message, global_manager)
 
-def notification_to_front(message):
+def notification_to_front(message, global_manager):
     '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
-    new_notification = notification(scale_coordinates(610, 236), scale_width(500), scale_height(500), ['strategic'], 'misc/default_notification.png', message)#coordinates, ideal_width, minimum_height, showing, modes, image, message
+    new_notification = notification(scale_coordinates(610, 236, global_manager), scale_width(500, global_manager), scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
 
-def show_tutorial_notifications():
+def show_tutorial_notifications(global_manager):
     intro_message = "Placeholder tutorial/opener notification"
-    display_notification(intro_message)
+    display_notification(intro_message, global_manager)
 
 def manage_rmb_down(clicked_button):
     nothing = 0
@@ -1811,163 +1645,204 @@ def manage_lmb_down(clicked_button):
     nothing = 0
     #may be used for selection and such, copy code from other program but no mouse boxes needed
 
-def scale_coordinates(x, y):
-    global display_width
-    global display_height
-    global default_display_width
-    global default_display_height
-    x_ratio = display_width/default_display_width
-    y_ratio = display_height/default_display_height
+def scale_coordinates(x, y, global_manager):
+    x_ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
+    y_ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     scaled_x = round(x * x_ratio)
     scaled_y = round(y * y_ratio)
     return(scaled_x, scaled_y)
 
-def scale_width(width):
-    global display_width
-    global default_display_width
-    ratio = display_width/default_display_width
+def scale_width(width, global_manager):
+    ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
     scaled_width = round(width * ratio)
     return(scaled_width)
 
-def scale_height(height):
-    global display_height
-    global default_display_height
-    ratio = display_height/default_display_height
+def scale_height(height, global_manager):
+    ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     scaled_height = round(height * ratio)
     return(scaled_height)
 
 def generate_article(word):
-    global vowels
+    vowels = ['a', 'e', 'i', 'o', 'u']
     if word[0] in vowels:
         return('an')
     else:
         return('a')
 
-def display_instructions_page(page_number):
-    global current_instructions_page
-    global current_instructions_page_index
-    global instructions_list
-    current_instructions_page_index = page_number
-    current_instructions_page_text = instructions_list[page_number]
-    current_instructions_page = instructions_page(current_instructions_page_text)
-    
-vowels = ['a', 'e', 'i', 'o', 'u']
+def display_instructions_page(page_number, global_manager):
+    global_manager.set('current_instructions_page_index', page_number)
+    global_manager.set('current_instructions_page_text', global_manager.get('instructions_list')[page_number])
+    global_manager.set('current_instructions_page', instructions_page(global_manager.get('current_instructions_page_text'), global_manager))
+
+global_dict = {} #dictionary of what would be global variables passed between functions and classes
+global_manager = global_manager_template(global_dict)
 resolution_finder = pygame.display.Info()
 default_display_width = 1728#all parts of game made to be at default and scaled to display
+global_dict['default_display_width'] = default_display_width
 default_display_height = 972
+global_dict['default_display_height'] = default_display_height
 display_width = resolution_finder.current_w - round(default_display_width/10)# + -500
+global_dict['display_width'] = display_width
 display_height = resolution_finder.current_h - round(default_display_height/10)# - 600
+global_dict['display_height'] = display_height
 loading = True
+global_dict['loading'] = loading
 loading_start_time = time.time()
-myfont = pygame.font.SysFont('Times New Roman', scale_width(15))
-font_size = scale_width(15)
-game_display = pygame.display.set_mode((display_width, display_height))
+global_dict['loading_start_time'] = loading_start_time
+myfont = pygame.font.SysFont('Times New Roman', scale_width(15, global_manager))
+global_dict['myfont'] = myfont
+font_size = scale_width(15, global_manager)
+global_dict['font_size'] = font_size
+game_display = pygame.display.set_mode((global_dict['display_width'], global_dict['display_height']))
+global_dict['game_display'] = game_display
+
 pygame.display.set_caption('')
 color_dict = {'black': (0, 0, 0), 'white': (255, 255, 255), 'light gray': (230, 230, 230), 'red': (255, 0, 0), 'dark green': (0, 150, 0), 'green': (0, 200, 0), 'bright green': (0, 255, 0), 'blue': (0, 0, 255), 'yellow': (255, 255, 0), 'brown': (132, 94, 59)}
+global_dict['color_dict'] = color_dict
 terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
+global_dict['terrain_list'] = terrain_list
 terrain_colors = {'clear': (150, 200, 104), 'hills': (50, 205, 50), 'jungle': (0, 100, 0), 'water': (0, 0, 200), 'mountain': (100, 100, 100), 'swamp': (100, 100, 50), 'desert': (255, 248, 104)}
+global_dict['terrain_colors'] = terrain_colors
 game_display.fill(color_dict['white'])
 default_text_box_height = 0
 text_box_height = 0#set in update display
 button_list = []
+global_dict['button_list'] = button_list
 current_instructions_page = 'none'
+global_dict['current_instructions_page'] = current_instructions_page
 current_instructions_page_index = 0
+global_dict['current_instructions_page_index'] = current_instructions_page_index
 instructions_list = []
+global_dict['instructions_list'] = instructions_list
 #page 1
 instructions_message = "Placeholder instructions, use += to add"
 instructions_list.append(instructions_message)
 
+
 grid_list = []
+global_dict['grid_list'] = grid_list
 text_list = ['']
+global_dict['text_list'] = text_list
 image_list = []
+global_dict['image_list'] = image_list
 bar_list = []
+global_dict['bar_list'] = bar_list
 actor_list = []
+global_dict['actor_list'] = actor_list
 strategic_actor_list = []
-location_list = []
-stored_location_list = []
-obstacle_list = []
+global_dict['strategic_actor_list'] = strategic_actor_list
 tile_list = []
+global_dict['tile_list'] = tile_list
 overlay_tile_list = []
+global_dict['overlay_tile_list'] = overlay_tile_list
 notification_list = []
+global_dict['notification_list'] = notification_list
 label_list = []
+global_dict['label_list'] = label_list
 notification_queue = []
+global_dict['notification_queue'] = notification_queue
 sight_range = 3.5
 pygame.key.set_repeat(300, 200)#100)
 crashed = False
+global_dict['crashed'] = crashed
 lmb_down = False
+global_dict['lmb_down'] = lmb_down
 rmb_down = False
+global_dict['rmb_down'] = rmb_down
 mmb_down = False
+global_dict['mmb_down'] = mmb_down
 typing = False
+global_dict['typing'] = typing
 message = ''
+global_dict['message'] = message
 show_grid_lines = True
+global_dict['show_grid_lines'] = show_grid_lines
 show_text_box = True
+global_dict['show_text_box'] = show_text_box
 mouse_origin_x = 0
+global_dict['mouse_origin_x'] = mouse_origin_x
 mouse_origin_y = 0
+global_dict['mouse_origin_y'] = mouse_origin_y
 mouse_destination_x = 0
+global_dict['mouse_destination_x'] = mouse_destination_x
 mouse_destination_y = 0
-show_grid_lines = True
-input_manager = input_manager_template()
+global_dict['mouse_destination_y'] = mouse_destination_y
 
-location_name_image_dict = {}
- 
-loading_image = loading_image_class('misc/loading.png')
-#strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 64, 60, True, color_dict['dark green'], ['strategic'])
-#strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 32, 30, True, color_dict['dark green'], ['strategic'])
-strategic_map_grid = grid(scale_coordinates(729, 150), scale_width(870), scale_height(810), 16, 15, color_dict['dark green'], ['strategic'])
+r_shift = 'up'
+global_dict['r_shift'] = r_shift
+l_shift = 'up'
+global_dict['l_shift'] = l_shift
+capital = False
+global_dict['capital'] = capital
+r_ctrl = 'up'
+global_dict['r_ctrl'] = r_ctrl
+l_ctrl = 'up'
+global_dict['l_ctrl'] = l_ctrl
+ctrl = False
+global_dict['ctrl'] = ctrl
+start_time = time.time()
+global_dict['start_time'] = start_time
+current_time = time.time()
+global_dict['current_time'] = current_time
+mouse_moved_time = time.time()
+global_dict['mouse_moved_time'] = mouse_moved_time
+old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
+global_dict['old_mouse_x'] = old_mouse_x
+global_dict['old_mouse_y'] = old_mouse_y
+show_tutorial_notifications(global_manager)
+loading_image = loading_image_class('misc/loading.png', global_manager)
+global_dict['loading_image'] = loading_image
+current_game_mode = 'none'
+global_dict['current_game_mode'] = current_game_mode
+
+input_manager = input_manager_template(global_manager)
+global_dict['input_manager'] = input_manager #to do: verify that this correctly adds an entry for input_manager in global_manager's global_dict
+#strategic_map_grid = grid(scale_coordinates(729, 150, global_manager), scale_width(870, global_manager), scale_height(810, global_manager), 64, 60, True, color_dict['dark green'], ['strategic']) #other map sizes
+#strategic_map_grid = grid(scale_coordinates(729, 150, global_manager), scale_width(870, global_manager), scale_height(810, global_manager), 32, 30, True, color_dict['dark green'], ['strategic'])
+strategic_map_grid = grid(scale_coordinates(729, 150, global_manager), scale_width(870, global_manager), scale_height(810, global_manager), 16, 15, color_dict['dark green'], ['strategic'], global_manager)
+global_dict['strategic_map_grid'] = strategic_map_grid
+set_game_mode('strategic', global_manager)
 #mouse_follower = mouse_follower_class()
 button_start_x = 600#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 12#tracks current button to move each one farther right
 
-left_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move left', pygame.K_a, ['strategic'], 'misc/left_button.png')
+left_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'move left', pygame.K_a, ['strategic'], 'misc/left_button.png', global_manager)
 current_button_number += 1
-down_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move down', pygame.K_s, ['strategic'], 'misc/down_button.png')#movement buttons should be usable in any mode with a grid
+down_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'move down', pygame.K_s, ['strategic'], 'misc/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
 
-up_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 80), scale_width(50), scale_height(50), 'blue', 'move up', pygame.K_w, ['strategic'], 'misc/up_button.png')
+up_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'move up', pygame.K_w, ['strategic'], 'misc/up_button.png', global_manager)
 current_button_number += 1
-right_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20), scale_width(50), scale_height(50), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png')
+right_arrow_button = button_class(scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
 current_button_number += 2#move more when switching categories
 
 current_button_number += 1
 
-expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50), scale_width(50), scale_height(50), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png') #'none' for no keybind
-toggle_grid_lines_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png')
-instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170), scale_width(50), scale_height(50), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png')
-toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50), scale_width(50), scale_height(50), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png')
+expand_text_box_button = button_class(scale_coordinates(0, default_display_height - 50, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
+toggle_grid_lines_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 50, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
+instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
+toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
 
-r_shift = 'up'
-l_shift = 'up'
-capital = False
-r_ctrl = 'up'
-l_ctrl = 'up'
-ctrl = False
-start_time = time.time()
-current_time = time.time()
-mouse_moved_time = time.time()
-old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
-show_tutorial_notifications()
-current_game_mode = 'none'
-set_game_mode('strategic')
-while not crashed:
-    if len(notification_list) == 0:
+while not global_manager.get('crashed'):
+    if len(global_manager.get('notification_list')) == 0:
         stopping = False
     input_manager.update_input()
     if input_manager.taking_input:
         typing = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            crashed = True
-        if r_shift == 'down' or l_shift == 'down':
-            capital = True
+            global_manager.set('crashed', True)
+        if global_manager.get('r_shift') == 'down' or global_manager.get('l_shift') == 'down':
+            global_manager.set('capital', True)
         else:
-            capital = False
-        if r_ctrl == 'down' or l_ctrl == 'down':
-            ctrl = True
+            global_manager.set('capital', False)
+        if global_manager.get('r_ctrl') == 'down' or global_manager.get('l_ctrl') == 'down':
+            global_manager.set('ctrl', True)
         else:
-            ctrl = False
+            global_manager.set('ctrl', False)
         if event.type == pygame.KEYDOWN:
-            for button in button_list:
-                if current_game_mode in button.modes and not typing:
+            for button in global_manager.get('button_list'):
+                if global_manager.get('current_game_mode') in button.modes and not global_manager.get('typing'):
                     if button.has_keybind:
                         if event.key == button.keybind_id:
                             if button.has_released:
@@ -1978,255 +1853,260 @@ while not crashed:
                     else:
                         button.confirming = False
             if event.key == pygame.K_RSHIFT:
-                r_shift = 'down'
+                global_manager.set('r_shift', 'down')
             if event.key == pygame.K_LSHIFT:
-                l_shift = 'down'
+                global_manager.set('l_shift', 'down')
             if event.key == pygame.K_RCTRL:
-                r_ctrl = 'down'
+                global_manager.set('r_ctrl', 'down')
             if event.key == pygame.K_LCTRL:
-                l_ctrl = 'down'
+                global_manager.set('l_ctrl', 'down')
             if event.key == pygame.K_ESCAPE:
-                typing = False
-                message = ''
+                global_manager.set('typing', False)
+                global_manager.set('message', '')
             if event.key == pygame.K_SPACE:
-                if typing:
-                    message = add_to_message(message, ' ')
+                if global_manager.get('typing'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), ' ')) #add space to message and set message to it
             if event.key == pygame.K_BACKSPACE:
-                if typing:
-                    message = message[:-1]
+                if global_manager.get('typing'):
+                    global_manager.set('message', global_manager.get('message')[:-1]) #remove last character from message and set message to it
             if event.key == pygame.K_a:
-                if typing and not capital:
-                    message = add_to_message(message, 'a')
-                elif typing and capital:
-                    message = add_to_message(message, 'A')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'a'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'A'))
             if event.key == pygame.K_b:
-                if typing and not capital:
-                    message = add_to_message(message, 'b')
-                elif typing and capital:
-                    message = add_to_message(message, 'B')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'b'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'B'))
             if event.key == pygame.K_c:
-                if typing and not capital:
-                    message = add_to_message(message, 'c')
-                elif typing and capital:
-                    message = add_to_message(message, 'C')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'c'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'C'))
             if event.key == pygame.K_d:
-                if typing and not capital:
-                    message = add_to_message(message, 'd')
-                elif typing and capital:
-                    message = add_to_message(message, 'D')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'd'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'D'))
             if event.key == pygame.K_e:
-                if typing and not capital:
-                    message = add_to_message(message, 'e')
-                elif typing and capital:
-                    message = add_to_message(message, 'E')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'e'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'E'))
             if event.key == pygame.K_f:
-                if typing and not capital:
-                    message = add_to_message(message, 'f')
-                elif typing and capital:
-                    message = add_to_message(message, 'F')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'f'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'F'))
             if event.key == pygame.K_g:
-                if typing and not capital:
-                    message = add_to_message(message, 'g')
-                elif typing and capital:
-                    message = add_to_message(message, 'G')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'g'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'G'))
             if event.key == pygame.K_h:
-                if typing and not capital:
-                    message = add_to_message(message, 'h')
-                elif typing and capital:
-                    message = add_to_message(message, 'H')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'h'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'H'))
             if event.key == pygame.K_i:
-                if typing and not capital:
-                    message = add_to_message(message, 'i')
-                elif typing and capital:
-                    message = add_to_message(message, 'I')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'i'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'I'))
             if event.key == pygame.K_j:
-                if typing and not capital:
-                    message = add_to_message(message, 'j')
-                elif typing and capital:
-                    message = add_to_message(message, 'J')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'j'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'J'))
             if event.key == pygame.K_k:
-                if typing and not capital:
-                    message = add_to_message(message, 'k')
-                elif typing and capital:
-                    message = add_to_message(message, 'K')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'k'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'K'))
             if event.key == pygame.K_l:
-                if typing and not capital:
-                    message = add_to_message(message, 'l')
-                elif typing and capital:
-                    message = add_to_message(message, 'L')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'l'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'L'))
             if event.key == pygame.K_m:
-                if typing and not capital:
-                    message = add_to_message(message, 'm')
-                elif typing and capital:
-                    message = add_to_message(message, 'M')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'm'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'M'))
             if event.key == pygame.K_n:
-                if typing and not capital:
-                    message = add_to_message(message, 'n')
-                elif typing and capital:
-                    message = add_to_message(message, 'N')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'n'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'N'))
             if event.key == pygame.K_o:
-                if typing and not capital:
-                    message = add_to_message(message, 'o')
-                elif typing and capital:
-                    message = add_to_message(message, 'O')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'o'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'O'))
             if event.key == pygame.K_p:
-                if typing and not capital:
-                    message = add_to_message(message, 'p')
-                elif typing and capital:
-                    message = add_to_message(message, 'P')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'p'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'P'))
             if event.key == pygame.K_q:
-                if typing and not capital:
-                    message = add_to_message(message, 'q')
-                elif typing and capital:
-                    message = add_to_message(message, 'Q')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'q'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'Q'))
             if event.key == pygame.K_r:
-                if typing and not capital:
-                    message = add_to_message(message, 'r')
-                elif typing and capital:
-                    message = add_to_message(message, 'R')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'r'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'R'))
             if event.key == pygame.K_s:
-                if typing and not capital:
-                    message = add_to_message(message, 's')
-                elif typing and capital:
-                    message = add_to_message(message, 'S')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 's'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'S'))
             if event.key == pygame.K_t:
-                if typing and not capital:
-                    message = add_to_message(message, 't')
-                elif typing and capital:
-                    message = add_to_message(message, 'T')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 't'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'T'))
             if event.key == pygame.K_u:
-                if typing and not capital:
-                    message = add_to_message(message, 'u')
-                elif typing and capital:
-                    message = add_to_message(message, 'U')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'u'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'U'))
             if event.key == pygame.K_v:
-                if typing and not capital:
-                    message = add_to_message(message, 'v')
-                elif typing and capital:
-                    message = add_to_message(message, 'V')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'v'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'V'))
             if event.key == pygame.K_w:
-                if typing and not capital:
-                    message = add_to_message(message, 'w')
-                elif typing and capital:
-                    message = add_to_message(message, 'W')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'w'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'W'))
             if event.key == pygame.K_x:
-                if typing and not capital:
-                    message = add_to_message(message, 'x')
-                elif typing and capital:
-                    message = add_to_message(message, 'X')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'x'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'X'))
             if event.key == pygame.K_y:
-                if typing and not capital:
-                    message = add_to_message(message, 'y')
-                elif typing and capital:
-                    message = add_to_message(message, 'Y')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'y'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'Y'))
             if event.key == pygame.K_z:
-                if typing and not capital:
-                    message = add_to_message(message, 'z')
-                elif typing and capital:
-                    message = add_to_message(message, 'Z')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'z'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), 'Z'))
+
             if event.key == pygame.K_1:
-                if typing and not capital:
-                    message = add_to_message(message, '1')
-                elif typing and capital:
-                    message = add_to_message(message, '!')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '1'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '!'))
             if event.key == pygame.K_2:
-                if typing and not capital:
-                    message = add_to_message(message, '2')
-                elif typing and capital:
-                    message = add_to_message(message, '@')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '2'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '@'))
             if event.key == pygame.K_3:
-                if typing and not capital:
-                    message = add_to_message(message, '3')
-                elif typing and capital:
-                    message = add_to_message(message, '#')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '3'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '#'))
             if event.key == pygame.K_4:
-                if typing and not capital:
-                    message = add_to_message(message, '4')
-                elif typing and capital:
-                    message = add_to_message(message, '$')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '4'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '$'))
             if event.key == pygame.K_5:
-                if typing and not capital:
-                    message = add_to_message(message, '5')
-                elif typing and capital:
-                    message = add_to_message(message, '%')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '5'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '%'))
             if event.key == pygame.K_6:
-                if typing and not capital:
-                    message = add_to_message(message, '6')
-                elif typing and capital:
-                    message = add_to_message(message, '^')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '6'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '^'))
             if event.key == pygame.K_7:
-                if typing and not capital:
-                    message = add_to_message(message, '7')
-                elif typing and capital:
-                    message = add_to_message(message, '&')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '7'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '&'))
             if event.key == pygame.K_8:
-                if typing and not capital:
-                    message = add_to_message(message, '8')
-                elif typing and capital:
-                    message = add_to_message(message, '*')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '8'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '*'))
             if event.key == pygame.K_9:
-                if typing and not capital:
-                    message = add_to_message(message, '9')
-                elif typing and capital:
-                    message = add_to_message(message, '(')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '9'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '('))
             if event.key == pygame.K_0:
-                if typing and not capital:
-                    message = add_to_message(message, '0')
-                elif typing and capital:
-                    message = add_to_message(message, ')')
+                if global_manager.get('typing') and not global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), '0'))
+                elif global_manager.get('typing') and global_manager.get('capital'):
+                    global_manager.set('message', add_to_message(global_manager.get('message'), ')'))
+                    
         if event.type == pygame.KEYUP:
-            for button in button_list:
-                if not typing or button.keybind_id == pygame.K_TAB or button.keybind_id == pygame.K_e:
+            for button in global_manager.get('button_list'):
+                if not global_manager.get('typing') or button.keybind_id == pygame.K_TAB or button.keybind_id == pygame.K_e:
                     if button.has_keybind:
                         if event.key == button.keybind_id:
                             button.on_release()
                             button.has_released = True
             if event.key == pygame.K_RSHIFT:
-                r_shift = 'up'
+                global_manager.set('r_shift', 'up')
             if event.key == pygame.K_LSHIFT:
-                l_shift = 'up'
+                global_manager.set('l_shift', 'up')
             if event.key == pygame.K_LCTRL:
-                l_ctrl = 'up'
+                global_manager.set('l_ctrl', 'up')
             if event.key == pygame.K_RCTRL:
-                r_ctrl = 'up'
+                global_manager.set('r_ctrl', 'up')
             if event.key == pygame.K_RETURN:
-                if typing:
+                if global_manager.get('typing'):
                     if input_manager.taking_input:
-                        input_response = message
+                        #input_response = message
                         input_manager.taking_input = False
-                        print_to_screen('Response: ' + message)
-                        input_manager.receive_input(message)
+                        print_to_screen('Response: ' + global_manager.get('message'), global_manager)
+                        input_manager.receive_input(global_manager.get('message'))
                         check_pointer_removal('not typing')
                     else:
-                        print_to_screen(message)
-                    typing = False
-                    message = ''
+                        print_to_screen(global_manager.get('message'), global_manager)
+                    global_manager.set('typing', False)
+                    global_manager.set('message', '')
                 else:
-                    typing = True
-    old_lmb_down = lmb_down
-    old_rmb_down = rmb_down
-    old_mmb_down = mmb_down
+                    global_manager.set('typing', True)
+    global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
+    global_manager.set('old_rmb_down', global_manager.get('rmb_down'))
+    global_manager.set('old_mmb_down', global_manager.get('mmb_down'))
     lmb_down, mmb_down, rmb_down = pygame.mouse.get_pressed()
+    global_manager.set('lmb_down', lmb_down)
+    global_manager.set('mmb_down', mmb_down)
+    global_manager.set('rmb_down', rmb_down)
 
-    if not old_rmb_down == rmb_down:#if lmb changes
-        if not rmb_down:#if user just released lmb
+    if not global_manager.get('old_rmb_down') == global_manager.get('rmb_down'): #if rmb changes
+        if not global_manager.get('rmb_down'): #if user just released rmb
             clicked_button = False
             stopping = False
             if current_instructions_page == 'none':
-                for button in button_list:
-                    if button.touching_mouse() and current_game_mode in button.modes and button in notification_list and not stopping:
+                for button in global_manager.get('button_list'):
+                    if button.touching_mouse() and current_game_mode in button.modes and button in global_manager.get('notification_list') and not stopping:
                         button.on_rmb_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
                         button.on_rmb_release()
                         clicked_button = True
                         stopping = True
             else:
-                if current_instructions_page.touching_mouse() and current_game_mode in current_instructions_page.modes:
-                    current_instructions_page.on_rmb_click()
+                if global_manager.get('current_instructions_page').touching_mouse() and current_game_mode in global_manager.get('current_instructions_page').modes:
+                    global_manager.get('current_instructions_page').on_rmb_click()
                     clicked_button = True
                     stopping = True
             if not stopping:
-                for button in button_list:
-                    if button.touching_mouse() and current_game_mode in button.modes:
+                for button in global_manager.get('button_list'):
+                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes:
                         button.on_rmb_click()
                         button.on_rmb_release()
                         clicked_button = True
@@ -2234,27 +2114,29 @@ while not crashed:
 
         else:#if user just clicked rmb
             mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
-            making_mouse_box = True
+            global_manager.set('mouse_origin_x', mouse_origin_x)
+            global_manager.set('mouse_origin_y', mouse_origin_y)
+            #making_mouse_box = True
             
-    if not old_lmb_down == lmb_down:#if lmb changes
-        if not lmb_down:#if user just released lmb
+    if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
+        if not global_manager.get('lmb_down'):#if user just released lmb
             clicked_button = False
             stopping = False
-            if current_instructions_page == 'none':
-                for button in button_list:
-                    if button.touching_mouse() and current_game_mode in button.modes and (button in notification_list) and not stopping:
+            if global_manager.get('current_instructions_page') == 'none':
+                for button in global_manager.get('button_list'):
+                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes and (button in global_manager.get('notification_list')) and not stopping:
                         button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
                         button.on_release()
                         clicked_button = True
                         stopping = True
             else:
-                if current_instructions_page.touching_mouse() and current_game_mode in current_instructions_page.modes:
-                    current_instructions_page.on_click()
+                if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_game_mode') in global_manager.get('current_instructions_page').modes:
+                    global_manager.get('current_instructions_page').on_click()
                     clicked_button = True
                     stopping = True
             if not stopping:
-                for button in button_list:
-                    if button.touching_mouse() and current_game_mode in button.modes:
+                for button in global_manager.get('button_list'):
+                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes:
                         button.on_click()
                         button.on_release()
                         clicked_button = True
@@ -2262,15 +2144,19 @@ while not crashed:
             
         else:#if user just clicked lmb
             mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
-            making_mouse_box = True
+            global_manager.set('mouse_origin_x', mouse_origin_x)
+            global_manager.set('mouse_origin_y', mouse_origin_y)
+            #making_mouse_box = True
 
-    if not loading:
-        update_display()
+    if not global_manager.get('loading'):
+        update_display(global_manager)
     else:
-        draw_loading_screen()
+        draw_loading_screen(global_manager)
     current_time = time.time()
-    for actor in actor_list:
+    global_manager.set('current_time', current_time)
+    for actor in global_manager.get('actor_list'):
         if not actor.image.image_description == actor.image.previous_idle_image and time.time() >= actor.image.last_image_switch + 0.6:
             actor.image.set_image(actor.image.previous_idle_image)
     start_time = time.time()
+    global_manager.set('start_time', start_time)
 pygame.quit()
