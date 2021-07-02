@@ -1,9 +1,8 @@
-#to do
+#to do:
 #create relevant actors
 #review rules
 #trigger button outlines when clicking, currently only works when pressing
 #add more docstrings and comments
-#make better images for certain resources
 #move classes and functions to different files
 #add global_manager as input to certain docstrings
 #
@@ -16,6 +15,10 @@
 #removed obsolete showing and can_show() variables and functions, respectively
 #added images for all resources
 #remove all global variables
+#make better images for all resources
+#add mobs
+#add selecting and mouse boxes
+#add movement and basic movement restrictions
 
 import pygame
 import time
@@ -317,6 +320,26 @@ class button_class():
         if self.button_type == 'hi printer':
             print_to_screen('hi')
 
+        elif self.button_type == 'move left':
+            for mob in global_manager.get('mob_list'):
+                if mob.selected and mob.can_move(-1, 0):
+                    mob.move(-1, 0) #x_change, y_change
+                    
+        elif self.button_type == 'move right':
+            for mob in global_manager.get('mob_list'):
+                if mob.selected and mob.can_move(1, 0):
+                    mob.move(1, 0)
+                    
+        elif self.button_type == 'move up':
+            for mob in global_manager.get('mob_list'):
+                if mob.selected and mob.can_move(0, 1):
+                    mob.move(0, 1)
+                    
+        elif self.button_type == 'move down':
+            for mob in global_manager.get('mob_list'):
+                if mob.selected and mob.can_move(0, -1):
+                    mob.move(0, -1)
+                    
         elif self.button_type == 'toggle grid lines':
             if self.global_manager.get('show_grid_lines'):
                 self.global_manager.set('show_grid_lines', False)
@@ -1015,15 +1038,17 @@ class actor_image():
         self.grid_x = self.actor.x
         self.grid_y = self.actor.y
         self.go_to_cell((self.grid_x, self.grid_y))
+        #if self.actor.selected:
+        #    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.outline), self.outline_width)
         #if show_selected:
         #    if self.actor.selected:
         #        pygame.draw.rect(game_display, color_dict['light gray'], (self.outline), self.outline_width)
         #    elif self.actor.targeted:
         #        pygame.draw.rect(game_display, color_dict['red'], (self.outline), self.outline_width)
-        display_image(self.image, self.x, self.y - self.height)
+        display_image(self.image, self.x, self.y - self.height, self.global_manager)
         
     def go_to_cell(self, coordinates):
-        self.x, self.y = self.grid.convert_coordinates(coordinates, self.global_manager)
+        self.x, self.y = self.grid.convert_coordinates(coordinates)
         self.Rect.x = self.x
         self.Rect.y = self.y - self.height
         self.outline.x = self.x - self.outline_width
@@ -1155,7 +1180,8 @@ class actor():
         self.name = ''
         self.set_name('placeholder')
         self.set_coordinates(self.x, self.y, False)
-        self.controllable = False
+        #self.controllable = False# obsolete but possibly usable later
+        self.selected = False
     
     def set_name(self, new_name):
         self.name = new_name        
@@ -1169,8 +1195,8 @@ class actor():
             self.x = x
             self.y = y
             self.grid.find_cell(self.x, self.y).occupied = True
-        elif able_to_print:
-            print_to_screen('This cell is blocked.')
+        else:#elif able_to_print:
+            print_to_screen('This cell is blocked.', self.global_manager)
             
     def set_tooltip(self, new_tooltip):
         self.image.set_tooltip(new_tooltip)
@@ -1218,9 +1244,43 @@ class actor():
             text_line = self.image.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text(text_line, myfont, self.global_manager), (self.image.tooltip_box.x + 10, self.image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
+class mob(actor):
+    '''a mobile and selectable actor'''
+    def __init__(self, coordinates, grid, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grid, modes, global_manager)
+        self.image_dict = {'default': image_id}
+        self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), self.grid, 'default', self.global_manager)#self, actor, width, height, grid, image_description, global_manager
+        global_manager.get('mob_list').append(self)
+
+    def draw_outline(self):
+        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.image.outline), self.image.outline_width)
+
+    def update_tooltip(self):
+        self.set_tooltip(['A person'])
+
+    def remove(self):
+        super().remove()
+        global_manager.set('mob_list', remove_from_list(global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+
+    def can_move(self, x_change, y_change):
+        future_x = self.x + x_change
+        future_y = self.y + y_change
+        if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+            if not self.grid.find_cell(future_x, future_y).terrain == 'water':
+                return(True)
+            else:
+                print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
+                return(False)
+        else:
+            print_to_screen("You can't move off of the map.", self.global_manager)
+            return(False)
+
+    def move(self, x_change, y_change):
+        self.x += x_change
+        self.y += y_change
+
 class tile_class(actor):
     '''like an obstacle without a tooltip or movement blocking'''
-    
     def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
         super().__init__(coordinates, grid, modes, global_manager)
         self.set_name(name)
@@ -1352,8 +1412,8 @@ class tile_shader(tile_image):
             super().draw()
         
         
-class strategic_actor(actor):
-    '''actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob'''
+'''class strategic_actor(actor): #just add locations as a class when needed
+    #actor that operates on the strategic map: able to move and use actions unlike actor, able to ignore whether cells are occupied and not have health unlike mob
     def __init__(self, coordinates, grid, image_dict, controllable, modes, global_manager):
         super().__init__(coordinates, grid, modes, global_manager)
         self.image_dict = image_dict
@@ -1364,7 +1424,7 @@ class strategic_actor(actor):
         self.set_name('strategic actor')
 
     def set_coordinates(self, x, y, able_to_print):
-        '''on the strategic map there can be multiple strategic actors on each other, such as the player's party on a location, able to print is an unnecessary parameter from parent kept for inheritance rules'''
+        #on the strategic map there can be multiple strategic actors on each other, such as the player's party on a location, able to print is an unnecessary parameter from parent kept for inheritance rules
         self.x = x
         self.y = y
                 
@@ -1373,7 +1433,7 @@ class strategic_actor(actor):
         
     def remove(self):
         super().remove()
-        self.global_manager.set('strategic_actor_list', remove_from_list(global_manager.get('strategic_actor_list'), self))
+        self.global_manager.set('strategic_actor_list', remove_from_list(global_manager.get('strategic_actor_list'), self))'''
     
 def remove_from_list(received_list, item_to_remove):
     output_list = []
@@ -1514,7 +1574,7 @@ def draw_text_box(global_manager):
         textsurface = myfont.render(global_manager.get('message'), False, (0, 0, 0))
     game_display.blit(textsurface,(10, display_height - (font_size + 5)))
     
-def update_display(global_manager):
+def update_display(global_manager): #to do: transfer if current game mode in modes to draw functions, do not manage it here
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
         draw_loading_screen(global_manager)
@@ -1547,6 +1607,10 @@ def update_display(global_manager):
         for grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in grid.modes:
                 grid.draw_grid_lines()
+
+        for mob in global_manager.get('mob_list'):
+            if mob.selected and global_manager.get('current_game_mode') in mob.image.modes:
+                mob.draw_outline()
             
         for actor in global_manager.get('actor_list'):
             #if show_selected and current_game_mode in actor.image.modes:
@@ -1570,6 +1634,16 @@ def update_display(global_manager):
                 notification.draw()
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
+
+        if global_manager.get('making_mouse_box'):
+            mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
+            global_manager.set('mouse_destination_x', mouse_destination_x + 4)
+            global_manager.set('mouse_destination_y', mouse_destination_y + 4)
+            #mouse_destination_y += 4
+            if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
+                mouse_box_color = 'light gray'
+                pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
+            
         if not global_manager.get('current_instructions_page') == 'none':
             global_manager.get('current_instructions_page').draw()
         if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
@@ -1638,12 +1712,18 @@ def show_tutorial_notifications(global_manager):
     intro_message = "Placeholder tutorial/opener notification"
     display_notification(intro_message, global_manager)
 
-def manage_rmb_down(clicked_button):
-    nothing = 0
+def manage_rmb_down(clicked_button, global_manager):
+    manage_lmb_down(clicked_button, global_manager)
     
-def manage_lmb_down(clicked_button):
-    nothing = 0
-    #may be used for selection and such, copy code from other program but no mouse boxes needed
+def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
+    if global_manager.get('making_mouse_box'): 
+        if not clicked_button:#do not do selecting operations if user was trying to click a button
+            for mob in global_manager.get('mob_list'):
+                if actor.image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
+                    actor.selected = True
+                else:
+                    actor.selected = False
+        global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
 def scale_coordinates(x, y, global_manager):
     x_ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
@@ -1729,8 +1809,8 @@ bar_list = []
 global_dict['bar_list'] = bar_list
 actor_list = []
 global_dict['actor_list'] = actor_list
-strategic_actor_list = []
-global_dict['strategic_actor_list'] = strategic_actor_list
+mob_list = []
+global_dict['mob_list'] = mob_list
 tile_list = []
 global_dict['tile_list'] = tile_list
 overlay_tile_list = []
@@ -1767,6 +1847,8 @@ mouse_destination_x = 0
 global_dict['mouse_destination_x'] = mouse_destination_x
 mouse_destination_y = 0
 global_dict['mouse_destination_y'] = mouse_destination_y
+making_mouse_box = False
+global_dict['making_mouse_box'] = making_mouse_box
 
 r_shift = 'up'
 global_dict['r_shift'] = r_shift
@@ -1823,6 +1905,7 @@ toggle_grid_lines_button = button_class(scale_coordinates(default_display_width 
 instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
 toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
 
+person = mob((10, 10), global_manager.get('strategic_map_grid'), 'mobs/person/default.png', 'Vrotki', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
 while not global_manager.get('crashed'):
     if len(global_manager.get('notification_list')) == 0:
         stopping = False
@@ -2110,13 +2193,13 @@ while not global_manager.get('crashed'):
                         button.on_rmb_click()
                         button.on_rmb_release()
                         clicked_button = True
-            manage_rmb_down(clicked_button)
+            manage_rmb_down(clicked_button, global_manager)
 
         else:#if user just clicked rmb
             mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
             global_manager.set('mouse_origin_x', mouse_origin_x)
             global_manager.set('mouse_origin_y', mouse_origin_y)
-            #making_mouse_box = True
+            global_manager.set('making_mouse_box', True)
             
     if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
         if not global_manager.get('lmb_down'):#if user just released lmb
@@ -2140,13 +2223,13 @@ while not global_manager.get('crashed'):
                         button.on_click()
                         button.on_release()
                         clicked_button = True
-            manage_lmb_down(clicked_button)#whether button was clicked or not determines whether characters are deselected
+            manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
             
         else:#if user just clicked lmb
             mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
             global_manager.set('mouse_origin_x', mouse_origin_x)
             global_manager.set('mouse_origin_y', mouse_origin_y)
-            #making_mouse_box = True
+            global_manager.set('making_mouse_box', True)
 
     if not global_manager.get('loading'):
         update_display(global_manager)
