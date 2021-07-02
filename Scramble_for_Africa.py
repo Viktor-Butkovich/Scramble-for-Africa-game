@@ -655,6 +655,9 @@ class grid():
             for start_x in start_x_list:
                 self.make_random_river_worm(round(coordinate_height * 0.75), round(coordinate_height * 1.25), start_x)
                 #self.make_random_river_worm(10, 21, start_x)
+            for cell in self.cell_list:
+                if cell.y == 0 or cell.y == 1:
+                    cell.set_visibility(True)
                 
     def draw(self):
         if self.global_manager.get('current_game_mode') in self.modes:
@@ -925,7 +928,13 @@ class cell():
         self.resource = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
+        self.set_visibility(False)
 
+    def set_visibility(self, new_visibility):
+        self.visible = new_visibility
+        if not self.tile == 'none':
+            self.tile.set_visibility(new_visibility)
+    
     def set_resource(self, new_resource):
         self.resource = new_resource
         self.tile.set_resource(new_resource)
@@ -936,7 +945,7 @@ class cell():
             self.tile.set_terrain(new_terrain)
         self.color = terrain_colors[new_terrain]
             
-    def draw(self): #eventually add a tutorial message the first time cells or multiple cells are shaded to explain cell shading mechanics
+    def draw(self):
         current_color = self.color
         red = current_color[0]
         green = current_color[1]
@@ -1243,7 +1252,7 @@ class actor():
         for text_line_index in range(len(self.image.tooltip_text)):
             text_line = self.image.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text(text_line, myfont, self.global_manager), (self.image.tooltip_box.x + 10, self.image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
-
+            
 class mob(actor):
     '''a mobile and selectable actor'''
     def __init__(self, coordinates, grid, image_id, name, modes, global_manager):
@@ -1251,12 +1260,13 @@ class mob(actor):
         self.image_dict = {'default': image_id}
         self.image = actor_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), self.grid, 'default', self.global_manager)#self, actor, width, height, grid, image_description, global_manager
         global_manager.get('mob_list').append(self)
+        self.set_name(name)
 
     def draw_outline(self):
         pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.image.outline), self.image.outline_width)
 
     def update_tooltip(self):
-        self.set_tooltip(['A person'])
+        self.set_tooltip([self.name])
 
     def remove(self):
         super().remove()
@@ -1266,11 +1276,17 @@ class mob(actor):
         future_x = self.x + x_change
         future_y = self.y + y_change
         if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-            if not self.grid.find_cell(future_x, future_y).terrain == 'water':
-                return(True)
+            if self.grid.find_cell(future_x, future_y).visible:
+                if not self.grid.find_cell(future_x, future_y).terrain == 'water':
+                    return(True)
+                else:
+                    if self.grid.find_cell(future_x, future_y).visible:
+                        print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
+                        return(False)
             else:
-                print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
+                print_to_screen("You can't move into an unexplored tile.", self.global_manager)
                 return(False)
+
         else:
             print_to_screen("You can't move off of the map.", self.global_manager)
             return(False)
@@ -1278,6 +1294,77 @@ class mob(actor):
     def move(self, x_change, y_change):
         self.x += x_change
         self.y += y_change
+
+
+class explorer(mob):
+    '''mob that can explore tiles'''
+    def __init__(self, coordinates, grid, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grid, image_id, name, modes, global_manager)
+        self.grid.find_cell(self.x, self.y).set_visibility(True)
+        self.veteran = False
+        self.veteran_icon = 'none'
+        
+    def can_move(self, x_change, y_change):
+        future_x = self.x + x_change
+        future_y = self.y + y_change
+        if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+            if not self.grid.find_cell(future_x, future_y).terrain == 'water':
+                return(True)
+            else:
+                if self.grid.find_cell(future_x, future_y).visible:
+                    print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
+                    return(False)
+                else:
+                    return(True) #will attempt to move there and discover it and discover it
+        else:
+            print_to_screen("You can't move off of the map.", self.global_manager)
+            return(False)
+
+    def move(self, x_change, y_change):
+        future_x = self.x + x_change
+        future_y = self.y + y_change
+        died = False
+        future_cell = self.grid.find_cell(future_x, future_y)
+        if future_cell.visible == False:
+            if self.veteran:
+                print_to_screen("The veteran explorer can roll twice and pick the higher result.", self.global_manager)
+                roll_result = max(roll(6, "Exploration roll", 4, self.global_manager), roll(6, "Exploration roll", 4, self.global_manager))
+                print_to_screen("The higher result, " + str(roll_result) + ", was used.", self.global_manager)
+                self.global_manager.get('roll_label').set_label("Roll: " + str(roll_result)) #label should show the roll that was used
+            else:
+                roll_result = roll(6, "Exploration roll", 4, self.global_manager)
+                if roll_result == 6:
+                    self.veteran = True
+                    print_to_screen("This explorer has become a veteran explorer.", self.global_manager)
+                    self.set_name("Veteran explorer")
+                    self.veteran_icon = tile_class((self.x, self.y), self.grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager)
+            if roll_result > 4: #4+ required on D6 for exploration
+                if not future_cell.resource == 'none':
+                    print_to_screen("You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource.", self.global_manager)
+                else:
+                    print_to_screen("You discovered a " + future_cell.terrain + " tile.", self.global_manager)
+                future_cell.set_visibility(True)
+                if not future_cell.terrain == 'water':
+                    self.x += x_change
+                    self.y += y_change
+            else:
+                print_to_screen("You were not able to explore the tile.", self.global_manager)
+            if roll_result == 1:
+                print_to_screen("This explorer has died.", self.global_manager)
+                self.remove()
+                died = True
+                
+        else:
+            self.x += x_change
+            self.y += y_change
+        if not died and self.veteran:
+            self.veteran_icon.x = self.x
+            self.veteran_icon.y = self.y
+
+    def remove(self):
+        super().remove()
+        if not self.veteran_icon == 'none':
+            self.veteran_icon.remove()
 
 class tile_class(actor):
     '''like an obstacle without a tooltip or movement blocking'''
@@ -1292,11 +1379,27 @@ class tile_class(actor):
         self.cell = self.grid.find_cell(self.x, self.y)
         if self.cell.tile == 'none':
             self.cell.tile = self
-        if self.show_terrain:
+        if self.show_terrain: #to do: make terrain tiles a subclass
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
+            self.image_dict['hidden'] = 'scenery/hidden.png'
+            self.set_visibility(self.cell.visible)
+        elif self.name == 'resource icon':
+            self.image_dict['hidden'] = 'misc/empty.png'
         else:
             self.terrain = 'floor'
+
+    def set_visibility(self, new_visibility):
+        if new_visibility == True:
+            image_name = 'default'
+        else:
+            image_name = 'hidden'
+            
+        self.image.set_image(image_name)
+        self.image.previous_idle_image = image_name
+        if not self.resource_icon == 'none':
+            self.resource_icon.image.set_image(image_name)
+            self.resource_icon.image.previous_idle_image = image_name
             
     def set_resource(self, new_resource):
         if not self.resource_icon == 'none':
@@ -1305,6 +1408,7 @@ class tile_class(actor):
         self.resource = new_resource
         if not self.cell.resource == 'none':
             self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False, global_manager)
+            self.set_visibility(self.cell.visible)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
         if new_terrain == 'clear':
@@ -1329,29 +1433,32 @@ class tile_class(actor):
         elif new_terrain == 'desert':
             self.image_dict['default'] = 'scenery/terrain/desert.png'
             
-        self.image.set_image('default')
+        #self.image.set_image('default')
 
     def update_tooltip(self):
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
-            tooltip_message.append('This is a ' + self.cell.terrain + ' tile.')
-            if not self.cell.resource == 'none':
-                tooltip_message.append('This tile has a ' + self.cell.resource + ' resource.')
+            if self.cell.visible:
+                tooltip_message.append('This is a ' + self.cell.terrain + ' tile.')
+                if not self.cell.resource == 'none':
+                    tooltip_message.append('This tile has a ' + self.cell.resource + ' resource.')
+            else:
+                tooltip_message .append('This tile has not been explored.')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])
 
     def set_coordinates(self, x, y, able_to_print):
         my_cell = self.grid.find_cell(self.x, self.y)
-        if self.is_clear(x, y):
-            my_cell.occupied = False
-            self.x = x
-            self.y = y
-            my_cell = self.grid.find_cell(self.x, self.y)
-            my_cell.occupied = False
-        else:
-            if self.controllable and able_to_print:
-                print_to_screen("You can't move to an occupied cell.")
+        #if self.is_clear(x, y):
+        #my_cell.occupied = False
+        self.x = x
+        self.y = y
+        my_cell = self.grid.find_cell(self.x, self.y)
+        #my_cell.occupied = False
+        #else:
+        #    if self.controllable and able_to_print:
+        #        print_to_screen("You can't move to an occupied cell.")
                 
     def remove(self):
         super().remove()
@@ -1434,6 +1541,19 @@ class tile_shader(tile_image):
     def remove(self):
         super().remove()
         self.global_manager.set('strategic_actor_list', remove_from_list(global_manager.get('strategic_actor_list'), self))'''
+
+def roll(num_sides, roll_type, requirement, global_manager):
+    print_to_screen("", global_manager)
+    result = random.randrange(1, num_sides + 1)
+    global_manager.get('roll_label').set_label("Roll: " + str(result))
+    print_to_screen(roll_type + ": " + str(requirement) + "+ required to succeed", global_manager)
+    if result >= requirement:
+        print_to_screen("You rolled a " + str(result) + ": success!", global_manager)
+        #return(True)
+    else:
+        print_to_screen("You rolled a " + str(result) + ": failure", global_manager)
+        #return(False)
+    return(result) #returns int rather than boolean
     
 def remove_from_list(received_list, item_to_remove):
     output_list = []
@@ -1719,10 +1839,10 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
     if global_manager.get('making_mouse_box'): 
         if not clicked_button:#do not do selecting operations if user was trying to click a button
             for mob in global_manager.get('mob_list'):
-                if actor.image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-                    actor.selected = True
+                if mob.image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
+                    mob.selected = True
                 else:
-                    actor.selected = False
+                    mob.selected = False
         global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
 def scale_coordinates(x, y, global_manager):
@@ -1885,6 +2005,10 @@ strategic_map_grid = grid(scale_coordinates(729, 150, global_manager), scale_wid
 global_dict['strategic_map_grid'] = strategic_map_grid
 set_game_mode('strategic', global_manager)
 #mouse_follower = mouse_follower_class()
+
+roll_label = label(scale_coordinates(625, global_manager.get('default_display_height') - 50, global_manager), scale_width(90, global_manager), scale_height(50, global_manager), ['strategic'], 'misc/small_label.png', 'Roll: ', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager
+global_dict['roll_label'] = roll_label
+
 button_start_x = 600#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 12#tracks current button to move each one farther right
@@ -1905,7 +2029,21 @@ toggle_grid_lines_button = button_class(scale_coordinates(default_display_width 
 instructions_button = button_class(scale_coordinates(default_display_width - 50, default_display_height - 170, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
 toggle_text_box_button = button_class(scale_coordinates(75, default_display_height - 50, global_manager), scale_width(50, global_manager), scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
 
-person = mob((10, 10), global_manager.get('strategic_map_grid'), 'mobs/person/default.png', 'Vrotki', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
+    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+    start_y = 1
+    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
+        break
+new_explorer = explorer((start_x, start_y), global_manager.get('strategic_map_grid'), 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+
+#while True: 
+#    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+#    start_y = 1
+#    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
+#        break
+#new_worker = mob((start_x, start_y), global_manager.get('strategic_map_grid'), 'mobs/default/default.png', 'Worker', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+
+
 while not global_manager.get('crashed'):
     if len(global_manager.get('notification_list')) == 0:
         stopping = False
