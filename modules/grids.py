@@ -3,7 +3,7 @@ import pygame
 from . import cells
 
 class grid():
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, global_manager):
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, strategic_grid, global_manager):
         self.global_manager = global_manager
         self.global_manager.get('grid_list').append(self)
         self.modes = modes
@@ -15,7 +15,7 @@ class grid():
         self.color = color
         self.cell_list = []
         self.create_cells()
-        if self.modes == ['strategic']:
+        if strategic_grid:
             area = self.coordinate_width * self.coordinate_height
             num_worms = area // 5
             for i in range(num_worms):
@@ -42,7 +42,6 @@ class grid():
             for cell in self.cell_list:
                 if cell.y == 0 or cell.y == 1:
                     cell.set_visibility(True)
-                
     def draw(self):
         if self.global_manager.get('current_game_mode') in self.modes:
             for cell in self.cell_list:
@@ -90,7 +89,6 @@ class grid():
                 self.create_cell(x, y, self)
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
-                
     def create_cell(self, x, y, grid):
         new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.color, self.global_manager)
         
@@ -248,46 +246,28 @@ class grid():
                 elif direction == 4:
                     current_x = current_x - 1
                 self.find_cell(current_x, current_y).set_terrain(terrain)
-    '''            
-    def make_coordinate_terrain_worm(self, start_x, start_y, min_len, max_len, possible_terrains):
-        current_x = start_x
-        current_y = start_y
-        worm_length = random.randrange(min_len, max_len + 1)
-        terrain = random.choice(possible_terrains)
-        self.find_cell(current_x, current_y).set_terrain(terrain)
-        counter = 0        
-        while not counter == worm_length:           
-            counter = counter + 1
-            direction = random.randrange(1, 5)
-            if not (((current_x == self.coordinate_width - 1) and direction == 2) or ((current_x == 0) and direction == 4) or ((current_y == self.coordinate_height - 1) and direction == 3) or ((current_y == 0) and direction == 1)):
-                if direction == 3:
-                    current_y = current_y + 1
-                if direction == 2:
-                    current_x = current_x + 1
-                if direction == 1:
-                   current_y = current_y - 1
-                if direction == 4:
-                    current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
-                
-    def make_coordinate_river_worm(self, start_x, start_y, min_len, max_len):
-        current_x = start_x
-        current_y = start_y
-        worm_length = random.randrange(min_len, max_len + 1)
-        terrain = 'water' #random.choice(possible_terrains)
-        self.find_cell(current_x, current_y).set_terrain(terrain)
-        counter = 0        
-        while not counter == worm_length:           
-            counter = counter + 1
-            direction = random.randrange(1, 5)
-            if not (((current_x == self.coordinate_width - 1) and direction == 2) or ((current_x == 0) and direction == 4) or ((current_y == self.coordinate_height - 1) and direction == 3) or ((current_y == 0) and direction == 1)):
-                if direction == 3 or direction == 1:
-                    current_y = current_y + 1
-                if direction == 2:
-                    current_x = current_x + 1
-                #if direction == 1:
-                #   current_y = current_y - 1
-                if direction == 4:
-                    current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
-'''
+
+class mini_grid(grid):
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, global_manager, attached_grid):
+        super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, False, global_manager)
+        self.attached_grid = attached_grid
+        #self.calibrate(10, 10)
+
+    def calibrate(self, center_x, center_y):
+        self.center_x = center_x
+        self.center_y = center_y
+        for current_cell in self.cell_list:
+            attached_x = self.center_x + current_cell.x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
+            attached_y = self.center_y + current_cell.y - round((self.coordinate_width - 1) / 2)
+            if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
+                attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
+                current_cell.set_visibility(attached_cell.visible)
+                current_cell.set_terrain(attached_cell.terrain)
+                #if not self.attached_grid.find_cell(attached_x, attached_y).resource == 'none':
+                current_cell.set_resource(attached_cell.resource)
+                #print(self.attached_grid.find_cell(attached_x, attached_y).terrain)
+                #print(self.attached_grid.find_cell(attached_x, attached_y).resource)
+            else: #if off-map
+                current_cell.set_visibility(True)
+                current_cell.set_terrain('none')
+                current_cell.set_resource('none')

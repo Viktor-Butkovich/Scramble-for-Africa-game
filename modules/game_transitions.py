@@ -25,9 +25,19 @@ def set_game_mode(new_game_mode, global_manager):
 def create_strategic_map(global_manager):
     text_tools.print_to_screen('Creating map...', global_manager)
     main_loop.update_display(global_manager)
-    for current_cell in global_manager.get('strategic_map_grid').cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
-        new_terrain = actors.tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager) #creates a terrain tile that will be modified to the grid cell's terrain type
-    global_manager.get('strategic_map_grid').set_resources()
+    #for current_cell in global_manager.get('strategic_map_grid').cell_list: #recreates the tiles that were deleted upon switching modes, tiles match the stored cell terrain types
+    #    new_terrain = actors.tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager) #creates a terrain tile that will be modified to the grid cell's terrain type
+    #global_manager.get('strategic_map_grid').set_resources()
+    #for current_cell in global_manager.get('minimap_grid').cell_list:
+    #    new_terrain = actors.tile_class((current_cell.x, current_cell.y), current_cell.grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager)
+    #global_manager.get('minimap_grid').set_resources()
+
+    for current_grid in global_manager.get('grid_list'):
+        for current_cell in current_grid.cell_list:
+            new_terrain = actors.tile_class((current_cell.x, current_cell.y), current_grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager)
+            #if(current_cell.tile == 'none'):
+            #    print(str(current_cell.x) + ', ' + str(current_cell.y))
+        current_grid.set_resources()
 
 def start_loading(global_manager):
     global_manager.set('loading', True)

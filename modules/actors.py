@@ -119,6 +119,7 @@ class mob(actor):
     def move(self, x_change, y_change):
         self.x += x_change
         self.y += y_change
+        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
 
 
 class explorer(mob):
@@ -150,7 +151,7 @@ class explorer(mob):
         future_y = self.y + y_change
         died = False
         future_cell = self.grid.find_cell(future_x, future_y)
-        if future_cell.visible == False:
+        if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.veteran:
                 text_tools.print_to_screen("The veteran explorer can roll twice and pick the higher result.", self.global_manager)
                 roll_result = max(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
@@ -170,8 +171,9 @@ class explorer(mob):
                     text_tools.print_to_screen("You discovered a " + future_cell.terrain + " tile.", self.global_manager)
                 future_cell.set_visibility(True)
                 if not future_cell.terrain == 'water':
-                    self.x += x_change
-                    self.y += y_change
+                    super().move(x_change, y_change)
+                    #self.x += x_change
+                    #self.y += y_change
             else:
                 text_tools.print_to_screen("You were not able to explore the tile.", self.global_manager)
             if roll_result == 1:
@@ -179,9 +181,10 @@ class explorer(mob):
                 self.remove()
                 died = True
                 
-        else:
-            self.x += x_change
-            self.y += y_change
+        else: #if moving to explored area, move normally
+            super().move(x_change, y_change)
+            #self.x += x_change
+            #self.y += y_change
         if not died and self.veteran:
             self.veteran_icon.x = self.x
             self.veteran_icon.y = self.y
@@ -191,7 +194,7 @@ class explorer(mob):
         if not self.veteran_icon == 'none':
             self.veteran_icon.remove()
 
-class tile_class(actor):
+class tile_class(actor): #to do: make terrain tiles a subclass
     '''like an obstacle without a tooltip or movement blocking'''
     def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
         super().__init__(coordinates, grid, modes, global_manager)
@@ -202,9 +205,10 @@ class tile_class(actor):
         #self.shader = tile_shader(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
         self.show_terrain = show_terrain
         self.cell = self.grid.find_cell(self.x, self.y)
-        if self.cell.tile == 'none':
-            self.cell.tile = self
+        #if self.cell.tile == 'none':
+        #    self.cell.tile = self
         if self.show_terrain: #to do: make terrain tiles a subclass
+            self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'#'scenery/hidden.png'
@@ -213,7 +217,6 @@ class tile_class(actor):
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
             self.terrain = 'floor'
-
     def set_visibility(self, new_visibility):
         if new_visibility == True:
             image_name = 'default'
@@ -227,15 +230,17 @@ class tile_class(actor):
             self.resource_icon.image.previous_idle_image = image_name
             
     def set_resource(self, new_resource):
-        if not self.resource_icon == 'none':
-            self.resource_icon.remove()
-            self.resource_icon = 'none'
-        self.resource = new_resource
-        if not self.cell.resource == 'none':
+        #if self.show_terrain: #only do something if a terrain tile
+            if not self.resource_icon == 'none':
+                self.resource_icon.remove()
+                self.resource_icon = 'none'
+            self.resource = new_resource
+            #if not self.cell.resource == 'none':
             self.resource_icon = tile_class((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False, self.global_manager)
             self.set_visibility(self.cell.visible)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
+        #print(self.cell.terrain + ' ' + new_terrain)
         if new_terrain == 'clear':
             #random_grass = random.randrange(1, 3) #clear, hills, jungle, water, mountain, swamp, desert
             #self.image_dict['default'] = 'scenery/terrain/clear' + str(random_grass) + '.png'
@@ -258,8 +263,11 @@ class tile_class(actor):
             
         elif new_terrain == 'desert':
             self.image_dict['default'] = 'scenery/terrain/desert.png'
-            
-        #self.image.set_image('default')
+
+        elif new_terrain == 'none':
+            self.image_dict['default'] = 'scenery/hidden.png'
+
+        self.image.set_image('default')
 
     def update_tooltip(self):
         if self.show_terrain: #if is terrain, show tooltip
@@ -291,7 +299,9 @@ class tile_class(actor):
         self.global_manager.set('tile_list', utility.remove_from_list(self.global_manager.get('tile_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         #self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.shader))
-        self.cell.tile = 'none'
+        #print('removing')
+        #self.cell.tile = 'none'
+        #to do: this remove function is being called incorrectly at some point in the program, causing tiles to be removed
 
     def can_show_tooltip(self): #tiles don't have tooltips, except for terrain tiles
         if self.show_terrain == True:

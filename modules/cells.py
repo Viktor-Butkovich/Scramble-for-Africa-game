@@ -22,6 +22,7 @@ class cell():
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
+        #self.set_visibility(True)
 
     def set_visibility(self, new_visibility):
         self.visible = new_visibility
@@ -34,7 +35,7 @@ class cell():
 
     def set_terrain(self, new_terrain):
         self.terrain = new_terrain
-        if (not self.tile == 'none') and self.tile.show_terrain:
+        if (not self.tile == 'none'):# and self.tile.show_terrain:
             self.tile.set_terrain(new_terrain)
         self.color = self.global_manager.get('terrain_colors')[new_terrain]
             

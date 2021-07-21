@@ -125,8 +125,8 @@ def draw_text_box(global_manager):
     #else:
     greatest_width = 300
     greatest_width = scaling.scale_width(greatest_width, global_manager)
-    max_screen_lines = (global_manager.get('default_display_height') // 15) - 1
-    max_text_box_lines = (global_manager.get('text_box_height') // 15) - 1
+    max_screen_lines = (global_manager.get('default_display_height') // global_manager.get('font_size')) - 1
+    max_text_box_lines = (global_manager.get('text_box_height') // global_manager.get('font_size')) - 1
     text_index = 0 #probably obsolete, to do: verify that this is obsolete
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
@@ -152,15 +152,15 @@ def draw_text_box(global_manager):
         pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
 
     global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
-    myfont = pygame.font.SysFont('Times New Roman', scaling.scale_width(15, global_manager))
+    
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
-            textsurface = myfont.render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
+            textsurface = global_manager.get('myfont').render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
             global_manager.get('game_display').blit(textsurface,(10, (-1 * global_manager.get('font_size') * text_index) + global_manager.get('display_height') - ((2 * global_manager.get('font_size')) + 5)))
     if global_manager.get('input_manager').taking_input:
-        textsurface = myfont.render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
+        textsurface = global_manager.get('myfont').render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
     else:
-        textsurface = myfont.render(global_manager.get('message'), False, (0, 0, 0))
+        textsurface = global_manager.get('myfont').render(global_manager.get('message'), False, (0, 0, 0))
     global_manager.get('game_display').blit(textsurface,(10, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
 
 def manage_rmb_down(clicked_button, global_manager):
