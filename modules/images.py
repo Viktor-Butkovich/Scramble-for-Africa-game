@@ -49,7 +49,7 @@ class actor_image():
         self.global_manager.get('image_list').append(self)
         self.grid = grid
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
-        self.outline_width = 2
+        self.outline_width = 3#2
         self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
 
@@ -72,9 +72,16 @@ class actor_image():
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):
-        self.grid_x = self.actor.x
-        self.grid_y = self.actor.y
-        self.go_to_cell((self.grid_x, self.grid_y))
+        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+                self.grid_x, self.grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+                self.go_to_cell((self.grid_x, self.grid_y))
+                drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+        else:
+            self.grid_x = self.actor.x
+            self.grid_y = self.actor.y
+            self.go_to_cell((self.grid_x, self.grid_y))
+            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
         #if self.actor.selected:
         #    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.outline), self.outline_width)
         #if show_selected:
@@ -82,7 +89,6 @@ class actor_image():
         #        pygame.draw.rect(game_display, color_dict['light gray'], (self.outline), self.outline_width)
         #    elif self.actor.targeted:
         #        pygame.draw.rect(game_display, color_dict['red'], (self.outline), self.outline_width)
-        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
         
     def go_to_cell(self, coordinates):
         self.x, self.y = self.grid.convert_coordinates(coordinates)

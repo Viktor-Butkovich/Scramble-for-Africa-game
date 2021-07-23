@@ -1,64 +1,100 @@
-#separate files:
-#main,
-#classes:
-#   global_manager_template
-#   input_manager_template
-#   button_class
-#   label
-#       notification
-#       instructions_page
-#   bar
-#       actor_bar
-#   grid
-#   cell
-#   free_image
-#       loading_image_class
-#   actor_image
-#       button_image
-#       tile_image
-#   actor
-#       mob
-#           explorer
-#       tile_class
-#           overlay_tile
+#Scramble_for_Africa.py
+#
+#modules folder
+#
+#    actors.py
+#       class actor
+#           class mob
+#               class explorer
+#           class tile_class
+#               class overlay_tile
+#       def create_image_dict
+#
+#    button.py
+#       class button_class
+#
+#    notification_tools.py
+#       def display_notification
+#       def notification_to_front
+#       def show_tutorial_notifications
+#
+#    notification.py
+#       class notification(label)
+#
+#    main_loop.py
+#       def update_display
+#       def draw_loading_screen
+#       def manage_tooltip_drawing
+#       def draw_text_box
+#       def manage_rmb_down
+#       def manage_lmb_down
+#
+#    csv_tools.py
+#       def read_csv
+#
+#    data_managers.py
+#       class global_manager_template
+#       class input_manager_template
+#       class flavor_text_manager_template
+#
+#    cells.py
+#       class cell
+#
+#    utility.py
+#       def find_object_distance (takes objects with x and y attributes)
+#       def find_coordinate_distance (takes coordinate tuples)
+#       def remove_from_list
+#       def toggle
+#       def generate_article
+#       def add_to_message
+#
+#    label.py
+#       class label
+#           class instructions_page
+#
+#    images.py
+#       class free_image
+#           class loading_image_class
+#       class actor_image
+#           class button_image
+#           class tile_image
+#
+#    text_tools.py
+#       def message_width
+#       def get_input
+#       def text
+#       def manage_text_list
+#       def print_to_screen
+#       def print_to_previous_message
+#       def clear_message
+#
+#    grids.py
+#       class grid
+#
+#    game_transitions.py
+#       def set_game_mode
+#       def create_strategic_map
+#       def start_loading
+#       def display_instructions_page
+#
+#    bars.py
+#       class bar
+#           class actor_bar
+#
+#    drawing_tools.py
+#       def rect_to_surface
+#       def display_image
+#       def display_image_angle
+#
+#    scaling.py
+#       def scale_coordinates
+#       def scale_width
+#       def scale_height
+#
+#    dice.py
+#       def roll
 
-#functions:
-#   roll
-#   remove_from_list
-#   get_input
-#   text
-#   rect_to_surface
-#   message_width
-#   display_image
-#   display_image_angle
-#   manage_text_list
-#   add_to_message
-#   print_to_screen
-#   print_to_previous_message
-#   clear_message
-#   toggle
-#   find_object_distance #find grid coordinate distance between two objects with x and y attributes
-#   find_coordinate_distance #find grid coordinate distance between two tuples of coordinates
-#   set_game_mode
-#   create_strategic_map
-#   draw_text_box
-#   update_display
-#   draw_loading_screen
-#   start_loading
-#   manage_tooltip_drawing
-#   create_image_dict
-#   display_notification
-#   notification_to_front
-#   show_tutorial_notifications
-#   manage_rmb_down
-#   manage_lmb_down
-#   scale_coordinates
-#   scale_width
-#   scale_height
-#   generate_article
-#   display_instructions_page
-
-#to do:
+#to do: update this
 #create relevant actors
 #review rules
 #trigger button outlines when clicking, currently only works when pressing
@@ -99,6 +135,7 @@ import modules.actors as actors
 import modules.grids as grids
 import modules.bars as bars
 import modules.data_managers as data_managers
+import modules.csv_tools as csv_tools
 
 pygame.init()
 #clock = pygame.time.Clock()
@@ -121,8 +158,25 @@ global_manager.set('font_size', scaling.scale_width(15, global_manager))
 global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
 pygame.display.set_caption('SFA')
-color_dict = {'black': (0, 0, 0), 'white': (255, 255, 255), 'light gray': (230, 230, 230), 'dark gray': (150, 150, 150), 'red': (255, 0, 0), 'dark green': (0, 150, 0), 'green': (0, 200, 0), 'bright green': (0, 255, 0), 'blue': (0, 0, 255), 'yellow': (255, 255, 0), 'brown': (132, 94, 59)}
+
+color_dict = {}
+color_dict['black'] = (0, 0, 0)
+color_dict['white'] = (255, 255, 255)
+color_dict['light gray'] = (230, 230, 230)
+color_dict['dark gray'] = (150, 150, 150)
+color_dict['bright red'] = (255, 0, 0)
+color_dict['red'] = (200, 0, 0)
+color_dict['dark red'] = (150, 0, 0)
+color_dict['bright green'] = (0, 255, 0)
+color_dict['green'] = (0, 200, 0)
+color_dict['dark green'] = (0, 150, 0)
+color_dict['bright blue'] = (0, 0, 255)
+color_dict['blue'] = (0, 0, 200)
+color_dict['dark blue'] = (0, 0, 150)
+color_dict['yellow'] = (255, 255, 0)
+color_dict['brown'] = (132, 94, 59)
 global_manager.set('color_dict', color_dict)
+
 terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
 global_manager.set('terrain_list', terrain_list)
 terrain_colors = {'clear': (150, 200, 104), 'hills': (50, 205, 50), 'jungle': (0, 100, 0), 'water': (0, 0, 200), 'mountain': (100, 100, 100), 'swamp': (100, 100, 50), 'desert': (255, 248, 104), 'none': (0, 0, 0)}
@@ -156,6 +210,8 @@ global_manager.set('typing', False)
 global_manager.set('message', '')
 global_manager.set('show_grid_lines', True)
 global_manager.set('show_text_box', True)
+global_manager.set('show_selection_outlines', True)
+global_manager.set('show_minimap_outlines', True)
 global_manager.set('mouse_origin_x', 0)
 global_manager.set('mouse_origin_y', 0)
 global_manager.set('mouse_destination_x', 0)
@@ -171,6 +227,8 @@ global_manager.set('l_ctrl', 'up')
 global_manager.set('ctrl', 'up')
 global_manager.set('start_time', time.time())
 global_manager.set('current_time', time.time())
+global_manager.set('last_selection_outline_switch', time.time())
+global_manager.set('last_minimap_outline_switch', time.time())
 mouse_moved_time = time.time()
 global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
@@ -180,18 +238,20 @@ notification_tools.show_tutorial_notifications(global_manager)
 global_manager.set('loading_image', images.loading_image_class('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
+global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
 global_manager.set('background_image', images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic'], global_manager))
 #strategic_map_grid = grids.grid(scaling.scale_coordinates(729, 150, global_manager), scaling.scale_width(870, global_manager), scaling.scale_height(810, global_manager), 64, 60, True, color_dict['dark green'], ['strategic']) #other map sizes
 #strategic_map_grid = grids.grid(scaling.scale_coordinates(729, 150, global_manager), scaling.scale_width(870, global_manager), scaling.scale_height(810, global_manager), 32, 30, True, color_dict['dark green'], ['strategic'])
 #strategic_map_grid = grids.grid(scaling.scale_coordinates(695, 150, global_manager), scaling.scale_width(864, global_manager), scaling.scale_height(810, global_manager), 16, 15, color_dict['dark green'], ['strategic'], global_manager) #54 by 54
 #default
-#strategic_map_grid = grids.grid(scaling.scale_coordinates(695, 50, global_manager), scaling.scale_width(960, global_manager), scaling.scale_height(900, global_manager), 16, 15, color_dict['dark green'], ['strategic'], global_manager) #60 by 60
+#strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('display_width') - (grid_width + 100), global_manager.get('display_height') - (grid_height + 25), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 16, 15, color_dict['dark green'], ['strategic'], True, global_manager)
 grid_height = 450
 grid_width = 480
-strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('display_width') - (grid_width + 100), global_manager.get('display_height') - (grid_height + 25), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 16, 15, color_dict['dark green'], ['strategic'], True, global_manager) #60 by 60
+
+strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (grid_height + 25), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 16, 15, 'black', 'black', ['strategic'], True, 2, global_manager)
 global_manager.set('strategic_map_grid', strategic_map_grid)
 
-minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('display_width') - (grid_width + 100), global_manager.get('display_height') - (2 * (grid_height + 25)), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 5, 5, color_dict['dark green'], ['strategic'], global_manager, global_manager.get('strategic_map_grid')) #60 by 60
+minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (2 * (grid_height + 25)), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 5, 5, 'black', 'red', ['strategic'], global_manager.get('strategic_map_grid'), 3, global_manager) #60 by 60
 
 global_manager.set('minimap_grid', minimap_grid)
 game_transitions.set_game_mode('strategic', global_manager)
@@ -214,15 +274,15 @@ current_button_number += 2#move more when switching categories
 current_button_number += 1
 
 expand_text_box_button = button.button_class(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
-toggle_grid_lines_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
-instructions_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
+#toggle_grid_lines_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
+instructions_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
 toggle_text_box_button = button.button_class(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
 while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
     start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
     start_y = 1
     if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
         break
-new_explorer = actors.explorer((start_x, start_y), global_manager.get('strategic_map_grid'), 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+new_explorer = actors.explorer((start_x, start_y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
 global_manager.get('minimap_grid').calibrate(start_x, start_y)
 #while True: 
 #    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
@@ -562,9 +622,21 @@ while not global_manager.get('crashed'):
         main_loop.draw_loading_screen(global_manager)
     current_time = time.time()
     global_manager.set('current_time', current_time)
+    if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
+        global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
+        global_manager.set('last_selection_outline_switch', time.time())
+    if global_manager.get('current_time') - global_manager.get('last_minimap_outline_switch') > 1:
+        global_manager.set('show_minimap_outlines', utility.toggle(global_manager.get('show_minimap_outlines')))
+        global_manager.set('last_minimap_outline_switch', time.time())
+        
     for actor in global_manager.get('actor_list'):
-        if not actor.image.image_description == actor.image.previous_idle_image and time.time() >= actor.image.last_image_switch + 0.6:
-            actor.image.set_image(actor.image.previous_idle_image)
+        for current_image in actor.images:
+            if not current_image.image_description == current_image.previous_idle_image and time.time() >= current_image.last_image_switch + 0.6:
+                current_image.set_image(current_image.previous_idle_image)
     start_time = time.time()
     global_manager.set('start_time', start_time)
+
+global_manager.set('current_time', time.time())
+global_manager.set('last_selection_outline_switch', time.time())
+    
 pygame.quit()

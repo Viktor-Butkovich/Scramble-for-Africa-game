@@ -3,17 +3,22 @@ import pygame
 from . import cells
 
 class grid():
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, strategic_grid, global_manager):
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, strategic_grid, grid_line_width, global_manager):
         self.global_manager = global_manager
         self.global_manager.get('grid_list').append(self)
+        self.grid_line_width = grid_line_width
+        self.is_mini_grid = False
         self.modes = modes
         self.origin_x, self.origin_y = origin_coordinates
         self.coordinate_width = coordinate_width
         self.coordinate_height = coordinate_height
         self.pixel_width = pixel_width
         self.pixel_height = pixel_height
-        self.color = color
+        #self.color = color
+        self.internal_line_color = internal_line_color
+        self.external_line_color = external_line_color
         self.cell_list = []
+        self.mini_grid = 'none'
         self.create_cells()
         if strategic_grid:
             area = self.coordinate_width * self.coordinate_height
@@ -23,7 +28,7 @@ class grid():
             for cell in self.cell_list:
                 if cell.y == 0:
                     cell.set_terrain('water')
-            num_rivers = random.randrange(2, 4)#2-3
+            num_rivers = random.randrange(2, 4)#2-3 # to do restore this
             valid = False
             while not valid:
                 valid = True
@@ -50,11 +55,31 @@ class grid():
     def draw_grid_lines(self):
         if self.global_manager.get('show_grid_lines'):
             for x in range(0, self.coordinate_width+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)))
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
             for y in range(0, self.coordinate_height+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)))                     
-
-
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
+            if (not self.mini_grid == 'none') and self.global_manager.get('show_minimap_outlines'):
+                mini_map_outline_color = self.mini_grid.external_line_color
+                left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
+                right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
+                down_y = self.mini_grid.center_y - ((self.mini_grid.coordinate_height - 1) / 2)
+                up_y = self.mini_grid.center_y + ((self.mini_grid.coordinate_height - 1) / 2) + 1
+                if right_x > self.coordinate_width:
+                    right_x = self.coordinate_width
+                if left_x < 0:
+                    left_x = 0# - 1
+                if up_y > self.coordinate_height:
+                    up_y = self.coordinate_height# - 1
+                if down_y < 0:
+                    down_y = 0
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
 
     def find_cell_center(self, coordinates):
         '''converts grid coordinates to pixel coordinates at center of cell'''
@@ -74,9 +99,11 @@ class grid():
     
     def get_cell_width(self):
         return(int(self.pixel_width/self.coordinate_width) + 1)
+        #return(int(self.pixel_width/self.coordinate_width))
 
     def get_cell_height(self):
         return(int(self.pixel_height/self.coordinate_height) + 1)
+        #return(int(self.pixel_height/self.coordinate_height))
 
     def find_cell(self, x, y):
         for cell in self.cell_list:
@@ -90,7 +117,7 @@ class grid():
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
     def create_cell(self, x, y, grid):
-        new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.color, self.global_manager)
+        new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], self.global_manager)
         
     def is_clear(self, x, y):
         if self.find_cell(x, y).occupied == False:
@@ -248,9 +275,13 @@ class grid():
                 self.find_cell(current_x, current_y).set_terrain(terrain)
 
 class mini_grid(grid):
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, global_manager, attached_grid):
-        super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, color, modes, False, global_manager)
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
+        super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
+        self.is_mini_grid = True
         self.attached_grid = attached_grid
+        self.attached_grid.mini_grid = self
+        self.center_x = 0
+        self.center_y = 0
         #self.calibrate(10, 10)
 
     def calibrate(self, center_x, center_y):
@@ -258,7 +289,7 @@ class mini_grid(grid):
         self.center_y = center_y
         for current_cell in self.cell_list:
             attached_x = self.center_x + current_cell.x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
-            attached_y = self.center_y + current_cell.y - round((self.coordinate_width - 1) / 2)
+            attached_y = self.center_y + current_cell.y - round((self.coordinate_height - 1) / 2)
             if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                 attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
                 current_cell.set_visibility(attached_cell.visible)
@@ -271,3 +302,50 @@ class mini_grid(grid):
                 current_cell.set_visibility(True)
                 current_cell.set_terrain('none')
                 current_cell.set_resource('none')
+
+    def get_mini_grid_coordinates(self, original_x, original_y): #take strategic map coordinates and convert them to minimap coordinates
+        return(original_x - self.center_x + (round(self.coordinate_width - 1) / 2), original_y - self.center_y + round((self.coordinate_height - 1) / 2))
+
+    def is_on_mini_grid(self, original_x, original_y):
+        minimap_x = original_x - self.center_x
+        minimap_y = original_y - self.center_y
+        if(minimap_x >= 0 and minimap_x < self.coordinate_width and minimap_y >= 0 and minimap_y < self.coordinate_height):
+            return(True)
+        else:
+            return(False)
+
+    def draw_grid_lines(self):
+        if self.global_manager.get('show_grid_lines'):
+            lower_left_corner = self.get_mini_grid_coordinates(0, 0)
+            upper_right_corner = self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, self.attached_grid.coordinate_height)
+            #corners = [self.get_mini_grid_coordinates(0, 0), self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, 0) self.get_mini_grid_coordinates(0, self.attached_grid.coordinate_height - 1), self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, self.attached_grid.coordinate_height - 1)]
+            if lower_left_corner[0] < 0: #left
+                left_x = 0
+            else:
+                left_x = lower_left_corner[0]
+            if lower_left_corner[1] < 0: #down
+                down_y = 0
+            else:
+                down_y = lower_left_corner[1]
+            if upper_right_corner[0] >= self.coordinate_width: #right
+                right_x = self.coordinate_width# - 1
+            else:
+                right_x = upper_right_corner[0] + 1
+            if upper_right_corner[1] > self.coordinate_height: #up
+                up_y = self.coordinate_height# - 1
+            else:
+                up_y = upper_right_corner[1]
+                
+            for x in range(0, self.coordinate_width+1):
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
+            for y in range(0, self.coordinate_height+1):
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
+            #pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
+            #pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
+            #pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
+            #pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1) 
+

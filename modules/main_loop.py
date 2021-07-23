@@ -44,8 +44,9 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 grid.draw_grid_lines()
 
         for mob in global_manager.get('mob_list'):
-            if mob.selected and global_manager.get('current_game_mode') in mob.image.modes:
-                mob.draw_outline()
+            for current_image in mob.images:
+                if mob.selected and global_manager.get('current_game_mode') in current_image.modes:
+                    mob.draw_outline()
             
         for actor in global_manager.get('actor_list'):
             #if show_selected and current_game_mode in actor.image.modes:
@@ -98,7 +99,7 @@ def draw_loading_screen(global_manager):
     if global_manager.get('loading_start_time') + 2 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
         global_manager.set('loading', False)
 
-def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
+def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if near bottom of screen, make first tooltip appear higher and have last tooltip on bottom of screen
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
     if possible_tooltip_drawers_length == 0:
         return()
@@ -170,8 +171,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
     if global_manager.get('making_mouse_box'): 
         if not clicked_button:#do not do selecting operations if user was trying to click a button
             for mob in global_manager.get('mob_list'):
-                if mob.image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-                    mob.selected = True
-                else:
-                    mob.selected = False
+                mob.selected = False
+                for current_image in mob.images:
+                    if current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
+                        mob.selected = True
         global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed

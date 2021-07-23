@@ -22,7 +22,6 @@ def toggle(variable):
     elif variable == False:
         return(True)
 
-
 def generate_article(word):
     vowels = ['a', 'e', 'i', 'o', 'u']
     if word[0] in vowels:

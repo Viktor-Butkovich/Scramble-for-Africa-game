@@ -1,3 +1,7 @@
+from . import csv_tools
+import random
+
+
 class global_manager_template():
     '''
     An object designed to be passed between functions and objects as a simpler alternative to passing each variable or object separately
@@ -40,3 +44,17 @@ class input_manager_template():
                 self.global_manager.set('crashed', True)
             else:
                 text_tools.print_to_screen("I didn't understand that.")
+
+class flavor_text_manager_template():
+    def __init__(self, global_manager):
+        self.global_manager = global_manager
+        self.explorer_flavor_text_list = []
+        current_flavor_text = csv_tools.read_csv('text/flavor_explorer.csv')
+        for line in current_flavor_text: #each line is a list
+            self.explorer_flavor_text_list.append(line[0])
+
+        self.subject_dict = {}
+        self.subject_dict['explorer'] = self.explorer_flavor_text_list
+                
+    def generate_flavor_text(self, subject):
+        return(random.choice(self.subject_dict['explorer']))
