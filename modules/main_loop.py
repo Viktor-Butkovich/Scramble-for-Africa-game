@@ -175,4 +175,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                 for current_image in mob.images:
                     if current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
                         mob.selected = True
+                        global_manager.set('show_selection_outlines', True)
+                        global_manager.set('show_minimap_outlines', True)
+                        global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+                        global_manager.set('last_minimap_outline_switch', time.time())
         global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed

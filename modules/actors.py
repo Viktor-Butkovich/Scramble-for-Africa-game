@@ -1,8 +1,10 @@
 import pygame
+import time
 from . import images
 from . import text_tools
 from . import dice
 from . import utility
+from . import notification_tools
 
 class actor():
     def __init__(self, coordinates, grids, modes, global_manager):
@@ -160,8 +162,13 @@ class explorer(mob):
             return(False)
 
     def move(self, x_change, y_change): #to do: add directions to default movement
+        self.global_manager.set('show_selection_outlines', True)
+        self.global_manager.set('show_minimap_outlines', True)
+        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+        self.global_manager.set('last_minimap_outline_switch', time.time())
         future_x = self.x + x_change
         future_y = self.y + y_change
+        roll_result = 0
         if x_change > 0:
             direction = 'east'
         elif x_change < 0:
@@ -172,48 +179,82 @@ class explorer(mob):
             direction = 'south'
         else:
             direction = 'none'
-        died = False
+        #died = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            text_tools.print_to_screen("", self.global_manager)
-            text_tools.print_to_screen('The expedition heads towards the ' + direction + '.', self.global_manager)
-            text_tools.print_to_screen(self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer'), self.global_manager)
+            text = ""
+            text += "The expedition heads towards the " + direction + ". /n"
+            text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
+            notification_tools.display_exploration_notification(text, self.global_manager)
+            text += "/n"
             if self.veteran:
-                text_tools.print_to_screen("The veteran explorer can roll twice and pick the higher result.", self.global_manager)
-                roll_result = max(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
-                text_tools.print_to_screen("The higher result, " + str(roll_result) + ", was used.", self.global_manager)
-                self.global_manager.get('roll_label').set_label("Roll: " + str(roll_result)) #label should show the roll that was used
+                text += ("The veteran explorer can roll twice and pick the higher result /n")
+                first_roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
+                second_roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
+                text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+                roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
+                text += ("The higher result, " + str(roll_result) + ", was used. /n")
+                #self.global_manager.get('roll_label').set_label("Roll: " + str(roll_result)) #label should show the roll that was used
             else:
-                roll_result = dice.roll(6, "Exploration roll", 4, self.global_manager)
+                roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
+                text += roll_list[1]
+                roll_result = roll_list[0]
                 if roll_result == 6:
                     self.veteran = True
-                    text_tools.print_to_screen("This explorer has become a veteran explorer.", self.global_manager)
+                    text += "This explorer has become a veteran explorer /n"
                     self.set_name("Veteran explorer")
-                    for current_grid in self.grids:
-                        self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
-            if roll_result > 4: #4+ required on D6 for exploration
+                    #for current_grid in self.grids:
+                    #    self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
+            notification_tools.display_exploration_notification(text, self.global_manager)
+            text += "/n"
+            if roll_result >= 4: #4+ required on D6 for exploration
                 if not future_cell.resource == 'none':
-                    text_tools.print_to_screen("You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource.", self.global_manager)
+                    text += "You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource. /n"
                 else:
-                    text_tools.print_to_screen("You discovered a " + future_cell.terrain + " tile.", self.global_manager)
-                future_cell.set_visibility(True)
-                if not future_cell.terrain == 'water':
-                    super().move(x_change, y_change)
-                    #self.x += x_change
-                    #self.y += y_change
-                else: #if discovered a water tile, update minimap but don't move there
-                    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+                    text += "You discovered a " + future_cell.terrain + " tile. /n"
+                #future_cell.set_visibility(True)
+                #if not future_cell.terrain == 'water':
+                #    super().move(x_change, y_change)
+                #else: #if discovered a water tile, update minimap but don't move there
+                #    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
             else:
-                text_tools.print_to_screen("You were not able to explore the tile.", self.global_manager)
+                text += "You were not able to explore the tile. /n"
             if roll_result == 1:
-                text_tools.print_to_screen("This explorer has died.", self.global_manager)
-                self.remove()
-                died = True
+                text += "This explorer has died. /n"
+                #self.remove()
+                #died = True
+            notification_tools.display_exploration_notification(text, self.global_manager)
                 
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-            #self.x += x_change
-            #self.y += y_change
+        #if not died and self.veteran:
+        #    for current_veteran_icon in self.veteran_icons:
+        #        if current_veteran_icon.grid.is_mini_grid:
+        #            current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
+        #        else:
+        #            current_veteran_icon.x = self.x
+        #            current_veteran_icon.y = self.y
+        self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
+
+    def complete_exploration(self): #roll_result, x_change, y_change
+        exploration_result = self.global_manager.get('exploration_result')
+        roll_result = exploration_result[1]
+        x_change = exploration_result[2]
+        y_change = exploration_result[3]
+        future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
+        died = False
+        if roll_result >= 4:
+            future_cell.set_visibility(True)
+            if not future_cell.terrain == 'water':
+                super().move(x_change, y_change)
+            else: #if discovered a water tile, update minimap but don't move there
+                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        if roll_result == 6:
+            for current_grid in self.grids:
+                self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
+        elif roll_result == 1:
+            self.remove()
+            died = True
         if not died and self.veteran:
             for current_veteran_icon in self.veteran_icons:
                 if current_veteran_icon.grid.is_mini_grid:
@@ -221,11 +262,9 @@ class explorer(mob):
                 else:
                     current_veteran_icon.x = self.x
                     current_veteran_icon.y = self.y
-
+            
     def remove(self):
         super().remove()
-        #if not self.veteran_icon == 'none':
-        #    self.veteran_icon.remove()
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 

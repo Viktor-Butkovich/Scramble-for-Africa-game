@@ -251,12 +251,12 @@ grid_width = 480
 strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (grid_height + 25), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 16, 15, 'black', 'black', ['strategic'], True, 2, global_manager)
 global_manager.set('strategic_map_grid', strategic_map_grid)
 
-minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (2 * (grid_height + 25)), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 5, 5, 'black', 'red', ['strategic'], global_manager.get('strategic_map_grid'), 3, global_manager) #60 by 60
+minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (2 * (grid_height + 25)), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 5, 5, 'black', 'bright red', ['strategic'], global_manager.get('strategic_map_grid'), 3, global_manager) #60 by 60
 
 global_manager.set('minimap_grid', minimap_grid)
 game_transitions.set_game_mode('strategic', global_manager)
-roll_label = label.label(scaling.scale_coordinates(580, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(90, global_manager), scaling.scale_height(50, global_manager), ['strategic'], 'misc/small_label.png', 'Roll: ', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager
-global_manager.set('roll_label', roll_label)
+#roll_label = label.label(scaling.scale_coordinates(580, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(90, global_manager), scaling.scale_height(50, global_manager), ['strategic'], 'misc/small_label.png', 'Roll: ', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager
+#global_manager.set('roll_label', roll_label)
 
 button_start_x = 500#600#x position of leftmost button
 button_separation = 60#x separation between each button
