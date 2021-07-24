@@ -125,7 +125,7 @@ import modules.scaling as scaling
 import modules.main_loop as main_loop
 import modules.text_tools as text_tools
 import modules.utility as utility
-import modules.dice as dice
+import modules.dice_utility as dice_utility
 import modules.notification_tools as notification_tools
 import modules.images as images
 import modules.label as label
@@ -163,6 +163,7 @@ color_dict = {}
 color_dict['black'] = (0, 0, 0)
 color_dict['white'] = (255, 255, 255)
 color_dict['light gray'] = (230, 230, 230)
+color_dict['gray'] = (190, 190, 190)
 color_dict['dark gray'] = (150, 150, 150)
 color_dict['bright red'] = (255, 0, 0)
 color_dict['red'] = (200, 0, 0)
@@ -184,6 +185,7 @@ global_manager.set('terrain_colors', terrain_colors)
 global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
 global_manager.set('button_list', [])
 global_manager.set('current_instructions_page', 'none')
+global_manager.set('current_dice_rolling_notification', 'none')
 global_manager.set('current_instructions_page_index', 0)
 global_manager.set('instructions_list', [])
 #page 1
@@ -200,7 +202,9 @@ global_manager.set('tile_list', [])
 global_manager.set('overlay_tile_list', [])
 global_manager.set('notification_list', [])
 global_manager.set('label_list', [])
+global_manager.set('dice_list', [])
 global_manager.set('notification_queue', [])
+global_manager.set('notification_type_queue', [])
 pygame.key.set_repeat(300, 200)
 global_manager.set('crashed', False)
 global_manager.set('lmb_down', False)

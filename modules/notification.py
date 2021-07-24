@@ -33,7 +33,7 @@ class notification(label):
                 next_word = ""
         next_line += next_word
         new_message.append(next_line)
-        new_message.append("Click to remove this notification")
+        new_message.append("Click to remove this notification.")
         self.message = new_message
                     
     def update_tooltip(self):
@@ -50,9 +50,39 @@ class notification(label):
         if len(self.global_manager.get('notification_queue')) > 0:
             notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
 
+class dice_rolling_notification(notification): #automatically removed when dice finish rolling, blocks other notifications
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        global_manager.set('current_dice_rolling_notification', self)
+
+    def format_message(self):
+        super().format_message()
+        self.message.pop(-1) #remove "Click to remove this notification"
+        
+    def on_click(self):
+        nothing = 0 #does not remove self when clicked
+
+    def remove(self):
+        super().remove()
+        self.global_manager.set('current_dice_rolling_notification', 'none')
+        if len(self.global_manager.get('dice_list')) > 1:
+            max_roll = 0
+            max_die = 0#self.global_manager.get('dice_list')[0]
+            for current_die in self.global_manager.get('dice_list'):
+                if current_die.roll_result > max_roll:
+                    max_roll = current_die.roll_result
+                    max_die = current_die
+            max_die.highlighted = True#outline_color = 'white'
+        else:
+            self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
+
 class exploration_notification(notification):
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def format_message(self):
+        super().format_message()
+        self.message.pop(-1) #remove "Click to remove this notification"
 
     def remove(self):
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
@@ -62,20 +92,21 @@ class exploration_notification(notification):
         if len(self.global_manager.get('notification_queue')) >= 1:
             self.global_manager.get('notification_queue').pop(0)
         if len(self.global_manager.get('notification_queue')) > 0:
-            exploration_notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
+            notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
         else:
             self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
-        #super().remove()
-        #if len(self.global_manager.get('notification_queue')) > 0:
-        #    exploration_notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
-        #else:
-        #    self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
             
-def exploration_notification_to_front(message, global_manager):
-    '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
-    new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)
-
 def notification_to_front(message, global_manager):
     '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
-    new_notification = notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
+    #if notification_type == 'roll':
+    #elif notification_type == '
+    notification_type = global_manager.get('notification_type_queue').pop(0)
+    if notification_type == 'roll':
+        new_notification = dice_rolling_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)
+        for current_die in global_manager.get('dice_list'):
+            current_die.start_rolling()
+    elif notification_type == 'exploration':
+        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)
+    else:
+        new_notification = notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
 

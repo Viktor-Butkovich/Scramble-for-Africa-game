@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 from . import utility
 from . import drawing_tools
 from . import text_tools

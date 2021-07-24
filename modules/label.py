@@ -1,4 +1,6 @@
 import pygame
+import time
+import random
 from .button import button_class
 from . import scaling
 from . import text_tools

@@ -2,9 +2,12 @@ import pygame
 import time
 from . import images
 from . import text_tools
-from . import dice
+from . import dice_utility
 from . import utility
 from . import notification_tools
+#from . import label
+from . import dice
+from . import scaling
 
 class actor():
     def __init__(self, coordinates, grids, modes, global_manager):
@@ -161,6 +164,11 @@ class explorer(mob):
             text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
             return(False)
 
+    def display_exploration_die(self, coordinates, result):
+        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, result, self.global_manager)
+
     def move(self, x_change, y_change): #to do: add directions to default movement
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('show_minimap_outlines', True)
@@ -185,27 +193,45 @@ class explorer(mob):
             text = ""
             text += "The expedition heads towards the " + direction + ". /n"
             text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
-            notification_tools.display_exploration_notification(text, self.global_manager)
+            
+            notification_tools.display_exploration_notification(text + "Click to roll.", self.global_manager)
+            
+            notification_tools.display_dice_rolling_notification(text + "Rolling... ", self.global_manager)
+            
             text += "/n"
+
+        #new_die = label.die(300, 300, 100, 100, ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, result, global_manager)
             if self.veteran:
                 text += ("The veteran explorer can roll twice and pick the higher result /n")
-                first_roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
-                second_roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
+                
+                first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+                self.display_exploration_die((500, 500), first_roll_list[0])
+                #new_die = label.die(scaling.scale_coordinates(500, 500, self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, first_roll_list[0], self.global_manager)
+                
+                second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+                self.display_exploration_die((500, 380), second_roll_list[0])
+                #other_new_die = label.die(scaling.scale_coordinates(500, 380), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, second_roll_list[0], self.global_manager)
+                
                 text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
                 roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
                 text += ("The higher result, " + str(roll_result) + ", was used. /n")
                 #self.global_manager.get('roll_label').set_label("Roll: " + str(roll_result)) #label should show the roll that was used
             else:
-                roll_list = dice.roll_to_list(6, "Exploration roll", 4, self.global_manager)
+                roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+                #new_die = label.die(scaling.scale_coordinates(500, 500, self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, roll_list[0], self.global_manager)
+                self.display_exploration_die((500, 440), roll_list[0])
+                
                 text += roll_list[1]
                 roll_result = roll_list[0]
-                if roll_result == 6:
-                    self.veteran = True
-                    text += "This explorer has become a veteran explorer /n"
-                    self.set_name("Veteran explorer")
+                #if roll_result == 6:
+                #    self.veteran = True
+                #    text += "This explorer has become a veteran explorer. /n"
+                #    self.set_name("Veteran explorer")
                     #for current_grid in self.grids:
                     #    self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
-            notification_tools.display_exploration_notification(text, self.global_manager)
+                    
+            notification_tools.display_exploration_notification(text + "Click to continue.", self.global_manager)
+            
             text += "/n"
             if roll_result >= 4: #4+ required on D6 for exploration
                 if not future_cell.resource == 'none':
@@ -220,10 +246,14 @@ class explorer(mob):
             else:
                 text += "You were not able to explore the tile. /n"
             if roll_result == 1:
-                text += "This explorer has died. /n"
-                #self.remove()
-                #died = True
-            notification_tools.display_exploration_notification(text, self.global_manager)
+                text += "This explorer has died. /n" #actual death occurs when exploration completes
+
+            if (not self.veteran) and roll_result == 6:
+                self.veteran = True
+                text += "This explorer has become a veteran explorer. /n"
+                self.set_name("Veteran explorer")
+                
+            notification_tools.display_exploration_notification(text + "Click to remove this notification.", self.global_manager)
                 
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
@@ -262,6 +292,12 @@ class explorer(mob):
                 else:
                     current_veteran_icon.x = self.x
                     current_veteran_icon.y = self.y
+        #dice_list = self.global_manager.get('dice_list')
+        #while len(dice_list) > 0:
+        #    dice_list[0].remove()
+        copy_dice_list = self.global_manager.get('dice_list')
+        for current_die in copy_dice_list:
+            current_die.remove()
             
     def remove(self):
         super().remove()

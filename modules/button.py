@@ -1,7 +1,8 @@
 import pygame
 from . import images
 from . import text_tools
-from . import game_transitions
+#from . import game_transitions
+from . import instructions
 
 class button_class():
     '''
@@ -295,7 +296,7 @@ class button_class():
             text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
         elif self.button_type == 'instructions':
             if self.global_manager.get('current_instructions_page') == 'none':
-                game_transitions.display_instructions_page(0, self.global_manager)
+                instructions.display_instructions_page(0, self.global_manager)
             else:
                 if not self.global_manager.get('current_instructions_page') == 'none':
                     self.global_manager.get('current_instructions_page').remove()
