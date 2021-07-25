@@ -50,8 +50,10 @@ class actor_image():
         self.global_manager.get('image_list').append(self)
         self.grid = grid
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
-        self.outline_width = 3#2
-        self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline_width = self.grid.grid_line_width + 1#3#2
+        #self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
+        self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
+
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
 
     def get_center_coordinates(self):
@@ -95,8 +97,8 @@ class actor_image():
         self.x, self.y = self.grid.convert_coordinates(coordinates)
         self.Rect.x = self.x
         self.Rect.y = self.y - self.height
-        self.outline.x = self.x - self.outline_width
-        self.outline.y = self.y - (self.height + self.outline_width)
+        self.outline.x = self.x
+        self.outline.y = self.y - self.height
                 
     def set_tooltip(self, tooltip_text):
         self.tooltip_text = tooltip_text

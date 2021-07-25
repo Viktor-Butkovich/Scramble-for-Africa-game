@@ -147,6 +147,7 @@ class explorer(mob):
         self.grid.find_cell(self.x, self.y).set_visibility(True)
         self.veteran = False
         self.veteran_icons = []
+        self.exploration_mark_list = []
         
     def can_move(self, x_change, y_change):
         future_x = self.x + x_change
@@ -190,6 +191,13 @@ class explorer(mob):
         #died = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
+            for current_grid in self.grids:
+                coordinates = (0, 0)
+                if current_grid.is_mini_grid:
+                    coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+                else:
+                    coordinates = (self.x + x_change, self.y + y_change)
+                self.exploration_mark_list.append(tile_class(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
             text = ""
             text += "The expedition heads towards the " + direction + ". /n"
             text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
@@ -298,6 +306,10 @@ class explorer(mob):
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
+        copy_exploration_mark_list = self.exploration_mark_list
+        for current_exploration_mark in copy_exploration_mark_list:
+            current_exploration_mark.remove()
+        self.exploration_mark_list = []
             
     def remove(self):
         super().remove()
