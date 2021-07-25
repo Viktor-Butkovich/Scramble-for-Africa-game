@@ -223,6 +223,8 @@ mouse_destination_y = 0
 global_manager.set('mouse_destination_y', 0)
 global_manager.set('making_mouse_box', False)
 
+global_manager.set('ongoing_exploration', False)
+
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')
 global_manager.set('capital', False)
@@ -232,7 +234,7 @@ global_manager.set('ctrl', 'up')
 global_manager.set('start_time', time.time())
 global_manager.set('current_time', time.time())
 global_manager.set('last_selection_outline_switch', time.time())
-global_manager.set('last_minimap_outline_switch', time.time())
+#global_manager.set('last_minimap_outline_switch', time.time())
 mouse_moved_time = time.time()
 global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
@@ -471,7 +473,6 @@ while not global_manager.get('crashed'):
                     global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'z'))
                 elif global_manager.get('typing') and global_manager.get('capital'):
                     global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'Z'))
-
             if event.key == pygame.K_1:
                 if global_manager.get('typing') and not global_manager.get('capital'):
                     global_manager.set('message', utility.add_to_message(global_manager.get('message'), '1'))
@@ -629,9 +630,9 @@ while not global_manager.get('crashed'):
     if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
         global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
         global_manager.set('last_selection_outline_switch', time.time())
-    if global_manager.get('current_time') - global_manager.get('last_minimap_outline_switch') > 1:
-        global_manager.set('show_minimap_outlines', utility.toggle(global_manager.get('show_minimap_outlines')))
-        global_manager.set('last_minimap_outline_switch', time.time())
+    #if global_manager.get('current_time') - global_manager.get('last_minimap_outline_switch') > 1:
+    #    global_manager.set('show_minimap_outlines', utility.toggle(global_manager.get('show_minimap_outlines')))
+    #    global_manager.set('last_minimap_outline_switch', time.time())
         
     for actor in global_manager.get('actor_list'):
         for current_image in actor.images:

@@ -92,6 +92,11 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         pygame.display.update()
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
 
+def action_possible(global_manager):
+    if global_manager.get('ongoing_exploration'):
+        return(False)
+    return(True)
+
 def draw_loading_screen(global_manager):
     global_manager.get('game_display').fill((125, 125, 125))
     global_manager.get('loading_image').draw()

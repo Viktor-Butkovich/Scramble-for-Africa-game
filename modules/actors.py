@@ -191,6 +191,7 @@ class explorer(mob):
         #died = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
+            self.global_manager.set('ongoing_exploration', True)
             for current_grid in self.grids:
                 coordinates = (0, 0)
                 if current_grid.is_mini_grid:
@@ -310,6 +311,7 @@ class explorer(mob):
         for current_exploration_mark in copy_exploration_mark_list:
             current_exploration_mark.remove()
         self.exploration_mark_list = []
+        self.global_manager.set('ongoing_exploration', False)
             
     def remove(self):
         super().remove()

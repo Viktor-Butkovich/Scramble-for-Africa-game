@@ -3,6 +3,9 @@ from . import images
 from . import text_tools
 #from . import game_transitions
 from . import instructions
+from . import grids
+from . import scaling
+from . import main_loop
 
 class button_class():
     '''
@@ -258,24 +261,36 @@ class button_class():
             text_tools.print_to_screen('hi')
 
         elif self.button_type == 'move left':
-            for mob in self.global_manager.get('mob_list'):
-                if mob.selected and mob.can_move(-1, 0):
-                    mob.move(-1, 0) #x_change, y_change
+            if main_loop.action_possible(self.global_manager):
+                for mob in self.global_manager.get('mob_list'):
+                    if mob.selected and mob.can_move(-1, 0):
+                        mob.move(-1, 0) #x_change, y_change
+            else:
+                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                     
         elif self.button_type == 'move right':
-            for mob in self.global_manager.get('mob_list'):
-                if mob.selected and mob.can_move(1, 0):
-                    mob.move(1, 0)
+            if main_loop.action_possible(self.global_manager):
+                for mob in self.global_manager.get('mob_list'):
+                    if mob.selected and mob.can_move(1, 0):
+                        mob.move(1, 0)
+            else:
+                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                     
         elif self.button_type == 'move up':
-            for mob in self.global_manager.get('mob_list'):
-                if mob.selected and mob.can_move(0, 1):
-                    mob.move(0, 1)
+            if main_loop.action_possible(self.global_manager):
+                for mob in self.global_manager.get('mob_list'):
+                    if mob.selected and mob.can_move(0, 1):
+                        mob.move(0, 1)
+            else:
+                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                     
         elif self.button_type == 'move down':
-            for mob in self.global_manager.get('mob_list'):
-                if mob.selected and mob.can_move(0, -1):
-                    mob.move(0, -1)
+            if main_loop.action_possible(self.global_manager):
+                for mob in self.global_manager.get('mob_list'):
+                    if mob.selected and mob.can_move(0, -1):
+                        mob.move(0, -1)
+            else:
+                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                     
         elif self.button_type == 'toggle grid lines':
             if self.global_manager.get('show_grid_lines'):
