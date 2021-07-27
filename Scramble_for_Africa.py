@@ -124,6 +124,7 @@ import modules.bars as bars
 import modules.data_managers as data_managers
 import modules.csv_tools as csv_tools
 import modules.actor_utility as actor_utility
+import modules.groups as groups
 
 pygame.init()
 #clock = pygame.time.Clock()
@@ -187,6 +188,8 @@ global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('officer_list', [])
+global_manager.set('worker_list', [])
+global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
 global_manager.set('overlay_tile_list', [])
 global_manager.set('notification_list', [])
@@ -272,7 +275,8 @@ expand_text_box_button = button.button_class(scaling.scale_coordinates(0, global
 #toggle_grid_lines_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
 instructions_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
 toggle_text_box_button = button.button_class(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
-merge_button = button.merge_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_m, ['strategic'], 'misc/merge_button.png', global_manager)
+merge_button = groups.merge_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_m, ['strategic'], 'misc/merge_button.png', global_manager)
+split_button = groups.split_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_n, ['strategic'], 'misc/split_button.png', global_manager)
 
 for i in range(0, 5):
     selected_icon = button.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', i, global_manager)
@@ -284,7 +288,7 @@ for i in range(0, 5):
 #    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
 #        break
 new_explorer = actors.explorer(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
-new_mob = actors.mob(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Mob', ['strategic'], global_manager)
+new_mob = actors.worker(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Worker', ['strategic'], global_manager)
 
 global_manager.get('minimap_grid').calibrate(new_explorer.x, new_explorer.y)
 

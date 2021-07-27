@@ -141,8 +141,6 @@ class mob_image(actor_image):
         self.current_cell = 'none'
 
     def add_to_cell(self):
-        #self.remove_from_cell()
-        #print('to here')
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
             mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
             if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
@@ -161,6 +159,7 @@ class mob_image(actor_image):
             self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
             if not self.actor in self.current_cell.contained_mobs:
                 self.current_cell.contained_mobs.insert(0, self.actor)
+            self.go_to_cell((self.current_cell.x, self.current_cell.y))
             #print(self.grid.find_cell(self.actor.x, self.actor.y).contained_mobs)
 
     #def draw(self): #only draw top mob
@@ -168,6 +167,8 @@ class mob_image(actor_image):
     #        super().draw()
 
     def can_show(self):
+        if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
+            return(False)
         if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor:
             return(True)
         else:
@@ -248,6 +249,20 @@ class veteran_icon_image(tile_image):
         super().__init__(actor, width, height, grid, image_description, global_manager)
 
     def draw(self):
-        if self.actor.actor.images[0].can_show():
+        if self.actor.actor.images[0].can_show() and self.can_show():
             self.go_to_cell((self.actor.x, self.actor.y))
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+
+    def can_show(self):
+        #print(self.grid)
+        #print(super().can_show())
+        if self.grid == self.global_manager.get('minimap_grid') and not self.grid.is_on_mini_grid(self.actor.actor.x, self.actor.actor.y): #do not show if mob (veteran icon's actor) is off map
+            #print('false')
+            return(False)
+        else:
+            #print('here')
+            #if super().can_show():
+                #print('true')
+            #else:
+                #print('false')
+            return(super().can_show())

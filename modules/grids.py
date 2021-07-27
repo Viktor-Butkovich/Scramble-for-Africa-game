@@ -296,30 +296,26 @@ class mini_grid(grid):
         self.center_x = center_x
         self.center_y = center_y
         for current_cell in self.cell_list:
-            #attached_x = self.center_x + current_cell.x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
-            #attached_y = self.center_y + current_cell.y - round((self.coordinate_height - 1) / 2)
             attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
             if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                 attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
                 current_cell.set_visibility(attached_cell.visible)
                 current_cell.set_terrain(attached_cell.terrain)
-                #if not self.attached_grid.find_cell(attached_x, attached_y).resource == 'none':
                 current_cell.set_resource(attached_cell.resource)
                 current_cell.contained_mobs = attached_cell.contained_mobs
-                #print(self.attached_grid.find_cell(attached_x, attached_y).terrain)
-                #print(self.attached_grid.find_cell(attached_x, attached_y).resource)
             else: #if off-map
                 current_cell.set_visibility(True)
                 current_cell.set_terrain('none')
                 current_cell.set_resource('none')
         self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
         for current_mob in self.global_manager.get('mob_list'):
-            for current_image in current_mob.images:
-                if current_image.grid == self:
-                    #print('here')
-                    current_image.add_to_cell()
+            if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
+                for current_image in current_mob.images:
+                    if current_image.grid == self:
+                        current_image.add_to_cell()
         for current_officer in self.global_manager.get('officer_list'):
-            current_officer.update_veteran_icons()
+            if not current_officer.in_group:
+                current_officer.update_veteran_icons()
 
     def get_main_grid_coordinates(self, mini_x, mini_y): #take minimap coordinates and convert them to strategic map coordinates
         attached_x = self.center_x + mini_x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0

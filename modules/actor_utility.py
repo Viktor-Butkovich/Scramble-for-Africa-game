@@ -13,6 +13,22 @@ def create_image_dict(stem):
 def can_merge(global_manager):
     selected_list = get_selected_list(global_manager)
     if len(selected_list) == 2:
+        worker_present = False
+        officer_present = False
+        for current_selected in selected_list:
+            if current_selected in global_manager.get('worker_list'):
+                worker_present = True
+            elif current_selected in global_manager.get('officer_list'):
+                officer_present = True
+        if worker_present and officer_present:
+            return(True)
+        else:
+            return(False)
+    return(False)
+
+def can_split(global_manager):
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 1 and selected_list[0] in global_manager.get('group_list'):
         return(True)
     return(False)
     

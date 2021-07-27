@@ -107,6 +107,11 @@ class mob(actor):
         self.set_name(name)
         self.update_tooltip()
 
+    def select(self):
+        self.selected = True
+        self.global_manager.set('show_selection_outlines', True)
+        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+
     def draw_outline(self):
         if self.global_manager.get('show_selection_outlines'):
             for current_image in self.images:
@@ -117,6 +122,8 @@ class mob(actor):
         self.set_tooltip([self.name])
 
     def remove(self):
+        for current_image in self.images:
+            current_image.remove_from_cell()
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
@@ -149,12 +156,79 @@ class mob(actor):
             #print('from here mob move')
             current_image.add_to_cell()
 
+    def touching_mouse(self):
+        for current_image in self.images:
+            if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
+                if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
+                    return(True)
+        return(False) #return false if none touch mouse
+
+class worker(mob):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        global_manager.get('worker_list').append(self)
+        self.in_group = False
+
+    def can_show_tooltip(self):
+        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability
+            #print('true')
+            return(True)
+        else:
+            #print('false')
+            #print('touching mouse: ' + str(self.touching_mouse()))
+            #print('in group: ' + str(self.in_group))
+            #for current_image in self.images:
+            #    if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
+            #        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], current_image.Rect)
+            return(False)
+
+    def join_group(self):
+        self.in_group = True
+        self.selected = False
+        for current_image in self.images:
+            current_image.remove_from_cell()
+
+    def leave_group(self, group):
+        self.in_group = False
+        self.x = group.x
+        self.y = group.y
+        for current_image in self.images:
+            current_image.add_to_cell()
+        self.select()
+
+    def remove(self):
+        super().remove()
+        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
+
 class officer(mob):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('officer_list').append(self)
         self.veteran = False
         self.veteran_icons = []
+        self.in_group = False
+        self.officer_type = 'default'
+
+    def can_show_tooltip(self): #moved to actor
+        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability 
+            return(True)
+        else:
+            return(False)
+
+    def join_group(self):
+        self.in_group = True
+        self.selected = False
+        for current_image in self.images:
+            current_image.remove_from_cell()
+
+    def leave_group(self, group):
+        self.in_group = False
+        self.x = group.x
+        self.y = group.y
+        self.update_veteran_icons()
+        for current_image in self.images:
+            current_image.add_to_cell()
+        self.select()
 
     def remove(self):
         super().remove()
@@ -170,163 +244,16 @@ class officer(mob):
                 current_veteran_icon.x = self.x
                 current_veteran_icon.y = self.y
 
+    def move(self, x_change, y_change):
+        super().move(x_change, y_change)
+        self.update_veteran_icons()
+        #print(self.veteran_icons)
+
 class explorer(officer):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.grid.find_cell(self.x, self.y).set_visibility(True)
-        #self.veteran = False
-        #self.veteran_icons = []
-        self.exploration_mark_list = []
-        
-    def can_move(self, x_change, y_change):
-        future_x = self.x + x_change
-        future_y = self.y + y_change
-        if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-            if not self.grid.find_cell(future_x, future_y).terrain == 'water':
-                return(True)
-            else:
-                if self.grid.find_cell(future_x, future_y).visible:
-                    text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
-                    return(False)
-                else:
-                    return(True) #will attempt to move there and discover it and discover it
-        else:
-            text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
-            return(False)
-
-    def display_exploration_die(self, coordinates, result):
-        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, result, self.global_manager)
-
-    def move(self, x_change, y_change): #to do: add directions to default movement
-        self.global_manager.set('show_selection_outlines', True)
-        self.global_manager.set('show_minimap_outlines', True)
-        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        self.global_manager.set('last_minimap_outline_switch', time.time())
-        future_x = self.x + x_change
-        future_y = self.y + y_change
-        roll_result = 0
-        if x_change > 0:
-            direction = 'east'
-        elif x_change < 0:
-            direction = 'west'
-        elif y_change > 0:
-            direction = 'north'
-        elif y_change < 0:
-            direction = 'south'
-        else:
-            direction = 'none'
-        #died = False
-        self.just_promoted = False
-        future_cell = self.grid.find_cell(future_x, future_y)
-        if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            self.global_manager.set('ongoing_exploration', True)
-            for current_grid in self.grids:
-                coordinates = (0, 0)
-                if current_grid.is_mini_grid:
-                    coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-                else:
-                    coordinates = (self.x + x_change, self.y + y_change)
-                self.exploration_mark_list.append(tile_class(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
-            text = ""
-            text += "The expedition heads towards the " + direction + ". /n"
-            text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
-            
-            notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
-            
-            notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
-            
-            text += "/n"
-
-        #new_die = label.die(300, 300, 100, 100, ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, result, global_manager)
-            if self.veteran:
-                text += ("The veteran explorer can roll twice and pick the higher result /n")
-                
-                first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 500), first_roll_list[0])
-                                
-                second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 380), second_roll_list[0])
-                                
-                text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-                roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
-                text += ("The higher result, " + str(roll_result) + ", was used. /n")
-            else:
-                roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 440), roll_list[0])
-                
-                text += roll_list[1]
-                roll_result = roll_list[0]
-                    
-            notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
-            
-            text += "/n"
-            if roll_result >= 4: #4+ required on D6 for exploration
-                if not future_cell.resource == 'none':
-                    text += "You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource. /n"
-                else:
-                    text += "You discovered a " + future_cell.terrain + " tile. /n"
-            else:
-                text += "You were not able to explore the tile. /n"
-            if roll_result == 1:
-                text += "This explorer has died. /n" #actual death occurs when exploration completes
-
-            if (not self.veteran) and roll_result == 6:
-                self.veteran = True
-                self.just_promoted = True
-                text += "This explorer has become a veteran explorer. /n"
-                self.set_name("Veteran explorer")
-                
-            notification_tools.display_notification(text + "Click to remove this notification.", 'exploration', self.global_manager)
-                
-        else: #if moving to explored area, move normally
-            super().move(x_change, y_change)
-            self.update_veteran_icons()
-            
-        self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
-
-    def complete_exploration(self): #roll_result, x_change, y_change
-        exploration_result = self.global_manager.get('exploration_result')
-        roll_result = exploration_result[1]
-        x_change = exploration_result[2]
-        y_change = exploration_result[3]
-        future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
-        died = False
-        if roll_result >= 4:
-            future_cell.set_visibility(True)
-            if not future_cell.terrain == 'water':
-                super().move(x_change, y_change)
-                self.update_veteran_icons
-                #for current_veteran_icon in self.veteran_icons:
-                #    if current_veteran_icon.grid.is_mini_grid:
-                #        current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-                #    else:
-                #        current_veteran_icon.x = self.x
-                #        current_veteran_icon.y = self.y
-            else: #if discovered a water tile, update minimap but don't move there
-                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-        if self.just_promoted:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
-        elif roll_result == 1:
-            self.remove()
-            died = True
-        #dice_list = self.global_manager.get('dice_list')
-        #while len(dice_list) > 0:
-        #    dice_list[0].remove()
-        copy_dice_list = self.global_manager.get('dice_list')
-        for current_die in copy_dice_list:
-            current_die.remove()
-        copy_exploration_mark_list = self.exploration_mark_list
-        for current_exploration_mark in copy_exploration_mark_list:
-            current_exploration_mark.remove()
-        self.exploration_mark_list = []
-        self.global_manager.set('ongoing_exploration', False)
+        self.officer_type = 'explorer'
 
 class tile_class(actor): #to do: make terrain tiles a subclass
     '''like an obstacle without a tooltip or movement blocking'''

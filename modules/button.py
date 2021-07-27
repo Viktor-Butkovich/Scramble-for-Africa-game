@@ -8,6 +8,7 @@ from . import grids
 from . import scaling
 from . import main_loop
 from . import actor_utility
+#from . import groups
 
 class button_class():
     '''
@@ -310,23 +311,28 @@ class button_class():
                 else:
                     text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
                         
+
             elif self.button_type == 'toggle grid lines':
                 if self.global_manager.get('show_grid_lines'):
                     self.global_manager.set('show_grid_lines', False)
                 else:
                     self.global_manager.set('show_grid_lines', True)
+
             elif self.button_type == 'toggle text box':
                 if self.global_manager.get('show_text_box'):
                     self.global_manager.set('show_text_box', False)
                 else:
                     self.global_manager.set('show_text_box', True)
+
             elif self.button_type == 'expand text box':
                 if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
                     self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
                 else:
                     self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
+
             elif self.button_type == 'do something':
                 text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
+
             elif self.button_type == 'instructions':
                 if self.global_manager.get('current_instructions_page') == 'none':
                     instructions.display_instructions_page(0, self.global_manager)
@@ -335,10 +341,6 @@ class button_class():
                         self.global_manager.get('current_instructions_page').remove()
                         self.global_manager.set('current_instructions_page', 'none')
                     self.global_manager.set('current_instructions_page_index', 0)
-            elif self.button_type == 'merge':
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                for current_mob in selected_list:
-                    current_mob.remove()
 
     def on_rmb_release(self):
         '''
@@ -361,25 +363,6 @@ class button_class():
 
     def can_show(self):
         return(True)
-
-class merge_button(button_class):
-    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
-        super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
-        
-    def can_show(self):
-        if actor_utility.can_merge(self.global_manager):
-            return(True)
-        else:
-            return(False)
-
-    def on_click(self):
-        if self.can_show():
-            super().on_click()
-
-    def draw(self):
-        if self.can_show():
-            super().draw()
-
 
 class selected_icon(button_class):
     def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, global_manager):

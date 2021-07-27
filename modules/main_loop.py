@@ -176,7 +176,7 @@ def manage_rmb_down(clicked_button, global_manager):
             for current_grid in global_manager.get('grid_list'):
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
-                        if len(current_cell.contained_mobs) > 0:
+                        if len(current_cell.contained_mobs) > 1:
                             moved_mob = current_cell.contained_mobs[1]
                             for current_image in moved_mob.images:
                                 if not current_image.current_cell == 'none':
@@ -200,22 +200,22 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
                             if len(current_cell.contained_mobs) > 0:
-                                current_cell.contained_mobs[0].selected = True
                                 selected_new_mob = True
-                                global_manager.set('show_selection_outlines', True)
-                                #global_manager.set('show_minimap_outlines', True)
-                                global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-                                #global_manager.set('last_minimap_outline_switch', time.time())
+                                current_cell.contained_mobs[0].select()
+                                #current_cell.contained_mobs[0].selected = True
+                                #global_manager.set('show_selection_outlines', True)
+                                #global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
             else:
                 for mob in global_manager.get('mob_list'):
                     for current_image in mob.images: #if mouse box drawn, select all mobs within mouse box
                         if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
                             selected_new_mob = True
-                            mob.selected = True
-                            global_manager.set('show_selection_outlines', True)
-                            #global_manager.set('show_minimap_outlines', True)
-                            global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-                            #global_manager.set('last_minimap_outline_switch', time.time())
+                            for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
+                                if not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group): #do not select workers or officerses in group
+                                    current_mob.select()
+                                    #current_mob.selected = True
+                            #global_manager.set('show_selection_outlines', True)
+                            #global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
             if selected_new_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)
                 if len(selected_list) == 1:
