@@ -8,6 +8,7 @@ from . import notification_tools
 #from . import label
 from . import dice
 from . import scaling
+from . import actor_utility
 
 class actor():
     def __init__(self, coordinates, grids, modes, global_manager):
@@ -100,15 +101,18 @@ class mob(actor):
         self.selection_outline_color = 'bright green'
         self.images = []
         for current_grid in self.grids:
-            self.images.append(images.actor_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
+            
         global_manager.get('mob_list').append(self)
         self.set_name(name)
+        self.update_tooltip()
 
     def draw_outline(self):
         if self.global_manager.get('show_selection_outlines'):
-            for current_image in self.images: #dark gray
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
-
+            for current_image in self.images:
+                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+        
     def update_tooltip(self):
         self.set_tooltip([self.name])
 
@@ -136,17 +140,42 @@ class mob(actor):
             return(False)
 
     def move(self, x_change, y_change):
+        for current_image in self.images:
+            current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        for current_image in self.images:
+            #print('from here mob move')
+            current_image.add_to_cell()
 
-class explorer(mob):
-    '''mob that can explore tiles'''
+class officer(mob):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        global_manager.get('officer_list').append(self)
+        self.veteran = False
+        self.veteran_icons = []
+
+    def remove(self):
+        super().remove()
+        self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
+        for current_veteran_icon in self.veteran_icons:
+            current_veteran_icon.remove()
+
+    def update_veteran_icons(self):
+        for current_veteran_icon in self.veteran_icons:
+            if current_veteran_icon.grid.is_mini_grid:
+                current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
+            else:
+                current_veteran_icon.x = self.x
+                current_veteran_icon.y = self.y
+
+class explorer(officer):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.grid.find_cell(self.x, self.y).set_visibility(True)
-        self.veteran = False
-        self.veteran_icons = []
+        #self.veteran = False
+        #self.veteran_icons = []
         self.exploration_mark_list = []
         
     def can_move(self, x_change, y_change):
@@ -189,6 +218,7 @@ class explorer(mob):
         else:
             direction = 'none'
         #died = False
+        self.just_promoted = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             self.global_manager.set('ongoing_exploration', True)
@@ -203,9 +233,9 @@ class explorer(mob):
             text += "The expedition heads towards the " + direction + ". /n"
             text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
             
-            notification_tools.display_exploration_notification(text + "Click to roll.", self.global_manager)
+            notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
             
-            notification_tools.display_dice_rolling_notification(text + "Rolling... ", self.global_manager)
+            notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
             
             text += "/n"
 
@@ -215,31 +245,21 @@ class explorer(mob):
                 
                 first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
                 self.display_exploration_die((500, 500), first_roll_list[0])
-                #new_die = label.die(scaling.scale_coordinates(500, 500, self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, first_roll_list[0], self.global_manager)
-                
+                                
                 second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
                 self.display_exploration_die((500, 380), second_roll_list[0])
-                #other_new_die = label.die(scaling.scale_coordinates(500, 380), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, second_roll_list[0], self.global_manager)
-                
+                                
                 text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
                 roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
                 text += ("The higher result, " + str(roll_result) + ", was used. /n")
-                #self.global_manager.get('roll_label').set_label("Roll: " + str(roll_result)) #label should show the roll that was used
             else:
                 roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                #new_die = label.die(scaling.scale_coordinates(500, 500, self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100), ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, roll_list[0], self.global_manager)
                 self.display_exploration_die((500, 440), roll_list[0])
                 
                 text += roll_list[1]
                 roll_result = roll_list[0]
-                #if roll_result == 6:
-                #    self.veteran = True
-                #    text += "This explorer has become a veteran explorer. /n"
-                #    self.set_name("Veteran explorer")
-                    #for current_grid in self.grids:
-                    #    self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
                     
-            notification_tools.display_exploration_notification(text + "Click to continue.", self.global_manager)
+            notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
             
             text += "/n"
             if roll_result >= 4: #4+ required on D6 for exploration
@@ -247,11 +267,6 @@ class explorer(mob):
                     text += "You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource. /n"
                 else:
                     text += "You discovered a " + future_cell.terrain + " tile. /n"
-                #future_cell.set_visibility(True)
-                #if not future_cell.terrain == 'water':
-                #    super().move(x_change, y_change)
-                #else: #if discovered a water tile, update minimap but don't move there
-                #    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
             else:
                 text += "You were not able to explore the tile. /n"
             if roll_result == 1:
@@ -259,20 +274,16 @@ class explorer(mob):
 
             if (not self.veteran) and roll_result == 6:
                 self.veteran = True
+                self.just_promoted = True
                 text += "This explorer has become a veteran explorer. /n"
                 self.set_name("Veteran explorer")
                 
-            notification_tools.display_exploration_notification(text + "Click to remove this notification.", self.global_manager)
+            notification_tools.display_notification(text + "Click to remove this notification.", 'exploration', self.global_manager)
                 
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-        #if not died and self.veteran:
-        #    for current_veteran_icon in self.veteran_icons:
-        #        if current_veteran_icon.grid.is_mini_grid:
-        #            current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-        #        else:
-        #            current_veteran_icon.x = self.x
-        #            current_veteran_icon.y = self.y
+            self.update_veteran_icons()
+            
         self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
 
     def complete_exploration(self): #roll_result, x_change, y_change
@@ -286,21 +297,25 @@ class explorer(mob):
             future_cell.set_visibility(True)
             if not future_cell.terrain == 'water':
                 super().move(x_change, y_change)
+                self.update_veteran_icons
+                #for current_veteran_icon in self.veteran_icons:
+                #    if current_veteran_icon.grid.is_mini_grid:
+                #        current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
+                #    else:
+                #        current_veteran_icon.x = self.x
+                #        current_veteran_icon.y = self.y
             else: #if discovered a water tile, update minimap but don't move there
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-        if roll_result == 6:
+        if self.just_promoted:
             for current_grid in self.grids:
-                self.veteran_icons.append(tile_class((self.x, self.y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self.global_manager))
+                if current_grid == self.global_manager.get('minimap_grid'):
+                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                else:
+                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
         elif roll_result == 1:
             self.remove()
             died = True
-        if not died and self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                if current_veteran_icon.grid.is_mini_grid:
-                    current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    current_veteran_icon.x = self.x
-                    current_veteran_icon.y = self.y
         #dice_list = self.global_manager.get('dice_list')
         #while len(dice_list) > 0:
         #    dice_list[0].remove()
@@ -312,11 +327,6 @@ class explorer(mob):
             current_exploration_mark.remove()
         self.exploration_mark_list = []
         self.global_manager.set('ongoing_exploration', False)
-            
-    def remove(self):
-        super().remove()
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.remove()
 
 class tile_class(actor): #to do: make terrain tiles a subclass
     '''like an obstacle without a tooltip or movement blocking'''
@@ -336,7 +346,7 @@ class tile_class(actor): #to do: make terrain tiles a subclass
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
-            self.image_dict['hidden'] = 'scenery/paper_hidden.png'#'scenery/hidden.png'
+            self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_visibility(self.cell.visible)
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
@@ -439,6 +449,14 @@ class tile_class(actor): #to do: make terrain tiles a subclass
                 return(False)
         else:
             return(False)
+
+class veteran_icon(tile_class):
+    def __init__(self, coordinates, grid, image, name, modes, show_terrain, actor, global_manager):
+        super().__init__(coordinates, grid, image, name, modes, show_terrain, global_manager)
+        self.actor = actor
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
+        self.images = [self.image]
         
 class overlay_tile(tile_class):
     '''kind of tile, preferably transparent, that appears in front of obstacles. Good for darkness and such'''
@@ -450,13 +468,3 @@ class overlay_tile(tile_class):
         super().remove()
         self.global_manager.set('overlay_tile_list', utility.remove_from_list(self.global_manager.get('overlay_tile_list'), self))
 
-            
-def create_image_dict(stem):
-    '''if stem is a certain value, add extra ones, such as special combat animations: only works for images in graphics/mobs'''
-    stem = 'mobs/' + stem
-    stem += '/'#goes to that folder
-    image_dict = {}
-    image_dict['default'] = stem + 'default.png'
-    image_dict['right'] = stem + 'right.png'  
-    image_dict['left'] = stem + 'left.png'
-    return(image_dict)

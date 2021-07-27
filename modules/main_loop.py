@@ -2,6 +2,7 @@ import pygame
 import time
 from . import scaling
 from . import text_tools
+from . import actor_utility
 
 def update_display(global_manager): #to do: transfer if current game mode in modes to draw functions, do not manage it here
     if global_manager.get('loading'):
@@ -170,18 +171,72 @@ def draw_text_box(global_manager):
     global_manager.get('game_display').blit(textsurface,(10, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
 
 def manage_rmb_down(clicked_button, global_manager):
-    manage_lmb_down(clicked_button, global_manager)
+    #if global_manager.get('making_mouse_box'):
+        if not clicked_button:
+            for current_grid in global_manager.get('grid_list'):
+                for current_cell in current_grid.cell_list:
+                    if current_cell.touching_mouse():
+                        if len(current_cell.contained_mobs) > 0:
+                            moved_mob = current_cell.contained_mobs[1]
+                            for current_image in moved_mob.images:
+                                if not current_image.current_cell == 'none':
+                                    while not moved_mob == current_image.current_cell.contained_mobs[0]:
+                                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+                            global_manager.set('show_selection_outlines', True)
+                            global_manager.set('last_selection_outline_switch', time.time())
+            
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
-    if global_manager.get('making_mouse_box'): 
+    #if global_manager.get('making_mouse_box'): 
         if not clicked_button:#do not do selecting operations if user was trying to click a button
-            for mob in global_manager.get('mob_list'):
-                mob.selected = False
-                for current_image in mob.images:
-                    if current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-                        mob.selected = True
-                        global_manager.set('show_selection_outlines', True)
-                        global_manager.set('show_minimap_outlines', True)
-                        global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-                        global_manager.set('last_minimap_outline_switch', time.time())
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            selected_new_mob = False
+            for mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
+                if not global_manager.get('capital'): #if holding shift, do not deselect
+                    mob.selected = False
+                        
+            if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
+                for current_grid in global_manager.get('grid_list'):
+                    for current_cell in current_grid.cell_list:
+                        if current_cell.touching_mouse():
+                            if len(current_cell.contained_mobs) > 0:
+                                current_cell.contained_mobs[0].selected = True
+                                selected_new_mob = True
+                                global_manager.set('show_selection_outlines', True)
+                                #global_manager.set('show_minimap_outlines', True)
+                                global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+                                #global_manager.set('last_minimap_outline_switch', time.time())
+            else:
+                for mob in global_manager.get('mob_list'):
+                    for current_image in mob.images: #if mouse box drawn, select all mobs within mouse box
+                        if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
+                            selected_new_mob = True
+                            mob.selected = True
+                            global_manager.set('show_selection_outlines', True)
+                            #global_manager.set('show_minimap_outlines', True)
+                            global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+                            #global_manager.set('last_minimap_outline_switch', time.time())
+            if selected_new_mob:
+                selected_list = actor_utility.get_selected_list(global_manager)
+                if len(selected_list) == 1:
+                    global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
+            else:
+                if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
+                    breaking = False
+                    for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
+                        for current_cell in current_grid.cell_list:
+                            if current_cell.touching_mouse():
+                                if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
+                                    if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                                        main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                        global_manager.get('minimap_grid').calibrate(main_x, main_y)
+                                else:
+                                    global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                                breaking = True
+                                break
+                            if breaking:
+                                break
+                        if breaking:
+                            break
         global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
+

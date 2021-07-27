@@ -15,14 +15,17 @@
 #
 #    notification_tools.py
 #       def display_notification
-#       def notification_to_front
 #       def show_tutorial_notifications
 #
 #    notification.py
 #       class notification(label)
+#           class exploration_notification
+#           class dice_rolling_notification
+#       def notification_to_front
 #
 #    main_loop.py
 #       def update_display
+#       def action_possible
 #       def draw_loading_screen
 #       def manage_tooltip_drawing
 #       def draw_text_box
@@ -70,12 +73,12 @@
 #
 #    grids.py
 #       class grid
+#           class mini_grid
 #
 #    game_transitions.py
 #       def set_game_mode
 #       def create_strategic_map
 #       def start_loading
-#       def display_instructions_page
 #
 #    bars.py
 #       class bar
@@ -92,30 +95,14 @@
 #       def scale_height
 #
 #    dice.py
-#       def roll
-
-#to do: update this
-#create relevant actors
-#review rules
-#trigger button outlines when clicking, currently only works when pressing
-#add more docstrings and comments
-#move classes and functions to different files
-#add global_manager as input to certain docstrings
+#       class die
 #
-#done since 6/15
-#remove varision-specific program elements
-#convert old game mode to a strategic game mode, removing other game modes
-#add correct terrain types with corresponding colors and/or images
-#change strategic map to correct size
-#added docstring descriptions of certain classes and functions
-#removed obsolete showing and can_show() variables and functions, respectively
-#added images for all resources
-#remove all global variables
-#make better images for all resources
-#add mobs
-#add selecting and mouse boxes
-#add movement and basic movement restrictions
-
+#    dice_utility.py
+#       def roll
+#       def roll_to_list
+#
+#   instructions.py
+#       def display_instructions_page
 import pygame
 import time
 import random
@@ -136,6 +123,7 @@ import modules.grids as grids
 import modules.bars as bars
 import modules.data_managers as data_managers
 import modules.csv_tools as csv_tools
+import modules.actor_utility as actor_utility
 
 pygame.init()
 #clock = pygame.time.Clock()
@@ -198,6 +186,7 @@ global_manager.set('image_list', [])
 global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
+global_manager.set('officer_list', [])
 global_manager.set('tile_list', [])
 global_manager.set('overlay_tile_list', [])
 global_manager.set('notification_list', [])
@@ -283,13 +272,22 @@ expand_text_box_button = button.button_class(scaling.scale_coordinates(0, global
 #toggle_grid_lines_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
 instructions_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
 toggle_text_box_button = button.button_class(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
-while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
-    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
-    start_y = 1
-    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
-        break
-new_explorer = actors.explorer((start_x, start_y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
-global_manager.get('minimap_grid').calibrate(start_x, start_y)
+merge_button = button.merge_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_m, ['strategic'], 'misc/merge_button.png', global_manager)
+
+for i in range(0, 5):
+    selected_icon = button.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', i, global_manager)
+#selected_icon_1 = button.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 270, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', 0, global_manager)#coordinates, width, height, color, modes, image_id, selection_index, global_manager
+
+#while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
+#    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+#    start_y = 1
+#    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
+#        break
+new_explorer = actors.explorer(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+new_mob = actors.mob(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Mob', ['strategic'], global_manager)
+
+global_manager.get('minimap_grid').calibrate(new_explorer.x, new_explorer.y)
+
 #while True: 
 #    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
 #    start_y = 1
@@ -343,186 +341,23 @@ while not global_manager.get('crashed'):
             if event.key == pygame.K_BACKSPACE:
                 if global_manager.get('typing'):
                     global_manager.set('message', global_manager.get('message')[:-1]) #remove last character from message and set message to it
-            if event.key == pygame.K_a:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'a'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'A'))
-            if event.key == pygame.K_b:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'b'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'B'))
-            if event.key == pygame.K_c:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'c'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'C'))
-            if event.key == pygame.K_d:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'd'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'D'))
-            if event.key == pygame.K_e:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'e'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'E'))
-            if event.key == pygame.K_f:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'f'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'F'))
-            if event.key == pygame.K_g:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'g'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'G'))
-            if event.key == pygame.K_h:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'h'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'H'))
-            if event.key == pygame.K_i:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'i'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'I'))
-            if event.key == pygame.K_j:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'j'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'J'))
-            if event.key == pygame.K_k:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'k'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'K'))
-            if event.key == pygame.K_l:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'l'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'L'))
-            if event.key == pygame.K_m:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'm'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'M'))
-            if event.key == pygame.K_n:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'n'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'N'))
-            if event.key == pygame.K_o:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'o'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'O'))
-            if event.key == pygame.K_p:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'p'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'P'))
-            if event.key == pygame.K_q:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'q'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'Q'))
-            if event.key == pygame.K_r:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'r'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'R'))
-            if event.key == pygame.K_s:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 's'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'S'))
-            if event.key == pygame.K_t:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 't'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'T'))
-            if event.key == pygame.K_u:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'u'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'U'))
-            if event.key == pygame.K_v:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'v'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'V'))
-            if event.key == pygame.K_w:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'w'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'W'))
-            if event.key == pygame.K_x:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'x'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'X'))
-            if event.key == pygame.K_y:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'y'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'Y'))
-            if event.key == pygame.K_z:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'z'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), 'Z'))
-            if event.key == pygame.K_1:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '1'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '!'))
-            if event.key == pygame.K_2:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '2'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '@'))
-            if event.key == pygame.K_3:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '3'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '#'))
-            if event.key == pygame.K_4:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '4'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '$'))
-            if event.key == pygame.K_5:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '5'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '%'))
-            if event.key == pygame.K_6:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '6'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '^'))
-            if event.key == pygame.K_7:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '7'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '&'))
-            if event.key == pygame.K_8:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '8'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '*'))
-            if event.key == pygame.K_9:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '9'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '('))
-            if event.key == pygame.K_0:
-                if global_manager.get('typing') and not global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), '0'))
-                elif global_manager.get('typing') and global_manager.get('capital'):
-                    global_manager.set('message', utility.add_to_message(global_manager.get('message'), ')'))
+
+            key_codes = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p]
+            key_codes += [pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x, pygame.K_y, pygame.K_z]
+            key_codes += [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0]
+            lowercase_key_values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+            uppercase_key_values = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
+
+            for key_index in range(len(key_codes)):
+                correct_key = False
+                if event.key == key_codes[key_index]:
+                    correct_key = True
+                    if global_manager.get('typing') and not global_manager.get('capital'):
+                        global_manager.set('message', utility.add_to_message(global_manager.get('message'), lowercase_key_values[key_index]))
+                    elif global_manager.get('typing') and global_manager.get('capital'):
+                        global_manager.set('message', utility.add_to_message(global_manager.get('message'), uppercase_key_values[key_index]))
+                if correct_key:
+                    break
                     
         if event.type == pygame.KEYUP:
             for button in global_manager.get('button_list'):
@@ -585,11 +420,11 @@ while not global_manager.get('crashed'):
                         clicked_button = True
             main_loop.manage_rmb_down(clicked_button, global_manager)
 
-        else:#if user just clicked rmb
-            mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
-            global_manager.set('mouse_origin_x', mouse_origin_x)
-            global_manager.set('mouse_origin_y', mouse_origin_y)
-            global_manager.set('making_mouse_box', True)
+        #else:#if user just clicked rmb
+            #mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
+            #global_manager.set('mouse_origin_x', mouse_origin_x)
+            #global_manager.set('mouse_origin_y', mouse_origin_y)
+            #global_manager.set('making_mouse_box', True)
             
     if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
         if not global_manager.get('lmb_down'):#if user just released lmb

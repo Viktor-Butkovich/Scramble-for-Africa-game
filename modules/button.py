@@ -1,4 +1,5 @@
 import pygame
+import time
 from . import images
 from . import text_tools
 #from . import game_transitions
@@ -6,6 +7,7 @@ from . import instructions
 from . import grids
 from . import scaling
 from . import main_loop
+from . import actor_utility
 
 class button_class():
     '''
@@ -71,6 +73,8 @@ class button_class():
             self.set_tooltip(['Press to change the size of the text box'])
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
+        elif self.button_type == 'merge':
+            self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer."])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -229,22 +233,23 @@ class button_class():
         Outputs:
             Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
         '''
-        self.update_tooltip()
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        mouse_y += y_displacement
-        if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-            mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
-        if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
-            mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
-        self.tooltip_box.x = mouse_x
-        self.tooltip_box.y = mouse_y
-        self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
-        self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
-        for text_line_index in range(len(self.tooltip_text)):
-            text_line = self.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+        if self.can_show():
+            self.update_tooltip()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_y += y_displacement
+            if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+                mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+            if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+                mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
+            self.tooltip_box.x = mouse_x
+            self.tooltip_box.y = mouse_y
+            self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
+            self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            for text_line_index in range(len(self.tooltip_text)):
+                text_line = self.tooltip_text[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
         '''
@@ -256,67 +261,84 @@ class button_class():
         '''
         Controls what the button does when left clicked. The action taken will depend on button_type's value.
         '''
-        self.showing_outline = True
-        if self.button_type == 'hi printer':
-            text_tools.print_to_screen('hi')
+        if self.can_show():
+            self.showing_outline = True
+            if self.button_type == 'hi printer':
+                text_tools.print_to_screen('hi')
 
-        elif self.button_type == 'move left':
-            if main_loop.action_possible(self.global_manager):
-                for mob in self.global_manager.get('mob_list'):
-                    if mob.selected and mob.can_move(-1, 0):
-                        mob.move(-1, 0) #x_change, y_change
-            else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
-                    
-        elif self.button_type == 'move right':
-            if main_loop.action_possible(self.global_manager):
-                for mob in self.global_manager.get('mob_list'):
-                    if mob.selected and mob.can_move(1, 0):
-                        mob.move(1, 0)
-            else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
-                    
-        elif self.button_type == 'move up':
-            if main_loop.action_possible(self.global_manager):
-                for mob in self.global_manager.get('mob_list'):
-                    if mob.selected and mob.can_move(0, 1):
-                        mob.move(0, 1)
-            else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
-                    
-        elif self.button_type == 'move down':
-            if main_loop.action_possible(self.global_manager):
-                for mob in self.global_manager.get('mob_list'):
-                    if mob.selected and mob.can_move(0, -1):
-                        mob.move(0, -1)
-            else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
-                    
-        elif self.button_type == 'toggle grid lines':
-            if self.global_manager.get('show_grid_lines'):
-                self.global_manager.set('show_grid_lines', False)
-            else:
-                self.global_manager.set('show_grid_lines', True)
-        elif self.button_type == 'toggle text box':
-            if self.global_manager.get('show_text_box'):
-                self.global_manager.set('show_text_box', False)
-            else:
-                self.global_manager.set('show_text_box', True)
-        elif self.button_type == 'expand text box':
-            if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
-            else:
-                self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
-        elif self.button_type == 'do something':
-            text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
-        elif self.button_type == 'instructions':
-            if self.global_manager.get('current_instructions_page') == 'none':
-                instructions.display_instructions_page(0, self.global_manager)
-            else:
-                if not self.global_manager.get('current_instructions_page') == 'none':
-                    self.global_manager.get('current_instructions_page').remove()
-                    self.global_manager.set('current_instructions_page', 'none')
-                self.global_manager.set('current_instructions_page_index', 0)
+            elif self.button_type == 'move left':
+                if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+                    if main_loop.action_possible(self.global_manager):
+                        for mob in self.global_manager.get('mob_list'):
+                            if mob.selected and mob.can_move(-1, 0):
+                                mob.move(-1, 0) #x_change, y_change
+                    else:
+                        text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+                        
+            elif self.button_type == 'move right':
+                if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+                    if main_loop.action_possible(self.global_manager):
+                        for mob in self.global_manager.get('mob_list'):
+                            if mob.selected and mob.can_move(1, 0):
+                                mob.move(1, 0)
+                    else:
+                        text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+                        
+            elif self.button_type == 'move up':
+                if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+                    if main_loop.action_possible(self.global_manager):
+                        for mob in self.global_manager.get('mob_list'):
+                            if mob.selected and mob.can_move(0, 1):
+                                mob.move(0, 1)
+                    else:
+                        text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+                        
+            elif self.button_type == 'move down':
+                if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+                    if main_loop.action_possible(self.global_manager):
+                        for mob in self.global_manager.get('mob_list'):
+                            if mob.selected and mob.can_move(0, -1):
+                                mob.move(0, -1)
+                    else:
+                        text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+                        
+            elif self.button_type == 'toggle grid lines':
+                if self.global_manager.get('show_grid_lines'):
+                    self.global_manager.set('show_grid_lines', False)
+                else:
+                    self.global_manager.set('show_grid_lines', True)
+            elif self.button_type == 'toggle text box':
+                if self.global_manager.get('show_text_box'):
+                    self.global_manager.set('show_text_box', False)
+                else:
+                    self.global_manager.set('show_text_box', True)
+            elif self.button_type == 'expand text box':
+                if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
+                    self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
+                else:
+                    self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
+            elif self.button_type == 'do something':
+                text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
+            elif self.button_type == 'instructions':
+                if self.global_manager.get('current_instructions_page') == 'none':
+                    instructions.display_instructions_page(0, self.global_manager)
+                else:
+                    if not self.global_manager.get('current_instructions_page') == 'none':
+                        self.global_manager.get('current_instructions_page').remove()
+                        self.global_manager.set('current_instructions_page', 'none')
+                    self.global_manager.set('current_instructions_page_index', 0)
+            elif self.button_type == 'merge':
+                selected_list = actor_utility.get_selected_list(self.global_manager)
+                for current_mob in selected_list:
+                    current_mob.remove()
 
     def on_rmb_release(self):
         '''
@@ -336,3 +358,73 @@ class button_class():
         '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+
+    def can_show(self):
+        return(True)
+
+class merge_button(button_class):
+    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
+        super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
+        
+    def can_show(self):
+        if actor_utility.can_merge(self.global_manager):
+            return(True)
+        else:
+            return(False)
+
+    def on_click(self):
+        if self.can_show():
+            super().on_click()
+
+    def draw(self):
+        if self.can_show():
+            super().draw()
+
+
+class selected_icon(button_class):
+    def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, global_manager):
+        self.attached_mob = 'none'
+        super().__init__(coordinates, width, height, color, 'selected', 'none', modes, image_id, global_manager)
+        self.old_selected_list = []
+        self.default_image_id = image_id
+        self.selection_index = selection_index
+
+    def on_click(self):
+        if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+            self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            for current_image in self.attached_mob.images:
+                if not current_image.current_cell == 'none':
+                    while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
+                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+            self.global_manager.set('show_selection_outlines', True)
+            self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+                        
+    def draw(self):
+        new_selected_list = actor_utility.get_selected_list(self.global_manager)
+        if not new_selected_list == self.old_selected_list:
+            self.old_selected_list = new_selected_list
+            if len(self.old_selected_list) > self.selection_index:
+                self.attached_mob = self.old_selected_list[self.selection_index]
+                self.image.set_image(self.attached_mob.images[0].image_id)
+        if len(self.old_selected_list) > self.selection_index:
+            #self.set_tooltip(self.attached_mob.images[0].tooltip_text)
+            super().draw()
+        else:
+            self.image.set_image('misc/empty.png')
+            self.attached_mob = 'none'
+            #self.set_tooltip('')
+
+    def can_show(self):
+        if self.attached_mob == 'none':
+            return(False)
+        else:
+            return(True)
+
+    def update_tooltip(self):
+        if self.attached_mob == 'none':
+            self.set_tooltip([])
+        else:
+            self.set_tooltip(self.attached_mob.images[0].tooltip_text)
+        
+            
+    

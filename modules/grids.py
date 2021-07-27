@@ -14,6 +14,7 @@ class grid():
         self.coordinate_height = coordinate_height
         self.pixel_width = pixel_width
         self.pixel_height = pixel_height
+        self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
         #self.color = color
         self.internal_line_color = internal_line_color
         self.external_line_color = external_line_color
@@ -28,7 +29,7 @@ class grid():
             for cell in self.cell_list:
                 if cell.y == 0:
                     cell.set_terrain('water')
-            num_rivers = random.randrange(2, 4)#2-3 # to do restore this
+            num_rivers = 0#random.randrange(2, 4)#2-3 # to do restore this
             valid = False
             while not valid:
                 valid = True
@@ -116,6 +117,7 @@ class grid():
                 self.create_cell(x, y, self)
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
+            
     def create_cell(self, x, y, grid):
         new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], self.global_manager)
         
@@ -274,6 +276,12 @@ class grid():
                     current_x = current_x - 1
                 self.find_cell(current_x, current_y).set_terrain(terrain)
 
+    def touching_mouse(self):
+        if self.Rect.collidepoint(pygame.mouse.get_pos()):
+            return(True)
+        else:
+            return(False)
+
 class mini_grid(grid):
     def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
         super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
@@ -288,27 +296,42 @@ class mini_grid(grid):
         self.center_x = center_x
         self.center_y = center_y
         for current_cell in self.cell_list:
-            attached_x = self.center_x + current_cell.x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
-            attached_y = self.center_y + current_cell.y - round((self.coordinate_height - 1) / 2)
+            #attached_x = self.center_x + current_cell.x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
+            #attached_y = self.center_y + current_cell.y - round((self.coordinate_height - 1) / 2)
+            attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
             if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                 attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
                 current_cell.set_visibility(attached_cell.visible)
                 current_cell.set_terrain(attached_cell.terrain)
                 #if not self.attached_grid.find_cell(attached_x, attached_y).resource == 'none':
                 current_cell.set_resource(attached_cell.resource)
+                current_cell.contained_mobs = attached_cell.contained_mobs
                 #print(self.attached_grid.find_cell(attached_x, attached_y).terrain)
                 #print(self.attached_grid.find_cell(attached_x, attached_y).resource)
             else: #if off-map
                 current_cell.set_visibility(True)
                 current_cell.set_terrain('none')
                 current_cell.set_resource('none')
+        self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
+        for current_mob in self.global_manager.get('mob_list'):
+            for current_image in current_mob.images:
+                if current_image.grid == self:
+                    #print('here')
+                    current_image.add_to_cell()
+        for current_officer in self.global_manager.get('officer_list'):
+            current_officer.update_veteran_icons()
 
+    def get_main_grid_coordinates(self, mini_x, mini_y): #take minimap coordinates and convert them to strategic map coordinates
+        attached_x = self.center_x + mini_x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
+        attached_y = self.center_y + mini_y - round((self.coordinate_height - 1) / 2)
+        return(attached_x, attached_y)
+            
     def get_mini_grid_coordinates(self, original_x, original_y): #take strategic map coordinates and convert them to minimap coordinates
         return(original_x - self.center_x + (round(self.coordinate_width - 1) / 2), original_y - self.center_y + round((self.coordinate_height - 1) / 2))
 
     def is_on_mini_grid(self, original_x, original_y):
-        minimap_x = original_x - self.center_x
-        minimap_y = original_y - self.center_y
+        minimap_x = original_x - self.center_x + (round(self.coordinate_width - 1) / 2)
+        minimap_y = original_y - self.center_y + (round(self.coordinate_height - 1) / 2)
         if(minimap_x >= 0 and minimap_x < self.coordinate_width and minimap_y >= 0 and minimap_y < self.coordinate_height):
             return(True)
         else:

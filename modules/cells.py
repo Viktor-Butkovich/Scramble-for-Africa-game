@@ -22,6 +22,7 @@ class cell():
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
+        self.contained_mobs = []
         #self.set_visibility(True)
 
     def set_visibility(self, new_visibility):
@@ -69,3 +70,9 @@ class cell():
             adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
         self.diagonal_adjacent_list = diagonal_adjacent_list
         self.adjacent_list = adjacent_list
+
+    def touching_mouse(self):
+        if self.Rect.collidepoint(pygame.mouse.get_pos()):
+            return(True)
+        else:
+            return(False)

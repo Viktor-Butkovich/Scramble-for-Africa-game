@@ -53,8 +53,15 @@ class actor_image():
         self.outline_width = self.grid.grid_line_width + 1#3#2
         #self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
         self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
-
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
+        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+            #if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+            grid_x, grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+            #self.go_to_cell((grid_x, grid_y))
+        else:
+            grid_x = self.actor.x
+            grid_y = self.actor.y
+        self.go_to_cell((grid_x, grid_y))
 
     def get_center_coordinates(self):
         cell_width = self.grid.get_cell_width()
@@ -75,23 +82,24 @@ class actor_image():
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):
-        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
-            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
-                self.grid_x, self.grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
-                self.go_to_cell((self.grid_x, self.grid_y))
+        if self.can_show():
+            if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+                if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+                    grid_x, grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+                    self.go_to_cell((grid_x, grid_y))
+                    drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            else:
+                #self.grid_x = self.actor.x
+                #self.grid_y = self.actor.y
+                self.go_to_cell((self.actor.x, self.actor.y))
                 drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
-        else:
-            self.grid_x = self.actor.x
-            self.grid_y = self.actor.y
-            self.go_to_cell((self.grid_x, self.grid_y))
-            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
-        #if self.actor.selected:
-        #    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.outline), self.outline_width)
-        #if show_selected:
-        #    if self.actor.selected:
-        #        pygame.draw.rect(game_display, color_dict['light gray'], (self.outline), self.outline_width)
-        #    elif self.actor.targeted:
-        #        pygame.draw.rect(game_display, color_dict['red'], (self.outline), self.outline_width)
+            #if self.actor.selected:
+            #    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['light gray'], (self.outline), self.outline_width)
+            #if show_selected:
+            #    if self.actor.selected:
+            #        pygame.draw.rect(game_display, color_dict['light gray'], (self.outline), self.outline_width)
+            #    elif self.actor.targeted:
+            #        pygame.draw.rect(game_display, color_dict['red'], (self.outline), self.outline_width)
         
     def go_to_cell(self, coordinates):
         self.x, self.y = self.grid.convert_coordinates(coordinates)
@@ -110,6 +118,60 @@ class actor_image():
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
+
+    def touching_mouse(self):
+        if self.Rect.collidepoint(pygame.mouse.get_pos()):
+            return(True)
+        else:
+            return(False)
+
+    def can_show(self):
+        return(True)
+
+class mob_image(actor_image):
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
+        self.current_cell = 'none'
+        #print('from here mob image')
+        self.add_to_cell()
+        
+    def remove_from_cell(self):
+        if not self.current_cell == 'none':
+            self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
+        self.current_cell = 'none'
+
+    def add_to_cell(self):
+        #self.remove_from_cell()
+        #print('to here')
+        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+            mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+                old_cell = self.current_cell
+                self.current_cell = self.grid.find_cell(mini_x, mini_y)
+                #if not self.current_cell == 'none':
+                    #print(self.current_cell)
+                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs:
+                    self.current_cell.contained_mobs.insert(0, self.actor)
+            else:
+                self.remove_from_cell()
+            self.go_to_cell((mini_x, mini_y))
+        else:
+            #print(self.grid.find_cell(self.actor.x, self.actor.y).contained_mobs)
+            self.remove_from_cell()
+            self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
+            if not self.actor in self.current_cell.contained_mobs:
+                self.current_cell.contained_mobs.insert(0, self.actor)
+            #print(self.grid.find_cell(self.actor.x, self.actor.y).contained_mobs)
+
+    #def draw(self): #only draw top mob
+    #    if self.can_show():#if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor:
+    #        super().draw()
+
+    def can_show(self):
+        if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor:
+            return(True)
+        else:
+            return(False)
 
 class button_image(actor_image):
     def __init__(self, button, width, height, image_id, global_manager):
@@ -146,7 +208,7 @@ class button_image(actor_image):
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):
-        if self.global_manager.get('current_game_mode') in self.button.modes:
+        if self.global_manager.get('current_game_mode') in self.button.modes and self.button.can_show():
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
@@ -160,9 +222,9 @@ class button_image(actor_image):
 class tile_image(actor_image):
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         super().__init__(actor, width, height, grid, image_description, global_manager)
-        self.grid_x = self.actor.x
-        self.grid_y = self.actor.y
-        self.go_to_cell((self.grid_x, self.grid_y))
+        #self.grid_x = self.actor.x
+        #self.grid_y = self.actor.y
+        self.go_to_cell((self.actor.x, self.actor.y))
 
     def go_to_cell(self, coordinates):
         self.x, self.y = self.grid.convert_coordinates(coordinates)
@@ -172,7 +234,20 @@ class tile_image(actor_image):
         self.outline.y = self.y - (self.height + self.outline_width)
         
     def draw(self):
-        self.grid_x = self.actor.x
-        self.grid_y = self.actor.y
-        self.go_to_cell((self.grid_x, self.grid_y))
+        #self.grid_x = self.actor.x
+        #self.grid_y = self.actor.y
+        self.go_to_cell((self.actor.x, self.actor.y))
+        #if self.actor.name == 'veteran icon':
+        #    if self.actor.actor.images[0].can_show():
+        #        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+        #else:
         drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+
+class veteran_icon_image(tile_image):
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
+
+    def draw(self):
+        if self.actor.actor.images[0].can_show():
+            self.go_to_cell((self.actor.x, self.actor.y))
+            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
