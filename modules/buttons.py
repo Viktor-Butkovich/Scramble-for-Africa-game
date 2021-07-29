@@ -2,15 +2,11 @@ import pygame
 import time
 from . import images
 from . import text_tools
-#from . import game_transitions
 from . import instructions
-from . import grids
-from . import scaling
 from . import main_loop
 from . import actor_utility
-#from . import groups
 
-class button_class():
+class button():
     '''
     A button that will do something when clicked or when the corresponding key is pressed
     '''
@@ -25,6 +21,7 @@ class button_class():
             keybind_id: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
             modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
             image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
         '''
         self.global_manager = global_manager
         self.has_released = True
@@ -196,7 +193,10 @@ class button_class():
 
     def touching_mouse(self):
         '''
-        Returns whether the button is colliding with the mouse
+        Inputs:
+            none
+        Outputs:
+            Returns whether this button and the mouse are colliding
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
@@ -205,7 +205,10 @@ class button_class():
 
     def can_show_tooltip(self):
         '''
-        Returns whether the button's tooltip should be shown, which is when the button is currently displayed and the mouse is colliding with it.
+        Inputs:
+            none
+        Outputs:
+            Returns whether the button's tooltip should be shown; its tooltip should be shown when the button is being displayed and is colliding with the mouse
         '''
         if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
@@ -214,13 +217,16 @@ class button_class():
         
     def draw(self):
         '''
-        Draws the button with a description of its keybind if applicable, along with an outline if being pressed
+        Inputs:
+            none
+        Outputs:
+            Draws this button with a description of its keybind if applicable, along with an outline if it's key is being pressed
         '''
         if self.showing_outline: 
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['dark gray'], self.outline)
         pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
         self.image.draw()
-        myfont = pygame.font.SysFont('Times New Roman', 15)
+        #myfont = pygame.font.SysFont('Times New Roman', 15)
         if self.has_keybind: #The key to which a button is bound will appear on the button's image
             message = self.keybind_name
             color = 'white'
@@ -254,13 +260,19 @@ class button_class():
 
     def on_rmb_click(self):
         '''
-        Controls what the button does when right clicked. All button objects need an on_rmb_click function so that button subclasses that do something different on right click work correctly.
+        Inputs:
+            none
+        Outputs:
+            Controls the button's behavior when right clicked. By default, the button's right click behavior is the same as its left click behavior.
         '''
         self.on_click()
 
     def on_click(self):
         '''
-        Controls what the button does when left clicked. The action taken will depend on button_type's value.
+        Inputs:
+            none
+        Outputs:
+            Controls the button's behavior when left clicked. This behavior depends on the button's button_type value.
         '''
         if self.can_show():
             self.showing_outline = True
@@ -344,19 +356,28 @@ class button_class():
 
     def on_rmb_release(self):
         '''
-        Controls what the button does when right clicked and released. All button objects need an on_rmb_release function so that button subclasses that do something different on right click work correctly.
+        Inputs:
+            none
+        Outputs:
+            Controls what the button does when right clicked and released. By default, buttons will stop showing their outlines when released.
         '''
         self.on_release() #if any rmb buttons did something different on release, change in subclass
                 
     def on_release(self):
         '''
-        Controls what the button does when left clicked and released. By default, buttons will stop showing their outlines when released. Currently, buttons do not correctly show outlines when clicked
+        Inputs:
+            none
+        Outputs:
+            Controls what the button does when left clicked and released. By default, buttons will stop showing their outlines when released.
         '''
         self.showing_outline = False
 
     def remove(self):
         '''
-        Function shared by most objects that removes them from all relevant lists and references
+        Inputs:
+            none
+        Outputs:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
@@ -364,8 +385,22 @@ class button_class():
     def can_show(self):
         return(True)
 
-class selected_icon(button_class):
+class selected_icon(button):
+    '''
+    A button whose appearance and tooltip matches that of a selected mob and moves the minimap to that mob when clicked
+    '''
     def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, global_manager):
+        '''
+        Inputs:
+            coordinates: tuple of 2 integers for initial coordinate x and y values
+            width: int representing the width in pixels of the button
+            height: int representing the height in pixels of the button
+            color: string representing a color in the color_dict dictionary
+            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
+            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
+            selection_index: int representing the index of the selected_list to which this selected_icon can be attached
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
+        '''
         self.attached_mob = 'none'
         super().__init__(coordinates, width, height, color, 'selected', 'none', modes, image_id, global_manager)
         self.old_selected_list = []
@@ -373,6 +408,12 @@ class selected_icon(button_class):
         self.selection_index = selection_index
 
     def on_click(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Moves minimap to attached selected mob when clicked
+        '''
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
             for current_image in self.attached_mob.images:
@@ -383,6 +424,12 @@ class selected_icon(button_class):
             self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
                         
     def draw(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws a copy of the attached selected mob's image at this button's location with the button's shape as a background
+        '''
         new_selected_list = actor_utility.get_selected_list(self.global_manager)
         if not new_selected_list == self.old_selected_list:
             self.old_selected_list = new_selected_list
@@ -398,12 +445,24 @@ class selected_icon(button_class):
             #self.set_tooltip('')
 
     def can_show(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns True if this button has an attached selected mob - it is not visible when there is no attached selected mob
+        '''
         if self.attached_mob == 'none':
             return(False)
         else:
             return(True)
 
     def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Sets the button's tooltip to that of its attached selected mob
+        '''
         if self.attached_mob == 'none':
             self.set_tooltip([])
         else:

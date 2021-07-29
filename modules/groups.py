@@ -1,8 +1,8 @@
 import time
-from .actors import mob
-from .actors import tile_class
-from .actors import veteran_icon
-from .button import button_class
+from .mobs import mob
+from .tiles import tile
+from .tiles import veteran_icon
+from .buttons import button
 from . import actor_utility
 from . import text_tools
 from . import dice_utility
@@ -10,6 +10,7 @@ from . import utility
 from . import notification_tools
 from . import dice
 from . import scaling
+from . import main_loop
 
 class group(mob):
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
@@ -28,6 +29,9 @@ class group(mob):
         #self.officer.veteran_icons = []
         self.global_manager.get('group_list').append(self)
 
+    def update_tooltip(self):
+        self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
+
     def disband(self):
         self.worker.leave_group(self)
         self.officer.veteran_icons = self.veteran_icons
@@ -43,6 +47,11 @@ class group(mob):
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
         #for current_veteran_icon in self.veteran_icons: #keep veteran icons for officer, remove officer to remove them
         #    current_veteran_icon.remove()
+
+    def die(self):
+        self.remove()
+        self.officer.remove()
+        self.worker.remove()
 
     def update_veteran_icons(self):
         for current_veteran_icon in self.veteran_icons:
@@ -111,7 +120,7 @@ class expedition(group):
                     coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
                 else:
                     coordinates = (self.x + x_change, self.y + y_change)
-                self.exploration_mark_list.append(tile_class(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
+                self.exploration_mark_list.append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
             text = ""
             text += "The expedition heads towards the " + direction + ". /n"
             text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
@@ -153,7 +162,7 @@ class expedition(group):
             else:
                 text += "You were not able to explore the tile. /n"
             if roll_result == 1:
-                text += "This explorer has died. /n" #actual death occurs when exploration completes
+                text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
 
             if (not self.veteran) and roll_result == 6:
                 self.veteran = True
@@ -190,7 +199,7 @@ class expedition(group):
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
                 self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
         elif roll_result == 1:
-            self.remove()
+            self.die()#self.remove()
             died = True
 
         copy_dice_list = self.global_manager.get('dice_list')
@@ -202,7 +211,7 @@ class expedition(group):
         self.exploration_mark_list = []
         self.global_manager.set('ongoing_exploration', False)
 
-class merge_button(button_class):
+class merge_button(button):
     def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
         super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
         
@@ -214,32 +223,35 @@ class merge_button(button_class):
 
     def on_click(self):
         if self.can_show():
-            selected_list = actor_utility.get_selected_list(self.global_manager)
-            #for current_mob in selected_list:
-            #    current_mob.remove()
-            if len(selected_list) == 2:
-                officer = 'none'
-                worker = 'none'
-                for current_selected in selected_list:
-                    if current_selected in self.global_manager.get('officer_list'):
-                        officer = current_selected
-                    elif current_selected in self.global_manager.get('worker_list'):
-                        worker = current_selected
-                if not (officer == 'none' or worker == 'none'): #if worker and officer selected
-                    if officer.x == worker.x and officer.y == worker.y:
-                        create_group(worker, officer, self.global_manager)
+            if main_loop.action_possible(self.global_manager):    
+                selected_list = actor_utility.get_selected_list(self.global_manager)
+                #for current_mob in selected_list:
+                #    current_mob.remove()
+                if len(selected_list) == 2:
+                    officer = 'none'
+                    worker = 'none'
+                    for current_selected in selected_list:
+                        if current_selected in self.global_manager.get('officer_list'):
+                            officer = current_selected
+                        elif current_selected in self.global_manager.get('worker_list'):
+                            worker = current_selected
+                    if not (officer == 'none' or worker == 'none'): #if worker and officer selected
+                        if officer.x == worker.x and officer.y == worker.y:
+                            create_group(worker, officer, self.global_manager)
+                        else:
+                            text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
                     else:
                         text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
             else:
-                text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not form a group.", self.global_manager)
 
     def draw(self):
         if self.can_show():
             super().draw()
 
-class split_button(button_class):
+class split_button(button):
     def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
         super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
         
@@ -251,13 +263,16 @@ class split_button(button_class):
 
     def on_click(self):
         if self.can_show():
-            selected_list = actor_utility.get_selected_list(self.global_manager)
-            #for current_mob in selected_list:
-            #    current_mob.remove()
-            if len(selected_list) == 1 and selected_list[0] in self.global_manager.get('group_list'):
-                selected_list[0].disband()
+            if main_loop.action_possible(self.global_manager):         
+                selected_list = actor_utility.get_selected_list(self.global_manager)
+                #for current_mob in selected_list:
+                #    current_mob.remove()
+                if len(selected_list) == 1 and selected_list[0] in self.global_manager.get('group_list'):
+                    selected_list[0].disband()
+                else:
+                    text_tools.print_to_screen("You must have a group selected to split it into a worker and and officer.", self.global_manager)
             else:
-                text_tools.print_to_screen("You must have a group selected to split it into a worker and and officer.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
     def draw(self):
         if self.can_show():
@@ -265,6 +280,6 @@ class split_button(button_class):
 
 def create_group(worker, officer, global_manager):
     if officer.officer_type == 'explorer':
-        new_group = expedition((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = expedition((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/expedition.png', 'Expedition', ['strategic'], worker, officer, global_manager)
     else:
-        new_group = group((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = group((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)

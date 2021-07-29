@@ -1,108 +1,3 @@
-#Scramble_for_Africa.py
-#
-#modules folder
-#
-#    actors.py
-#       class actor
-#           class mob
-#               class explorer
-#           class tile_class
-#               class overlay_tile
-#       def create_image_dict
-#
-#    button.py
-#       class button_class
-#
-#    notification_tools.py
-#       def display_notification
-#       def show_tutorial_notifications
-#
-#    notification.py
-#       class notification(label)
-#           class exploration_notification
-#           class dice_rolling_notification
-#       def notification_to_front
-#
-#    main_loop.py
-#       def update_display
-#       def action_possible
-#       def draw_loading_screen
-#       def manage_tooltip_drawing
-#       def draw_text_box
-#       def manage_rmb_down
-#       def manage_lmb_down
-#
-#    csv_tools.py
-#       def read_csv
-#
-#    data_managers.py
-#       class global_manager_template
-#       class input_manager_template
-#       class flavor_text_manager_template
-#
-#    cells.py
-#       class cell
-#
-#    utility.py
-#       def find_object_distance (takes objects with x and y attributes)
-#       def find_coordinate_distance (takes coordinate tuples)
-#       def remove_from_list
-#       def toggle
-#       def generate_article
-#       def add_to_message
-#
-#    label.py
-#       class label
-#           class instructions_page
-#
-#    images.py
-#       class free_image
-#           class loading_image_class
-#       class actor_image
-#           class button_image
-#           class tile_image
-#
-#    text_tools.py
-#       def message_width
-#       def get_input
-#       def text
-#       def manage_text_list
-#       def print_to_screen
-#       def print_to_previous_message
-#       def clear_message
-#
-#    grids.py
-#       class grid
-#           class mini_grid
-#
-#    game_transitions.py
-#       def set_game_mode
-#       def create_strategic_map
-#       def start_loading
-#
-#    bars.py
-#       class bar
-#           class actor_bar
-#
-#    drawing_tools.py
-#       def rect_to_surface
-#       def display_image
-#       def display_image_angle
-#
-#    scaling.py
-#       def scale_coordinates
-#       def scale_width
-#       def scale_height
-#
-#    dice.py
-#       class die
-#
-#    dice_utility.py
-#       def roll
-#       def roll_to_list
-#
-#   instructions.py
-#       def display_instructions_page
 import pygame
 import time
 import random
@@ -112,22 +7,17 @@ import modules.scaling as scaling
 import modules.main_loop as main_loop
 import modules.text_tools as text_tools
 import modules.utility as utility
-import modules.dice_utility as dice_utility
 import modules.notification_tools as notification_tools
 import modules.images as images
-import modules.label as label
-import modules.button as button
+import modules.buttons as buttons
 import modules.game_transitions as game_transitions
-import modules.actors as actors
 import modules.grids as grids
-import modules.bars as bars
 import modules.data_managers as data_managers
-import modules.csv_tools as csv_tools
 import modules.actor_utility as actor_utility
 import modules.groups as groups
+import modules.mobs as mobs
 
 pygame.init()
-#clock = pygame.time.Clock()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
 resolution_finder = pygame.display.Info()
@@ -147,7 +37,6 @@ global_manager.set('font_size', scaling.scale_width(15, global_manager))
 global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
 pygame.display.set_caption('SFA')
-
 color_dict = {}
 color_dict['black'] = (0, 0, 0)
 color_dict['white'] = (255, 255, 255)
@@ -233,7 +122,7 @@ old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
 global_manager.set('old_mouse_x', old_mouse_x)
 global_manager.set('old_mouse_y', old_mouse_y)
 notification_tools.show_tutorial_notifications(global_manager)
-global_manager.set('loading_image', images.loading_image_class('misc/loading.png', global_manager))
+global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
 global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
@@ -253,51 +142,37 @@ minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('def
 
 global_manager.set('minimap_grid', minimap_grid)
 game_transitions.set_game_mode('strategic', global_manager)
-#roll_label = label.label(scaling.scale_coordinates(580, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(90, global_manager), scaling.scale_height(50, global_manager), ['strategic'], 'misc/small_label.png', 'Roll: ', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager
-#global_manager.set('roll_label', roll_label)
 
 button_start_x = 500#600#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
-left_arrow_button = button.button_class(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move left', pygame.K_a, ['strategic'], 'misc/left_button.png', global_manager)
+left_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move left', pygame.K_a, ['strategic'], 'misc/left_button.png', global_manager)
 current_button_number += 1
-down_arrow_button = button.button_class(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move down', pygame.K_s, ['strategic'], 'misc/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
+down_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move down', pygame.K_s, ['strategic'], 'misc/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
 
-up_arrow_button = button.button_class(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move up', pygame.K_w, ['strategic'], 'misc/up_button.png', global_manager)
+up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move up', pygame.K_w, ['strategic'], 'misc/up_button.png', global_manager)
 current_button_number += 1
-right_arrow_button = button.button_class(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
+right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
 current_button_number += 2#move more when switching categories
 
 current_button_number += 1
 
-expand_text_box_button = button.button_class(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
-#toggle_grid_lines_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
-instructions_button = button.button_class(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
-toggle_text_box_button = button.button_class(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
+expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black', 'expand text box', pygame.K_j, ['strategic'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
+#toggle_grid_lines_button = button.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
+instructions_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic'], 'misc/instructions.png', global_manager)
+toggle_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'toggle text box', pygame.K_t, ['strategic'], 'misc/toggle_text_box_button.png', global_manager)
 merge_button = groups.merge_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_m, ['strategic'], 'misc/merge_button.png', global_manager)
 split_button = groups.split_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_n, ['strategic'], 'misc/split_button.png', global_manager)
 
 for i in range(0, 5):
-    selected_icon = button.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', i, global_manager)
-#selected_icon_1 = button.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 270, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', 0, global_manager)#coordinates, width, height, color, modes, image_id, selection_index, global_manager
+    selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic'], 'misc/default_button.png', i, global_manager)
 
-#while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
-#    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
-#    start_y = 1
-#    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
-#        break
-new_explorer = actors.explorer(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
-new_mob = actors.worker(actor_utility.get_start_coordinates(global_manager), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Worker', ['strategic'], global_manager)
+start_x, start_y = actor_utility.get_start_coordinates(global_manager)
+new_worker = mobs.worker((start_x, start_y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/worker/default.png', 'Worker', ['strategic'], global_manager)
+new_explorer = mobs.explorer((start_x, start_y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/default.png', 'Explorer', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
 
-global_manager.get('minimap_grid').calibrate(new_explorer.x, new_explorer.y)
-
-#while True: 
-#    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
-#    start_y = 1
-#    if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
-#        break
-#new_worker = actors.mob((start_x, start_y), global_manager.get('strategic_map_grid'), 'mobs/default/default.png', 'Worker', ['strategic'], global_manager)#self, coordinates, grid, image_id, name, modes, global_manager
+global_manager.get('minimap_grid').calibrate(start_x, start_y)
 
 while not global_manager.get('crashed'):
     if len(global_manager.get('notification_list')) == 0:
@@ -317,17 +192,17 @@ while not global_manager.get('crashed'):
         else:
             global_manager.set('ctrl', False)
         if event.type == pygame.KEYDOWN:
-            for button in global_manager.get('button_list'):
-                if global_manager.get('current_game_mode') in button.modes and not global_manager.get('typing'):
-                    if button.has_keybind:
-                        if event.key == button.keybind_id:
-                            if button.has_released:
-                                button.on_click()
-                                button.has_released = False
+            for current_button in global_manager.get('button_list'):
+                if global_manager.get('current_game_mode') in current_button.modes and not global_manager.get('typing'):
+                    if current_button.has_keybind:
+                        if event.key == current_button.keybind_id:
+                            if current_button.has_released:
+                                current_button.on_click()
+                                current_button.has_released = False
                         else:#stop confirming an important button press if user starts doing something else
-                            button.confirming = False
+                            current_button.confirming = False
                     else:
-                        button.confirming = False
+                        current_button.confirming = False
             if event.key == pygame.K_RSHIFT:
                 global_manager.set('r_shift', 'down')
             if event.key == pygame.K_LSHIFT:
@@ -364,12 +239,12 @@ while not global_manager.get('crashed'):
                     break
                     
         if event.type == pygame.KEYUP:
-            for button in global_manager.get('button_list'):
-                if not global_manager.get('typing') or button.keybind_id == pygame.K_TAB or button.keybind_id == pygame.K_e:
-                    if button.has_keybind:
-                        if event.key == button.keybind_id:
-                            button.on_release()
-                            button.has_released = True
+            for current_button in global_manager.get('button_list'):
+                if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
+                    if current_button.has_keybind:
+                        if event.key == current_button.keybind_id:
+                            current_button.on_release()
+                            current_button.has_released = True
             if event.key == pygame.K_RSHIFT:
                 global_manager.set('r_shift', 'up')
             if event.key == pygame.K_LSHIFT:
@@ -405,10 +280,10 @@ while not global_manager.get('crashed'):
             clicked_button = False
             stopping = False
             if global_manager.get('current_instructions_page') == 'none':
-                for button in global_manager.get('button_list'):
-                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes and button in global_manager.get('notification_list') and not stopping:
-                        button.on_rmb_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
-                        button.on_rmb_release()
+                for current_button in global_manager.get('button_list'):
+                    if current_button.touching_mouse() and global_manager.get('current_game_mode') in current_button.modes and current_button in global_manager.get('notification_list') and not stopping:
+                        current_button.on_rmb_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                        current_button.on_rmb_release()
                         clicked_button = True
                         stopping = True
             else:
@@ -417,10 +292,10 @@ while not global_manager.get('crashed'):
                     clicked_button = True
                     stopping = True
             if not stopping:
-                for button in global_manager.get('button_list'):
-                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes:
-                        button.on_rmb_click()
-                        button.on_rmb_release()
+                for current_button in global_manager.get('button_list'):
+                    if current_button.touching_mouse() and global_manager.get('current_game_mode') in current_button.modes:
+                        current_button.on_rmb_click()
+                        current_button.on_rmb_release()
                         clicked_button = True
             main_loop.manage_rmb_down(clicked_button, global_manager)
 
@@ -435,10 +310,10 @@ while not global_manager.get('crashed'):
             clicked_button = False
             stopping = False
             if global_manager.get('current_instructions_page') == 'none':
-                for button in global_manager.get('button_list'):
-                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes and (button in global_manager.get('notification_list')) and not stopping:
-                        button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
-                        button.on_release()
+                for current_button in global_manager.get('button_list'):
+                    if current_button.touching_mouse() and global_manager.get('current_game_mode') in current_button.modes and (current_button in global_manager.get('notification_list')) and not stopping:
+                        current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                        current_button.on_release()
                         clicked_button = True
                         stopping = True
             else:
@@ -447,10 +322,10 @@ while not global_manager.get('crashed'):
                     clicked_button = True
                     stopping = True
             if not stopping:
-                for button in global_manager.get('button_list'):
-                    if button.touching_mouse() and global_manager.get('current_game_mode') in button.modes:
-                        button.on_click()
-                        button.on_release()
+                for current_button in global_manager.get('button_list'):
+                    if current_button.touching_mouse() and global_manager.get('current_game_mode') in current_button.modes:
+                        current_button.on_click()
+                        current_button.on_release()
                         clicked_button = True
             main_loop.manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
             

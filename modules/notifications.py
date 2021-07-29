@@ -1,17 +1,35 @@
-from .label import label
+from .labels import label
 from . import text_tools
 from . import utility
 from . import scaling
 
 class notification(label):
-    '''special label with slightly different message and disappears when clicked'''
+    '''
+    Label that disappear when clicked and prompts the user to click on it
+    '''
     
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        '''
+        Inputs:
+            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
+            ideal_width: int representing the width that the notification will try to keep - each line of text will create a new line after the ideal width is reached
+            minimum_height: int representing the minimum height of the notification - if it has enough lines of text, its height will increase and the top of the notification will move up
+            modes: list of strings representing the game modes in which the notification can appear
+            image: string representing the file path to the notificaton's background image
+            message: string with lines separated by /n representing the text that will appear on the notification
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
+        '''
         self.global_manager = global_manager
         self.global_manager.get('notification_list').append(self)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
+        '''
+        Inputs:
+            none
+        Outputs:
+            Converts the notification's string message to a list of strings, with each string representing a line of text and having a length depending on the /n characters in the message and the notification's ideal width
+        '''
         new_message = []
         next_line = ""
         next_word = ""
@@ -37,12 +55,30 @@ class notification(label):
         self.message = new_message
                     
     def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Sets this notification's tooltip to an appropriate message
+        '''
         self.set_tooltip(["Click to remove this notification"])
             
     def on_click(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            The notification is deleted when clicked
+        '''
         self.remove()
             
     def remove(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        '''
         super().remove()
         self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
         if len(self.global_manager.get('notification_queue')) >= 1:
@@ -51,18 +87,44 @@ class notification(label):
             notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
 
 class dice_rolling_notification(notification): #automatically removed when dice finish rolling, blocks other notifications
+    '''
+    Notification that is removed when a dice roll is completed rather than when clicked
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        '''
+        Inputs:
+            Same as superclass
+        '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
 
     def format_message(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Converts the notification's string message to a list of strings, with each string representing a line of text and having a length depending on the /n characters in the message and the notification's ideal width
+            The list created will not have a prompt to click on the notification, unlike the superclass
+        '''
         super().format_message()
         self.message.pop(-1) #remove "Click to remove this notification"
         
     def on_click(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Dice rolling notifications do nothing when clicked, unlike the superclass
+        '''
         nothing = 0 #does not remove self when clicked
 
     def remove(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        '''
         super().remove()
         self.global_manager.set('current_dice_rolling_notification', 'none')
         if len(self.global_manager.get('dice_list')) > 1:
@@ -77,7 +139,14 @@ class dice_rolling_notification(notification): #automatically removed when dice 
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
 
 class exploration_notification(notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        '''
+        Inputs:
+            Same as superclass
+        '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self):
@@ -98,8 +167,6 @@ class exploration_notification(notification):
             
 def notification_to_front(message, global_manager):
     '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
-    #if notification_type == 'roll':
-    #elif notification_type == '
     notification_type = global_manager.get('notification_type_queue').pop(0)
     if notification_type == 'roll':
         new_notification = dice_rolling_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)

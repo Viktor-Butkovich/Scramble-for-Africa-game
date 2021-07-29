@@ -1,12 +1,10 @@
 import pygame
-import time
-import random
-from .button import button_class
+from .buttons import button
 from . import scaling
 from . import text_tools
 from . import utility
 
-class label(button_class):
+class label(button):
     '''
     A button that shares most of a normal button's image and tooltip behaviors but does nothing when clicked. Used to display information
     '''
@@ -39,6 +37,12 @@ class label(button_class):
         super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id, global_manager)
 
     def set_label(self, new_message):
+        '''
+        Inputs:
+            string representing this label's new text
+        Outputs:
+            Sets this label's text to a list based on the inputted string and changes its size as needed
+        '''
         self.message = new_message
         self.format_message()
         for text_line in self.message:
@@ -46,6 +50,12 @@ class label(button_class):
                 self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length
+        '''
+        Inputs:
+            none
+        Outputs:
+            Convert's this label's message string attribute to a list of strings representing lines that will appear on the label
+        '''
         new_message = []
         next_line = ""
         next_word = ""
@@ -73,17 +83,41 @@ class label(button_class):
         self.message = new_message
 
     def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Sets this label's tooltip to be the same as the text it displays
+        '''
         self.set_tooltip(self.message)
             
-    def on_click(self): #labels are buttons to have tooltip functionality but don't do anything when clicked
+    def on_click(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            none, unlike superclass
+        '''
         i = 0
 
     def remove(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        '''
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def draw(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws this label's image with its text
+        '''
         if self.global_manager.get('current_game_mode') in self.modes:
             self.image.draw()
             for text_line_index in range(len(self.message)):
@@ -91,6 +125,12 @@ class label(button_class):
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
                 
     def draw_tooltip(self, y_displacement):
+        '''
+        Inputs:
+            int representing the number of vertical pixels the label will be moved by, allowing multiple tooltips to be shown at once
+        Outputs:
+            Draw's this label's tooltip at a position depending on the mouse's position and the inputted int
+        '''
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_y += y_displacement
@@ -109,11 +149,24 @@ class label(button_class):
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class instructions_page(label):
+    '''
+    Label shown when the instructions button is pressed that goes to the next instructions page when clicked, or stops showing instructions if it is the last one
+    '''
     def __init__(self, instruction_text, global_manager):
+        '''
+        Inputs:
+            string representing the text contained in the instructions page, global_manager_template object
+        '''
         self.global_manager = global_manager
         super().__init__(scaling.scale_coordinates(60, 60, self.global_manager), scaling.scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager), scaling.scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager), ['strategic'], 'misc/default_instruction.png', instruction_text, global_manager)
 
     def on_click(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            When clicked, goes to the next instructions page if possible, or closes the instructions if there are no more instructions pages
+        '''
         if not self.global_manager.get('current_instructions_page_index') == len(self.global_manager.get('instructions_list')) - 1:
             self.global_manager.set('current_instructions_page_index', self.global_manager.get('current_instructions_page_index') + 1)
             self.global_manager.set('current_instructions_page_text', self.global_manager.get('instructions_list')[self.global_manager.get('current_instructions_page_index')])
@@ -124,7 +177,12 @@ class instructions_page(label):
             self.global_manager.set('current_instructions_page', 'none')
             
     def format_message(self):
-        '''takes a string message and divides it into a list of strings based on length'''
+        '''
+        Inputs:
+            none
+        Outputs:
+            Similar to superclass except describes to the user how to use the instructions
+        '''
         new_message = []
         next_line = ""
         next_word = ""
@@ -144,5 +202,11 @@ class instructions_page(label):
         
         self.message = new_message
     def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Sets this instructions page's tooltip to describe how to use the instructions
+        '''
         self.set_tooltip(["Click to go to the next instructions page.", "Press the display instructions button on the right side of the screen again to close the instructions."])
 

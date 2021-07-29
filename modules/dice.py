@@ -1,13 +1,26 @@
 import pygame
 import time
 import random
-from .button import button_class
-from . import scaling
-from . import text_tools
+from .buttons import button
 from . import utility
 
-class die(button_class):
+class die(button):
+    '''
+    A die with a predetermined result that will appear, show random rolling, and end with the predetermined result and an outline with a color based on the result
+    '''
     def __init__(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
+        '''
+        Input:
+            coordinates: tuple of two int variables that represents the pixel location of the bottom left of this die
+            width: int representing the width in pixels of this die
+            height: int representing the height in pixels of this die
+            modes: list of string representing the game modes in which this die can appear
+            num_sides: int representing the number of sides of the simulated die
+            result_outcome_dict: dictionary of string keys and int values that records the die results required for certain outcomes
+            outcome_color_dict: dictionary of string keys and int values that records the colors associated with certain die results
+            final_result: int representing the predetermined final result of this die roll
+            global_manager: global_manager_template object
+        '''
         self.result_outcome_dict = result_outcome_dict #min_success: 4, min_crit_success: 6, max_crit_fail: 1
         self.outcome_color_dict = outcome_color_dict #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
         self.rolls_completed = 0
@@ -26,6 +39,14 @@ class die(button_class):
         self.outline_color = self.outcome_color_dict['default']
 
     def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this die's tooltip to describe it. If the die is not rolling yet, the tooltip will describe the results required for different outcomes.
+            If the die is currently rolling, its current value will be displayed.
+            If the die is finished rolling, its final value will be displayed and a description that it has finished rolling and whether its outcome was chosen for the roll's purpose will be described.
+        '''
         tooltip_list = []
         if self.rolls_completed == 0:
             tooltip_list.append(str(self.result_outcome_dict['min_success']) + '+ required for success')
@@ -48,11 +69,22 @@ class die(button_class):
         self.set_tooltip(tooltip_list)
 
     def start_rolling(self):
-        #self.roll()
+        '''
+        Input:
+            none
+        Output:
+            Causes the die to start rolling, after which it will roll to a different side every roll_interval seconds
+        '''
         self.last_roll = time.time()
         self.rolling = True
         
     def roll(self):
+        '''
+        Input:
+            none
+        Output:
+            Rolls the die to a random face, or to the predetermined result if it is the last roll. When all dice finish rolling, dice rolling notifications will be removed.
+        '''
         self.last_roll = time.time()
         if self.rolls_completed == self.num_rolls: #if last roll just happened, stop rolling - allows slight pause after last roll during which you don't know if it is the final one
             self.rolling = False
@@ -82,24 +114,30 @@ class die(button_class):
             self.rolls_completed += 1
 
     def draw(self):
+        '''
+        Input:
+            none
+        Output:
+            If enough time has passed since the last roll and the die is still rolling, this will roll the die. Additionally, this draws the die, displaying its current value.
+            If it is finished rolling and it was chosen as the result to use for the roll's purpose, an outline with a color depending on the roll's outcome will be displayed.
+        '''
         if self.global_manager.get('current_game_mode') in self.modes:
             if self.rolling and time.time() >= self.last_roll + self.roll_interval: #if roll_interval time has passed since last_roll
                 self.roll()
-            #self.image.draw()
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.color], self.Rect)
-            #pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)
             if self.highlighted:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.outline_color], self.Rect, 6)
             else:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)
-                #pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.highlight_Rect, 3)
-            self.image.draw()
-            #for text_line_index in range(len(self.message)):
-            #    text_line = self.message[text_line_index]
-            #    self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
-        
+            self.image.draw()        
 
     def remove(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        '''
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))

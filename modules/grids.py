@@ -3,7 +3,24 @@ import pygame
 from . import cells
 
 class grid():
+    '''
+    Grid of cells of the same size with different positions based on the grid's size and the number of cells
+    '''
     def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, strategic_grid, grid_line_width, global_manager):
+        '''
+        Inputs:
+            origin_coordinates: tuple of two int variables that represents the pixel location at which the bottom left corner of the grid is
+            pixel_width: int representing the width in pixels of the grid
+            pixel_height: int representing the height in pixels of the grid
+            coordinate_width: int representing the width in number of cells of the grid
+            coordinate_height: int representing the height in number of cells of the grid
+            internal_line_color: string representing the name of the color of the lines of the grid between cells
+            external_line_color: string representing the name of the color of the lines on the outside of the grid
+            modes: list of strings representing the game modes in which the grid can appear
+            strategic_grid: boolean representing whether this grid is the primary strategic map of the game
+            grid_line_width: int representing the width in pixels of the lines of the grid between cells. The lines on the outside of the grid are one pixel thicker.
+            global_manager: global_manager_template object
+        '''
         self.global_manager = global_manager
         self.global_manager.get('grid_list').append(self)
         self.grid_line_width = grid_line_width
@@ -48,12 +65,25 @@ class grid():
             for cell in self.cell_list:
                 if cell.y == 0 or cell.y == 1:
                     cell.set_visibility(True)
+                    
     def draw(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws each cell of the grid
+        '''
         if self.global_manager.get('current_game_mode') in self.modes:
             for cell in self.cell_list:
                 cell.draw()
 
     def draw_grid_lines(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws the lines between the cells of the grid and the lines on the outside of the grid. If the grid has an attached mini_grid, the outline of the area the mini_grid covers will be shown
+        '''
         if self.global_manager.get('show_grid_lines'):
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
@@ -83,51 +113,109 @@ class grid():
                 pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
 
     def find_cell_center(self, coordinates):
-        '''converts grid coordinates to pixel coordinates at center of cell'''
+        '''
+        Inputs:
+            tuple of two int variables representing the grid coordinates of the cell to find the center of
+        Outputs:
+            Returns a tuple of two int variables representing the pixel coordinates at the center of the requested cell
+        '''
         x, y = coordinates
         return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x + int(self.get_cell_width()/2)), (display_height - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y + int(self.get_cell_height()/2))))
 
     def convert_coordinates(self, coordinates):
-        '''converts grid coordinates to pixel coordinates'''
+        '''
+        Inputs:
+            tuple of two int variables representing the grid coordinates of the cell to find the center of
+        Outputs:
+            Returns a tuple of two int variables representing the pixel coordinates at the bottom left of the requested cell
+        '''
         x, y = coordinates
         return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x), (self.global_manager.get('display_height') - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y )))
     
     def get_height(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns the number of cells in each of this grid's columns
+        '''
         return(self.coordinate_height)
     
     def get_width(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns the number of cells in each of this grid's rows
+        '''
         return(self.coordinate_width)
     
     def get_cell_width(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns the width in pixels of one of this grid's cells
+        '''
         return(int(self.pixel_width/self.coordinate_width) + 1)
         #return(int(self.pixel_width/self.coordinate_width))
 
     def get_cell_height(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns the height in pixels of one of this grid's cells
+        '''
         return(int(self.pixel_height/self.coordinate_height) + 1)
         #return(int(self.pixel_height/self.coordinate_height))
 
     def find_cell(self, x, y):
+        '''
+        Inputs:
+            int representing the x coordinate in this grid of the cell to search for, int representing the y coordinate in this grid of the cell to search for, 
+        Outputs:
+            Returns this grid's cell object with the inputted coordinates
+        '''
         for cell in self.cell_list:
             if cell.x == x and cell.y == y:
                 return(cell)
             
     def create_cells(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Creates a cell object for each coordinate of this grid
+        '''
         for x in range(0, self.coordinate_width):
             for y in range(0, self.coordinate_height):
-                self.create_cell(x, y, self)
+                self.create_cell(x, y)
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
             
-    def create_cell(self, x, y, grid):
+    def create_cell(self, x, y):
+        '''
+        Inputs:
+            int representing the x coordinate in this grid in which to make a new cell, int representing the y coordinate in this grid in which to make a new cell
+        Outputs:
+            Creates a cell object at a location in this grid based on the inputted coordinates
+        '''
         new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], self.global_manager)
         
-    def is_clear(self, x, y):
-        if self.find_cell(x, y).occupied == False:
-            return(True)
-        else:
-            return(False)
+    #def is_clear(self, x, y):
+    #    if self.find_cell(x, y).occupied == False:
+    #        return(True)
+    #    else:
+    #        return(False)
 
     def make_resource_list(self, terrain):
+        '''
+        Inputs:
+            string representing the type of terrain for which to make a resource list
+        Outputs:
+            Returns a list of strings of possible resource types based on the inputted terrain. The frequency of each resource in the list determines the chance of that resource appearing in a tile of the inputted resource
+        '''
         resource_list = []
         if terrain == 'clear':
             for i in range(135):
@@ -213,6 +301,12 @@ class grid():
         return(resource_list)
 
     def set_resources(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Assigns a resource to each cell in this grid, depending on each cell's terrain
+        '''
         #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
         #clear_resources = make_resource_list('clear')
         #mountain_resources = make_resource_list('mountain')
@@ -229,6 +323,12 @@ class grid():
             cell.set_resource(random.choice(resource_list_dict[cell.terrain]))
             
     def make_random_terrain_worm(self, min_len, max_len, possible_terrains):
+        '''
+        Inputs:
+            int representing the minimum length of a terrain worm, int representing the maximum length of a terrain worm, list of string representing the types of terrain the terrain worm can spread
+        Outputs:
+            Chooses a random terrain from the inputted possible terrains and assigns a random connected string of cells in this grid of a length between the minimum and maximum lengths to the chosen terrain
+        '''
         start_x = random.randrange(0, self.coordinate_width)
         start_y = random.randrange(0, self.coordinate_height)
         current_x = start_x
@@ -252,6 +352,13 @@ class grid():
                 self.find_cell(current_x, current_y).set_terrain(terrain)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
+        '''
+        Inputs:
+            int representing the minimum length of a terrain worm, int representing the maximum length of a terrain worm
+        Outputs:
+            Assigns a random connected string of cells in this grid of a length between the minimum and maximum lengths to the water terrain.
+            These strings will start at the coast and be more likely to move inland than to the sides and will be more likely to move to the sides than towards the coast.
+        '''
         #start_x = random.randrange(0, self.coordinate_width)
         start_y = 1 #random.randrange(0, self.coordinate_height)
         current_x = start_x
@@ -277,13 +384,28 @@ class grid():
                 self.find_cell(current_x, current_y).set_terrain(terrain)
 
     def touching_mouse(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns whether this grid is colliding with the mouse
+        '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()):
             return(True)
         else:
             return(False)
 
 class mini_grid(grid):
+    '''
+    Grid that zooms in on a small area of a larger attached grid, centered on a certain cell in the attached grid that can be moved
+    '''
     def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
+        '''
+        Inputs:
+            Same as superclass except:
+            attached_grid: grid object to which this grid is attached
+            Can not be the primary strategic_grid, unlike superclass
+        '''
         super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
         self.is_mini_grid = True
         self.attached_grid = attached_grid
@@ -293,6 +415,12 @@ class mini_grid(grid):
         #self.calibrate(10, 10)
 
     def calibrate(self, center_x, center_y):
+        '''
+        Inputs:
+            int representing the x coordinate of the attached grid to center on, int representing the y coordinate of the attached grid to center on
+        Outputs:
+            Centers this mini grid on the inputted coordinates of the attached grid
+        '''
         self.center_x = center_x
         self.center_y = center_y
         for current_cell in self.cell_list:
@@ -317,15 +445,33 @@ class mini_grid(grid):
             if not current_officer.in_group:
                 current_officer.update_veteran_icons()
 
-    def get_main_grid_coordinates(self, mini_x, mini_y): #take minimap coordinates and convert them to strategic map coordinates
+    def get_main_grid_coordinates(self, mini_x, mini_y):
+        '''
+        Inputs:
+            int representing an x coordinate on this mini grid, int representing a y coordinate on this mini grid
+        Outputs:
+            Returns an int representing the corresponding x_coordinate of the attached grid and an int representing the corresponding y_coordinate of the attached grid
+        '''
         attached_x = self.center_x + mini_x - round((self.coordinate_width - 1) / 2) #if width is 5, ((5 - 1) / 2) = (4 / 2) = 2, since 2 is the center of a 5 width grid starting at 0
         attached_y = self.center_y + mini_y - round((self.coordinate_height - 1) / 2)
         return(attached_x, attached_y)
             
-    def get_mini_grid_coordinates(self, original_x, original_y): #take strategic map coordinates and convert them to minimap coordinates
+    def get_mini_grid_coordinates(self, original_x, original_y):
+        '''
+        Inputs:
+            int representing an x coordinate on the attached grid, int representing a y coordinate on the attached grid
+        Outputs:
+            Returns an int representing the corresponding x_coordinate of this mini grid and an int representing the corresponding y_coordinate of this mini grid
+        '''
         return(original_x - self.center_x + (round(self.coordinate_width - 1) / 2), original_y - self.center_y + round((self.coordinate_height - 1) / 2))
 
     def is_on_mini_grid(self, original_x, original_y):
+        '''
+        Inputs:
+            int representing an x coordinate on the attached grid, int representing a y coordinate on the attached grid
+        Outputs:
+            Returns whether the inputted attached grid coordinates are in the area covered by this mini grid
+        '''
         minimap_x = original_x - self.center_x + (round(self.coordinate_width - 1) / 2)
         minimap_y = original_y - self.center_y + (round(self.coordinate_height - 1) / 2)
         if(minimap_x >= 0 and minimap_x < self.coordinate_width and minimap_y >= 0 and minimap_y < self.coordinate_height):
@@ -334,6 +480,12 @@ class mini_grid(grid):
             return(False)
 
     def draw_grid_lines(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws the lines between the cells of the grid and the lines on the outside of the grid
+        '''
         if self.global_manager.get('show_grid_lines'):
             lower_left_corner = self.get_mini_grid_coordinates(0, 0)
             upper_right_corner = self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, self.attached_grid.coordinate_height)
