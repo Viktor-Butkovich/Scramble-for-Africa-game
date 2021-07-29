@@ -20,6 +20,7 @@ import modules.mobs as mobs
 pygame.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
+global_manager.set('europe_grid', 'none')
 resolution_finder = pygame.display.Info()
 global_manager.set('default_display_width', 1728)#all parts of game made to be at default and scaled to display
 global_manager.set('default_display_height', 972)
@@ -71,6 +72,7 @@ instructions_message = "Placeholder instructions, use += to add"
 global_manager.get('instructions_list').append(instructions_message)
 
 global_manager.set('grid_list', [])
+global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('bar_list', [])
@@ -139,8 +141,11 @@ strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('de
 global_manager.set('strategic_map_grid', strategic_map_grid)
 
 minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 100), global_manager.get('default_display_height') - (2 * (grid_height + 25)), global_manager), scaling.scale_width(grid_width, global_manager), scaling.scale_height(grid_height, global_manager), 5, 5, 'black', 'bright red', ['strategic'], global_manager.get('strategic_map_grid'), 3, global_manager) #60 by 60
-
 global_manager.set('minimap_grid', minimap_grid)
+
+europe_grid = grids.abstract_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (grid_width + 340), global_manager.get('default_display_height') - (grid_height + 25), global_manager), scaling.scale_width(round(grid_width / 4), global_manager), scaling.scale_height(round(grid_width / 4), global_manager), 'black', 'black', ['strategic'], 3, 'locations/europe.png', 'Europe', global_manager)
+global_manager.set('europe_grid', europe_grid)
+
 game_transitions.set_game_mode('strategic', global_manager)
 
 button_start_x = 500#600#x position of leftmost button
@@ -155,6 +160,12 @@ up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (cur
 current_button_number += 1
 right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
 current_button_number += 2#move more when switching categories
+
+to_africa_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'to africa', pygame.K_1, ['strategic'], 'locations/africa_button.png', global_manager.get('strategic_map_grid'), global_manager)
+
+current_button_number += 1
+
+to_europe_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', global_manager.get('europe_grid'), global_manager)
 
 current_button_number += 1
 

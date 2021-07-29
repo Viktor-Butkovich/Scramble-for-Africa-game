@@ -18,10 +18,7 @@ class actor():
     
     def set_name(self, new_name):
         self.name = new_name        
-       
-    #def is_clear(self, x, y):
-    #    return self.grid.is_clear(x, y)
-    
+
     def set_coordinates(self, x, y):
         #if self.is_clear(x, y):
         #self.grid.find_cell(self.x, self.y).occupied = False

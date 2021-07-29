@@ -78,6 +78,7 @@ SFA folder
         grids.py
             class grid
                 class mini_grid
+                class abstract_grid
 
         groups.py
             imports time, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility
@@ -162,6 +163,7 @@ SFA folder
         tiles.py
             imports pygame, images, utility, actors
             class tile
-            class veteran_icon
-            class overlay_tile
+                class abstract_tile
+                class veteran_icon
+                class overlay_tile
 '''

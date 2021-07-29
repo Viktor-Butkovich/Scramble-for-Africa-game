@@ -35,7 +35,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
-            self.terrain = 'floor'
+            self.terrain = 'none'
+            
     def set_visibility(self, new_visibility):
         '''
         Inputs:
@@ -173,6 +174,42 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             return(False)
 
+class abstract_tile(tile):
+    '''
+    tile for abstract grids that can have a tooltip but does not have terrain
+    '''
+    def __init__ (self, grid, image, name, modes, global_manager):
+        '''
+        Inputs:
+            grid: grid object representing the grid on which the tile will appear
+            image: string representing a file path to the image used by the tile
+            name: string representing the tile's name
+            modes: list of string representing the game modes in which this tile can appear
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
+        '''
+        super().__init__((0, 0), grid, image, name, modes, False, global_manager)
+
+    def update_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Sets this tile's tooltip to reflect being part of an abstract grid
+        '''
+        self.set_tooltip([self.name])
+
+    def can_show_tooltip(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns whether this tile should show its tooltip. It should show its tooltip only when it can appear and is touching the mouse. Unlike superclass, it does not require being a terrain tile.
+        '''
+        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
+
 class veteran_icon(tile):
     '''
     A tile that follows a veteran officer's image to show that it is a veteran officer
@@ -193,6 +230,9 @@ class veteran_icon(tile):
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
         self.images = [self.image]
+
+    def remove(self):
+        super().remove()
         
 class overlay_tile(tile):
     '''

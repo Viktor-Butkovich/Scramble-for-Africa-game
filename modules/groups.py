@@ -29,6 +29,24 @@ class group(mob):
         #self.officer.veteran_icons = []
         self.global_manager.get('group_list').append(self)
 
+    def go_to_grid(self, new_grid, new_coordinates):
+        if self.veteran:
+            for current_veteran_icon in self.veteran_icons:
+                current_veteran_icon.remove()
+            self.veteran_icons = []
+        super().go_to_grid(new_grid, new_coordinates)
+        if self.veteran:
+            for current_grid in self.grids:
+                if current_grid == self.global_manager.get('minimap_grid'):
+                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                else:
+                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+        self.officer.go_to_grid(new_grid, new_coordinates)
+        self.officer.join_group() #hides images
+        self.worker.go_to_grid(new_grid, new_coordinates)
+        self.worker.join_group()
+
     def update_tooltip(self):
         self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
 
@@ -280,6 +298,6 @@ class split_button(button):
 
 def create_group(worker, officer, global_manager):
     if officer.officer_type == 'explorer':
-        new_group = expedition((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/explorer/expedition.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', ['strategic'], worker, officer, global_manager)
     else:
-        new_group = group((officer.x, officer.y), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'mobs/default/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)

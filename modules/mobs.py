@@ -4,6 +4,7 @@ from . import images
 from . import text_tools
 from . import utility
 from .actors import actor
+from .tiles import veteran_icon
 
 class mob(actor):
     '''
@@ -30,6 +31,27 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(name)
         self.update_tooltip()
+
+    def go_to_grid(self, new_grid, new_coordinates):
+        '''
+        Input:
+            grid object representing the grid to which the mob is transferring, tuple of two int variables representing the coordinates to which the mob will move on the new grid
+        Output:
+            Moves this mob and all of its images to the inputted grid at the inputted coordinates
+        '''
+        self.x, self.y = new_coordinates
+        for current_image in self.images:
+            current_image.remove_from_cell()
+            self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
+        self.grids = [new_grid]
+        self.grid = new_grid
+        if not new_grid.mini_grid == 'none':
+            new_grid.mini_grid.calibrate(new_coordinates[0], new_coordinates[1])
+            self.grids.append(new_grid.mini_grid)
+        self.images = []
+        for current_grid in self.grids:
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
+            self.images[-1].add_to_cell()
 
     def select(self):
         '''
@@ -84,20 +106,24 @@ class mob(actor):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-            if self.grid.find_cell(future_x, future_y).visible:
-                if not self.grid.find_cell(future_x, future_y).terrain == 'water':
-                    return(True)
+        if not self.grid in self.global_manager.get('abstract_grid_list'):
+            if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+                if self.grid.find_cell(future_x, future_y).visible:
+                    if not self.grid.find_cell(future_x, future_y).terrain == 'water':
+                        return(True)
+                    else:
+                        if self.grid.find_cell(future_x, future_y).visible:
+                            text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
+                            return(False)
                 else:
-                    if self.grid.find_cell(future_x, future_y).visible:
-                        text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
-                        return(False)
-            else:
-                text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
-                return(False)
+                    text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
+                    return(False)
 
+            else:
+                text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
+                return(False)
         else:
-            text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
+            text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
             return(False)
 
     def move(self, x_change, y_change):
@@ -200,6 +226,20 @@ class officer(mob):
         self.veteran_icons = []
         self.in_group = False
         self.officer_type = 'default'
+
+    def go_to_grid(self, new_grid, new_coordinates):
+        if (not self.in_group) and self.veteran:
+            for current_veteran_icon in self.veteran_icons:
+                current_veteran_icon.remove()
+            self.veteran_icons = []
+        super().go_to_grid(new_grid, new_coordinates)
+        if (not self.in_group) and self.veteran:
+            for current_grid in self.grids:
+                if current_grid == self.global_manager.get('minimap_grid'):
+                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                else:
+                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
 
     def can_show_tooltip(self): #moved to actor
         '''

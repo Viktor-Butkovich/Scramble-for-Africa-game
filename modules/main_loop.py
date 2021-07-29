@@ -55,9 +55,13 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             for current_image in current_mob.images:
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
+            if current_mob.can_show_tooltip():
+                for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
+                    if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
+                        possible_tooltip_drawers.append(same_tile_mob)
             
         for current_actor in global_manager.get('actor_list'):
-            if current_actor.can_show_tooltip():
+            if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
         for current_grid in global_manager.get('grid_list'):
@@ -85,7 +89,7 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             global_manager.set('mouse_destination_y', mouse_destination_y + 4)
             #mouse_destination_y += 4
             if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
-                mouse_box_color = 'dark gray'
+                mouse_box_color = 'white'
                 pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
             
         if not global_manager.get('current_instructions_page') == 'none':
@@ -205,7 +209,6 @@ def manage_rmb_down(clicked_button, global_manager):
     Outputs:
         Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
     '''
-    #if global_manager.get('making_mouse_box'):
     if not clicked_button:
         for current_grid in global_manager.get('grid_list'):
             for current_cell in current_grid.cell_list:
@@ -230,7 +233,6 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
         If the user was not clicking a button, any mobs not just selected will be unselected. However, if shift is being held down, no mobs will be unselected.
     '''
-    #if global_manager.get('making_mouse_box'): 
     if not clicked_button:#do not do selecting operations if user was trying to click a button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         selected_new_mob = False
@@ -245,9 +247,6 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                         if len(current_cell.contained_mobs) > 0:
                             selected_new_mob = True
                             current_cell.contained_mobs[0].select()
-                            #current_cell.contained_mobs[0].selected = True
-                            #global_manager.set('show_selection_outlines', True)
-                            #global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         else:
             for clicked_mob in global_manager.get('mob_list'):
                 for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
@@ -256,12 +255,9 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                         for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
                             if not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group): #do not select workers or officerses in group
                                 current_mob.select()
-                                #current_mob.selected = True
-                        #global_manager.set('show_selection_outlines', True)
-                        #global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
-            if len(selected_list) == 1:
+            if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
                 global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
         else:
             if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
@@ -273,7 +269,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 if not current_cell.terrain == 'none': #if off map, do not move minimap there
                                     main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
                                     global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                            else:
+                            elif current_grid == global_manager.get('strategic_map_grid'):
                                 global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
                             breaking = True
                             break

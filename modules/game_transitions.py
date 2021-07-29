@@ -1,7 +1,7 @@
 import time
 from . import main_loop
 from . import text_tools
-from .tiles import tile
+from . import tiles
 
 def set_game_mode(new_game_mode, global_manager):
     '''
@@ -38,9 +38,12 @@ def create_strategic_map(global_manager):
     main_loop.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
-        for current_cell in current_grid.cell_list:
-            new_terrain = tile((current_cell.x, current_cell.y), current_grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager)
-        current_grid.set_resources()
+        if current_grid in global_manager.get('abstract_grid_list'):
+            new_terrain = tiles.abstract_tile(current_grid, current_grid.tile_image_id, current_grid.name, ['strategic'], global_manager)
+        else:
+            for current_cell in current_grid.cell_list:
+                new_terrain = tiles.tile((current_cell.x, current_cell.y), current_grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager)
+            current_grid.set_resources()
 
 def start_loading(global_manager):
     '''

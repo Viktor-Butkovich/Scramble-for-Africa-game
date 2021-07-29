@@ -226,7 +226,6 @@ class button():
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['dark gray'], self.outline)
         pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
         self.image.draw()
-        #myfont = pygame.font.SysFont('Times New Roman', 15)
         if self.has_keybind: #The key to which a button is bound will appear on the button's image
             message = self.keybind_name
             color = 'white'
@@ -285,6 +284,8 @@ class button():
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(-1, 0):
                                 mob.move(-1, 0) #x_change, y_change
+                                self.global_manager.set('show_selection_outlines', True)
+                                self.global_manager.set('last_selection_outline_switch', time.time())
                     else:
                         text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                 else:
@@ -296,6 +297,8 @@ class button():
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(1, 0):
                                 mob.move(1, 0)
+                                self.global_manager.set('show_selection_outlines', True)
+                                self.global_manager.set('last_selection_outline_switch', time.time())
                     else:
                         text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                 else:
@@ -307,6 +310,8 @@ class button():
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, 1):
                                 mob.move(0, 1)
+                                self.global_manager.set('show_selection_outlines', True)
+                                self.global_manager.set('last_selection_outline_switch', time.time())
                     else:
                         text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                 else:
@@ -318,11 +323,12 @@ class button():
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, -1):
                                 mob.move(0, -1)
+                                self.global_manager.set('show_selection_outlines', True)
+                                self.global_manager.set('last_selection_outline_switch', time.time())
                     else:
                         text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
-                        
 
             elif self.button_type == 'toggle grid lines':
                 if self.global_manager.get('show_grid_lines'):
@@ -383,6 +389,12 @@ class button():
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def can_show(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns whether the button can currently be shown. Subclass versions will not necessarily always return True.
+        '''
         return(True)
 
 class selected_icon(button):
@@ -463,10 +475,69 @@ class selected_icon(button):
         Outputs:
             Sets the button's tooltip to that of its attached selected mob
         '''
-        if self.attached_mob == 'none':
+        if not self.can_show():#self.attached_mob == 'none':
             self.set_tooltip([])
         else:
             self.set_tooltip(self.attached_mob.images[0].tooltip_text)
         
-            
-    
+class switch_grid_button(button):
+    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grid, global_manager):
+        '''
+        Inputs:
+            same as superclass, except:
+            destination_grid: grid object representing the grid to which this button sends mobs
+        '''
+        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
+        self.destination_grid = destination_grid
+
+    def on_click(self):      
+        '''
+        Inputs:
+            none
+        Outputs:
+            Controls the button's behavior when left clicked. Grid switching buttons require one mob to be selected and outside of this button's destination grid to be used, and move the selected mob to the destination grid when used.
+        '''
+        if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+            if main_loop.action_possible(self.global_manager):
+                for mob in self.global_manager.get('mob_list'):
+                    if mob.selected and not mob.grids[0] == self.destination_grid:
+                        destination_x = 0
+                        destination_y = 0
+                        if self.destination_grid in self.global_manager.get('abstract_grid_list'):
+                            destination_x, destination_y = (0, 0)
+                        else:
+                            destination_x, destination_y = actor_utility.get_start_coordinates(self.global_manager)
+                        mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
+                        self.global_manager.set('show_selection_outlines', True)
+                        self.global_manager.set('last_selection_outline_switch', time.time())
+            else:
+                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+        else:
+            text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+
+    def update_tooltip(self):
+        message = "Sends the currently selected entity to "
+        if self.button_type == 'to africa':
+            message += "Africa."
+        elif self.button_type == 'to europe':
+            message += "Europe."
+        self.set_tooltip([message])
+
+    def draw(self):
+        if self.can_show():
+            super().draw()
+
+    def can_show(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Returns whether the button can currently be shown. A grid switching button is only shown when there is one mob selected and that mob is not on this button's destination grid.
+        '''
+        selected_list = actor_utility.get_selected_list(self.global_manager)
+        if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
+            return(False)
+        elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
+            return(False)
+        else:
+            return(super().can_show()) #if nothing preventing being shown, use conditions of superclass

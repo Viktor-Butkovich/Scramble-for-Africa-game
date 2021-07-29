@@ -1,6 +1,7 @@
 import random
 import pygame
 from . import cells
+#from .tiles import tile
 
 class grid():
     '''
@@ -46,7 +47,7 @@ class grid():
             for cell in self.cell_list:
                 if cell.y == 0:
                     cell.set_terrain('water')
-            num_rivers = 0#random.randrange(2, 4)#2-3 # to do restore this
+            num_rivers = random.randrange(2, 4)#2-3 # to do restore this
             valid = False
             while not valid:
                 valid = True
@@ -202,12 +203,6 @@ class grid():
             Creates a cell object at a location in this grid based on the inputted coordinates
         '''
         new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], self.global_manager)
-        
-    #def is_clear(self, x, y):
-    #    if self.find_cell(x, y).occupied == False:
-    #        return(True)
-    #    else:
-    #        return(False)
 
     def make_resource_list(self, terrain):
         '''
@@ -519,4 +514,27 @@ class mini_grid(grid):
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1) 
+
+class abstract_grid(grid):
+    '''
+    1-cell grid that is not directly connected to the primary strategic grid
+    '''
+    def __init__(self, origin_coordinates, pixel_width, pixel_height, internal_line_color, external_line_color, modes, grid_line_width, tile_image_id, name, global_manager):
+        '''
+        Inputs:
+            origin_coordinates: tuple of two int variables that represents the pixel location at which the bottom left corner of the grid is
+            pixel_width: int representing the width in pixels of the grid
+            pixel_height: int representing the height in pixels of the grid
+            internal_line_color: string representing the name of the color of the lines of the grid between cells
+            external_line_color: string representing the name of the color of the lines on the outside of the grid
+            modes: list of strings representing the game modes in which the grid can appear
+            grid_line_width: int representing the width in pixels of the lines of the grid between cells. The lines on the outside of the grid are one pixel thicker.
+            name: string representing the name of this grid
+            global_manager: global_manager_template object
+        '''
+        super().__init__(origin_coordinates, pixel_width, pixel_height, 1, 1, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
+        self.name = name
+        self.global_manager.get('abstract_grid_list').append(self)
+        self.tile_image_id = tile_image_id
+        self.cell_list[0].set_visibility(True)
 
