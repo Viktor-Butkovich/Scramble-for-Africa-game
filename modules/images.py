@@ -288,7 +288,7 @@ class mob_image(actor_image):
         '''
         if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
             return(False)
-        if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor:
+        if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
         else:
             return(False)
@@ -359,7 +359,7 @@ class button_image(actor_image):
         Outputs:
             Draws this image where its button is located if its button is supposed to be shown and if the game mode is correct
         '''
-        if self.global_manager.get('current_game_mode') in self.button.modes and self.button.can_show():
+        if self.button.can_show(): #self.global_manager.get('current_game_mode') in self.button.modes should be in button.can_show()
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)

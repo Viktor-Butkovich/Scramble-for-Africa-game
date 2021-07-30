@@ -25,15 +25,15 @@ def can_merge(global_manager):
         If the correct mobs are selected but they are in different locations, this will return True and the merge button will show, but pressing it will prompt the user to move them to the same location.
     '''
     selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 2:
-        worker_present = False
+    if len(selected_list) == 1:
+        #worker_present = False
         officer_present = False
         for current_selected in selected_list:
-            if current_selected in global_manager.get('worker_list'):
-                worker_present = True
-            elif current_selected in global_manager.get('officer_list'):
+            #if current_selected in global_manager.get('worker_list'):
+            #    worker_present = True
+            if current_selected in global_manager.get('officer_list'):
                 officer_present = True
-        if worker_present and officer_present:
+        if officer_present:
             return(True)
         else:
             return(False)

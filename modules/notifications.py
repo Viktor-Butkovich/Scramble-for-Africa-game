@@ -1,7 +1,9 @@
 from .labels import label
+from .images import free_image
 from . import text_tools
 from . import utility
 from . import scaling
+from . import actor_utility
 
 class notification(label):
     '''
@@ -142,11 +144,22 @@ class exploration_notification(notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
         '''
         Inputs:
             Same as superclass
         '''
+        self.is_last = is_last
+        if self.is_last:
+            current_expedition = actor_utility.get_selected_list(global_manager)[0]
+            self.notification_images = []
+            explored_cell = current_expedition.destination_cell
+            explored_tile = explored_cell.tile
+            explored_terrain_image_id = explored_cell.tile.image_dict['default']
+            self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(400, 400, global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
+            if not explored_tile.resource_icon == 'none':
+                explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
+                self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(400, 400, global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self):
@@ -160,10 +173,19 @@ class exploration_notification(notification):
         self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
         if len(self.global_manager.get('notification_queue')) >= 1:
             self.global_manager.get('notification_queue').pop(0)
-        if len(self.global_manager.get('notification_queue')) > 0:
+        if len(self.global_manager.get('notification_queue')) == 1:
             notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
-        else:
             self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
+        elif len(self.global_manager.get('notification_queue')) > 0:
+            notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
+        #if len(self.global_manager.get('notification_queue')) >= 1:
+        #    self.global_manager.get('notification_queue').pop(0)
+        #if len(self.global_manager.get('notification_queue')) > 0:
+        #    notification_to_front(self.global_manager.get('notification_queue')[0], self.global_manager)
+
+        if self.is_last:
+            for current_image in self.notification_images:
+                current_image.remove()
             
 def notification_to_front(message, global_manager):
     '''#displays a notification from the queue, which is a list of string messages that this formats into notifications'''
@@ -173,7 +195,9 @@ def notification_to_front(message, global_manager):
         for current_die in global_manager.get('dice_list'):
             current_die.start_rolling()
     elif notification_type == 'exploration':
-        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)
+        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, False, global_manager)
+    elif notification_type == 'final_exploration':
+        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, True, global_manager)
     else:
         new_notification = notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
 

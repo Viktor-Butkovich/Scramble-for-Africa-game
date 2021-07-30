@@ -25,8 +25,9 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         for current_image in global_manager.get('image_list'):
             current_image.has_drawn = False
 
-        global_manager.get('background_image').draw()
-        global_manager.get('background_image').has_drawn = True
+        for current_background_image in global_manager.get('background_image_list'):
+            current_background_image.draw()
+            current_background_image.has_drawn = True
             
         for current_tile in global_manager.get('tile_list'):
             if global_manager.get('current_game_mode') in current_tile.image.modes and not current_tile in global_manager.get('overlay_tile_list'):
@@ -65,8 +66,9 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
         for current_grid in global_manager.get('grid_list'):
-            for current_cell in current_grid.cell_list:
-                current_cell.show_num_mobs()
+            if global_manager.get('current_game_mode') in current_grid.modes:
+                for current_cell in current_grid.cell_list:
+                    current_cell.show_num_mobs()
 
         for current_button in global_manager.get('button_list'):
             if not current_button in global_manager.get('notification_list'): #notifications are drawn later
@@ -209,18 +211,19 @@ def manage_rmb_down(clicked_button, global_manager):
     Outputs:
         Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
     '''
-    if not clicked_button:
+    if (not clicked_button) and action_possible(global_manager):
         for current_grid in global_manager.get('grid_list'):
-            for current_cell in current_grid.cell_list:
-                if current_cell.touching_mouse():
-                    if len(current_cell.contained_mobs) > 1:
-                        moved_mob = current_cell.contained_mobs[1]
-                        for current_image in moved_mob.images:
-                            if not current_image.current_cell == 'none':
-                                while not moved_mob == current_image.current_cell.contained_mobs[0]:
-                                    current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-                        global_manager.set('show_selection_outlines', True)
-                        global_manager.set('last_selection_outline_switch', time.time())
+            if global_manager.get('current_game_mode') in current_grid.modes:
+                for current_cell in current_grid.cell_list:
+                    if current_cell.touching_mouse():
+                        if len(current_cell.contained_mobs) > 1:
+                            moved_mob = current_cell.contained_mobs[1]
+                            for current_image in moved_mob.images:
+                                if not current_image.current_cell == 'none':
+                                    while not moved_mob == current_image.current_cell.contained_mobs[0]:
+                                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+                            global_manager.set('show_selection_outlines', True)
+                            global_manager.set('last_selection_outline_switch', time.time())
             
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
@@ -233,28 +236,29 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
         If the user was not clicking a button, any mobs not just selected will be unselected. However, if shift is being held down, no mobs will be unselected.
     '''
-    if not clicked_button:#do not do selecting operations if user was trying to click a button
+    if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         selected_new_mob = False
         for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
-            if not global_manager.get('capital'): #if holding shift, do not deselect
+            if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
                 current_mob.selected = False
                     
         if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
             for current_grid in global_manager.get('grid_list'):
-                for current_cell in current_grid.cell_list:
-                    if current_cell.touching_mouse():
-                        if len(current_cell.contained_mobs) > 0:
-                            selected_new_mob = True
-                            current_cell.contained_mobs[0].select()
+                if global_manager.get('current_game_mode') in current_grid.modes:
+                    for current_cell in current_grid.cell_list:
+                        if current_cell.touching_mouse():
+                            if len(current_cell.contained_mobs) > 0:
+                                selected_new_mob = True
+                                current_cell.contained_mobs[0].select()
         else:
             for clicked_mob in global_manager.get('mob_list'):
                 for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
                     if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
                         selected_new_mob = True
                         for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-                            if not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group): #do not select workers or officerses in group
-                                current_mob.select()
+                            if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group
+                                current_mob.select()#if mob can show
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid

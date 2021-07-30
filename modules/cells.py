@@ -142,3 +142,15 @@ class cell():
             return(True)
         else:
             return(False)
+
+    def has_worker(self):
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list'):
+                return(True)
+        return(False)
+
+    def get_worker(self):
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list'):
+                return(current_mob)
+        return('none')

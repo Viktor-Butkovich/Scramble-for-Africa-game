@@ -161,7 +161,8 @@ class expedition(group):
                                 
                 text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
                 roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
-                text += ("The higher result, " + str(roll_result) + ", was used. /n")
+                result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+                text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
             else:
                 roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
                 self.display_exploration_die((500, 440), roll_list[0])
@@ -174,9 +175,9 @@ class expedition(group):
             text += "/n"
             if roll_result >= 4: #4+ required on D6 for exploration
                 if not future_cell.resource == 'none':
-                    text += "You discovered a " + future_cell.terrain + " tile with a " + future_cell.resource + " resource. /n"
+                    text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
                 else:
-                    text += "You discovered a " + future_cell.terrain + " tile. /n"
+                    text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
             else:
                 text += "You were not able to explore the tile. /n"
             if roll_result == 1:
@@ -186,9 +187,11 @@ class expedition(group):
                 self.veteran = True
                 self.just_promoted = True
                 text += "This explorer has become a veteran explorer. /n"
-                
-            notification_tools.display_notification(text + "Click to remove this notification.", 'exploration', self.global_manager)
-                
+            if roll_result >= 4:
+                self.destination_cell = future_cell
+                notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
+            else:
+                notification_tools.display_notification(text, 'default', self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
             
@@ -241,27 +244,30 @@ class merge_button(button):
 
     def on_click(self):
         if self.can_show():
+            self.showing_outline = True
             if main_loop.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 #for current_mob in selected_list:
                 #    current_mob.remove()
-                if len(selected_list) == 2:
+                if len(selected_list) == 1:
                     officer = 'none'
                     worker = 'none'
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                        elif current_selected in self.global_manager.get('worker_list'):
-                            worker = current_selected
+                            #if officer.images[0].current_cell.has_worker():
+                            worker = officer.images[0].current_cell.get_worker()
+                        #elif current_selected in self.global_manager.get('worker_list'):
+                        #    worker = current_selected
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
-                            create_group(worker, officer, self.global_manager)
+                            create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                         else:
-                            text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
+                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
+                        text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select a worker and an officer in the same tile to create a group.", self.global_manager)
+                    text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not form a group.", self.global_manager)
 
@@ -281,6 +287,7 @@ class split_button(button):
 
     def on_click(self):
         if self.can_show():
+            self.showing_outline = True
             if main_loop.action_possible(self.global_manager):         
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 #for current_mob in selected_list:
@@ -298,6 +305,6 @@ class split_button(button):
 
 def create_group(worker, officer, global_manager):
     if officer.officer_type == 'explorer':
-        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
     else:
-        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', ['strategic'], worker, officer, global_manager)
+        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

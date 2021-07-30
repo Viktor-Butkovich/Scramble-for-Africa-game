@@ -39,6 +39,10 @@ class mob(actor):
         Output:
             Moves this mob and all of its images to the inputted grid at the inputted coordinates
         '''
+        if new_grid == self.global_manager.get('europe_grid'):
+            self.modes.append('europe')
+        else:
+            self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
         for current_image in self.images:
             current_image.remove_from_cell()
@@ -203,7 +207,7 @@ class worker(mob):
         self.y = group.y
         for current_image in self.images:
             current_image.add_to_cell()
-        self.select()
+        #self.select()
 
     def remove(self):
         '''
