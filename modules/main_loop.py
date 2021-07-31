@@ -224,6 +224,8 @@ def manage_rmb_down(clicked_button, global_manager):
                                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
                             global_manager.set('show_selection_outlines', True)
                             global_manager.set('last_selection_outline_switch', time.time())
+                            global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
             
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
@@ -242,6 +244,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
             if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
                 current_mob.selected = False
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
                     
         if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
             for current_grid in global_manager.get('grid_list'):
@@ -251,6 +255,12 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                             if len(current_cell.contained_mobs) > 0:
                                 selected_new_mob = True
                                 current_cell.contained_mobs[0].select()
+                                if current_grid == global_manager.get('minimap_grid'):
+                                    main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
+                                elif current_grid == global_manager.get('strategic_map_grid'):
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+
         else:
             for clicked_mob in global_manager.get('mob_list'):
                 for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
@@ -259,10 +269,12 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                         for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
                             if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group
                                 current_mob.select()#if mob can show
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
                 global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
+                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(selected_list[0].x, selected_list[0].y).tile)
         else:
             if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
                 breaking = False
@@ -273,8 +285,10 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 if not current_cell.terrain == 'none': #if off map, do not move minimap there
                                     main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
                                     global_manager.get('minimap_grid').calibrate(main_x, main_y)
+                                    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
                             elif current_grid == global_manager.get('strategic_map_grid'):
                                 global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
                             breaking = True
                             break
                         if breaking:

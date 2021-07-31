@@ -44,7 +44,8 @@ class free_image():
         Outputs:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
-        self.global_manager.get('image_list').remove(self)
+        #self.global_manager.get('image_list').remove(self)
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
 
     def set_image(self, new_image):
         '''
@@ -56,6 +57,34 @@ class free_image():
         self.image_id = new_image
         self.image = pygame.image.load('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+class actor_match_free_image(free_image): #free image that matches any selected mobs
+    def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager):
+        self.actor_image_type = actor_image_type
+        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
+        #self.global_manager.get('mob_info_display_list').append(self) #include mob labels and mob free images
+
+    def calibrate(self, new_actor):
+        if not new_actor == 'none':
+            if self.actor_image_type == 'resource':
+                if new_actor.cell.visible:
+                    if not new_actor.resource_icon == 'none':
+                        self.set_image(new_actor.resource_icon.image_dict['default'])
+                    else: #show nothing if no resource
+                        self.set_image('misc/empty.png')
+                else: #show nothing if cell not visible
+                    self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
+                self.set_image(new_actor.image_dict['hidden'])
+            else:
+                self.set_image(new_actor.image_dict['default'])
+        else:
+            self.set_image('misc/empty.png')
+
+    #def remove(self):
+    #    super().remove()
+    #    self.global_manager.set('mob_info_display_list', utility.remove_from_list(self.global_manager.get('mob_info_display_list'), self))
+        
 
 class loading_image_template(free_image):
     '''
@@ -100,11 +129,12 @@ class actor_image():
         self.modes = actor.modes
         self.width = width
         self.height = height
+        self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.set_image(image_description)
         self.image_description == image_description
         self.global_manager.get('image_list').append(self)
         self.grid = grid
-        self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
+        #self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.outline_width = self.grid.grid_line_width + 1#3#2
         #self.outline = pygame.Rect(self.actor.x - self.outline_width, self.global_manager.get('display_height') - (self.actor.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
         self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
@@ -147,6 +177,9 @@ class actor_image():
             print('graphics/' + self.image_id)
             self.image = pygame.image.load('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        #self.Rect.width = self.width #causes tooltips and button collisions to work with new image size
+        #self.Rect.height = self.height
+        #self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height)
         
     def draw(self):
         '''
@@ -351,6 +384,7 @@ class button_image(actor_image):
         except:
             print('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        #self.Rect.width = self.width
         
     def draw(self):
         '''

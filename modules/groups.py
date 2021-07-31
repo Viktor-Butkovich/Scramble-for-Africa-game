@@ -51,6 +51,7 @@ class group(mob):
         self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
 
     def disband(self):
+        self.remove()
         self.worker.leave_group(self)
         self.officer.veteran_icons = self.veteran_icons
         for current_veteran_icon in self.veteran_icons:
@@ -58,7 +59,7 @@ class group(mob):
         #self.veteran_icons = []
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
-        self.remove()
+        #self.remove()
 
     def remove(self):
         super().remove()

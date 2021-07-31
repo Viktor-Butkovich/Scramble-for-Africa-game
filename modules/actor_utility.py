@@ -84,4 +84,8 @@ def get_start_coordinates(global_manager):
         if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
             break
     return(start_x, start_y)
-            
+
+def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
+    for current_object in info_display_list:
+        current_object.calibrate(new_actor)
+    

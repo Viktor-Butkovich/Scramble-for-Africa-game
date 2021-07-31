@@ -7,7 +7,7 @@ from . import actor_utility
 
 class notification(label):
     '''
-    Label that disappear when clicked and prompts the user to click on it
+    Label that disappear when clicked and prompts the user to click on it, can also have multiple lines
     '''
     
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
@@ -24,6 +24,20 @@ class notification(label):
         self.global_manager = global_manager
         self.global_manager.get('notification_list').append(self)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def draw(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws this label's image with its text
+        '''
+        if self.global_manager.get('current_game_mode') in self.modes:
+            self.image.draw()
+            for text_line_index in range(len(self.message)):
+                text_line = self.message[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
         '''
@@ -64,7 +78,20 @@ class notification(label):
             Sets this notification's tooltip to an appropriate message
         '''
         self.set_tooltip(["Click to remove this notification"])
-            
+
+    def set_label(self, new_message):
+        '''
+        Inputs:
+            string representing this label's new text
+        Outputs:
+            Sets this label's text to a list based on the inputted string and changes its size as needed
+        '''
+        self.message = new_message
+        self.format_message()
+        for text_line in self.message:
+            if text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.ideal_width:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10
+
     def on_click(self):
         '''
         Inputs:

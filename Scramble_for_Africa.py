@@ -17,6 +17,7 @@ import modules.actor_utility as actor_utility
 import modules.groups as groups
 import modules.mobs as mobs
 import modules.europe_transactions as europe_transactions
+import modules.labels as labels
 
 pygame.init()
 
@@ -87,6 +88,8 @@ global_manager.set('tile_list', [])
 global_manager.set('overlay_tile_list', [])
 global_manager.set('notification_list', [])
 global_manager.set('label_list', [])
+global_manager.set('mob_info_display_list', [])
+global_manager.set('tile_info_display_list', [])
 global_manager.set('dice_list', [])
 global_manager.set('notification_queue', [])
 global_manager.set('notification_type_queue', [])
@@ -188,6 +191,38 @@ toggle_text_box_button = buttons.button(scaling.scale_coordinates(75, global_man
 merge_button = groups.merge_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_m, ['strategic', 'europe'], 'misc/merge_button.png', global_manager)
 split_button = groups.split_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 220, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_n, ['strategic', 'europe'], 'misc/split_button.png', global_manager)
 
+#mob background image
+mob_free_image_background = images.free_image('misc/mob_background.png', scaling.scale_coordinates(0, global_manager.get('default_display_height') - 370, global_manager), scaling.scale_width(250, global_manager), scaling.scale_height(250, global_manager), ['strategic', 'europe'], global_manager)
+
+#mob image
+mob_free_image = images.actor_match_free_image(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 370, global_manager), scaling.scale_width(250, global_manager), scaling.scale_height(250, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('mob_info_display_list').append(mob_free_image)
+
+#mob name label
+mob_name_label = labels.actor_match_label(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 410, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'name', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('mob_info_display_list').append(mob_name_label)
+
+
+#tile background image
+tile_free_image_background = images.free_image('misc/mob_background.png', scaling.scale_coordinates(0, global_manager.get('default_display_height') - 685, global_manager), scaling.scale_width(250, global_manager), scaling.scale_height(250, global_manager), ['strategic'], global_manager)
+
+#tile terrain image
+tile_free_image = images.actor_match_free_image(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 685, global_manager), scaling.scale_width(250, global_manager), scaling.scale_height(250, global_manager), ['strategic'], 'terrain', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_image)
+
+#tile resource image
+tile_free_resource_image = images.actor_match_free_image(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 685, global_manager), scaling.scale_width(250, global_manager), scaling.scale_height(250, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_resource_image)
+
+#tile terrain label
+tile_terrain_label = labels.actor_match_label(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 725, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'terrain', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('tile_info_display_list').append(tile_terrain_label)
+
+#tile resource label
+tile_resource_label = labels.actor_match_label(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 765, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('tile_info_display_list').append(tile_resource_label)
+
+
 for i in range(0, 5):
     selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, global_manager)
 
@@ -200,6 +235,7 @@ for recruitment_index in range(len(recruitment_types)):
     new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, 500 + (120 * recruitment_index), global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue', recruitment_types[recruitment_index], 'none', ['europe'], global_manager)
 
 global_manager.get('minimap_grid').calibrate(2, 2)
+actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none') #tile info display should start empty
 
 while not global_manager.get('crashed'):
     if len(global_manager.get('notification_list')) == 0:

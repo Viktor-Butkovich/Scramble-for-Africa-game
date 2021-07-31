@@ -3,6 +3,7 @@ import time
 from . import images
 from . import text_tools
 from . import utility
+from . import actor_utility
 from .actors import actor
 from .tiles import veteran_icon
 
@@ -20,6 +21,7 @@ class mob(actor):
             modes: list of strings representing the game modes in which the mob can appear
             global_manager: global_manager_template object used to manage a dictionary of shared variables
         '''
+        self.selected = False
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
         #self.grids = grids #for things like drawing images on each grid, go through each grid on which the mob can appear # moved to actor class
@@ -31,6 +33,7 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(name)
         self.update_tooltip()
+        self.select()
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -41,6 +44,7 @@ class mob(actor):
         '''
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
         else:
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
@@ -67,6 +71,8 @@ class mob(actor):
         self.selected = True
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+        if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def draw_outline(self):
         '''
@@ -96,6 +102,10 @@ class mob(actor):
         Outputs:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
+        if self.selected:
+            self.selected = False
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()
@@ -157,6 +167,11 @@ class mob(actor):
                 if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
                     return(True)
         return(False) #return false if none touch mouse
+
+    def set_name(self, new_name):
+        super().set_name(new_name)
+        if self.selected:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
 class worker(mob):
     '''

@@ -28,13 +28,15 @@ class label(button):
         self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
-        self.set_label(self.message)
-        if self.width < ideal_width:
-            self.width = ideal_width
-        self.height = (self.font_size * len(self.message)) + 15
-        if self.height < minimum_height:
-            self.height = minimum_height
+        #self.set_label(self.message)
+        #if self.width < ideal_width:
+        #    self.width = ideal_width
+        #self.height = (self.font_size * len(self.message)) + 15
+        self.height = minimum_height
+        #if self.height < minimum_height:
+        #    self.height = minimum_height
         super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id, global_manager)
+        self.set_label(self.message)
 
     def set_label(self, new_message):
         '''
@@ -44,18 +46,22 @@ class label(button):
             Sets this label's text to a list based on the inputted string and changes its size as needed
         '''
         self.message = new_message
-        self.format_message()
-        for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.ideal_width:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10
+        #self.format_message()
+        #for text_line in self.message:
+        if text_tools.message_width(self.message, self.font_size, self.font_name) + 10 > self.ideal_width:
+            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
+            self.image.width = self.width
+            self.Rect.width = self.width
+            self.image.set_image(self.image.image_id) #update width scaling
+            self.image.Rect = self.Rect
 
-    def format_message(self): #takes a string message and divides it into a list of strings based on length
-        '''
+    '''def format_message(self): #takes a string message and divides it into a list of strings based on length
+        
         Inputs:
             none
         Outputs:
             Convert's this label's message string attribute to a list of strings representing lines that will appear on the label
-        '''
+        
         new_message = []
         next_line = ""
         next_word = ""
@@ -80,7 +86,7 @@ class label(button):
             if text_tools.message_width(line, self.font_size, self.font_name) > greatest_width:
                 greatest_width = text_tools.message_width(line, self.font_size, self.font_name)
         self.width = greatest_width + 10
-        self.message = new_message
+        self.message = new_message'''
 
     def update_tooltip(self):
         '''
@@ -89,7 +95,7 @@ class label(button):
         Outputs:
             Sets this label's tooltip to be the same as the text it displays
         '''
-        self.set_tooltip(self.message)
+        self.set_tooltip([self.message])
             
     def on_click(self):
         '''
@@ -120,9 +126,9 @@ class label(button):
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             self.image.draw()
-            for text_line_index in range(len(self.message)):
-                text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+            #for text_line_index in range(len(self.message)):
+            #    text_line = self.message[text_line_index]
+            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
                 
     def draw_tooltip(self, y_displacement):
         '''
@@ -148,9 +154,48 @@ class label(button):
             text_line = self.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
+class actor_match_label(label):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image_id, actor_label_type, global_manager):
+        message = 'default'
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager)
+        #self.global_manager.get('mob_info_display_list').append(self) #include mob labels and mob free images
+        self.actor_label_type = actor_label_type
+        if self.actor_label_type == 'name':
+            self.message_start = 'Name: '
+        elif self.actor_label_type == 'resource':
+            self.message_start = 'Resource: '
+        elif self.actor_label_type == 'terrain':
+            self.message_start = 'Terrain: '
+        else:
+            self.message_start = 'none'
+        self.actor = 'none'
+        self.calibrate('none')
+
+    def calibrate(self, new_actor):
+        self.actor = new_actor
+        if not new_actor == 'none':
+            if self.actor_label_type == 'name':
+                self.set_label(self.message_start + str(new_actor.name))
+            elif self.actor_label_type == 'terrain':
+                if self.actor.cell.visible:
+                    self.set_label(self.message_start + str(new_actor.cell.terrain))
+                else:
+                    self.set_label(self.message_start + 'unknown')
+            elif self.actor_label_type == 'resource':
+                if self.actor.cell.visible:
+                    self.set_label(self.message_start + str(new_actor.cell.resource))
+                else:
+                    self.set_label(self.message_start + 'unknown')
+        else:
+            self.set_label(self.message_start + 'n/a')
+
+    #def remove(self):
+    #    super().remove()
+    #    self.global_manager.set('mob_info_display_list', utility.remove_from_list(self.global_manager.get('mob_info_display_list'), self))
+
 class instructions_page(label):
     '''
-    Label shown when the instructions button is pressed that goes to the next instructions page when clicked, or stops showing instructions if it is the last one
+    Label shown when the instructions button is pressed that goes to the next instructions page when clicked, or stops showing instructions if it is the last one, can also have multiple lines
     '''
     def __init__(self, instruction_text, global_manager):
         '''
@@ -175,6 +220,33 @@ class instructions_page(label):
         else:
             self.remove()
             self.global_manager.set('current_instructions_page', 'none')
+
+    def set_label(self, new_message):
+        '''
+        Inputs:
+            string representing this label's new text
+        Outputs:
+            Sets this label's text to a list based on the inputted string and changes its size as needed
+        '''
+        self.message = new_message
+        self.format_message()
+        for text_line in self.message:
+            if text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.ideal_width:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10
+
+    def draw(self):
+        '''
+        Inputs:
+            none
+        Outputs:
+            Draws this label's image with its text
+        '''
+        if self.global_manager.get('current_game_mode') in self.modes:
+            self.image.draw()
+            for text_line_index in range(len(self.message)):
+                text_line = self.message[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+
             
     def format_message(self):
         '''
