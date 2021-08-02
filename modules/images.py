@@ -34,8 +34,15 @@ class free_image():
         Outputs:
             Draws the image if the current game mode matches this image's game modes
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        #if self.global_manager.get('current_game_mode') in self.modes:
+        if self.can_show():
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+
+    def can_show(self):
+        if self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
 
     def remove(self):
         '''
@@ -57,34 +64,6 @@ class free_image():
         self.image_id = new_image
         self.image = pygame.image.load('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
-
-class actor_match_free_image(free_image): #free image that matches any selected mobs
-    def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager):
-        self.actor_image_type = actor_image_type
-        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
-        #self.global_manager.get('mob_info_display_list').append(self) #include mob labels and mob free images
-
-    def calibrate(self, new_actor):
-        if not new_actor == 'none':
-            if self.actor_image_type == 'resource':
-                if new_actor.cell.visible:
-                    if not new_actor.resource_icon == 'none':
-                        self.set_image(new_actor.resource_icon.image_dict['default'])
-                    else: #show nothing if no resource
-                        self.set_image('misc/empty.png')
-                else: #show nothing if cell not visible
-                    self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
-                self.set_image(new_actor.image_dict['hidden'])
-            else:
-                self.set_image(new_actor.image_dict['default'])
-        else:
-            self.set_image('misc/empty.png')
-
-    #def remove(self):
-    #    super().remove()
-    #    self.global_manager.set('mob_info_display_list', utility.remove_from_list(self.global_manager.get('mob_info_display_list'), self))
-        
 
 class loading_image_template(free_image):
     '''

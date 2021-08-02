@@ -1,5 +1,6 @@
 import pygame
 import time
+#import random #remove this after testing
 from . import images
 from . import text_tools
 from . import utility
@@ -35,6 +36,18 @@ class mob(actor):
         self.update_tooltip()
         self.select()
 
+    def change_inventory(self, commodity, change):
+        if self.can_hold_commodities:
+            self.inventory[commodity] += change
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def set_inventory(self, commodity, new_value):
+        if self.can_hold_commodities:
+            self.inventory[commodity] = new_value
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
     def go_to_grid(self, new_grid, new_coordinates):
         '''
         Input:
@@ -44,7 +57,7 @@ class mob(actor):
         '''
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
         else:
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
@@ -102,6 +115,10 @@ class mob(actor):
         Outputs:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
+        if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
+            current_tile = self.images[0].current_cell.tile
+            for current_commodity in self.global_manager.get('commodity_types'):
+                current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         if self.selected:
             self.selected = False
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
@@ -151,9 +168,11 @@ class mob(actor):
             current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
+        #self.inventory['coffee'] += 1 #test showing how to add to inventory
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
+        #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1)
 
     def touching_mouse(self):
         '''
@@ -298,6 +317,7 @@ class officer(mob):
         for current_image in self.images:
             current_image.add_to_cell()
         self.select()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
 
     def remove(self):
         '''
@@ -348,3 +368,9 @@ class explorer(officer):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.grid.find_cell(self.x, self.y).set_visibility(True)
         self.officer_type = 'explorer'
+        
+    #def update_tooltip(self): #test to show commodities carried
+    #    tooltip_list = []
+    #    for current_commodity in self.global_manager.get('commodity_types'):
+    #        tooltip_list.append(current_commodity + ': ' + str(self.inventory[current_commodity]))
+    #    self.set_tooltip(tooltip_list)

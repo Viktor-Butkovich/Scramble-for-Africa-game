@@ -1,5 +1,5 @@
 import time
-from . import main_loop
+from . import main_loop_tools
 from . import text_tools
 from . import tiles
 from . import actor_utility
@@ -43,7 +43,7 @@ def create_strategic_map(global_manager):
         Creates a tile object for each grid cell and randomly sets their resources
     '''
     text_tools.print_to_screen('Creating map...', global_manager)
-    main_loop.update_display(global_manager)
+    main_loop_tools.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
         if current_grid in global_manager.get('abstract_grid_list'):
@@ -62,4 +62,4 @@ def start_loading(global_manager):
     '''
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
-    main_loop.update_display(global_manager)#draw_loading_screen()
+    main_loop_tools.update_display(global_manager)#draw_loading_screen()

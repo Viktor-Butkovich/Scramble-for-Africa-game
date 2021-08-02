@@ -86,6 +86,10 @@ def get_start_coordinates(global_manager):
     return(start_x, start_y)
 
 def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
+    if info_display_list == global_manager.get('tile_info_display_list'):
+        global_manager.set('displayed_tile', new_actor)
+    elif info_display_list == global_manager.get('mob_info_display_list'):
+        global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
     

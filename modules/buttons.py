@@ -3,7 +3,7 @@ import time
 from . import images
 from . import text_tools
 from . import instructions
-from . import main_loop
+from . import main_loop_tools
 from . import actor_utility
 
 class button():
@@ -45,6 +45,7 @@ class button():
         self.showing_outline = False
         self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
+        self.tooltip_text = []
         self.update_tooltip()
         self.confirming = False
 
@@ -73,6 +74,10 @@ class button():
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
             self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
+        elif self.button_type == 'pick up commodity':
+            self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+        elif self.button_type == 'drop commodity':
+            self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " into this unit's tile"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -210,7 +215,7 @@ class button():
         Outputs:
             Returns whether the button's tooltip should be shown; its tooltip should be shown when the button is being displayed and is colliding with the mouse
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
+        if self.touching_mouse() and self.can_show():
             return(True)
         else:
             return(False)
@@ -222,7 +227,7 @@ class button():
         Outputs:
             Draws this button with a description of its keybind if applicable, along with an outline if it's key is being pressed
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
             if self.showing_outline: 
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
             pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
@@ -281,7 +286,7 @@ class button():
 
             elif self.button_type == 'move left':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(-1, 0):
                                 mob.move(-1, 0) #x_change, y_change
@@ -294,7 +299,7 @@ class button():
                         
             elif self.button_type == 'move right':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(1, 0):
                                 mob.move(1, 0)
@@ -307,7 +312,7 @@ class button():
                         
             elif self.button_type == 'move up':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, 1):
                                 mob.move(0, 1)
@@ -320,7 +325,7 @@ class button():
                         
             elif self.button_type == 'move down':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, -1):
                                 mob.move(0, -1)
@@ -360,6 +365,32 @@ class button():
                         self.global_manager.get('current_instructions_page').remove()
                         self.global_manager.set('current_instructions_page', 'none')
                     self.global_manager.set('current_instructions_page_index', 0)
+
+            elif self.button_type == 'drop commodity':
+                if main_loop_tools.action_possible(self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        displayed_mob.change_inventory(commodity, -1)
+                        displayed_tile.change_inventory(commodity, 1)
+                    else:
+                        text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
+                else:
+                     text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
+                
+            elif self.button_type == 'pick up commodity':
+                if main_loop_tools.action_possible(self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        displayed_mob.change_inventory(commodity, 1)
+                        displayed_tile.change_inventory(commodity, -1)
+                    else:
+                        text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
+                else:
+                     text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
 
     def on_rmb_release(self):
         '''
@@ -431,6 +462,7 @@ class selected_icon(button):
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
             self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
             for current_image in self.attached_mob.images:
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
@@ -503,7 +535,7 @@ class switch_grid_button(button):
         if self.can_show():
             self.showing_outline = True
             if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                if main_loop.action_possible(self.global_manager):
+                if main_loop_tools.action_possible(self.global_manager):
                     for mob in self.global_manager.get('mob_list'):
                         if mob.selected and not mob.grids[0] == self.destination_grid:
                             destination_x = 0

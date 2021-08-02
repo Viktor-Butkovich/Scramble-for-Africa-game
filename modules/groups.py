@@ -10,7 +10,7 @@ from . import utility
 from . import notification_tools
 from . import dice
 from . import scaling
-from . import main_loop
+from . import main_loop_tools
 
 class group(mob):
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
@@ -19,6 +19,13 @@ class group(mob):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
+        
+        for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
+            self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
+            self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
+        self.worker.inventory_setup()
+        self.officer.inventory_setup()
+        
         self.select()
         self.veteran = self.officer.veteran
         if self.veteran:
@@ -51,6 +58,8 @@ class group(mob):
         self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
 
     def disband(self):
+        self.officer.inventory = self.inventory
+        self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
         self.officer.veteran_icons = self.veteran_icons
@@ -246,7 +255,7 @@ class merge_button(button):
     def on_click(self):
         if self.can_show():
             self.showing_outline = True
-            if main_loop.action_possible(self.global_manager):    
+            if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 #for current_mob in selected_list:
                 #    current_mob.remove()
@@ -289,7 +298,7 @@ class split_button(button):
     def on_click(self):
         if self.can_show():
             self.showing_outline = True
-            if main_loop.action_possible(self.global_manager):         
+            if main_loop_tools.action_possible(self.global_manager):         
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 #for current_mob in selected_list:
                 #    current_mob.remove()
@@ -309,3 +318,5 @@ def create_group(worker, officer, global_manager):
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)
+    #worker.inventory_setup() #resets inventory to empty
+    #officer.inventory_setup() 

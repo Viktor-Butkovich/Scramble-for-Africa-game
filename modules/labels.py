@@ -124,7 +124,7 @@ class label(button):
         Outputs:
             Draws this label's image with its text
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if self.can_show(): #if self.global_manager.get('current_game_mode') in self.modes:
             self.image.draw()
             #for text_line_index in range(len(self.message)):
             #    text_line = self.message[text_line_index]
@@ -153,45 +153,6 @@ class label(button):
         for text_line_index in range(len(self.tooltip_text)):
             text_line = self.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
-
-class actor_match_label(label):
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image_id, actor_label_type, global_manager):
-        message = 'default'
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image_id, message, global_manager)
-        #self.global_manager.get('mob_info_display_list').append(self) #include mob labels and mob free images
-        self.actor_label_type = actor_label_type
-        if self.actor_label_type == 'name':
-            self.message_start = 'Name: '
-        elif self.actor_label_type == 'resource':
-            self.message_start = 'Resource: '
-        elif self.actor_label_type == 'terrain':
-            self.message_start = 'Terrain: '
-        else:
-            self.message_start = 'none'
-        self.actor = 'none'
-        self.calibrate('none')
-
-    def calibrate(self, new_actor):
-        self.actor = new_actor
-        if not new_actor == 'none':
-            if self.actor_label_type == 'name':
-                self.set_label(self.message_start + str(new_actor.name))
-            elif self.actor_label_type == 'terrain':
-                if self.actor.cell.visible:
-                    self.set_label(self.message_start + str(new_actor.cell.terrain))
-                else:
-                    self.set_label(self.message_start + 'unknown')
-            elif self.actor_label_type == 'resource':
-                if self.actor.cell.visible:
-                    self.set_label(self.message_start + str(new_actor.cell.resource))
-                else:
-                    self.set_label(self.message_start + 'unknown')
-        else:
-            self.set_label(self.message_start + 'n/a')
-
-    #def remove(self):
-    #    super().remove()
-    #    self.global_manager.set('mob_info_display_list', utility.remove_from_list(self.global_manager.get('mob_info_display_list'), self))
 
 class instructions_page(label):
     '''

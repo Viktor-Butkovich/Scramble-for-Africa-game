@@ -1,6 +1,7 @@
 import pygame
 from . import text_tools
 from . import utility
+from . import actor_utility
 
 class actor():
     def __init__(self, coordinates, grids, modes, global_manager):
@@ -15,6 +16,41 @@ class actor():
         self.set_coordinates(self.x, self.y)
         #self.controllable = False# obsolete but possibly usable later
         self.selected = False
+        self.can_hold_commodities = True
+        self.tooltip_text = []
+        if self.can_hold_commodities:
+            self.inventory_setup()
+
+    def inventory_setup(self):
+        self.inventory = {}
+        for current_commodity in self.global_manager.get('commodity_types'):
+            self.inventory[current_commodity] = 0
+
+    def get_inventory(self, commodity):
+        if self.can_hold_commodities:
+            return(self.inventory[commodity])
+        else:
+            return(-1)
+
+    def change_inventory(self, commodity, change):
+        if self.can_hold_commodities:
+            self.inventory[commodity] += change
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def set_inventory(self, commodity, new_value):
+        if self.can_hold_commodities:
+            self.inventory[commodity] = new_value
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def get_held_commodities(self):
+        if self.can_hold_commodities:
+            held_commodities = []
+            for current_commodity in self.global_manager.get('commodity_types'):
+                if self.get_inventory(current_commodity) > 0:
+                    held_commodities.append(current_commodity)
+            return(held_commodities)
+        else:
+            return([])
     
     def set_name(self, new_name):
         self.name = new_name        
@@ -29,6 +65,7 @@ class actor():
         #    text_tools.print_to_screen('This cell is blocked.', self.global_manager)
             
     def set_tooltip(self, new_tooltip):
+        self.tooltip_text = new_tooltip
         for current_image in self.images:
             current_image.set_tooltip(new_tooltip)
     

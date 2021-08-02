@@ -1,299 +1,197 @@
-import pygame
 import time
-from . import scaling
+import pygame
+from . import main_loop_tools
+from . import utility
 from . import text_tools
-from . import actor_utility
+from . import utility
 
-def update_display(global_manager): #to do: transfer if current game mode in modes to draw functions, do not manage it here
-    '''
-    Inputs:
-        global_manager_template object
-    Outputs:
-        Draws all images and shapes and calls the drawing of the text box and tooltips
-    '''
-    if global_manager.get('loading'):
-        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
-        draw_loading_screen(global_manager)
-    else:
-        global_manager.get('game_display').fill((125, 125, 125))
-        possible_tooltip_drawers = []
+def main_loop(global_manager):
+    while not global_manager.get('crashed'):
+        if len(global_manager.get('notification_list')) == 0:
+            stopping = False
+        global_manager.get('input_manager').update_input()
+        if global_manager.get('input_manager').taking_input:
+            typing = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                global_manager.set('crashed', True)
+            if global_manager.get('r_shift') == 'down' or global_manager.get('l_shift') == 'down':
+                global_manager.set('capital', True)
+            else:
+                global_manager.set('capital', False)
+            if global_manager.get('r_ctrl') == 'down' or global_manager.get('l_ctrl') == 'down':
+                global_manager.set('ctrl', True)
+            else:
+                global_manager.set('ctrl', False)
+            if event.type == pygame.KEYDOWN:
+                for current_button in global_manager.get('button_list'):
+                    if global_manager.get('current_game_mode') in current_button.modes and not global_manager.get('typing'):
+                        if current_button.has_keybind:
+                            if event.key == current_button.keybind_id:
+                                if current_button.has_released:
+                                    current_button.on_click()
+                                    current_button.has_released = False
+                            else:#stop confirming an important button press if user starts doing something else
+                                current_button.confirming = False
+                        else:
+                            current_button.confirming = False
+                if event.key == pygame.K_RSHIFT:
+                    global_manager.set('r_shift', 'down')
+                if event.key == pygame.K_LSHIFT:
+                    global_manager.set('l_shift', 'down')
+                if event.key == pygame.K_RCTRL:
+                    global_manager.set('r_ctrl', 'down')
+                if event.key == pygame.K_LCTRL:
+                    global_manager.set('l_ctrl', 'down')
+                if event.key == pygame.K_ESCAPE:
+                    global_manager.set('typing', False)
+                    global_manager.set('message', '')
+                if event.key == pygame.K_SPACE:
+                    if global_manager.get('typing'):
+                        global_manager.set('message', utility.add_to_message(global_manager.get('message'), ' ')) #add space to message and set message to it
+                if event.key == pygame.K_BACKSPACE:
+                    if global_manager.get('typing'):
+                        global_manager.set('message', global_manager.get('message')[:-1]) #remove last character from message and set message to it
 
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                current_grid.draw()
+                key_codes = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n, pygame.K_o, pygame.K_p]
+                key_codes += [pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u, pygame.K_v, pygame.K_w, pygame.K_x, pygame.K_y, pygame.K_z]
+                key_codes += [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0]
+                lowercase_key_values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+                uppercase_key_values = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
 
-        for current_image in global_manager.get('image_list'):
-            current_image.has_drawn = False
-
-        for current_background_image in global_manager.get('background_image_list'):
-            current_background_image.draw()
-            current_background_image.has_drawn = True
-            
-        for current_tile in global_manager.get('tile_list'):
-            if global_manager.get('current_game_mode') in current_tile.image.modes and not current_tile in global_manager.get('overlay_tile_list'):
-                current_tile.image.draw()
-                current_tile.image.has_drawn = True
-        
-        for current_image in global_manager.get('image_list'):
-            if not current_image.has_drawn:
-                if global_manager.get('current_game_mode') in current_image.modes:
-                    current_image.draw()
-                    current_image.has_drawn = True
-        for current_bar in global_manager.get('bar_list'):
-            if global_manager.get('current_game_mode') in current_bar.modes:
-                current_bar.draw()
-                
-        for current_overlay_tile in global_manager.get('overlay_tile_list'):
-            if global_manager.get('current_game_mode') in current_overlay_tile.image.modes:
-                current_overlay_tile.image.draw()
-                current_overlay_tile.image.has_drawn = True
-                
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                current_grid.draw_grid_lines()
-
-        for current_mob in global_manager.get('mob_list'):
-            for current_image in current_mob.images:
-                if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
-                    current_mob.draw_outline()
-            if current_mob.can_show_tooltip():
-                for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
-                    if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
-                        possible_tooltip_drawers.append(same_tile_mob)
-            
-        for current_actor in global_manager.get('actor_list'):
-            if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
-                possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
-
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                for current_cell in current_grid.cell_list:
-                    current_cell.show_num_mobs()
-
-        for current_button in global_manager.get('button_list'):
-            if not current_button in global_manager.get('notification_list'): #notifications are drawn later
-                current_button.draw()
-            if current_button.can_show_tooltip():
-                possible_tooltip_drawers.append(current_button) #only one of these will be drawn to prevent overlapping tooltips
-                
-        for current_label in global_manager.get('label_list'):
-            if not current_label in global_manager.get('notification_list'):
-                current_label.draw()
-        for current_notification in global_manager.get('notification_list'):
-            if not current_notification == global_manager.get('current_instructions_page'):
-                current_notification.draw()
-        if global_manager.get('show_text_box'):
-            draw_text_box(global_manager)
-
-        if global_manager.get('making_mouse_box'):
-            mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
-            global_manager.set('mouse_destination_x', mouse_destination_x + 4)
-            global_manager.set('mouse_destination_y', mouse_destination_y + 4)
-            #mouse_destination_y += 4
-            if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
-                mouse_box_color = 'white'
-                pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
-            
-        if not global_manager.get('current_instructions_page') == 'none':
-            global_manager.get('current_instructions_page').draw()
-        if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
-            global_manager.set('mouse_moved_time', time.time())
-            old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
-            global_manager.set('old_mouse_x', old_mouse_x)
-            global_manager.set('old_mouse_y', old_mouse_y)
-        if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
-            manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
-        pygame.display.update()
-        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
-
-def action_possible(global_manager):
-    '''
-    Inputs:
-        global_manager_template object
-    Outputs:
-        Returns whether the player is allowed to do anything, preventing actions from being done before other actions are done
-    '''
-    if global_manager.get('ongoing_exploration'):
-        return(False)
-    return(True)
-
-def draw_loading_screen(global_manager):
-    '''
-    Inputs:
-        global_manager_template object
-    Outputs:
-        Draws loading screen while the game is still loading
-    '''
-    global_manager.get('game_display').fill((125, 125, 125))
-    global_manager.get('loading_image').draw()
-    pygame.display.update()    
-    if global_manager.get('loading_start_time') + 2 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
-        global_manager.set('loading', False)
-
-def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if near bottom of screen, make first tooltip appear higher and have last tooltip on bottom of screen
-    '''
-    Inputs:
-        list of objects that can draw tooltips based on the mouse position and their status, global_manager_template object
-    Outputs:
-        Draws tooltips of objecst that can draw tooltips, with tooltips beyond the first appearing at progressively lower locations
-    '''
-    possible_tooltip_drawers_length = len(possible_tooltip_drawers)
-    if possible_tooltip_drawers_length == 0:
-        return()
-    elif possible_tooltip_drawers_length == 1:
-        possible_tooltip_drawers[0].draw_tooltip(60)
-    else:
-        tooltip_index = 1
-        stopping = False
-        for possible_tooltip_drawer in possible_tooltip_drawers:
-            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
-                possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
-                stopping = True
-            if (possible_tooltip_drawer in global_manager.get('notification_list')) and not stopping:
-                possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
-                stopping = True
-        if not stopping:
-            for possible_tooltip_drawer in possible_tooltip_drawers:
-                possible_tooltip_drawer.draw_tooltip(tooltip_index * 60)
-                tooltip_index += 1
-
-def draw_text_box(global_manager):
-    '''
-    Inputs:
-        global_manager_template object
-    Outputs:
-        Draws the text box and any text it contains
-    '''
-    greatest_width = 300
-    greatest_width = scaling.scale_width(greatest_width, global_manager)
-    max_screen_lines = (global_manager.get('default_display_height') // global_manager.get('font_size')) - 1
-    max_text_box_lines = (global_manager.get('text_box_height') // global_manager.get('font_size')) - 1
-    text_index = 0 #probably obsolete, to do: verify that this is obsolete
-    for text_index in range(len(global_manager.get('text_list'))):
-        if text_index < max_text_box_lines:
-            if text_tools.message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') > greatest_width:
-                greatest_width = text_tools.message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') #manages the width of already printed text lines
-    if global_manager.get('input_manager').taking_input:
-        if text_tools.message_width("Response: " + global_manager.get('message'), font_size, 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width("Response: " + global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
-    else:
-        if text_tools.message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
-    text_box_width = greatest_width + 10
-    x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
-    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
-    if global_manager.get('typing'):
-        x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
-        pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
-        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
-    else:
-        x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
-        pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
-        #x, y = (0, default_display_height - (font_size))
-        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
-
-    global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
-    
-    for text_index in range(len(global_manager.get('text_list'))):
-        if text_index < max_text_box_lines:
-            textsurface = global_manager.get('myfont').render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
-            global_manager.get('game_display').blit(textsurface,(10, (-1 * global_manager.get('font_size') * text_index) + global_manager.get('display_height') - ((2 * global_manager.get('font_size')) + 5)))
-    if global_manager.get('input_manager').taking_input:
-        textsurface = global_manager.get('myfont').render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
-    else:
-        textsurface = global_manager.get('myfont').render(global_manager.get('message'), False, (0, 0, 0))
-    global_manager.get('game_display').blit(textsurface,(10, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
-
-def manage_rmb_down(clicked_button, global_manager):
-    '''
-    Inputs:
-        boolean representing whether a button was just clicked (not pressed), global_manager_template object
-    Outputs:
-        Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
-    '''
-    if (not clicked_button) and action_possible(global_manager):
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                for current_cell in current_grid.cell_list:
-                    if current_cell.touching_mouse():
-                        if len(current_cell.contained_mobs) > 1:
-                            moved_mob = current_cell.contained_mobs[1]
-                            for current_image in moved_mob.images:
-                                if not current_image.current_cell == 'none':
-                                    while not moved_mob == current_image.current_cell.contained_mobs[0]:
-                                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-                            global_manager.set('show_selection_outlines', True)
-                            global_manager.set('last_selection_outline_switch', time.time())
-                            global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-            
-    
-def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
-    '''
-    Inputs:
-        boolean representing whether a button was just clicked (not pressed), global_manager_template object
-    Outputs:
-        Will do nothing if the user was clicking a button.
-        If the user was not clicking a button and a mouse box was being drawn, the mouse box will stop being drawn and all mobs within it will be selected.
-        If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
-        If the user was not clicking a button, any mobs not just selected will be unselected. However, if shift is being held down, no mobs will be unselected.
-    '''
-    if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        selected_new_mob = False
-        for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
-            if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
-                current_mob.selected = False
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
-                    
-        if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
-            for current_grid in global_manager.get('grid_list'):
-                if global_manager.get('current_game_mode') in current_grid.modes:
-                    for current_cell in current_grid.cell_list:
-                        if current_cell.touching_mouse():
-                            if len(current_cell.contained_mobs) > 0:
-                                selected_new_mob = True
-                                current_cell.contained_mobs[0].select()
-                                if current_grid == global_manager.get('minimap_grid'):
-                                    main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
-                                elif current_grid == global_manager.get('strategic_map_grid'):
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-
-        else:
-            for clicked_mob in global_manager.get('mob_list'):
-                for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
-                    if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-                        selected_new_mob = True
-                        for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-                            if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group
-                                current_mob.select()#if mob can show
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
-        if selected_new_mob:
-            selected_list = actor_utility.get_selected_list(global_manager)
-            if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
-                global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
-                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(selected_list[0].x, selected_list[0].y).tile)
-        else:
-            if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
-                breaking = False
-                for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
-                    for current_cell in current_grid.cell_list:
-                        if current_cell.touching_mouse():
-                            if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
-                                if not current_cell.terrain == 'none': #if off map, do not move minimap there
-                                    main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                    global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                                    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
-                            elif current_grid == global_manager.get('strategic_map_grid'):
-                                global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
-                                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-                            breaking = True
-                            break
-                        if breaking:
-                            break
-                    if breaking:
+                for key_index in range(len(key_codes)):
+                    correct_key = False
+                    if event.key == key_codes[key_index]:
+                        correct_key = True
+                        if global_manager.get('typing') and not global_manager.get('capital'):
+                            global_manager.set('message', utility.add_to_message(global_manager.get('message'), lowercase_key_values[key_index]))
+                        elif global_manager.get('typing') and global_manager.get('capital'):
+                            global_manager.set('message', utility.add_to_message(global_manager.get('message'), uppercase_key_values[key_index]))
+                    if correct_key:
                         break
-    global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
+                        
+            if event.type == pygame.KEYUP:
+                for current_button in global_manager.get('button_list'):
+                    if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
+                        if current_button.has_keybind:
+                            if event.key == current_button.keybind_id:
+                                current_button.on_release()
+                                current_button.has_released = True
+                if event.key == pygame.K_RSHIFT:
+                    global_manager.set('r_shift', 'up')
+                if event.key == pygame.K_LSHIFT:
+                    global_manager.set('l_shift', 'up')
+                if event.key == pygame.K_LCTRL:
+                    global_manager.set('l_ctrl', 'up')
+                if event.key == pygame.K_RCTRL:
+                    global_manager.set('r_ctrl', 'up')
+                if event.key == pygame.K_RETURN:
+                    if global_manager.get('typing'):
+                        if global_manager.get('input_manager').taking_input:
+                            #input_response = message
+                            global_manager.get('input_manager').taking_input = False
+                            text_tools.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
+                            input_manager.receive_input(global_manager.get('message'))
+                            check_pointer_removal('not typing')
+                        else:
+                            text_tools.print_to_screen(global_manager.get('message'), global_manager)
+                        global_manager.set('typing', False)
+                        global_manager.set('message', '')
+                    else:
+                        global_manager.set('typing', True)
+        global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
+        global_manager.set('old_rmb_down', global_manager.get('rmb_down'))
+        global_manager.set('old_mmb_down', global_manager.get('mmb_down'))
+        lmb_down, mmb_down, rmb_down = pygame.mouse.get_pressed()
+        global_manager.set('lmb_down', lmb_down)
+        global_manager.set('mmb_down', mmb_down)
+        global_manager.set('rmb_down', rmb_down)
 
+        if not global_manager.get('old_rmb_down') == global_manager.get('rmb_down'): #if rmb changes
+            if not global_manager.get('rmb_down'): #if user just released rmb
+                clicked_button = False
+                stopping = False
+                if global_manager.get('current_instructions_page') == 'none':
+                    for current_button in global_manager.get('button_list'):
+                        if current_button.touching_mouse() and current_button.can_show() and current_button in global_manager.get('notification_list') and not stopping:
+                            current_button.on_rmb_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                            current_button.on_rmb_release()
+                            clicked_button = True
+                            stopping = True
+                else:
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show():
+                        global_manager.get('current_instructions_page').on_rmb_click()
+                        clicked_button = True
+                        stopping = True
+                if not stopping:
+                    for current_button in global_manager.get('button_list'):
+                        if current_button.touching_mouse() and current_button.can_show():
+                            current_button.on_rmb_click()
+                            current_button.on_rmb_release()
+                            clicked_button = True
+                main_loop_tools.manage_rmb_down(clicked_button, global_manager)
+
+            #else:#if user just clicked rmb
+                #mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
+                #global_manager.set('mouse_origin_x', mouse_origin_x)
+                #global_manager.set('mouse_origin_y', mouse_origin_y)
+                #global_manager.set('making_mouse_box', True)
+                
+        if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
+            if not global_manager.get('lmb_down'):#if user just released lmb
+                clicked_button = False
+                stopping = False
+                if global_manager.get('current_instructions_page') == 'none':
+                    for current_button in global_manager.get('button_list'):
+                        if current_button.touching_mouse() and current_button.can_show() and (current_button in global_manager.get('notification_list')) and not stopping:
+                            current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                            current_button.on_release()
+                            clicked_button = True
+                            stopping = True
+                else:
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show():
+                        global_manager.get('current_instructions_page').on_click()
+                        clicked_button = True
+                        stopping = True
+                if not stopping:
+                    for current_button in global_manager.get('button_list'):
+                        if current_button.touching_mouse() and current_button.can_show():
+                            current_button.on_click()
+                            current_button.on_release()
+                            clicked_button = True
+                main_loop_tools.manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
+                
+            else:#if user just clicked lmb
+                mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
+                global_manager.set('mouse_origin_x', mouse_origin_x)
+                global_manager.set('mouse_origin_y', mouse_origin_y)
+                global_manager.set('making_mouse_box', True)
+
+        if global_manager.get('lmb_down') or global_manager.get('rmb_down'):
+            for current_button in global_manager.get('button_list'):
+                if current_button.touching_mouse() and current_button.can_show():
+                    current_button.showing_outline = True
+                else:
+                    current_button.showing_outline = False
+
+        if not global_manager.get('loading'):
+            main_loop_tools.update_display(global_manager)
+        else:
+            main_loop_tools.draw_loading_screen(global_manager)
+        current_time = time.time()
+        global_manager.set('current_time', current_time)
+        if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
+            global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
+            global_manager.set('last_selection_outline_switch', time.time())
+        #if global_manager.get('current_time') - global_manager.get('last_minimap_outline_switch') > 1:
+        #    global_manager.set('show_minimap_outlines', utility.toggle(global_manager.get('show_minimap_outlines')))
+        #    global_manager.set('last_minimap_outline_switch', time.time())
+            
+        for actor in global_manager.get('actor_list'):
+            for current_image in actor.images:
+                if not current_image.image_description == current_image.previous_idle_image and time.time() >= current_image.last_image_switch + 0.6:
+                    current_image.set_image(current_image.previous_idle_image)
+        start_time = time.time()
+        global_manager.set('start_time', start_time)
+        global_manager.set('current_time', time.time())
+        global_manager.set('last_selection_outline_switch', time.time())
