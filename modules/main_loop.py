@@ -3,9 +3,15 @@ import pygame
 from . import main_loop_tools
 from . import utility
 from . import text_tools
-from . import utility
 
 def main_loop(global_manager):
+    '''
+    Input:
+        global_manager_template object
+    Output:
+        Controls the main loop of the program, handling events such as mouse clicks and button presses, controlling timers, and drawing shapes and images.
+        The program will end once this function stops.
+    '''
     while not global_manager.get('crashed'):
         if len(global_manager.get('notification_list')) == 0:
             stopping = False

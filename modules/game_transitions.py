@@ -20,10 +20,6 @@ def set_game_mode(new_game_mode, global_manager):
         global_manager.set('current_game_mode', 'strategic')
         global_manager.set('default_text_box_height', 185)
         global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
-        #copy_tile_list = global_manager.get('tile_list')
-        #for current_tile in copy_tile_list:
-        #    current_tile.remove()
-        #create_strategic_map(global_manager)
         text_tools.print_to_screen("Entering strategic map", global_manager)
     elif new_game_mode == 'europe':
         start_loading(global_manager)
@@ -62,4 +58,4 @@ def start_loading(global_manager):
     '''
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
-    main_loop_tools.update_display(global_manager)#draw_loading_screen()
+    main_loop_tools.update_display(global_manager)

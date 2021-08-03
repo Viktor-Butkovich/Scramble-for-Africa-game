@@ -1,9 +1,9 @@
 from . import labels
 def display_instructions_page(page_number, global_manager):
     '''
-    Inputs:
+    Input:
         int representing the page number to display, global_manager_template object
-    Outputs:
+    Output:
         Displays a new instructions page corresponding to the inputted page number
     '''
     global_manager.set('current_instructions_page_index', page_number)

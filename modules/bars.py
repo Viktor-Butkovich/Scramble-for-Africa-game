@@ -6,7 +6,7 @@ class bar():
     '''
     def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, global_manager):
         '''
-        Inputs:
+        Input:
             coordinates: tuple of two int variables representing pixel coordinates where the bar will appear
             minimum: int representing the minimum value that the bar can hold
             maximum: int representing the maximum value that the bar can hold
@@ -34,27 +34,27 @@ class bar():
 
     def calculate_full_width(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns the width that the filled portion of the bar will be
         '''
         return(int((self.current/ self.maximum) * self.width))
 
     def calculate_empty_width(self, full_width):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns the width that the unfilled portion of the bar will be
         '''
         return(self.width - full_width)
 
     def update_bar(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Updates the bar's appearance to match its current value
         '''
         if self.current < self.minimum:
@@ -76,9 +76,9 @@ class bar():
 
     def draw(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Draws this bar with an appearance based on its current value
         '''
         self.update_bar()
@@ -89,9 +89,9 @@ class bar():
 
     def touching_mouse(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns whether the bar is colliding with the mouse
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
@@ -105,7 +105,7 @@ class actor_bar(bar):
         '''
     def __init__(self, coordinates, minimum, maximum, current, width, height, full_color, empty_color, actor, y_multiplier, global_manager):
         '''
-        Inputs:
+        Input:
             coordinates: tuple of two int variables representing pixel coordinates where the bar will appear
             minimum: int representing the minimum value that the bar can hold
             maximum: int representing the maximum value that the bar can hold
@@ -125,9 +125,9 @@ class actor_bar(bar):
         
     def update_status(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Changes the bar's location depending on its actors location
         '''
         self.x = int(self.actor.image.x + (self.actor.image.width * 0.1))
@@ -137,9 +137,9 @@ class actor_bar(bar):
         
     def draw(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Draws the bar on top of its actor
         '''
         self.update_status()
@@ -147,9 +147,9 @@ class actor_bar(bar):
         
     def draw_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             none, superclass is supposed to show current value as tooltip
         '''
         self.update_status()

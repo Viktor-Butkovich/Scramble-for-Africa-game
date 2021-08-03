@@ -5,27 +5,27 @@ class global_manager_template():
     '''
     An object designed to manage a dictionary of shared variables and be passed between functions and objects as a simpler alternative to passing each variable or object separately
     '''
-    def __init__(self):#, global_dict):
+    def __init__(self):
         '''
-        Inputs:
+        Input:
             none
         '''
-        self.global_dict = {}#global_dict #dictionary with values in the format 'variable_name': variable_value
+        self.global_dict = {}
         
     def get(self, name):
         '''
-        Inputs:
+        Input:
             string name representing the name of an entry in this global_manager's dictionary
-        Outputs:
+        Output:
             Returns the value corresponding to name's entry in this global_manager's dictionary
         '''
-        return(self.global_dict[name]) #variables in the dictionary are accessed with global_manager.get('variable_name')
+        return(self.global_dict[name])
     
-    def set(self, name, value): #create a new dictionary value or change an existing one with global_manager.set('variable_name', new_variable_value)
+    def set(self, name, value):
         '''
-        Inputs:
+        Input:
             string name representing the name of an entry to create/replace in this global_manager's dictionary, variable representing the value to set this entry to
-        Outputs:
+        Output:
             Creates/replaces an entry in this global_manager's dictionary based on the inputted name and value
         '''
         self.global_dict[name] = value
@@ -36,7 +36,7 @@ class input_manager_template():
     '''
     def __init__(self, global_manager):
         '''
-        Inputs:
+        Input:
             global_manager_template object
         '''
         self.global_manager = global_manager
@@ -48,9 +48,9 @@ class input_manager_template():
         
     def check_for_input(self):
         '''
-        Inputs:
+        Input:
             None
-        Outputs:
+        Output:
             Returns True if input was just being taken and is no longer being taken, showing that there is input ready. Otherwise, returns False.
         '''
         if self.old_taking_input == True and self.taking_input == False: 
@@ -60,9 +60,9 @@ class input_manager_template():
         
     def start_receiving_input(self, solicitant, message):
         '''
-        Inputs:
+        Input:
             string representing the part of the program to sent input to, string representing the prompt for the user to enter input
-        Outputs:
+        Output:
             Displays the prompt for the user to enter input and prepares to receive input and send it to the part of the program requesting input
         '''
         text_tools.print_to_screen(message, self.global_manager)
@@ -71,18 +71,18 @@ class input_manager_template():
         
     def update_input(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Updates whether the input_manager_template is currently taking input
         '''
         self.old_taking_input = self.taking_input
         
     def receive_input(self, received_input):
         '''
-        Inputs:
+        Input:
             string representing the input entered by the user into the text box
-        Outputs:
+        Output:
             Sends the inputted string to the part of the program that initially requested input
         '''
         if self.send_input_to == 'do something':
@@ -97,7 +97,7 @@ class flavor_text_manager_template():
     '''
     def __init__(self, global_manager):
         '''
-        Inputs:
+        Input:
             global_manager_template object
         '''
         self.global_manager = global_manager
@@ -110,9 +110,9 @@ class flavor_text_manager_template():
                 
     def generate_flavor_text(self, subject):
         '''
-        Inputs:
+        Input:
             string representing the type of flavor text to return
-        Outputs:
+        Output:
             Returns a random flavor text statement based on the inputted string
         '''
         return(random.choice(self.subject_dict['explorer']))

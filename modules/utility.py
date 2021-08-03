@@ -1,17 +1,17 @@
 def find_object_distance(first, second):
     '''
-    Inputs:
+    Input:
         Two objects with int x and y attributes
-    Outputs:
+    Output:
         Calculates and returns the distance between the x and y coordinates of each inputted object
     '''
     return((((first.x - second.x) ** 2) + ((first.y - second.y) ** 2)) ** 0.5)
 
 def find_coordinate_distance(first, second):
     '''
-    Inputs:
+    Input:
         Two tuples containing two int variables each representing coordinates
-    Outputs:
+    Output:
         Calculates and returns the distance between the x and y coordinates from each inputted tuple
     '''
     first_x, first_y = first
@@ -21,9 +21,9 @@ def find_coordinate_distance(first, second):
     
 def remove_from_list(received_list, item_to_remove):
     '''
-    Inputs:
+    Input:
         A list and a variable value or object
-    Outputs:
+    Output:
         Returns the list with all instances of inputted variable value or object removed
     '''
     output_list = []
@@ -34,9 +34,9 @@ def remove_from_list(received_list, item_to_remove):
 
 def toggle(variable):
     '''
-    Inputs:
+    Input:
         A boolean variable
-    Outputs:
+    Output:
         Returns the opposite of the inputted boolean's value
     '''
     if variable == True:
@@ -46,9 +46,9 @@ def toggle(variable):
 
 def generate_article(word):
     '''
-    Inputs:
+    Input:
         A string
-    Outputs:
+    Output:
         Returns 'an' if the word starts with a vowel or 'a' if the word does not start with a vowel
     '''
     vowels = ['a', 'e', 'i', 'o', 'u']
@@ -59,9 +59,9 @@ def generate_article(word):
 
 def add_to_message(message, new):
     '''
-    Inputs:
+    Input:
         Two strings
-    Outputs:
+    Output:
         Returns a concatenation of the two strings
     '''
     return (message + new)

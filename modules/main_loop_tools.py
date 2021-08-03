@@ -6,9 +6,9 @@ from . import actor_utility
 
 def update_display(global_manager): #to do: transfer if current game mode in modes to draw functions, do not manage it here
     '''
-    Inputs:
+    Input:
         global_manager_template object
-    Outputs:
+    Output:
         Draws all images and shapes and calls the drawing of the text box and tooltips
     '''
     if global_manager.get('loading'):
@@ -108,9 +108,9 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
 
 def action_possible(global_manager):
     '''
-    Inputs:
+    Input:
         global_manager_template object
-    Outputs:
+    Output:
         Returns whether the player is allowed to do anything, preventing actions from being done before other actions are done
     '''
     if global_manager.get('ongoing_exploration'):
@@ -119,9 +119,9 @@ def action_possible(global_manager):
 
 def draw_loading_screen(global_manager):
     '''
-    Inputs:
+    Input:
         global_manager_template object
-    Outputs:
+    Output:
         Draws loading screen while the game is still loading
     '''
     global_manager.get('game_display').fill((125, 125, 125))
@@ -132,9 +132,9 @@ def draw_loading_screen(global_manager):
 
 def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if near bottom of screen, make first tooltip appear higher and have last tooltip on bottom of screen
     '''
-    Inputs:
+    Input:
         list of objects that can draw tooltips based on the mouse position and their status, global_manager_template object
-    Outputs:
+    Output:
         Draws tooltips of objecst that can draw tooltips, with tooltips beyond the first appearing at progressively lower locations
     '''
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
@@ -145,7 +145,6 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
     elif possible_tooltip_drawers_length == 1:
         possible_tooltip_drawers[0].draw_tooltip(y_displacement)
     else:
-        #tooltip_index = 1
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
@@ -166,20 +165,18 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
-                #tooltip_index += 1
 
 def draw_text_box(global_manager):
     '''
-    Inputs:
+    Input:
         global_manager_template object
-    Outputs:
+    Output:
         Draws the text box and any text it contains
     '''
     greatest_width = 300
     greatest_width = scaling.scale_width(greatest_width, global_manager)
     max_screen_lines = (global_manager.get('default_display_height') // global_manager.get('font_size')) - 1
     max_text_box_lines = (global_manager.get('text_box_height') // global_manager.get('font_size')) - 1
-    text_index = 0 #probably obsolete, to do: verify that this is obsolete
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
             if text_tools.message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') > greatest_width:
@@ -200,7 +197,6 @@ def draw_text_box(global_manager):
     else:
         x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
         pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
-        #x, y = (0, default_display_height - (font_size))
         pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
 
     global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
@@ -217,9 +213,9 @@ def draw_text_box(global_manager):
 
 def manage_rmb_down(clicked_button, global_manager):
     '''
-    Inputs:
+    Input:
         boolean representing whether a button was just clicked (not pressed), global_manager_template object
-    Outputs:
+    Output:
         Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
     '''
     if (not clicked_button) and action_possible(global_manager):
@@ -241,9 +237,9 @@ def manage_rmb_down(clicked_button, global_manager):
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
     '''
-    Inputs:
+    Input:
         boolean representing whether a button was just clicked (not pressed), global_manager_template object
-    Outputs:
+    Output:
         Will do nothing if the user was clicking a button.
         If the user was not clicking a button and a mouse box was being drawn, the mouse box will stop being drawn and all mobs within it will be selected.
         If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
@@ -285,7 +281,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
                 global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
-                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(selected_list[0].x, selected_list[0].y).tile)
+                
         else:
             if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
                 breaking = False
@@ -296,10 +292,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 if not current_cell.terrain == 'none': #if off map, do not move minimap there
                                     main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
                                     global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                                    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
                             elif current_grid == global_manager.get('strategic_map_grid'):
                                 global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
-                                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
                             breaking = True
                             break
                         if breaking:

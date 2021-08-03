@@ -35,7 +35,7 @@ class die(button):
         self.final_result = final_result
         self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
         self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + height + 3), width + 6, height + 6)
-        self.color = 'white'#self.outcome_color_dict['default']
+        self.color = 'white'
         self.outline_color = self.outcome_color_dict['default']
 
     def update_tooltip(self):
@@ -133,9 +133,9 @@ class die(button):
 
     def remove(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))

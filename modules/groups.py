@@ -13,7 +13,21 @@ from . import scaling
 from . import main_loop_tools
 
 class group(mob):
+    '''
+    Mob that is created by a combination of a worker and officer, can have unique capabilities, and restores its worker and officer upon being disbanded
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Input:
+            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
+            grids: list of grid objects on which the mob's images will appear
+            image_id: string representing the file path to the mob's default image
+            name: string representing the mob's name
+            modes: list of strings representing the game modes in which the mob can appear
+            worker: worker object representing the worker that is part of this group
+            officer: officer object representing the officer that is part of this group
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
+        '''
         self.worker = worker
         self.officer = officer
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
@@ -25,7 +39,6 @@ class group(mob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        
         self.select()
         self.veteran = self.officer.veteran
         if self.veteran:
@@ -33,10 +46,15 @@ class group(mob):
         self.veteran_icons = self.officer.veteran_icons
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self
-        #self.officer.veteran_icons = []
         self.global_manager.get('group_list').append(self)
 
     def go_to_grid(self, new_grid, new_coordinates):
+        '''
+        Input:
+            grid object representing the grid to which the group is transferring, tuple of two int variables representing the coordinates to which the group will move on the new grid
+        Output:
+            Moves this group and all of its images to the inputted grid at the inputted coordinates. A group will also move its attached officer, worker, and veteran icons to the new grid.
+        '''
         if self.veteran:
             for current_veteran_icon in self.veteran_icons:
                 current_veteran_icon.remove()
@@ -55,9 +73,21 @@ class group(mob):
         self.worker.join_group()
 
     def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this group's tooltip to what it should be. A group's tooltip shows the name of the group, its officer, and its worker.
+        '''
         self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
 
     def disband(self):
+        '''
+        Input:
+            none
+        Output:
+            Separates this group into its components, giving its inventory to the officer
+        '''
         self.officer.inventory = self.inventory
         self.inventory_setup() #reset inventory to empty
         self.remove()
@@ -71,17 +101,34 @@ class group(mob):
         #self.remove()
 
     def remove(self):
+        '''
+        Input:
+            none
+        Output:
+            Removes the group from relevant lists and prevents it from further appearing in or affecting the program.
+            However, a group will not automatically remove its officer and worker when removed, since disbanding a group removes the group but not its members - to remove the members, use the die function instead
+        '''
         super().remove()
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
-        #for current_veteran_icon in self.veteran_icons: #keep veteran icons for officer, remove officer to remove them
-        #    current_veteran_icon.remove()
 
     def die(self):
+        '''
+        Input:
+            none
+        Output:
+            Removes the group and its members from relevant lists and prevents them from further appearing in or affecting the program.
+        '''
         self.remove()
         self.officer.remove()
         self.worker.remove()
 
     def update_veteran_icons(self):
+        '''
+        Input:
+            none
+        Output:
+            Moves this group's veteran icons to follow its images
+        '''
         for current_veteran_icon in self.veteran_icons:
             if current_veteran_icon.grid.is_mini_grid:
                 current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
@@ -90,11 +137,24 @@ class group(mob):
                 current_veteran_icon.y = self.y
 
     def move(self, x_change, y_change):
+        '''
+        Input:
+            Same as superclass
+        Output:
+            Same as superclass but also moves its veteran icons to follow its images
+        '''
         super().move(x_change, y_change)
         self.update_veteran_icons()
 
 class expedition(group):
+    '''
+    A group with an explorer officer that is able to explore
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Input:
+            same as superclass
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.exploration_mark_list = []
 
@@ -115,11 +175,28 @@ class expedition(group):
             return(False)
 
     def display_exploration_die(self, coordinates, result):
+        '''
+        Input:
+            tuple of two int variables representing the pixel coordinates at which to display the die, int representing the final result that the die will roll
+        Output:
+            Creates a die object at the inputted coordinates that will roll, eventually stopping displaying the inputted result with an outline depending on the outcome.
+            If multiple dice are present, only the die with the highest result will be outlined, showing that it was chosen.
+        '''
         result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
-    def move(self, x_change, y_change): #to do: add directions to default movement
+    def move(self, x_change, y_change):
+        '''
+        Input:
+            Same as superclass
+        Output:
+            Same as superclass when moving into explored areas.
+            When moving into explored areas, the expedition will attempt to explore there, showing a series of notifications and dice rolls.
+            An exploration will result in the death of the expedition, no change, exploring the area, or exploring the area and promoting to the expedition's officer to a veteran, depending on the dice roll's result.
+            Within the move function, an exploration's result will be determined. However, its outcome will not be shown until the last of the exploration notifications is shown, at which point the outcome is
+            shown through the complete_exploration function.
+        '''
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('show_minimap_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
@@ -137,7 +214,6 @@ class expedition(group):
             direction = 'south'
         else:
             direction = 'none'
-        #died = False
         self.just_promoted = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
@@ -159,7 +235,6 @@ class expedition(group):
             
             text += "/n"
 
-        #new_die = label.die(300, 300, 100, 100, ['strategic'], 6, result_outcome_dict, outcome_color_dict, 7, result, global_manager)
             if self.veteran:
                 text += ("The veteran explorer can roll twice and pick the higher result /n")
                 
@@ -170,7 +245,7 @@ class expedition(group):
                 self.display_exploration_die((500, 380), second_roll_list[0])
                                 
                 text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-                roll_result = max(first_roll_list[0], second_roll_list[0])#(dice.roll(6, "Exploration roll", 4, self.global_manager), dice.roll(6, "Exploration roll", 4, self.global_manager))
+                roll_result = max(first_roll_list[0], second_roll_list[0])
                 result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
                 text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
             else:
@@ -208,6 +283,12 @@ class expedition(group):
         self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
 
     def complete_exploration(self): #roll_result, x_change, y_change
+        '''
+        Input:
+            none
+        Output:
+            Shows the outcome of an exploration attempt, which was previously determined in the move function
+        '''
         exploration_result = self.global_manager.get('exploration_result')
         roll_result = exploration_result[1]
         x_change = exploration_result[2]
@@ -230,9 +311,8 @@ class expedition(group):
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
                 self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
         elif roll_result == 1:
-            self.die()#self.remove()
+            self.die()
             died = True
-
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
@@ -243,32 +323,46 @@ class expedition(group):
         self.global_manager.set('ongoing_exploration', False)
 
 class merge_button(button):
+    '''
+    Button that, when pressed, merges a selected officer with a worker in the same tile
+    '''
     def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
+        '''
+        Input:
+            same as superclass, except button_type is set to 'merge'
+        '''
         super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
         
     def can_show(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns whether the merge button should be shown. A merge button is shown when only an officer is selected and the officer is in the same tile as a worker.
+        '''
         if actor_utility.can_merge(self.global_manager):
             return(True)
         else:
             return(False)
 
     def on_click(self):
+        '''
+        Input:
+            none
+        Output:
+            Controls the button's behavior when clicked. The merge button will cause the selected officer to form a group with a worker in the same tile.
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                #for current_mob in selected_list:
-                #    current_mob.remove()
                 if len(selected_list) == 1:
                     officer = 'none'
                     worker = 'none'
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            #if officer.images[0].current_cell.has_worker():
                             worker = officer.images[0].current_cell.get_worker()
-                        #elif current_selected in self.global_manager.get('worker_list'):
-                        #    worker = current_selected
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
                             create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
@@ -281,13 +375,12 @@ class merge_button(button):
             else:
                 text_tools.print_to_screen("You are busy and can not form a group.", self.global_manager)
 
-    def draw(self):
-        if self.can_show():
-            super().draw()
-
 class split_button(button):
+    '''
+    Button that, when pressed, splits a selected group into its officer and worker
+    '''
     def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
-        super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
+        super().__init__(coordinates, width, height, color, 'split', keybind_id, modes, image_id, global_manager)
         
     def can_show(self):
         if actor_utility.can_split(self.global_manager):
@@ -296,12 +389,16 @@ class split_button(button):
             return(False)
 
     def on_click(self):
+        '''
+        Input:
+            none
+        Output:
+            Controls the button's behavior when clicked. The merge button requires that only a group is selected, and will cause the selected group to split into its officer and worker, destroying the group.
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                #for current_mob in selected_list:
-                #    current_mob.remove()
                 if len(selected_list) == 1 and selected_list[0] in self.global_manager.get('group_list'):
                     selected_list[0].disband()
                 else:
@@ -309,14 +406,18 @@ class split_button(button):
             else:
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
-    def draw(self):
-        if self.can_show():
-            super().draw()
-
 def create_group(worker, officer, global_manager):
+    '''
+    Input:
+        worker object representing the worker that will join the group, officer object representing the officer that will join the group, global_manager_template object
+    Output:
+        Causes the inputted officer to form a group with inputted worker.
+        The type of group formed will depend on the type of officer. An explorer officer will create an expedition, which is able to explore.
+        The formed group's inventory will be the combination of the inventories of the officer and the worker.
+        Upon joining a group, the worker and officer will be stored by the group and will not be able to be seen or selected.
+        Upon the disbanding of a group, its worker and officer will be restored and placed in the same tile as the group, with the officer being given the group's inventory.
+    '''
     if officer.officer_type == 'explorer':
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)
-    #worker.inventory_setup() #resets inventory to empty
-    #officer.inventory_setup() 

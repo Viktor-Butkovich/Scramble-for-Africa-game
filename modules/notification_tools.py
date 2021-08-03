@@ -2,9 +2,9 @@ from . import notifications
 
 def display_notification(message, notification_type, global_manager): #default, exploration, or roll
     '''
-    Inputs:
+    Input:
         string representing the text of the notification created, string representing the type of notification created, global_manager_template object
-    Outputs:
+    Output:
         Creates a notification of inputted type with inputted text
     '''
     global_manager.get('notification_queue').append(message)
@@ -14,9 +14,9 @@ def display_notification(message, notification_type, global_manager): #default, 
 
 def show_tutorial_notifications(global_manager):
     '''
-    Inputs:
+    Input:
         global_manager_template object
-    Outputs:
+    Output:
         Displays a tutorial message notification when the program is started
     '''
     intro_message = "Placeholder tutorial/opener notification"

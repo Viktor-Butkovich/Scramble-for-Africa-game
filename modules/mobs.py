@@ -1,6 +1,5 @@
 import pygame
 import time
-#import random #remove this after testing
 from . import images
 from . import text_tools
 from . import utility
@@ -14,7 +13,7 @@ class mob(actor):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
-        Inputs:
+        Input:
             coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
             grids: list of grid objects on which the mob's images will appear
             image_id: string representing the file path to the mob's default image
@@ -25,8 +24,6 @@ class mob(actor):
         self.selected = False
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
-        #self.grids = grids #for things like drawing images on each grid, go through each grid on which the mob can appear # moved to actor class
-        #self.grid = grids[0] #for things like detecting if moving is possible, use the first grid, which will be the main map
         self.selection_outline_color = 'bright green'
         self.images = []
         for current_grid in self.grids:
@@ -37,12 +34,24 @@ class mob(actor):
         self.select()
 
     def change_inventory(self, commodity, change):
+        '''
+        Input:
+            same as superclass
+        Output:
+            same as superclass, except, if currently being shown in the mob info display, updates the displayed commodities to reflect the change
+        '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
             if self.global_manager.get('displayed_mob') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_inventory(self, commodity, new_value):
+        '''
+        Input:
+            same as superclass
+        Output:
+            same as superclass, except, if currently being shown in the mob info display, updates the displayed commodities to reflect the change
+        '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
             if self.global_manager.get('displayed_mob') == self:
@@ -76,9 +85,9 @@ class mob(actor):
 
     def select(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Causes this mob to be selected and causes the selection outline timer to be reset, displaying it immediately
         '''
         self.selected = True
@@ -89,9 +98,9 @@ class mob(actor):
 
     def draw_outline(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             If selection outlines are currently allowed to appear and if this mob is showing, draw a selection outline around each of its images
         '''
         if self.global_manager.get('show_selection_outlines'):
@@ -101,18 +110,18 @@ class mob(actor):
         
     def update_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Sets this mob's tooltip to its name
         '''
         self.set_tooltip([self.name])
 
     def remove(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
@@ -130,9 +139,9 @@ class mob(actor):
 
     def can_move(self, x_change, y_change):
         '''
-        Inputs:
+        Input:
             int representing the distance moved to the right from a proposed movement, int representing the distance moved upward from a proposed movement
-        Outputs:
+        Output:
             Returns whether the proposed movement would be possible
         '''
         future_x = self.x + x_change
@@ -159,9 +168,9 @@ class mob(actor):
 
     def move(self, x_change, y_change):
         '''
-        Inputs:
+        Input:
             int representing the distance moved to the right, int representing the distance moved upward
-        Outputs:
+        Output:
             Moves this mob x_change tiles to the right and y_change tiles upward
         '''
         for current_image in self.images:
@@ -176,9 +185,9 @@ class mob(actor):
 
     def touching_mouse(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns whether any of this mob's images are colliding with the mouse
         '''
         for current_image in self.images:
@@ -188,8 +197,14 @@ class mob(actor):
         return(False) #return false if none touch mouse
 
     def set_name(self, new_name):
+        '''
+        Input:
+            same as superclass
+        Output:
+            same as superclass, except, if currently being shown in the mob info display, updates the displayed name 
+        '''
         super().set_name(new_name)
-        if self.selected:
+        if self.global_manager.get('displayed_mob') == self: #self.selected:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
 class worker(mob):
@@ -198,7 +213,7 @@ class worker(mob):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
-        Inputs:
+        Input:
             same as superclass 
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
@@ -207,9 +222,9 @@ class worker(mob):
 
     def can_show_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Same as superclass but only returns True if not part of a group
         '''
         if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability
@@ -219,9 +234,9 @@ class worker(mob):
 
     def join_group(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Prevents this worker from being seen and interacted with, storing it as part of a group
         '''
         self.in_group = True
@@ -231,9 +246,9 @@ class worker(mob):
 
     def leave_group(self, group):
         '''
-        Inputs:
+        Input:
             group object from which this worker is leaving
-        Outputs:
+        Output:
             Allows this worker to be seen and interacted with, moving it to where the group was disbanded
         '''
         self.in_group = False
@@ -245,9 +260,9 @@ class worker(mob):
 
     def remove(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         super().remove()
@@ -258,6 +273,10 @@ class officer(mob):
     Mob that is considered an officer and can join groups and become a veteran
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Input:
+            Same as superclass
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('officer_list').append(self)
         self.veteran = False
@@ -266,6 +285,12 @@ class officer(mob):
         self.officer_type = 'default'
 
     def go_to_grid(self, new_grid, new_coordinates):
+        '''
+        Input:
+            Same as superclass
+        Output:
+            Same as superclass, except it also moves veteran icons to the new grid and coordinates
+        '''
         if (not self.in_group) and self.veteran:
             for current_veteran_icon in self.veteran_icons:
                 current_veteran_icon.remove()
@@ -279,11 +304,11 @@ class officer(mob):
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
                 self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
 
-    def can_show_tooltip(self): #moved to actor
+    def can_show_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Same as superclass but only returns True if not part of a group
         '''
         if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability 
@@ -293,9 +318,9 @@ class officer(mob):
 
     def join_group(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Prevents this officer from being seen and interacted with, storing it as part of a group
         '''
         self.in_group = True
@@ -305,9 +330,9 @@ class officer(mob):
 
     def leave_group(self, group):
         '''
-        Inputs:
+        Input:
             group object from which this officer is leaving
-        Outputs:
+        Output:
             Allows this officer to be seen and interacted with, moving it to where the group was disbanded
         '''
         self.in_group = False
@@ -321,9 +346,9 @@ class officer(mob):
 
     def remove(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         super().remove()
@@ -333,9 +358,9 @@ class officer(mob):
 
     def update_veteran_icons(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Moves this officer's veteran icons to follow its images
         '''
         for current_veteran_icon in self.veteran_icons:
@@ -347,14 +372,13 @@ class officer(mob):
 
     def move(self, x_change, y_change):
         '''
-        Inputs:
+        Input:
             Same as superclass
-        Outputs:
+        Output:
             Same as superclass but also moves its veteran icons to follow its images
         '''
         super().move(x_change, y_change)
         self.update_veteran_icons()
-        #print(self.veteran_icons)
 
 class explorer(officer):
     '''
@@ -362,15 +386,9 @@ class explorer(officer):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
-        Inputs:
+        Input:
             Same as superclass
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.grid.find_cell(self.x, self.y).set_visibility(True)
         self.officer_type = 'explorer'
-        
-    #def update_tooltip(self): #test to show commodities carried
-    #    tooltip_list = []
-    #    for current_commodity in self.global_manager.get('commodity_types'):
-    #        tooltip_list.append(current_commodity + ': ' + str(self.inventory[current_commodity]))
-    #    self.set_tooltip(tooltip_list)

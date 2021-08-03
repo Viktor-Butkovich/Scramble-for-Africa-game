@@ -1,8 +1,8 @@
 def scale_coordinates(x, y, global_manager):
     '''
-    Inputs:
+    Input:
         Two int variables representing unscaled coordinates, global_manager_template object
-    Outputs:
+    Output:
         Returns a tuple of two int variables representing coordinates scaled to the user's resolution
     '''
     x_ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
@@ -13,9 +13,9 @@ def scale_coordinates(x, y, global_manager):
 
 def scale_width(width, global_manager):
     '''
-    Inputs:
+    Input:
         int representing unscaled pixel width, global_manager_template object
-    Outputs:
+    Output:
         Returns an int pixel width scaled to the user's resolution
     '''
     ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
@@ -24,9 +24,9 @@ def scale_width(width, global_manager):
 
 def scale_height(height, global_manager):
     '''
-    Inputs:
+    Input:
         int representing unscaled pixel height, global_manager_template object
-    Outputs:
+    Output:
         Returns an int pixel height scaled to the user's resolution
     '''
     ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
