@@ -1,5 +1,8 @@
 import random
 from . import csv_tools
+from . import notifications
+from . import choice_notifications
+from . import scaling
 
 class global_manager_template():
     '''
@@ -116,3 +119,65 @@ class flavor_text_manager_template():
             Returns a random flavor text statement based on the inputted string
         '''
         return(random.choice(self.subject_dict['explorer']))
+
+class value_tracker():
+    def __init__(self, value_key, initial_value, global_manager):
+        self.global_manager = global_manager
+        self.global_manager.set(value_key, initial_value)
+        self.value_label = 'none'
+        self.value_key = value_key
+
+    def get(self):
+        return(self.global_manager.get(self.value_key))
+
+    def change(self, value_change):
+        self.global_manager.set(self.value_key, self.get() + value_change)
+        if not self.value_label == 'none':
+            self.value_label.update_label(self.get())
+    
+    def set(self, new_value):
+        self.global_manager.set(self.value_key, initial_value)
+        if not self.value_label == 'none':
+            self.value_label.update_label(self.get())
+
+class notification_manager_template():
+    def __init__(self, global_manager):
+        self.notification_queue = []
+        self.notification_type_queue = []
+        self.choice_notification_choices_queue = []
+        self.choice_notification_info_dict_queue = []
+        self.global_manager = global_manager
+
+    def notification_to_front(self, message):
+        '''
+        Input:
+            string from the notification_queue representing the text of the new notification, global_manager_template object
+        Output:
+            Displays a new notification with text matching the inputted string. The type of notification is determined by first item of the notification_type_queue, a list of strings corresponding to the notification_queue.
+        '''
+        notification_type = self.notification_type_queue.pop(0)
+        if notification_type == 'roll':
+            new_notification = notifications.dice_rolling_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
+                                                                       ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
+            
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.start_rolling()
+                
+        elif notification_type == 'exploration':
+            new_notification = notifications.exploration_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
+                                                                      ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+            
+        elif notification_type == 'final_exploration':
+            new_notification = notifications.exploration_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
+                                                                      ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+            
+        elif notification_type == 'choice':
+            choice_notification_choices = self.choice_notification_choices_queue.pop(0)
+            choice_notification_info_dict = self.choice_notification_info_dict_queue.pop(0)
+            new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
+                                                                        ['strategic', 'europe'], 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, self.global_manager)
+
+        else:
+            new_notification = notifications.notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager), ['strategic', 'europe'],
+                                                          'misc/default_notification.png', message, self.global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
+    

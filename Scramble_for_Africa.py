@@ -14,6 +14,7 @@ import modules.groups as groups
 import modules.europe_transactions as europe_transactions
 import modules.labels as labels
 import modules.actor_match_tools as actor_match_tools
+import modules.instructions as instructions
 
 pygame.init()
 
@@ -108,8 +109,8 @@ global_manager.set('displayed_mob', 'none')
 global_manager.set('tile_info_display_list', [])
 global_manager.set('displayed_tile', 'none')
 global_manager.set('dice_list', [])
-global_manager.set('notification_queue', [])
-global_manager.set('notification_type_queue', [])
+#global_manager.set('notification_queue', [])
+#global_manager.set('notification_type_queue', [])
 pygame.key.set_repeat(300, 200)
 global_manager.set('crashed', False)
 global_manager.set('lmb_down', False)
@@ -127,6 +128,7 @@ global_manager.set('mouse_destination_x', 0)
 mouse_destination_y = 0
 global_manager.set('mouse_destination_y', 0)
 global_manager.set('making_mouse_box', False)
+global_manager.set('making_choice', False)
 
 global_manager.set('ongoing_exploration', False)
 
@@ -145,11 +147,12 @@ global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
 global_manager.set('old_mouse_x', old_mouse_x)
 global_manager.set('old_mouse_y', old_mouse_y)
+global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
+global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
 notification_tools.show_tutorial_notifications(global_manager)
 global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
-global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
 
 strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe'], global_manager)
 #europe_background_image = images.free_image('misc/europe_background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['europe'], global_manager)
@@ -180,6 +183,11 @@ global_manager.set('europe_grid', europe_grid)
 
 game_transitions.set_game_mode('strategic', global_manager)
 game_transitions.create_strategic_map(global_manager)
+
+global_manager.set('money_tracker', data_managers.value_tracker('money', 100, global_manager))
+labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+                   'misc/default_label.png', 'money', global_manager)
+                
 
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(round(grid_width / 8), global_manager), scaling.scale_height(round(grid_width / 8),
                                        global_manager), 'blue', 'none', True, ['strategic'], 'misc/european_hq_button.png', global_manager)
@@ -223,7 +231,7 @@ expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_mana
 #toggle_grid_lines_button = button.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager),
 #scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', pygame.K_g, ['strategic'], 'misc/grid_line_button.png', global_manager)
 
-instructions_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
                                      scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
 
 toggle_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',

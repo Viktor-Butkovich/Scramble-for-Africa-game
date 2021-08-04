@@ -157,6 +157,7 @@ class expedition(group):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.exploration_mark_list = []
+        self.exploration_cost = 2
 
     def can_move(self, x_change, y_change):
         future_x = self.x + x_change
@@ -214,72 +215,91 @@ class expedition(group):
             direction = 'south'
         else:
             direction = 'none'
-        self.just_promoted = False
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            self.global_manager.set('ongoing_exploration', True)
-            for current_grid in self.grids:
-                coordinates = (0, 0)
-                if current_grid.is_mini_grid:
-                    coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-                else:
-                    coordinates = (self.x + x_change, self.y + y_change)
-                self.exploration_mark_list.append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
-            text = ""
-            text += "The expedition heads towards the " + direction + ". /n"
-            text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
+            choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
+            notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
+                                                            ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
             
-            notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
-            
-            notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
-            
-            text += "/n"
-
-            if self.veteran:
-                text += ("The veteran explorer can roll twice and pick the higher result /n")
-                
-                first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 500), first_roll_list[0])
-                                
-                second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 380), second_roll_list[0])
-                                
-                text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
-                roll_result = max(first_roll_list[0], second_roll_list[0])
-                result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
-                text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
-            else:
-                roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-                self.display_exploration_die((500, 440), roll_list[0])
-                
-                text += roll_list[1]
-                roll_result = roll_list[0]
-                    
-            notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
-            
-            text += "/n"
-            if roll_result >= 4: #4+ required on D6 for exploration
-                if not future_cell.resource == 'none':
-                    text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
-                else:
-                    text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
-            else:
-                text += "You were not able to explore the tile. /n"
-            if roll_result == 1:
-                text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
-
-            if (not self.veteran) and roll_result == 6:
-                self.veteran = True
-                self.just_promoted = True
-                text += "This explorer has become a veteran explorer. /n"
-            if roll_result >= 4:
-                self.destination_cell = future_cell
-                notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
-            else:
-                notification_tools.display_notification(text, 'default', self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
+
+    def start_exploration(self, x_change, y_change):
+        future_x = self.x + x_change
+        future_y = self.y + y_change
+        roll_result = 0
+        if x_change > 0:
+            direction = 'east'
+        elif x_change < 0:
+            direction = 'west'
+        elif y_change > 0:
+            direction = 'north'
+        elif y_change < 0:
+            direction = 'south'
+        else:
+            direction = 'none'
+        future_cell = self.grid.find_cell(future_x, future_y)
+        self.just_promoted = False
+        self.global_manager.set('ongoing_exploration', True)
+        for current_grid in self.grids:
+            coordinates = (0, 0)
+            if current_grid.is_mini_grid:
+                coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+            else:
+                coordinates = (self.x + x_change, self.y + y_change)
+            self.exploration_mark_list.append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
+        text = ""
+        text += "The expedition heads towards the " + direction + ". /n"
+        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
             
+        notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
+            
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+            
+        text += "/n"
+
+        if self.veteran:
+            text += ("The veteran explorer can roll twice and pick the higher result /n")
+                
+            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            self.display_exploration_die((500, 500), first_roll_list[0])
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            self.display_exploration_die((500, 380), second_roll_list[0])
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            self.display_exploration_die((500, 440), roll_list[0])
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+                    
+        notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= 4: #4+ required on D6 for exploration
+            if not future_cell.resource == 'none':
+                text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
+            else:
+                text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
+        else:
+            text += "You were not able to explore the tile. /n"
+        if roll_result == 1:
+            text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
+
+        if (not self.veteran) and roll_result == 6:
+            self.veteran = True
+            self.just_promoted = True
+            text += "This explorer has become a veteran explorer. /n"
+        if roll_result >= 4:
+            self.destination_cell = future_cell
+            notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
 
     def complete_exploration(self): #roll_result, x_change, y_change

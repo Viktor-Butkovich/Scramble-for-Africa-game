@@ -2,9 +2,10 @@ import pygame
 import time
 from . import images
 from . import text_tools
-from . import instructions
+#from . import instructions
 from . import main_loop_tools
 from . import actor_utility
+from . import utility
 
 class button():
     '''
@@ -357,14 +358,18 @@ class button():
             elif self.button_type == 'do something':
                 text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
 
-            elif self.button_type == 'instructions':
-                if self.global_manager.get('current_instructions_page') == 'none':
-                    instructions.display_instructions_page(0, self.global_manager)
-                else:
-                    if not self.global_manager.get('current_instructions_page') == 'none':
-                        self.global_manager.get('current_instructions_page').remove()
-                        self.global_manager.set('current_instructions_page', 'none')
-                    self.global_manager.set('current_instructions_page_index', 0)
+            #elif self.button_type == 'instructions':
+            #    if self.global_manager.get('current_instructions_page') == 'none':
+            #        instructions.display_instructions_page(0, self.global_manager)
+            #    else:
+            #        if not self.global_manager.get('current_instructions_page') == 'none':
+            #            self.global_manager.get('current_instructions_page').remove()
+            #            self.global_manager.set('current_instructions_page', 'none')
+            #        self.global_manager.set('current_instructions_page_index', 0)
+
+            elif self.button_type == 'exploration':
+                self.expedition.start_exploration(self.x_change, self.y_change)
+                self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
 
             elif self.button_type == 'drop commodity':
                 if main_loop_tools.action_possible(self.global_manager):
