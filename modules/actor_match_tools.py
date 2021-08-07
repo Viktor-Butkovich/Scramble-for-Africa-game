@@ -127,6 +127,8 @@ class actor_match_label(label):
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
+        elif self.actor_label_type == 'movement':
+            self.message_start = 'Movement points: '
         else:
             self.message_start = 'none'
         self.actor = 'none'
@@ -153,6 +155,8 @@ class actor_match_label(label):
                     self.set_label(self.message_start + str(new_actor.cell.resource))
                 else:
                     self.set_label(self.message_start + 'unknown')
+            elif self.actor_label_type == 'movement':
+                self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
         else:
             self.set_label(self.message_start + 'n/a')
 

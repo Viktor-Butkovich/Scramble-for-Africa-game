@@ -47,6 +47,10 @@ class group(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self
         self.global_manager.get('group_list').append(self)
+        if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
+            self.set_movement_points(self.officer.movement_points)
+        else:
+            self.set_movement_points(self.worker.movement_points)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -77,28 +81,28 @@ class group(mob):
         Input:
             none
         Output:
-            Sets this group's tooltip to what it should be. A group's tooltip shows the name of the group, its officer, and its worker.
+            Sets this group's tooltip to what it should be. A group's tooltip shows the name of the group, its officer, its worker, and its movement points.
         '''
-        self.set_tooltip([self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name])
+        self.set_tooltip(["Name: " + self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def disband(self):
         '''
         Input:
             none
         Output:
-            Separates this group into its components, giving its inventory to the officer
+            Separates this group into its components, giving its inventory to the officer and setting their number of movement points to that of the group
         '''
         self.officer.inventory = self.inventory
         self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
+        self.worker.set_movement_points(self.movement_points)
         self.officer.veteran_icons = self.veteran_icons
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self.officer
-        #self.veteran_icons = []
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
-        #self.remove()
+        self.officer.set_movement_points(self.movement_points)
 
     def remove(self):
         '''
@@ -158,22 +162,25 @@ class expedition(group):
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.exploration_mark_list = []
         self.exploration_cost = 2
+        self.can_explore = True
 
-    def can_move(self, x_change, y_change):
+    '''def can_move(self, x_change, y_change):
         future_x = self.x + x_change
         future_y = self.y + y_change
+        result = super().can_move(x_change, y_change)
+        if result == False and 
         if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
             if not self.grid.find_cell(future_x, future_y).terrain == 'water':
                 return(True)
             else:
-                if self.grid.find_cell(future_x, future_y).visible:
+                :
                     text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
                     return(False)
-                else:
+                if not self.grid.find_cell(future_x, future_y).visible:
                     return(True) #will attempt to move there and discover it and discover it
         else:
             text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
-            return(False)
+            return(False)'''
 
     def display_exploration_die(self, coordinates, result):
         '''
@@ -321,6 +328,9 @@ class expedition(group):
                 super().move(x_change, y_change)
             else: #if discovered a water tile, update minimap but don't move there
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+                self.change_movement_points(-1 * self.movement_cost) #when exploring, movement points should be consumed regardless of exploration success or destination
+        else:
+            self.change_movement_points(-1 * self.movement_cost) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.set_name("Veteran expedition")
             self.officer.set_name("Veteran explorer")

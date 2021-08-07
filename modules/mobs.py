@@ -30,8 +30,27 @@ class mob(actor):
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
         global_manager.get('mob_list').append(self)
         self.set_name(name)
+        self.can_explore = False
+        self.max_movement_points = 1
+        self.movement_cost = 1
+        self.reset_movement_points()
         self.update_tooltip()
         self.select()
+
+    def change_movement_points(self, change):
+        self.movement_points += change
+        if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def set_movement_points(self, new_value):
+        self.movement_points = new_value
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def reset_movement_points(self):
+        self.movement_points = self.max_movement_points
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def change_inventory(self, commodity, change):
         '''
@@ -113,9 +132,9 @@ class mob(actor):
         Input:
             none
         Output:
-            Sets this mob's tooltip to its name
+            Sets this mob's tooltip to its name and movement points
         '''
-        self.set_tooltip([self.name])
+        self.set_tooltip(["Name: " + self.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def remove(self):
         '''
@@ -150,14 +169,22 @@ class mob(actor):
             if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
                 if self.grid.find_cell(future_x, future_y).visible:
                     if not self.grid.find_cell(future_x, future_y).terrain == 'water':
-                        return(True)
+                        if self.movement_points >= self.movement_cost:
+                            return(True)
+                        else:
+                            text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
+                            text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+                            return(False)
                     else:
                         if self.grid.find_cell(future_x, future_y).visible:
                             text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
                             return(False)
                 else:
-                    text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
-                    return(False)
+                    if not self.can_explore:
+                        text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
+                        return(False)
+                    else:
+                        return(True)
 
             else:
                 text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
@@ -181,6 +208,7 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
+        self.change_movement_points(-1 * self.movement_cost)
         #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1)
 
     def touching_mouse(self):

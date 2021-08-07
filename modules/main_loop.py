@@ -31,16 +31,22 @@ def main_loop(global_manager):
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
                 for current_button in global_manager.get('button_list'):
-                    if global_manager.get('current_game_mode') in current_button.modes and not global_manager.get('typing'):
+                    if current_button.can_show() and not global_manager.get('typing'):
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
                                 if current_button.has_released:
                                     current_button.on_click()
                                     current_button.has_released = False
+                                    current_button.being_pressed = True
                             else:#stop confirming an important button press if user starts doing something else
                                 current_button.confirming = False
+                                current_button.being_pressed = False
                         else:
                             current_button.confirming = False
+                            current_button.being_pressed = False
+                    else:
+                        current_button.confirming = False
+                        current_button.being_pressed = False
                 if event.key == pygame.K_RSHIFT:
                     global_manager.set('r_shift', 'down')
                 if event.key == pygame.K_LSHIFT:
@@ -142,7 +148,6 @@ def main_loop(global_manager):
                 #global_manager.set('mouse_origin_x', mouse_origin_x)
                 #global_manager.set('mouse_origin_y', mouse_origin_y)
                 #global_manager.set('making_mouse_box', True)
-                
         if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
             if not global_manager.get('lmb_down'):#if user just released lmb
                 clicked_button = False
@@ -173,12 +178,17 @@ def main_loop(global_manager):
                 global_manager.set('mouse_origin_y', mouse_origin_y)
                 global_manager.set('making_mouse_box', True)
 
-        if global_manager.get('lmb_down') or global_manager.get('rmb_down'):
+        if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):
                 if current_button.touching_mouse() and current_button.can_show():
                     current_button.showing_outline = True
-                else:
+                elif not current_button.being_pressed:
                     current_button.showing_outline = False
+        else:
+            for current_button in global_manager.get('button_list'):
+                if not current_button.being_pressed:
+                    current_button.showing_outline = False
+        
 
         if not global_manager.get('loading'):
             main_loop_tools.update_display(global_manager)

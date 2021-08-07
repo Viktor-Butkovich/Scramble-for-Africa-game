@@ -39,6 +39,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
             self.terrain = 'none'
+        self.update_tooltip()
 
     def change_inventory(self, commodity, change):
         '''
@@ -156,9 +157,9 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
             if self.cell.visible:
-                tooltip_message.append('This is a ' + self.cell.terrain + ' tile.')
+                tooltip_message.append('This is ' + utility.generate_article(self.cell.terrain) + ' ' + self.cell.terrain + ' tile.')
                 if not self.cell.resource == 'none':
-                    tooltip_message.append('This tile has a ' + self.cell.resource + ' resource.')
+                    tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource.')
             else:
                 tooltip_message .append('This tile has not been explored.')
             self.set_tooltip(tooltip_message)

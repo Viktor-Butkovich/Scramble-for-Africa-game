@@ -52,11 +52,26 @@ def generate_article(word):
         Returns 'an' if the word starts with a vowel or 'a' if the word does not start with a vowel
     '''
     vowels = ['a', 'e', 'i', 'o', 'u']
-    if word[0] in vowels:
+    exceptions = ['European', 'unit']
+    if word[0] in vowels and (not word in exceptions):
         return('an')
     else:
         return('a')
 
+def generate_capitalized_article(word):
+    '''
+    Input:
+        A string
+    Output:
+        Returns 'An' if the word starts with a vowel or 'A' if the word does not start with a vowel
+    '''
+    vowels = ['a', 'e', 'i', 'o', 'u']
+    exceptions = ['European', 'unit']
+    if word[0] in vowels and (not word in exceptions):
+        return('An')
+    else:
+        return('A')
+    
 def add_to_message(message, new):
     '''
     Input:

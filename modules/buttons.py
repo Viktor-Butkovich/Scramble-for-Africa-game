@@ -49,6 +49,7 @@ class button():
         self.tooltip_text = []
         self.update_tooltip()
         self.confirming = False
+        self.being_pressed = False
 
     def update_tooltip(self):
         '''

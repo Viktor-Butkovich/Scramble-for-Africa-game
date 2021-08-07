@@ -5,6 +5,7 @@ from .mobs import worker
 from . import main_loop_tools
 from . import notification_tools
 from . import text_tools
+from . import utility
 
 class european_hq_button(button):
     '''
@@ -88,7 +89,8 @@ class recruitment_button(button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id}
-                    notification_tools.display_choice_notification('Are you sure you want to recruit a ' + self.recruitment_type + '? A ' + self.recruitment_type + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
+                    notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + '? ' +
+                                                                   utility.generate_capitalized_article(self.recruitment_type) + ' ' + self.recruitment_type + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
                                                                    ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
@@ -106,7 +108,7 @@ class recruitment_button(button):
         Output:
             Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
         '''
-        self.set_tooltip(['Recruits a ' + self.recruitment_type + '.'])
+        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + '.'])
             
 #create button that goes to slots in europe screen and matches mobs in the europe grid
 

@@ -258,6 +258,12 @@ mob_name_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0
 
 global_manager.get('mob_info_display_list').append(mob_name_label)
 
+#mob movement points label
+mob_movement_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 325, global_manager), scaling.scale_width(100, global_manager),
+                        scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'movement', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+
+global_manager.get('mob_info_display_list').append(mob_movement_label)
+
 
 #tile background image
 tile_free_image_background = images.free_image('misc/mob_background.png', scaling.scale_coordinates(0, global_manager.get('default_display_height') - 560, global_manager), scaling.scale_width(125, global_manager),
