@@ -15,6 +15,7 @@ import modules.europe_transactions as europe_transactions
 import modules.labels as labels
 import modules.actor_match_tools as actor_match_tools
 import modules.instructions as instructions
+import modules.turn_management_tools as turn_management_tools
 
 pygame.init()
 
@@ -129,6 +130,7 @@ mouse_destination_y = 0
 global_manager.set('mouse_destination_y', 0)
 global_manager.set('making_mouse_box', False)
 global_manager.set('making_choice', False)
+global_manager.set('player_turn', True)
 
 global_manager.set('ongoing_exploration', False)
 
@@ -187,13 +189,18 @@ game_transitions.create_strategic_map(global_manager)
 global_manager.set('money_tracker', data_managers.value_tracker('money', 100, global_manager))
 labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
                    'misc/default_label.png', 'money', global_manager)
-                
+
+global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
+labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+                   'misc/default_label.png', 'turn', global_manager)
 
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(round(grid_width / 8), global_manager), scaling.scale_height(round(grid_width / 8),
                                        global_manager), 'blue', 'none', True, ['strategic'], 'misc/european_hq_button.png', global_manager)
 
 europe_transactions.european_hq_button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 100, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
                                        pygame.K_ESCAPE, False, ['europe'], 'misc/exit_european_hq_button.png', global_manager)
+
+end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic'], 'misc/end_turn_button.png', global_manager)
 
 button_start_x = 500#600#x position of leftmost button
 button_separation = 60#x separation between each button
@@ -315,6 +322,8 @@ for recruitment_index in range(len(recruitment_types)):
 
 global_manager.get('minimap_grid').calibrate(2, 2)
 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none') #tile info display should start empty
+
+turn_management_tools.start_turn(global_manager)
 
 main_loop.main_loop(global_manager)
 pygame.quit()

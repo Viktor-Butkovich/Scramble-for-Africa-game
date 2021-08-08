@@ -6,6 +6,8 @@ from . import text_tools
 from . import main_loop_tools
 from . import actor_utility
 from . import utility
+from . import turn_management_tools
+from . import notification_tools
 
 class button():
     '''
@@ -80,6 +82,8 @@ class button():
             self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
         elif self.button_type == 'drop commodity':
             self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " into this unit's tile"])
+        elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
+            self.set_tooltip(['Ends the current turn'])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -398,6 +402,16 @@ class button():
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
 
+            elif self.button_type == 'start end turn':
+                if main_loop_tools.action_possible(self.global_manager):
+                    choice_info_dict = {}
+                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                else:
+                    text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)
+    
+            elif self.button_type == 'end turn':
+                turn_management_tools.end_turn(self.global_manager)
+                
     def on_rmb_release(self):
         '''
         Input:

@@ -167,7 +167,7 @@ class mob(actor):
         future_y = self.y + y_change
         if not self.grid in self.global_manager.get('abstract_grid_list'):
             if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-                if self.grid.find_cell(future_x, future_y).visible:
+                if self.grid.find_cell(future_x, future_y).visible or self.can_explore:
                     if not self.grid.find_cell(future_x, future_y).terrain == 'water':
                         if self.movement_points >= self.movement_cost:
                             return(True)
@@ -176,16 +176,12 @@ class mob(actor):
                             text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
                             return(False)
                     else:
-                        if self.grid.find_cell(future_x, future_y).visible:
+                        if self.grid.find_cell(future_x, future_y).visible or self.can_explore:
                             text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
                             return(False)
                 else:
-                    if not self.can_explore:
-                        text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
-                        return(False)
-                    else:
-                        return(True)
-
+                    text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
+                    return(False)
             else:
                 text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
                 return(False)

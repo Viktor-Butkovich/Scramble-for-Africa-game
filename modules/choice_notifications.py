@@ -66,6 +66,8 @@ class choice_button(button):
             self.expedition = self.notification.choice_info_dict['expedition']
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
+        elif button_type == 'end turn':
+            self.message = 'End turn'
         elif button_type == 'none':
             self.message = 'Do nothing'
         else:
@@ -90,15 +92,13 @@ class choice_button(button):
             self.set_tooltip(['Recruits a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
         elif self.button_type == 'exploration':
             self.set_tooltip(['Attempts an exploration for ' + str(self.cost) + ' money'])
+        elif self.button_type == 'end turn':
+            self.set_tooltip(['Ends the current turn'])
         else:
             self.set_tooltip(['Does nothing'])
 
 class recruitment_choice_button(choice_button):
     def __init__(self, coordinates, width, height, button_type, modes, image_id, notification, global_manager):
-        #self.notification = notification
-        #self.recruitment_type = self.notification.choice_info_dict['recruitment_type']
-        #self.cost = self.notification.choice_info_dict['cost']
-        #self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
         super().__init__(coordinates, width, height, button_type, modes, image_id, notification, global_manager)
 
     def on_click(self):

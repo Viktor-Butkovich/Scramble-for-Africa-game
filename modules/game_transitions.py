@@ -59,3 +59,4 @@ def start_loading(global_manager):
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
     main_loop_tools.update_display(global_manager)
+

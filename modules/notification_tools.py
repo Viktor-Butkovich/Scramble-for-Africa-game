@@ -1,5 +1,3 @@
-#from . import notifications
-
 def display_notification(message, notification_type, global_manager): #default, exploration, or roll
     '''
     Input:
