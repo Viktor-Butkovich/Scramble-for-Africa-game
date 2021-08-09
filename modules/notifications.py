@@ -26,6 +26,7 @@ class notification(label):
         self.ideal_width = ideal_width
         self.minimum_height = minimum_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        self.in_notification = True
 
     def draw(self):
         '''

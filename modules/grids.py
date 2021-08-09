@@ -376,6 +376,12 @@ class grid():
         else:
             return(False)
 
+    def can_show(self):
+        if self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
+
 class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell in the attached grid that can be moved

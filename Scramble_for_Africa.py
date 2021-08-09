@@ -78,6 +78,21 @@ global_manager.set('terrain_colors',
 )
 
 global_manager.set('commodity_types', ['coffee', 'copper', 'diamonds', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
+
+global_manager.set('commodity_prices',
+    {
+    'coffee': 5,
+    'copper': 5,
+    'diamonds': 5,
+    'exotic wood': 5,
+    'fruit': 5,
+    'gold': 5,
+    'iron': 5,
+    'ivory': 5,
+    'rubber': 5
+    }
+)
+
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
 global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
@@ -297,10 +312,20 @@ tile_resource_label = actor_match_tools.actor_match_label(scaling.scale_coordina
                                                ['strategic'], 'misc/default_label.png', 'resource', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
+commodity_prices_x, commodity_prices_y = (870, 100)
+commodity_prices_height = 300
+commodity_prices_width = 200
+global_manager.set('commodity_prices_label', labels.commodity_prices_label(scaling.scale_coordinates(commodity_prices_x, commodity_prices_y, global_manager), scaling.scale_width(200, global_manager),
+                                                                           scaling.scale_height(commodity_prices_height, global_manager), ['europe'], 'misc/commodity_prices_label.png', global_manager))
+for current_index in range(len(global_manager.get('commodity_types'))):
+    new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 30,
+            commodity_prices_y + commodity_prices_height - 55 - (25 * current_index), global_manager), scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), ['europe'], global_manager)
+
+
 for current_index in range(len(global_manager.get('commodity_types'))):
     new_commodity_match_label = actor_match_tools.commodity_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (150 + (35 * current_index)), global_manager),
             scaling.scale_width(50, global_manager), scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', current_index, 'mob', global_manager)
-            #coordinates, ideal_width, minimum_height, modes, image_id, commodity_index, global_manager
+
     
     global_manager.get('mob_info_display_list').append(new_commodity_match_label)
 

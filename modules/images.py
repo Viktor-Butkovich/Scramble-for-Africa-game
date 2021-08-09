@@ -126,6 +126,7 @@ class actor_image():
             grid_x = self.actor.x
             grid_y = self.actor.y
         self.go_to_cell((grid_x, grid_y))
+        self.set_tooltip('')
 
     def get_center_coordinates(self):
         '''

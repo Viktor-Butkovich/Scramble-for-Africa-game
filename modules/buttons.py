@@ -52,6 +52,7 @@ class button():
         self.update_tooltip()
         self.confirming = False
         self.being_pressed = False
+        self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
 
     def update_tooltip(self):
         '''

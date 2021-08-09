@@ -124,5 +124,53 @@ class value_label(label):
 
     def update_label(self, new_value):
         self.set_label(self.value_name + ': ' + str(new_value))
-    
+
+class commodity_prices_label(label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+        self.ideal_width = minimum_width
+        self.minimum_height = height
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
+        self.update_label()
+
+    def update_label(self):
+        message = ["Selling prices: "]
+        for current_commodity in self.global_manager.get('commodity_types'):
+            current_line = current_commodity + ": " +  str(self.global_manager.get('commodity_prices')[current_commodity])
+            message.append(current_line)
+        self.set_label(message)
+            
+    def set_label(self, new_message):
+        '''
+        Input:
+            string representing this label's new text
+        Output:
+            Sets this label's text to a list based on the inputted string and changes its size as needed
+        '''
+        self.message = new_message
+        #self.format_message()
+        for text_line in self.message:
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name)
+
+    def draw(self):
+        '''
+        Input:
+            none
+        Output:
+            Draws this label's image with its text
+        '''
+        if self.global_manager.get('current_game_mode') in self.modes:
+            self.image.draw()
+            for text_line_index in range(len(self.message)):
+                text_line = self.message[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+
+    def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this label's tooltip to be the same as the text it displays
+        '''
+        self.set_tooltip(self.message)
 

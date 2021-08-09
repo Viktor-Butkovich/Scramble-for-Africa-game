@@ -76,6 +76,7 @@ class choice_button(button):
         self.font_size = scaling.scale_width(25, global_manager)
         self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
+        self.in_notification = True
 
     def on_click(self):
         super().on_click()

@@ -71,17 +71,19 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                     current_cell.show_num_mobs()
 
         for current_button in global_manager.get('button_list'):
-            if not current_button in global_manager.get('notification_list'): #notifications are drawn later
+            if not (current_button in global_manager.get('button_list') and current_button.in_notification): #notifications are drawn later
                 current_button.draw()
             if current_button.can_show_tooltip():
                 possible_tooltip_drawers.append(current_button) #only one of these will be drawn to prevent overlapping tooltips
                 
         for current_label in global_manager.get('label_list'):
-            if not current_label in global_manager.get('notification_list'):
+            if not (current_label in global_manager.get('button_list') and current_label.in_notification):
                 current_label.draw()
-        for current_notification in global_manager.get('notification_list'):
-            if not current_notification == global_manager.get('current_instructions_page'):
-                current_notification.draw()
+                
+        for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
+            if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
+                current_button.draw()
+                
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
 
@@ -89,7 +91,6 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
             global_manager.set('mouse_destination_x', mouse_destination_x + 4)
             global_manager.set('mouse_destination_y', mouse_destination_y + 4)
-            #mouse_destination_y += 4
             if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
                 mouse_box_color = 'white'
                 pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
@@ -157,7 +158,7 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
                 stopping = True
-            if (possible_tooltip_drawer in global_manager.get('notification_list')) and not stopping:
+            if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
                 possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
@@ -290,19 +291,20 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
             if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
                 breaking = False
                 for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
-                    for current_cell in current_grid.cell_list:
-                        if current_cell.touching_mouse():
-                            if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
-                                if not current_cell.terrain == 'none': #if off map, do not move minimap there
-                                    main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                    global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                            elif current_grid == global_manager.get('strategic_map_grid'):
-                                global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
-                            breaking = True
-                            break
+                    if current_grid.can_show():
+                        for current_cell in current_grid.cell_list:
+                            if current_cell.touching_mouse():
+                                if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
+                                    if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                                        main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                        global_manager.get('minimap_grid').calibrate(main_x, main_y)
+                                elif current_grid == global_manager.get('strategic_map_grid'):
+                                    global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                                breaking = True
+                                break
+                            if breaking:
+                                break
                         if breaking:
                             break
-                    if breaking:
-                        break
     global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
