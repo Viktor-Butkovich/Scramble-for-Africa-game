@@ -42,7 +42,7 @@ def create_strategic_map(global_manager):
     main_loop_tools.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
-        if current_grid in global_manager.get('abstract_grid_list'):
+        if current_grid in global_manager.get('abstract_grid_list'): #if europe grid
             new_terrain = tiles.abstract_tile(current_grid, current_grid.tile_image_id, current_grid.name, ['strategic', 'europe'], global_manager)
         else:
             for current_cell in current_grid.cell_list:

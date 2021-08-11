@@ -130,12 +130,23 @@ class commodity_prices_label(label):
         self.ideal_width = minimum_width
         self.minimum_height = height
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
+        self.font_size = scaling.scale_width(30, global_manager)
+        self.font_name = "Times New Roman"
+        self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 
     def update_label(self):
-        message = ["Selling prices: "]
+        message = ["Prices: "]
+        widest_commodity_width = 0 #text_tools.message_width(message, fontsize, font_name)
         for current_commodity in self.global_manager.get('commodity_types'):
-            current_line = current_commodity + ": " +  str(self.global_manager.get('commodity_prices')[current_commodity])
+            current_message_width = text_tools.message_width(current_commodity, self.font_size, self.font_name)
+            if current_message_width > widest_commodity_width:
+                widest_commodity_width = current_message_width
+        for current_commodity in self.global_manager.get('commodity_types'):
+            current_line = ''
+            while text_tools.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
+                current_line += ' '
+            current_line += current_commodity + ": " +  str(self.global_manager.get('commodity_prices')[current_commodity])
             message.append(current_line)
         self.set_label(message)
             
@@ -149,8 +160,12 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name)
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width + 20:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20
+                self.image.width = self.width
+                self.Rect.width = self.width
+                self.image.set_image(self.image.image_id) #update width scaling
+                self.image.Rect = self.Rect
 
     def draw(self):
         '''

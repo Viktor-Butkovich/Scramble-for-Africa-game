@@ -73,8 +73,8 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         for current_button in global_manager.get('button_list'):
             if not (current_button in global_manager.get('button_list') and current_button.in_notification): #notifications are drawn later
                 current_button.draw()
-            if current_button.can_show_tooltip():
-                possible_tooltip_drawers.append(current_button) #only one of these will be drawn to prevent overlapping tooltips
+                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                    possible_tooltip_drawers = [current_button]
                 
         for current_label in global_manager.get('label_list'):
             if not (current_label in global_manager.get('button_list') and current_label.in_notification):
@@ -83,6 +83,8 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
             if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
                 current_button.draw()
+                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                    possible_tooltip_drawers = [current_button]#notifications have priority over buttons and will be shown first
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
@@ -96,7 +98,10 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
             
         if not global_manager.get('current_instructions_page') == 'none':
-            global_manager.get('current_instructions_page').draw()
+            instructions_page = global_manager.get('current_instructions_page')
+            instructions_page.draw()
+            if instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                possible_tooltip_drawers = [instructions_page]#instructions have priority over everything
         if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
             global_manager.set('mouse_moved_time', time.time())
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
@@ -270,7 +275,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 if current_grid == global_manager.get('minimap_grid'):
                                     main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
                                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
-                                elif current_grid == global_manager.get('strategic_map_grid'):
+                                else: #elif current_grid == global_manager.get('strategic_map_grid'):
                                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
 
         else:
@@ -300,6 +305,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                         global_manager.get('minimap_grid').calibrate(main_x, main_y)
                                 elif current_grid == global_manager.get('strategic_map_grid'):
                                     global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                                else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
                                 breaking = True
                                 break
                             if breaking:

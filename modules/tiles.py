@@ -35,6 +35,13 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
+        elif self.name == 'Europe': #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
+            self.cell.tile = self
+            self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
+            #self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
+            self.image_dict['hidden'] = 'scenery/paper_hidden.png'
+            self.set_visibility(self.cell.visible)
+            self.can_hold_commodities = True
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
@@ -50,7 +57,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
-            self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
+            if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
+                self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
             if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
 
@@ -63,7 +71,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
-            self.get_equivalent_tile.inventory[commodity] = new_value
+            if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
+                self.get_equivalent_tile.inventory[commodity] = new_value
             if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
 
@@ -81,6 +90,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             return(self.grid.mini_grid.find_cell(mini_x, mini_y).tile)
+        return('none')
             
     def set_visibility(self, new_visibility):
         '''

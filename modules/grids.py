@@ -26,6 +26,8 @@ class grid():
         self.global_manager.get('grid_list').append(self)
         self.grid_line_width = grid_line_width
         self.is_mini_grid = False
+        self.is_abstract_grid = False
+        self.attached_grid = 'none'
         self.modes = modes
         self.origin_x, self.origin_y = origin_coordinates
         self.coordinate_width = coordinate_width
@@ -530,6 +532,7 @@ class abstract_grid(grid):
             global_manager: global_manager_template object
         '''
         super().__init__(origin_coordinates, pixel_width, pixel_height, 1, 1, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
+        self.is_abstract_grid = True
         self.name = name
         self.global_manager.get('abstract_grid_list').append(self)
         self.tile_image_id = tile_image_id

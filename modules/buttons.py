@@ -80,9 +80,15 @@ class button():
         elif self.button_type == 'merge':
             self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
         elif self.button_type == 'pick up commodity':
-            self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'drop commodity':
-            self.set_tooltip(["Transfers 1 " + self.global_manager.get('resource_types')[self.attached_label.commodity_index] + " into this unit's tile"])
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
         else:
@@ -482,7 +488,10 @@ class selected_icon(button):
         '''
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
-            self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
+                self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            else: #otherwise, show info of tile that mob is on without moving minimap
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
             for current_image in self.attached_mob.images:
                 if not current_image.current_cell == 'none':

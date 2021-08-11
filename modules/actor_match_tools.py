@@ -146,12 +146,16 @@ class actor_match_label(label):
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + str(new_actor.name))
             elif self.actor_label_type == 'terrain':
-                if self.actor.cell.visible:
+                if new_actor.grid.is_abstract_grid:
+                    self.set_label(self.message_start + 'n/a')
+                elif self.actor.cell.visible:
                     self.set_label(self.message_start + str(new_actor.cell.terrain))
                 else:
                     self.set_label(self.message_start + 'unknown')
             elif self.actor_label_type == 'resource':
-                if self.actor.cell.visible:
+                if new_actor.grid.is_abstract_grid:
+                    self.set_label(self.message_start + 'n/a')
+                elif self.actor.cell.visible:
                     self.set_label(self.message_start + str(new_actor.cell.resource))
                 else:
                     self.set_label(self.message_start + 'unknown')
@@ -181,9 +185,9 @@ class commodity_match_label(actor_match_label):
         self.commodity_index = commodity_index
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager   
         if matched_actor_type == 'mob':
-            self.commodity_button = label_button((self.x  + scaling.scale_width(175, self.global_manager), self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager)
+            self.commodity_button = label_button((self.x  + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager)
         elif matched_actor_type == 'tile':
-            self.commodity_button = label_button((self.x + scaling.scale_width(175, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
+            self.commodity_button = label_button((self.x + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
 
     def calibrate(self, new_actor):
         '''

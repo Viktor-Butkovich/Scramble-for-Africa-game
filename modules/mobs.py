@@ -1,5 +1,6 @@
 import pygame
 import time
+#import random #test showing how to add to inventory
 from . import images
 from . import text_tools
 from . import utility
@@ -36,6 +37,7 @@ class mob(actor):
         self.reset_movement_points()
         self.update_tooltip()
         self.select()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def change_movement_points(self, change):
         self.movement_points += change
@@ -86,7 +88,9 @@ class mob(actor):
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
-        else:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), new_grid.cell_list[0].tile)
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), new_grid.cell_list[0].tile)
+        else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
         for current_image in self.images:
@@ -114,6 +118,7 @@ class mob(actor):
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def draw_outline(self):
         '''
@@ -205,7 +210,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
         self.change_movement_points(-1 * self.movement_cost)
-        #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1)
+        #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1) #test showing how to add to inventory
 
     def touching_mouse(self):
         '''

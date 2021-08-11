@@ -109,7 +109,58 @@ class recruitment_button(button):
             Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
         '''
         self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + '.'])
-            
+
+class buy_commodity_button(button):
+    def __init__(self, coordinates, width, height, color, commodity_type, modes, global_manager):
+        '''
+        Input:
+            same as superclass, except:
+                recruitment_type: string representing the type of unit recruited by this button
+                button_type is always set to 'recruitment'
+        '''
+        possible_commodity_types = global_manager.get('commodity_types')
+        if commodity_type in possible_commodity_types:
+            image_id = 'scenery/resources/buttons/' + commodity_type + '.png'
+            #self.mob_image_id = 'mobs/' + commodity_type + '/default.png'
+        else:
+            image_id = 'misc/default_button.png'
+            #self.mob_image_id = 'mobs/default/default.png'
+        self.commodity_type = commodity_type
+        self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
+        global_manager.set(commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
+        super().__init__(coordinates, width, height, color, 'recruitment', 'none', modes, image_id, global_manager)
+
+    def on_click(self):
+        '''
+        Input:
+            none
+        Output:
+            Controls the button's behavior when clicked. A recruitment button will create a new unit and place it in Europe. The unit created will depend on the button's recruitment type.
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money_tracker').get() >= self.cost:
+                    self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
+                    self.global_manager.get('money_tracker').change(-1 * self.cost)
+                else:
+                    text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not purchase commodities', self.global_manager)
+            #if self.recruitment_type == 'explorer':
+            #    new_explorer = explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
+            #elif self.recruitment_type == 'European worker':
+            #    new_worker = worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
+
+    def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
+        '''
+        self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
+        
 #create button that goes to slots in europe screen and matches mobs in the europe grid
 
 #create button that matches different things that can be purchased and purchases them when clicked
