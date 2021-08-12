@@ -17,14 +17,14 @@ def roll(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, glo
     text_tools.print_to_screen(roll_type + ": " + str(requirement) + "+ required to succeed", global_manager)
     if result >= requirement:
         if result >= min_crit_success:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": critical success!", global_manager)
+            text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL SUCCESS!", global_manager)
         else:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": success!", global_manager)
+            text_tools.print_to_screen("You rolled a " + str(result) + ": SUCCESS!", global_manager)
     else:
         if result <= max_crit_fail:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": critical failure", global_manager)
+            text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL FAILURE", global_manager)
         else:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": failure", global_manager)
+            text_tools.print_to_screen("You rolled a " + str(result) + ": FAILURE", global_manager)
     return(result)
 
 def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, global_manager):
@@ -45,12 +45,12 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
     text += (roll_type + ": " + str(requirement) + "+ required to succeed /n")
     if result >= requirement:
         if result >= min_crit_success:
-            text += "You rolled a " + str(result) + ": critical success! /n"
+            text += "You rolled a " + str(result) + ": CRITICAL SUCCESS! /n"
         else:
-            text += "You rolled a " + str(result) + ": success! /n"
+            text += "You rolled a " + str(result) + ": SUCCESS! /n"
     else:
         if result <= max_crit_fail:
-            text += ("You rolled a " + str(result) + ": critical failure /n")
+            text += ("You rolled a " + str(result) + ": CRITICAL FAILURE /n")
         else:
-            text += ("You rolled a " + str(result) + ": failure /n")
+            text += ("You rolled a " + str(result) + ": FAILURE /n")
     return([result, text])

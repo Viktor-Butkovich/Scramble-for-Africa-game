@@ -35,7 +35,12 @@ class cell():
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
-        #self.set_visibility(True)
+
+    def contains_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle:
+                return(True)
+        return(False)
 
     def set_visibility(self, new_visibility):
         '''
@@ -66,7 +71,7 @@ class cell():
             Sets the terrain of this cell and its tile, if applicable, to the inputted string
         '''
         self.terrain = new_terrain
-        if (not self.tile == 'none'):# and self.tile.show_terrain:
+        if (not self.tile == 'none'):
             self.tile.set_terrain(new_terrain)
         self.color = self.global_manager.get('terrain_colors')[new_terrain]
             
@@ -142,3 +147,27 @@ class cell():
             return(True)
         else:
             return(False)
+
+    def has_worker(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns whether a worker is present in this cell
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list'):
+                return(True)
+        return(False)
+
+    def get_worker(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns the first worker present in this cell, or 'none' if no workers are present
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list'):
+                return(current_mob)
+        return('none')

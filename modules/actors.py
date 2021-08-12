@@ -1,9 +1,20 @@
 import pygame
 from . import text_tools
 from . import utility
+from . import actor_utility
 
 class actor():
+    '''
+    Object that can exist within certain coordinates on one or more grids and can optionally be able to hold an inventory of commodities
+    '''
     def __init__(self, coordinates, grids, modes, global_manager):
+        '''
+        Input:
+            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
+            grids: list of grid objects on which the mob's images will appear
+            modes: list of strings representing the game modes in which the mob can appear
+            global_manager: global_manager_template object used to manage a dictionary of shared variables
+        '''
         self.global_manager = global_manager
         global_manager.get('actor_list').append(self)
         self.modes = modes
@@ -13,52 +24,152 @@ class actor():
         self.name = ''
         self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
-        #self.controllable = False# obsolete but possibly usable later
         self.selected = False
+        self.can_hold_commodities = True
+        self.tooltip_text = []
+        if self.can_hold_commodities:
+            self.inventory_setup()
+
+    def inventory_setup(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this actor's inventory to a dictionary with a string key for each commodity type corresponding to an int representing the amount of the commodity held, which is initially set to 0
+        '''
+        self.inventory = {}
+        for current_commodity in self.global_manager.get('commodity_types'):
+            self.inventory[current_commodity] = 0
+
+    def get_inventory(self, commodity):
+        '''
+        Input:
+            string representing the type of commodity to get the amount of
+        Output:
+            Returns the number of the inputted commodity held by this actor
+        '''
+        if self.can_hold_commodities:
+            return(self.inventory[commodity])
+        else:
+            return(-1)
+
+    def change_inventory(self, commodity, change):
+        '''
+        Input:
+            string representing the type of commodity to change the amount of, int representing the amount of the commodity to add or remove
+        Output:
+            Changes the number of the inputted commodity held by this actor by the inputted int
+        '''
+        if self.can_hold_commodities:
+            self.inventory[commodity] += change
+
+    def set_inventory(self, commodity, new_value):
+        '''
+        Input:
+            string representing the type of commodity to set the amount of, int representing the amount to set the commodity to
+        Output:
+            Sets the number of the inputted commodity held by this actor to the inputted int
+        '''
+        if self.can_hold_commodities:
+            self.inventory[commodity] = new_value
+
+    def get_held_commodities(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns a list of string variables representing each commodity of which this actor holds more than 0 units
+        '''
+        if self.can_hold_commodities:
+            held_commodities = []
+            for current_commodity in self.global_manager.get('commodity_types'):
+                if self.get_inventory(current_commodity) > 0:
+                    held_commodities.append(current_commodity)
+            return(held_commodities)
+        else:
+            return([])
     
     def set_name(self, new_name):
+        '''
+        Input:
+            string representing what this actor's name will be set to
+        Output:
+            Sets this actor's name to the inputted string
+        '''
         self.name = new_name        
 
     def set_coordinates(self, x, y):
-        #if self.is_clear(x, y):
-        #self.grid.find_cell(self.x, self.y).occupied = False
+        '''
+        Input:
+            int representing the x coordinate to move this actor to, int representing the y coordinate to move this actor to
+        Output:
+            Sets this actor's x and y coordinates to the inputted int values
+        '''
         self.x = x
         self.y = y
-        #self.grid.find_cell(self.x, self.y).occupied = True
-        #else:#elif able_to_print:
-        #    text_tools.print_to_screen('This cell is blocked.', self.global_manager)
             
     def set_tooltip(self, new_tooltip):
+        '''
+        Input:
+            list of string variables to set this actor's tooltip to
+        Output:
+            Sets this actor's tooltip to the inputted list of string variables, with each string representing a line of tooltip text
+        '''
+        self.tooltip_text = new_tooltip
         for current_image in self.images:
             current_image.set_tooltip(new_tooltip)
     
     def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this actor's tooltip to what it should currently be. By default, an actor's tooltip will be its name.
+        '''
         self.set_tooltip([self.name])
         
     def remove(self):
+        '''
+        Input:
+            none
+        Output:
+            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        '''
         self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
         for current_image in self.images:
             self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
 
-    def interact(self, other):
-        if other == None:
-            text_tools.print_to_screen(self.name + ' has nothing to interact with.')
-        else:
-            text_tools.print_to_screen(self.name + ' is interacting with ' + other.name)
-
     def touching_mouse(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns whether any of this actor's images are colliding with the mouse
+        '''
         for current_image in self.images:
             if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
                 return(True)
         return(False) #return false if none touch mouse
 
-    def can_show_tooltip(self): #moved to actor
+    def can_show_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Returns whether this actor's tooltip should be shown. By default, an actor's tooltip should be shown when one of its images is colliding with the mouse and the game mode is correct.
+        '''
         if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability 
             return(True)
         else:
             return(False)
 
     def draw_tooltip(self, y_displacement):
+        '''
+        Input:
+            y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
+        Output:
+            Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
+        '''
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         tooltip_image = self.images[0]

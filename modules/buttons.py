@@ -2,9 +2,12 @@ import pygame
 import time
 from . import images
 from . import text_tools
-from . import instructions
-from . import main_loop
+#from . import instructions
+from . import main_loop_tools
 from . import actor_utility
+from . import utility
+from . import turn_management_tools
+from . import notification_tools
 
 class button():
     '''
@@ -12,12 +15,12 @@ class button():
     '''
     def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager):
         '''
-        Inputs:
+        Input:
             coordinates: tuple of 2 integers for initial coordinate x and y values
             width: int representing the width in pixels of the button
             height: int representing the height in pixels of the button
             color: string representing a color in the color_dict dictionary
-            button_type: string representing a subtype of button, such as a 'move up' button
+            button_type: string representing a subtype of button, such as a 'move up' button, determining its tooltip and behavior
             keybind_id: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
             modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
             image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
@@ -45,14 +48,17 @@ class button():
         self.showing_outline = False
         self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
+        self.tooltip_text = []
         self.update_tooltip()
         self.confirming = False
+        self.being_pressed = False
+        self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
 
     def update_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Calls the set_tooltip function with a list of strings that will each be a line in this button's tooltip.
         '''
         if self.button_type == 'move up':
@@ -72,15 +78,33 @@ class button():
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
-            self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer."])
+            self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
+        elif self.button_type == 'split':
+            self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
+        elif self.button_type == 'embark':
+            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected."])
+        elif self.button_type == 'disembark':
+            self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
+        elif self.button_type == 'pick up commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+            else:
+                self.set_tooltip(['none'])
+        elif self.button_type == 'drop commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
+            else:
+                self.set_tooltip(['none'])
+        elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
+            self.set_tooltip(['Ends the current turn'])
         else:
             self.set_tooltip(['placeholder'])
             
     def set_keybind(self, new_keybind):
         '''
-        Inputs:
+        Input:
             new_keybind: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
-        Outputs:
+        Output:
             Sets keybind_name to a string used in the tooltip that describes the key to which this button is bound.
         '''
         if new_keybind == pygame.K_a:
@@ -174,9 +198,9 @@ class button():
 
     def set_tooltip(self, tooltip_text):
         '''
-        Inputs:
+        Input:
             tooltip_text: a list of strings representing the lines of the tooltip message
-        Outputs:
+        Output:
             Creates a tooltip message and the Pygame Rect objects (background and outline) required to display it.
         '''
         self.tooltip_text = tooltip_text
@@ -193,9 +217,9 @@ class button():
 
     def touching_mouse(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns whether this button and the mouse are colliding
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
@@ -205,38 +229,39 @@ class button():
 
     def can_show_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns whether the button's tooltip should be shown; its tooltip should be shown when the button is being displayed and is colliding with the mouse
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
+        if self.touching_mouse() and self.can_show():
             return(True)
         else:
             return(False)
         
     def draw(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Draws this button with a description of its keybind if applicable, along with an outline if it's key is being pressed
         '''
-        if self.showing_outline: 
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['dark gray'], self.outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
-        self.image.draw()
-        if self.has_keybind: #The key to which a button is bound will appear on the button's image
-            message = self.keybind_name
-            color = 'white'
-            textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
-            self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
+        if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
+            if self.showing_outline: 
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
+            self.image.draw()
+            if self.has_keybind: #The key to which a button is bound will appear on the button's image
+                message = self.keybind_name
+                color = 'white'
+                textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
+                self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
 
     def draw_tooltip(self, y_displacement):
         '''
-        Inputs:
+        Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
-        Outputs:
+        Output:
             Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
         '''
         if self.can_show():
@@ -259,18 +284,18 @@ class button():
 
     def on_rmb_click(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Controls the button's behavior when right clicked. By default, the button's right click behavior is the same as its left click behavior.
         '''
         self.on_click()
 
     def on_click(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Controls the button's behavior when left clicked. This behavior depends on the button's button_type value.
         '''
         if self.can_show():
@@ -280,10 +305,10 @@ class button():
 
             elif self.button_type == 'move left':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(-1, 0):
-                                mob.move(-1, 0) #x_change, y_change
+                                mob.move(-1, 0)
                                 self.global_manager.set('show_selection_outlines', True)
                                 self.global_manager.set('last_selection_outline_switch', time.time())
                     else:
@@ -293,7 +318,7 @@ class button():
                         
             elif self.button_type == 'move right':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(1, 0):
                                 mob.move(1, 0)
@@ -306,7 +331,7 @@ class button():
                         
             elif self.button_type == 'move up':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, 1):
                                 mob.move(0, 1)
@@ -319,7 +344,7 @@ class button():
                         
             elif self.button_type == 'move down':
                 if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-                    if main_loop.action_possible(self.global_manager):
+                    if main_loop_tools.action_possible(self.global_manager):
                         for mob in self.global_manager.get('mob_list'):
                             if mob.selected and mob.can_move(0, -1):
                                 mob.move(0, -1)
@@ -351,38 +376,78 @@ class button():
             elif self.button_type == 'do something':
                 text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
 
-            elif self.button_type == 'instructions':
-                if self.global_manager.get('current_instructions_page') == 'none':
-                    instructions.display_instructions_page(0, self.global_manager)
-                else:
-                    if not self.global_manager.get('current_instructions_page') == 'none':
-                        self.global_manager.get('current_instructions_page').remove()
-                        self.global_manager.set('current_instructions_page', 'none')
-                    self.global_manager.set('current_instructions_page_index', 0)
+            #elif self.button_type == 'instructions':
+            #    if self.global_manager.get('current_instructions_page') == 'none':
+            #        instructions.display_instructions_page(0, self.global_manager)
+            #    else:
+            #        if not self.global_manager.get('current_instructions_page') == 'none':
+            #            self.global_manager.get('current_instructions_page').remove()
+            #            self.global_manager.set('current_instructions_page', 'none')
+            #        self.global_manager.set('current_instructions_page_index', 0)
 
+            elif self.button_type == 'exploration':
+                self.expedition.start_exploration(self.x_change, self.y_change)
+                self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
+
+            elif self.button_type == 'drop commodity':
+                if main_loop_tools.action_possible(self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        displayed_mob.change_inventory(commodity, -1)
+                        displayed_tile.change_inventory(commodity, 1)
+                    else:
+                        text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
+                else:
+                     text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
+                
+            elif self.button_type == 'pick up commodity':
+                if main_loop_tools.action_possible(self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        displayed_mob.change_inventory(commodity, 1)
+                        displayed_tile.change_inventory(commodity, -1)
+                    else:
+                        text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
+                else:
+                     text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
+
+            elif self.button_type == 'start end turn':
+                if main_loop_tools.action_possible(self.global_manager):
+                    choice_info_dict = {}
+                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                else:
+                    text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)
+    
+            elif self.button_type == 'end turn':
+                turn_management_tools.end_turn(self.global_manager)
+                
     def on_rmb_release(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Controls what the button does when right clicked and released. By default, buttons will stop showing their outlines when released.
         '''
         self.on_release() #if any rmb buttons did something different on release, change in subclass
                 
     def on_release(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Controls what the button does when left clicked and released. By default, buttons will stop showing their outlines when released.
         '''
         self.showing_outline = False
 
     def remove(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
@@ -390,12 +455,13 @@ class button():
 
     def can_show(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
-            Returns whether the button can currently be shown. Subclass versions will not necessarily always return True.
+        Output:
+            Returns whether the button can currently be shown
         '''
-        return(True)
+        if self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
 
 class selected_icon(button):
     '''
@@ -403,7 +469,7 @@ class selected_icon(button):
     '''
     def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, global_manager):
         '''
-        Inputs:
+        Input:
             coordinates: tuple of 2 integers for initial coordinate x and y values
             width: int representing the width in pixels of the button
             height: int representing the height in pixels of the button
@@ -421,13 +487,18 @@ class selected_icon(button):
 
     def on_click(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Moves minimap to attached selected mob when clicked
         '''
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-            self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            self.showing_outline = True
+            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
+                self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
+            else: #otherwise, show info of tile that mob is on without moving minimap
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
             for current_image in self.attached_mob.images:
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
@@ -437,9 +508,9 @@ class selected_icon(button):
                         
     def draw(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Draws a copy of the attached selected mob's image at this button's location with the button's shape as a background
         '''
         new_selected_list = actor_utility.get_selected_list(self.global_manager)
@@ -449,18 +520,16 @@ class selected_icon(button):
                 self.attached_mob = self.old_selected_list[self.selection_index]
                 self.image.set_image(self.attached_mob.images[0].image_id)
         if len(self.old_selected_list) > self.selection_index:
-            #self.set_tooltip(self.attached_mob.images[0].tooltip_text)
             super().draw()
         else:
             self.image.set_image('misc/empty.png')
             self.attached_mob = 'none'
-            #self.set_tooltip('')
 
     def can_show(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns True if this button has an attached selected mob - it is not visible when there is no attached selected mob
         '''
         if self.attached_mob == 'none':
@@ -470,12 +539,12 @@ class selected_icon(button):
 
     def update_tooltip(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Sets the button's tooltip to that of its attached selected mob
         '''
-        if not self.can_show():#self.attached_mob == 'none':
+        if not self.can_show():
             self.set_tooltip([])
         else:
             self.set_tooltip(self.attached_mob.images[0].tooltip_text)
@@ -483,7 +552,7 @@ class selected_icon(button):
 class switch_grid_button(button):
     def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grid, global_manager):
         '''
-        Inputs:
+        Input:
             same as superclass, except:
             destination_grid: grid object representing the grid to which this button sends mobs
         '''
@@ -492,52 +561,58 @@ class switch_grid_button(button):
 
     def on_click(self):      
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Controls the button's behavior when left clicked. Grid switching buttons require one mob to be selected and outside of this button's destination grid to be used, and move the selected mob to the destination grid when used.
         '''
-        if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
-            if main_loop.action_possible(self.global_manager):
-                for mob in self.global_manager.get('mob_list'):
-                    if mob.selected and not mob.grids[0] == self.destination_grid:
-                        destination_x = 0
-                        destination_y = 0
-                        if self.destination_grid in self.global_manager.get('abstract_grid_list'):
-                            destination_x, destination_y = (0, 0)
-                        else:
-                            destination_x, destination_y = actor_utility.get_start_coordinates(self.global_manager)
-                        mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
-                        self.global_manager.set('show_selection_outlines', True)
-                        self.global_manager.set('last_selection_outline_switch', time.time())
+        if self.can_show():
+            self.showing_outline = True
+            if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+                if main_loop_tools.action_possible(self.global_manager):
+                    for mob in self.global_manager.get('mob_list'):
+                        if mob.selected and not mob.grids[0] == self.destination_grid:
+                            destination_x = 0
+                            destination_y = 0
+                            if self.destination_grid in self.global_manager.get('abstract_grid_list'):
+                                destination_x, destination_y = (0, 0)
+                            else:
+                                destination_x, destination_y = actor_utility.get_random_ocean_coordinates(self.global_manager)
+                            mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
+                            self.global_manager.set('show_selection_outlines', True)
+                            self.global_manager.set('last_selection_outline_switch', time.time())
+                else:
+                    text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
-        else:
-            text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
+                text_tools.print_to_screen("You can only move one entity at a time.", self.global_manager)
 
     def update_tooltip(self):
-        message = "Sends the currently selected entity to "
+        '''
+        Input:
+            none
+        Output:
+            Sets this button's tooltip to what it should be. A switch_grid_button's tooltip should describe the location that it sends units to
+        '''
+        message = "Sends the currently selected ship to "
         if self.button_type == 'to africa':
             message += "Africa."
         elif self.button_type == 'to europe':
             message += "Europe."
         self.set_tooltip([message])
 
-    def draw(self):
-        if self.can_show():
-            super().draw()
-
     def can_show(self):
         '''
-        Inputs:
+        Input:
             none
-        Outputs:
+        Output:
             Returns whether the button can currently be shown. A grid switching button is only shown when there is one mob selected and that mob is not on this button's destination grid.
         '''
         selected_list = actor_utility.get_selected_list(self.global_manager)
         if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
             return(False)
         elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
+            return(False)
+        elif not selected_list[0].can_travel: #only ships can move between grids
             return(False)
         else:
             return(super().can_show()) #if nothing preventing being shown, use conditions of superclass
