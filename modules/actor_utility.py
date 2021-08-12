@@ -27,10 +27,14 @@ def can_merge(global_manager):
     selected_list = get_selected_list(global_manager)
     if len(selected_list) == 1:
         officer_present = False
+        worker_present = False
         for current_selected in selected_list:
             if current_selected in global_manager.get('officer_list'):
                 officer_present = True
-        if officer_present:
+                for current_mob in current_selected.images[0].current_cell.contained_mobs:
+                    if current_mob in global_manager.get('worker_list'):
+                        worker_present = True
+        if officer_present and worker_present:
             return(True)
         else:
             return(False)
@@ -47,6 +51,22 @@ def can_split(global_manager):
     if len(selected_list) == 1 and selected_list[0] in global_manager.get('group_list'):
         return(True)
     return(False)
+
+def can_embark_vehicle(global_manager): #if 1 vehicle and 1 non-vehicle selected
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 2:
+        if (selected_list[0].is_vehicle and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle): #1 of each
+            if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
+                return(True) #later check to see if vehicle has room
+    return(False)
+
+def can_disembark_vehicle(global_manager): #if 1 vehicle with any contents is selected
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 1:
+        if selected_list[0].is_vehicle:
+            if len(selected_list[0].contained_mobs) > 0: #or if any commodities carried
+                return(True)
+    return(False)
     
 def get_selected_list(global_manager):
     '''
@@ -61,21 +81,15 @@ def get_selected_list(global_manager):
             selected_list.append(current_mob)
     return(selected_list)
 
-def get_start_coordinates(global_manager):
-    '''
-    Input:
-        global_manager_template object
-    Output:
-        Returns a random tuple of two ints representing the grid coordinates at which to start the game, which must be on the 2nd lowest row of the map on a land tile
-    '''
+def get_random_ocean_coordinates(global_manager):
     mob_list = global_manager.get('mob_list')
     mob_coordinate_list = []
-    start_x, start_y = (0, 0)
-    while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
-        start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
-        start_y = 1
-        if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
-            break
+    #start_x, start_y = (0, 0)
+    #while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
+    start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
+    start_y = 0
+    #if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
+    #    break
     return(start_x, start_y)
 
 def calibrate_actor_info_display(global_manager, info_display_list, new_actor):

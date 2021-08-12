@@ -185,9 +185,10 @@ class commodity_match_label(actor_match_label):
         self.commodity_index = commodity_index
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager   
         if matched_actor_type == 'mob':
-            self.commodity_button = label_button((self.x  + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager)
+            self.commodity_button = label_button((self.x, self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager)
         elif matched_actor_type == 'tile':
-            self.commodity_button = label_button((self.x + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
+            self.commodity_button = label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
+            #self.commodity_button = label_button((self.x + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
 
     def calibrate(self, new_actor):
         '''
@@ -203,6 +204,9 @@ class commodity_match_label(actor_match_label):
                 self.showing_commodity = True
                 commodity = commodity_list[self.commodity_index]
                 self.set_label(commodity + ': ' + str(new_actor.get_inventory(commodity))) #format - commodity_name: how_many
+                self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
+                self.commodity_button.Rect.x = self.commodity_button.x
+                self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
                 self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
             else:
                 self.showing_commodity = False

@@ -79,6 +79,12 @@ class button():
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
             self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
+        elif self.button_type == 'split':
+            self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
+        elif self.button_type == 'embark':
+            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected."])
+        elif self.button_type == 'disembark':
+            self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
@@ -488,7 +494,7 @@ class selected_icon(button):
         '''
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
-            if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
+            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
                 self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
             else: #otherwise, show info of tile that mob is on without moving minimap
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
@@ -571,7 +577,7 @@ class switch_grid_button(button):
                             if self.destination_grid in self.global_manager.get('abstract_grid_list'):
                                 destination_x, destination_y = (0, 0)
                             else:
-                                destination_x, destination_y = actor_utility.get_start_coordinates(self.global_manager)
+                                destination_x, destination_y = actor_utility.get_random_ocean_coordinates(self.global_manager)
                             mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
                             self.global_manager.set('show_selection_outlines', True)
                             self.global_manager.set('last_selection_outline_switch', time.time())
@@ -587,7 +593,7 @@ class switch_grid_button(button):
         Output:
             Sets this button's tooltip to what it should be. A switch_grid_button's tooltip should describe the location that it sends units to
         '''
-        message = "Sends the currently selected entity to "
+        message = "Sends the currently selected ship to "
         if self.button_type == 'to africa':
             message += "Africa."
         elif self.button_type == 'to europe':
@@ -605,6 +611,8 @@ class switch_grid_button(button):
         if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
             return(False)
         elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
+            return(False)
+        elif not selected_list[0].can_travel: #only ships can move between grids
             return(False)
         else:
             return(super().can_show()) #if nothing preventing being shown, use conditions of superclass

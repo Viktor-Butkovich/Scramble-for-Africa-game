@@ -2,6 +2,7 @@ import pygame
 from .buttons import button
 from .notifications import notification
 from . import mobs
+from . import vehicles
 from . import text_tools
 from . import scaling
 
@@ -110,4 +111,6 @@ class recruitment_choice_button(choice_button):
                 new_explorer = mobs.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = mobs.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
+            elif self.recruitment_type == 'ship':
+                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'ship', ['strategic', 'europe'], self.global_manager)
         super().on_click()

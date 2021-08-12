@@ -61,7 +61,7 @@ class recruitment_button(button):
                 recruitment_type: string representing the type of unit recruited by this button
                 button_type is always set to 'recruitment'
         '''
-        possible_recruitment_types = ['European worker', 'explorer']
+        possible_recruitment_types = ['European worker', 'explorer', 'ship']
         if recruitment_type in possible_recruitment_types:
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
@@ -73,6 +73,8 @@ class recruitment_button(button):
             self.cost = 5
         elif self.recruitment_type == 'European worker':
             self.cost = 3
+        elif self.recruitment_type == 'ship':
+            self.cost = 5
         else:
             self.cost = 0
         super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
@@ -108,7 +110,7 @@ class recruitment_button(button):
         Output:
             Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
         '''
-        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + '.'])
+        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + ' for ' + str(self.cost) + ' money.'])
 
 class buy_commodity_button(button):
     def __init__(self, coordinates, width, height, color, commodity_type, modes, global_manager):

@@ -23,6 +23,8 @@ class mob(actor):
             global_manager: global_manager_template object used to manage a dictionary of shared variables
         '''
         self.selected = False
+        self.in_group = False
+        self.in_vehicle = False
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
         self.selection_outline_color = 'bright green'
@@ -31,7 +33,11 @@ class mob(actor):
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
         global_manager.get('mob_list').append(self)
         self.set_name(name)
-        self.can_explore = False
+        self.can_explore = False #if can attempt to explore unexplored areas
+        self.can_swim = False #if can enter water areas without ships in them
+        self.can_walk = True #if can enter land areas
+        self.can_travel = False #if can go between Europe, Africa, etc.
+        self.is_vehicle = False
         self.max_movement_points = 1
         self.movement_cost = 1
         self.reset_movement_points()
@@ -172,18 +178,26 @@ class mob(actor):
         future_y = self.y + y_change
         if not self.grid in self.global_manager.get('abstract_grid_list'):
             if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-                if self.grid.find_cell(future_x, future_y).visible or self.can_explore:
-                    if not self.grid.find_cell(future_x, future_y).terrain == 'water':
+                future_cell = self.grid.find_cell(future_x, future_y)
+                if future_cell.visible or self.can_explore:
+                    destination_type = 'land'
+                    if future_cell.terrain == 'water':
+                        destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
+                    if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
                         if self.movement_points >= self.movement_cost:
                             return(True)
                         else:
                             text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
                             text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
                             return(False)
-                    else:
-                        if self.grid.find_cell(future_x, future_y).visible or self.can_explore:
-                            text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
-                            return(False)
+                    elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
+                        #if future_cell.visible or self.can_explore: #already checked earlier
+                        text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
+                        return(False)
+                    else: #if trying to swim in water and can't 
+                        #if future_cell.visible or self.can_explore: #already checked earlier
+                        text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                        return(False)
                 else:
                     text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
                     return(False)
@@ -236,6 +250,30 @@ class mob(actor):
         if self.global_manager.get('displayed_mob') == self: #self.selected:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
+    def can_show_tooltip(self):
+        if self.in_vehicle:
+            return(False)
+        else:
+            return(super().can_show_tooltip())
+
+    def hide_images(self):
+        for current_image in self.images:
+            current_image.remove_from_cell()
+
+    def embark_vehicle(self, vehicle):
+        self.in_vehicle = True
+        self.selected = False
+        self.hide_images()
+        vehicle.contained_mobs.append(self)
+
+    def disembark_vehicle(self, vehicle):
+        self.in_vehicle = False
+        self.x = vehicle.x
+        self.y = vehicle.y
+        for current_image in self.images:
+            current_image.add_to_cell()
+        #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
+
 class worker(mob):
     '''
     Mob that is considered a worker and can join groups
@@ -247,7 +285,6 @@ class worker(mob):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('worker_list').append(self)
-        self.in_group = False
 
     def can_show_tooltip(self):
         '''
@@ -256,8 +293,8 @@ class worker(mob):
         Output:
             Same as superclass but only returns True if not part of a group
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability
-            return(True)
+        if not (self.in_group or self.in_vehicle):
+            return(super().can_show_tooltip())
         else:
             return(False)
 
@@ -310,7 +347,6 @@ class officer(mob):
         global_manager.get('officer_list').append(self)
         self.veteran = False
         self.veteran_icons = []
-        self.in_group = False
         self.officer_type = 'default'
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -320,12 +356,12 @@ class officer(mob):
         Output:
             Same as superclass, except it also moves veteran icons to the new grid and coordinates
         '''
-        if (not self.in_group) and self.veteran:
+        if (not (self.in_group or self.in_vehicle)) and self.veteran:
             for current_veteran_icon in self.veteran_icons:
                 current_veteran_icon.remove()
             self.veteran_icons = []
         super().go_to_grid(new_grid, new_coordinates)
-        if (not self.in_group) and self.veteran:
+        if (not (self.in_group or self.in_vehicle)) and self.veteran:
             for current_grid in self.grids:
                 if current_grid == self.global_manager.get('minimap_grid'):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -340,8 +376,8 @@ class officer(mob):
         Output:
             Same as superclass but only returns True if not part of a group
         '''
-        if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes and not self.in_group: #and not targeting_ability 
-            return(True)
+        if not (self.in_group or self.in_vehicle):
+            return(super().can_show_tooltip())
         else:
             return(False)
 
@@ -372,6 +408,14 @@ class officer(mob):
             current_image.add_to_cell()
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
+
+    def disembark_vehicle(self, vehicle):
+        self.in_vehicle = False
+        self.x = vehicle.x
+        self.y = vehicle.y
+        self.update_veteran_icons() #not in superclass
+        for current_image in self.images:
+            current_image.add_to_cell()
 
     def remove(self):
         '''

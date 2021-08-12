@@ -44,7 +44,7 @@ class label(button):
             self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
             self.image.width = self.width
             self.Rect.width = self.width
-            self.image.set_image(self.image.image_id) #update width scaling
+            self.image.set_image(self.image.image_id)
             self.image.Rect = self.Rect
 
     def update_tooltip(self):

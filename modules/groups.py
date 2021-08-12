@@ -72,11 +72,11 @@ class group(mob):
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
                 self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
-        self.officer.join_group() #hides images
+        self.officer.join_group() #hides images self.worker.hide_images()#
         self.worker.go_to_grid(new_grid, new_coordinates)
-        self.worker.join_group()
+        self.worker.join_group() #self.worker.hide_images()#
 
-    def update_tooltip(self):
+    def update_tooltip(self): #to do: show carried commodities in tooltip
         '''
         Input:
             none
@@ -139,6 +139,14 @@ class group(mob):
             else:
                 current_veteran_icon.x = self.x
                 current_veteran_icon.y = self.y
+
+    def disembark_vehicle(self, vehicle):
+        self.in_vehicle = False
+        self.x = vehicle.x
+        self.y = vehicle.y
+        self.update_veteran_icons() #not in superclass
+        for current_image in self.images:
+            current_image.add_to_cell()
 
     def move(self, x_change, y_change):
         '''
