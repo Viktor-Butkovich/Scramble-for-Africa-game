@@ -430,11 +430,11 @@ class mini_grid(grid):
                 for current_image in current_mob.images:
                     if current_image.grid == self:
                         current_image.add_to_cell()
-        for current_officer in self.global_manager.get('officer_list'):
-            if not current_officer.in_group:
-                current_officer.update_veteran_icons()
-        for current_group in self.global_manager.get('officer_list'):
-            current_group.update_veteran_icons()
+        #for current_officer in self.global_manager.get('officer_list'):
+        #    if not current_officer.in_group:
+        #        current_officer.update_veteran_icons()
+        #for current_group in self.global_manager.get('officer_list'):
+        #    current_group.update_veteran_icons()
 
     def get_main_grid_coordinates(self, mini_x, mini_y):
         '''

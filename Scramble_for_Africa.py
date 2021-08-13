@@ -217,7 +217,7 @@ labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_di
                    'misc/default_label.png', 'turn', global_manager)
 
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(round(grid_width / 8), global_manager), scaling.scale_height(round(grid_width / 8),
-                                       global_manager), 'blue', 'none', True, ['strategic'], 'misc/european_hq_button.png', global_manager)
+                                       global_manager), 'blue', pygame.K_e, True, ['strategic'], 'misc/european_hq_button.png', global_manager)
 
 europe_transactions.european_hq_button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 100, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
                                        pygame.K_ESCAPE, False, ['europe'], 'misc/exit_european_hq_button.png', global_manager)

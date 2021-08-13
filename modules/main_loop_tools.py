@@ -284,9 +284,9 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                     if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
                         selected_new_mob = True
                         for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-                            if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group
-                                current_mob.select()#if mob can show
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
+                            #if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group, should be unnecessary because they are removed from cell when in group
+                            current_mob.select()#if mob can show
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid

@@ -388,12 +388,12 @@ class officer(mob):
         Output:
             Same as superclass, except it also moves veteran icons to the new grid and coordinates
         '''
-        if (not (self.in_group or self.in_vehicle)) and self.veteran:
+        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
             for current_veteran_icon in self.veteran_icons:
                 current_veteran_icon.remove()
-            self.veteran_icons = []
+        self.veteran_icons = []
         super().go_to_grid(new_grid, new_coordinates)
-        if (not (self.in_group or self.in_vehicle)) and self.veteran:
+        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
             for current_grid in self.grids:
                 if current_grid == self.global_manager.get('minimap_grid'):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -435,21 +435,10 @@ class officer(mob):
         self.in_group = False
         self.x = group.x
         self.y = group.y
-        self.update_veteran_icons()
         for current_image in self.images:
             current_image.add_to_cell()
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
-
-    def disembark_vehicle(self, vehicle):
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        self.update_veteran_icons() #not in superclass
-        for current_image in self.images:
-            current_image.add_to_cell()
-        self.select()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def remove(self):
         '''
@@ -462,30 +451,6 @@ class officer(mob):
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
-
-    def update_veteran_icons(self):
-        '''
-        Input:
-            none
-        Output:
-            Moves this officer's veteran icons to follow its images
-        '''
-        for current_veteran_icon in self.veteran_icons:
-            if current_veteran_icon.grid.is_mini_grid:
-                current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-            else:
-                current_veteran_icon.x = self.x
-                current_veteran_icon.y = self.y
-
-    def move(self, x_change, y_change):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass but also moves its veteran icons to follow its images
-        '''
-        super().move(x_change, y_change)
-        self.update_veteran_icons()
 
 class explorer(officer):
     '''

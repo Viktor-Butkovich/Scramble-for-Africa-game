@@ -70,7 +70,7 @@ class group(mob):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
         self.officer.join_group() #hides images self.worker.hide_images()#
         self.worker.go_to_grid(new_grid, new_coordinates)
@@ -125,38 +125,6 @@ class group(mob):
         self.remove()
         self.officer.remove()
         self.worker.remove()
-
-    def update_veteran_icons(self):
-        '''
-        Input:
-            none
-        Output:
-            Moves this group's veteran icons to follow its images
-        '''
-        for current_veteran_icon in self.veteran_icons:
-            if current_veteran_icon.grid.is_mini_grid:
-                current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-            else:
-                current_veteran_icon.x = self.x
-                current_veteran_icon.y = self.y
-
-    def disembark_vehicle(self, vehicle):
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        self.update_veteran_icons() #not in superclass
-        for current_image in self.images:
-            current_image.add_to_cell()
-
-    def move(self, x_change, y_change):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass but also moves its veteran icons to follow its images
-        '''
-        super().move(x_change, y_change)
-        self.update_veteran_icons()
 
 class expedition(group):
     '''
@@ -347,7 +315,7 @@ class expedition(group):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
         elif roll_result == 1:
             self.die()
             died = True

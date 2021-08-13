@@ -82,7 +82,7 @@ class button():
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
         elif self.button_type == 'crew':
-            self.set_tooltip(["Orders a worker to crew a vehicle, allowing the vehicle to move and take passengers and cargo. Requires that only a worker and an uncrewed vehicle are selected."])
+            self.set_tooltip(["Merges a vehicle and a worker in the same tile to form a crewed vehicle. Requires that only an uncrewed vehicle is selected in the same tile as a worker."])
         elif self.button_type == 'uncrew':
             self.set_tooltip(["Orders a vehicle's crew to leave the vehicle, allowing the worker to act independently. Requires that only a crewed vehicle is selected."])
         elif self.button_type == 'embark':

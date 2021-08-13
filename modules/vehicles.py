@@ -149,24 +149,21 @@ class crew_vehicle_button(button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 2:
-                    vehicle = 'none'
+                if len(selected_list) == 1 and selected_list[0].is_vehicle and not selected_list[0].has_crew:
+                    vehicle = selected_list[0]
                     crew = 'none'
-                    if selected_list[0].is_vehicle and selected_list[1].is_worker:
-                        vehicle = selected_list[0]
-                        crew = selected_list[1]
-                    elif selected_list[1].is_vehicle and selected_list[0].is_worker:
-                        vehicle = selected_list[1]
-                        crew = selected_list[0]
+                    for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                        if contained_mob.is_worker:
+                            crew = contained_mob
                     if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                         if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                             crew.crew_vehicle(vehicle)
                         else:
-                            text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed vehicle to crew the vehicle.", self.global_manager)
+                            text_tools.print_to_screen("You must select an uncrewed vehicle in the same tile as a worker to crew the vehicle.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed vehicle to crew the vehicle.", self.global_manager)
+                        text_tools.print_to_screen("You must select an uncrewed vehicle in the same tile as a worker to crew the vehicle.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed vehicle to crew the vehicle.", self.global_manager)
+                    text_tools.print_to_screen("You must select an uncrewed vehicle in the same tile as a worker to crew the vehicle.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not crew a vehicle.", self.global_manager)
 
