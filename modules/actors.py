@@ -30,6 +30,17 @@ class actor():
         if self.can_hold_commodities:
             self.inventory_setup()
 
+    def set_image(self, new_image):
+        for current_image in self.images:
+            current_image.set_image(new_image)
+        self.image_dict['default'] = self.image_dict[new_image]
+        if self.actor_type == 'mob':
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        elif self.actor_type == 'tile':
+            if self.global_manager.get('displayed_tile') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+
     def inventory_setup(self):
         '''
         Input:

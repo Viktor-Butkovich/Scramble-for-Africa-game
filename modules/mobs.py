@@ -25,6 +25,7 @@ class mob(actor):
         self.selected = False
         self.in_group = False
         self.in_vehicle = False
+        self.actor_type = 'mob'
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
         self.selection_outline_color = 'bright green'
@@ -36,14 +37,19 @@ class mob(actor):
         self.can_explore = False #if can attempt to explore unexplored areas
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
-        self.can_travel = False #if can go between Europe, Africa, etc.
         self.is_vehicle = False
+        self.is_worker = False
+        self.is_officer = False
+        self.is_group = False
         self.max_movement_points = 1
         self.movement_cost = 1
         self.reset_movement_points()
         self.update_tooltip()
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
+    def can_travel(self): #if can move between Europe, Africa, etc.
+        return(False) #different for subclasses
 
     def change_movement_points(self, change):
         self.movement_points += change
@@ -265,6 +271,7 @@ class mob(actor):
         self.selected = False
         self.hide_images()
         vehicle.contained_mobs.append(self)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
 
     def disembark_vehicle(self, vehicle):
         self.in_vehicle = False
@@ -272,6 +279,8 @@ class mob(actor):
         self.y = vehicle.y
         for current_image in self.images:
             current_image.add_to_cell()
+        self.select()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
         #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 
 class worker(mob):
@@ -285,6 +294,7 @@ class worker(mob):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('worker_list').append(self)
+        self.is_worker = True
 
     def can_show_tooltip(self):
         '''
@@ -297,6 +307,27 @@ class worker(mob):
             return(super().can_show_tooltip())
         else:
             return(False)
+
+    def crew_vehicle(self, vehicle):
+        self.in_vehicle = True
+        self.selected = False
+        self.hide_images()
+        vehicle.crew = self
+        vehicle.has_crew = True
+        vehicle.set_image('crewed')
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+
+    def uncrew_vehicle(self, vehicle):
+        self.in_vehicle = False
+        self.x = vehicle.x
+        self.y = vehicle.y
+        for current_image in self.images:
+            current_image.add_to_cell()
+        vehicle.crew = 'none'
+        vehicle.has_crew = False
+        vehicle.set_image('uncrewed')
+        self.select()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):
         '''
@@ -347,6 +378,7 @@ class officer(mob):
         global_manager.get('officer_list').append(self)
         self.veteran = False
         self.veteran_icons = []
+        self.is_officer = True
         self.officer_type = 'default'
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -416,6 +448,8 @@ class officer(mob):
         self.update_veteran_icons() #not in superclass
         for current_image in self.images:
             current_image.add_to_cell()
+        self.select()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def remove(self):
         '''

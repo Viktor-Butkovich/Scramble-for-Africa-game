@@ -440,6 +440,11 @@ class veteran_icon_image(tile_image):
             If not outside of this image's grid area and this image's actor can be shown, draw this image 
         '''
         if self.actor.actor.images[0].can_show() and self.can_show():
+            if self.grid.is_mini_grid:
+                self.actor.x, self.actor.y = self.grid.get_mini_grid_coordinates(self.actor.actor.x, self.actor.actor.y)
+            else:
+                self.actor.x = self.actor.actor.x
+                self.actor.y = self.actor.actor.y
             self.go_to_cell((self.actor.x, self.actor.y))
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 

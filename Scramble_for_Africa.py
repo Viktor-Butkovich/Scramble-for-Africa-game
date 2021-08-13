@@ -278,6 +278,10 @@ embark_vehicle_button = vehicles.embark_vehicle_button(group_button_coordinates,
 
 disembark_vehicle_button = vehicles.disembark_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_n, ['strategic', 'europe'], 'misc/disembark_vehicle_button.png', global_manager)
 
+crew_vehicle_button = vehicles.crew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_b, ['strategic', 'europe'], 'misc/embark_vehicle_button.png', global_manager)
+
+uncrew_vehicle_button = vehicles.uncrew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_v, ['strategic', 'europe'], 'misc/disembark_vehicle_button.png', global_manager)
+
 #mob background image
 mob_free_image_background = images.free_image('misc/mob_background.png', scaling.scale_coordinates(0, global_manager.get('default_display_height') - 245, global_manager), scaling.scale_width(125, global_manager),
                                               scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)

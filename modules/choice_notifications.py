@@ -112,5 +112,6 @@ class recruitment_choice_button(choice_button):
             elif self.recruitment_type == 'European worker':
                 new_worker = mobs.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':
-                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'ship', ['strategic', 'europe'], self.global_manager)
+                image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
+                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], image_dict, 'ship', ['strategic', 'europe'], 'none', self.global_manager)
         super().on_click()

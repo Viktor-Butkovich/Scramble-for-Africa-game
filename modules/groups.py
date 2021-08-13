@@ -33,7 +33,7 @@ class group(mob):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
-        
+        self.is_group = True
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))

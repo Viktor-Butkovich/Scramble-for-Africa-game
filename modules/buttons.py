@@ -81,8 +81,12 @@ class button():
             self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
+        elif self.button_type == 'crew':
+            self.set_tooltip(["Orders a worker to crew a vehicle, allowing the vehicle to move and take passengers and cargo. Requires that only a worker and an uncrewed vehicle are selected."])
+        elif self.button_type == 'uncrew':
+            self.set_tooltip(["Orders a vehicle's crew to leave the vehicle, allowing the worker to act independently. Requires that only a crewed vehicle is selected."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected."])
+            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected and that the vehicle is crewed."])
         elif self.button_type == 'disembark':
             self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
         elif self.button_type == 'pick up commodity':
@@ -612,7 +616,7 @@ class switch_grid_button(button):
             return(False)
         elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
             return(False)
-        elif not selected_list[0].can_travel: #only ships can move between grids
+        elif not selected_list[0].can_travel(): #only ships can move between grids
             return(False)
         else:
             return(super().can_show()) #if nothing preventing being shown, use conditions of superclass

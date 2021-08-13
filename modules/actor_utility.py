@@ -55,7 +55,8 @@ def can_split(global_manager):
 def can_embark_vehicle(global_manager): #if 1 vehicle and 1 non-vehicle selected
     selected_list = get_selected_list(global_manager)
     if len(selected_list) == 2:
-        if (selected_list[0].is_vehicle and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle): #1 of each
+        if (selected_list[0].is_vehicle and selected_list[0].has_crew and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle and selected_list[1].has_crew):
+            #1 of each, vehicle must have crew
             if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
                 return(True) #later check to see if vehicle has room
     return(False)
@@ -67,6 +68,23 @@ def can_disembark_vehicle(global_manager): #if 1 vehicle with any contents is se
             if len(selected_list[0].contained_mobs) > 0: #or if any commodities carried
                 return(True)
     return(False)
+
+def can_crew_vehicle(global_manager):
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 2:
+        if (selected_list[0].is_vehicle and not selected_list[0].has_crew and selected_list[1].is_worker) or (selected_list[0].is_worker and selected_list[1].is_vehicle and not selected_list[1].has_crew):
+            #1 of each, vehicle must not have crew
+            if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
+                return(True) #later check to see if vehicle has room
+    return(False)
+
+def can_uncrew_vehicle(global_manager):
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 1:
+        if selected_list[0].is_vehicle:
+            if selected_list[0].has_crew and len(selected_list[0].contained_mobs) == 0: #crew can only leave if has crew and no passengers
+                return(True)
+    return(False) 
     
 def get_selected_list(global_manager):
     '''
