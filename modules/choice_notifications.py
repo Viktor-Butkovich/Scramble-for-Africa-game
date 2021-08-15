@@ -109,6 +109,8 @@ class recruitment_choice_button(choice_button):
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type == 'explorer':
                 new_explorer = mobs.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
+            elif self.recruitment_type == 'engineer':
+                new_explorer = mobs.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = mobs.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

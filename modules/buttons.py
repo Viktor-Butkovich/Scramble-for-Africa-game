@@ -498,17 +498,20 @@ class selected_icon(button):
         '''
         if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
-            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
+            actor_utility.deselect_all(self.global_manager) #deselect others, select attached
+            self.attached_mob.select() 
+            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #move minimap to attached mob
                 self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
             else: #otherwise, show info of tile that mob is on without moving minimap
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
-            for current_image in self.attached_mob.images:
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob) #managed in select()
+            for current_image in self.attached_mob.images: #move mob to front of each stack it is in
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-            self.global_manager.set('show_selection_outlines', True)
-            self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+            #self.global_manager.set('show_selection_outlines', True) #managed in select()
+            #self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+            
                         
     def draw(self):
         '''
@@ -551,7 +554,8 @@ class selected_icon(button):
         if not self.can_show():
             self.set_tooltip([])
         else:
-            self.set_tooltip(self.attached_mob.images[0].tooltip_text)
+            self.attached_mob.update_tooltip()
+            self.set_tooltip(self.attached_mob.tooltip_text + ["Click to deselect other units and focus on this one"])
         
 class switch_grid_button(button):
     def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grid, global_manager):
@@ -572,17 +576,18 @@ class switch_grid_button(button):
         '''
         if self.can_show():
             self.showing_outline = True
-            if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+            if len(actor_utility.get_selected_list(self.global_manager)) == 1:
                 if main_loop_tools.action_possible(self.global_manager):
-                    for mob in self.global_manager.get('mob_list'):
-                        if mob.selected and not mob.grids[0] == self.destination_grid:
+                    #for current_mob in self.global_manager.get('mob_list'):
+                        current_mob = actor_utility.get_selected_list(self.global_manager)[0]
+                        if current_mob.selected and not current_mob.grids[0] == self.destination_grid and current_mob.can_leave():
                             destination_x = 0
                             destination_y = 0
                             if self.destination_grid in self.global_manager.get('abstract_grid_list'):
                                 destination_x, destination_y = (0, 0)
                             else:
                                 destination_x, destination_y = actor_utility.get_random_ocean_coordinates(self.global_manager)
-                            mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
+                            current_mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
                             self.global_manager.set('show_selection_outlines', True)
                             self.global_manager.set('last_selection_outline_switch', time.time())
                 else:

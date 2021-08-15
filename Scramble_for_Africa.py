@@ -100,7 +100,8 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-global_manager.set('recruitment_types', ['explorer', 'European worker', 'ship'])
+global_manager.set('recruitment_types', ['explorer', 'engineer', 'European worker', 'ship'])
+global_manager.set('recruitment_costs', {'explorer': 5, 'engineer': 5, 'European worker': 3, 'ship': 5})
 
 global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
 global_manager.set('button_list', [])
@@ -356,11 +357,12 @@ for i in range(0, 5):
     selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager),
                                           scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, global_manager)
 
+buy_button_y = 260
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
-    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, 500 + (120 * recruitment_index), global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager),
+    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index + 1)), global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager),
                                                                     'blue', global_manager.get('recruitment_types')[recruitment_index], 'none', ['europe'], global_manager)
 
-new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, 380, global_manager), scaling.scale_width(100, global_manager),
+new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
     scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#self, coordinates, width, height, color, commodity_type, modes, global_manager
 
 #new_ship = vehicles.ship((0, 0), [global_manager.get('europe_grid')], 'mobs/ship/default.png', 'ship', ['strategic', 'europe'], global_manager) #coordinates, grids, image_id, name, modes, global_manager

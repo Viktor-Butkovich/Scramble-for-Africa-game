@@ -61,22 +61,15 @@ class recruitment_button(button):
                 recruitment_type: string representing the type of unit recruited by this button
                 button_type is always set to 'recruitment'
         '''
-        possible_recruitment_types = ['European worker', 'explorer', 'ship']
-        if recruitment_type in possible_recruitment_types:
+        #possible_recruitment_types = global_manger.#['European worker', 'explorer', 'ship']
+        if recruitment_type in global_manager.get('recruitment_types'):
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
         else:
             image_id = 'misc/default_button.png'
             self.mob_image_id = 'mobs/default/default.png'
         self.recruitment_type = recruitment_type
-        if self.recruitment_type == 'explorer':
-            self.cost = 5
-        elif self.recruitment_type == 'European worker':
-            self.cost = 3
-        elif self.recruitment_type == 'ship':
-            self.cost = 5
-        else:
-            self.cost = 0
+        self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
         super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
 
     def on_click(self):
@@ -98,10 +91,6 @@ class recruitment_button(button):
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not recruit a unit', self.global_manager)
-            #if self.recruitment_type == 'explorer':
-            #    new_explorer = explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
-            #elif self.recruitment_type == 'European worker':
-            #    new_worker = worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
 
     def update_tooltip(self):
         '''

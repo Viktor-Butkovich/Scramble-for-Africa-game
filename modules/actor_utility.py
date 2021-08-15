@@ -101,6 +101,17 @@ def get_selected_list(global_manager):
             selected_list.append(current_mob)
     return(selected_list)
 
+def deselect_all(global_manager):
+    '''
+    Input:
+        global_manager_template object
+    Output:
+        Deselects all selected mobs
+    '''
+    for current_mob in global_manager.get('mob_list'):
+        if current_mob.selected:
+            current_mob.selected = False
+    
 def get_random_ocean_coordinates(global_manager):
     mob_list = global_manager.get('mob_list')
     mob_coordinate_list = []

@@ -70,6 +70,14 @@ class ship(vehicle): #prevent movement when there are mobs in this tile that are
         self.can_swim = True
         self.can_walk = False
 
+    def can_leave(self): #can not move away if leaving behind units that can't swim in water
+        if self.images[0].current_cell.terrain == 'water':
+            for current_mob in self.images[0].current_cell.contained_mobs:
+                if not current_mob.can_swim:
+                    text_tools.print_to_screen("A " + self.vehicle_type + " can not leave without taking unaccompanied units as passengers.", self.global_manager)
+                    return(False)
+        return(True)
+
     def can_travel(self):
         if self.has_crew:
             return(True)

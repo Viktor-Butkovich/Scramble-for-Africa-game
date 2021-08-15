@@ -45,6 +45,7 @@ class mob(actor):
         self.movement_cost = 1
         self.reset_movement_points()
         self.update_tooltip()
+        actor_utility.deselect_all(self.global_manager)
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
@@ -173,6 +174,9 @@ class mob(actor):
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
+    def can_leave(self):
+        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
+
     def can_move(self, x_change, y_change):
         '''
         Input:
@@ -182,37 +186,38 @@ class mob(actor):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        if not self.grid in self.global_manager.get('abstract_grid_list'):
-            if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-                future_cell = self.grid.find_cell(future_x, future_y)
-                if future_cell.visible or self.can_explore:
-                    destination_type = 'land'
-                    if future_cell.terrain == 'water':
-                        destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                    if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
-                        if self.movement_points >= self.movement_cost:
-                            return(True)
-                        else:
-                            text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                            text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+        if self.can_leave():
+            if not self.grid in self.global_manager.get('abstract_grid_list'):
+                if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+                    future_cell = self.grid.find_cell(future_x, future_y)
+                    if future_cell.visible or self.can_explore:
+                        destination_type = 'land'
+                        if future_cell.terrain == 'water':
+                            destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
+                            if self.movement_points >= self.movement_cost:
+                                return(True)
+                            else:
+                                text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
+                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+                                return(False)
+                        elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
+                            #if future_cell.visible or self.can_explore: #already checked earlier
+                            text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
                             return(False)
-                    elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
-                        #if future_cell.visible or self.can_explore: #already checked earlier
-                        text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
-                        return(False)
-                    else: #if trying to swim in water and can't 
-                        #if future_cell.visible or self.can_explore: #already checked earlier
-                        text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                        else: #if trying to swim in water and can't 
+                            #if future_cell.visible or self.can_explore: #already checked earlier
+                            text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                            return(False)
+                    else:
+                        text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
                         return(False)
                 else:
-                    text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
+                    text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
                     return(False)
             else:
-                text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
+                text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
                 return(False)
-        else:
-            text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
-            return(False)
 
     def move(self, x_change, y_change):
         '''
@@ -462,5 +467,18 @@ class explorer(officer):
             Same as superclass
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        self.grid.find_cell(self.x, self.y).set_visibility(True)
+        #self.grid.find_cell(self.x, self.y).set_visibility(True)
         self.officer_type = 'explorer'
+
+class engineer(officer):
+    '''
+    Officer that is considered an engineer
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Input:
+            Same as superclass
+        '''
+        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        #self.grid.find_cell(self.x, self.y).set_visibility(True)
+        self.officer_type = 'engineer'

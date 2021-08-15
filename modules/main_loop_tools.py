@@ -258,9 +258,11 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
     if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         selected_new_mob = False
-        for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
-            if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
-                current_mob.selected = False
+        #for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
+        #    if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
+        #        current_mob.selected = False
+        if (not global_manager.get('capital')):
+            actor_utility.deselect_all(global_manager)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
                     
