@@ -60,6 +60,10 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
                         possible_tooltip_drawers.append(same_tile_mob)
+
+        for current_building in global_manager.get('building_list'):
+            if current_building.can_show_tooltip():
+                possible_tooltip_drawers.append(current_building)
             
         for current_actor in global_manager.get('actor_list'):
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
@@ -153,25 +157,57 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
     if possible_tooltip_drawers_length == 0:
         return()
     elif possible_tooltip_drawers_length == 1:
-        possible_tooltip_drawers[0].draw_tooltip(y_displacement)
+        height = y_displacement
+        height += font_size
+        for current_text_line in possible_tooltip_drawers[0].tooltip_text:
+            height += font_size
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        below_screen = False
+        if (global_manager.get('display_height') + 10 - mouse_y) - height < 0:
+            below_screen = True
+        possible_tooltip_drawers[0].draw_tooltip(below_screen, height, y_displacement)
     else:
+        stopping = False
+        height = y_displacement
+        for possible_tooltip_drawer in possible_tooltip_drawers:
+            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+                stopping = True
+            if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+                stopping = True
+        if not stopping:
+            for possible_tooltip_drawer in possible_tooltip_drawers:
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        below_screen = False
+        if (global_manager.get('display_height') + 10 - mouse_y) - height < 0:
+            below_screen = True
+        
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
                 stopping = True
             if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
                 stopping = True
         if not stopping:
             for possible_tooltip_drawer in possible_tooltip_drawers:
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size

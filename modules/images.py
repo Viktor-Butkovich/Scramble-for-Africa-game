@@ -226,6 +226,65 @@ class actor_image():
         '''
         return(True)
 
+class building_image(actor_image):
+    '''
+    actor_image attached to a building rather than an actor, gaining the ability to manage the cells in which this building is considered to be
+    '''
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        '''
+        Input:
+            actor: actor object representing the actor to which this actor is attached
+            width: int representing the pixel width of this image
+            height: int representing the pixel height of this image
+            grid: grid object representing the grid to which this mob image is attached
+            image_description: string representing the file path to this image's image file
+            global_manager: global_manager_template object
+        '''
+        super().__init__(actor, width, height, grid, image_description, global_manager)
+        self.current_cell = 'none'
+        self.add_to_cell()
+
+    def remove_from_cell(self):
+        '''
+        Input:
+            none
+        Output:
+            Remove's this image's mob from its cell, causing it to not be considered in the cell anymore. Does nothing if the image's mob is not already in a cell.
+        '''
+        if not self.current_cell == 'none':
+            self.current_cell.contained_buildings = utility.remove_from_list(self.current_cell.contained_buildings, self.actor)
+        self.current_cell = 'none'
+
+    def add_to_cell(self):
+        '''
+        Input:
+            none
+        Output:
+            Adds this image's mob to the front of a cell, causing it to be considered as being in the cell and causing it to be drawn on top of other mobs in that cell. This automatically removes this image's mob from other cells.
+        '''
+        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+            mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+                old_cell = self.current_cell
+                self.current_cell = self.grid.find_cell(mini_x, mini_y)
+                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
+                    self.current_cell.contained_buildings.insert(0, self.actor)
+            else:
+                self.remove_from_cell()
+            self.go_to_cell((mini_x, mini_y))
+        else:
+            self.remove_from_cell()
+            self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
+            if not self.actor in self.current_cell.contained_buildings:
+                self.current_cell.contained_buildings.insert(0, self.actor)
+            self.go_to_cell((self.current_cell.x, self.current_cell.y))
+            
+    def can_show(self):
+        if (not self.current_cell == 'none') and self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
+        
 class mob_image(actor_image):
     '''
     actor_image attached to a mob rather than an actor, gaining the ability to manage the cells in which this mob is considered to be

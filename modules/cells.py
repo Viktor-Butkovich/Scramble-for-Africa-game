@@ -27,14 +27,15 @@ class cell():
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
         #self.occupied = False
         self.grid.cell_list.append(self)
-        self.adjacent_list = [] #list of 4 nearby cells, used for movement
-        self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
+        #self.adjacent_list = [] #list of 4 nearby cells, used for movement
+        #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
+        self.contained_buildings = []
 
     def contains_vehicle(self):
         for current_mob in self.contained_mobs:
@@ -106,13 +107,11 @@ class cell():
             text_y = self.pixel_y - font_size
             self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))
         
-    def find_adjacent_cells(self):
-        '''
+    '''def find_adjacent_cells(self):
         Input:
             none
         Output:
             Records the cells that this cell is adjacent to in its grid
-        '''
         adjacent_list = []
         diagonal_adjacent_list = []
         if not self.x == 0:
@@ -134,7 +133,7 @@ class cell():
         if not self.y == self.grid.coordinate_height - 1:
             adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
         self.diagonal_adjacent_list = diagonal_adjacent_list
-        self.adjacent_list = adjacent_list
+        self.adjacent_list = adjacent_list'''
 
     def touching_mouse(self):
         '''

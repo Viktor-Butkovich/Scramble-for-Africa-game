@@ -191,8 +191,8 @@ class grid():
         for x in range(0, self.coordinate_width):
             for y in range(0, self.coordinate_height):
                 self.create_cell(x, y)
-        for current_cell in self.cell_list:
-            current_cell.find_adjacent_cells()
+        #for current_cell in self.cell_list:
+        #    current_cell.find_adjacent_cells()
             
     def create_cell(self, x, y):
         '''

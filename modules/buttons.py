@@ -261,7 +261,7 @@ class button():
                 textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
                 self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
 
-    def draw_tooltip(self, y_displacement):
+    def draw_tooltip(self, below_screen, height, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -271,11 +271,13 @@ class button():
         if self.can_show():
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
+            if below_screen:
+                mouse_y = self.global_manager.get('display_height') + 10 - height
             mouse_y += y_displacement
             if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
                 mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
-            if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
-                mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
+            #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+            #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width

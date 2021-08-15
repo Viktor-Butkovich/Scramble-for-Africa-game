@@ -67,6 +67,10 @@ class mob(actor):
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
+    def set_max_movement_points(self, new_value):
+        self.max_movement_points = new_value
+        self.set_movement_points(new_value)
+
     def change_inventory(self, commodity, change):
         '''
         Input:

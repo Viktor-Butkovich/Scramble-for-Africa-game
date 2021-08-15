@@ -18,6 +18,8 @@ import modules.instructions as instructions
 import modules.turn_management_tools as turn_management_tools
 import modules.vehicles as vehicles
 
+#import modules.buildings as buildings #for testing
+
 pygame.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
@@ -121,6 +123,7 @@ global_manager.set('background_image_list', [])
 global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
+global_manager.set('building_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
 global_manager.set('group_list', [])
@@ -344,6 +347,7 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
     new_commodity_match_label = actor_match_tools.commodity_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (150 + (35 * current_index)), global_manager),
             scaling.scale_width(50, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', current_index, 'mob', global_manager)
 
+
     global_manager.get('mob_info_display_list').append(new_commodity_match_label)
 
 for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected tile
@@ -371,6 +375,8 @@ global_manager.get('minimap_grid').calibrate(2, 2)
 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none') #tile info display should start empty
 
 turn_management_tools.start_turn(global_manager, True)
+
+#test_building = buildings.building((0, 0), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'misc/default_button.png', 'building',  ['strategic'], global_manager) #coordinates, grids, image_id, name, modes, global_manager
 
 main_loop.main_loop(global_manager)
 pygame.quit()

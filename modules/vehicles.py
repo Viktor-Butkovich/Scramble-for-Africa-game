@@ -66,6 +66,7 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
 class ship(vehicle): #prevent movement when there are mobs in this tile that are not in a ship
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
+        self.set_max_movement_points(3)
         self.vehicle_type = 'ship'
         self.can_swim = True
         self.can_walk = False

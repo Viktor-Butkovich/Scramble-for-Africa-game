@@ -174,7 +174,7 @@ class actor():
         else:
             return(False)
 
-    def draw_tooltip(self, y_displacement):
+    def draw_tooltip(self, below_screen, height, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -183,6 +183,8 @@ class actor():
         '''
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        if below_screen:
+            mouse_y = self.global_manager.get('display_height') + 10 - height
         tooltip_image = self.images[0]
         for current_image in self.images: #only draw tooltip from the image that the mouse is touching
             if current_image.Rect.collidepoint((mouse_x, mouse_y)):
@@ -190,8 +192,8 @@ class actor():
         mouse_y += y_displacement
         if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
             mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
-        if (self.global_manager.get('display_height') - mouse_y) - (len(tooltip_image.tooltip_text) * self.global_manager.get('font_size') + 5 + tooltip_image.tooltip_outline_width) < 0:
-            mouse_y = self.global_manager.get('display_height') - tooltip_image.tooltip_box.height
+        #if (self.global_manager.get('display_height') - mouse_y) - (len(tooltip_image.tooltip_text) * self.global_manager.get('font_size') + 5 + tooltip_image.tooltip_outline_width) < 0:
+        #    mouse_y = self.global_manager.get('display_height') - tooltip_image.tooltip_box.height
         tooltip_image.tooltip_box.x = mouse_x
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width
