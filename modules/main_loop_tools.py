@@ -33,12 +33,22 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             if global_manager.get('current_game_mode') in current_tile.image.modes and not current_tile in global_manager.get('overlay_tile_list'):
                 current_tile.image.draw()
                 current_tile.image.has_drawn = True
-        
+
+        mob_image_list = []
         for current_image in global_manager.get('image_list'):
             if not current_image.has_drawn:
                 if global_manager.get('current_game_mode') in current_image.modes:
-                    current_image.draw()
-                    current_image.has_drawn = True
+                    if not current_image.image_type == 'mob':
+                        current_image.draw()
+                        current_image.has_drawn = True
+                    else:
+                        mob_image_list.append(current_image)
+
+        for current_image in mob_image_list:
+            current_image.draw()
+            current_image.has_drawn = True
+
+                    
         for current_bar in global_manager.get('bar_list'):
             if global_manager.get('current_game_mode') in current_bar.modes:
                 current_bar.draw()
@@ -93,6 +103,8 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
 
+        global_manager.get('mouse_follower').draw()
+
         if global_manager.get('making_mouse_box'):
             mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
             global_manager.set('mouse_destination_x', mouse_destination_x + 4)
@@ -129,7 +141,16 @@ def action_possible(global_manager):
         return(False)
     elif not global_manager.get('player_turn'):
         return(False)
+    elif global_manager.get('choosing_destination'):
+        return(False)
     return(True)
+
+
+def can_make_mouse_box(global_manager):
+    if action_possible(global_manager):
+        return(True)
+    else:
+        return(False)
 
 def draw_loading_screen(global_manager):
     '''
@@ -264,11 +285,13 @@ def manage_rmb_down(clicked_button, global_manager):
     Output:
         Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
     '''
+    stopping = False
     if (not clicked_button) and action_possible(global_manager):
         for current_grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in current_grid.modes:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
+                        stopping = True #if doesn't reach this point, do same as lmb
                         if len(current_cell.contained_mobs) > 1:
                             moved_mob = current_cell.contained_mobs[1]
                             for current_image in moved_mob.images:
@@ -279,7 +302,8 @@ def manage_rmb_down(clicked_button, global_manager):
                             global_manager.set('last_selection_outline_switch', time.time())
                             global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-            
+    if not stopping:
+        manage_lmb_down(clicked_button, global_manager)
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
     '''
@@ -294,9 +318,6 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
     if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         selected_new_mob = False
-        #for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
-        #    if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
-        #        current_mob.selected = False
         if (not global_manager.get('capital')):
             actor_utility.deselect_all(global_manager)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
@@ -351,5 +372,31 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 break
                         if breaking:
                             break
+    elif (not clicked_button) and global_manager.get('choosing_destination'):
+        chooser = global_manager.get('choosing_destination_info_dict')['chooser']
+        destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
+        chose_destination = False
+        #destination_cell = 'none'
+        for current_grid in destination_grids:
+            for current_cell in current_grid.cell_list:
+                if current_cell.touching_mouse():
+                    stopping = False
+                    if not current_grid.is_abstract_grid: #if minimap or main grid
+                        destination_x, destination_y = current_cell.tile.get_main_grid_coordinates()
+                        if (not destination_y == 0) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                            text_tools.print_to_screen("You can only send ships to coastal waters and ports.", global_manager)
+                            stopping = True
+                    chose_destination = True
+                    #destination_cell = current_cell
+                    if not stopping:
+                        if current_grid.is_mini_grid:
+                            if not current_cell.terrain == 'none':
+                                chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
+                        else:
+                            chooser.end_turn_destination = current_cell.tile
+                        global_manager.set('show_selection_outlines', True)
+                        global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+        global_manager.set('choosing_destination', False)
+        global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 

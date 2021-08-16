@@ -17,8 +17,8 @@ import modules.actor_match_tools as actor_match_tools
 import modules.instructions as instructions
 import modules.turn_management_tools as turn_management_tools
 import modules.vehicles as vehicles
-
-#import modules.buildings as buildings #for testing
+import modules.buildings as buildings
+import modules.mouse_followers as mouse_followers
 
 pygame.init()
 
@@ -80,13 +80,13 @@ global_manager.set('terrain_colors',
     }
 )
 
-global_manager.set('commodity_types', ['coffee', 'copper', 'diamonds', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber', 'consumer goods'])
-
+global_manager.set('commodity_types', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber', 'consumer goods'])
+global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('commodity_prices',
     {
     'coffee': 1,
     'copper': 1,
-    'diamonds': 1,
+    'diamond': 1,
     'exotic wood': 1,
     'fruit': 1,
     'gold': 1,
@@ -94,6 +94,20 @@ global_manager.set('commodity_prices',
     'ivory': 1,
     'rubber': 1,
     'consumer goods': 5
+    }
+)
+
+global_manager.set('resource_building_dict',
+    {
+    'coffee': 'buildings/plantation.png',
+    'copper': 'buildings/mine.png',
+    'diamond': 'buildings/mine.png',
+    'exotic wood': 'buildings/plantation.png',
+    'fruit': 'buildings/plantation.png',
+    'gold': 'buildings/mine.png',
+    'iron': 'buildings/mine.png',
+    'ivory': 'buildings/hunting_area.png',
+    'rubber': 'buildings/plantation.png',
     }
 )
 
@@ -157,6 +171,8 @@ global_manager.set('mouse_destination_y', 0)
 global_manager.set('making_mouse_box', False)
 global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
+global_manager.set('choosing_destination', False)
+global_manager.set('choosing_destination_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
 
@@ -212,6 +228,8 @@ global_manager.set('europe_grid', europe_grid)
 game_transitions.set_game_mode('strategic', global_manager)
 game_transitions.create_strategic_map(global_manager)
 
+global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
+
 global_manager.set('money_tracker', data_managers.value_tracker('money', 100, global_manager))
 labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
                    'misc/default_label.png', 'money', global_manager)
@@ -249,14 +267,26 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
 current_button_number += 2#move more when switching categories
 
 to_africa_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-                                              scaling.scale_height(50, global_manager), 'blue', 'to africa', pygame.K_1, ['strategic'], 'locations/africa_button.png', global_manager.get('strategic_map_grid'), global_manager)
+        scaling.scale_height(50, global_manager), 'blue', 'to africa', pygame.K_1, ['strategic'], 'locations/africa_button.png', [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], global_manager)
+
+resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'resource', ['strategic'], global_manager) ##self, coordinates, width, height, building_type, modes, global_manager
+
 
 current_button_number += 1
 
 to_europe_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-                                              scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', global_manager.get('europe_grid'), global_manager)
+        scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', [global_manager.get('europe_grid')], global_manager)
+#build harbor building button
 
 current_button_number += 1
+
+#build build fort building button
+#to slave traders button
+
+current_button_number += 1
+
+#upgrade infrastructure building
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
                                         'expand text box', pygame.K_j, ['strategic', 'europe'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind

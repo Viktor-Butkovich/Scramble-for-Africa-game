@@ -19,6 +19,7 @@ class free_image():
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'free'
         self.modes = modes
         self.width = width
         self.height = height
@@ -106,6 +107,7 @@ class actor_image():
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'actor'
         self.last_image_switch = 0
         self.previous_idle_image = 'default'
         self.actor = actor
@@ -242,6 +244,7 @@ class building_image(actor_image):
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.current_cell = 'none'
+        self.image_type = 'building'
         self.add_to_cell()
 
     def remove_from_cell(self):
@@ -252,7 +255,7 @@ class building_image(actor_image):
             Remove's this image's mob from its cell, causing it to not be considered in the cell anymore. Does nothing if the image's mob is not already in a cell.
         '''
         if not self.current_cell == 'none':
-            self.current_cell.contained_buildings = utility.remove_from_list(self.current_cell.contained_buildings, self.actor)
+            self.current_cell.contained_buildings[self.actor.building_type] = 'none'# = utility.remove_from_list(self.current_cell.contained_buildings, self.actor)
         self.current_cell = 'none'
 
     def add_to_cell(self):
@@ -268,7 +271,7 @@ class building_image(actor_image):
                 old_cell = self.current_cell
                 self.current_cell = self.grid.find_cell(mini_x, mini_y)
                 if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
-                    self.current_cell.contained_buildings.insert(0, self.actor)
+                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor #self.current_cell.contained_buildings.insert(0, self.actor)
             else:
                 self.remove_from_cell()
             self.go_to_cell((mini_x, mini_y))
@@ -276,7 +279,7 @@ class building_image(actor_image):
             self.remove_from_cell()
             self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
             if not self.actor in self.current_cell.contained_buildings:
-                self.current_cell.contained_buildings.insert(0, self.actor)
+                self.current_cell.contained_buildings[self.actor.building_type] = self.actor#self.current_cell.contained_buildings.insert(0, self.actor)
             self.go_to_cell((self.current_cell.x, self.current_cell.y))
             
     def can_show(self):
@@ -301,6 +304,7 @@ class mob_image(actor_image):
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.current_cell = 'none'
+        self.image_type = 'mob'
         self.add_to_cell()
         
     def remove_from_cell(self):
@@ -369,6 +373,7 @@ class button_image(actor_image):
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'button'
         self.button = button
         self.width = width
         self.height = height
@@ -456,6 +461,7 @@ class tile_image(actor_image):
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.go_to_cell((self.actor.x, self.actor.y))
+        #self.outline = pygame.Rect(self.actor.x + 10, self.global_manager.get('display_height') - (self.actor.y + self.height) + 10, self.width, self.height)
 
     def go_to_cell(self, coordinates):
         '''

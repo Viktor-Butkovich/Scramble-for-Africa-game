@@ -9,6 +9,8 @@ def end_turn(global_manager):
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
     global_manager.set('player_turn', False)
     text_tools.print_to_screen("Ending turn", global_manager)
+    for current_mob in global_manager.get('mob_list'):
+        current_mob.end_turn_move()
     #do things that happen at end of turn
     start_turn(global_manager, False)
 

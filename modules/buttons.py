@@ -560,14 +560,14 @@ class selected_icon(button):
             self.set_tooltip(self.attached_mob.tooltip_text + ["Click to deselect other units and focus on this one"])
         
 class switch_grid_button(button):
-    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grid, global_manager):
+    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grids, global_manager):
         '''
         Input:
             same as superclass, except:
             destination_grid: grid object representing the grid to which this button sends mobs
         '''
         super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
-        self.destination_grid = destination_grid
+        self.destination_grids = destination_grids
 
     def on_click(self):      
         '''
@@ -580,18 +580,14 @@ class switch_grid_button(button):
             self.showing_outline = True
             if len(actor_utility.get_selected_list(self.global_manager)) == 1:
                 if main_loop_tools.action_possible(self.global_manager):
-                    #for current_mob in self.global_manager.get('mob_list'):
-                        current_mob = actor_utility.get_selected_list(self.global_manager)[0]
-                        if current_mob.selected and not current_mob.grids[0] == self.destination_grid and current_mob.can_leave():
-                            destination_x = 0
-                            destination_y = 0
-                            if self.destination_grid in self.global_manager.get('abstract_grid_list'):
-                                destination_x, destination_y = (0, 0)
-                            else:
-                                destination_x, destination_y = actor_utility.get_random_ocean_coordinates(self.global_manager)
-                            current_mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
-                            self.global_manager.set('show_selection_outlines', True)
-                            self.global_manager.set('last_selection_outline_switch', time.time())
+                    current_mob = actor_utility.get_selected_list(self.global_manager)[0]
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        if not current_mob.grids[0] in self.destination_grids and current_mob.can_leave():
+                            current_mob.end_turn_destination = 'none'
+                            self.global_manager.set('choosing_destination', True)
+                            self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob, 'destination_grids': self.destination_grids})
+                    else:
+                        text_tools.print_to_screen("Crossing the ocean requires an entire turn of movement points.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
             else:
@@ -621,7 +617,7 @@ class switch_grid_button(button):
         selected_list = actor_utility.get_selected_list(self.global_manager)
         if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
             return(False)
-        elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
+        elif selected_list[0].grids[0] in self.destination_grids: #do not show if mob is in destination grid already
             return(False)
         elif not selected_list[0].can_travel(): #only ships can move between grids
             return(False)

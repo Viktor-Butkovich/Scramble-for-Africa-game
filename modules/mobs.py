@@ -35,12 +35,14 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(name)
         self.can_explore = False #if can attempt to explore unexplored areas
+        self.can_construct = False #if can construct buildings
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
         self.is_group = False
+        self.end_turn_destination = 'none'
         self.max_movement_points = 1
         self.movement_cost = 1
         self.reset_movement_points()
@@ -49,6 +51,15 @@ class mob(actor):
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
+    def end_turn_move(self):
+        if not self.end_turn_destination == 'none':
+            if self.grids[0] in self.end_turn_destination.grids: #if on same grid
+                nothing = 0 #do later
+            else: #if on different grid
+                if self.can_travel():
+                    self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
+            self.end_turn_destination = 'none'
+    
     def can_travel(self): #if can move between Europe, Africa, etc.
         return(False) #different for subclasses
 
@@ -63,7 +74,7 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def reset_movement_points(self):
-        self.movement_points = self.max_movement_points
+        self.movement_points = self.max_movement_points 
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -148,6 +159,11 @@ class mob(actor):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+            if not self.end_turn_destination == 'none':
+                self.end_turn_destination.draw_destination_outline()
+                equivalent_tile = self.end_turn_destination.get_equivalent_tile()
+                if not equivalent_tile == 'none':
+                    equivalent_tile.draw_destination_outline()
         
     def update_tooltip(self):
         '''
@@ -230,6 +246,7 @@ class mob(actor):
         Output:
             Moves this mob x_change tiles to the right and y_change tiles upward
         '''
+        self.end_turn_destination = 'none' #cancels planned movements
         for current_image in self.images:
             current_image.remove_from_cell()
         self.x += x_change
@@ -335,6 +352,7 @@ class worker(mob):
         vehicle.crew = 'none'
         vehicle.has_crew = False
         vehicle.set_image('uncrewed')
+        vehicle.end_turn_destination = 'none'
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 

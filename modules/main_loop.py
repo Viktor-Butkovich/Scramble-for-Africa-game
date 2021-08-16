@@ -172,11 +172,13 @@ def main_loop(global_manager):
                             clicked_button = True
                 main_loop_tools.manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
                 
-            else:#if user just clicked lmb
+            elif main_loop_tools.can_make_mouse_box(global_manager):#if user just clicked lmb
                 mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
                 global_manager.set('mouse_origin_x', mouse_origin_x)
                 global_manager.set('mouse_origin_y', mouse_origin_y)
                 global_manager.set('making_mouse_box', True)
+            else:
+                global_manager.set('making_mouse_box', False)
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):
@@ -188,7 +190,6 @@ def main_loop(global_manager):
             for current_button in global_manager.get('button_list'):
                 if not current_button.being_pressed:
                     current_button.showing_outline = False
-        
 
         if not global_manager.get('loading'):
             main_loop_tools.update_display(global_manager)
@@ -197,8 +198,10 @@ def main_loop(global_manager):
         current_time = time.time()
         global_manager.set('current_time', current_time)
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
+        #    print('switch')
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
             global_manager.set('last_selection_outline_switch', time.time())
+        #print(global_manager.get('last_selection_outline_switch'))
         #if global_manager.get('current_time') - global_manager.get('last_minimap_outline_switch') > 1:
         #    global_manager.set('show_minimap_outlines', utility.toggle(global_manager.get('show_minimap_outlines')))
         #    global_manager.set('last_minimap_outline_switch', time.time())
@@ -210,4 +213,4 @@ def main_loop(global_manager):
         start_time = time.time()
         global_manager.set('start_time', start_time)
         global_manager.set('current_time', time.time())
-        global_manager.set('last_selection_outline_switch', time.time())
+        #global_manager.set('last_selection_outline_switch', time.time())

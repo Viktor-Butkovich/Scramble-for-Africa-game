@@ -180,6 +180,7 @@ class grid():
         for cell in self.cell_list:
             if cell.x == x and cell.y == y:
                 return(cell)
+        return('none')
             
     def create_cells(self):
         '''
@@ -222,7 +223,7 @@ class grid():
         elif terrain == 'mountain':
             for i in range(135):
                 resource_list.append('none')
-            resource_list.append('diamonds')
+            resource_list.append('diamond')
             for i in range(2):
                 resource_list.append('gold')
             for i in range(4):
@@ -237,7 +238,7 @@ class grid():
         elif terrain == 'hills':
             for i in range(135):
                 resource_list.append('none')
-            resource_list.append('diamonds')
+            resource_list.append('diamond')
             for i in range(2):
                 resource_list.append('gold')
             for i in range(4):
@@ -251,7 +252,7 @@ class grid():
         elif terrain == 'jungle':
             for i in range(125):
                 resource_list.append('none')
-            resource_list.append('diamonds')
+            resource_list.append('diamond')
             for i in range(6):
                 resource_list.append('rubber')
             resource_list.append('coffee')
@@ -279,7 +280,7 @@ class grid():
             for i in range(140):
                 resource_list.append('none')
             for i in range(2):
-                resource_list.append('diamonds')
+                resource_list.append('diamond')
             resource_list.append('gold')
             resource_list.append('ivory')
             for i in range(2):

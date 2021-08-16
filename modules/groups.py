@@ -146,6 +146,7 @@ class construction_gang(group):
             same as superclass
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_construct = True
 
 class expedition(group):
     '''

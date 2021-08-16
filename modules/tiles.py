@@ -20,6 +20,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             global_manager: global_manager_template object used to manage a dictionary of shared variables
         '''
         self.actor_type = 'tile'
+        self.selection_outline_color = 'bright blue'
         super().__init__(coordinates, [grid], modes, global_manager)
         self.set_name(name)
         self.global_manager.get('tile_list').append(self)
@@ -43,11 +44,17 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
+            self.terrain = 'none'
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
             self.terrain = 'none'
         self.update_tooltip()
+
+    def draw_destination_outline(self): #called directly by mobs
+        for current_image in self.images:
+            outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (outline), current_image.outline_width)
 
     def change_inventory(self, commodity, change):
         '''
@@ -77,6 +84,12 @@ class tile(actor): #to do: make terrain tiles a subclass
             if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
 
+    def get_main_grid_coordinates(self):
+        if self.grid.is_mini_grid:
+            return(self.grid.get_main_grid_coordinates(self.x, self.y))
+        else:
+            return((self.x, self.y))
+
     def get_equivalent_tile(self):
         '''
         Input:
@@ -90,7 +103,11 @@ class tile(actor): #to do: make terrain tiles a subclass
             return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
-            return(self.grid.mini_grid.find_cell(mini_x, mini_y).tile)
+            equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)
+            if not equivalent_cell == 'none':
+                return(equivalent_cell.tile)
+            else:
+                return('none')
         return('none')
             
     def set_visibility(self, new_visibility):

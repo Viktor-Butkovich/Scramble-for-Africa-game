@@ -35,7 +35,8 @@ class cell():
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
-        self.contained_buildings = []
+        self.contained_buildings = {'resource': 'none'}#[]
+        
 
     def contains_vehicle(self):
         for current_mob in self.contained_mobs:
@@ -106,34 +107,6 @@ class cell():
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
             self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))
-        
-    '''def find_adjacent_cells(self):
-        Input:
-            none
-        Output:
-            Records the cells that this cell is adjacent to in its grid
-        adjacent_list = []
-        diagonal_adjacent_list = []
-        if not self.x == 0:
-            adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
-            diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
-            if not self.y == 0:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y - 1))
-            elif not self.y == self.grid.coordinate_height - 1:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y + 1))
-        if not self.x == self.grid.coordinate_width - 1:
-            adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
-            diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
-            if not self.y == 0:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y - 1))
-            elif not self.y == self.grid.coordinate_height - 1:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y + 1))
-        if not self.y == 0:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y - 1))
-        if not self.y == self.grid.coordinate_height - 1:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
-        self.diagonal_adjacent_list = diagonal_adjacent_list
-        self.adjacent_list = adjacent_list'''
 
     def touching_mouse(self):
         '''
