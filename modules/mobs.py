@@ -159,7 +159,7 @@ class mob(actor):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
-            if not self.end_turn_destination == 'none':
+            if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
                 self.end_turn_destination.draw_destination_outline()
                 equivalent_tile = self.end_turn_destination.get_equivalent_tile()
                 if not equivalent_tile == 'none':
@@ -256,6 +256,12 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
         self.change_movement_points(-1 * self.movement_cost)
+        if self.images[0].current_cell.contains_vehicle() and not self.is_vehicle:
+            self.selected = False
+            vehicle = self.images[0].current_cell.get_vehicle()
+            self.embark_vehicle(vehicle)
+            vehicle.select()
+            
         #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1) #test showing how to add to inventory
 
     def touching_mouse(self):

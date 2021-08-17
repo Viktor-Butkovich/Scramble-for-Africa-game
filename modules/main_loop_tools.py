@@ -372,30 +372,31 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 break
                         if breaking:
                             break
-    elif (not clicked_button) and global_manager.get('choosing_destination'):
+    elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
         chooser = global_manager.get('choosing_destination_info_dict')['chooser']
-        destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
+        #destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
         chose_destination = False
-        #destination_cell = 'none'
-        for current_grid in destination_grids:
+        for current_grid in global_manager.get('grid_list'): #destination_grids:
             for current_cell in current_grid.cell_list:
                 if current_cell.touching_mouse():
-                    stopping = False
-                    if not current_grid.is_abstract_grid: #if minimap or main grid
-                        destination_x, destination_y = current_cell.tile.get_main_grid_coordinates()
-                        if (not destination_y == 0) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
-                            text_tools.print_to_screen("You can only send ships to coastal waters and ports.", global_manager)
-                            stopping = True
-                    chose_destination = True
-                    #destination_cell = current_cell
-                    if not stopping:
-                        if current_grid.is_mini_grid:
-                            if not current_cell.terrain == 'none':
-                                chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
-                        else:
-                            chooser.end_turn_destination = current_cell.tile
-                        global_manager.set('show_selection_outlines', True)
-                        global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                    if not current_grid in chooser.grids:
+                        stopping = False
+                        if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
+                            destination_x, destination_y = current_cell.tile.get_main_grid_coordinates()
+                            if (not destination_y == 0) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                text_tools.print_to_screen("You can only send ships to coastal waters and ports.", global_manager)
+                                stopping = True
+                        chose_destination = True
+                        if not stopping:
+                            if current_grid.is_mini_grid:
+                                if not current_cell.terrain == 'none':
+                                    chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
+                            else:
+                                chooser.end_turn_destination = current_cell.tile
+                            global_manager.set('show_selection_outlines', True)
+                            global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                    else: #can not move to same continent
+                        text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
         global_manager.set('choosing_destination', False)
         global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed

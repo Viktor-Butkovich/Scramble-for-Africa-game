@@ -111,8 +111,9 @@ class construction_button(button):
                 if self.building_type == 'resource':
                     if self.attached_tile.cell.contained_buildings[self.building_type] == 'none':
                         self.attached_mob.set_movement_points(0)
-                        new_building = building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, 'resource', ['strategic'],
-                            self.global_manager)#coordinates, grids, image_id, name, modes, global_manager
+                        new_building = building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, 'resource',
+                            ['strategic'], self.global_manager)#coordinates, grids, image_id, name, modes, global_manager
+                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
                     else:
                         text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
             else:

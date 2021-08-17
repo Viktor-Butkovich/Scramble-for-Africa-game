@@ -266,8 +266,8 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
                                     'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
 current_button_number += 2#move more when switching categories
 
-to_africa_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-        scaling.scale_height(50, global_manager), 'blue', 'to africa', pygame.K_1, ['strategic'], 'locations/africa_button.png', [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], global_manager)
+switch_theatre_button = buttons.switch_theatre_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', pygame.K_1, ['strategic'], 'misc/switch_theatre_button.png', global_manager)
 
 resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'resource', ['strategic'], global_manager) ##self, coordinates, width, height, building_type, modes, global_manager
@@ -275,8 +275,8 @@ resource_building_button = buildings.construction_button(scaling.scale_coordinat
 
 current_button_number += 1
 
-to_europe_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-        scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', [global_manager.get('europe_grid')], global_manager)
+#to_europe_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
+#        scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', [global_manager.get('europe_grid')], global_manager)
 #build harbor building button
 
 current_button_number += 1
@@ -352,6 +352,11 @@ tile_free_resource_image = actor_match_tools.actor_match_free_image(scaling.scal
                                                          scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_image)
 
+#tile resource building image
+tile_free_resource_building_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, global_manager.get('default_display_height') - 555, global_manager), scaling.scale_width(115, global_manager),
+                                                         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
+
 #tile terrain label
 tile_terrain_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 600, global_manager), scaling.scale_width(100, global_manager),
                     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'terrain', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
@@ -389,7 +394,9 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
 
 for i in range(0, 5):
     selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager),
-                                          scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, global_manager)
+                                          scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
+selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * (i + 1)), global_manager),
+                                        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
 
 buy_button_y = 260
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):

@@ -44,6 +44,12 @@ class cell():
                 return(True)
         return(False)
 
+    def get_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle:
+                return(current_mob)
+        return('none')
+
     def set_visibility(self, new_visibility):
         '''
         Input:

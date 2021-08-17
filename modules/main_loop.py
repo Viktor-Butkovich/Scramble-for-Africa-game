@@ -153,20 +153,20 @@ def main_loop(global_manager):
                 clicked_button = False
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
-                    for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show() and (current_button in global_manager.get('notification_list')) and not stopping:
+                    for current_button in global_manager.get('button_list'):#here
+                        if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
                             current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
                             current_button.on_release()
                             clicked_button = True
                             stopping = True
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show():
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show(): #if instructions, click before other buttons
                         global_manager.get('current_instructions_page').on_click()
                         clicked_button = True
                         stopping = True
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show():
+                        if current_button.touching_mouse() and current_button.can_show() and not clicked_button: #only click 1 button at a time
                             current_button.on_click()
                             current_button.on_release()
                             clicked_button = True

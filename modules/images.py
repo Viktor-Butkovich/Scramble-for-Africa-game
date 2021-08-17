@@ -224,9 +224,12 @@ class actor_image():
         Input:
             none
         Output:
-            Returns whether this image should currently be shown. Subclasses will not necessarily always return True.
+            Returns whether this image should currently be shown
         '''
-        return(True)
+        if self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
 
 class building_image(actor_image):
     '''

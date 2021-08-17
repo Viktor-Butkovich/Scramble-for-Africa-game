@@ -20,7 +20,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             global_manager: global_manager_template object used to manage a dictionary of shared variables
         '''
         self.actor_type = 'tile'
-        self.selection_outline_color = 'bright blue'
+        self.selection_outline_color = 'yellow'#'bright blue'
         super().__init__(coordinates, [grid], modes, global_manager)
         self.set_name(name)
         self.global_manager.get('tile_list').append(self)
