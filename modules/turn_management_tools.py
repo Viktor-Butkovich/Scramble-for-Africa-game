@@ -11,6 +11,8 @@ def end_turn(global_manager):
     text_tools.print_to_screen("Ending turn", global_manager)
     for current_mob in global_manager.get('mob_list'):
         current_mob.end_turn_move()
+    for current_resource_building in global_manager.get('resource_building_list'):
+        current_resource_building.produce()
     #do things that happen at end of turn
     start_turn(global_manager, False)
 

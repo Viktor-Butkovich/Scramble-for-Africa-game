@@ -333,7 +333,7 @@ class mob_image(actor_image):
             if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
                 old_cell = self.current_cell
                 self.current_cell = self.grid.find_cell(mini_x, mini_y)
-                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle): #last part new
+                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building): #last part new
                     self.current_cell.contained_mobs.insert(0, self.actor)
             else:
                 self.remove_from_cell()
@@ -341,7 +341,7 @@ class mob_image(actor_image):
         else:
             self.remove_from_cell()
             self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
-            if not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle): #last part new
+            if not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building): #last part new
                 self.current_cell.contained_mobs.insert(0, self.actor)
             self.go_to_cell((self.current_cell.x, self.current_cell.y))
             
@@ -353,9 +353,9 @@ class mob_image(actor_image):
             Returns whether this image should be shown. If it is attached to an officer or worker that is part of a group, it should not be shown.
             If it is not attached to an officer or worker in a group and it is at the front of a cell, it should be shown. Otherwise, it should not be shown.
         '''
-        if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
-            return(False)
-        if self.actor.in_vehicle:
+        #if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
+        #    return(False)
+        if self.actor.in_vehicle or self.actor.in_group or self.actor.in_building:
             return(False)
         if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:
             return(True)

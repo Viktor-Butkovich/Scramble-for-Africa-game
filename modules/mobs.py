@@ -25,6 +25,7 @@ class mob(actor):
         self.selected = False
         self.in_group = False
         self.in_vehicle = False
+        self.in_building = False
         self.actor_type = 'mob'
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
@@ -259,7 +260,10 @@ class mob(actor):
         if self.images[0].current_cell.contains_vehicle() and not self.is_vehicle:
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle()
-            self.embark_vehicle(vehicle)
+            if self.is_worker and not vehicle.has_crew:
+                self.crew_vehicle(vehicle)
+            else:
+                self.embark_vehicle(vehicle)
             vehicle.select()
             
         #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1) #test showing how to add to inventory
@@ -289,7 +293,7 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def can_show_tooltip(self):
-        if self.in_vehicle:
+        if self.in_vehicle or self.in_group or self.in_building:
             return(False)
         else:
             return(super().can_show_tooltip())
@@ -298,11 +302,18 @@ class mob(actor):
         for current_image in self.images:
             current_image.remove_from_cell()
 
+    def show_images(self):
+        for current_image in self.images:
+            current_image.add_to_cell()        
+
     def embark_vehicle(self, vehicle):
         self.in_vehicle = True
         self.selected = False
         self.hide_images()
         vehicle.contained_mobs.append(self)
+        for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
+            vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
+        self.inventory_setup() #empty own inventory
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
 
     def disembark_vehicle(self, vehicle):
@@ -315,198 +326,3 @@ class mob(actor):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
         #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 
-class worker(mob):
-    '''
-    Mob that is considered a worker and can join groups
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            same as superclass 
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        global_manager.get('worker_list').append(self)
-        self.is_worker = True
-
-    def can_show_tooltip(self):
-        '''
-        Input:
-            none
-        Output:
-            Same as superclass but only returns True if not part of a group
-        '''
-        if not (self.in_group or self.in_vehicle):
-            return(super().can_show_tooltip())
-        else:
-            return(False)
-
-    def crew_vehicle(self, vehicle):
-        self.in_vehicle = True
-        self.selected = False
-        self.hide_images()
-        vehicle.crew = self
-        vehicle.has_crew = True
-        vehicle.set_image('crewed')
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
-
-    def uncrew_vehicle(self, vehicle):
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        vehicle.crew = 'none'
-        vehicle.has_crew = False
-        vehicle.set_image('uncrewed')
-        vehicle.end_turn_destination = 'none'
-        self.select()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
-
-    def join_group(self):
-        '''
-        Input:
-            none
-        Output:
-            Prevents this worker from being seen and interacted with, storing it as part of a group
-        '''
-        self.in_group = True
-        self.selected = False
-        for current_image in self.images:
-            current_image.remove_from_cell()
-
-    def leave_group(self, group):
-        '''
-        Input:
-            group object from which this worker is leaving
-        Output:
-            Allows this worker to be seen and interacted with, moving it to where the group was disbanded
-        '''
-        self.in_group = False
-        self.x = group.x
-        self.y = group.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        #self.select()
-
-    def remove(self):
-        '''
-        Input:
-            none
-        Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
-        '''
-        super().remove()
-        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
-
-class officer(mob):
-    '''
-    Mob that is considered an officer and can join groups and become a veteran
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        global_manager.get('officer_list').append(self)
-        self.veteran = False
-        self.veteran_icons = []
-        self.is_officer = True
-        self.officer_type = 'default'
-
-    def go_to_grid(self, new_grid, new_coordinates):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass, except it also moves veteran icons to the new grid and coordinates
-        '''
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                current_veteran_icon.remove()
-        self.veteran_icons = []
-        super().go_to_grid(new_grid, new_coordinates)
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
-
-    def can_show_tooltip(self):
-        '''
-        Input:
-            none
-        Output:
-            Same as superclass but only returns True if not part of a group
-        '''
-        if not (self.in_group or self.in_vehicle):
-            return(super().can_show_tooltip())
-        else:
-            return(False)
-
-    def join_group(self):
-        '''
-        Input:
-            none
-        Output:
-            Prevents this officer from being seen and interacted with, storing it as part of a group
-        '''
-        self.in_group = True
-        self.selected = False
-        for current_image in self.images:
-            current_image.remove_from_cell()
-
-    def leave_group(self, group):
-        '''
-        Input:
-            group object from which this officer is leaving
-        Output:
-            Allows this officer to be seen and interacted with, moving it to where the group was disbanded
-        '''
-        self.in_group = False
-        self.x = group.x
-        self.y = group.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        self.select()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
-
-    def remove(self):
-        '''
-        Input:
-            none
-        Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
-        '''
-        super().remove()
-        self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.remove()
-
-class explorer(officer):
-    '''
-    Officer that is considered an explorer
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        #self.grid.find_cell(self.x, self.y).set_visibility(True)
-        self.officer_type = 'explorer'
-
-class engineer(officer):
-    '''
-    Officer that is considered an engineer
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        #self.grid.find_cell(self.x, self.y).set_visibility(True)
-        self.officer_type = 'engineer'

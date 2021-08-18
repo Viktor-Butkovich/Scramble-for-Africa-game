@@ -99,6 +99,11 @@ class button():
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
             else:
                 self.set_tooltip(['none'])
+        elif self.button_type == 'remove worker':
+            if not self.attached_label.attached_building == 'none':
+                self.set_tooltip(["Detaches 1 worker from this " + self.attached_label.attached_building.name])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
         else:
@@ -420,6 +425,13 @@ class button():
                         text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
+
+            elif self.button_type == 'remove worker':
+                if not self.attached_label.attached_building == 'none':
+                    if not len(self.attached_label.attached_building.contained_workers) == 0:
+                        self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
+                    else:
+                        text_tools.print_to_screen("There are no workers to detach from this building.", self.global_manager)
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):

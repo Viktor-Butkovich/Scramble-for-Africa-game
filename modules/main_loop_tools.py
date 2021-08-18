@@ -67,6 +67,7 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
             if current_mob.can_show_tooltip():
+                #print(current_mob.images[0].current_cell)
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
                         possible_tooltip_drawers.append(same_tile_mob)

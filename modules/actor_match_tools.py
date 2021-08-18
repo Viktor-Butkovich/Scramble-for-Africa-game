@@ -134,6 +134,8 @@ class actor_match_label(label):
             self.message_start = 'Terrain: '
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
+        elif self.actor_label_type == 'building worker':
+            self.message_start = ''
         else:
             self.message_start = 'none'
         self.actor = 'none'
@@ -160,14 +162,74 @@ class actor_match_label(label):
             elif self.actor_label_type == 'resource':
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
-                elif self.actor.cell.visible:
-                    self.set_label(self.message_start + str(new_actor.cell.resource))
+                elif new_actor.cell.visible:
+                    if new_actor.cell.contained_buildings[self.actor_label_type] == 'none': #if no building built, show resource: name
+                        self.message_start = 'Resource: '
+                        self.set_label(self.message_start + new_actor.cell.resource)
+                    else:
+                        self.message_start = 'Resource building: '
+                        self.set_label(self.message_start + new_actor.cell.contained_buildings[self.actor_label_type].name)
                 else:
                     self.set_label(self.message_start + 'unknown')
             elif self.actor_label_type == 'movement':
                 self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
+            elif self.actor_label_type == 'building worker':
+                if self.list_type == 'resource building':
+                    if not new_actor.cell.contained_buildings['resource'] == 'none':
+                        self.attached_list = new_actor.cell.contained_buildings['resource'].contained_workers
+                        if len(self.attached_list) > self.list_index:
+                            self.set_label(self.message_start + self.attached_list[self.list_index].name)
+                    else:
+                        self.attached_list = []
         else:
             self.set_label(self.message_start + 'n/a')
+
+class list_item_label(actor_match_label): #attached to a certain list based on list type, has index of list that it shows
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager):
+        self.list_index = list_index
+        self.list_type = list_type
+        self.attached_list = []
+        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager)
+
+    def calibrate(self, new_actor):
+        self.attached_list = []
+        super().calibrate(new_actor)
+
+    def can_show(self):
+        if len(self.attached_list) > self.list_index:
+            return(super().can_show())
+        return(False)
+
+class building_workers_label(actor_match_label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, global_manager):
+        self.remove_worker_button = 'none'
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', global_manager)
+        self.building_type = building_type
+        self.attached_building = 'none'
+        self.remove_worker_button = label_button((self.x, self.y), self.height, self.height, 'remove worker', self.modes, 'misc/remove_worker_button.png', self, global_manager)
+        self.showing = False
+
+    def calibrate(self, new_actor):
+        self.actor = new_actor
+        self.showing = False
+        if not new_actor == 'none':
+            self.attached_building = new_actor.cell.contained_buildings[self.building_type]
+            if not self.attached_building == 'none':
+                self.set_label("Workers: " + str(len(self.attached_building.contained_workers)) + '/' + str(self.attached_building.worker_capacity))
+                self.showing = True
+
+    def set_label(self, new_message):
+        super().set_label(new_message)
+        if not self.remove_worker_button == 'none':
+            self.remove_worker_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
+            self.remove_worker_button.Rect.x = self.remove_worker_button.x
+            self.remove_worker_button.outline.x = self.remove_worker_button.x - self.remove_worker_button.outline_width
+
+    def can_show(self):
+        if self.showing:
+            return(super().can_show())
+        else:
+            return(False)
 
 class commodity_match_label(actor_match_label):
     '''
@@ -185,6 +247,7 @@ class commodity_match_label(actor_match_label):
             matched_actor_type: string representing whether this label should match selected mobs or tiles
             global_manager: global_manager_template object
         '''
+        self.commodity_button = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', global_manager)
         self.showing_commodity = False
         self.commodity_index = commodity_index
@@ -194,6 +257,17 @@ class commodity_match_label(actor_match_label):
         elif matched_actor_type == 'tile':
             self.commodity_button = label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
             #self.commodity_button = label_button((self.x + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
+
+    def set_label(self, new_message):
+        super().set_label(new_message)
+        if (not self.commodity_button == 'none') and (not new_message == 'n/a'):
+            commodity_list = self.actor.get_held_commodities()
+            commodity = commodity_list[self.commodity_index]
+            self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
+            self.commodity_button.Rect.x = self.commodity_button.x
+            self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
+            self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
+            
 
     def calibrate(self, new_actor):
         '''
@@ -209,10 +283,10 @@ class commodity_match_label(actor_match_label):
                 self.showing_commodity = True
                 commodity = commodity_list[self.commodity_index]
                 self.set_label(commodity + ': ' + str(new_actor.get_inventory(commodity))) #format - commodity_name: how_many
-                self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
-                self.commodity_button.Rect.x = self.commodity_button.x
-                self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
-                self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
+                #self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
+                #self.commodity_button.Rect.x = self.commodity_button.x
+                #self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
+                #self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
             else:
                 self.showing_commodity = False
                 self.set_label('n/a')
