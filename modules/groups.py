@@ -204,10 +204,12 @@ class expedition(group):
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-            notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
-                                                            ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-            
+            if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
+                choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
+                notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
+                                                                ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+            else:
+                text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
 

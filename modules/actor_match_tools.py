@@ -104,9 +104,9 @@ class label_button(button):
             Controls whether this button should be shown. This button is shown only when its attached label is shown. 
         '''
         if self.attached_label.can_show():
-            return(super().can_show())
-        else:
-            return(False)
+            if not ((self.button_type == 'sell commodity' or self.button_type == 'sell all commodity') and self.attached_label.current_commodity == 'consumer goods'):
+                return(super().can_show())
+        return(False)
 
 class actor_match_label(label):
     '''
@@ -247,26 +247,32 @@ class commodity_match_label(actor_match_label):
             matched_actor_type: string representing whether this label should match selected mobs or tiles
             global_manager: global_manager_template object
         '''
-        self.commodity_button = 'none'
+        self.actor = 'none'
+        self.current_commodity = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', global_manager)
         self.showing_commodity = False
         self.commodity_index = commodity_index
-        self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager   
+        self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
+        self.attached_buttons = []
         if matched_actor_type == 'mob':
-            self.commodity_button = label_button((self.x, self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager)
+            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager))
         elif matched_actor_type == 'tile':
-            self.commodity_button = label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
-            #self.commodity_button = label_button((self.x + scaling.scale_width(205, self.global_manager), self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager)
+            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'sell commodity', ['europe'], 'misc/commodity_sell_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + ((self.height + 5) * 2), self.y), self.height, self.height, 'sell all commodity', ['europe'], 'misc/commodity_sell_all_button.png', self, global_manager))
 
     def set_label(self, new_message):
         super().set_label(new_message)
-        if (not self.commodity_button == 'none') and (not new_message == 'n/a'):
+        if not self.actor == 'none': #self.setup_complete: #if not new_message == 'n/a':
             commodity_list = self.actor.get_held_commodities()
-            commodity = commodity_list[self.commodity_index]
-            self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
-            self.commodity_button.Rect.x = self.commodity_button.x
-            self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
-            self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
+            if len(commodity_list) > self.commodity_index:
+                commodity = commodity_list[self.commodity_index]
+                for i in range(len(self.attached_buttons)):
+                    current_button = self.attached_buttons[i]
+                    current_button.x = self.x + self.width + 5 + ((self.height + 5) * i) #to do: make a function to move all elements of a button
+                    current_button.Rect.x = current_button.x
+                    current_button.outline.x = current_button.x - current_button.outline_width
+                self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
             
 
     def calibrate(self, new_actor):
@@ -282,11 +288,8 @@ class commodity_match_label(actor_match_label):
             if len(commodity_list) - 1 >= self.commodity_index: #if index in commodity list
                 self.showing_commodity = True
                 commodity = commodity_list[self.commodity_index]
+                self.current_commodity = commodity
                 self.set_label(commodity + ': ' + str(new_actor.get_inventory(commodity))) #format - commodity_name: how_many
-                #self.commodity_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
-                #self.commodity_button.Rect.x = self.commodity_button.x
-                #self.commodity_button.outline.x = self.commodity_button.x - self.commodity_button.outline_width
-                #self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
             else:
                 self.showing_commodity = False
                 self.set_label('n/a')

@@ -7,6 +7,7 @@ from . import main_loop_tools
 from . import actor_utility
 from . import utility
 from . import turn_management_tools
+from . import market_tools
 from . import notification_tools
 
 class button():
@@ -106,6 +107,19 @@ class button():
                 self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
+        elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+            if not self.attached_label.actor == 'none':
+                commodity_list = self.attached_label.actor.get_held_commodities()
+                commodity = commodity_list[self.attached_label.commodity_index]
+                sell_price = self.global_manager.get('commodity_prices')[commodity]
+                if self.button_type == 'sell commodity':
+                    self.set_tooltip(["Sells 1 unit of " + commodity + " for " + str(sell_price) + " money", "Each unit of " + commodity + " sold has a chance of reducing the price"])
+                else:
+                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    self.set_tooltip(["Sells your entire stockpile of " + commodity + " for " + str(sell_price) + " money each, totaling to " + str(sell_price * num_present) + " money",
+                        "Each unit of " + commodity + " sold has a chance of reducing the price"])
+            else:
+                self.set_tooltip(['none'])         
         else:
             self.set_tooltip(['placeholder'])
             
@@ -302,7 +316,7 @@ class button():
         '''
         self.on_click()
 
-    def on_click(self):
+    def on_click(self): #sell commodity, sell all commodity
         '''
         Input:
             none
@@ -442,6 +456,17 @@ class button():
     
             elif self.button_type == 'end turn':
                 turn_management_tools.end_turn(self.global_manager)
+
+            elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+                commodity_list = self.attached_label.actor.get_held_commodities()
+                commodity = commodity_list[self.attached_label.commodity_index]
+                num_present = self.attached_label.actor.get_inventory(commodity)
+                num_sold = 0
+                if self.button_type == 'sell commodity':
+                    num_sold = 1
+                else:
+                    num_sold = num_present
+                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
                 
     def on_rmb_release(self):
         '''
@@ -604,10 +629,13 @@ class switch_theatre_button(button):
                 if main_loop_tools.action_possible(self.global_manager):
                     current_mob = actor_utility.get_selected_list(self.global_manager)[0]
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and 
-                            current_mob.end_turn_destination = 'none'
-                            self.global_manager.set('choosing_destination', True)
-                            self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
+                        if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and current_mob.y > 0): #or in a harbor
+                            if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and 
+                                current_mob.end_turn_destination = 'none'
+                                self.global_manager.set('choosing_destination', True)
+                                self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
+                        else:
+                            text_tools.print_to_screen("You are inland and can not cross the ocean.", self.global_manager) 
                     else:
                         text_tools.print_to_screen("Crossing the ocean requires an entire turn of movement points.", self.global_manager)
                 else:
