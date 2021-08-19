@@ -155,6 +155,8 @@ global_manager.set('building_list', [])
 global_manager.set('resource_building_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
+global_manager.set('num_workers', 0)
+global_manager.set('worker_upkeep', 1)
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
 global_manager.set('overlay_tile_list', [])
@@ -245,9 +247,9 @@ game_transitions.create_strategic_map(global_manager)
 
 global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
 
-global_manager.set('money_tracker', data_managers.value_tracker('money', 100, global_manager))
-labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
-    'misc/default_label.png', 'money', global_manager)
+global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
+labels.money_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+    'misc/default_label.png', global_manager)
 
 global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
 labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
@@ -282,7 +284,7 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
 current_button_number += 2#move more when switching categories
 
 switch_theatre_button = buttons.switch_theatre_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-    scaling.scale_height(50, global_manager), 'blue', pygame.K_1, ['strategic'], 'misc/switch_theatre_button.png', global_manager)\
+    scaling.scale_height(50, global_manager), 'blue', pygame.K_g, ['strategic'], 'misc/switch_theatre_button.png', global_manager)\
 #switches theatre between Europe and Africa
 
 resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
@@ -332,9 +334,9 @@ embark_vehicle_button = vehicles.embark_vehicle_button(group_button_coordinates,
 
 disembark_vehicle_button = vehicles.disembark_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_n, ['strategic', 'europe'], 'misc/disembark_vehicle_button.png', global_manager)
 
-crew_vehicle_button = vehicles.crew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_b, ['strategic', 'europe'], 'misc/embark_vehicle_button.png', global_manager)
+crew_vehicle_button = vehicles.crew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_m, ['strategic', 'europe'], 'misc/embark_vehicle_button.png', global_manager)
 
-uncrew_vehicle_button = vehicles.uncrew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_v, ['strategic', 'europe'], 'misc/disembark_vehicle_button.png', global_manager)
+uncrew_vehicle_button = vehicles.uncrew_vehicle_button(group_button_coordinates, group_button_width, group_button_height, 'blue', pygame.K_n, ['strategic', 'europe'], 'misc/disembark_vehicle_button.png', global_manager)
 
 #mob background image
 mob_free_image_background = images.free_image('misc/mob_background.png', scaling.scale_coordinates(0, global_manager.get('default_display_height') - 245, global_manager), scaling.scale_width(125, global_manager),
@@ -448,3 +450,5 @@ turn_management_tools.start_turn(global_manager, True)
 
 main_loop.main_loop(global_manager)
 pygame.quit()
+while True:
+    nothing = 0 #give user time to read final message and stop program when they want

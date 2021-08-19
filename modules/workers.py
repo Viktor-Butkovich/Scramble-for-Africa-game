@@ -14,6 +14,7 @@ class worker(mob):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('worker_list').append(self)
         self.is_worker = True
+        self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
 
     def can_show_tooltip(self):
         '''
@@ -84,6 +85,7 @@ class worker(mob):
         '''
         super().remove()
         self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
+        self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
 
     def work_building(self, building):
         self.in_building = True

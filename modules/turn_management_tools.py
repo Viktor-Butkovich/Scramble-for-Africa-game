@@ -13,6 +13,7 @@ def end_turn(global_manager):
         current_mob.end_turn_move()
     for current_resource_building in global_manager.get('resource_building_list'):
         current_resource_building.produce()
+    manage_upkeep(global_manager)
     #do things that happen at end of turn
     start_turn(global_manager, False)
 
@@ -26,4 +27,10 @@ def start_turn(global_manager, first_turn):
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
 
+def manage_upkeep(global_manager):
+    num_workers = global_manager.get('num_workers')
+    worker_upkeep = global_manager.get('worker_upkeep')
+    total_upkeep = num_workers * worker_upkeep
+    global_manager.get('money_tracker').change(-1 * total_upkeep)
+    text_tools.print_to_screen("You paid " + str(worker_upkeep) + " money for each of your " + str(num_workers) + " workers, totaling to " + str(total_upkeep) + " money", global_manager)
 

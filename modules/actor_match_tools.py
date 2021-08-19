@@ -255,11 +255,13 @@ class commodity_match_label(actor_match_label):
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
         self.attached_buttons = []
         if matched_actor_type == 'mob':
-            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/drop_commodity_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'drop commodity', self.modes, 'misc/commodity_drop_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'drop all commodity', self.modes, 'misc/commodity_drop_all_button.png', self, global_manager))
         elif matched_actor_type == 'tile':
-            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/pick_up_commodity_button.png', self, global_manager))
-            self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'sell commodity', ['europe'], 'misc/commodity_sell_button.png', self, global_manager))
-            self.attached_buttons.append(label_button((self.x + ((self.height + 5) * 2), self.y), self.height, self.height, 'sell all commodity', ['europe'], 'misc/commodity_sell_all_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'pick up commodity', self.modes, 'misc/commodity_pick_up_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'pick up all commodity', self.modes, 'misc/commodity_pick_up_all_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + ((self.height + 5) * 2), self.y), self.height, self.height, 'sell commodity', ['europe'], 'misc/commodity_sell_button.png', self, global_manager))
+            self.attached_buttons.append(label_button((self.x + ((self.height + 5) * 3), self.y), self.height, self.height, 'sell all commodity', ['europe'], 'misc/commodity_sell_all_button.png', self, global_manager))
 
     def set_label(self, new_message):
         super().set_label(new_message)

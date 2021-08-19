@@ -410,32 +410,28 @@ class mini_grid(grid):
         Output:
             Centers this mini grid on the inputted coordinates of the attached grid
         '''
-        self.center_x = center_x
-        self.center_y = center_y
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
-        for current_cell in self.cell_list:
-            attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
-            if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
-                attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
-                current_cell.set_visibility(attached_cell.visible)
-                current_cell.set_terrain(attached_cell.terrain)
-                current_cell.set_resource(attached_cell.resource)
-                current_cell.contained_mobs = attached_cell.contained_mobs
-            else: #if off-map
-                current_cell.set_visibility(True)
-                current_cell.set_terrain('none')
-                current_cell.set_resource('none')
-        self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
-        for current_mob in self.global_manager.get('mob_list'):
-            if not current_mob.in_group: #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
-                for current_image in current_mob.images:
-                    if current_image.grid == self:
-                        current_image.add_to_cell()
-        #for current_officer in self.global_manager.get('officer_list'):
-        #    if not current_officer.in_group:
-        #        current_officer.update_veteran_icons()
-        #for current_group in self.global_manager.get('officer_list'):
-        #    current_group.update_veteran_icons()
+        if self.global_manager.get('current_game_mode') in self.modes:
+            self.center_x = center_x
+            self.center_y = center_y
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
+            for current_cell in self.cell_list:
+                attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
+                    attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
+                    current_cell.set_visibility(attached_cell.visible)
+                    current_cell.set_terrain(attached_cell.terrain)
+                    current_cell.set_resource(attached_cell.resource)
+                    current_cell.contained_mobs = attached_cell.contained_mobs
+                else: #if off-map
+                    current_cell.set_visibility(True)
+                    current_cell.set_terrain('none')
+                    current_cell.set_resource('none')
+            self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
+            for current_mob in self.global_manager.get('mob_list'):
+                if not current_mob.in_group: #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
+                    for current_image in current_mob.images:
+                        if current_image.grid == self:
+                            current_image.add_to_cell()
 
     def get_main_grid_coordinates(self, mini_x, mini_y):
         '''

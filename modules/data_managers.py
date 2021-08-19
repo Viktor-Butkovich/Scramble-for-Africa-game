@@ -140,6 +140,22 @@ class value_tracker():
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
+class money_tracker(value_tracker):
+    def __init__(self, initial_value, global_manager):
+        super().__init__('money', initial_value, global_manager)
+
+    def change(self, value_change):
+        super().change(value_change)
+        if self.get() < 0:
+            self.global_manager.set('crashed', True)
+            print("You do not have enough money to continue running your company. GAME OVER")
+
+    def set(self, new_value):
+        super().set(new_value)
+        if self.get() < 0:
+            self.global_manager.set('crashed', True)
+            print("You do not have enough money to continue running your company. GAME OVER")
+
 class notification_manager_template():
     def __init__(self, global_manager):
         self.notification_queue = []

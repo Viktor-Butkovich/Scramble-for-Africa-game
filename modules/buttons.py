@@ -87,7 +87,7 @@ class button():
         elif self.button_type == 'uncrew':
             self.set_tooltip(["Orders a vehicle's crew to leave the vehicle, allowing the worker to act independently. Requires that only a crewed vehicle is selected."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected and that the vehicle is crewed."])
+            self.set_tooltip(["Orders all selected units to embark a vehicle.", "Requires a vehicle and other units are selected in the same tile."])
         elif self.button_type == 'disembark':
             self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
         elif self.button_type == 'pick up commodity':
@@ -95,9 +95,19 @@ class button():
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
             else:
                 self.set_tooltip(['none'])
+        elif self.button_type == 'pick up all commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'drop commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
+            else:
+                self.set_tooltip(['none'])
+        elif self.button_type == 'drop all commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
             else:
                 self.set_tooltip(['none'])
         elif self.button_type == 'remove worker':
@@ -414,27 +424,33 @@ class button():
                 self.expedition.start_exploration(self.x_change, self.y_change)
                 self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
 
-            elif self.button_type == 'drop commodity':
+            elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'drop all commodity':
+                        num_commodity = displayed_mob.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        displayed_mob.change_inventory(commodity, -1)
-                        displayed_tile.change_inventory(commodity, 1)
+                        displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                        displayed_tile.change_inventory(commodity, num_commodity)
                     else:
                         text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
                 
-            elif self.button_type == 'pick up commodity':
+            elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'pick up all commodity':
+                        num_commodity = displayed_tile.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        displayed_mob.change_inventory(commodity, 1)
-                        displayed_tile.change_inventory(commodity, -1)
+                        displayed_mob.change_inventory(commodity, num_commodity)
+                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
                     else:
                         text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
                 else:

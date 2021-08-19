@@ -100,24 +100,28 @@ class embark_vehicle_button(button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 2:
-                    vehicle = 'none'
-                    rider = 'none'
-                    if selected_list[0].is_vehicle and not selected_list[1].is_vehicle:
-                        vehicle = selected_list[0]
-                        rider = selected_list[1]
-                    elif selected_list[1].is_vehicle and not selected_list[0].is_vehicle:
-                        vehicle = selected_list[1]
-                        rider = selected_list[0]
-                    if not (vehicle == 'none' or rider == 'none'): #if vehicle and rider selected
-                        if vehicle.x == rider.x and vehicle.y == rider.y: #ensure that this doesn't work across grids
-                            rider.embark_vehicle(vehicle)
-                        else:
-                            text_tools.print_to_screen("You must select a unit in the same tile as a vehicle to embark the vehicle.", self.global_manager)
+                num_vehicles = 0
+                vehicle = 'none'
+                riders = []
+                for current_mob in selected_list:
+                    if current_mob.is_vehicle:
+                        num_vehicles += 1
+                        vehicle = current_mob
                     else:
-                        text_tools.print_to_screen("You must select a unit in the same tile as a vehicle to embark the vehicle.", self.global_manager)
+                        riders.append(current_mob)
+                if num_vehicles == 1 and len(riders) > 0:
+                    same_tile = True
+                    for current_rider in riders:
+                        if not (vehicle.x == current_rider.x and vehicle.y == current_rider.y and current_rider.grids[0] in vehicle.grids): #if not in same tile, stop
+                            same_tile = False
+                    if same_tile:
+                        for current_rider in riders:
+                            current_rider.embark_vehicle(vehicle)
+                    else:
+                        text_tools.print_to_screen("You must select units in the same tile as a vehicle to embark the vehicle.", self.global_manager)
+
                 else:
-                    text_tools.print_to_screen("You must select a unit in the same tile as a vehicle to embark the vehicle.", self.global_manager)
+                    text_tools.print_to_screen("You must select units in the same tile as a vehicle to embark the vehicle.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not embark a vehicle.", self.global_manager)
 

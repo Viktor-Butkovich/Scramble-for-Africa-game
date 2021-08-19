@@ -128,6 +128,19 @@ class value_label(label):
     def update_label(self, new_value):
         self.set_label(self.value_name + ': ' + str(new_value))
 
+class money_label(value_label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'money', global_manager)
+
+    def update_tooltip(self):
+        tooltip_text = [self.message]
+        num_workers = self.global_manager.get('num_workers')
+        worker_upkeep = self.global_manager.get('worker_upkeep')
+        total_upkeep = num_workers * worker_upkeep
+        tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money")
+        self.set_tooltip(tooltip_text)
+        
+
 class commodity_prices_label(label):
     def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
         self.ideal_width = minimum_width
@@ -163,8 +176,8 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width + 20:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.width - 10: #self.ideal_width + 20:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling

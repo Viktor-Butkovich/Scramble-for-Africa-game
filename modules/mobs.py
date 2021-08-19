@@ -315,6 +315,7 @@ class mob(actor):
             vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.inventory_setup() #empty own inventory
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), vehicle.images[0].current_cell.tile)
 
     def disembark_vehicle(self, vehicle):
         self.in_vehicle = False
