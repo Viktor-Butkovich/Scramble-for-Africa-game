@@ -7,6 +7,7 @@ from . import main_loop_tools
 from . import actor_utility
 from . import utility
 from . import turn_management_tools
+from . import market_tools
 from . import notification_tools
 
 class button():
@@ -81,8 +82,12 @@ class button():
             self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
+        elif self.button_type == 'crew':
+            self.set_tooltip(["Merges a vehicle and a worker in the same tile to form a crewed vehicle. Requires that only an uncrewed vehicle is selected in the same tile as a worker."])
+        elif self.button_type == 'uncrew':
+            self.set_tooltip(["Orders a vehicle's crew to leave the vehicle, allowing the worker to act independently. Requires that only a crewed vehicle is selected."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders a unit to embark a vehicle in the same tile.", "Requires that only a unit and vehicle are selected."])
+            self.set_tooltip(["Orders all selected units to embark a vehicle.", "Requires a vehicle and other units are selected in the same tile."])
         elif self.button_type == 'disembark':
             self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
         elif self.button_type == 'pick up commodity':
@@ -90,13 +95,41 @@ class button():
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
             else:
                 self.set_tooltip(['none'])
+        elif self.button_type == 'pick up all commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'drop commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
             else:
                 self.set_tooltip(['none'])
+        elif self.button_type == 'drop all commodity':
+            if not self.attached_label.actor == 'none':
+                self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
+            else:
+                self.set_tooltip(['none'])
+        elif self.button_type == 'remove worker':
+            if not self.attached_label.attached_building == 'none':
+                self.set_tooltip(["Detaches 1 worker from this " + self.attached_label.attached_building.name])
+            else:
+                self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
+        elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+            if not self.attached_label.actor == 'none':
+                commodity_list = self.attached_label.actor.get_held_commodities()
+                commodity = commodity_list[self.attached_label.commodity_index]
+                sell_price = self.global_manager.get('commodity_prices')[commodity]
+                if self.button_type == 'sell commodity':
+                    self.set_tooltip(["Sells 1 unit of " + commodity + " for " + str(sell_price) + " money", "Each unit of " + commodity + " sold has a chance of reducing the price"])
+                else:
+                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    self.set_tooltip(["Sells your entire stockpile of " + commodity + " for " + str(sell_price) + " money each, totaling to " + str(sell_price * num_present) + " money",
+                        "Each unit of " + commodity + " sold has a chance of reducing the price"])
+            else:
+                self.set_tooltip(['none'])         
         else:
             self.set_tooltip(['placeholder'])
             
@@ -257,7 +290,7 @@ class button():
                 textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
                 self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
 
-    def draw_tooltip(self, y_displacement):
+    def draw_tooltip(self, below_screen, height, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -267,11 +300,13 @@ class button():
         if self.can_show():
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
+            if below_screen:
+                mouse_y = self.global_manager.get('display_height') + 10 - height
             mouse_y += y_displacement
             if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
                 mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
-            if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
-                mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
+            #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+            #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
@@ -291,7 +326,7 @@ class button():
         '''
         self.on_click()
 
-    def on_click(self):
+    def on_click(self): #sell commodity, sell all commodity
         '''
         Input:
             none
@@ -389,31 +424,44 @@ class button():
                 self.expedition.start_exploration(self.x_change, self.y_change)
                 self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
 
-            elif self.button_type == 'drop commodity':
+            elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'drop all commodity':
+                        num_commodity = displayed_mob.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        displayed_mob.change_inventory(commodity, -1)
-                        displayed_tile.change_inventory(commodity, 1)
+                        displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                        displayed_tile.change_inventory(commodity, num_commodity)
                     else:
                         text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
                 
-            elif self.button_type == 'pick up commodity':
+            elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'pick up all commodity':
+                        num_commodity = displayed_tile.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        displayed_mob.change_inventory(commodity, 1)
-                        displayed_tile.change_inventory(commodity, -1)
+                        displayed_mob.change_inventory(commodity, num_commodity)
+                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
                     else:
                         text_tools.print_to_screen('There is nothing to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
+
+            elif self.button_type == 'remove worker':
+                if not self.attached_label.attached_building == 'none':
+                    if not len(self.attached_label.attached_building.contained_workers) == 0:
+                        self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
+                    else:
+                        text_tools.print_to_screen("There are no workers to detach from this building.", self.global_manager)
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -424,6 +472,17 @@ class button():
     
             elif self.button_type == 'end turn':
                 turn_management_tools.end_turn(self.global_manager)
+
+            elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+                commodity_list = self.attached_label.actor.get_held_commodities()
+                commodity = commodity_list[self.attached_label.commodity_index]
+                num_present = self.attached_label.actor.get_inventory(commodity)
+                num_sold = 0
+                if self.button_type == 'sell commodity':
+                    num_sold = 1
+                else:
+                    num_sold = num_present
+                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
                 
     def on_rmb_release(self):
         '''
@@ -467,7 +526,7 @@ class selected_icon(button):
     '''
     A button whose appearance and tooltip matches that of a selected mob and moves the minimap to that mob when clicked
     '''
-    def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, global_manager):
+    def __init__(self, coordinates, width, height, color, modes, image_id, selection_index, is_last, global_manager):
         '''
         Input:
             coordinates: tuple of 2 integers for initial coordinate x and y values
@@ -484,6 +543,9 @@ class selected_icon(button):
         self.old_selected_list = []
         self.default_image_id = image_id
         self.selection_index = selection_index
+        self.is_last = is_last
+        if self.is_last:
+            self.name_list = []
 
     def on_click(self):
         '''
@@ -492,20 +554,19 @@ class selected_icon(button):
         Output:
             Moves minimap to attached selected mob when clicked
         '''
-        if self.can_show(): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+        if self.can_show() and not self.is_last: #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
-            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #if not self.attached_mob.grids[0].attached_grid == 'none': #only calibrate minimap if on main map or minimap
+            actor_utility.deselect_all(self.global_manager) #deselect others, select attached
+            self.attached_mob.select() 
+            if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #move minimap to attached mob
                 self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
             else: #otherwise, show info of tile that mob is on without moving minimap
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
-            for current_image in self.attached_mob.images:
+            for current_image in self.attached_mob.images: #move mob to front of each stack it is in
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-            self.global_manager.set('show_selection_outlines', True)
-            self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-                        
+                         
     def draw(self):
         '''
         Input:
@@ -516,7 +577,16 @@ class selected_icon(button):
         new_selected_list = actor_utility.get_selected_list(self.global_manager)
         if not new_selected_list == self.old_selected_list:
             self.old_selected_list = new_selected_list
-            if len(self.old_selected_list) > self.selection_index:
+            if self.is_last and len(new_selected_list) > self.selection_index:
+                self.attached_mob = 'last'
+                self.image.set_image('misc/extra_selected_button.png')
+                name_list = []
+                for current_mob_index in range(len(self.old_selected_list)):
+                    if current_mob_index > self.selection_index - 1:
+                        name_list.append(self.old_selected_list[current_mob_index].name)
+                self.name_list = name_list
+                
+            elif len(self.old_selected_list) > self.selection_index:
                 self.attached_mob = self.old_selected_list[self.selection_index]
                 self.image.set_image(self.attached_mob.images[0].image_id)
         if len(self.old_selected_list) > self.selection_index:
@@ -547,17 +617,20 @@ class selected_icon(button):
         if not self.can_show():
             self.set_tooltip([])
         else:
-            self.set_tooltip(self.attached_mob.images[0].tooltip_text)
+            if self.is_last:
+                self.set_tooltip(["More: "] + self.name_list)
+            else:
+                self.attached_mob.update_tooltip()
+                self.set_tooltip(self.attached_mob.tooltip_text + ["Click to deselect other units and focus on this one"])
         
-class switch_grid_button(button):
-    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, destination_grid, global_manager):
+class switch_theatre_button(button):
+    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager): #destination_grids
         '''
         Input:
-            same as superclass, except:
-            destination_grid: grid object representing the grid to which this button sends mobs
+            same as superclass
         '''
-        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
-        self.destination_grid = destination_grid
+        super().__init__(coordinates, width, height, color, 'switch_theatre', keybind_id, modes, image_id, global_manager)
+        #self.destination_grids = destination_grids
 
     def on_click(self):      
         '''
@@ -568,19 +641,19 @@ class switch_grid_button(button):
         '''
         if self.can_show():
             self.showing_outline = True
-            if len(actor_utility.get_selected_list(self.global_manager)) <= 1:
+            if len(actor_utility.get_selected_list(self.global_manager)) == 1:
                 if main_loop_tools.action_possible(self.global_manager):
-                    for mob in self.global_manager.get('mob_list'):
-                        if mob.selected and not mob.grids[0] == self.destination_grid:
-                            destination_x = 0
-                            destination_y = 0
-                            if self.destination_grid in self.global_manager.get('abstract_grid_list'):
-                                destination_x, destination_y = (0, 0)
-                            else:
-                                destination_x, destination_y = actor_utility.get_random_ocean_coordinates(self.global_manager)
-                            mob.go_to_grid(self.destination_grid, (destination_x, destination_y))
-                            self.global_manager.set('show_selection_outlines', True)
-                            self.global_manager.set('last_selection_outline_switch', time.time())
+                    current_mob = actor_utility.get_selected_list(self.global_manager)[0]
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and current_mob.y > 0): #or in a harbor
+                            if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and 
+                                current_mob.end_turn_destination = 'none'
+                                self.global_manager.set('choosing_destination', True)
+                                self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
+                        else:
+                            text_tools.print_to_screen("You are inland and can not cross the ocean.", self.global_manager) 
+                    else:
+                        text_tools.print_to_screen("Crossing the ocean requires an entire turn of movement points.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
             else:
@@ -593,11 +666,7 @@ class switch_grid_button(button):
         Output:
             Sets this button's tooltip to what it should be. A switch_grid_button's tooltip should describe the location that it sends units to
         '''
-        message = "Sends the currently selected ship to "
-        if self.button_type == 'to africa':
-            message += "Africa."
-        elif self.button_type == 'to europe':
-            message += "Europe."
+        message = "Sends the currently selected ship to a different theatre (Africa or Europe)"
         self.set_tooltip([message])
 
     def can_show(self):
@@ -610,9 +679,9 @@ class switch_grid_button(button):
         selected_list = actor_utility.get_selected_list(self.global_manager)
         if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
             return(False)
-        elif selected_list[0].grids[0] == self.destination_grid: #do not show if mob is in destination grid already
-            return(False)
-        elif not selected_list[0].can_travel: #only ships can move between grids
+        #elif selected_list[0].grids[0] in self.destination_grids: #do not show if mob is in destination grid already
+        #    return(False)
+        elif not selected_list[0].can_travel(): #only ships can move between grids
             return(False)
         else:
             return(super().can_show()) #if nothing preventing being shown, use conditions of superclass

@@ -33,7 +33,7 @@ class group(mob):
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
-        
+        self.is_group = True
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -51,6 +51,16 @@ class group(mob):
             self.set_movement_points(self.officer.movement_points)
         else:
             self.set_movement_points(self.worker.movement_points)
+
+    def promote(self):
+        self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
+        self.officer.set_name("Veteran " + self.officer.name.lower()) #Explorer to Veteran explorer
+        for current_grid in self.grids:
+            if current_grid == self.global_manager.get('minimap_grid'):
+                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+            else:
+                veteran_icon_x, veteran_icon_y = (self.x, self.y)
+            self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -70,7 +80,7 @@ class group(mob):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
         self.officer.join_group() #hides images self.worker.hide_images()#
         self.worker.go_to_grid(new_grid, new_coordinates)
@@ -126,37 +136,17 @@ class group(mob):
         self.officer.remove()
         self.worker.remove()
 
-    def update_veteran_icons(self):
+class construction_gang(group):
+    '''
+    A group with an engineer officer that is able to construct buildings
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Input:
-            none
-        Output:
-            Moves this group's veteran icons to follow its images
+            same as superclass
         '''
-        for current_veteran_icon in self.veteran_icons:
-            if current_veteran_icon.grid.is_mini_grid:
-                current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-            else:
-                current_veteran_icon.x = self.x
-                current_veteran_icon.y = self.y
-
-    def disembark_vehicle(self, vehicle):
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        self.update_veteran_icons() #not in superclass
-        for current_image in self.images:
-            current_image.add_to_cell()
-
-    def move(self, x_change, y_change):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass but also moves its veteran icons to follow its images
-        '''
-        super().move(x_change, y_change)
-        self.update_veteran_icons()
+        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_construct = True
 
 class expedition(group):
     '''
@@ -171,24 +161,6 @@ class expedition(group):
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
-
-    '''def can_move(self, x_change, y_change):
-        future_x = self.x + x_change
-        future_y = self.y + y_change
-        result = super().can_move(x_change, y_change)
-        if result == False and 
-        if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-            if not self.grid.find_cell(future_x, future_y).terrain == 'water':
-                return(True)
-            else:
-                :
-                    text_tools.print_to_screen("You can't move into the water.", self.global_manager) #to do: change this when boats are added
-                    return(False)
-                if not self.grid.find_cell(future_x, future_y).visible:
-                    return(True) #will attempt to move there and discover it and discover it
-        else:
-            text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
-            return(False)'''
 
     def display_exploration_die(self, coordinates, result):
         '''
@@ -232,10 +204,12 @@ class expedition(group):
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
-            choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-            notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
-                                                            ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-            
+            if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
+                choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
+                notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
+                                                                ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+            else:
+                text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
 
@@ -340,14 +314,7 @@ class expedition(group):
         else:
             self.change_movement_points(-1 * self.movement_cost) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
-            self.set_name("Veteran expedition")
-            self.officer.set_name("Veteran explorer")
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+            self.promote()
         elif roll_result == 1:
             self.die()
             died = True
@@ -457,5 +424,7 @@ def create_group(worker, officer, global_manager):
     '''
     if officer.officer_type == 'explorer':
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'engineer':
+        new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'Construction gang', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

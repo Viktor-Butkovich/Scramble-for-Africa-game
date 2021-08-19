@@ -5,6 +5,8 @@ from . import mobs
 from . import vehicles
 from . import text_tools
 from . import scaling
+from . import workers
+from . import officers
 
 class choice_notification(notification):
     '''
@@ -108,9 +110,12 @@ class recruitment_choice_button(choice_button):
             self.showing_outline = True
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type == 'explorer':
-                new_explorer = mobs.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
+                new_explorer = officers.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
+            elif self.recruitment_type == 'engineer':
+                new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
-                new_worker = mobs.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
+                new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':
-                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'ship', ['strategic', 'europe'], self.global_manager)
+                image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
+                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], image_dict, 'ship', ['strategic', 'europe'], 'none', self.global_manager)
         super().on_click()

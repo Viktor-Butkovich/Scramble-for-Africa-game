@@ -33,12 +33,22 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             if global_manager.get('current_game_mode') in current_tile.image.modes and not current_tile in global_manager.get('overlay_tile_list'):
                 current_tile.image.draw()
                 current_tile.image.has_drawn = True
-        
+
+        mob_image_list = []
         for current_image in global_manager.get('image_list'):
             if not current_image.has_drawn:
                 if global_manager.get('current_game_mode') in current_image.modes:
-                    current_image.draw()
-                    current_image.has_drawn = True
+                    if not current_image.image_type == 'mob':
+                        current_image.draw()
+                        current_image.has_drawn = True
+                    else:
+                        mob_image_list.append(current_image)
+
+        for current_image in mob_image_list:
+            current_image.draw()
+            current_image.has_drawn = True
+
+                    
         for current_bar in global_manager.get('bar_list'):
             if global_manager.get('current_game_mode') in current_bar.modes:
                 current_bar.draw()
@@ -57,9 +67,14 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
             if current_mob.can_show_tooltip():
+                #print(current_mob.images[0].current_cell)
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
                         possible_tooltip_drawers.append(same_tile_mob)
+
+        for current_building in global_manager.get('building_list'):
+            if current_building.can_show_tooltip():
+                possible_tooltip_drawers.append(current_building)
             
         for current_actor in global_manager.get('actor_list'):
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
@@ -88,6 +103,8 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
+
+        global_manager.get('mouse_follower').draw()
 
         if global_manager.get('making_mouse_box'):
             mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
@@ -125,7 +142,16 @@ def action_possible(global_manager):
         return(False)
     elif not global_manager.get('player_turn'):
         return(False)
+    elif global_manager.get('choosing_destination'):
+        return(False)
     return(True)
+
+
+def can_make_mouse_box(global_manager):
+    if action_possible(global_manager):
+        return(True)
+    else:
+        return(False)
 
 def draw_loading_screen(global_manager):
     '''
@@ -153,25 +179,57 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
     if possible_tooltip_drawers_length == 0:
         return()
     elif possible_tooltip_drawers_length == 1:
-        possible_tooltip_drawers[0].draw_tooltip(y_displacement)
+        height = y_displacement
+        height += font_size
+        for current_text_line in possible_tooltip_drawers[0].tooltip_text:
+            height += font_size
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        below_screen = False
+        if (global_manager.get('display_height') + 10 - mouse_y) - height < 0:
+            below_screen = True
+        possible_tooltip_drawers[0].draw_tooltip(below_screen, height, y_displacement)
     else:
+        stopping = False
+        height = y_displacement
+        for possible_tooltip_drawer in possible_tooltip_drawers:
+            if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+                stopping = True
+            if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+                stopping = True
+        if not stopping:
+            for possible_tooltip_drawer in possible_tooltip_drawers:
+                height += font_size
+                for current_text_line in possible_tooltip_drawer.tooltip_text:
+                    height += font_size
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        below_screen = False
+        if (global_manager.get('display_height') + 10 - mouse_y) - height < 0:
+            below_screen = True
+        
         stopping = False
         for possible_tooltip_drawer in possible_tooltip_drawers:
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
                 stopping = True
             if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
                 stopping = True
         if not stopping:
             for possible_tooltip_drawer in possible_tooltip_drawers:
-                possible_tooltip_drawer.draw_tooltip(scaling.scale_height(y_displacement, global_manager))
+                possible_tooltip_drawer.draw_tooltip(below_screen, height, scaling.scale_height(y_displacement, global_manager))
                 y_displacement += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
                     y_displacement += font_size
@@ -228,11 +286,13 @@ def manage_rmb_down(clicked_button, global_manager):
     Output:
         Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
     '''
+    stopping = False
     if (not clicked_button) and action_possible(global_manager):
         for current_grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in current_grid.modes:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
+                        stopping = True #if doesn't reach this point, do same as lmb
                         if len(current_cell.contained_mobs) > 1:
                             moved_mob = current_cell.contained_mobs[1]
                             for current_image in moved_mob.images:
@@ -243,7 +303,8 @@ def manage_rmb_down(clicked_button, global_manager):
                             global_manager.set('last_selection_outline_switch', time.time())
                             global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-            
+    if not stopping:
+        manage_lmb_down(clicked_button, global_manager)
     
 def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify name
     '''
@@ -258,9 +319,8 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
     if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         selected_new_mob = False
-        for current_mob in global_manager.get('mob_list'): #regardless of whether a box is made or not, deselect mobs if not holding shift
-            if (not global_manager.get('capital')) and global_manager.get('current_game_mode') in current_mob.modes: #if holding shift, do not deselect
-                current_mob.selected = False
+        if (not global_manager.get('capital')):
+            actor_utility.deselect_all(global_manager)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
                     
@@ -284,9 +344,9 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                     if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
                         selected_new_mob = True
                         for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-                            if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group
-                                current_mob.select()#if mob can show
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
+                            #if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group, should be unnecessary because they are removed from cell when in group
+                            current_mob.select()#if mob can show
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
@@ -313,5 +373,32 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 break
                         if breaking:
                             break
+    elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
+        chooser = global_manager.get('choosing_destination_info_dict')['chooser']
+        #destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
+        chose_destination = False
+        for current_grid in global_manager.get('grid_list'): #destination_grids:
+            for current_cell in current_grid.cell_list:
+                if current_cell.touching_mouse():
+                    if not current_grid in chooser.grids:
+                        stopping = False
+                        if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
+                            destination_x, destination_y = current_cell.tile.get_main_grid_coordinates()
+                            if (not destination_y == 0) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                text_tools.print_to_screen("You can only send ships to coastal waters and ports.", global_manager)
+                                stopping = True
+                        chose_destination = True
+                        if not stopping:
+                            if current_grid.is_mini_grid:
+                                if not current_cell.terrain == 'none':
+                                    chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
+                            else:
+                                chooser.end_turn_destination = current_cell.tile
+                            global_manager.set('show_selection_outlines', True)
+                            global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                    else: #can not move to same continent
+                        text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
+        global_manager.set('choosing_destination', False)
+        global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 

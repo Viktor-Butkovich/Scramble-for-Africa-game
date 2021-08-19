@@ -87,29 +87,32 @@ class label(button):
             self.image.draw()
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
                 
-    def draw_tooltip(self, y_displacement):
+    def draw_tooltip(self, below_screen, height, y_displacement):
         '''
         Input:
             int representing the number of vertical pixels the label will be moved by, allowing multiple tooltips to be shown at once
         Output:
             Draw's this label's tooltip at a position depending on the mouse's position and the inputted int
         '''
-        self.update_tooltip()
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        mouse_y += y_displacement
-        if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-            mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
-        if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
-            mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
-        self.tooltip_box.x = mouse_x
-        self.tooltip_box.y = mouse_y
-        self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
-        self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
-        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
-        for text_line_index in range(len(self.tooltip_text)):
-            text_line = self.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+        if self.can_show():
+            self.update_tooltip()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if below_screen:
+                mouse_y = self.global_manager.get('display_height') + 10 - height
+            mouse_y += y_displacement
+            if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+                mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+            #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
+            #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
+            self.tooltip_box.x = mouse_x
+            self.tooltip_box.y = mouse_y
+            self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
+            self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            for text_line_index in range(len(self.tooltip_text)):
+                text_line = self.tooltip_text[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class value_label(label):
     '''
@@ -124,6 +127,19 @@ class value_label(label):
 
     def update_label(self, new_value):
         self.set_label(self.value_name + ': ' + str(new_value))
+
+class money_label(value_label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'money', global_manager)
+
+    def update_tooltip(self):
+        tooltip_text = [self.message]
+        num_workers = self.global_manager.get('num_workers')
+        worker_upkeep = self.global_manager.get('worker_upkeep')
+        total_upkeep = num_workers * worker_upkeep
+        tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money")
+        self.set_tooltip(tooltip_text)
+        
 
 class commodity_prices_label(label):
     def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
@@ -160,8 +176,8 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width + 20:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.width - 10: #self.ideal_width + 20:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling

@@ -30,6 +30,17 @@ class actor():
         if self.can_hold_commodities:
             self.inventory_setup()
 
+    def set_image(self, new_image):
+        for current_image in self.images:
+            current_image.set_image(new_image)
+        self.image_dict['default'] = self.image_dict[new_image]
+        if self.actor_type == 'mob':
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        elif self.actor_type == 'tile':
+            if self.global_manager.get('displayed_tile') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+
     def inventory_setup(self):
         '''
         Input:
@@ -163,7 +174,7 @@ class actor():
         else:
             return(False)
 
-    def draw_tooltip(self, y_displacement):
+    def draw_tooltip(self, below_screen, height, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -172,6 +183,8 @@ class actor():
         '''
         self.update_tooltip()
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        if below_screen:
+            mouse_y = self.global_manager.get('display_height') + 10 - height
         tooltip_image = self.images[0]
         for current_image in self.images: #only draw tooltip from the image that the mouse is touching
             if current_image.Rect.collidepoint((mouse_x, mouse_y)):
@@ -179,8 +192,8 @@ class actor():
         mouse_y += y_displacement
         if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
             mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
-        if (self.global_manager.get('display_height') - mouse_y) - (len(tooltip_image.tooltip_text) * self.global_manager.get('font_size') + 5 + tooltip_image.tooltip_outline_width) < 0:
-            mouse_y = self.global_manager.get('display_height') - tooltip_image.tooltip_box.height
+        #if (self.global_manager.get('display_height') - mouse_y) - (len(tooltip_image.tooltip_text) * self.global_manager.get('font_size') + 5 + tooltip_image.tooltip_outline_width) < 0:
+        #    mouse_y = self.global_manager.get('display_height') - tooltip_image.tooltip_box.height
         tooltip_image.tooltip_box.x = mouse_x
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width

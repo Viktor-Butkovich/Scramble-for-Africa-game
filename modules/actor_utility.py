@@ -29,10 +29,10 @@ def can_merge(global_manager):
         officer_present = False
         worker_present = False
         for current_selected in selected_list:
-            if current_selected in global_manager.get('officer_list'):
+            if current_selected.is_officer: #if current_selected in global_manager.get('officer_list'):
                 officer_present = True
                 for current_mob in current_selected.images[0].current_cell.contained_mobs:
-                    if current_mob in global_manager.get('worker_list'):
+                    if current_mob.is_worker: #if current_mob in global_manager.get('worker_list'):
                         worker_present = True
         if officer_present and worker_present:
             return(True)
@@ -48,16 +48,32 @@ def can_split(global_manager):
         Returns whether the player is able to split a group. A single group and no other mobs must be selected to split the group.
     '''
     selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 1 and selected_list[0] in global_manager.get('group_list'):
+    if len(selected_list) == 1 and selected_list[0].is_group:
         return(True)
     return(False)
 
 def can_embark_vehicle(global_manager): #if 1 vehicle and 1 non-vehicle selected
     selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 2:
-        if (selected_list[0].is_vehicle and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle): #1 of each
-            if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
-                return(True) #later check to see if vehicle has room
+    #if len(selected_list) == 2:
+    #    if (selected_list[0].is_vehicle and selected_list[0].has_crew and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle and selected_list[1].has_crew):
+            #1 of each, vehicle must have crew
+    #        if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
+    num_vehicles = 0
+    vehicle = 'none'
+    riders = []
+    for current_mob in selected_list:
+        if current_mob.is_vehicle:
+            num_vehicles += 1
+            vehicle = current_mob
+        else:
+            riders.append(current_mob)
+    if num_vehicles == 1 and vehicle.has_crew and len(riders) > 0:
+        same_tile = True
+        for current_rider in riders:
+            if not (vehicle.x == current_rider.x and vehicle.y == current_rider.y and current_rider.grids[0] in vehicle.grids): #if not in same tile, stop
+                same_tile = False
+        if same_tile:
+            return(True)#later check to see if vehicle has room
     return(False)
 
 def can_disembark_vehicle(global_manager): #if 1 vehicle with any contents is selected
@@ -67,6 +83,25 @@ def can_disembark_vehicle(global_manager): #if 1 vehicle with any contents is se
             if len(selected_list[0].contained_mobs) > 0: #or if any commodities carried
                 return(True)
     return(False)
+
+def can_crew_vehicle(global_manager):
+    selected_list = get_selected_list(global_manager)
+
+    if len(selected_list) == 1 and selected_list[0].is_vehicle and not selected_list[0].has_crew: #if uncrewed vehicle is selected and in same tile as worker
+        vehicle = selected_list[0]
+        crew = 'none'
+        for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+            if contained_mob.is_worker:
+                crew = contained_mob
+        if not crew == 'none':
+            return(True) #later check to see if vehicle has room
+    return(False)
+
+def can_uncrew_vehicle(global_manager):
+    selected_list = get_selected_list(global_manager)
+    if len(selected_list) == 1 and selected_list[0].is_vehicle and selected_list[0].has_crew and len(selected_list[0].contained_mobs) == 0: #crew can only leave if has crew and no passengers
+        return(True)
+    return(False) 
     
 def get_selected_list(global_manager):
     '''
@@ -81,15 +116,22 @@ def get_selected_list(global_manager):
             selected_list.append(current_mob)
     return(selected_list)
 
+def deselect_all(global_manager):
+    '''
+    Input:
+        global_manager_template object
+    Output:
+        Deselects all selected mobs
+    '''
+    for current_mob in global_manager.get('mob_list'):
+        if current_mob.selected:
+            current_mob.selected = False
+    
 def get_random_ocean_coordinates(global_manager):
     mob_list = global_manager.get('mob_list')
     mob_coordinate_list = []
-    #start_x, start_y = (0, 0)
-    #while True: #to do: prevent 2nd row from the bottom of the map grid from ever being completely covered with water due to unusual river RNG, causing infinite loop here, or start increasing y until land is found
     start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
     start_y = 0
-    #if not(global_manager.get('strategic_map_grid').find_cell(start_x, start_y).terrain == 'water'): #if there is land at that coordinate, break and allow explorer to spawn there
-    #    break
     return(start_x, start_y)
 
 def calibrate_actor_info_display(global_manager, info_display_list, new_actor):

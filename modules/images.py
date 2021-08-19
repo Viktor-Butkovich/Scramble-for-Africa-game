@@ -19,6 +19,7 @@ class free_image():
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'free'
         self.modes = modes
         self.width = width
         self.height = height
@@ -106,6 +107,7 @@ class actor_image():
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'actor'
         self.last_image_switch = 0
         self.previous_idle_image = 'default'
         self.actor = actor
@@ -222,10 +224,73 @@ class actor_image():
         Input:
             none
         Output:
-            Returns whether this image should currently be shown. Subclasses will not necessarily always return True.
+            Returns whether this image should currently be shown
         '''
-        return(True)
+        if self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
 
+class building_image(actor_image):
+    '''
+    actor_image attached to a building rather than an actor, gaining the ability to manage the cells in which this building is considered to be
+    '''
+    def __init__(self, actor, width, height, grid, image_description, global_manager):
+        '''
+        Input:
+            actor: actor object representing the actor to which this actor is attached
+            width: int representing the pixel width of this image
+            height: int representing the pixel height of this image
+            grid: grid object representing the grid to which this mob image is attached
+            image_description: string representing the file path to this image's image file
+            global_manager: global_manager_template object
+        '''
+        super().__init__(actor, width, height, grid, image_description, global_manager)
+        self.current_cell = 'none'
+        self.image_type = 'building'
+        self.add_to_cell()
+
+    def remove_from_cell(self):
+        '''
+        Input:
+            none
+        Output:
+            Remove's this image's mob from its cell, causing it to not be considered in the cell anymore. Does nothing if the image's mob is not already in a cell.
+        '''
+        if not self.current_cell == 'none':
+            self.current_cell.contained_buildings[self.actor.building_type] = 'none'# = utility.remove_from_list(self.current_cell.contained_buildings, self.actor)
+        self.current_cell = 'none'
+
+    def add_to_cell(self):
+        '''
+        Input:
+            none
+        Output:
+            Adds this image's mob to the front of a cell, causing it to be considered as being in the cell and causing it to be drawn on top of other mobs in that cell. This automatically removes this image's mob from other cells.
+        '''
+        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
+            mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
+                old_cell = self.current_cell
+                self.current_cell = self.grid.find_cell(mini_x, mini_y)
+                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
+                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor #self.current_cell.contained_buildings.insert(0, self.actor)
+            else:
+                self.remove_from_cell()
+            self.go_to_cell((mini_x, mini_y))
+        else:
+            self.remove_from_cell()
+            self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
+            if not self.actor in self.current_cell.contained_buildings:
+                self.current_cell.contained_buildings[self.actor.building_type] = self.actor#self.current_cell.contained_buildings.insert(0, self.actor)
+            self.go_to_cell((self.current_cell.x, self.current_cell.y))
+            
+    def can_show(self):
+        if (not self.current_cell == 'none') and self.global_manager.get('current_game_mode') in self.modes:
+            return(True)
+        else:
+            return(False)
+        
 class mob_image(actor_image):
     '''
     actor_image attached to a mob rather than an actor, gaining the ability to manage the cells in which this mob is considered to be
@@ -242,6 +307,7 @@ class mob_image(actor_image):
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.current_cell = 'none'
+        self.image_type = 'mob'
         self.add_to_cell()
         
     def remove_from_cell(self):
@@ -267,7 +333,7 @@ class mob_image(actor_image):
             if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
                 old_cell = self.current_cell
                 self.current_cell = self.grid.find_cell(mini_x, mini_y)
-                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle): #last part new
+                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building): #last part new
                     self.current_cell.contained_mobs.insert(0, self.actor)
             else:
                 self.remove_from_cell()
@@ -275,7 +341,7 @@ class mob_image(actor_image):
         else:
             self.remove_from_cell()
             self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
-            if not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle): #last part new
+            if not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building): #last part new
                 self.current_cell.contained_mobs.insert(0, self.actor)
             self.go_to_cell((self.current_cell.x, self.current_cell.y))
             
@@ -287,9 +353,9 @@ class mob_image(actor_image):
             Returns whether this image should be shown. If it is attached to an officer or worker that is part of a group, it should not be shown.
             If it is not attached to an officer or worker in a group and it is at the front of a cell, it should be shown. Otherwise, it should not be shown.
         '''
-        if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
-            return(False)
-        if self.actor.in_vehicle:
+        #if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
+        #    return(False)
+        if self.actor.in_vehicle or self.actor.in_group or self.actor.in_building:
             return(False)
         if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
@@ -310,6 +376,7 @@ class button_image(actor_image):
             global_manager: global_manager_template object
         '''
         self.global_manager = global_manager
+        self.image_type = 'button'
         self.button = button
         self.width = width
         self.height = height
@@ -397,6 +464,7 @@ class tile_image(actor_image):
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.go_to_cell((self.actor.x, self.actor.y))
+        #self.outline = pygame.Rect(self.actor.x + 10, self.global_manager.get('display_height') - (self.actor.y + self.height) + 10, self.width, self.height)
 
     def go_to_cell(self, coordinates):
         '''
@@ -440,6 +508,11 @@ class veteran_icon_image(tile_image):
             If not outside of this image's grid area and this image's actor can be shown, draw this image 
         '''
         if self.actor.actor.images[0].can_show() and self.can_show():
+            if self.grid.is_mini_grid:
+                self.actor.x, self.actor.y = self.grid.get_mini_grid_coordinates(self.actor.actor.x, self.actor.actor.y)
+            else:
+                self.actor.x = self.actor.actor.x
+                self.actor.y = self.actor.actor.y
             self.go_to_cell((self.actor.x, self.actor.y))
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 

@@ -27,20 +27,28 @@ class cell():
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
         #self.occupied = False
         self.grid.cell_list.append(self)
-        self.adjacent_list = [] #list of 4 nearby cells, used for movement
-        self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
+        #self.adjacent_list = [] #list of 4 nearby cells, used for movement
+        #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
+        self.contained_buildings = {'resource': 'none'}#[]
+        
 
     def contains_vehicle(self):
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle:
                 return(True)
         return(False)
+
+    def get_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle:
+                return(current_mob)
+        return('none')
 
     def set_visibility(self, new_visibility):
         '''
@@ -105,36 +113,6 @@ class cell():
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
             self.global_manager.get('game_display').blit(textsurface, (text_x, text_y))
-        
-    def find_adjacent_cells(self):
-        '''
-        Input:
-            none
-        Output:
-            Records the cells that this cell is adjacent to in its grid
-        '''
-        adjacent_list = []
-        diagonal_adjacent_list = []
-        if not self.x == 0:
-            adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
-            diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
-            if not self.y == 0:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y - 1))
-            elif not self.y == self.grid.coordinate_height - 1:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x - 1, self.y + 1))
-        if not self.x == self.grid.coordinate_width - 1:
-            adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
-            diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
-            if not self.y == 0:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y - 1))
-            elif not self.y == self.grid.coordinate_height - 1:
-                diagonal_adjacent_list.append(self.grid.find_cell(self.x + 1, self.y + 1))
-        if not self.y == 0:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y - 1))
-        if not self.y == self.grid.coordinate_height - 1:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
-        self.diagonal_adjacent_list = diagonal_adjacent_list
-        self.adjacent_list = adjacent_list
 
     def touching_mouse(self):
         '''

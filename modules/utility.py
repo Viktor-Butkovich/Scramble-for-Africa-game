@@ -58,6 +58,18 @@ def generate_article(word):
     else:
         return('a')
 
+def generate_plural(amount):
+    '''
+    Input:
+        A string
+    Output:
+        Returns 'an' if the word starts with a vowel or 'a' if the word does not start with a vowel
+    '''
+    if amount == 1:
+        return('')
+    else:
+        return('s')
+
 def generate_capitalized_article(word):
     '''
     Input:

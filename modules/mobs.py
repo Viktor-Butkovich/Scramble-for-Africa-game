@@ -25,6 +25,8 @@ class mob(actor):
         self.selected = False
         self.in_group = False
         self.in_vehicle = False
+        self.in_building = False
+        self.actor_type = 'mob'
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
         self.selection_outline_color = 'bright green'
@@ -34,16 +36,33 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(name)
         self.can_explore = False #if can attempt to explore unexplored areas
+        self.can_construct = False #if can construct buildings
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
-        self.can_travel = False #if can go between Europe, Africa, etc.
         self.is_vehicle = False
+        self.is_worker = False
+        self.is_officer = False
+        self.is_group = False
+        self.end_turn_destination = 'none'
         self.max_movement_points = 1
         self.movement_cost = 1
         self.reset_movement_points()
         self.update_tooltip()
+        actor_utility.deselect_all(self.global_manager)
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
+    def end_turn_move(self):
+        if not self.end_turn_destination == 'none':
+            if self.grids[0] in self.end_turn_destination.grids: #if on same grid
+                nothing = 0 #do later
+            else: #if on different grid
+                if self.can_travel():
+                    self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
+            self.end_turn_destination = 'none'
+    
+    def can_travel(self): #if can move between Europe, Africa, etc.
+        return(False) #different for subclasses
 
     def change_movement_points(self, change):
         self.movement_points += change
@@ -56,9 +75,13 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def reset_movement_points(self):
-        self.movement_points = self.max_movement_points
+        self.movement_points = self.max_movement_points 
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def set_max_movement_points(self, new_value):
+        self.max_movement_points = new_value
+        self.set_movement_points(new_value)
 
     def change_inventory(self, commodity, change):
         '''
@@ -137,6 +160,11 @@ class mob(actor):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+            if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
+                self.end_turn_destination.draw_destination_outline()
+                equivalent_tile = self.end_turn_destination.get_equivalent_tile()
+                if not equivalent_tile == 'none':
+                    equivalent_tile.draw_destination_outline()
         
     def update_tooltip(self):
         '''
@@ -167,6 +195,9 @@ class mob(actor):
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
+    def can_leave(self):
+        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
+
     def can_move(self, x_change, y_change):
         '''
         Input:
@@ -176,37 +207,38 @@ class mob(actor):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        if not self.grid in self.global_manager.get('abstract_grid_list'):
-            if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-                future_cell = self.grid.find_cell(future_x, future_y)
-                if future_cell.visible or self.can_explore:
-                    destination_type = 'land'
-                    if future_cell.terrain == 'water':
-                        destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                    if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
-                        if self.movement_points >= self.movement_cost:
-                            return(True)
-                        else:
-                            text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                            text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+        if self.can_leave():
+            if not self.grid in self.global_manager.get('abstract_grid_list'):
+                if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+                    future_cell = self.grid.find_cell(future_x, future_y)
+                    if future_cell.visible or self.can_explore:
+                        destination_type = 'land'
+                        if future_cell.terrain == 'water':
+                            destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
+                            if self.movement_points >= self.movement_cost:
+                                return(True)
+                            else:
+                                text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
+                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+                                return(False)
+                        elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
+                            #if future_cell.visible or self.can_explore: #already checked earlier
+                            text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
                             return(False)
-                    elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
-                        #if future_cell.visible or self.can_explore: #already checked earlier
-                        text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
-                        return(False)
-                    else: #if trying to swim in water and can't 
-                        #if future_cell.visible or self.can_explore: #already checked earlier
-                        text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                        else: #if trying to swim in water and can't 
+                            #if future_cell.visible or self.can_explore: #already checked earlier
+                            text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                            return(False)
+                    else:
+                        text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
                         return(False)
                 else:
-                    text_tools.print_to_screen("You can't move into an unexplored tile.", self.global_manager)
+                    text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
                     return(False)
             else:
-                text_tools.print_to_screen("You can't move off of the map.", self.global_manager)
+                text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
                 return(False)
-        else:
-            text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
-            return(False)
 
     def move(self, x_change, y_change):
         '''
@@ -215,6 +247,7 @@ class mob(actor):
         Output:
             Moves this mob x_change tiles to the right and y_change tiles upward
         '''
+        self.end_turn_destination = 'none' #cancels planned movements
         for current_image in self.images:
             current_image.remove_from_cell()
         self.x += x_change
@@ -224,6 +257,15 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
         self.change_movement_points(-1 * self.movement_cost)
+        if self.images[0].current_cell.contains_vehicle() and not self.is_vehicle:
+            self.selected = False
+            vehicle = self.images[0].current_cell.get_vehicle()
+            if self.is_worker and not vehicle.has_crew:
+                self.crew_vehicle(vehicle)
+            else:
+                self.embark_vehicle(vehicle)
+            vehicle.select()
+            
         #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1) #test showing how to add to inventory
 
     def touching_mouse(self):
@@ -251,7 +293,7 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def can_show_tooltip(self):
-        if self.in_vehicle:
+        if self.in_vehicle or self.in_group or self.in_building:
             return(False)
         else:
             return(super().can_show_tooltip())
@@ -260,208 +302,28 @@ class mob(actor):
         for current_image in self.images:
             current_image.remove_from_cell()
 
+    def show_images(self):
+        for current_image in self.images:
+            current_image.add_to_cell()        
+
     def embark_vehicle(self, vehicle):
         self.in_vehicle = True
         self.selected = False
         self.hide_images()
         vehicle.contained_mobs.append(self)
+        for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
+            vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
+        self.inventory_setup() #empty own inventory
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), vehicle.images[0].current_cell.tile)
 
     def disembark_vehicle(self, vehicle):
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
-
-class worker(mob):
-    '''
-    Mob that is considered a worker and can join groups
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            same as superclass 
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        global_manager.get('worker_list').append(self)
-
-    def can_show_tooltip(self):
-        '''
-        Input:
-            none
-        Output:
-            Same as superclass but only returns True if not part of a group
-        '''
-        if not (self.in_group or self.in_vehicle):
-            return(super().can_show_tooltip())
-        else:
-            return(False)
-
-    def join_group(self):
-        '''
-        Input:
-            none
-        Output:
-            Prevents this worker from being seen and interacted with, storing it as part of a group
-        '''
-        self.in_group = True
-        self.selected = False
-        for current_image in self.images:
-            current_image.remove_from_cell()
-
-    def leave_group(self, group):
-        '''
-        Input:
-            group object from which this worker is leaving
-        Output:
-            Allows this worker to be seen and interacted with, moving it to where the group was disbanded
-        '''
-        self.in_group = False
-        self.x = group.x
-        self.y = group.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        #self.select()
-
-    def remove(self):
-        '''
-        Input:
-            none
-        Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
-        '''
-        super().remove()
-        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
-
-class officer(mob):
-    '''
-    Mob that is considered an officer and can join groups and become a veteran
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        global_manager.get('officer_list').append(self)
-        self.veteran = False
-        self.veteran_icons = []
-        self.officer_type = 'default'
-
-    def go_to_grid(self, new_grid, new_coordinates):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass, except it also moves veteran icons to the new grid and coordinates
-        '''
-        if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                current_veteran_icon.remove()
-            self.veteran_icons = []
-        super().go_to_grid(new_grid, new_coordinates)
-        if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
-
-    def can_show_tooltip(self):
-        '''
-        Input:
-            none
-        Output:
-            Same as superclass but only returns True if not part of a group
-        '''
-        if not (self.in_group or self.in_vehicle):
-            return(super().can_show_tooltip())
-        else:
-            return(False)
-
-    def join_group(self):
-        '''
-        Input:
-            none
-        Output:
-            Prevents this officer from being seen and interacted with, storing it as part of a group
-        '''
-        self.in_group = True
-        self.selected = False
-        for current_image in self.images:
-            current_image.remove_from_cell()
-
-    def leave_group(self, group):
-        '''
-        Input:
-            group object from which this officer is leaving
-        Output:
-            Allows this officer to be seen and interacted with, moving it to where the group was disbanded
-        '''
-        self.in_group = False
-        self.x = group.x
-        self.y = group.y
-        self.update_veteran_icons()
         for current_image in self.images:
             current_image.add_to_cell()
         self.select()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 
-    def disembark_vehicle(self, vehicle):
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        self.update_veteran_icons() #not in superclass
-        for current_image in self.images:
-            current_image.add_to_cell()
-
-    def remove(self):
-        '''
-        Input:
-            none
-        Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
-        '''
-        super().remove()
-        self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.remove()
-
-    def update_veteran_icons(self):
-        '''
-        Input:
-            none
-        Output:
-            Moves this officer's veteran icons to follow its images
-        '''
-        for current_veteran_icon in self.veteran_icons:
-            if current_veteran_icon.grid.is_mini_grid:
-                current_veteran_icon.x, current_veteran_icon.y = current_veteran_icon.grid.get_mini_grid_coordinates(self.x, self.y)
-            else:
-                current_veteran_icon.x = self.x
-                current_veteran_icon.y = self.y
-
-    def move(self, x_change, y_change):
-        '''
-        Input:
-            Same as superclass
-        Output:
-            Same as superclass but also moves its veteran icons to follow its images
-        '''
-        super().move(x_change, y_change)
-        self.update_veteran_icons()
-
-class explorer(officer):
-    '''
-    Officer that is considered an explorer
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        self.grid.find_cell(self.x, self.y).set_visibility(True)
-        self.officer_type = 'explorer'
