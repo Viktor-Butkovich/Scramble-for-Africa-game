@@ -483,6 +483,13 @@ class button():
                 else:
                     num_sold = num_present
                 market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+
+            elif self.button_type == 'none': #used as option in confirmation notifications, remove anything created by opening notification, like exploration mark, when pressed
+                if self.global_manager.get('ongoing_exploration'):
+                    for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
+                        current_exploration_mark.remove()
+                    self.global_manager.set('ongoing_exploration', False)
+                    self.global_manager.set('exploration_mark_list', [])
                 
     def on_rmb_release(self):
         '''

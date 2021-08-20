@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 
 import modules.scaling as scaling
 import modules.main_loop as main_loop
@@ -82,20 +83,13 @@ global_manager.set('terrain_colors',
 
 global_manager.set('commodity_types', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber', 'consumer goods'])
 global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
-global_manager.set('commodity_prices',
-    {
-    'coffee': 1,
-    'copper': 1,
-    'diamond': 1,
-    'exotic wood': 1,
-    'fruit': 1,
-    'gold': 1,
-    'iron': 1,
-    'ivory': 1,
-    'rubber': 1,
-    'consumer goods': 5
-    }
-)
+global_manager.set('commodity_prices', {})
+
+for current_commodity in global_manager.get('commodity_types'):
+    if not current_commodity == 'consumer goods':
+        global_manager.get('commodity_prices')[current_commodity] = random.randrange(1, 6) #1-5
+    else:
+        global_manager.get('commodity_prices')[current_commodity] = 5
 
 global_manager.set('resource_building_dict',
     {
@@ -159,6 +153,7 @@ global_manager.set('num_workers', 0)
 global_manager.set('worker_upkeep', 1)
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
+global_manager.set('exploration_mark_list', [])
 global_manager.set('overlay_tile_list', [])
 global_manager.set('notification_list', [])
 global_manager.set('label_list', [])
@@ -450,5 +445,3 @@ turn_management_tools.start_turn(global_manager, True)
 
 main_loop.main_loop(global_manager)
 pygame.quit()
-while True:
-    nothing = 0 #give user time to read final message and stop program when they want

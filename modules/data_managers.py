@@ -148,13 +148,13 @@ class money_tracker(value_tracker):
         super().change(value_change)
         if self.get() < 0:
             self.global_manager.set('crashed', True)
-            print("You do not have enough money to continue running your company. GAME OVER")
+            #print("You do not have enough money to continue running your company. GAME OVER")
 
     def set(self, new_value):
         super().set(new_value)
         if self.get() < 0:
             self.global_manager.set('crashed', True)
-            print("You do not have enough money to continue running your company. GAME OVER")
+            #print("You do not have enough money to continue running your company. GAME OVER")
 
 class notification_manager_template():
     def __init__(self, global_manager):

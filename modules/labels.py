@@ -176,8 +176,8 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.width - 10: #self.ideal_width + 20:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10# + 20
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - 10 and text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.width: #self.ideal_width + 20:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling

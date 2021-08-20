@@ -206,8 +206,16 @@ class expedition(group):
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
                 choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-                notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
-                                                                ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'none'], choice_info_dict,
+                    self.global_manager) #message, choices, choice_info_dict, global_manager
+                self.global_manager.set('ongoing_exploration', True)
+                for current_grid in self.grids:
+                    coordinates = (0, 0)
+                    if current_grid.is_mini_grid:
+                        coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+                    else:
+                        coordinates = (self.x + x_change, self.y + y_change)
+                    self.global_manager.get('exploration_mark_list').append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
             else:
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
@@ -229,23 +237,18 @@ class expedition(group):
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
         self.just_promoted = False
-        self.global_manager.set('ongoing_exploration', True)
-        for current_grid in self.grids:
-            coordinates = (0, 0)
-            if current_grid.is_mini_grid:
-                coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-            else:
-                coordinates = (self.x + x_change, self.y + y_change)
-            self.exploration_mark_list.append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
         text = ""
-        text += "The expedition heads towards the " + direction + ". /n"
-        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
-            
-        notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
-            
+        text += "The expedition heads towards the " + direction + ". /n /n"
+        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
+        
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'exploration', self.global_manager)
+        else:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
+
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
             
-        text += "/n"
+        #text += "/n"
 
         if self.veteran:
             text += ("The veteran explorer can roll twice and pick the higher result /n")
@@ -266,7 +269,7 @@ class expedition(group):
                 
             text += roll_list[1]
             roll_result = roll_list[0]
-                    
+
         notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
             
         text += "/n"
@@ -321,9 +324,10 @@ class expedition(group):
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
-        copy_exploration_mark_list = self.exploration_mark_list
-        for current_exploration_mark in copy_exploration_mark_list:
+        #copy_exploration_mark_list = self.global_manager.get('exploration_mark_list'): #exploration_mark_list
+        for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
             current_exploration_mark.remove()
+        self.global_manager.set('exploration_mark_list', [])
         self.exploration_mark_list = []
         self.global_manager.set('ongoing_exploration', False)
 

@@ -38,6 +38,11 @@ class die(button):
         self.color = 'white'
         self.outline_color = self.outcome_color_dict['default']
 
+    def on_click(self):
+        if self.global_manager.get('ongoing_exploration'):
+            if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
+                self.global_manager.get('notification_list')[0].on_click()#self.start_rolling()
+
     def update_tooltip(self):
         '''
         Input:
@@ -60,6 +65,7 @@ class die(button):
                     tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' required for critical failure')
                 else:
                     tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' or lower required for critical failure')
+            tooltip_list.append('Click to roll')
         else:
             tooltip_list.append(str(self.roll_result))
             if not self.rolling: #if rolls completed
