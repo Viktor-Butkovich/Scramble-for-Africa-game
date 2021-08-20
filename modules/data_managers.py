@@ -163,7 +163,11 @@ class notification_manager_template():
         self.choice_notification_choices_queue = []
         self.choice_notification_info_dict_queue = []
         self.global_manager = global_manager
-
+        self.notification_width = 500
+        self.notification_height = 500
+        self.notification_x = (self.global_manager.get('minimap_grid').origin_x - (self.notification_width + 40))
+        self.notification_y = 236
+        
     def notification_to_front(self, message):
         '''
         Input:
@@ -172,28 +176,33 @@ class notification_manager_template():
             Displays a new notification with text matching the inputted string. The type of notification is determined by first item of the notification_type_queue, a list of strings corresponding to the notification_queue.
         '''
         notification_type = self.notification_type_queue.pop(0)
+        #notification_width = 500
+        #notification_height = 500
+        #notification_x = (self.global_manager.get('minimap_grid').origin_x - (notification_width + 100))#(610, 236)
+        #notification_y = 236
         if notification_type == 'roll':
-            new_notification = notifications.dice_rolling_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
-                                                                       ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
+            new_notification = notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
             
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
                 
         elif notification_type == 'exploration':
-            new_notification = notifications.exploration_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
-                                                                      ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+            new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_exploration':
-            new_notification = notifications.exploration_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
-                                                                      ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+            new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
             
         elif notification_type == 'choice':
             choice_notification_choices = self.choice_notification_choices_queue.pop(0)
             choice_notification_info_dict = self.choice_notification_info_dict_queue.pop(0)
-            new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager),
-                                                                        ['strategic', 'europe'], 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, self.global_manager)
+            new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, self.global_manager)
 
         else:
-            new_notification = notifications.notification(scaling.scale_coordinates(610, 236, self.global_manager), scaling.scale_width(500, self.global_manager), scaling.scale_height(500, self.global_manager), ['strategic', 'europe'],
-                                                          'misc/default_notification.png', message, self.global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
+            new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
+                #coordinates, ideal_width, minimum_height, showing, modes, image, message
     

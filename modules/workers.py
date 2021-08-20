@@ -41,14 +41,14 @@ class worker(mob):
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y
-        #for current_image in self.images:
-        #    current_image.add_to_cell()
         self.show_images()
         vehicle.crew = 'none'
         vehicle.has_crew = False
         vehicle.set_image('uncrewed')
         vehicle.end_turn_destination = 'none'
-        self.select()
+        #self.select()
+        vehicle.hide_images()
+        vehicle.show_images() #bring vehicle to front of tile
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):

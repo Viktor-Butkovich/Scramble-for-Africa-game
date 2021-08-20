@@ -142,7 +142,10 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
         Uses the calibrate function of each of the buttons and actors in the inputted info_display_list, causing them to reflect the appearance or information relating to the inputted actor 
     '''
     if info_display_list == global_manager.get('tile_info_display_list'):
+        #if not global_manager.get('displayed_tile') == 'none':
+        #    global_manager.get('displayed_tile').showing_calibrated_outline = False
         global_manager.set('displayed_tile', new_actor)
+        #global_manager.get('displayed_tile').showing_calibrated_outline = True
     elif info_display_list == global_manager.get('mob_info_display_list'):
         global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:

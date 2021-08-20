@@ -37,6 +37,7 @@ class die(button):
         self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + height + 3), width + 6, height + 6)
         self.color = 'white'
         self.outline_color = self.outcome_color_dict['default']
+        self.in_notification = True #dice are attached to notifications and should be drawn over other buttons
 
     def on_click(self):
         if self.global_manager.get('ongoing_exploration'):

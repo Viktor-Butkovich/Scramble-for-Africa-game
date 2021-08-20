@@ -47,7 +47,6 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         for current_image in mob_image_list:
             current_image.draw()
             current_image.has_drawn = True
-
                     
         for current_bar in global_manager.get('bar_list'):
             if global_manager.get('current_game_mode') in current_bar.modes:
@@ -61,6 +60,10 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
         for current_grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in current_grid.modes:
                 current_grid.draw_grid_lines()
+
+        displayed_tile = global_manager.get('displayed_tile')
+        if not displayed_tile == 'none':
+            displayed_tile.draw_actor_match_outline(False)
 
         for current_mob in global_manager.get('mob_list'):
             for current_image in current_mob.images:
@@ -148,10 +151,11 @@ def action_possible(global_manager):
 
 
 def can_make_mouse_box(global_manager):
-    if action_possible(global_manager):
-        return(True)
-    else:
-        return(False)
+    #if action_possible(global_manager):
+    #    return(True)
+    #else:
+    #    return(False)
+    return(True)
 
 def draw_loading_screen(global_manager):
     '''
@@ -301,7 +305,8 @@ def manage_rmb_down(clicked_button, global_manager):
                                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
                             global_manager.set('show_selection_outlines', True)
                             global_manager.set('last_selection_outline_switch', time.time())
-                            global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
+                            if global_manager.get('minimap_grid') in moved_mob.grids:
+                                global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
@@ -322,7 +327,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         if (not global_manager.get('capital')):
             actor_utility.deselect_all(global_manager)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+        #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
                     
         if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
             for current_grid in global_manager.get('grid_list'):
@@ -353,26 +358,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                 global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
                 
         else:
-            if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
-                breaking = False
-                for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
-                    if current_grid.can_show():
-                        for current_cell in current_grid.cell_list:
-                            if current_cell.touching_mouse():
-                                if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
-                                    if not current_cell.terrain == 'none': #if off map, do not move minimap there
-                                        main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                        global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                                elif current_grid == global_manager.get('strategic_map_grid'):
-                                    global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
-                                else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
-                                breaking = True
-                                break
-                            if breaking:
-                                break
-                        if breaking:
-                            break
+            click_move_minimap(global_manager)
     elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
         chooser = global_manager.get('choosing_destination_info_dict')['chooser']
         #destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
@@ -394,11 +380,36 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                     chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
                             else:
                                 chooser.end_turn_destination = current_cell.tile
+                            click_move_minimap(global_manager)
                             global_manager.set('show_selection_outlines', True)
                             global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
                     else: #can not move to same continent
                         text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
         global_manager.set('choosing_destination', False)
         global_manager.set('choosing_destination_info_dict', {})
+    elif not clicked_button:
+        click_move_minimap(global_manager)
     global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
+def click_move_minimap(global_manager): #move minimap to clicked tile
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
+        breaking = False
+        for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
+            if current_grid.can_show():
+                for current_cell in current_grid.cell_list:
+                    if current_cell.touching_mouse():
+                        if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
+                            if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                                main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                global_manager.get('minimap_grid').calibrate(main_x, main_y)
+                        elif current_grid == global_manager.get('strategic_map_grid'):
+                            global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                        else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
+                        breaking = True
+                        break
+                    if breaking:
+                        break
+                if breaking:
+                    break

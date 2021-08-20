@@ -1,3 +1,5 @@
+import pygame
+
 from .images import free_image
 from .labels import label
 from .buttons import button
@@ -18,6 +20,7 @@ class actor_match_free_image(free_image):
             global_manager: global_manager_template object
         '''
         self.actor_image_type = actor_image_type
+        self.actor = 'none'
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
 
     def calibrate(self, new_actor):
@@ -27,6 +30,7 @@ class actor_match_free_image(free_image):
         Output:
             Sets this image to match the inputted actor or string. If the input is 'none', it will be reset to an empty image. Otherwise, it will use the default appearance of the inputted actor.
         '''
+        self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_image_type == 'resource':
                 if new_actor.cell.visible:
@@ -47,6 +51,33 @@ class actor_match_free_image(free_image):
                 self.set_image(new_actor.image_dict['default'])
         else:
             self.set_image('misc/empty.png')
+
+    def can_show(self):
+        if self.actor == 'none':
+            return(False)
+        else:
+            return(super().can_show())
+
+class actor_match_background_image(free_image):
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        self.actor = 'none'
+        #self.outline_Rect = pygame.Rect(self.x - 2, self.y - self.height - 2, self.width + 4, self.height + 4)
+
+    def calibrate(self, new_actor):
+        self.actor = new_actor
+
+    def draw(self):
+        super().draw()
+        #if not self.actor == 'none':
+        #    if self.actor.actor_type == 'tile': #if tile background image as opposed to mob background image
+        #        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], (self.outline_Rect), 3)
+
+    def can_show(self):
+        if self.actor == 'none':
+            return(False)
+        else:
+            return(super().can_show())
 
 class label_image(free_image):
     '''
@@ -136,6 +167,10 @@ class actor_match_label(label):
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
+        elif self.actor_label_type == 'crew':
+            self.message_start = 'Crew: '
+        elif self.actor_label_type == 'passengers':
+            self.message_start = 'Passengers: '
         else:
             self.message_start = 'none'
         self.actor = 'none'
@@ -181,8 +216,32 @@ class actor_match_label(label):
                             self.set_label(self.message_start + self.attached_list[self.list_index].name)
                     else:
                         self.attached_list = []
+            elif self.actor_label_type == 'crew':
+                if self.actor.is_vehicle:
+                    if self.actor.has_crew:
+                        self.set_label(self.message_start + self.actor.crew.name)
+                    else:
+                        self.set_label(self.message_start + 'none')
+            elif self.actor_label_type == 'passengers':
+                if self.actor.is_vehicle:
+                    if self.actor.has_crew:
+                        self.set_label("A ship requires crew to function")
+                    else:
+                        if len(self.actor.passengers) == 0:
+                            self.set_label(self.message_start + 'none')
+                        else:
+                            self.set_label(self.message_start)
         else:
             self.set_label(self.message_start + 'n/a')
+
+    def can_show(self):
+        result = super().can_show()
+        if self.actor == 'none':
+            return(False)
+        elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle:
+            return(False)
+        else:
+            return(result)
 
 class list_item_label(actor_match_label): #attached to a certain list based on list type, has index of list that it shows
     def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager):

@@ -21,6 +21,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         self.actor_type = 'tile'
         self.selection_outline_color = 'yellow'#'bright blue'
+        self.actor_match_outline_color = 'white'
         super().__init__(coordinates, [grid], modes, global_manager)
         self.set_name(name)
         self.global_manager.get('tile_list').append(self)
@@ -55,6 +56,15 @@ class tile(actor): #to do: make terrain tiles a subclass
         for current_image in self.images:
             outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (outline), current_image.outline_width)
+
+    def draw_actor_match_outline(self, called_by_equivalent):
+        if self.images[0].can_show():
+            for current_image in self.images:
+                outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.actor_match_outline_color], (outline), current_image.outline_width)
+                equivalent_tile = self.get_equivalent_tile()
+                if (not equivalent_tile == 'none') and (not called_by_equivalent):
+                    equivalent_tile.draw_actor_match_outline(True)
 
     def change_inventory(self, commodity, change):
         '''
@@ -203,7 +213,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         self.x = x
         self.y = y
-        my_cell = self.grid.find_cell(self.x, self.y)
+        #my_cell = self.grid.find_cell(self.x, self.y)
                 
     def remove(self):
         '''

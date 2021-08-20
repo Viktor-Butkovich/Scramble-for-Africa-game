@@ -59,7 +59,8 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             current_mob.disembark_vehicle(self)
         first_mob = self.contained_mobs[0]
         self.contained_mobs = []
-        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        if self.global_manager.get('minimap_grid') in self.grids:
+            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         first_mob.select()
         #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), first_mob)
 

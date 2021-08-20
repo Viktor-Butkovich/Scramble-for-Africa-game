@@ -569,6 +569,7 @@ class selected_icon(button):
                 self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
             else: #otherwise, show info of tile that mob is on without moving minimap
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
             for current_image in self.attached_mob.images: #move mob to front of each stack it is in
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:

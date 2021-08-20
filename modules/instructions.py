@@ -30,7 +30,7 @@ class instructions_page(label):
         self.global_manager = global_manager
         self.minimum_height = scaling.scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager)
         self.ideal_width = scaling.scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager)
-        super().__init__(scaling.scale_coordinates(60, 60, self.global_manager), self.ideal_width, self.minimum_height, ['strategic'], 'misc/default_instruction.png', instruction_text, global_manager)
+        super().__init__(scaling.scale_coordinates(60, 60, self.global_manager), self.ideal_width, self.minimum_height, ['strategic', 'europe'], 'misc/default_instruction.png', instruction_text, global_manager)
 
     def on_click(self):
         '''

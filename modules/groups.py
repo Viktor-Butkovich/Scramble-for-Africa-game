@@ -250,14 +250,16 @@ class expedition(group):
             
         #text += "/n"
 
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
         if self.veteran:
             text += ("The veteran explorer can roll twice and pick the higher result /n")
                 
             first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 500), first_roll_list[0])
+            self.display_exploration_die((die_x, 500), first_roll_list[0])
                                 
             second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 380), second_roll_list[0])
+            self.display_exploration_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
@@ -265,7 +267,7 @@ class expedition(group):
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
             roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 440), roll_list[0])
+            self.display_exploration_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
             roll_result = roll_list[0]
