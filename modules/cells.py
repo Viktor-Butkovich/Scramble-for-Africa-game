@@ -38,15 +38,15 @@ class cell():
         self.contained_buildings = {'resource': 'none'}#[]
         
 
-    def contains_vehicle(self):
+    def has_vehicle(self):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle:
+            if current_mob.is_vehicle and current_mob.has_crew:
                 return(True)
         return(False)
 
     def get_vehicle(self):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle:
+            if current_mob.is_vehicle and current_mob.has_crew:
                 return(current_mob)
         return('none')
 

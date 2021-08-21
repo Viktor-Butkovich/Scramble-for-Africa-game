@@ -79,17 +79,17 @@ class button():
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
-            self.set_tooltip(["Merges a worker and an officer in the same tile to form a group with a type based on that of the officer.", "Requires that only an officer is selected in the same tile as a worker."])
+            self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
-            self.set_tooltip(["Splits a group into a separate worker and officer.", "Requires that only a group is selected."])
+            self.set_tooltip(["Splits a group into its worker and officer."])
         elif self.button_type == 'crew':
-            self.set_tooltip(["Merges a vehicle and a worker in the same tile to form a crewed vehicle. Requires that only an uncrewed vehicle is selected in the same tile as a worker."])
+            self.set_tooltip(["Merges this ship with a worker in the same tile to form a crewed ship. Requires that an uncrewed vehicle is selected in the same tile as a worker."])
         elif self.button_type == 'uncrew':
-            self.set_tooltip(["Orders a vehicle's crew to leave the vehicle, allowing the worker to act independently. Requires that only a crewed vehicle is selected."])
+            self.set_tooltip(["Orders this ship's crew to abandon the ship."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders all selected units to embark a vehicle.", "Requires a vehicle and other units are selected in the same tile."])
+            self.set_tooltip(["Orders this unit to embark a ship in the same tile.", "Requires that a unit is selected in the same tile as a crewed ship."])
         elif self.button_type == 'disembark':
-            self.set_tooltip(["Orders all units in a vehicle to disembark.", "Requires that a vehicle containing at least 1 unit is selected."]) 
+            self.set_tooltip(["Orders this unit to disembark the ship."]) 
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
@@ -410,16 +410,7 @@ class button():
 
             elif self.button_type == 'do something':
                 text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
-
-            #elif self.button_type == 'instructions':
-            #    if self.global_manager.get('current_instructions_page') == 'none':
-            #        instructions.display_instructions_page(0, self.global_manager)
-            #    else:
-            #        if not self.global_manager.get('current_instructions_page') == 'none':
-            #            self.global_manager.get('current_instructions_page').remove()
-            #            self.global_manager.set('current_instructions_page', 'none')
-            #        self.global_manager.set('current_instructions_page_index', 0)
-
+                
             elif self.button_type == 'exploration':
                 self.expedition.start_exploration(self.x_change, self.y_change)
                 self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
@@ -687,8 +678,6 @@ class switch_theatre_button(button):
         selected_list = actor_utility.get_selected_list(self.global_manager)
         if not len(selected_list) == 1: #do not show if there is not exactly one mob selected
             return(False)
-        #elif selected_list[0].grids[0] in self.destination_grids: #do not show if mob is in destination grid already
-        #    return(False)
         elif not selected_list[0].can_travel(): #only ships can move between grids
             return(False)
         else:

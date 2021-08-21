@@ -163,11 +163,16 @@ class notification_manager_template():
         self.choice_notification_choices_queue = []
         self.choice_notification_info_dict_queue = []
         self.global_manager = global_manager
+        self.update_notification_layout()
+
+    def update_notification_layout(self):
         self.notification_width = 500
         self.notification_height = 500
-        self.notification_x = (self.global_manager.get('minimap_grid').origin_x - (self.notification_width + 40))
         self.notification_y = 236
-        
+        if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
+            self.notification_x = (self.global_manager.get('minimap_grid').origin_x - (self.notification_width + 40))
+        else: #show notifications in center on europe mode
+            self.notification_x = 610
     def notification_to_front(self, message):
         '''
         Input:
@@ -175,11 +180,8 @@ class notification_manager_template():
         Output:
             Displays a new notification with text matching the inputted string. The type of notification is determined by first item of the notification_type_queue, a list of strings corresponding to the notification_queue.
         '''
+        self.update_notification_layout()
         notification_type = self.notification_type_queue.pop(0)
-        #notification_width = 500
-        #notification_height = 500
-        #notification_x = (self.global_manager.get('minimap_grid').origin_x - (notification_width + 100))#(610, 236)
-        #notification_y = 236
         if notification_type == 'roll':
             new_notification = notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)

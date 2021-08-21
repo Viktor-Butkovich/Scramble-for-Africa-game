@@ -215,7 +215,7 @@ class mob(actor):
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.has_vehicle() or (self.can_explore and not future_cell.visible)))): 
                             if self.movement_points >= self.movement_cost:
                                 return(True)
                             else:
@@ -257,7 +257,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
         self.change_movement_points(-1 * self.movement_cost)
-        if self.images[0].current_cell.contains_vehicle() and not self.is_vehicle:
+        if self.images[0].current_cell.has_vehicle() and not self.is_vehicle:
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle()
             if self.is_worker and not vehicle.has_crew:
@@ -314,16 +314,21 @@ class mob(actor):
         for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
             vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.inventory_setup() #empty own inventory
+        vehicle.hide_images()
+        vehicle.show_images() #moves vehicle images to front
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
-        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), vehicle.images[0].current_cell.tile)
 
     def disembark_vehicle(self, vehicle):
+        vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y
         for current_image in self.images:
             current_image.add_to_cell()
+        vehicle.selected = False
         self.select()
+        if self.global_manager.get('minimap_grid') in self.grids:
+            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
         #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 

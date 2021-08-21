@@ -110,7 +110,12 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.grid == self.global_manager.get('minimap_grid'):
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
-            return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
+            try:
+                return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
+            except:
+                print("Minimap main grid conversion error, possibly when rmb near edge of map - (" + str(main_x) + ", " + str(main_y) + ")")
+                return('none')
+            
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)

@@ -21,10 +21,14 @@ def set_game_mode(new_game_mode, global_manager):
         global_manager.set('default_text_box_height', 185)
         global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
         text_tools.print_to_screen("Entering strategic map", global_manager)
+        centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(centered_cell_x, centered_cell_y).tile)
+            #calibrate tile info to minimap center
     elif new_game_mode == 'europe':
         start_loading(global_manager)
         global_manager.set('current_game_mode', 'europe')
         text_tools.print_to_screen("Entering European Company Headquarters", global_manager)
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
     else:
         global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):

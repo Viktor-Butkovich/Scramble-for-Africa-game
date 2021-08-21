@@ -15,6 +15,7 @@ class worker(mob):
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def can_show_tooltip(self):
         '''

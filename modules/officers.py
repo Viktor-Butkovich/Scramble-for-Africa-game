@@ -18,6 +18,7 @@ class officer(mob):
         self.veteran_icons = []
         self.is_officer = True
         self.officer_type = 'default'
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
