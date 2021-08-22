@@ -39,6 +39,7 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
+        self.travel_possible = False #if can switch theatres
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
@@ -142,11 +143,12 @@ class mob(actor):
         Output:
             Causes this mob to be selected and causes the selection outline timer to be reset, displaying it immediately
         '''
+        actor_utility.deselect_all(self.global_manager)
         self.selected = True
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        #if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
             #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def draw_outline(self):

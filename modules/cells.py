@@ -50,6 +50,18 @@ class cell():
                 return(current_mob)
         return('none')
 
+    def has_uncrewed_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and not current_mob.has_crew:
+                return(True)
+        return(False)
+
+    def get_uncrewed_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and not current_mob.has_crew:
+                return(current_mob)
+        return('none')
+
     def set_visibility(self, new_visibility):
         '''
         Input:

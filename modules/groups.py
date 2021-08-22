@@ -147,6 +147,7 @@ class construction_gang(group):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_construct = True
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
 class expedition(group):
     '''

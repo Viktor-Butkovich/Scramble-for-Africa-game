@@ -40,8 +40,7 @@ class notification(label):
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
-
-    #to do: make sure instructions use same format message function as label, maybe make a shared label subclass with multiple line messages that has format_message as a function
+                
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
         '''
         Input:
@@ -194,10 +193,12 @@ class exploration_notification(notification):
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
             explored_terrain_image_id = explored_cell.tile.image_dict['default']
-            self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(400, 400, global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
+            self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
             if not explored_tile.resource_icon == 'none':
                 explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-                self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(400, 400, global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
+                self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self):
@@ -234,21 +235,3 @@ class exploration_notification(notification):
         if self.is_last:
             for current_image in self.notification_images:
                 current_image.remove()
-'''            
-def notification_to_front(message, global_manager):
-    Input:
-        string from the notification_queue representing the text of the new notification, global_manager_template object
-    Output:
-        Displays a new notification with text matching the inputted string. The type of notification is determined by first item of the notification_type_queue, a list of strings corresponding to the notification_queue.
-    notification_type = global_manager.get('notification_type_queue').pop(0)
-    if notification_type == 'roll':
-        new_notification = dice_rolling_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)
-        for current_die in global_manager.get('dice_list'):
-            current_die.start_rolling()
-    elif notification_type == 'exploration':
-        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, False, global_manager)
-    elif notification_type == 'final_exploration':
-        new_notification = exploration_notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, True, global_manager)
-    else:
-        new_notification = notification(scaling.scale_coordinates(610, 236, global_manager), scaling.scale_width(500, global_manager), scaling.scale_height(500, global_manager), ['strategic'], 'misc/default_notification.png', message, global_manager)#coordinates, ideal_width, minimum_height, showing, modes, image, message
-'''

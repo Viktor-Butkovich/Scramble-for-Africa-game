@@ -1,4 +1,3 @@
-#convert work building, construction, switch grid to actor ui
 import pygame
 import time
 import random
@@ -101,22 +100,23 @@ global_manager.set('resource_building_dict',
     'fruit': 'buildings/plantation.png',
     'gold': 'buildings/mine.png',
     'iron': 'buildings/mine.png',
-    'ivory': 'buildings/hunting_area.png',
+    'ivory': 'buildings/camp.png',
     'rubber': 'buildings/plantation.png',
     }
 )
 
 global_manager.set('resource_building_button_dict',
     {
-    'coffee': 'buildings/buttons/plantation.png',
-    'copper': 'buildings/buttons/mine.png',
-    'diamond': 'buildings/buttons/mine.png',
-    'exotic wood': 'buildings/buttons/plantation.png',
-    'fruit': 'buildings/buttons/plantation.png',
-    'gold': 'buildings/buttons/mine.png',
-    'iron': 'buildings/buttons/mine.png',
-    'ivory': 'buildings/buttons/hunting_area.png',
-    'rubber': 'buildings/buttons/plantation.png',
+    'coffee': 'scenery/resources/production/coffee.png',
+    'copper': 'buildings/buttons/production/copper.png',
+    'diamond': 'scenery/resources/production/diamond.png',
+    'exotic wood': 'scenery/resources/production/exotic wood.png',
+    'fruit': 'scenery/resources/production/fruit.png',
+    'gold': 'scenery/resources/production/gold.png',
+    'iron': 'scenery/resources/production/iron.png',
+    'ivory': 'scenery/resources/production/ivory.png',
+    'rubber': 'scenery/resources/production/rubber.png',
+    'none': 'scenery/resources/production/none.png',
     }
 )
 
@@ -176,12 +176,12 @@ global_manager.set('show_grid_lines', True)
 global_manager.set('show_text_box', True)
 global_manager.set('show_selection_outlines', True)
 global_manager.set('show_minimap_outlines', True)
-global_manager.set('mouse_origin_x', 0)
-global_manager.set('mouse_origin_y', 0)
-global_manager.set('mouse_destination_x', 0)
-mouse_destination_y = 0
-global_manager.set('mouse_destination_y', 0)
-global_manager.set('making_mouse_box', False)
+#global_manager.set('mouse_origin_x', 0)
+#global_manager.set('mouse_origin_y', 0)
+#global_manager.set('mouse_destination_x', 0)
+#mouse_destination_y = 0
+#global_manager.set('mouse_destination_y', 0)
+#global_manager.set('making_mouse_box', False)
 global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
@@ -261,27 +261,27 @@ button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
 left_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move left', pygame.K_a, ['strategic'], 'misc/left_button.png', global_manager)
+    'move left', pygame.K_a, ['strategic', 'europe'], 'misc/left_button.png', global_manager)
 current_button_number += 1
 
 down_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move down', pygame.K_s, ['strategic'], 'misc/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
+    'move down', pygame.K_s, ['strategic', 'europe'], 'misc/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
 
 
 up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move up', pygame.K_w, ['strategic'], 'misc/up_button.png', global_manager)
+    'move up', pygame.K_w, ['strategic', 'europe'], 'misc/up_button.png', global_manager)
 current_button_number += 1
 
 right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move right', pygame.K_d, ['strategic'], 'misc/right_button.png', global_manager)
+    'move right', pygame.K_d, ['strategic', 'europe'], 'misc/right_button.png', global_manager)
 current_button_number += 2#move more when switching categories
 
-switch_theatre_button = buttons.switch_theatre_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-    scaling.scale_height(50, global_manager), 'blue', pygame.K_g, ['strategic'], 'misc/switch_theatre_button.png', global_manager)\
+#switch_theatre_button = buttons.switch_theatre_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
+#    scaling.scale_height(50, global_manager), 'blue', pygame.K_g, ['strategic'], 'misc/switch_theatre_button.png', global_manager)\
 #switches theatre between Europe and Africa
 
-resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-    scaling.scale_height(50, global_manager), 'resource', ['strategic'], global_manager) ##self, coordinates, width, height, building_type, modes, global_manage
+#resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
+#    scaling.scale_height(50, global_manager), 'resource', ['strategic'], global_manager) ##self, coordinates, width, height, building_type, modes, global_manage
 #creates resource building
 
 #worker_to_building_button = buildings.worker_to_building_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
@@ -368,6 +368,12 @@ tile_free_image_background = actor_match_tools.actor_match_background_image('mis
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)
 global_manager.get('tile_info_display_list').append(tile_free_image_background)
 
+for i in range(0, 3): #add button to cycle through
+    same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (30 * i), global_manager),
+        scaling.scale_width(25, global_manager), scaling.scale_height(25, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
+same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (30 * (i + 1)), global_manager),
+    scaling.scale_width(25, global_manager), scaling.scale_height(25, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
+
 #tile background image's tooltip
 tile_free_image_background_tooltip = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
     ['strategic', 'europe'], 'misc/empty.png', 'tooltip', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager
@@ -436,12 +442,6 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
         #coordinates, ideal_width, minimum_height, modes, image_id, commodity_index, global_manager
     
     global_manager.get('tile_info_display_list').append(new_commodity_match_label)
-
-for i in range(0, 5):
-    selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * i), global_manager),
-        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
-selected_icon = buttons.selected_icon(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - (280 + 60 * (i + 1)), global_manager),
-    scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
 
 buy_button_y = 260
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):

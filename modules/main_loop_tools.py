@@ -109,13 +109,13 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
 
         global_manager.get('mouse_follower').draw()
 
-        if global_manager.get('making_mouse_box'):
-            mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
-            global_manager.set('mouse_destination_x', mouse_destination_x + 4)
-            global_manager.set('mouse_destination_y', mouse_destination_y + 4)
-            if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
-                mouse_box_color = 'white'
-                pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
+        #if global_manager.get('making_mouse_box'):
+        #    mouse_destination_x, mouse_destination_y = pygame.mouse.get_pos()
+        #    global_manager.set('mouse_destination_x', mouse_destination_x + 4)
+        #    global_manager.set('mouse_destination_y', mouse_destination_y + 4)
+        #    if abs(mouse_destination_x - global_manager.get('mouse_origin_x')) > 3 or (mouse_destination_y - global_manager.get('mouse_origin_y')) > 3:
+        #        mouse_box_color = 'white'
+        #        pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[mouse_box_color], (min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y'))), 3)
             
         if not global_manager.get('current_instructions_page') == 'none':
             instructions_page = global_manager.get('current_instructions_page')
@@ -150,12 +150,12 @@ def action_possible(global_manager):
     return(True)
 
 
-def can_make_mouse_box(global_manager):
+#def can_make_mouse_box(global_manager):
     #if action_possible(global_manager):
     #    return(True)
     #else:
     #    return(False)
-    return(True)
+#    return(True)
 
 def draw_loading_screen(global_manager):
     '''
@@ -307,7 +307,8 @@ def manage_rmb_down(clicked_button, global_manager):
                             global_manager.set('last_selection_outline_switch', time.time())
                             if global_manager.get('minimap_grid') in moved_mob.grids:
                                 global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+                            moved_mob.select()
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), moved_mob.images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -329,29 +330,29 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
         #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
                     
-        if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
-            for current_grid in global_manager.get('grid_list'):
-                if global_manager.get('current_game_mode') in current_grid.modes:
-                    for current_cell in current_grid.cell_list:
-                        if current_cell.touching_mouse():
-                            if len(current_cell.contained_mobs) > 0:
-                                selected_new_mob = True
-                                current_cell.contained_mobs[0].select()
-                                if current_grid == global_manager.get('minimap_grid'):
-                                    main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
-                                else: #elif current_grid == global_manager.get('strategic_map_grid'):
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+        #if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
+        for current_grid in global_manager.get('grid_list'):
+            if global_manager.get('current_game_mode') in current_grid.modes:
+                for current_cell in current_grid.cell_list:
+                    if current_cell.touching_mouse():
+                        if len(current_cell.contained_mobs) > 0:
+                            selected_new_mob = True
+                            current_cell.contained_mobs[0].select()
+                            if current_grid == global_manager.get('minimap_grid'):
+                                main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
+                            else: #elif current_grid == global_manager.get('strategic_map_grid'):
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
 
-        else:
-            for clicked_mob in global_manager.get('mob_list'):
-                for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
-                    if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-                        selected_new_mob = True
-                        for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-                            #if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group, should be unnecessary because they are removed from cell when in group
-                            current_mob.select()#if mob can show
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
+        #else:
+        #    for clicked_mob in global_manager.get('mob_list'):
+        #        for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
+        #            if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
+        #                selected_new_mob = True
+        #                for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
+        #                    #if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group, should be unnecessary because they are removed from cell when in group
+        #                    current_mob.select()#if mob can show
+        #                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
@@ -389,27 +390,27 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         global_manager.set('choosing_destination_info_dict', {})
     elif not clicked_button:
         click_move_minimap(global_manager)
-    global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
+    #global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
 def click_move_minimap(global_manager): #move minimap to clicked tile
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
-        breaking = False
-        for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
-            if current_grid.can_show():
-                for current_cell in current_grid.cell_list:
-                    if current_cell.touching_mouse():
-                        if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
-                            if not current_cell.terrain == 'none': #if off map, do not move minimap there
-                                main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                global_manager.get('minimap_grid').calibrate(main_x, main_y)
-                        elif current_grid == global_manager.get('strategic_map_grid'):
-                            global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
-                        else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
-                        breaking = True
-                        break
-                    if breaking:
-                        break
+    #if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
+    breaking = False
+    for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
+        if current_grid.can_show():
+            for current_cell in current_grid.cell_list:
+                if current_cell.touching_mouse():
+                    if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
+                        if not current_cell.terrain == 'none': #if off map, do not move minimap there
+                            main_x, main_y = current_grid.get_main_grid_coordinates(current_cell.x, current_cell.y)
+                            global_manager.get('minimap_grid').calibrate(main_x, main_y)
+                    elif current_grid == global_manager.get('strategic_map_grid'):
+                        global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
+                    else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
+                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
+                    breaking = True
+                    break
                 if breaking:
                     break
+            if breaking:
+                 break
