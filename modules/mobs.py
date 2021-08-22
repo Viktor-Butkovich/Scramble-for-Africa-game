@@ -174,6 +174,7 @@ class mob(actor):
             Sets this mob's tooltip to its name and movement points
         '''
         self.set_tooltip(["Name: " + self.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
+        
 
     def remove(self):
         '''

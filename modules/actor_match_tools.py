@@ -71,17 +71,18 @@ class actor_match_background_image(free_image):
     def calibrate(self, new_actor):
         self.actor = new_actor
 
-    def draw(self):
-        super().draw()
-        #if not self.actor == 'none':
-        #    if self.actor.actor_type == 'tile': #if tile background image as opposed to mob background image
-        #        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], (self.outline_Rect), 3)
-
     def can_show(self):
         if self.actor == 'none':
             return(False)
         else:
             return(super().can_show())
+
+    def update_tooltip(self):
+        if not self.actor == 'none':
+            tooltip_text = self.actor.tooltip_text
+            self.set_tooltip(tooltip_text)
+        else:
+            super().update_tooltip()
 
 class label_image(free_image):
     '''
@@ -127,16 +128,17 @@ class actor_match_label(label):
             actor_image_type: string representing the type of information of a selected mob or tile that will be shown
             global_manager: global_manager_template object
         '''
-        message = 'default'
+        message = ''#'default'
         self.attached_buttons = []
         self.actor = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
         self.actor_label_type = actor_label_type
+        super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
             self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/merge_button.png', self, global_manager))
             self.attached_buttons.append(split_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/split_button.png', self, global_manager))
             self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_vehicle_button.png', self, global_manager))
+            self.attached_buttons.append(worker_to_building_button((self.x, self.y), self.height, self.height, 'none', 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -145,6 +147,8 @@ class actor_match_label(label):
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
+            self.attached_building = 'none'
+            self.attached_buttons.append(remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/remove_worker_button.png', self, global_manager))
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
             self.attached_buttons.append(crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_vehicle_button.png', self, global_manager))
@@ -154,9 +158,33 @@ class actor_match_label(label):
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
             self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/disembark_vehicle_button.png', self, global_manager))
+        elif self.actor_label_type == 'tooltip':
+            self.message_start = ''
         else:
             self.message_start = 'none'
         self.calibrate('none')
+
+    def update_tooltip(self):
+        if not self.actor == 'none':
+            self.actor.update_tooltip()
+        if self.actor_label_type in ['building worker', 'current passenger']:
+            if len(self.attached_list) > self.list_index:
+                tooltip_text = self.attached_list[self.list_index].tooltip_text
+                self.set_tooltip(tooltip_text)
+            else:
+                super().update_tooltip()
+        elif self.actor_label_type == 'crew':
+            if (not self.actor == 'none') and self.actor.has_crew:
+                tooltip_text = self.actor.crew.tooltip_text
+                self.set_tooltip(tooltip_text)
+            else:
+                super().update_tooltip()
+        elif self.actor_label_type == 'tooltip':
+            if not self.actor == 'none':
+                tooltip_text = self.actor.tooltip_text
+                self.set_tooltip(tooltip_text)
+        else:
+            super().update_tooltip()
 
     def calibrate(self, new_actor):
         '''
@@ -193,10 +221,12 @@ class actor_match_label(label):
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
                     if not new_actor.cell.contained_buildings['resource'] == 'none':
-                        self.attached_list = new_actor.cell.contained_buildings['resource'].contained_workers
+                        self.attached_building = new_actor.cell.contained_buildings['resource']
+                        self.attached_list = self.attached_building.contained_workers
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name)
                     else:
+                        self.attached_building = 'none'
                         self.attached_list = []
             elif self.actor_label_type == 'crew':
                 if self.actor.is_vehicle:
@@ -219,6 +249,8 @@ class actor_match_label(label):
                         self.attached_list = new_actor.contained_mobs
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name)
+        elif self.actor_label_type == 'tooltip':
+            nothing = 0 #do not set text for tooltip label
         else:
             self.set_label(self.message_start + 'n/a')
 
@@ -232,7 +264,6 @@ class actor_match_label(label):
                 current_button.Rect.x = current_button.x
                 current_button.outline.x = current_button.x - current_button.outline_width
                 x_displacement += (current_button.width + 5)
-                
 
     def can_show(self):
         result = super().can_show()
@@ -267,7 +298,6 @@ class building_workers_label(actor_match_label):
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', global_manager)
         self.building_type = building_type
         self.attached_building = 'none'
-        self.remove_worker_button = label_button((self.x, self.y), self.height, self.height, 'remove worker', 'none', self.modes, 'misc/remove_worker_button.png', self, global_manager)
         self.showing = False
 
     def calibrate(self, new_actor):
@@ -278,13 +308,6 @@ class building_workers_label(actor_match_label):
             if not self.attached_building == 'none':
                 self.set_label("Workers: " + str(len(self.attached_building.contained_workers)) + '/' + str(self.attached_building.worker_capacity))
                 self.showing = True
-
-    #def set_label(self, new_message):
-    #    super().set_label(new_message)
-    #    if not self.remove_worker_button == 'none':
-    #        self.remove_worker_button.x = self.x + self.width + 5 #to do: make a function to move all elements of a button
-    #        self.remove_worker_button.Rect.x = self.remove_worker_button.x
-    #        self.remove_worker_button.outline.x = self.remove_worker_button.x - self.remove_worker_button.outline_width
 
     def can_show(self):
         if self.showing:
@@ -330,11 +353,6 @@ class commodity_match_label(actor_match_label):
             commodity_list = self.actor.get_held_commodities()
             if len(commodity_list) > self.commodity_index:
                 commodity = commodity_list[self.commodity_index]
-                #for i in range(len(self.attached_buttons)):
-                #    current_button = self.attached_buttons[i]
-                #    current_button.x = self.x + self.width + 5 + ((self.height + 5) * i) #to do: make a function to move all elements of a button
-                #    current_button.Rect.x = current_button.x
-                #    current_button.outline.x = current_button.x - current_button.outline_width
                 self.commodity_image.set_image('scenery/resources/' + commodity + '.png')
             
 
@@ -534,6 +552,27 @@ class split_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
+class remove_worker_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'remove worker', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.attached_label.attached_list[self.attached_label.list_index].in_building:
+                return(False)
+        return(result)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):         
+                if len(self.attached_label.actor.contained_mobs) > 0:
+                    self.attached_label.attached_list[self.attached_label.list_index].leave_building(self.attached_label.actor)
+                else:
+                    text_tools.print_to_screen("You must select a building with workers to remove workers.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not remove a worker from a building.", self.global_manager)
 
 class disembark_vehicle_button(label_button):
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
@@ -583,3 +622,64 @@ class embark_vehicle_button(label_button):
                     text_tools.print_to_screen("You must select a unit in the same tile as a crewed ship to embark.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not embark a ship.", self.global_manager)
+
+class worker_to_building_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, building_type, modes, image_id, attached_label, global_manager):
+        self.building_type = building_type
+        self.attached_worker = 'none'
+        self.attached_building = 'none'
+        self.building_type = building_type
+        super().__init__(coordinates, width, height, 'worker to resource', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+
+    def update_info(self):
+        self.attached_worker = self.attached_label.actor #selected_list[0]
+        if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
+            possible_attached_building = self.attached_worker.images[0].current_cell.contained_buildings[self.building_type]
+            if (not possible_attached_building == 'none'): #and building has capacity
+                #attach to building if building of correct type present in same tile
+                self.attached_building = possible_attached_building
+            else:
+                self.attached_building = 'none'
+        else:
+            self.attached_building = 'none'
+        
+    def draw(self):
+        #self.update_info()
+        super().draw()
+    
+    def can_show(self):
+        result = super().can_show()
+        self.update_info()
+        if result:
+            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker): #if selected but not worker, return false
+                return(False)
+        return(result)
+    
+    def update_tooltip(self): #make sure that attached building is not none
+        if not (self.attached_worker == 'none' or self.attached_building == 'none'):
+            if self.building_type == 'resource':
+                self.set_tooltip(['Assigns the selected worker to the ' + self.attached_building.name + ', producing ' + self.attached_building.resource_type + ' over time.'])
+            else:
+                self.set_tooltip(['placeholder'])
+        elif not self.attached_worker == 'none':
+            if self.building_type == 'resource':
+                self.set_tooltip(['Assigns the selected worker to a resource building, producing resources over time.'])
+        else:
+            self.set_tooltip(['placeholder'])
+
+    def on_click(self):
+        if self.can_show():
+            if not self.attached_building == 'none':
+                if self.attached_building.worker_capacity > len(self.attached_building.contained_workers): #if has extra space
+                    self.showing_outline = True
+                    self.attached_worker.work_building(self.attached_building)
+                else:
+                    text_tools.print_to_screen("This building is at its worker capacity.", self.global_manager)
+                    text_tools.print_to_screen("Upgrade the building to add more worker capacity.", self.global_manager)
+            else:
+                text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
+
+class remove_worker_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'remove worker', keybind_id, modes, image_id, attached_label, global_manager)
+

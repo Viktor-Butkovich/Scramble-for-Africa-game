@@ -452,7 +452,7 @@ class button():
                     if not len(self.attached_label.attached_building.contained_workers) == 0:
                         self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
                     else:
-                        text_tools.print_to_screen("There are no workers to detach from this building.", self.global_manager)
+                        text_tools.print_to_screen("There are no workers to remove from this building.", self.global_manager)
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
