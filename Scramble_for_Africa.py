@@ -108,7 +108,7 @@ global_manager.set('resource_building_dict',
 global_manager.set('resource_building_button_dict',
     {
     'coffee': 'scenery/resources/production/coffee.png',
-    'copper': 'buildings/buttons/production/copper.png',
+    'copper': 'scenery/resources/production.copper.png',
     'diamond': 'scenery/resources/production/diamond.png',
     'exotic wood': 'scenery/resources/production/exotic wood.png',
     'fruit': 'scenery/resources/production/fruit.png',
@@ -368,11 +368,13 @@ tile_free_image_background = actor_match_tools.actor_match_background_image('mis
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)
 global_manager.get('tile_info_display_list').append(tile_free_image_background)
 
+cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_match_current_y + 95, global_manager),
+        scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/cycle_passengers_down.png', global_manager)
 for i in range(0, 3): #add button to cycle through
-    same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (30 * i), global_manager),
-        scaling.scale_width(25, global_manager), scaling.scale_height(25, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
-same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (30 * (i + 1)), global_manager),
-    scaling.scale_width(25, global_manager), scaling.scale_height(25, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
+    same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (32 * i), global_manager),
+        scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
+same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (32 * (i + 1)), global_manager),
+    scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
 
 #tile background image's tooltip
 tile_free_image_background_tooltip = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
@@ -386,12 +388,12 @@ global_manager.get('tile_info_display_list').append(tile_free_image)
 
 #tile resource image
 tile_free_resource_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
+    scaling.scale_height(115, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_image)
 
 #tile resource building image
 tile_free_resource_building_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
+    scaling.scale_height(115, global_manager), ['strategic'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
 
 #tile terrain label
@@ -403,20 +405,34 @@ global_manager.get('tile_info_display_list').append(tile_terrain_label)
 #tile resource label
 actor_match_current_y -= 35
 tile_resource_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager),
-    scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'resource', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
 #tile resource building workers label
 actor_match_current_y -= 35
 building_workers_label = actor_match_tools.building_workers_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager), scaling.scale_height(30, global_manager),
-    ['strategic', 'europe'], 'misc/default_label.png', 'resource', global_manager)
+    ['strategic'], 'misc/default_label.png', 'resource', global_manager)
 global_manager.get('tile_info_display_list').append(building_workers_label)
+
+native_population_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager), scaling.scale_height(30, global_manager),
+    ['strategic'], 'misc/default_label.png', 'native population', global_manager)
+global_manager.get('tile_info_display_list').append(native_population_label) #at same level as workers label
 
 for i in range(0, 3): #0, 1, 2
     actor_match_current_y -= 35
     building_worker_label = actor_match_tools.list_item_label(scaling.scale_coordinates(50, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager), scaling.scale_height(30, global_manager),
-        ['strategic', 'europe'], 'misc/default_label.png', 'building worker', i, 'resource building', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
+        ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
     global_manager.get('tile_info_display_list').append(building_worker_label)
+    if i == 0: #available workers, at same level as first current worker label
+        native_available_workers_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager), scaling.scale_height(30, global_manager),
+            ['strategic'], 'misc/default_label.png', 'native available workers', global_manager)
+        global_manager.get('tile_info_display_list').append(native_available_workers_label)
+    elif i == 1: #aggressiveness, at same level as second curent worker label
+        native_aggressiveness_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager), scaling.scale_height(30, global_manager),
+            ['strategic'], 'misc/default_label.png', 'native aggressiveness', global_manager)
+        global_manager.get('tile_info_display_list').append(native_aggressiveness_label)
+
+actor_match_current_y -= 35
 
 
 commodity_prices_x, commodity_prices_y = (870, 100)

@@ -31,12 +31,12 @@ class cell():
         #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
+        self.village = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
         self.contained_buildings = {'resource': 'none'}#[]
-        
 
     def has_vehicle(self):
         for current_mob in self.contained_mobs:

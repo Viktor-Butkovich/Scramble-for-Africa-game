@@ -2,6 +2,7 @@ import pygame
 from . import images
 from . import utility
 from . import actor_utility
+from . import villages
 from .actors import actor
 
 class tile(actor): #to do: make terrain tiles a subclass
@@ -110,11 +111,15 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.grid == self.global_manager.get('minimap_grid'):
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
-            try:
-                return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
-            except:
-                print("Minimap main grid conversion error, possibly when rmb near edge of map - (" + str(main_x) + ", " + str(main_y) + ")")
-                return('none')
+            #try:
+            attached_cell = self.grid.attached_grid.find_cell(main_x, main_y)
+            if not attached_cell == 'none':
+                return(attached_cell.tile)
+            return('none')
+            #return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
+            #except:
+            #    print("Minimap main grid conversion error, possibly when rmb near edge of map - (" + str(main_x) + ", " + str(main_y) + ")")
+            #    return('none')
             
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -155,6 +160,15 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.resource_icon = 'none'
         self.resource = new_resource
         self.resource_icon = tile((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False, self.global_manager)
+        if self.resource == 'natives':
+            equivalent_tile = self.get_equivalent_tile()
+            village_exists = False
+            if not equivalent_tile == 'none':
+                if not equivalent_tile.cell.village == 'none': #if equivalent tile present and equivalent tile has village, copy village to equivalent instead of creating new one
+                    village_exists = True
+                    self.cell.village = equivalent_tile.cell.village
+            if not village_exists: #make new village if village not present
+                self.cell.village = villages.village(self.cell)
         self.set_visibility(self.cell.visible)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
@@ -201,7 +215,9 @@ class tile(actor): #to do: make terrain tiles a subclass
             tooltip_message = []
             if self.cell.visible:
                 tooltip_message.append('This is ' + utility.generate_article(self.cell.terrain) + ' ' + self.cell.terrain + ' tile.')
-                if not self.cell.resource == 'none':
+                if not self.cell.village == 'none': #if village present, show village
+                    tooltip_message += self.cell.village.get_tooltip()
+                elif not self.cell.resource == 'none': #if not village but other resource present, show resource
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource.')
             else:
                 tooltip_message .append('This tile has not been explored.')

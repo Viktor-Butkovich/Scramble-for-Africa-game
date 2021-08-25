@@ -165,6 +165,12 @@ class actor_match_label(label):
             self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/disembark_vehicle_button.png', self, global_manager))
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
+        elif self.actor_label_type == 'native aggressiveness':
+            self.message_start = 'Aggressiveness: '
+        elif self.actor_label_type == 'native population':
+            self.message_start = 'Total population: '
+        elif self.actor_label_type == 'native available workers':
+            self.message_start = 'Available workers: '
         else:
             self.message_start = 'none'
         self.calibrate('none')
@@ -200,6 +206,15 @@ class actor_match_label(label):
                 self.actor.update_tooltip()
                 tooltip_text = self.actor.tooltip_text
                 self.set_tooltip(tooltip_text)
+        elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
+            tooltip_text = [self.message]
+            if self.actor_label_type == 'native aggressiveness':
+                tooltip_text.append('Corresponds to the chance that the people of this village will attack nearby company units')
+            elif self.actor_label_type == 'native population':
+                tooltip_text.append('The total population of this village, which grows over time unless attacked or if willing villagers leave to become company workers')
+            elif self.actor_label_type == 'native available workers':
+                tooltip_text.append("The portion of this village's population that would be willing to work for your company")
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -225,12 +240,12 @@ class actor_match_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    if new_actor.cell.contained_buildings[self.actor_label_type] == 'none': #if no building built, show resource: name
-                        self.message_start = 'Resource: '
+                    if (not new_actor.cell.village == 'none') and new_actor.cell.visible:
+                        self.set_label('Village name: ' + new_actor.cell.village.name)
+                    elif new_actor.cell.contained_buildings[self.actor_label_type] == 'none': #if no building built, show resource: name
                         self.set_label(self.message_start + new_actor.cell.resource)
                     else:
-                        self.message_start = 'Resource building: '
-                        self.set_label(self.message_start + new_actor.cell.contained_buildings[self.actor_label_type].name)
+                        self.set_label('Resource building: ' + new_actor.cell.contained_buildings[self.actor_label_type].name) #if resource building built, show it
                 else:
                     self.set_label(self.message_start + 'unknown')
             elif self.actor_label_type == 'movement':
@@ -266,6 +281,14 @@ class actor_match_label(label):
                         self.attached_list = new_actor.contained_mobs
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name)
+            elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
+                if (not self.actor.cell.village == 'none') and self.actor.cell.visible: #if village present
+                    if self.actor_label_type == 'native aggressiveness':
+                        self.set_label(self.message_start + str(self.actor.cell.village.aggressiveness))
+                    elif self.actor_label_type == 'native population':
+                        self.set_label(self.message_start + str(self.actor.cell.village.population))
+                    elif self.actor_label_type == 'native available workers':
+                        self.set_label(self.message_start + str(self.actor.cell.village.available_workers))
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -331,6 +354,18 @@ class building_workers_label(actor_match_label):
             return(super().can_show())
         else:
             return(False)
+
+class native_info_label(actor_match_label): #possible actor_label_types: native aggressiveness, native population, native available workers
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager):
+        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not self.actor.cell.village == 'none') and self.actor.cell.visible: #only show if village present and discovered
+                return(True)
+        return(False)
+        
 
 class commodity_match_label(actor_match_label):
     '''
@@ -454,9 +489,9 @@ class worker_crew_vehicle_button(label_button): #appears on worker, finds ship t
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
                     else:
-                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the vehicle.", self.global_manager)
+                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the ship.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the vehicle.", self.global_manager)
+                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the ship.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not crew a vehicle.", self.global_manager)
 
@@ -475,18 +510,14 @@ class crew_vehicle_button(label_button): #appears on ship, finds worker to attac
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 1 and selected_list[0].is_vehicle and not selected_list[0].has_crew:
-                    vehicle = selected_list[0]
-                    crew = 'none'
-                    for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-                        if contained_mob.is_worker:
-                            crew = contained_mob
-                    if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
-                        if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
-                            crew.crew_vehicle(vehicle)
-                        else:
-                            text_tools.print_to_screen("You must select an uncrewed ship in the same tile as a worker to crew the ship.", self.global_manager)
+                vehicle = self.attached_label.actor
+                crew = 'none'
+                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                    if contained_mob.is_worker:
+                        crew = contained_mob
+                if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
+                    if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
+                        crew.crew_vehicle(vehicle)
                     else:
                         text_tools.print_to_screen("You must select an uncrewed ship in the same tile as a worker to crew the ship.", self.global_manager)
                 else:
@@ -803,10 +834,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = global_manager.get('resource_building_button_dict')['none']
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
     def update_info(self):
-        #selected_list = actor_utility.get_selected_list(self.global_manager)
-        #if len(selected_list) == 1:
-            #new_attached_mob = selected_list[0] #new_attached_mob.images[0].current_cell.tile == self.attached_tile
-            #if not (new_attached_mob == self.attached_mob and new_attached_mob.x == self.attached_mob.x and new_attached_mob.y == self.attached_mob.y): #if selected mob changes or if tile changes, update building options
         self.attached_mob = self.attached_label.actor #new_attached_mob
         if not self.attached_mob == 'none':
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
@@ -825,17 +852,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                         self.attached_resource = 'none'
                         self.building_name = 'none'
                         self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
-                #self.image.set_image(self.attached_tile.image.image_id)
-        #else:
-        #    self.image.set_image('misc/empty.png')
-        #    self.attached_mob = 'none'
-        #    self.attached_tile = 'none'
-        #    if self.building_type == 'resource':
-        #        self.attached_resource = 'none'
-
-    #def draw(self):
-    #    self.update_info()
-    #    super().draw()
 
     def can_show(self):
         result = super().can_show()

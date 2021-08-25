@@ -160,6 +160,13 @@ class button():
                 for current_passenger in self.attached_label.actor.contained_mobs:
                     tooltip_text.append("    " + current_passenger.name)
             self.set_tooltip(tooltip_text)
+        elif self.button_type == 'cycle tile mobs':
+            tooltip_text = ["Cycles through this tile's units"]
+            tooltip_text.append("Units: " )
+            if self.can_show():
+                for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
+                    tooltip_text.append("    " + current_mob.name)
+            self.set_tooltip(tooltip_text)
         else:
             self.set_tooltip(['placeholder'])
             
@@ -529,6 +536,32 @@ class button():
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
 
+class cycle_same_tile_button(button):
+    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+        super().__init__(coordinates, width, height, color, 'cycle tile mobs', 'none', modes, image_id, global_manager)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                cycled_tile = self.global_manager.get('displayed_tile')
+                moved_mob = cycled_tile.cell.contained_mobs.pop(0)
+                cycled_tile.cell.contained_mobs.append(moved_mob)
+                cycled_tile.cell.contained_mobs[0].select()
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_tile) #updates mob info display list to show changed passenger order
+            else:
+                text_tools.print_to_screen("You are busy and can not cycle units.", self.global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            displayed_tile = self.global_manager.get('displayed_tile')
+            if not displayed_tile == 'none':
+                if len(displayed_tile.cell.contained_mobs) >= 4:
+                    return(True)
+        return(False)
+    
+
 class same_tile_icon(button):#shows all mobs in same tile as clickable icons
     def __init__(self, coordinates, width, height, color, modes, image_id, index, is_last, global_manager):
         self.attached_mob = 'none'
@@ -549,13 +582,7 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
         '''
         if self.can_show() and not self.is_last: #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
-            #actor_utility.deselect_all(self.global_manager) #deselect others, select attached
             self.attached_mob.select() 
-            #if self.global_manager.get('minimap_grid') in self.attached_mob.grids: #move minimap to attached mob
-            #    self.global_manager.get('minimap_grid').calibrate(self.attached_mob.x, self.attached_mob.y)
-            #else: #otherwise, show info of tile that mob is on without moving minimap
-            #    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_mob)
             for current_image in self.attached_mob.images: #move mob to front of each stack it is in
                 if not current_image.current_cell == 'none':
                     while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
@@ -586,8 +613,13 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
                 elif len(self.old_contained_mobs) > self.index:
                     self.attached_mob = self.old_contained_mobs[self.index]
                     self.image.set_image(self.attached_mob.images[0].image_id)
+                    
         if len(self.old_contained_mobs) > self.index:
+            #if not self.global_manager.get('displayed_mob') == 'none':
+            if self.index == 0 and self.can_show():
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
             super().draw()
+
         else:
             self.image.set_image('misc/empty.png')
             self.attached_mob = 'none'
