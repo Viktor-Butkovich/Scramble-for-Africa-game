@@ -25,6 +25,7 @@ class building(actor):
         self.contained_workers = []
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
+        self.is_port = False #used to determine if port is in a tile to move there
 
     def remove(self):
         for current_image in self.images:
@@ -35,13 +36,17 @@ class building(actor):
 
     def update_tooltip(self): #should be shown below mob tooltips
         tooltip_text = [self.name.capitalize()]
-        tooltip_text.append("Worker capacity: " + str(len(self.contained_workers)) + '/' + str(self.worker_capacity))
-        if len(self.contained_workers) == 0:
-            tooltip_text.append("Workers: none")
-        else:
-            tooltip_text.append("Workers: ")
-        for current_worker in self.contained_workers:
-            tooltip_text.append("    " + current_worker.name)
+        if self.building_type == 'resource':
+            tooltip_text.append("Worker capacity: " + str(len(self.contained_workers)) + '/' + str(self.worker_capacity))
+            if len(self.contained_workers) == 0:
+                tooltip_text.append("Workers: none")
+            else:
+                tooltip_text.append("Workers: ")
+            for current_worker in self.contained_workers:
+                tooltip_text.append("    " + current_worker.name)
+            tooltip_tist.append("Produces 1 unit of " + resource_type + " per attached worker per turn")
+        elif self.building_type == 'port':
+            tooltip_text.append("Allows ships to enter this tile")
         self.set_tooltip(tooltip_text)
 
     def touching_mouse(self):
@@ -56,6 +61,11 @@ class building(actor):
                 if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
                     return(True)
         return(False)
+
+class port(building):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
+        self.is_port = True #used to determine if port is in a tile to move there
 
 class resource_building(building):
     def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):

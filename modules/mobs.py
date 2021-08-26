@@ -53,6 +53,12 @@ class mob(actor):
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
+    def adjacent_to_water(self):
+        for current_cell in self.images[0].current_cell.adjacent_list:
+            if current_cell.terrain == 'water':
+                return(True)
+        return(False)
+
     def end_turn_move(self):
         if not self.end_turn_destination == 'none':
             if self.grids[0] in self.end_turn_destination.grids: #if on same grid
@@ -218,7 +224,8 @@ class mob(actor):
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.has_vehicle() or (self.can_explore and not future_cell.visible)))): 
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
+                            (destination_type == 'water' and (self.can_swim or future_cell.has_vehicle() or (self.can_explore and not future_cell.visible)))): 
                             if self.movement_points >= self.movement_cost:
                                 return(True)
                             else:
@@ -227,7 +234,7 @@ class mob(actor):
                                 return(False)
                         elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                             #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
+                            text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
                             return(False)
                         else: #if trying to swim in water and can't 
                             #if future_cell.visible or self.can_explore: #already checked earlier

@@ -396,6 +396,11 @@ tile_free_resource_building_image = actor_match_tools.actor_match_free_image(sca
     scaling.scale_height(115, global_manager), ['strategic'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
 
+#tile resource building image
+tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_port_image)
+
 #tile terrain label
 actor_match_current_y -= 35
 tile_terrain_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(25, global_manager),

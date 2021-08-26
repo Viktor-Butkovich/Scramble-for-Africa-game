@@ -192,8 +192,8 @@ class grid():
         for x in range(0, self.coordinate_width):
             for y in range(0, self.coordinate_height):
                 self.create_cell(x, y)
-        #for current_cell in self.cell_list:
-        #    current_cell.find_adjacent_cells()
+        for current_cell in self.cell_list:
+            current_cell.find_adjacent_cells()
             
     def create_cell(self, x, y):
         '''
@@ -425,13 +425,15 @@ class mini_grid(grid):
                     current_cell.set_terrain(attached_cell.terrain)
                     current_cell.set_resource(attached_cell.resource)
                     current_cell.contained_mobs = attached_cell.contained_mobs
+                    current_cell.contained_buildings = attached_cell.contained_buildings
                 else: #if off-map
                     current_cell.set_visibility(True)
                     current_cell.set_terrain('none')
                     current_cell.set_resource('none')
+                    current_cell.reset_buildings()
             self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
             for current_mob in self.global_manager.get('mob_list'):
-                if not current_mob.in_group: #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
+                if not (current_mob.in_group or current_mob.in_vehicle or current_mob.in_building): #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
                     for current_image in current_mob.images:
                         if current_image.grid == self:
                             current_image.add_to_cell()

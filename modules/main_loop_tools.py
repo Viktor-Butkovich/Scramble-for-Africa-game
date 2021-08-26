@@ -340,19 +340,11 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                             current_cell.contained_mobs[0].select()
                             if current_grid == global_manager.get('minimap_grid'):
                                 main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile)
+                                main_tile = global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile
+                                if not main_tile == 'none':
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
                             else: #elif current_grid == global_manager.get('strategic_map_grid'):
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-
-        #else:
-        #    for clicked_mob in global_manager.get('mob_list'):
-        #        for current_image in clicked_mob.images: #if mouse box drawn, select all mobs within mouse box
-        #            if current_image.can_show() and current_image.Rect.colliderect((min(global_manager.get('mouse_destination_x'), global_manager.get('mouse_origin_x')), min(global_manager.get('mouse_destination_y'), global_manager.get('mouse_origin_y')), abs(global_manager.get('mouse_destination_x') - global_manager.get('mouse_origin_x')), abs(global_manager.get('mouse_destination_y') - global_manager.get('mouse_origin_y')))):
-        #                selected_new_mob = True
-        #                for current_mob in current_image.current_cell.contained_mobs: #mobs that can't show but are in same tile are selected
-        #                    #if (not ((current_mob in global_manager.get('officer_list') or current_mob in global_manager.get('worker_list')) and current_mob.in_group)): #do not select workers or officers in group, should be unnecessary because they are removed from cell when in group
-        #                    current_mob.select()#if mob can show
-        #                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
         if selected_new_mob:
             selected_list = actor_utility.get_selected_list(global_manager)
             if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
@@ -367,21 +359,26 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         for current_grid in global_manager.get('grid_list'): #destination_grids:
             for current_cell in current_grid.cell_list:
                 if current_cell.touching_mouse():
+                    click_move_minimap(global_manager)
+                    target_cell = 'none'
+                    if current_cell.grid.is_abstract_grid:
+                        target_cell = current_cell
+                    else:
+                        target_cell = global_manager.get('minimap_grid').find_cell(2, 2) #center
                     if not current_grid in chooser.grids:
                         stopping = False
                         if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
-                            destination_x, destination_y = current_cell.tile.get_main_grid_coordinates()
-                            if (not destination_y == 0) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
-                                text_tools.print_to_screen("You can only send ships to coastal waters and ports.", global_manager)
+                            destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
+                            if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_port()))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                text_tools.print_to_screen("You can only send ships to coastal waters and coastal ports.", global_manager)
                                 stopping = True
                         chose_destination = True
                         if not stopping:
                             if current_grid.is_mini_grid:
-                                if not current_cell.terrain == 'none':
-                                    chooser.end_turn_destination = current_cell.tile.get_equivalent_tile()
+                                if not target_cell.terrain == 'none':
+                                    chooser.end_turn_destination = target_cell.tile.get_equivalent_tile()
                             else:
-                                chooser.end_turn_destination = current_cell.tile
-                            click_move_minimap(global_manager)
+                                chooser.end_turn_destination = target_cell.tile
                             global_manager.set('show_selection_outlines', True)
                             global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
                     else: #can not move to same continent
@@ -390,11 +387,9 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         global_manager.set('choosing_destination_info_dict', {})
     elif not clicked_button:
         click_move_minimap(global_manager)
-    #global_manager.set('making_mouse_box', False) #however, stop making mouse box regardless of if a button was pressed
 
 def click_move_minimap(global_manager): #move minimap to clicked tile
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    #if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #only move minimap if clicking, not when making box
     breaking = False
     for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
         if current_grid.can_show():

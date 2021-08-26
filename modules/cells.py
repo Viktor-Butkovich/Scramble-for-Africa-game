@@ -36,7 +36,15 @@ class cell():
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
-        self.contained_buildings = {'resource': 'none'}#[]
+        self.reset_buildings()
+
+    def reset_buildings(self):
+        self.contained_buildings = {'resource': 'none', 'port': 'none'}
+
+    def has_port(self):
+        if self.contained_buildings['port'] == 'none':
+            return(False)
+        return(True)
 
     def has_vehicle(self):
         for current_mob in self.contained_mobs:
@@ -161,3 +169,15 @@ class cell():
             if current_mob in self.global_manager.get('worker_list'):
                 return(current_mob)
         return('none')
+
+    def find_adjacent_cells(self):
+        adjacent_list = []
+        if not self.x == 0:
+            adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
+        if not self.x == self.grid.coordinate_width - 1:
+            adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
+        if not self.y == 0:
+            adjacent_list.append(self.grid.find_cell(self.x, self.y - 1))
+        if not self.y == self.grid.coordinate_height - 1:
+            adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
+        self.adjacent_list = adjacent_list
