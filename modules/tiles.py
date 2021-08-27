@@ -53,6 +53,10 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.terrain = 'none'
         self.update_tooltip()
 
+    def update_resource_icon(self): #changes size of resource icon if building present
+        if not self.resource_icon == 'none':
+            self.resource_icon.update_resource_icon()
+
     def draw_destination_outline(self): #called directly by mobs
         for current_image in self.images:
             outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
@@ -159,16 +163,17 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.resource_icon.remove()
             self.resource_icon = 'none'
         self.resource = new_resource
-        self.resource_icon = tile((self.x, self.y), self.grid, 'scenery/resources/' + self.cell.resource + '.png', 'resource icon', ['strategic'], False, self.global_manager)
-        if self.resource == 'natives':
-            equivalent_tile = self.get_equivalent_tile()
-            village_exists = False
-            if not equivalent_tile == 'none':
-                if not equivalent_tile.cell.village == 'none': #if equivalent tile present and equivalent tile has village, copy village to equivalent instead of creating new one
-                    village_exists = True
-                    self.cell.village = equivalent_tile.cell.village
-            if not village_exists: #make new village if village not present
-                self.cell.village = villages.village(self.cell)
+        if not new_resource == 'none':
+            if self.resource == 'natives':
+                equivalent_tile = self.get_equivalent_tile()
+                village_exists = False
+                if not equivalent_tile == 'none':
+                    if not equivalent_tile.cell.village == 'none': #if equivalent tile present and equivalent tile has village, copy village to equivalent instead of creating new one
+                        village_exists = True
+                        self.cell.village = equivalent_tile.cell.village
+                if not village_exists: #make new village if village not present
+                    self.cell.village = villages.village(self.cell)
+            self.resource_icon = resource_icon((self.x, self.y), self.grid, self.cell.resource, 'resource icon', ['strategic'], False, self, self.global_manager)
         self.set_visibility(self.cell.visible)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
@@ -300,6 +305,40 @@ class abstract_tile(tile):
             return(True)
         else:
             return(False)
+
+class resource_icon(tile):
+    def __init__(self, coordinates, grid, resource, name, modes, show_terrain, attached_tile, global_manager):
+        self.attached_tile = attached_tile
+        self.resource = resource
+        default_image_id = 'scenery/resources/' + self.resource + '.png'
+        small_image_id = 'scenery/resources/small/' + self.resource + '.png'
+        super().__init__(coordinates, grid, default_image_id, name, modes, show_terrain, global_manager)
+        self.image_dict['small'] = small_image_id
+        self.image_dict['large'] = default_image_id
+        self.update_resource_icon()
+
+    def update_resource_icon(self):
+        if self.resource == 'natives':
+            attached_village = self.attached_tile.cell.village
+            if attached_village.population == 0: #0
+                self.image_dict['small'] = 'scenery/resources/small/natives0.png'
+                self.image_dict['large'] = 'scenery/resources/natives0.png'
+            elif attached_village.population <= 3: #1-3
+                self.image_dict['small'] = 'scenery/resources/small/natives1.png'
+                self.image_dict['large'] = 'scenery/resources/natives1.png'
+            elif attached_village.population <= 6: #4-6
+                self.image_dict['small'] = 'scenery/resources/small/natives2.png'
+                self.image_dict['large'] = 'scenery/resources/natives2.png'
+            else: #7-10
+                self.image_dict['small'] = 'scenery/resources/small/natives3.png'
+                self.image_dict['large'] = 'scenery/resources/natives3.png'
+                
+        if (not self.attached_tile.cell.contained_buildings['port'] == 'none') or (not self.attached_tile.cell.contained_buildings['resource'] == 'none'): #make small if building present
+            self.image.set_image('small')
+            self.image_dict['default'] = self.image_dict['small']
+        else:
+            self.image.set_image('large')
+            self.image_dict['default'] = self.image_dict['large']
 
 class veteran_icon(tile):
     '''

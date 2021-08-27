@@ -108,7 +108,7 @@ global_manager.set('resource_building_dict',
 global_manager.set('resource_building_button_dict',
     {
     'coffee': 'scenery/resources/production/coffee.png',
-    'copper': 'scenery/resources/production.copper.png',
+    'copper': 'scenery/resources/production/copper.png',
     'diamond': 'scenery/resources/production/diamond.png',
     'exotic wood': 'scenery/resources/production/exotic wood.png',
     'fruit': 'scenery/resources/production/fruit.png',
@@ -274,34 +274,7 @@ current_button_number += 1
 
 right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'move right', pygame.K_d, ['strategic', 'europe'], 'misc/right_button.png', global_manager)
-current_button_number += 2#move more when switching categories
 
-#switch_theatre_button = buttons.switch_theatre_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-#    scaling.scale_height(50, global_manager), 'blue', pygame.K_g, ['strategic'], 'misc/switch_theatre_button.png', global_manager)\
-#switches theatre between Europe and Africa
-
-#resource_building_button = buildings.construction_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-#    scaling.scale_height(50, global_manager), 'resource', ['strategic'], global_manager) ##self, coordinates, width, height, building_type, modes, global_manage
-#creates resource building
-
-#worker_to_building_button = buildings.worker_to_building_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-#    scaling.scale_height(50, global_manager), 'resource', ['strategic'], 'misc/worker_to_building_button.png', global_manager) #coordinates, width, height, building_type, modes, global_manage
-#assigns worker to resource building
-
-current_button_number += 1
-
-#to_europe_button = buttons.switch_grid_button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager),
-#        scaling.scale_height(50, global_manager), 'blue', 'to europe', pygame.K_2, ['strategic'], 'locations/europe_button.png', [global_manager.get('europe_grid')], global_manager)
-#build harbor building button
-
-current_button_number += 1
-
-#build build fort building button
-#to slave traders button
-
-current_button_number += 1
-
-#upgrade infrastructure building
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
     'expand text box', pygame.K_j, ['strategic', 'europe'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind

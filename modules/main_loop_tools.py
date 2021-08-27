@@ -364,7 +364,7 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                     if current_cell.grid.is_abstract_grid:
                         target_cell = current_cell
                     else:
-                        target_cell = global_manager.get('minimap_grid').find_cell(2, 2) #center
+                        target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) #center
                     if not current_grid in chooser.grids:
                         stopping = False
                         if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
@@ -374,11 +374,18 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                                 stopping = True
                         chose_destination = True
                         if not stopping:
-                            if current_grid.is_mini_grid:
-                                if not target_cell.terrain == 'none':
-                                    chooser.end_turn_destination = target_cell.tile.get_equivalent_tile()
-                            else:
-                                chooser.end_turn_destination = target_cell.tile
+                            #if current_grid.is_mini_grid:
+                            #    if not target_cell.terrain == 'none':
+                            #        chooser.end_turn_destination = target_cell.tile.get_equivalent_tile()
+                            #        print('mini')
+                            #        print(target_cell.tile.x)
+                            #        print(target_cell.tile.y)
+                            #        print(target_cell.tile.get_equivalent_tile().x)
+                            #        print(target_cell.tile.get_equivalent_tile().y)
+                            #else:
+                            chooser.end_turn_destination = target_cell.tile
+                            #   print(target_cell.tile.x)
+                            #   print(target_cell.tile.y)
                             global_manager.set('show_selection_outlines', True)
                             global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
                     else: #can not move to same continent

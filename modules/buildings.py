@@ -25,6 +25,7 @@ class building(actor):
         self.contained_workers = []
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
+            current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
 
     def remove(self):
@@ -44,7 +45,7 @@ class building(actor):
                 tooltip_text.append("Workers: ")
             for current_worker in self.contained_workers:
                 tooltip_text.append("    " + current_worker.name)
-            tooltip_tist.append("Produces 1 unit of " + resource_type + " per attached worker per turn")
+            tooltip_text.append("Produces 1 unit of " + self.resource_type + " per attached worker per turn")
         elif self.building_type == 'port':
             tooltip_text.append("Allows ships to enter this tile")
         self.set_tooltip(tooltip_text)
@@ -69,9 +70,9 @@ class port(building):
 
 class resource_building(building):
     def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):
+        self.resource_type = resource_type
         super().__init__(coordinates, grids, image_id, name, 'resource', modes, global_manager)
         global_manager.get('resource_building_list').append(self)
-        self.resource_type = resource_type
         self.worker_capacity = 1 #improve with upgrades
 
     def remove(self):

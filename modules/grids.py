@@ -421,11 +421,11 @@ class mini_grid(grid):
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                     attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
+                    current_cell.contained_mobs = attached_cell.contained_mobs
+                    current_cell.contained_buildings = attached_cell.contained_buildings
                     current_cell.set_visibility(attached_cell.visible)
                     current_cell.set_terrain(attached_cell.terrain)
                     current_cell.set_resource(attached_cell.resource)
-                    current_cell.contained_mobs = attached_cell.contained_mobs
-                    current_cell.contained_buildings = attached_cell.contained_buildings
                 else: #if off-map
                     current_cell.set_visibility(True)
                     current_cell.set_terrain('none')

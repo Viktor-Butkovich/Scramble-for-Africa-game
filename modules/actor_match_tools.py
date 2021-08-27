@@ -319,6 +319,8 @@ class actor_match_label(label):
             return(False)
         elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle:
             return(False)
+        elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building):
+            return(False)
         else:
             return(result)
 
@@ -844,7 +846,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
     def update_info(self):
         self.attached_mob = self.attached_label.actor #new_attached_mob
-        if not self.attached_mob == 'none':
+        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
             if self.attached_mob.can_construct:
                 if self.building_type == 'resource':
