@@ -67,6 +67,8 @@ class port(building):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
+        for current_image in self.images:
+            current_image.current_cell.tile.inventory_capacity += 5
 
 class resource_building(building):
     def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):

@@ -31,7 +31,6 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.images = [self.image] #tiles only appear on 1 grid, but have a list of images defined to be more consistent with other actor subclasses
         self.show_terrain = show_terrain
         self.cell = self.grid.find_cell(self.x, self.y)
-        self.can_hold_commodities = False
         if self.show_terrain:
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
@@ -39,6 +38,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
+            self.inventory_setup()
         elif self.name == 'Europe': #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
@@ -46,6 +46,8 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
             self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
+            self.can_hold_infinite_commodities = True
+            self.inventory_setup()
             self.terrain = 'none'
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'

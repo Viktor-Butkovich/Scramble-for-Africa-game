@@ -42,10 +42,13 @@ class label(button):
         self.message = new_message
         if text_tools.message_width(self.message, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
             self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
-            self.image.width = self.width
-            self.Rect.width = self.width
-            self.image.set_image(self.image.image_id)
-            self.image.Rect = self.Rect
+        else:
+            self.width = self.minimum_width
+        self.image.width = self.width
+        self.Rect.width = self.width
+        self.image.set_image(self.image.image_id)
+        self.image.Rect = self.Rect
+            
 
     def update_tooltip(self):
         '''

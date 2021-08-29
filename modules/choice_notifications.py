@@ -113,6 +113,8 @@ class recruitment_choice_button(choice_button):
                 new_explorer = officers.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'engineer':
                 new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
+            elif self.recruitment_type == 'porter foreman':
+                new_porter_foreman = officers.porter_foreman((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Porter foreman', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

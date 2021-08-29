@@ -177,6 +177,8 @@ class actor_match_label(label):
             self.message_start = 'Total population: '
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
+        elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
+            self.message_start = 'Inventory: '
         else:
             self.message_start = 'none'
         self.calibrate('none')
@@ -220,6 +222,21 @@ class actor_match_label(label):
                 tooltip_text.append('The total population of this village, which grows over time unless attacked or if willing villagers leave to become company workers')
             elif self.actor_label_type == 'native available workers':
                 tooltip_text.append("The portion of this village's population that would be willing to work for your company")
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
+            tooltip_text = [self.message]
+            if self.actor_label_type == 'mob inventory capacity':
+                if not self.actor == 'none':
+                    tooltip_text.append("This unit is currently holding " + str(self.actor.get_inventory_used()) + " commodities")
+                    tooltip_text.append("This unit can hold a maximum of " + str(self.actor.inventory_capacity) + " commodities.")
+            elif self.actor_label_type == 'tile inventory capacity':
+                if not self.actor == 'none':
+                    if self.actor.can_hold_infinite_commodities:
+                        tooltip_text.append("This tile can hold infinite commodities.")
+                    else:
+                        tooltip_text.append("This tile currently contains " + str(self.actor.get_inventory_used()) + " commodities")
+                        tooltip_text.append("This tile can retain a maximum of " + str(self.actor.inventory_capacity) + " commodities.")
+                        tooltip_text.append("If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -295,6 +312,11 @@ class actor_match_label(label):
                         self.set_label(self.message_start + str(self.actor.cell.village.population))
                     elif self.actor_label_type == 'native available workers':
                         self.set_label(self.message_start + str(self.actor.cell.village.available_workers))
+            elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
+                if self.actor.can_hold_infinite_commodities:
+                    self.set_label(self.message_start + 'unlimited')
+                else:
+                    self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -314,6 +336,8 @@ class actor_match_label(label):
     def can_show(self):
         result = super().can_show()
         if self.actor == 'none':
+            return(False)
+        elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
             return(False)
         elif self.actor_label_type == 'resource' and self.actor.grid.is_abstract_grid:
             return(False)

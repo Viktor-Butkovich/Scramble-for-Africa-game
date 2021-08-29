@@ -25,11 +25,13 @@ class actor():
         self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
         self.selected = False
-        self.can_hold_commodities = True
+        self.can_hold_commodities = False
+        self.can_hold_infinite_commodities = False
+        self.inventory_capacity = 0
         self.tooltip_text = []
         if self.can_hold_commodities:
             self.inventory_setup()
-
+            
     def set_image(self, new_image):
         for current_image in self.images:
             current_image.set_image(new_image)
@@ -52,6 +54,18 @@ class actor():
         for current_commodity in self.global_manager.get('commodity_types'):
             self.inventory[current_commodity] = 0
 
+    def get_inventory_remaining(self, possible_amount_added = 0):
+        num_commodities = possible_amount_added #if not 0, will show how much inventory will be remaining after an inventory change
+        for current_commodity in self.global_manager.get('commodity_types'):
+            num_commodities += self.get_inventory(current_commodity)
+        return(self.inventory_capacity - num_commodities)
+
+    def get_inventory_used(self):
+        num_commodities = 0
+        for current_commodity in self.global_manager.get('commodity_types'):
+            num_commodities += self.get_inventory(current_commodity)
+        return(num_commodities)
+
     def get_inventory(self, commodity):
         '''
         Input:
@@ -62,7 +76,7 @@ class actor():
         if self.can_hold_commodities:
             return(self.inventory[commodity])
         else:
-            return(-1)
+            return(0)
 
     def change_inventory(self, commodity, change):
         '''

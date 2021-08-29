@@ -437,6 +437,9 @@ class button():
                         if displayed_mob in displayed_tile.cell.contained_mobs:
                             displayed_mob.change_inventory(commodity, -1 * num_commodity)
                             displayed_tile.change_inventory(commodity, num_commodity)
+                            if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
@@ -454,8 +457,15 @@ class button():
                         num_commodity = displayed_tile.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                         if displayed_mob in displayed_tile.cell.contained_mobs:
-                            displayed_mob.change_inventory(commodity, num_commodity)
-                            displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                            if displayed_mob.can_hold_commodities:
+                                if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                    displayed_mob.change_inventory(commodity, num_commodity)
+                                    displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                else:
+                                    text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
+                                        str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                            else:
+                                text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
@@ -617,7 +627,10 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
         if len(self.old_contained_mobs) > self.index:
             #if not self.global_manager.get('displayed_mob') == 'none':
             if self.index == 0 and self.can_show():
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                else:
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
             super().draw()
 
         else:

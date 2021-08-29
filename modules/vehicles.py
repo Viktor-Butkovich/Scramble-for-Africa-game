@@ -74,6 +74,9 @@ class ship(vehicle): #prevent movement when there are mobs in this tile that are
         self.can_swim = True
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
+        self.can_hold_commodities = True
+        self.inventory_capacity = 50
+        self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
 
     def can_leave(self): #can not move away if leaving behind units that can't swim in water

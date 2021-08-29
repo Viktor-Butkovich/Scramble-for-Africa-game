@@ -136,6 +136,17 @@ class group(mob):
         self.officer.remove()
         self.worker.remove()
 
+class porters(group):
+    '''
+    A group with a porter foreman officer that can hold commodities
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_hold_commodities = True
+        self.inventory_capacity = 10
+        self.inventory_setup()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+
 class construction_gang(group):
     '''
     A group with an engineer officer that is able to construct buildings
@@ -349,5 +360,7 @@ def create_group(worker, officer, global_manager):
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'engineer':
         new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'Construction gang', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'porter foreman':
+        new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

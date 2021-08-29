@@ -1,3 +1,5 @@
+import random
+
 from . import text_tools
 from . import actor_utility
 from . import market_tools
@@ -11,6 +13,11 @@ def end_turn(global_manager):
     text_tools.print_to_screen("Ending turn", global_manager)
     for current_mob in global_manager.get('mob_list'):
         current_mob.end_turn_move()
+    for current_cell in global_manager.get('strategic_map_grid').cell_list:
+        current_tile = current_cell.tile
+        while current_tile.get_inventory_used() > current_tile.inventory_capacity:
+            discarded_commodity = random.choice(current_tile.get_held_commodities())
+            current_tile.change_inventory(discarded_commodity, -1)
     for current_resource_building in global_manager.get('resource_building_list'):
         current_resource_building.produce()
     manage_upkeep(global_manager)
