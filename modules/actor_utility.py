@@ -1,5 +1,7 @@
 import random
 
+from . import scaling
+
 def create_image_dict(stem):
     '''
     Input:
@@ -150,4 +152,14 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
         global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
+
+def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
+    current_y = default_y
+    for current_label in info_display_list:
+        if current_label.can_show():
+            current_y -= 35
+            scaled_y = scaling.scale_height(current_y, global_manager)
+            if not current_label.y == scaled_y: #if y is not the same as last time, move it
+                current_label.set_y(scaled_y)
+            
     

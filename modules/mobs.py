@@ -267,7 +267,7 @@ class mob(actor):
         for current_image in self.images:
             current_image.add_to_cell()
         self.change_movement_points(-1 * self.movement_cost)
-        if self.images[0].current_cell.has_vehicle() and not self.is_vehicle:
+        if self.images[0].current_cell.has_vehicle() and (not self.is_vehicle) and current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle()
             if self.is_worker and not vehicle.has_crew:

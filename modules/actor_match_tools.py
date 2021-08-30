@@ -123,7 +123,7 @@ class actor_match_label(label):
     '''
     Label that changes its text to match the information of selected mobs or tiles
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager):
         '''
         Input:
             coordinates: tuple of 2 integers for initial coordinate x and y values
@@ -137,8 +137,14 @@ class actor_match_label(label):
         message = ''#'default'
         self.attached_buttons = []
         self.actor = 'none'
-        self.actor_label_type = actor_label_type
+        self.actor_label_type = actor_label_type #name, terrain, resource, etc
+        self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
         super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
+        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #except for certain types, all actor match labels should be in mob/tile_ordered_label_list
+            if self.actor_type == 'mob':
+                self.global_manager.get('mob_ordered_label_list').append(self)
+            elif self.actor_type == 'tile':
+                self.global_manager.get('tile_ordered_label_list').append(self)
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
             self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/merge_button.png', self, global_manager))
@@ -333,6 +339,16 @@ class actor_match_label(label):
                 current_button.outline.x = current_button.x - current_button.outline_width
                 x_displacement += (current_button.width + 5)
 
+    def set_y(self, new_y):
+        self.y = new_y
+        self.image.y = self.y
+        #self.Rect.y = self.y
+        self.image.Rect = self.Rect    
+        for current_button in self.attached_buttons:
+            current_button.y = self.y
+            current_button.Rect.y = self.global_manager.get('display_height') - (current_button.y + current_button.height)
+            current_button.outline.y = current_button.Rect.y - current_button.outline_width
+
     def can_show(self):
         result = super().can_show()
         if self.actor == 'none':
@@ -349,11 +365,11 @@ class actor_match_label(label):
             return(result)
 
 class list_item_label(actor_match_label): #attached to a certain list based on list type, has index of list that it shows
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, actor_type, global_manager):
         self.list_index = list_index
         self.list_type = list_type
         self.attached_list = []
-        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager)
+        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager)
 
     def calibrate(self, new_actor):
         self.attached_list = []
@@ -365,9 +381,9 @@ class list_item_label(actor_match_label): #attached to a certain list based on l
         return(False)
 
 class building_workers_label(actor_match_label):
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, global_manager):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
         self.remove_worker_button = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', global_manager)
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
         self.attached_building = 'none'
         self.showing = False
@@ -388,8 +404,8 @@ class building_workers_label(actor_match_label):
             return(False)
 
 class native_info_label(actor_match_label): #possible actor_label_types: native aggressiveness, native population, native available workers
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager):
-        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, global_manager)
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager):
+        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager)
 
     def can_show(self):
         result = super().can_show()
@@ -417,7 +433,7 @@ class commodity_match_label(actor_match_label):
         '''
         #self.actor = 'none'
         self.current_commodity = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', global_manager)
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', matched_actor_type, global_manager)
         self.showing_commodity = False
         self.commodity_index = commodity_index
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager

@@ -54,6 +54,11 @@ class actor():
         for current_commodity in self.global_manager.get('commodity_types'):
             self.inventory[current_commodity] = 0
 
+    def drop_inventory(self):
+        for current_commodity in self.global_manager.get('commodity_types'):
+            self.images[0].current_cell.tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
+            self.set_inventory(current_commodity, 0)
+
     def get_inventory_remaining(self, possible_amount_added = 0):
         num_commodities = possible_amount_added #if not 0, will show how much inventory will be remaining after an inventory change
         for current_commodity in self.global_manager.get('commodity_types'):

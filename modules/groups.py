@@ -102,8 +102,10 @@ class group(mob):
         Output:
             Separates this group into its components, giving its inventory to the officer and setting their number of movement points to that of the group
         '''
-        self.officer.inventory = self.inventory
-        self.inventory_setup() #reset inventory to empty
+        if self.can_hold_commodities:
+            self.drop_inventory()
+        #self.officer.inventory = self.inventory
+        #self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
         self.worker.set_movement_points(self.movement_points)

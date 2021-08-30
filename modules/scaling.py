@@ -14,7 +14,7 @@ def scale_coordinates(x, y, global_manager):
 def scale_width(width, global_manager):
     '''
     Input:
-        int representing unscaled pixel width, global_manager_template object
+        int representing unscaled pixel width, global_manager_template object. Also works for x coordinates alone rather than just widths
     Output:
         Returns an int pixel width scaled to the user's resolution
     '''
@@ -25,7 +25,7 @@ def scale_width(width, global_manager):
 def scale_height(height, global_manager):
     '''
     Input:
-        int representing unscaled pixel height, global_manager_template object
+        int representing unscaled pixel height, global_manager_template object. Also works for y coordinates alone rather than just heights
     Output:
         Returns an int pixel height scaled to the user's resolution
     '''
