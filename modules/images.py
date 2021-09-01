@@ -199,10 +199,12 @@ class actor_image():
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 50
+        font_size = self.global_manager.get('font_size')
+        font_name = self.global_manager.get('font_name')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, self.global_manager.get('font_size'), 'Times New Roman') + 10 > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, self.global_manager.get('font_size'), 'Times New Roman') + 10
-        tooltip_height = (self.global_manager.get('font_size') * len(tooltip_text)) + 5
+            if text_tools.message_width(text_line, font_size, font_name) + 10 > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + 10
+        tooltip_height = (font_size * len(tooltip_text)) + 5
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))

@@ -128,7 +128,7 @@ class cell():
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)
-            current_font = pygame.font.SysFont('Times New Roman', font_size)
+            current_font = pygame.font.SysFont(self.global_manager.get('font_name'), font_size)
             textsurface = current_font.render(message, False, self.global_manager.get('color_dict')[color])
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size

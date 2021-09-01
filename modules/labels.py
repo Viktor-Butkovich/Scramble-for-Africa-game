@@ -25,7 +25,7 @@ class label(button):
         self.minimum_width = minimum_width#self.ideal_width = ideal_width
         self.width = minimum_width#ideal_width
         self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
         self.height = height#minimum_height
@@ -150,7 +150,7 @@ class commodity_prices_label(label):
         self.minimum_height = height
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
         self.font_size = scaling.scale_width(30, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 

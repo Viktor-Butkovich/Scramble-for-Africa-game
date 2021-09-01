@@ -33,12 +33,12 @@ global_manager.set('display_height', resolution_finder.current_h - round(global_
 global_manager.set('loading', True)
 global_manager.set('loading_start_time', time.time())
 
-#default
-#global_manager.set('myfont', pygame.font.SysFont('Times New Roman', scaling.scale_width(15, global_manager)))
-
-global_manager.set('myfont', pygame.font.SysFont('Times New Roman', scaling.scale_width(15, global_manager)))
-
+global_manager.set('font_name', 'times new roman')
+#global_manager.set('font_name', 'couriernew') monospaced
+#print(pygame.font.get_fonts())
 global_manager.set('font_size', scaling.scale_width(15, global_manager))
+global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
+
 global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
 pygame.display.set_caption('SFA')

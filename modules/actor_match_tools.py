@@ -597,10 +597,10 @@ class uncrew_vehicle_button(label_button): #later only allow uncrewing in a port
             if main_loop_tools.action_possible(self.global_manager):
                 vehicle = self.attached_label.actor
                 crew = vehicle.crew
-                if len(vehicle.contained_mobs) == 0:
+                if len(vehicle.contained_mobs) == 0 and len(vehicle.get_held_commodities()) == 0:
                     crew.uncrew_vehicle(vehicle)
                 else:
-                    text_tools.print_to_screen("You must select a ship with no passengers to remove the crew.", self.global_manager)
+                    text_tools.print_to_screen("You can not remove the crew from a ship with passengers or cargo.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not remove a ship's crew.", self.global_manager)
 
@@ -667,11 +667,14 @@ class split_button(label_button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 1 and selected_list[0] in self.global_manager.get('group_list'):
-                    selected_list[0].disband()
+                displayed_mob = self.global_manager.get('displayed_mob')#selected_list = actor_utility.get_selected_list(self.global_manager)
+                if (not displayed_mob == 'none') and displayed_mob.is_group:
+                    if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
+                        displayed_mob.disband()
+                    else:
+                        text_tools.print_to_screen("You can not split a group of porters that is carrying commodities.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must have a group selected to split it into a worker and and officer.", self.global_manager)
+                    text_tools.print_to_screen("Only a group can be split it into a worker and an officer.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 

@@ -251,39 +251,41 @@ def draw_text_box(global_manager):
     greatest_width = scaling.scale_width(greatest_width, global_manager)
     max_screen_lines = (global_manager.get('default_display_height') // global_manager.get('font_size')) - 1
     max_text_box_lines = (global_manager.get('text_box_height') // global_manager.get('font_size')) - 1
+    font_name = global_manager.get('font_name')
+    font_size = global_manager.get('font_size')
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
-            if text_tools.message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') > greatest_width:
-                greatest_width = text_tools.message_width(global_manager.get('text_list')[-text_index - 1], global_manager.get('font_size'), 'Times New Roman') #manages the width of already printed text lines
+            if text_tools.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
+                greatest_width = text_tools.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
     if global_manager.get('input_manager').taking_input:
-        if text_tools.message_width("Response: " + global_manager.get('message'), font_size, 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width("Response: " + global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
+        if text_tools.message_width("Response: " + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_tools.message_width("Response: " + global_manager.get('message'), font_size, font_name)
     else:
-        if text_tools.message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman') > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width(global_manager.get('message'), global_manager.get('font_size'), 'Times New Roman')
+        if text_tools.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_tools.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + 10
     x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
     pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
     if global_manager.get('typing'):
         x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
         pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
-        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
+        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['red'], (0, global_manager.get('display_height') - (font_size + 5)), (text_box_width, global_manager.get('display_height') - (font_size + 5)))
     else:
         x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
         pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (x, y, text_box_width, global_manager.get('text_box_height')), 3)
-        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (global_manager.get('font_size') + 5)), (text_box_width, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
+        pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')['black'], (0, global_manager.get('display_height') - (font_size + 5)), (text_box_width, global_manager.get('display_height') - (font_size + 5)))
 
     global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
     
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
             textsurface = global_manager.get('myfont').render(global_manager.get('text_list')[(-1 * text_index) - 1], False, (0, 0, 0))
-            global_manager.get('game_display').blit(textsurface,(10, (-1 * global_manager.get('font_size') * text_index) + global_manager.get('display_height') - ((2 * global_manager.get('font_size')) + 5)))
+            global_manager.get('game_display').blit(textsurface,(10, (-1 * font_size * text_index) + global_manager.get('display_height') - ((2 * font_size) + 5)))
     if global_manager.get('input_manager').taking_input:
         textsurface = global_manager.get('myfont').render('Response: ' + global_manager.get('message'), False, (0, 0, 0))
     else:
         textsurface = global_manager.get('myfont').render(global_manager.get('message'), False, (0, 0, 0))
-    global_manager.get('game_display').blit(textsurface,(10, global_manager.get('display_height') - (global_manager.get('font_size') + 5)))
+    global_manager.get('game_display').blit(textsurface,(10, global_manager.get('display_height') - (font_size + 5)))
 
 def manage_rmb_down(clicked_button, global_manager):
     '''

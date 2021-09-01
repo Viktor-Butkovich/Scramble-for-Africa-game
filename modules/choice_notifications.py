@@ -77,7 +77,7 @@ class choice_button(button):
             self.message = button_type
         super().__init__(coordinates, width, height, 'blue', button_type, 'none', modes, image_id, global_manager)
         self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#"Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
 
