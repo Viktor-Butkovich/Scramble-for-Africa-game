@@ -32,6 +32,7 @@ class building(actor):
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = 'none'
             current_image.remove_from_cell()
+            current_image.remove()
         super().remove()
         self.global_manager.set('building_list', utility.remove_from_list(self.global_manager.get('building_list'), self))
 
@@ -48,6 +49,12 @@ class building(actor):
             tooltip_text.append("Produces 1 unit of " + self.resource_type + " per attached worker per turn")
         elif self.building_type == 'port':
             tooltip_text.append("Allows ships to enter this tile")
+        elif self.building_type == 'infrastructure':
+            tooltip_text.append("Halves movement cost for units going to another tile with a road or railroad")
+            if self.is_railroad:
+                tooltip_text.append("Allows trains to move from this tile to other tiles that have railroads")
+            else:
+                tooltip_text.append("Can be upgraded to a railroad to allow trains to move through this tile")
         self.set_tooltip(tooltip_text)
 
     def touching_mouse(self):
@@ -58,10 +65,38 @@ class building(actor):
             Returns whether any of this building's images are colliding with the mouse
         '''
         for current_image in self.images:
-            if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
-                if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
-                    return(True)
+            if current_image.change_with_other_images: #don't show tooltips for road connection images, only the base road building images
+                if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
+                    if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
+                        return(True)
         return(False)
+
+class infrastructure_building(building):
+    def __init__(self, coordinates, grids, image_id, name, infrastructure_type, modes, global_manager):
+        self.infrastructure_type = infrastructure_type
+        if self.infrastructure_type == 'railroad':
+            self.is_road = False
+            self.is_railroad = True
+        elif self.infrastructure_type == 'road':
+            self.is_railroad = False
+            self.is_road = True
+        super().__init__(coordinates, grids, image_id, name, 'infrastructure', modes, global_manager)
+        self.image_dict['left_road'] = 'buildings/infrastructure/left_road.png'
+        self.image_dict['right_road'] = 'buildings/infrastructure/right_road.png'
+        self.image_dict['down_road'] = 'buildings/infrastructure/down_road.png'
+        self.image_dict['up_road'] = 'buildings/infrastructure/up_road.png'
+        self.image_dict['left_railroad'] = 'buildings/infrastructure/left_railroad.png'
+        self.image_dict['right_railroad'] = 'buildings/infrastructure/right_railroad.png'
+        self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
+        self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
+        self.image_dict['empty'] = 'misc/empty.png'
+        for current_grid in self.grids:
+            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager))
+            #actor, width, height, grid, image_description, direction, global_manager
+            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager))
+            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager))
+            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager))
+        actor_utility.update_roads(self.global_manager)
 
 class port(building):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):

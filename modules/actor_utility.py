@@ -18,6 +18,10 @@ def create_image_dict(stem):
     image_dict['left'] = stem + 'left.png'
     return(image_dict)
 
+def update_roads(global_manager):
+    for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
+        current_infrastructure_connection_image.update_roads()
+
 def can_merge(global_manager):
     '''
     Input:

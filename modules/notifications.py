@@ -194,11 +194,11 @@ class exploration_notification(notification):
             explored_tile = explored_cell.tile
             explored_terrain_image_id = explored_cell.tile.image_dict['default']
             self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
+                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             if not explored_tile.resource_icon == 'none':
                 explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
                 self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager))
+                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self):

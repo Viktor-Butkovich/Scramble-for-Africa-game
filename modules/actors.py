@@ -31,10 +31,12 @@ class actor():
         self.tooltip_text = []
         if self.can_hold_commodities:
             self.inventory_setup()
+        #self.removed = False
             
     def set_image(self, new_image):
         for current_image in self.images:
-            current_image.set_image(new_image)
+            if current_image.change_with_other_images:
+                current_image.set_image(new_image)
         self.image_dict['default'] = self.image_dict[new_image]
         if self.actor_type == 'mob':
             if self.global_manager.get('displayed_mob') == self:
@@ -168,6 +170,7 @@ class actor():
         self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
         for current_image in self.images:
             self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
+        #self.removed = True
 
     def touching_mouse(self):
         '''

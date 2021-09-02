@@ -142,12 +142,14 @@ global_manager.set('grid_list', [])
 global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
+global_manager.set('free_image_list', [])
 global_manager.set('background_image_list', [])
 global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('building_list', [])
 global_manager.set('resource_building_list', [])
+global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
 global_manager.set('num_workers', 0)
@@ -379,6 +381,11 @@ global_manager.get('tile_info_display_list').append(tile_free_resource_building_
 #tile port image
 tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_port_image)
+
+#tile infrastructure image
+tile_free_infrastructure_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_port_image)
 
 #tile terrain label

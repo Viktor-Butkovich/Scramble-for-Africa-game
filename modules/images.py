@@ -8,7 +8,7 @@ class free_image():
     '''
     Image unrelated to any actors or grids that appears on a part of the screen
     '''
-    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
         '''
         Input:
             image_id: string representing the file path to this image's image file
@@ -26,7 +26,9 @@ class free_image():
         self.set_image(image_id)
         self.x, self.y = coordinates
         self.y = self.global_manager.get('display_height') - self.y
+        self.to_front = to_front
         self.global_manager.get('image_list').append(self)
+        self.global_manager.get('free_image_list').append(self)
         
     def draw(self):
         '''
@@ -58,6 +60,7 @@ class free_image():
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
         '''
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
+        self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
 
     def set_image(self, new_image):
         '''
@@ -129,6 +132,7 @@ class actor_image():
             grid_y = self.actor.y
         self.go_to_cell((grid_x, grid_y))
         self.set_tooltip('')
+        self.change_with_other_images = True #determines whether set_image function of actor affects this image
 
     def get_center_coordinates(self):
         '''
@@ -149,8 +153,8 @@ class actor_image():
             Changes this image to match the image represented by the value of the inputted key to this image's actor's image dictionary
         '''
         self.last_image_switch = time.time()
-        if new_image_description == 'default' or new_image_description == 'right' or new_image_description == 'left':
-            self.previous_idle_image = new_image_description
+        #if new_image_description == 'default' or new_image_description == 'right' or new_image_description == 'left':
+        self.previous_idle_image = new_image_description
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
         try: #use if there are any image path issues to help with file troubleshooting, does not prevent an error from occuring
@@ -233,6 +237,9 @@ class actor_image():
         else:
             return(False)
 
+    def remove(self): #different in subclasses
+        nothing = 0
+
 class building_image(actor_image):
     '''
     actor_image attached to a building rather than an actor, gaining the ability to manage the cells in which this building is considered to be
@@ -292,6 +299,54 @@ class building_image(actor_image):
             return(True)
         else:
             return(False)
+
+
+class infrastructure_connection_image(building_image):
+    def __init__(self, actor, width, height, grid, image_description, direction, global_manager):
+        super().__init__(actor, width, height, grid, image_description, global_manager)
+        self.showing_connection = False
+        self.direction = direction
+        self.global_manager.get('infrastructure_connection_list').append(self)
+        self.change_with_other_images = False #determines whether set_image function of actor affects this image
+        #self.removed = False
+
+    def update_roads(self):
+        #if not self.removed: #prevents images from previous infrastructure versions from causing errors, non-ideal solution
+        own_tile_infrastructure_type = self.actor.infrastructure_type
+        adjacent_cell = 'none'
+        #if not self.grid.is_mini_grid:
+        adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
+        #else: #if on mini grid, use adjacent cell of main grid to get connection correct
+        #    adjacent_cell = self.actor.images[0].current_cell.tile.get_equivalent_tile().cell.adjacent_cells[self.direction]
+        if not adjacent_cell == 'none': #check if adjacent cell exists
+            adjacent_tile_infrastructure = adjacent_cell.contained_buildings['infrastructure']
+            if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
+                adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
+                if own_tile_infrastructure_type == 'railroad' and own_tile_infrastructure_type == adjacent_tile_infrastructure_type: #if both railroads, draw railroad
+                    self.set_image(self.direction + '_railroad') #up_railroad
+                    self.actor.set_image('empty') #if connecting to other railroad, hide railroad cross
+                else: #if both have infrastructure and at least 1 is not a railroad, draw road
+                    self.set_image(self.direction + '_road')
+                    if own_tile_infrastructure_type == 'road': #hide center cross if adjacent tiles have same type
+                        self.actor.set_image('empty')
+                    else:
+                        self.actor.set_image('default') #if not same, show cross
+                self.showing_connection = True
+            else:
+                self.showing_connection = False
+        else:
+            self.showing_connection = False #do not show if adjacent cell does not exist 
+            
+    def remove(self):
+        self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
+        #self.removed = True
+        super().remove()
+
+    def can_show(self):
+        if self.showing_connection:
+            return(super().can_show())
+        return(False)
+        
         
 class mob_image(actor_image):
     '''

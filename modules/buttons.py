@@ -625,11 +625,15 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
                 elif len(self.old_contained_mobs) > self.index:
                     self.attached_mob = self.old_contained_mobs[self.index]
                     self.image.set_image(self.attached_mob.images[0].image_id)
-                    
+        else:
+            self.image.set_image('misc/empty.png')
+            self.attached_mob = 'none'
+            
         if len(self.old_contained_mobs) > self.index:
             #if not self.global_manager.get('displayed_mob') == 'none':
-            if self.index == 0 and self.can_show():
-                if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+            displayed_tile = self.global_manager.get('displayed_tile')
+            if self.index == 0 and self.can_show() and not displayed_tile == 'none':
+                if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
                 else:
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)

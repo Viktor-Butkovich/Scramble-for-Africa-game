@@ -57,6 +57,12 @@ class actor_match_free_image(free_image):
                     self.set_image('buildings/port.png') #matches resource building
                 else:
                     self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'infrastructure':
+                contained_infrastructure = new_actor.cell.contained_buildings['infrastructure']
+                if not contained_infrastructure == 'none':
+                    self.set_image(contained_infrastructure.image_dict['default'])
+                else:
+                    self.set_image('misc/empty.png')
             else:
                 self.set_image(new_actor.image_dict['default'])
         else:
@@ -155,6 +161,7 @@ class actor_match_label(label):
             self.attached_buttons.append(switch_theatre_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/switch_theatre_button.png', self, global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'port', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'infrastructure', global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -886,7 +893,12 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         elif self.building_type == 'port':
             image_id = 'buildings/buttons/port.png'
             self.building_name = 'port'
+        elif self.building_type == 'infrastructure':
+            self.road_image_id = 'misc/road_button.png'
+            self.railroad_image_id = 'misc/railroad_button.png'
+            image_id = self.road_image_id
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+
     def update_info(self):
         self.attached_mob = self.attached_label.actor #new_attached_mob
         if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
@@ -906,6 +918,14 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                         self.attached_resource = 'none'
                         self.building_name = 'none'
                         self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
+                elif self.building_type == 'infrastructure':
+                    current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
+                    if current_infrastructure == 'none':
+                        self.building_name = 'road'
+                        self.image.set_image('misc/road_button.png')
+                    else: #if has road or railroad, show railroad icon
+                        self.building_name = 'railroad'
+                        self.image.set_image('misc/railroad_button.png')
                 #elif self.building_type == 'port': #port info never changes
                 #    self.building_name = 'port'
                 #    self.image.set_image('misc/
@@ -921,11 +941,18 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
     def update_tooltip(self):
         if self.building_type == 'resource':
             if self.attached_resource == 'none':
-                self.set_tooltip(['Builds a building that produces commodities over time.', 'Requires that this unit is in the same tile as a resource', 'Costs 1 movement point'])
+                self.set_tooltip(['Builds a building that produces commodities over time', 'Requires that this unit is in the same tile as a resource', 'Costs 1 movement point'])
             else:
-                self.set_tooltip(['Builds a ' + self.building_name + ' that produces ' + self.attached_resource + ' over time.', 'Costs 1 movement point'])
+                self.set_tooltip(['Builds a ' + self.building_name + ' that produces ' + self.attached_resource + ' over time', 'Costs 1 movement point'])
         elif self.building_type == 'port':
-            self.set_tooltip(['Builds a port, allowing ships to land in this tile.', 'Requires that this unit is adjacent to a water tile.', 'Costs 1 movement point'])
+            self.set_tooltip(['Builds a port, allowing ships to land in this tile', 'Requires that this unit is adjacent to a water tile', 'Costs 1 movement point'])
+        elif self.building_type == 'infrastructure':
+            if self.building_name == 'road':
+                self.set_tooltip(["Upgrades this tile's road into a railroad, allowing trains to move through this tile", "Retains the benefits of a road",
+                    "Costs 1 movement point"])
+            else:
+                self.set_tooltip(['Builds a road, halving the cost to move between this tile and other tiles with roads or railroads', 'A road can be upgraded into a railroad that allows trains to move through this tile',
+                    'Costs 1 movement point'])
         else:
             self.set_tooltip(['placeholder'])
 
@@ -933,24 +960,32 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         if self.can_show():
             self.showing_outline = True
             if self.attached_mob.movement_points >= 1:
-                if self.attached_tile.cell.contained_buildings[self.building_type] == 'none':
+                current_building = self.attached_tile.cell.contained_buildings[self.building_type]
+                if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                     if not self.global_manager.get('europe_grid') in self.attached_mob.grids:
-                        if self.building_type == 'resource':
-                            if not self.attached_resource == 'none':
-                                self.construct()
-                            else:
-                                text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
-                        elif self.building_type == 'port':
-                            if self.attached_mob.adjacent_to_water():
-                                if not self.attached_mob.images[0].current_cell.terrain == 'water':
+                        if not self.attached_tile.cell.terrain == 'water':
+                            if self.building_type == 'resource':
+                                if not self.attached_resource == 'none':
                                     self.construct()
-                                    text_tools.print_to_screen("This building can not be built on water.", self.global_manager)
-                            else:
-                                text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
+                                else:
+                                    text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
+                            elif self.building_type == 'port':
+                                if self.attached_mob.adjacent_to_water():
+                                    if not self.attached_mob.images[0].current_cell.terrain == 'water':
+                                        self.construct()
+                                else:
+                                    text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
+                            elif self.building_type == 'infrastructure':
+                                self.construct()
+                        else:
+                            text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                     else:
                         text_tools.print_to_screen("This building can not be built in Europe.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
+                    if self.building_type == 'infrastructure': #if railroad
+                        text_tools.print_to_screen("This tile already contains a railroad.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
             else:
                 text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
                 text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
@@ -958,12 +993,23 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             
     def construct(self): #move stuff from on click here
         self.attached_mob.set_movement_points(0)
+        if not self.attached_mob.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
+            self.attached_mob.images[0].current_cell.contained_buildings[self.building_type].remove()
         if self.building_type == 'resource':
             new_building = buildings.resource_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, self.attached_resource,
                 ['strategic'], self.global_manager)
         elif self.building_type == 'port':
             new_building = buildings.port((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name,
                 ['strategic'], self.global_manager)
+        elif self.building_type == 'infrastructure':
+            building_image_id = 'none'
+            if self.building_name == 'road':
+                building_image_id = 'buildings/infrastructure/road.png'
+            elif self.building_name == 'railroad':
+                building_image_id = 'buildings/infrastructure/railroad.png'
+            new_building = buildings.infrastructure_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, building_image_id, self.building_name, self.building_name,
+                ['strategic'], self.global_manager)
+            #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
         else:
             new_building = buildings.building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, self.building_type,
                 ['strategic'], self.global_manager)

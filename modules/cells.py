@@ -37,9 +37,10 @@ class cell():
         self.set_visibility(False)
         self.contained_mobs = []
         self.reset_buildings()
+        self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
 
     def reset_buildings(self):
-        self.contained_buildings = {'resource': 'none', 'port': 'none'}
+        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none'}
 
     def has_port(self):
         if self.contained_buildings['port'] == 'none':
@@ -173,11 +174,19 @@ class cell():
     def find_adjacent_cells(self):
         adjacent_list = []
         if not self.x == 0:
-            adjacent_list.append(self.grid.find_cell(self.x - 1, self.y))
+            adjacent_cell = self.grid.find_cell(self.x - 1, self.y)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['left'] = adjacent_cell
         if not self.x == self.grid.coordinate_width - 1:
-            adjacent_list.append(self.grid.find_cell(self.x + 1, self.y))
+            adjacent_cell = self.grid.find_cell(self.x + 1, self.y)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['right'] = adjacent_cell
         if not self.y == 0:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y - 1))
+            adjacent_cell = self.grid.find_cell(self.x, self.y - 1)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['down'] = adjacent_cell
         if not self.y == self.grid.coordinate_height - 1:
-            adjacent_list.append(self.grid.find_cell(self.x, self.y + 1))
+            adjacent_cell = self.grid.find_cell(self.x, self.y + 1)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['up'] = adjacent_cell
         self.adjacent_list = adjacent_list
