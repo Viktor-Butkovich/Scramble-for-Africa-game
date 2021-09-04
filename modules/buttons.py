@@ -64,18 +64,51 @@ class button():
         '''
         if self.button_type in ['move up', 'move down', 'move left', 'move right']:
             direction = 'none'
+            x_change = 0
+            y_change = 0
             if self.button_type == 'move up':
                 direction = 'north'
+                non_cardinal_direction = 'up'
+                y_change = 1
             elif self.button_type == 'move down':
                 direction = 'south'
+                non_cardinal_direction = 'down'
+                y_change = -1
             elif self.button_type == 'move left':
                 direction = 'west'
+                non_cardinal_direction = 'left'
+                x_change = -1
             elif self.button_type == 'move right':
                 direction = 'east'
-            tooltip_text = ["Press to move to the " + direction, "Costs 1 movement point"]
+                non_cardinal_direction = 'right'
+                x_change = 1
+            tooltip_text = ["Press to move to the " + direction]
             selected_list = actor_utility.get_selected_list(self.global_manager)
             if len(selected_list) > 0:
                 current_mob = selected_list[0]
+                message = ""
+                movement_cost = current_mob.get_movement_cost(x_change, y_change)
+                local_infrastructure = current_mob.images[0].current_cell.contained_buildings['infrastructure']
+                adjacent_cell = current_mob.images[0].current_cell.adjacent_cells[non_cardinal_direction]
+                if not adjacent_cell == 'none':
+                    if current_mob.can_walk:
+                        tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
+                        adjacent_infrastructure = adjacent_cell.contained_buildings['infrastructure']
+                        message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
+                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                            message += "this tile has a " + local_infrastructure.infrastructure_type + " and the tile moved to has a " + adjacent_infrastructure.infrastructure_type
+                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                            message += "this tile has no road or railroad to connect to the " + adjacent_infrastructure.infrastructure_type + " of the tile moved to"
+                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                            message += "the tile moved to has no road or railroad to connect to this tile's " + local_infrastructure.infrastructure_type
+                        else: #
+                            message += "there are no roads or railroads between this tile and the tile moved to"
+                    else:
+                        tooltip_text.append("Costs 1 movement point")
+                else:
+                    message = "Moving in this direction would move off of the map"
+                if not message == "":
+                    tooltip_text.append(message)
                 if current_mob.can_walk:
                     tooltip_text.append("Can move on land")
                 else:
@@ -445,7 +478,7 @@ class button():
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
+                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
                 
@@ -471,7 +504,7 @@ class button():
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
+                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
 
