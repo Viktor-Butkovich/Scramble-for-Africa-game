@@ -142,7 +142,6 @@ class money_label(value_label):
         total_upkeep = num_workers * worker_upkeep
         tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money")
         self.set_tooltip(tooltip_text)
-        
 
 class commodity_prices_label(label):
     def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):

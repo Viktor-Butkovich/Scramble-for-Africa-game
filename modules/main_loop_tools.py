@@ -349,9 +349,11 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
                             current_cell.contained_mobs[0].select()
                             if current_grid == global_manager.get('minimap_grid'):
                                 main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                main_tile = global_manager.get('strategic_map_grid').find_cell(main_x, main_y).tile
-                                if not main_tile == 'none':
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
+                                main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                if not main_cell == 'none':
+                                    main_tile = main_cell.tile
+                                    if not main_tile == 'none':
+                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
                             else: #elif current_grid == global_manager.get('strategic_map_grid'):
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
         if selected_new_mob:

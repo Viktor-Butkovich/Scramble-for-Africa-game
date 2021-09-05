@@ -383,10 +383,33 @@ tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_co
     scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_port_image)
 
+#tile train station image
+tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
+
 #tile infrastructure image
 tile_free_infrastructure_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure', global_manager) #coordinates, width, height, modes, global_manager
-global_manager.get('tile_info_display_list').append(tile_free_port_image)
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_middle', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_infrastructure_image)
+
+#make actor_match_free_image subclass that requires a direction parameter
+#tile infrastructure connection up image
+tile_free_infrastructure_up_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'up', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_infrastructure_up_image)
+#tile infrastructure connection down image
+tile_free_infrastructure_down_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'down', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_infrastructure_down_image)
+#tile infrastructure connection right image
+tile_free_infrastructure_right_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'right', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_infrastructure_right_image)
+#tile infrastructure connection left image
+tile_free_infrastructure_left_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'left', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_infrastructure_left_image)
 
 #tile terrain label
 #actor_match_current_y -= 35

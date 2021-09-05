@@ -54,8 +54,9 @@ class mob(actor):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def get_movement_cost(self, x_change, y_change):
-        local_infrastructure = self.images[0].current_cell.contained_buildings['infrastructure']
-        if not local_infrastructure == 'none':
+        #local_infrastructure = self.images[0].current_cell.contained_buildings['infrastructure']
+        local_cell = self.images[0].current_cell
+        if local_cell.has_road() or local_cell.has_railroad(): #if not local_infrastructure == 'none':
             direction = 'non'
             if x_change < 0:
                 direction = 'left'
@@ -65,8 +66,9 @@ class mob(actor):
                 direction = 'up'
             elif y_change < 0:
                 direction = 'down'
-            adjacent_infrastructure = self.images[0].current_cell.adjacent_cells[direction].contained_buildings['infrastructure']
-            if not adjacent_infrastructure == 'none':
+            #adjacent_infrastructure = self.images[0].current_cell.adjacent_cells[direction].contained_buildings['infrastructure']
+            adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
+            if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
                 return(self.movement_cost / 2.0)
         return(self.movement_cost)
 

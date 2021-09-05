@@ -57,10 +57,24 @@ class actor_match_free_image(free_image):
                     self.set_image('buildings/port.png') #matches resource building
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'infrastructure':
+            elif self.actor_image_type == 'train_station':
+                if not new_actor.cell.contained_buildings['train_station'] == 'none':
+                    self.set_image('buildings/train_station.png')
+                else:
+                    self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'infrastructure_middle':
                 contained_infrastructure = new_actor.cell.contained_buildings['infrastructure']
                 if not contained_infrastructure == 'none':
                     self.set_image(contained_infrastructure.image_dict['default'])
+                else:
+                    self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'infrastructure_connection':
+                contained_infrastructure = new_actor.cell.contained_buildings['infrastructure']
+                if not contained_infrastructure == 'none':
+                    if contained_infrastructure.infrastructure_connection_images[self.direction].can_show():
+                        self.set_image(contained_infrastructure.infrastructure_connection_images[self.direction].image_id)
+                    else:
+                        self.set_image('misc/empty.png')
                 else:
                     self.set_image('misc/empty.png')
             else:
@@ -73,6 +87,11 @@ class actor_match_free_image(free_image):
             return(False)
         else:
             return(super().can_show())
+
+class actor_match_infrastructure_connection_image(actor_match_free_image):
+    def __init__(self, coordinates, width, height, modes, actor_image_type, direction, global_manager):
+        self.direction = direction
+        super().__init__(coordinates, width, height, modes, actor_image_type, global_manager)
 
 class actor_match_background_image(free_image):
     def __init__(self, image_id, coordinates, width, height, modes, global_manager):
@@ -162,6 +181,7 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'port', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'infrastructure', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'train_station', global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -349,7 +369,7 @@ class actor_match_label(label):
     def set_y(self, new_y):
         self.y = new_y
         self.image.y = self.y
-        #self.Rect.y = self.y
+        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)#self.y
         self.image.Rect = self.Rect    
         for current_button in self.attached_buttons:
             current_button.y = self.y
@@ -897,6 +917,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             self.road_image_id = 'misc/road_button.png'
             self.railroad_image_id = 'misc/railroad_button.png'
             image_id = self.road_image_id
+        elif self.building_type == 'train_station':
+            image_id = 'misc/railroad_button.png'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
@@ -926,7 +948,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
                         self.image.set_image('misc/railroad_button.png')
-                #elif self.building_type == 'port': #port info never changes
+                #elif self.building_type == 'port': #port and train station info never changes
                 #    self.building_name = 'port'
                 #    self.image.set_image('misc/
 
@@ -941,11 +963,14 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
     def update_tooltip(self):
         if self.building_type == 'resource':
             if self.attached_resource == 'none':
-                self.set_tooltip(['Builds a building that produces commodities over time', 'Requires that this unit is in the same tile as a resource', 'Costs 1 movement point'])
+                self.set_tooltip(['Builds a building that produces commodities over time', 'Can only be built in the same tile as a resource', 'Costs 1 movement point'])
             else:
-                self.set_tooltip(['Builds a ' + self.building_name + ' that produces ' + self.attached_resource + ' over time', 'Costs 1 movement point'])
+                self.set_tooltip(['Builds a ' + self.building_name + ' that produces ' + self.attached_resource + ' over time', 'Can only be built in the same tile as a ' + self.attached_resource + ' resource.',
+                    'Costs 1 movement point'])
         elif self.building_type == 'port':
-            self.set_tooltip(['Builds a port, allowing ships to land in this tile', 'Requires that this unit is adjacent to a water tile', 'Costs 1 movement point'])
+            self.set_tooltip(['Builds a port, allowing ships to land in this tile', 'Can only be built in a tile adjacent to water', 'Costs 1 movement point'])
+        elif self.building_type == 'train_station':
+            self.set_tooltip(['Builds a train station, allowing trains to pick up and drop off passengers and cargo', 'Can only be built on a railroad', 'Costs 1 movement point'])
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
                 self.set_tooltip(["Upgrades this tile's road into a railroad, allowing trains to move through this tile", "Retains the benefits of a road",
@@ -975,6 +1000,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                         self.construct()
                                 else:
                                     text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
+                            elif self.building_type == 'train_station':
+                                if self.attached_tile.cell.has_railroad():
+                                    self.construct()
+                                else:
+                                    text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                             elif self.building_type == 'infrastructure':
                                 self.construct()
                         else:
@@ -999,8 +1029,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             new_building = buildings.resource_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, self.attached_resource,
                 ['strategic'], self.global_manager)
         elif self.building_type == 'port':
-            new_building = buildings.port((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name,
-                ['strategic'], self.global_manager)
+            new_building = buildings.port((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, ['strategic'], self.global_manager)
+        elif self.building_type == 'train_station':
+            new_building = buildings.train_station((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/train_station.png', self.building_name, ['strategic'], self.global_manager)
         elif self.building_type == 'infrastructure':
             building_image_id = 'none'
             if self.building_name == 'road':

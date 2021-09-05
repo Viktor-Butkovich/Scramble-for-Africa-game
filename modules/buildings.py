@@ -90,13 +90,28 @@ class infrastructure_building(building):
         self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
         self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
         self.image_dict['empty'] = 'misc/empty.png'
+        self.infrastructure_connection_images = {}
         for current_grid in self.grids:
-            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager))
+            up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
+            down_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager)
+            right_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager)
+            left_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager)
             #actor, width, height, grid, image_description, direction, global_manager
-            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager))
-            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager))
-            self.images.append(images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager))
+            self.images.append(up_image)
+            self.images.append(down_image)
+            self.images.append(right_image)
+            self.images.append(left_image)
+            self.infrastructure_connection_images['up'] = up_image
+            self.infrastructure_connection_images['down'] = down_image
+            self.infrastructure_connection_images['right'] = right_image
+            self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
+
+class train_station(building):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)
+        for current_image in self.images:
+            current_image.current_cell.tile.inventory_capacity += 5
 
 class port(building):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
