@@ -39,6 +39,7 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
+        self.travel_possible = False #if can switch theatres
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
@@ -51,6 +52,31 @@ class mob(actor):
         actor_utility.deselect_all(self.global_manager)
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
+    def get_movement_cost(self, x_change, y_change):
+        #local_infrastructure = self.images[0].current_cell.contained_buildings['infrastructure']
+        local_cell = self.images[0].current_cell
+        if local_cell.has_road() or local_cell.has_railroad(): #if not local_infrastructure == 'none':
+            direction = 'non'
+            if x_change < 0:
+                direction = 'left'
+            elif x_change > 0:
+                direction = 'right'
+            elif y_change > 0:
+                direction = 'up'
+            elif y_change < 0:
+                direction = 'down'
+            #adjacent_infrastructure = self.images[0].current_cell.adjacent_cells[direction].contained_buildings['infrastructure']
+            adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
+            if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
+                return(self.movement_cost / 2.0)
+        return(self.movement_cost)
+
+    def adjacent_to_water(self):
+        for current_cell in self.images[0].current_cell.adjacent_list:
+            if current_cell.terrain == 'water':
+                return(True)
+        return(False)
 
     def end_turn_move(self):
         if not self.end_turn_destination == 'none':
@@ -66,16 +92,22 @@ class mob(actor):
 
     def change_movement_points(self, change):
         self.movement_points += change
+        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+            self.movement_points = round(self.movement_points)
         if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_movement_points(self, new_value):
         self.movement_points = new_value
+        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+            self.movement_points = round(self.movement_points)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def reset_movement_points(self):
-        self.movement_points = self.max_movement_points 
+        self.movement_points = self.max_movement_points
+        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+            self.movement_points = round(self.movement_points)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -142,11 +174,12 @@ class mob(actor):
         Output:
             Causes this mob to be selected and causes the selection outline timer to be reset, displaying it immediately
         '''
+        actor_utility.deselect_all(self.global_manager)
         self.selected = True
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        #if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
             #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def draw_outline(self):
@@ -174,6 +207,7 @@ class mob(actor):
             Sets this mob's tooltip to its name and movement points
         '''
         self.set_tooltip(["Name: " + self.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
+        
 
     def remove(self):
         '''
@@ -215,16 +249,17 @@ class mob(actor):
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                        if ((destination_type == 'land' and (self.can_walk or self.can_explore)) or (destination_type == 'water' and (self.can_swim or future_cell.contains_vehicle() or (self.can_explore and not future_cell.visible)))): 
-                            if self.movement_points >= self.movement_cost:
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
+                            (destination_type == 'water' and (self.can_swim or future_cell.has_vehicle() or (self.can_explore and not future_cell.visible)))): 
+                            if self.movement_points >= self.get_movement_cost(x_change, y_change): #self.movement_cost:
                                 return(True)
                             else:
                                 text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.movement_cost) + " are required.", self.global_manager)
+                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
                                 return(False)
                         elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                             #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on land with this unit.", self.global_manager)
+                            text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
                             return(False)
                         else: #if trying to swim in water and can't 
                             #if future_cell.visible or self.can_explore: #already checked earlier
@@ -248,6 +283,7 @@ class mob(actor):
             Moves this mob x_change tiles to the right and y_change tiles upward
         '''
         self.end_turn_destination = 'none' #cancels planned movements
+        self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change))
         for current_image in self.images:
             current_image.remove_from_cell()
         self.x += x_change
@@ -256,8 +292,7 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
-        self.change_movement_points(-1 * self.movement_cost)
-        if self.images[0].current_cell.contains_vehicle() and not self.is_vehicle:
+        if self.images[0].current_cell.has_vehicle() and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle()
             if self.is_worker and not vehicle.has_crew:
@@ -314,16 +349,21 @@ class mob(actor):
         for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
             vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.inventory_setup() #empty own inventory
+        vehicle.hide_images()
+        vehicle.show_images() #moves vehicle images to front
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
-        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), vehicle.images[0].current_cell.tile)
 
     def disembark_vehicle(self, vehicle):
+        vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y
         for current_image in self.images:
             current_image.add_to_cell()
+        vehicle.selected = False
         self.select()
+        if self.global_manager.get('minimap_grid') in self.grids:
+            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
         #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 

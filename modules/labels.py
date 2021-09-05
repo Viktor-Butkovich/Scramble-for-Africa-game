@@ -25,7 +25,7 @@ class label(button):
         self.minimum_width = minimum_width#self.ideal_width = ideal_width
         self.width = minimum_width#ideal_width
         self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
         self.height = height#minimum_height
@@ -42,10 +42,13 @@ class label(button):
         self.message = new_message
         if text_tools.message_width(self.message, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
             self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
-            self.image.width = self.width
-            self.Rect.width = self.width
-            self.image.set_image(self.image.image_id)
-            self.image.Rect = self.Rect
+        else:
+            self.width = self.minimum_width
+        self.image.width = self.width
+        self.Rect.width = self.width
+        self.image.set_image(self.image.image_id)
+        self.image.Rect = self.Rect
+            
 
     def update_tooltip(self):
         '''
@@ -139,7 +142,6 @@ class money_label(value_label):
         total_upkeep = num_workers * worker_upkeep
         tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money")
         self.set_tooltip(tooltip_text)
-        
 
 class commodity_prices_label(label):
     def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
@@ -147,7 +149,7 @@ class commodity_prices_label(label):
         self.minimum_height = height
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
         self.font_size = scaling.scale_width(30, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 
@@ -176,8 +178,8 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.width - 10: #self.ideal_width + 20:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10# + 20
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - 10 and text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.width: #self.ideal_width + 20:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling

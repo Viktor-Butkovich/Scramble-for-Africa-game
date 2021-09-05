@@ -172,13 +172,13 @@ def main_loop(global_manager):
                             clicked_button = True
                 main_loop_tools.manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
                 
-            elif main_loop_tools.can_make_mouse_box(global_manager):#if user just clicked lmb
-                mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
-                global_manager.set('mouse_origin_x', mouse_origin_x)
-                global_manager.set('mouse_origin_y', mouse_origin_y)
-                global_manager.set('making_mouse_box', True)
-            else:
-                global_manager.set('making_mouse_box', False)
+            #elif main_loop_tools.can_make_mouse_box(global_manager):#if user just clicked lmb
+            #    mouse_origin_x, mouse_origin_y = pygame.mouse.get_pos()
+            #    global_manager.set('mouse_origin_x', mouse_origin_x)
+            #    global_manager.set('mouse_origin_y', mouse_origin_y)
+            #    global_manager.set('making_mouse_box', True)
+            #else:
+            #    global_manager.set('making_mouse_box', False)
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):

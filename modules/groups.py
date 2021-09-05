@@ -102,8 +102,10 @@ class group(mob):
         Output:
             Separates this group into its components, giving its inventory to the officer and setting their number of movement points to that of the group
         '''
-        self.officer.inventory = self.inventory
-        self.inventory_setup() #reset inventory to empty
+        if self.can_hold_commodities:
+            self.drop_inventory()
+        #self.officer.inventory = self.inventory
+        #self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
         self.worker.set_movement_points(self.movement_points)
@@ -136,6 +138,17 @@ class group(mob):
         self.officer.remove()
         self.worker.remove()
 
+class porters(group):
+    '''
+    A group with a porter foreman officer that can hold commodities
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_hold_commodities = True
+        self.inventory_capacity = 10
+        self.inventory_setup()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+
 class construction_gang(group):
     '''
     A group with an engineer officer that is able to construct buildings
@@ -147,6 +160,7 @@ class construction_gang(group):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_construct = True
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
 class expedition(group):
     '''
@@ -206,8 +220,16 @@ class expedition(group):
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
                 choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-                notification_tools.display_choice_notification('Are you sure you want to attempt an exploration? It would cost ' + str(choice_info_dict['cost']) + ' money to attempt an exploration.',
-                                                                ['exploration', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'none'], choice_info_dict,
+                    self.global_manager) #message, choices, choice_info_dict, global_manager
+                self.global_manager.set('ongoing_exploration', True)
+                for current_grid in self.grids:
+                    coordinates = (0, 0)
+                    if current_grid.is_mini_grid:
+                        coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+                    else:
+                        coordinates = (self.x + x_change, self.y + y_change)
+                    self.global_manager.get('exploration_mark_list').append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
             else:
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
@@ -229,32 +251,29 @@ class expedition(group):
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
         self.just_promoted = False
-        self.global_manager.set('ongoing_exploration', True)
-        for current_grid in self.grids:
-            coordinates = (0, 0)
-            if current_grid.is_mini_grid:
-                coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-            else:
-                coordinates = (self.x + x_change, self.y + y_change)
-            self.exploration_mark_list.append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
         text = ""
-        text += "The expedition heads towards the " + direction + ". /n"
-        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n")
-            
-        notification_tools.display_notification(text + "Click to roll.", 'exploration', self.global_manager)
-            
+        text += "The expedition heads towards the " + direction + ". /n /n"
+        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
+        
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'exploration', self.global_manager)
+        else:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
+
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
             
-        text += "/n"
+        #text += "/n"
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             text += ("The veteran explorer can roll twice and pick the higher result /n")
                 
             first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 500), first_roll_list[0])
+            self.display_exploration_die((die_x, 500), first_roll_list[0])
                                 
             second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 380), second_roll_list[0])
+            self.display_exploration_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
@@ -262,11 +281,11 @@ class expedition(group):
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
             roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
-            self.display_exploration_die((500, 440), roll_list[0])
+            self.display_exploration_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
             roll_result = roll_list[0]
-                    
+
         notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
             
         text += "/n"
@@ -310,9 +329,9 @@ class expedition(group):
                 super().move(x_change, y_change)
             else: #if discovered a water tile, update minimap but don't move there
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                self.change_movement_points(-1 * self.movement_cost) #when exploring, movement points should be consumed regardless of exploration success or destination
+                self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
         else:
-            self.change_movement_points(-1 * self.movement_cost) #when exploring, movement points should be consumed regardless of exploration success or destination
+            self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
         elif roll_result == 1:
@@ -321,95 +340,12 @@ class expedition(group):
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
-        copy_exploration_mark_list = self.exploration_mark_list
-        for current_exploration_mark in copy_exploration_mark_list:
+        #copy_exploration_mark_list = self.global_manager.get('exploration_mark_list'): #exploration_mark_list
+        for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
             current_exploration_mark.remove()
+        self.global_manager.set('exploration_mark_list', [])
         self.exploration_mark_list = []
         self.global_manager.set('ongoing_exploration', False)
-
-class merge_button(button):
-    '''
-    Button that, when pressed, merges a selected officer with a worker in the same tile
-    '''
-    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
-        '''
-        Input:
-            same as superclass, except button_type is set to 'merge'
-        '''
-        super().__init__(coordinates, width, height, color, 'merge', keybind_id, modes, image_id, global_manager)
-        
-    def can_show(self):
-        '''
-        Input:
-            none
-        Output:
-            Returns whether the merge button should be shown. A merge button is shown when only an officer is selected and the officer is in the same tile as a worker.
-        '''
-        if actor_utility.can_merge(self.global_manager):
-            return(True)
-        else:
-            return(False)
-
-    def on_click(self):
-        '''
-        Input:
-            none
-        Output:
-            Controls the button's behavior when clicked. The merge button will cause the selected officer to form a group with a worker in the same tile.
-        '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):    
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 1:
-                    officer = 'none'
-                    worker = 'none'
-                    for current_selected in selected_list:
-                        if current_selected in self.global_manager.get('officer_list'):
-                            officer = current_selected
-                            worker = officer.images[0].current_cell.get_worker()
-                    if not (officer == 'none' or worker == 'none'): #if worker and officer selected
-                        if officer.x == worker.x and officer.y == worker.y:
-                            create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
-                        else:
-                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
-                    else:
-                        text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
-                else:
-                    text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
-            else:
-                text_tools.print_to_screen("You are busy and can not form a group.", self.global_manager)
-
-class split_button(button):
-    '''
-    Button that, when pressed, splits a selected group into its officer and worker
-    '''
-    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
-        super().__init__(coordinates, width, height, color, 'split', keybind_id, modes, image_id, global_manager)
-        
-    def can_show(self):
-        if actor_utility.can_split(self.global_manager):
-            return(True)
-        else:
-            return(False)
-
-    def on_click(self):
-        '''
-        Input:
-            none
-        Output:
-            Controls the button's behavior when clicked. The merge button requires that only a group is selected, and will cause the selected group to split into its officer and worker, destroying the group.
-        '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):         
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 1 and selected_list[0] in self.global_manager.get('group_list'):
-                    selected_list[0].disband()
-                else:
-                    text_tools.print_to_screen("You must have a group selected to split it into a worker and and officer.", self.global_manager)
-            else:
-                text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
 def create_group(worker, officer, global_manager):
     '''
@@ -426,5 +362,7 @@ def create_group(worker, officer, global_manager):
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'engineer':
         new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'Construction gang', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'porter foreman':
+        new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

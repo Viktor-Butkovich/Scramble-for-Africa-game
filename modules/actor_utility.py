@@ -1,5 +1,7 @@
 import random
 
+from . import scaling
+
 def create_image_dict(stem):
     '''
     Input:
@@ -15,6 +17,10 @@ def create_image_dict(stem):
     image_dict['right'] = stem + 'right.png'  
     image_dict['left'] = stem + 'left.png'
     return(image_dict)
+
+def update_roads(global_manager):
+    for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
+        current_infrastructure_connection_image.update_roads()
 
 def can_merge(global_manager):
     '''
@@ -142,9 +148,22 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
         Uses the calibrate function of each of the buttons and actors in the inputted info_display_list, causing them to reflect the appearance or information relating to the inputted actor 
     '''
     if info_display_list == global_manager.get('tile_info_display_list'):
+        #if not global_manager.get('displayed_tile') == 'none':
+        #    global_manager.get('displayed_tile').showing_calibrated_outline = False
         global_manager.set('displayed_tile', new_actor)
+        #global_manager.get('displayed_tile').showing_calibrated_outline = True
     elif info_display_list == global_manager.get('mob_info_display_list'):
         global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
+
+def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
+    current_y = default_y
+    for current_label in info_display_list:
+        if current_label.can_show():
+            current_y -= 35
+            scaled_y = scaling.scale_height(current_y, global_manager)
+            if not current_label.y == scaled_y: #if y is not the same as last time, move it
+                current_label.set_y(scaled_y)
+            
     

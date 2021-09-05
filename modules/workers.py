@@ -15,6 +15,7 @@ class worker(mob):
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def can_show_tooltip(self):
         '''
@@ -41,14 +42,14 @@ class worker(mob):
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y
-        #for current_image in self.images:
-        #    current_image.add_to_cell()
         self.show_images()
         vehicle.crew = 'none'
         vehicle.has_crew = False
         vehicle.set_image('uncrewed')
         vehicle.end_turn_destination = 'none'
-        self.select()
+        #self.select()
+        vehicle.hide_images()
+        vehicle.show_images() #bring vehicle to front of tile
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):

@@ -77,7 +77,7 @@ class choice_button(button):
             self.message = button_type
         super().__init__(coordinates, width, height, 'blue', button_type, 'none', modes, image_id, global_manager)
         self.font_size = scaling.scale_width(25, global_manager)
-        self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#"Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.in_notification = True
 
@@ -113,6 +113,8 @@ class recruitment_choice_button(choice_button):
                 new_explorer = officers.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'engineer':
                 new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
+            elif self.recruitment_type == 'porter foreman':
+                new_porter_foreman = officers.porter_foreman((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Porter foreman', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

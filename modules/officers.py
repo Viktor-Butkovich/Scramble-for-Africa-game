@@ -18,6 +18,7 @@ class officer(mob):
         self.veteran_icons = []
         self.is_officer = True
         self.officer_type = 'default'
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -92,6 +93,14 @@ class officer(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
+class porter_foreman(officer):
+    '''
+    Officer that is considered a porter foreman
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        self.officer_type = 'porter foreman'
+
 class explorer(officer):
     '''
     Officer that is considered an explorer
@@ -102,7 +111,6 @@ class explorer(officer):
             Same as superclass
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        #self.grid.find_cell(self.x, self.y).set_visibility(True)
         self.officer_type = 'explorer'
 
 class engineer(officer):

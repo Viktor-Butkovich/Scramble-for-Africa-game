@@ -31,22 +31,55 @@ class cell():
         #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
+        self.village = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
         self.set_visibility(False)
         self.contained_mobs = []
-        self.contained_buildings = {'resource': 'none'}#[]
-        
+        self.reset_buildings()
+        self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
 
-    def contains_vehicle(self):
+    def has_road(self):
+        if self.contained_buildings['infrastructure'] == 'none':
+            return(False)
+        if self.contained_buildings['infrastructure'].is_road:
+            return(True)
+
+    def has_railroad(self):
+        if self.contained_buildings['infrastructure'] == 'none':
+            return(False)
+        if self.contained_buildings['infrastructure'].is_railroad:
+            return(True)
+
+    def reset_buildings(self):
+        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none'}
+
+    def has_port(self):
+        if self.contained_buildings['port'] == 'none':
+            return(False)
+        return(True)
+
+    def has_vehicle(self):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle:
+            if current_mob.is_vehicle and current_mob.has_crew:
                 return(True)
         return(False)
 
     def get_vehicle(self):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle:
+            if current_mob.is_vehicle and current_mob.has_crew:
+                return(current_mob)
+        return('none')
+
+    def has_uncrewed_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and not current_mob.has_crew:
+                return(True)
+        return(False)
+
+    def get_uncrewed_vehicle(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_vehicle and not current_mob.has_crew:
                 return(current_mob)
         return('none')
 
@@ -108,7 +141,7 @@ class cell():
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)
-            current_font = pygame.font.SysFont('Times New Roman', font_size)
+            current_font = pygame.font.SysFont(self.global_manager.get('font_name'), font_size)
             textsurface = current_font.render(message, False, self.global_manager.get('color_dict')[color])
             text_x = self.pixel_x + self.width - (font_size * 0.5)
             text_y = self.pixel_y - font_size
@@ -149,3 +182,23 @@ class cell():
             if current_mob in self.global_manager.get('worker_list'):
                 return(current_mob)
         return('none')
+
+    def find_adjacent_cells(self):
+        adjacent_list = []
+        if not self.x == 0:
+            adjacent_cell = self.grid.find_cell(self.x - 1, self.y)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['left'] = adjacent_cell
+        if not self.x == self.grid.coordinate_width - 1:
+            adjacent_cell = self.grid.find_cell(self.x + 1, self.y)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['right'] = adjacent_cell
+        if not self.y == 0:
+            adjacent_cell = self.grid.find_cell(self.x, self.y - 1)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['down'] = adjacent_cell
+        if not self.y == self.grid.coordinate_height - 1:
+            adjacent_cell = self.grid.find_cell(self.x, self.y + 1)
+            adjacent_list.append(adjacent_cell)
+            self.adjacent_cells['up'] = adjacent_cell
+        self.adjacent_list = adjacent_list
