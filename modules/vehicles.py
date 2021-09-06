@@ -66,10 +66,30 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         #disembarker.select()
         #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), first_mob)
 
+class train(vehicle):
+    def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+        super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
+        self.set_max_movement_points(10)
+        self.vehicle_type = 'train'
+        self.can_swim = False
+        self.can_walk = True
+        self.can_hold_commodities = True
+        self.inventory_capacity = 50
+        self.inventory_setup()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def can_move(self, x_change, y_change):
+        result = super().can_move(x_change, y_change)
+        if result:
+            if not (self.images[0].current_cell.has_railroad() and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_railroad()):
+                text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
+                return(False)
+        return(result)
+
 class ship(vehicle): #prevent movement when there are mobs in this tile that are not in a ship
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
-        self.set_max_movement_points(3)
+        self.set_max_movement_points(10)
         self.vehicle_type = 'ship'
         self.can_swim = True
         self.can_walk = False

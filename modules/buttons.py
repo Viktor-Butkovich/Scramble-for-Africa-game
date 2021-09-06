@@ -134,16 +134,18 @@ class button():
             self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into its worker and officer."])
-        elif self.button_type == 'crew':
-            self.set_tooltip(["Merges this ship with a worker in the same tile to form a crewed ship.", "Requires that an uncrewed ship is selected in the same tile as a worker."])
-        elif self.button_type == 'worker to crew':
-            self.set_tooltip(["Merges this worker with a ship in the same tile to form a crewed ship.", "Requires that a worker is selected in the same tile as an uncrewed ship."])
+        elif self.button_type == 'crew': #clicked on vehicle side
+            self.set_tooltip(["Merges this " + self.vehicle_type + " with a worker in the same tile to form a crewed " + self.vehicle_type + ".",
+                "Requires that an uncrewed " + self.vehicle_type + " is selected in the same tile as a worker."])
+        elif self.button_type == 'worker to crew': #clicked on worker side
+            self.set_tooltip(["Merges this worker with a " + self.vehicle_type + " in the same tile to form a crewed " + self.vehicle_type + ".",
+                "Requires that a worker is selected in the same tile as an uncrewed " + self.vehicle_type + "."])
         elif self.button_type == 'uncrew':
-            self.set_tooltip(["Orders this ship's crew to abandon the ship."])
+            self.set_tooltip(["Orders this " + self.vehicle_type + "'s crew to abandon the " + self.vehicle_type + "."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders this unit to embark a ship in the same tile.", "Requires that a unit is selected in the same tile as a crewed ship."])
+            self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile.", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type + "."])
         elif self.button_type == 'disembark':
-            self.set_tooltip(["Orders this unit to disembark the ship."])
+            self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type + "."])
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
@@ -187,7 +189,7 @@ class button():
         elif self.button_type == 'switch theatre':
            self.set_tooltip(["Moves this ship between Africa and Europe", " Requires that this ship has all of its movement points and is not inland"])
         elif self.button_type == 'cycle passengers':
-            tooltip_text = ["Cycles through this ship's passengers"]
+            tooltip_text = ["Cycles through this " + self.vehicle_type + "'s passengers"]
             tooltip_text.append("Passengers: " )
             if self.can_show():
                 for current_passenger in self.attached_label.actor.contained_mobs:
@@ -200,6 +202,8 @@ class button():
                 for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
                     tooltip_text.append("    " + current_mob.name)
             self.set_tooltip(tooltip_text)
+        elif self.button_type == 'build train':
+            self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -470,11 +474,16 @@ class button():
                         num_commodity = displayed_mob.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                         if displayed_mob in displayed_tile.cell.contained_mobs:
-                            displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                            displayed_tile.change_inventory(commodity, num_commodity)
-                            if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
-                                text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                            can_drop_off = True
+                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                can_drop_off = False
+                                text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
+                            if can_drop_off:
+                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                                displayed_tile.change_inventory(commodity, num_commodity)
+                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                    text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                    text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
@@ -493,12 +502,17 @@ class button():
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                         if displayed_mob in displayed_tile.cell.contained_mobs:
                             if displayed_mob.can_hold_commodities:
-                                if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                    displayed_mob.change_inventory(commodity, num_commodity)
-                                    displayed_tile.change_inventory(commodity, -1 * num_commodity)
-                                else:
-                                    text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                        str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                can_pick_up = True
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                    can_pick_up = False
+                                    text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
+                                if can_pick_up:
+                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                        displayed_mob.change_inventory(commodity, num_commodity)
+                                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                    else:
+                                        text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
+                                            str(displayed_mob.inventory_capacity) + ".", self.global_manager)
                             else:
                                 text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                         else:
