@@ -309,7 +309,19 @@ class actor_match_label(label):
                 else:
                     self.set_label(self.message_start + 'unknown')
             elif self.actor_label_type == 'movement':
-                self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
+                if not new_actor.has_infinite_movement:
+                    self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
+                else:
+                    if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                        if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            self.set_label("No movement")
+                        else:
+                            self.set_label("Infinite movement until cargo/passenger dropped")
+                    else:
+                        if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            self.set_label("No movement")
+                        else:
+                            self.set_label("Infinite movement")
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
                     if not new_actor.cell.contained_buildings['resource'] == 'none':
@@ -773,6 +785,8 @@ class disembark_vehicle_button(label_button):
                             text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
                             can_disembark = False
                     if can_disembark:
+                        if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                            self.attached_label.actor.set_movement_points(0)
                         self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
                     #label is attached to ship and has an attached list of its passengers - tells passenger of index to disembark ship
                 else:

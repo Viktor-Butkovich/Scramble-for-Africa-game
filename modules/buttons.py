@@ -481,6 +481,8 @@ class button():
                             if can_drop_off:
                                 displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                 displayed_tile.change_inventory(commodity, num_commodity)
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                                    displayed_mob.set_movement_points(0)
                                 if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
                                     text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
                                     text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
