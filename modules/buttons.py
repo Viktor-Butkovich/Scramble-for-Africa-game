@@ -146,6 +146,8 @@ class button():
             self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile.", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type + "."])
         elif self.button_type == 'disembark':
             self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type + "."])
+        elif self.button_type == 'pick up all passengers':
+            self.set_tooltip(["Orders this " + self.vehicle_type + " take all non-vehicle units in this tile as passengers."])
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])

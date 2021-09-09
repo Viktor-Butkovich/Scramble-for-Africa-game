@@ -203,6 +203,7 @@ class actor_match_label(label):
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
             self.attached_buttons.append(cycle_passengers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
+            self.attached_buttons.append(pick_up_all_passengers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
             self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/disembark_ship_button.png', self, global_manager))
@@ -599,6 +600,33 @@ class worker_crew_vehicle_button(label_button): #appears on worker, finds ship t
         self.was_showing = result
         return(result)
 
+class pick_up_all_passengers_button(label_button): #appears on ship, finds mobs to take as passengers
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
+        super().__init__(coordinates, width, height, 'pick up all passengers', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):    
+                vehicle = self.attached_label.actor
+                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                    passenger = contained_mob
+                    if not passenger.is_vehicle: #vehicles won't be picked up as passengers
+                        passenger.embark_vehicle(vehicle)
+            else:
+                text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
+                return(False)
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = self.attached_label.actor.vehicle_type
+                self.image.set_image('misc/embark_' + self.vehicle_type + '_button.png')
+        return(result)
+
 class crew_vehicle_button(label_button): #appears on ship, finds worker to attach as crew
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         self.vehicle_type = 'none'
@@ -628,7 +656,7 @@ class crew_vehicle_button(label_button): #appears on ship, finds worker to attac
         if result:
             if self.attached_label.actor.has_crew:
                 return(False)
-            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'):
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
                 self.image.set_image('misc/crew_' + self.vehicle_type + '_button.png')
         return(result)

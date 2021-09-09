@@ -125,8 +125,11 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-global_manager.set('recruitment_types', ['explorer', 'engineer', 'porter foreman', 'European worker', 'ship'])
-global_manager.set('recruitment_costs', {'explorer': 5, 'engineer': 5, 'porter foreman': 5, 'European worker': 3, 'ship': 5})
+global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'missionary'])
+global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
+global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
+for current_officer in global_manager.get('officer_types'):
+    global_manager.get('recruitment_costs')[current_officer] = 5
 
 global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
 global_manager.set('button_list', [])
@@ -482,7 +485,7 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
     
     global_manager.get('tile_info_display_list').append(new_commodity_match_label)
 
-buy_button_y = 140
+buy_button_y = 0#140
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
     new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index + 1)), global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), 'blue', global_manager.get('recruitment_types')[recruitment_index], 'none', ['europe'], global_manager)
