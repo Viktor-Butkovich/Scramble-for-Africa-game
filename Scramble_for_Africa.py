@@ -368,26 +368,6 @@ tile_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordin
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'terrain', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_image)
 
-#tile resource image
-tile_free_resource_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
-global_manager.get('tile_info_display_list').append(tile_free_resource_image)
-
-#tile resource building image
-tile_free_resource_building_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
-global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
-
-#tile port image
-tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
-global_manager.get('tile_info_display_list').append(tile_free_port_image)
-
-#tile train station image
-tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-    scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
-global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
-
 #tile infrastructure image
 tile_free_infrastructure_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_middle', global_manager) #coordinates, width, height, modes, global_manager
@@ -410,6 +390,28 @@ global_manager.get('tile_info_display_list').append(tile_free_infrastructure_rig
 tile_free_infrastructure_left_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'left', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_left_image)
+
+#tile resource image
+tile_free_resource_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_resource_image)
+
+#tile resource building image
+tile_free_resource_building_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
+
+#tile port image
+tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_port_image)
+
+#tile train station image
+tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
+
+
 
 #tile terrain label
 #actor_match_current_y -= 35

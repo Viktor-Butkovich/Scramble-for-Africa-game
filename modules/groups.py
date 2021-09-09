@@ -329,9 +329,9 @@ class expedition(group):
                 super().move(x_change, y_change)
             else: #if discovered a water tile, update minimap but don't move there
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
+                self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         else:
-            self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
+            self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
         elif roll_result == 1:

@@ -36,6 +36,10 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
                 current_tile.image.draw()
                 current_tile.image.has_drawn = True
 
+        for current_infrastructure_connection in global_manager.get('infrastructure_connection_list'): #draw roads above terrain and below building icons, which are drawn below mobs
+            current_infrastructure_connection.draw()
+            current_infrastructure_connection.has_drawn = True
+
         mob_image_list = []
         for current_image in global_manager.get('image_list'):
             if not current_image.has_drawn:
