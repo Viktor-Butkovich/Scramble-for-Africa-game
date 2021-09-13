@@ -2,6 +2,7 @@ import pygame
 from . import text_tools
 from . import utility
 from . import actor_utility
+from . import scaling
 
 class actor():
     '''
@@ -224,6 +225,7 @@ class actor():
         pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + 10, tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+            self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
+                tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 

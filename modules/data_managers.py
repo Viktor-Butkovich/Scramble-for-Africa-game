@@ -170,9 +170,10 @@ class notification_manager_template():
         self.notification_height = 500
         self.notification_y = 236
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-            self.notification_x = (self.global_manager.get('minimap_grid').origin_x - (self.notification_width + 40))
+            self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid').origin_x, self.global_manager) - (self.notification_width + 40))
         else: #show notifications in center on europe mode
             self.notification_x = 610
+            
     def notification_to_front(self, message):
         '''
         Input:

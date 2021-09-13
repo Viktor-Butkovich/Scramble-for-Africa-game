@@ -2,7 +2,7 @@ import pygame
 import time
 from . import images
 from . import text_tools
-#from . import instructions
+from . import scaling
 from . import main_loop_tools
 from . import actor_utility
 from . import utility
@@ -315,13 +315,13 @@ class button():
         self.tooltip_text = tooltip_text
         if self.has_keybind:
             self.tooltip_text.append("Press " + self.keybind_name + " to use.")
-        tooltip_width = 50
+        tooltip_width = 0#50
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + 10 > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + 10
-        tooltip_height = (len(self.tooltip_text) * font_size) + 5
+            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -366,7 +366,8 @@ class button():
                 message = self.keybind_name
                 color = 'white'
                 textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
-                self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
+                self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10, self.global_manager), (self.global_manager.get('display_height') -
+                    (self.y + self.height - scaling.scale_height(5, self.global_manager)))))
 
     def draw_tooltip(self, below_screen, height, y_displacement):
         '''
@@ -393,7 +394,8 @@ class button():
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                    (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
         '''

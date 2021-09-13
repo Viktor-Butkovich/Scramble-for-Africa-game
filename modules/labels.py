@@ -40,8 +40,8 @@ class label(button):
             Sets this label's text to a list based on the inputted string and changes its size as needed
         '''
         self.message = new_message
-        if text_tools.message_width(self.message, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
-            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
+        if text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width: #self.ideal_width:
+            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
         else:
             self.width = self.minimum_width
         self.image.width = self.width
@@ -88,7 +88,8 @@ class label(button):
         '''
         if self.can_show():
             self.image.draw()
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
+            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                (self.y + self.height)))
                 
     def draw_tooltip(self, below_screen, height, y_displacement):
         '''
@@ -115,7 +116,8 @@ class label(button):
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager),
+                    self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class value_label(label):
     '''

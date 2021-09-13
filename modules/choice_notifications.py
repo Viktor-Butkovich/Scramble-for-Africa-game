@@ -13,7 +13,7 @@ class choice_notification(notification):
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, button_types, choice_info_dict, global_manager):
-        button_height = 50
+        button_height = scaling.scale_height(50, global_manager)
         coordinates = (coordinates[0], coordinates[1] + button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
         minimum_height -= button_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
@@ -89,7 +89,8 @@ class choice_button(button):
     def draw(self):
         if self.can_show():
             self.image.draw()
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
+            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                (self.y + self.height)))
 
     def update_tooltip(self):
         if self.button_type == 'recruitment':
