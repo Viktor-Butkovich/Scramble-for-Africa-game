@@ -190,7 +190,7 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
     '''
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
     font_size = scaling.scale_width(global_manager.get('font_size'), global_manager)
-    y_displacement = font_size * 2
+    y_displacement = scaling.scale_width(30, global_manager) #estimated mouse size
     if possible_tooltip_drawers_length == 0:
         return()
     elif possible_tooltip_drawers_length == 1:
@@ -232,23 +232,23 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager): #to do: if
         for possible_tooltip_drawer in possible_tooltip_drawers:
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
                 possible_tooltip_drawer.draw_tooltip(below_screen, height, y_displacement)
-                y_displacement += font_size
+                y_displacement += scaling.unscale_width(font_size, global_manager)
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += font_size
+                    y_displacement += scaling.unscale_width(font_size, global_manager)
                 stopping = True
             if (possible_tooltip_drawer in global_manager.get('button_list') and possible_tooltip_drawer.in_notification) and not stopping:
                 possible_tooltip_drawer.draw_tooltip(below_screen, height, y_displacement)
-                y_displacement += font_size
+                y_displacement += scaling.unscale_width(font_size, global_manager)
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += font_size
+                    y_displacement += scaling.unscale_width(font_size, global_manager)
                 stopping = True
                 
         if not stopping:
             for possible_tooltip_drawer in possible_tooltip_drawers:
                 possible_tooltip_drawer.draw_tooltip(below_screen, height, y_displacement)
-                y_displacement += font_size
+                y_displacement += scaling.unscale_width(font_size, global_manager)
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
-                    y_displacement += font_size
+                    y_displacement += scaling.unscale_width(font_size, global_manager)
 
 def draw_text_box(global_manager):
     '''
