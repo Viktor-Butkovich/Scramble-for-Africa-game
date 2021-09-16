@@ -173,19 +173,19 @@ class actor_match_label(label):
                 self.global_manager.get('tile_ordered_label_list').append(self)
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/merge_button.png', self, global_manager))
-            self.attached_buttons.append(split_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/split_button.png', self, global_manager))
-            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/crew_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/crew_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(worker_to_building_button((self.x, self.y), self.height, self.height, 'none', 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
-            self.attached_buttons.append(switch_theatre_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/switch_theatre_button.png', self, global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'resource', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'port', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'infrastructure', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'train_station', global_manager))
-            self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/build_train_button.png', self, global_manager))
+            self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/merge_button.png', self, global_manager))
+            self.attached_buttons.append(split_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/split_button.png', self, global_manager))
+            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(worker_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
+            self.attached_buttons.append(switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'misc/switch_theatre_button.png', self, global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
+            self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -198,15 +198,22 @@ class actor_match_label(label):
             self.attached_buttons.append(remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/remove_worker_button.png', self, 'resource', global_manager))
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
-            self.attached_buttons.append(crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/crew_ship_button.png', self, global_manager))
-            self.attached_buttons.append(uncrew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/uncrew_ship_button.png', self, global_manager))
+            self.attached_buttons.append(crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, global_manager))
+            self.attached_buttons.append(uncrew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/uncrew_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
-            self.attached_buttons.append(cycle_passengers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
-            self.attached_buttons.append(pick_up_all_passengers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(cycle_passengers_button((self.x, self.y), self.height, self.height, pygame.K_4, self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
+            self.attached_buttons.append(pick_up_all_passengers_button((self.x, self.y), self.height, self.height, pygame.K_z, self.modes, 'misc/embark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
-            self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/disembark_ship_button.png', self, global_manager))
+            keybind = 'none'
+            if self.list_index == 0:
+                keybind = pygame.K_1
+            elif self.list_index == 1:
+                keybind = pygame.K_2
+            elif self.list_index == 2:
+                keybind = pygame.K_3
+            self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, keybind, self.modes, 'misc/disembark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
         elif self.actor_label_type == 'native aggressiveness':

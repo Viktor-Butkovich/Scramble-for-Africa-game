@@ -206,6 +206,8 @@ class button():
             self.set_tooltip(tooltip_text)
         elif self.button_type == 'build train':
             self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
+        elif self.button_type == 'cycle units':
+            self.set_tooltip(["Selects the next unit that has movement remaining"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -369,7 +371,7 @@ class button():
                 self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10, self.global_manager), (self.global_manager.get('display_height') -
                     (self.y + self.height - scaling.scale_height(5, self.global_manager)))))
 
-    def draw_tooltip(self, below_screen, height, y_displacement):
+    def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -381,9 +383,12 @@ class button():
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
                 mouse_y = self.global_manager.get('display_height') + 10 - height
+            if beyond_screen:
+                mouse_x = self.global_manager.get('display_width') - width
             mouse_y += y_displacement
-            if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-                mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+            
+            #if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+            #    mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
             #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
             #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
@@ -555,6 +560,33 @@ class button():
                 else:
                     num_sold = num_present
                 market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+
+            elif self.button_type == 'cycle units':
+                mob_list = self.global_manager.get('mob_list')
+                cycled_mob = 'none'
+                cycled_index = 0
+                for current_mob_index in range(len(mob_list)):
+                    current_mob = mob_list[current_mob_index]
+                    if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
+                        if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
+                            if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
+                                if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
+                                    cycled_mob = current_mob
+                                    cycled_index = current_mob_index
+                                    break
+                if cycled_mob == 'none':
+                    text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
+                else:
+                    mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
+                    cycled_mob.select()
+                    for current_image in cycled_mob.images:
+                        current_cell = cycled_mob.images[0].current_cell
+                        while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
+                            current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+                    if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
+                        cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
+                    else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
+                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
             elif self.button_type == 'none': #used as option in confirmation notifications, remove anything created by opening notification, like exploration mark, when pressed
                 if self.global_manager.get('ongoing_exploration'):

@@ -9,6 +9,7 @@ def end_turn(global_manager):
     #    current_mob.selected = False
     #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
     #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+    global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     text_tools.print_to_screen("Ending turn", global_manager)
     for current_mob in global_manager.get('mob_list'):
@@ -33,8 +34,14 @@ def start_turn(global_manager, first_turn):
         current_mob.reset_movement_points()
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), global_manager.get('displayed_mob')) #update any tile/mob info that changed
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+    end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
+    if not end_turn_selected_mob == 'none':
+        end_turn_selected_mob.select()
+    else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
+        if not global_manager.get('displayed_tile') == 'none':
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), global_manager.get('displayed_mob')) #update any tile/mob info that changed
+    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
 
 def manage_upkeep(global_manager):
     num_workers = global_manager.get('num_workers')
