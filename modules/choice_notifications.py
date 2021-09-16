@@ -13,7 +13,7 @@ class choice_notification(notification):
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, button_types, choice_info_dict, global_manager):
-        button_height = 50
+        button_height = scaling.scale_height(50, global_manager)
         coordinates = (coordinates[0], coordinates[1] + button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
         minimum_height -= button_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
@@ -89,7 +89,8 @@ class choice_button(button):
     def draw(self):
         if self.can_show():
             self.image.draw()
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
+            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                (self.y + self.height)))
 
     def update_tooltip(self):
         if self.button_type == 'recruitment':
@@ -109,12 +110,12 @@ class recruitment_choice_button(choice_button):
         if self.can_show():
             self.showing_outline = True
             self.global_manager.get('money_tracker').change(-1 * self.cost)
-            if self.recruitment_type == 'explorer':
-                new_explorer = officers.explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
-            elif self.recruitment_type == 'engineer':
-                new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
-            elif self.recruitment_type == 'porter foreman':
-                new_porter_foreman = officers.porter_foreman((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Porter foreman', ['strategic', 'europe'], self.global_manager)
+            if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
+                new_explorer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.recruitment_type, self.global_manager)
+            #elif self.recruitment_type == 'engineer':
+            #    new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
+            #elif self.recruitment_type == 'porter foreman':
+            #    new_porter_foreman = officers.porter_foreman((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Porter foreman', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

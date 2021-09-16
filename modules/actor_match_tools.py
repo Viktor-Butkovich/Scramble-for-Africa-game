@@ -9,6 +9,7 @@ from . import scaling
 from . import actor_utility
 from . import text_tools
 from . import groups
+from . import vehicles
 
 class actor_match_free_image(free_image):
     '''
@@ -172,16 +173,19 @@ class actor_match_label(label):
                 self.global_manager.get('tile_ordered_label_list').append(self)
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/merge_button.png', self, global_manager))
-            self.attached_buttons.append(split_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/split_button.png', self, global_manager))
-            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/embark_vehicle_button.png', self, global_manager))
-            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/crew_vehicle_button.png', self, global_manager))
-            self.attached_buttons.append(worker_to_building_button((self.x, self.y), self.height, self.height, 'none', 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
-            self.attached_buttons.append(switch_theatre_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/switch_theatre_button.png', self, global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'resource', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'port', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'infrastructure', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, 'none', self.modes, self, 'train_station', global_manager))
+            self.attached_buttons.append(merge_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/merge_button.png', self, global_manager))
+            self.attached_buttons.append(split_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/split_button.png', self, global_manager))
+            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(worker_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
+            self.attached_buttons.append(switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'misc/switch_theatre_button.png', self, global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
+            self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -194,14 +198,22 @@ class actor_match_label(label):
             self.attached_buttons.append(remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/remove_worker_button.png', self, 'resource', global_manager))
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
-            self.attached_buttons.append(crew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/crew_vehicle_button.png', self, global_manager))
-            self.attached_buttons.append(uncrew_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/uncrew_vehicle_button.png', self, global_manager))
+            self.attached_buttons.append(crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, global_manager))
+            self.attached_buttons.append(uncrew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/uncrew_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
-            self.attached_buttons.append(cycle_passengers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
+            self.attached_buttons.append(cycle_passengers_button((self.x, self.y), self.height, self.height, pygame.K_4, self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
+            self.attached_buttons.append(pick_up_all_passengers_button((self.x, self.y), self.height, self.height, pygame.K_z, self.modes, 'misc/embark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
-            self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/disembark_vehicle_button.png', self, global_manager))
+            keybind = 'none'
+            if self.list_index == 0:
+                keybind = pygame.K_1
+            elif self.list_index == 1:
+                keybind = pygame.K_2
+            elif self.list_index == 2:
+                keybind = pygame.K_3
+            self.attached_buttons.append(disembark_vehicle_button((self.x, self.y), self.height, self.height, keybind, self.modes, 'misc/disembark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
         elif self.actor_label_type == 'native aggressiveness':
@@ -305,7 +317,19 @@ class actor_match_label(label):
                 else:
                     self.set_label(self.message_start + 'unknown')
             elif self.actor_label_type == 'movement':
-                self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
+                if not new_actor.has_infinite_movement:
+                    self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
+                else:
+                    if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                        if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            self.set_label("No movement")
+                        else:
+                            self.set_label("Infinite movement until cargo/passenger dropped")
+                    else:
+                        if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            self.set_label("No movement")
+                        else:
+                            self.set_label("Infinite movement")
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
                     if not new_actor.cell.contained_buildings['resource'] == 'none':
@@ -325,7 +349,7 @@ class actor_match_label(label):
             elif self.actor_label_type == 'passengers':
                 if self.actor.is_vehicle:
                     if not self.actor.has_crew:
-                        self.set_label("A ship requires crew to function")
+                        self.set_label("A " + self.actor.vehicle_type + " requires crew to function")
                     else:
                         if len(self.actor.contained_mobs) == 0:
                             self.set_label(self.message_start + 'none')
@@ -550,7 +574,9 @@ class label_button(button):
 
 
 class worker_crew_vehicle_button(label_button): #appears on worker, finds ship to attach as crew
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, vehicle_type, global_manager):
+        self.vehicle_type = vehicle_type
+        self.was_showing = False
         super().__init__(coordinates, width, height, 'worker to crew', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
@@ -558,27 +584,59 @@ class worker_crew_vehicle_button(label_button): #appears on worker, finds ship t
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle()
+                vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type)
                 crew = self.attached_label.actor
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
                     else:
-                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the ship.", self.global_manager)
+                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed ship to crew the ship.", self.global_manager)
+                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not crew a vehicle.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
     def can_show(self):
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.is_worker) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle()):
+            if (not self.attached_label.actor.is_worker) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
+                result = False#return(False)
+        if not result == self.was_showing: #if visibility changes, update actor info display
+            self.was_showing = result
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
+        self.was_showing = result
+        return(result)
+
+class pick_up_all_passengers_button(label_button): #appears on ship, finds mobs to take as passengers
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
+        super().__init__(coordinates, width, height, 'pick up all passengers', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):    
+                vehicle = self.attached_label.actor
+                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                    passenger = contained_mob
+                    if not passenger.is_vehicle: #vehicles won't be picked up as passengers
+                        passenger.embark_vehicle(vehicle)
+            else:
+                text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
                 return(False)
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = self.attached_label.actor.vehicle_type
+                self.image.set_image('misc/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
 class crew_vehicle_button(label_button): #appears on ship, finds worker to attach as crew
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'crew', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
@@ -594,21 +652,25 @@ class crew_vehicle_button(label_button): #appears on ship, finds worker to attac
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
                     else:
-                        text_tools.print_to_screen("You must select an uncrewed ship in the same tile as a worker to crew the ship.", self.global_manager)
+                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a worker to crew the " + self.vehicle_type + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select an uncrewed ship in the same tile as a worker to crew the ship.", self.global_manager)
+                    text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a worker to crew the " + self.vehicle_type + ".", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not crew a ship.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
     def can_show(self):
         result = super().can_show()
         if result:
             if self.attached_label.actor.has_crew:
                 return(False)
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = self.attached_label.actor.vehicle_type
+                self.image.set_image('misc/crew_' + self.vehicle_type + '_button.png')
         return(result)
 
-class uncrew_vehicle_button(label_button): #later only allow uncrewing in a port
+class uncrew_vehicle_button(label_button): 
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'uncrew', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
@@ -616,6 +678,9 @@ class uncrew_vehicle_button(label_button): #later only allow uncrewing in a port
         if result:
             if not self.attached_label.actor.has_crew:
                 return(False)
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'):
+                self.vehicle_type = self.attached_label.actor.vehicle_type
+                self.image.set_image('misc/uncrew_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -627,9 +692,9 @@ class uncrew_vehicle_button(label_button): #later only allow uncrewing in a port
                 if len(vehicle.contained_mobs) == 0 and len(vehicle.get_held_commodities()) == 0:
                     crew.uncrew_vehicle(vehicle)
                 else:
-                    text_tools.print_to_screen("You can not remove the crew from a ship with passengers or cargo.", self.global_manager)
+                    text_tools.print_to_screen("You can not remove the crew from a " + self.vehicle_type + " with passengers or cargo.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not remove a ship's crew.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not remove a " + self.vehicle_type + "'s crew.", self.global_manager)
 
 class merge_button(label_button):
     '''
@@ -730,6 +795,7 @@ class remove_worker_button(label_button):
 
 class disembark_vehicle_button(label_button):
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'disembark', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
@@ -737,6 +803,10 @@ class disembark_vehicle_button(label_button):
         if result:
             if not self.attached_label.attached_list[self.attached_label.list_index].in_vehicle:
                 return(False)
+            old_vehicle_type = self.vehicle_type
+            self.vehicle_type = self.attached_label.actor.vehicle_type
+            if not self.vehicle_type == old_vehicle_type and not self.vehicle_type == 'none': #if changed
+                self.image.set_image('misc/disembark_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -744,41 +814,64 @@ class disembark_vehicle_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
                 if len(self.attached_label.actor.contained_mobs) > 0:
-                    self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
+                    can_disembark = True
+                    if self.vehicle_type == 'train':
+                        if self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                            text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
+                            can_disembark = False
+                    if can_disembark:
+                        if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                            self.attached_label.actor.set_movement_points(0)
+                        self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
                     #label is attached to ship and has an attached list of its passengers - tells passenger of index to disembark ship
                 else:
-                    text_tools.print_to_screen("You must select a ship with passengers to disembark passengers.", self.global_manager)
+                    text_tools.print_to_screen("You must select a " + self.vehicle_type + "with passengers to disembark passengers.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not disembark from a ship.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not disembark from a " + self.vehicle_type + ".", self.global_manager)
 
 class embark_vehicle_button(label_button):
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, vehicle_type, global_manager):
+        self.vehicle_type = vehicle_type
+        self.was_showing = False
         super().__init__(coordinates, width, height, 'embark', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
         result = super().can_show()
         if result:
             if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
-                return(False)
+                result = False#return(False)
+            elif not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
+                result = False#return(False)
+        if not result == self.was_showing: #if visibility changes, update actor info display
+            self.was_showing = result
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
+        self.was_showing = result
         return(result)
     
     def on_click(self):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.attached_label.actor.images[0].current_cell.has_vehicle():
+                if self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                     selected_list = actor_utility.get_selected_list(self.global_manager)
                     num_vehicles = 0
-                    vehicle = self.attached_label.actor.images[0].current_cell.get_vehicle()
+                    vehicle = self.attached_label.actor.images[0].current_cell.get_vehicle(self.vehicle_type)
                     rider = self.attached_label.actor
-                    rider.embark_vehicle(vehicle)
+                    can_embark = True
+                    if vehicle.vehicle_type == 'train':
+                        if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                            text_tools.print_to_screen("A train can only pick up passengers at a train station.", self.global_manager)
+                            can_embark = False
+                    if can_embark:
+                        rider.embark_vehicle(vehicle)
                 else:
-                    text_tools.print_to_screen("You must select a unit in the same tile as a crewed ship to embark.", self.global_manager)
+                    text_tools.print_to_screen("You must select a unit in the same tile as a crewed " + self.vehicle_type + " to embark.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not embark a ship.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not embark a " + self.vehicle_type + ".", self.global_manager)
 
 class cycle_passengers_button(label_button):
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'cycle passengers', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
@@ -788,6 +881,7 @@ class cycle_passengers_button(label_button):
                 return(False)
             elif not len(self.attached_label.actor.contained_mobs) > 3: #only show if vehicle with 3+ passengers
                 return(False)
+            self.vehicle_type = self.attached_label.actor.vehicle_type
         return(result)
     
     def on_click(self):
@@ -900,6 +994,36 @@ class switch_theatre_button(label_button):
                 return(False)
         return(result) 
 
+class build_train_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'build train', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_construct): #if selected but not worker, return false
+                return(False)
+        return(result)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if self.attached_label.actor.movement_points >= 1:
+                    if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
+                        if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
+                            if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
+                                new_train = vehicles.train((self.attached_label.actor.x, self.attached_label.actor.y), self.attached_label.actor.grids, image_dict, 'train', ['strategic'], 'none', self.global_manager)
+                            else:
+                                text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                        else:
+                            text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
+                text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
         self.building_type = building_type
@@ -919,6 +1043,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
             image_id = 'misc/railroad_button.png'
+            self.building_name = 'train station'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
@@ -972,7 +1097,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         elif self.building_type == 'train_station':
             self.set_tooltip(['Builds a train station, allowing trains to pick up and drop off passengers and cargo', 'Can only be built on a railroad', 'Costs 1 movement point'])
         elif self.building_type == 'infrastructure':
-            if self.building_name == 'road':
+            if self.building_name == 'railroad':
                 self.set_tooltip(["Upgrades this tile's road into a railroad, allowing trains to move through this tile", "Retains the benefits of a road",
                     "Costs 1 movement point"])
             else:

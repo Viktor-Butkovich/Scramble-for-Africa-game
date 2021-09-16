@@ -7,7 +7,7 @@ class officer(mob):
     '''
     Mob that is considered an officer and can join groups and become a veteran
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, coordinates, grids, image_id, name, modes, officer_type, global_manager):
         '''
         Input:
             Same as superclass
@@ -17,7 +17,7 @@ class officer(mob):
         self.veteran = False
         self.veteran_icons = []
         self.is_officer = True
-        self.officer_type = 'default'
+        self.officer_type = officer_type
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -93,35 +93,39 @@ class officer(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
-class porter_foreman(officer):
-    '''
-    Officer that is considered a porter foreman
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        self.officer_type = 'porter foreman'
+#class porter_foreman(officer):
+#    '''
+#    Officer that is considered a porter foreman
+#    '''
+#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+#        self.officer_type = 'porter foreman'
 
-class explorer(officer):
-    '''
-    Officer that is considered an explorer
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        self.officer_type = 'explorer'
+#class explorer(officer):
+#    '''
+#    Officer that is considered an explorer
+#    '''
+#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+#        '''
+#        Input:
+#            Same as superclass
+#        '''
+#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+#        self.officer_type = 'explorer'
 
-class engineer(officer):
-    '''
-    Officer that is considered an engineer
-    '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-        #self.grid.find_cell(self.x, self.y).set_visibility(True)
-        self.officer_type = 'engineer'
+#class engineer(officer):
+#    '''
+#    Officer that is considered an engineer
+#    '''
+#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+#        '''
+#        Input:
+#            Same as superclass
+#        '''
+#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+#        #self.grid.find_cell(self.x, self.y).set_visibility(True)
+#        self.officer_type = 'engineer'
+
+#class merchant(officer):
+#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)

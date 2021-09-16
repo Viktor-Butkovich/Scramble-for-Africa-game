@@ -2,7 +2,7 @@ import pygame
 import time
 from . import images
 from . import text_tools
-#from . import instructions
+from . import scaling
 from . import main_loop_tools
 from . import actor_utility
 from . import utility
@@ -134,16 +134,20 @@ class button():
             self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into its worker and officer."])
-        elif self.button_type == 'crew':
-            self.set_tooltip(["Merges this ship with a worker in the same tile to form a crewed ship.", "Requires that an uncrewed ship is selected in the same tile as a worker."])
-        elif self.button_type == 'worker to crew':
-            self.set_tooltip(["Merges this worker with a ship in the same tile to form a crewed ship.", "Requires that a worker is selected in the same tile as an uncrewed ship."])
+        elif self.button_type == 'crew': #clicked on vehicle side
+            self.set_tooltip(["Merges this " + self.vehicle_type + " with a worker in the same tile to form a crewed " + self.vehicle_type + ".",
+                "Requires that an uncrewed " + self.vehicle_type + " is selected in the same tile as a worker."])
+        elif self.button_type == 'worker to crew': #clicked on worker side
+            self.set_tooltip(["Merges this worker with a " + self.vehicle_type + " in the same tile to form a crewed " + self.vehicle_type + ".",
+                "Requires that a worker is selected in the same tile as an uncrewed " + self.vehicle_type + "."])
         elif self.button_type == 'uncrew':
-            self.set_tooltip(["Orders this ship's crew to abandon the ship."])
+            self.set_tooltip(["Orders this " + self.vehicle_type + "'s crew to abandon the " + self.vehicle_type + "."])
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders this unit to embark a ship in the same tile.", "Requires that a unit is selected in the same tile as a crewed ship."])
+            self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile.", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type + "."])
         elif self.button_type == 'disembark':
-            self.set_tooltip(["Orders this unit to disembark the ship."])
+            self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type + "."])
+        elif self.button_type == 'pick up all passengers':
+            self.set_tooltip(["Orders this " + self.vehicle_type + " take all non-vehicle units in this tile as passengers."])
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
@@ -187,7 +191,7 @@ class button():
         elif self.button_type == 'switch theatre':
            self.set_tooltip(["Moves this ship between Africa and Europe", " Requires that this ship has all of its movement points and is not inland"])
         elif self.button_type == 'cycle passengers':
-            tooltip_text = ["Cycles through this ship's passengers"]
+            tooltip_text = ["Cycles through this " + self.vehicle_type + "'s passengers"]
             tooltip_text.append("Passengers: " )
             if self.can_show():
                 for current_passenger in self.attached_label.actor.contained_mobs:
@@ -200,6 +204,10 @@ class button():
                 for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
                     tooltip_text.append("    " + current_mob.name)
             self.set_tooltip(tooltip_text)
+        elif self.button_type == 'build train':
+            self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
+        elif self.button_type == 'cycle units':
+            self.set_tooltip(["Selects the next unit that has movement remaining"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -309,13 +317,13 @@ class button():
         self.tooltip_text = tooltip_text
         if self.has_keybind:
             self.tooltip_text.append("Press " + self.keybind_name + " to use.")
-        tooltip_width = 50
+        tooltip_width = 0#50
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + 10 > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + 10
-        tooltip_height = (len(self.tooltip_text) * font_size) + 5
+            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
@@ -360,9 +368,10 @@ class button():
                 message = self.keybind_name
                 color = 'white'
                 textsurface = self.global_manager.get('myfont').render(message, False, self.global_manager.get('color_dict')[color])
-                self.global_manager.get('game_display').blit(textsurface, (self.x + 10, (self.global_manager.get('display_height') - (self.y + self.height - 5))))
+                self.global_manager.get('game_display').blit(textsurface, (self.x + scaling.scale_width(10, self.global_manager), (self.global_manager.get('display_height') -
+                    (self.y + self.height - scaling.scale_height(5, self.global_manager)))))
 
-    def draw_tooltip(self, below_screen, height, y_displacement):
+    def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
         Input:
             y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
@@ -374,9 +383,12 @@ class button():
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
                 mouse_y = self.global_manager.get('display_height') + 10 - height
+            if beyond_screen:
+                mouse_x = self.global_manager.get('display_width') - width
             mouse_y += y_displacement
-            if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-                mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+            
+            #if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+            #    mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
             #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
             #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
@@ -387,7 +399,8 @@ class button():
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                    (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
         '''
@@ -470,11 +483,18 @@ class button():
                         num_commodity = displayed_mob.get_inventory(commodity)
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                         if displayed_mob in displayed_tile.cell.contained_mobs:
-                            displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                            displayed_tile.change_inventory(commodity, num_commodity)
-                            if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
-                                text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                            can_drop_off = True
+                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                can_drop_off = False
+                                text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
+                            if can_drop_off:
+                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                                displayed_tile.change_inventory(commodity, num_commodity)
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                                    displayed_mob.set_movement_points(0)
+                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                    text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                    text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
                         else:
                             text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
@@ -493,12 +513,17 @@ class button():
                     if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                         if displayed_mob in displayed_tile.cell.contained_mobs:
                             if displayed_mob.can_hold_commodities:
-                                if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                    displayed_mob.change_inventory(commodity, num_commodity)
-                                    displayed_tile.change_inventory(commodity, -1 * num_commodity)
-                                else:
-                                    text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                        str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                can_pick_up = True
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                    can_pick_up = False
+                                    text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
+                                if can_pick_up:
+                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                        displayed_mob.change_inventory(commodity, num_commodity)
+                                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                    else:
+                                        text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
+                                            str(displayed_mob.inventory_capacity) + ".", self.global_manager)
                             else:
                                 text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                         else:
@@ -535,6 +560,33 @@ class button():
                 else:
                     num_sold = num_present
                 market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+
+            elif self.button_type == 'cycle units':
+                mob_list = self.global_manager.get('mob_list')
+                cycled_mob = 'none'
+                cycled_index = 0
+                for current_mob_index in range(len(mob_list)):
+                    current_mob = mob_list[current_mob_index]
+                    if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
+                        if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
+                            if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
+                                if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
+                                    cycled_mob = current_mob
+                                    cycled_index = current_mob_index
+                                    break
+                if cycled_mob == 'none':
+                    text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
+                else:
+                    mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
+                    cycled_mob.select()
+                    for current_image in cycled_mob.images:
+                        current_cell = cycled_mob.images[0].current_cell
+                        while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
+                            current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+                    if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
+                        cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
+                    else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
+                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
             elif self.button_type == 'none': #used as option in confirmation notifications, remove anything created by opening notification, like exploration mark, when pressed
                 if self.global_manager.get('ongoing_exploration'):

@@ -47,6 +47,7 @@ class mob(actor):
         self.end_turn_destination = 'none'
         self.max_movement_points = 1
         self.movement_cost = 1
+        self.has_infinite_movement = False
         self.reset_movement_points()
         self.update_tooltip()
         actor_utility.deselect_all(self.global_manager)
@@ -91,11 +92,12 @@ class mob(actor):
         return(False) #different for subclasses
 
     def change_movement_points(self, change):
-        self.movement_points += change
-        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
-            self.movement_points = round(self.movement_points)
-        if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        if not self.has_infinite_movement:
+            self.movement_points += change
+            if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+                self.movement_points = round(self.movement_points)
+            if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_movement_points(self, new_value):
         self.movement_points = new_value
@@ -250,8 +252,8 @@ class mob(actor):
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
-                            (destination_type == 'water' and (self.can_swim or future_cell.has_vehicle() or (self.can_explore and not future_cell.visible)))): 
-                            if self.movement_points >= self.get_movement_cost(x_change, y_change): #self.movement_cost:
+                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
+                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:
                                 text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
@@ -292,9 +294,9 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
-        if self.images[0].current_cell.has_vehicle() and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
-            vehicle = self.images[0].current_cell.get_vehicle()
+            vehicle = self.images[0].current_cell.get_vehicle('ship')
             if self.is_worker and not vehicle.has_crew:
                 self.crew_vehicle(vehicle)
             else:
@@ -351,7 +353,8 @@ class mob(actor):
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+        vehicle.select()
+        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
 
     def disembark_vehicle(self, vehicle):
         vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)

@@ -162,6 +162,26 @@ class construction_gang(group):
         self.can_construct = True
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
+class caravan(group):
+    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Input:
+            same as superclass
+        '''
+        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_hold_commodities = True
+        self.inventory_capacity = 10
+        self.inventory_setup()
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+
+class mission(group):
+    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Input:
+            same as superclass
+        '''
+        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+
 class expedition(group):
     '''
     A group with an explorer officer that is able to explore
@@ -329,9 +349,9 @@ class expedition(group):
                 super().move(x_change, y_change)
             else: #if discovered a water tile, update minimap but don't move there
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
+                self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         else:
-            self.change_movement_points(-1 * self.get_movement_cost()) #when exploring, movement points should be consumed regardless of exploration success or destination
+            self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
         elif roll_result == 1:
@@ -364,5 +384,9 @@ def create_group(worker, officer, global_manager):
         new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'Construction gang', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'porter foreman':
         new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'merchant':
+        new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'Caravan', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'missionary':
+        new_group = mission((officer.x, officer.y), officer.grids, 'mobs/missionary/mission.png', 'Mission', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

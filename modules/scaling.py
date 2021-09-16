@@ -32,3 +32,26 @@ def scale_height(height, global_manager):
     ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     scaled_height = round(height * ratio)
     return(scaled_height)
+
+def unscale_width(width, global_manager):
+    '''
+    Input:
+        int representing scaled pixel width, global_manager_template object. Also works for x coordinates alone rather than just widths
+    Output:
+        Returns an int pixel width restored to the default game resolution
+    '''
+    ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
+    unscaled_width = round(width / ratio)
+    return(unscaled_width)
+
+def unscale_height(height, global_manager):
+    '''
+    Input:
+        int representing scaled pixel height, global_manager_template object. Also works for y coordinates alone rather than just heights
+    Output:
+        Returns an int pixel height restored to the default game resolution
+    '''
+    ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
+    unscaled_height = round(height / ratio)
+    return(unscaled_height)
+

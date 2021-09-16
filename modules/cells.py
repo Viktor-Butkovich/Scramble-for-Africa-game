@@ -59,27 +59,27 @@ class cell():
             return(False)
         return(True)
 
-    def has_vehicle(self):
+    def has_vehicle(self, vehicle_type):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew:
+            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
-    def get_vehicle(self):
+    def get_vehicle(self, vehicle_type):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew:
+            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 
-    def has_uncrewed_vehicle(self):
+    def has_uncrewed_vehicle(self, vehicle_type):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and not current_mob.has_crew:
+            if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
-    def get_uncrewed_vehicle(self):
+    def get_uncrewed_vehicle(self, vehicle_type):
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and not current_mob.has_crew:
+            if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 

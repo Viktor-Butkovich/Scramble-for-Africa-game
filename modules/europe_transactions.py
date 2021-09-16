@@ -150,6 +150,7 @@ class buy_commodity_button(button):
         Output:
             Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
         '''
+        self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
         self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
         
 #create button that goes to slots in europe screen and matches mobs in the europe grid

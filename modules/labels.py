@@ -40,8 +40,8 @@ class label(button):
             Sets this label's text to a list based on the inputted string and changes its size as needed
         '''
         self.message = new_message
-        if text_tools.message_width(self.message, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
-            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + 10
+        if text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width: #self.ideal_width:
+            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
         else:
             self.width = self.minimum_width
         self.image.width = self.width
@@ -88,9 +88,10 @@ class label(button):
         '''
         if self.can_show():
             self.image.draw()
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height)))
+            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                (self.y + self.height)))
                 
-    def draw_tooltip(self, below_screen, height, y_displacement):
+    def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
         Input:
             int representing the number of vertical pixels the label will be moved by, allowing multiple tooltips to be shown at once
@@ -102,9 +103,11 @@ class label(button):
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
                 mouse_y = self.global_manager.get('display_height') + 10 - height
+            if beyond_screen:
+                mouse_x = self.global_manager.get('display_width') - width
             mouse_y += y_displacement
-            if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-                mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
+            #if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
+            #    mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
             #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
             #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
@@ -115,7 +118,8 @@ class label(button):
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + 10, self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager),
+                    self.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
 class value_label(label):
     '''
@@ -148,7 +152,7 @@ class commodity_prices_label(label):
         self.ideal_width = minimum_width
         self.minimum_height = height
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
-        self.font_size = scaling.scale_width(30, global_manager)
+        self.font_size = scaling.scale_height(30, global_manager)
         self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
@@ -178,8 +182,9 @@ class commodity_prices_label(label):
         self.message = new_message
         #self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - 10 and text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.width: #self.ideal_width + 20:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 20# + 20
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10, self.global_manager) and text_tools.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.width:
+                    
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(20, self.global_manager)# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling
@@ -196,7 +201,8 @@ class commodity_prices_label(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                    (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
         '''

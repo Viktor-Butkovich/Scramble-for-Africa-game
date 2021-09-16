@@ -29,14 +29,20 @@ class worker(mob):
         else:
             return(False)
 
-    def crew_vehicle(self, vehicle):
+    def crew_vehicle(self, vehicle): #to do: make vehicle go to front of info display
         self.in_vehicle = True
         self.selected = False
         self.hide_images()
         vehicle.crew = self
         vehicle.has_crew = True
         vehicle.set_image('crewed')
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+        moved_mob = vehicle
+        for current_image in moved_mob.images: #moves vehicle to front
+            if not current_image.current_cell == 'none':
+                while not moved_mob == current_image.current_cell.contained_mobs[0]:
+                    current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        vehicle.select()
+        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
 
     def uncrew_vehicle(self, vehicle):
         self.in_vehicle = False

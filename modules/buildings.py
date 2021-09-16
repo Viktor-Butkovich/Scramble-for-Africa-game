@@ -55,6 +55,9 @@ class building(actor):
                 tooltip_text.append("Allows trains to move from this tile to other tiles that have railroads")
             else:
                 tooltip_text.append("Can be upgraded to a railroad to allow trains to move through this tile")
+        elif self.building_type == 'train_station':
+            tooltip_text.append("Allows construction gangs to build trains on this tile")
+            tooltip_text.append("Allows trains to drop off or pick up cargo or passengers in this tile")
         self.set_tooltip(tooltip_text)
 
     def touching_mouse(self):
