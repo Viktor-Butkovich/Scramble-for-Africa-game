@@ -44,6 +44,11 @@ class cell():
             return(False)
         return(True)
 
+    def has_trading_post(self):
+        if self.contained_buildings['trading_post'] == 'none':
+            return(False)
+        return(True)
+
     def has_road(self):
         if self.contained_buildings['infrastructure'] == 'none':
             return(False)

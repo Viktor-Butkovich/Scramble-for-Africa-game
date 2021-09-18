@@ -185,8 +185,9 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
-            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_h, self.modes, self, 'trading_post', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
+            self.attached_buttons.append(trade_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/trade_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -765,7 +766,7 @@ class split_button(label_button):
                     if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
                         displayed_mob.disband()
                     else:
-                        text_tools.print_to_screen("You can not split a group of porters that is carrying commodities.", self.global_manager)
+                        text_tools.print_to_screen("You can not split a unit that is carrying commodities.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Only a group can be split it into a worker and an officer.", self.global_manager)
             else:
@@ -950,6 +951,39 @@ class worker_to_building_button(label_button):
                     text_tools.print_to_screen("Upgrade the building to add more worker capacity.", self.global_manager)
             else:
                 text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
+
+class trade_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'trade', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_trade):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points == current_mob.max_movement_points:
+                    current_cell = current_mob.images[0].current_cell
+                    if current_cell.has_trading_post():
+                        if current_mob.get_inventory('consumer goods') > 0:
+                            #current_mob.set_movement_points(0) have confirmation message to ensure that player wants to trade before using movement points 
+                            current_mob.start_trade()
+                        else:
+                            text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                    elif current_cell.has_village():
+                        text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("Trading is only possible at a trading post in a village.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
 
 class switch_theatre_button(label_button):
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):

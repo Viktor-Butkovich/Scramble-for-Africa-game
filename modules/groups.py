@@ -176,6 +176,26 @@ class caravan(group):
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
+    def start_trade(self):
+        current_village = self.images[0].current_cell.village
+        choice_info_dict = {'caravan': self, 'village': current_village}
+        message = 'Are you sure you want to attempt to trade with the village of ' + current_village.name
+        message += "? Each population unit in the village has a chance of being willing to trade based on the village's aggressiveness. One trade will be possible for each willing population unit. In each trade, the caravan will give "
+        message += " a unit of consumer goods for a chance of gaining a random commodity in return. Additionally, each unit of consumer goods given has a chance of turning a population unit into an available worker."
+        notification_tools.display_choice_notification(message, ['start trading', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        #picking trade opens a trade notification if any are willing to trade, otherwise has a click out notification saying no more trades are possible
+        #trade notification, when opened, will be a choice notification saying that a pop is willing to trade and give option of stop trading or attempt trade.
+        #attempt trade will be a dice rolling notification that is clicked out of after finishing, showing results of trade.
+        #after clicking out of attempt trade, if any more population willing to trade, start another trade notification, otherwise show a click out notification saying no more trades are possible
+        #
+        #after a start trading notification or a trade dice roll notification, show if any are willing to trade: do none willing to trade notification or willing to trade notification
+        #types of notifications:
+        #start trading notification, gives option of start trading or do not trade at all
+        #willing to trade notification, choice trade or stop trading
+        #none willing to trade notification, click out notification
+        #trade dice roll notification, dice rolling notification
+        #after trade dice roll notification showing results, click out notification
+        
 class mission(group):
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''

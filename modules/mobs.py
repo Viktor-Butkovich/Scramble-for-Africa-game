@@ -347,10 +347,15 @@ class mob(actor):
     def embark_vehicle(self, vehicle):
         self.in_vehicle = True
         self.selected = False
+        for current_commodity in self.get_held_commodities(): #gives inventory to ship
+            num_held = self.get_inventory(current_commodity)
+            for current_commodity_unit in range(num_held):
+                if vehicle.get_inventory_remaining() > 0:
+                    vehicle.change_inventory(current_commodity, 1)
+                else:
+                    self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
         self.hide_images()
         vehicle.contained_mobs.append(self)
-        for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
-            vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front

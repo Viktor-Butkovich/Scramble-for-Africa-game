@@ -208,6 +208,10 @@ class button():
             self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
         elif self.button_type == 'cycle units':
             self.set_tooltip(["Selects the next unit that has movement remaining"])
+        elif self.button_type == 'trade':
+            self.set_tooltip(["Attempts to trade consumer goods for random commodities", "Can only be done at a trading post in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
+                "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
+                "Costs an entire turn of movement points"])
         else:
             self.set_tooltip(['placeholder'])
             
