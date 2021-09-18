@@ -110,6 +110,10 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
 
+class trading_post(building):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, 'trading_post', modes, global_manager)
+
 class train_station(building):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)

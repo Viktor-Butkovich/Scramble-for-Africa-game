@@ -55,17 +55,6 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             current_mob.selected = False
             current_mob.hide_images()
 
-    #def disembark(self, disembarker):
-        #for current_mob in self.contained_mobs:
-        #    current_mob.disembark_vehicle(self)
-        #first_mob = self.contained_mobs[0]
-        #self.contained_mobs = []
-        #if self.global_manager.get('minimap_grid') in self.grids:
-        #    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-        #first_mob.select()
-        #disembarker.select()
-        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), first_mob)
-
 class train(vehicle):
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
@@ -75,7 +64,7 @@ class train(vehicle):
         self.can_swim = False
         self.can_walk = True
         self.can_hold_commodities = True
-        self.inventory_capacity = 50
+        self.inventory_capacity = 10
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -97,7 +86,7 @@ class ship(vehicle): #prevent movement when there are mobs in this tile that are
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
         self.can_hold_commodities = True
-        self.inventory_capacity = 50
+        self.inventory_capacity = 10
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
 

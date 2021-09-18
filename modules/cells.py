@@ -39,6 +39,11 @@ class cell():
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
 
+    def has_village(self):
+        if self.village == 'none':
+            return(False)
+        return(True)
+
     def has_road(self):
         if self.contained_buildings['infrastructure'] == 'none':
             return(False)
@@ -52,7 +57,7 @@ class cell():
             return(True)
 
     def reset_buildings(self):
-        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none'}
+        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none', 'trading_post': 'none'}
 
     def has_port(self):
         if self.contained_buildings['port'] == 'none':

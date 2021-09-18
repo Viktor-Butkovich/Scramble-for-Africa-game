@@ -53,14 +53,9 @@ class actor_match_free_image(free_image):
                     self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'port':
-                if not new_actor.cell.contained_buildings['port'] == 'none':
-                    self.set_image('buildings/port.png') #matches resource building
-                else:
-                    self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'train_station':
-                if not new_actor.cell.contained_buildings['train_station'] == 'none':
-                    self.set_image('buildings/train_station.png')
+            elif self.actor_image_type in ['port', 'train_station', 'trading_post']:
+                if not new_actor.cell.contained_buildings[self.actor_image_type] == 'none':
+                    self.set_image('buildings/' + self.actor_image_type + '.png')
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_middle':
@@ -76,6 +71,11 @@ class actor_match_free_image(free_image):
                         self.set_image(contained_infrastructure.infrastructure_connection_images[self.direction].image_id)
                     else:
                         self.set_image('misc/empty.png')
+                else:
+                    self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'veteran_icon':
+                if (self.actor.is_officer or self.actor.is_group) and self.actor.veteran:
+                    self.set_image('misc/veteran_icon.png')
                 else:
                     self.set_image('misc/empty.png')
             else:
@@ -185,6 +185,7 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_h, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
@@ -1030,6 +1031,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_mob = 'none'
         self.attached_tile = 'none'
         self.building_name = 'none'
+        self.requirement = 'can_construct'
         image_id = 'misc/default_button.png'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
@@ -1042,8 +1044,12 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             self.railroad_image_id = 'misc/railroad_button.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
-            image_id = 'misc/railroad_button.png'
+            image_id = 'misc/train_station_button.png'
             self.building_name = 'train station'
+        elif self.building_type == 'trading_post':
+            image_id = 'misc/trading_post_button.png'
+            self.building_name = 'trading post'
+            self.requirement = 'can_trade'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
@@ -1081,7 +1087,12 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         result = super().can_show()
         if result:
             self.update_info()
-            if (not self.attached_label.actor.can_construct): #if selected but not worker, return false
+            can_create = 'none'
+            if self.requirement == 'can_construct':
+                can_create = self.attached_label.actor.can_construct
+            elif self.requirement == 'can_trade':
+                can_create = self.attached_label.actor.can_trade
+            if (not can_create): #show if unit selected can create this building
                 return(False)
         return(result) 
 
@@ -1103,6 +1114,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             else:
                 self.set_tooltip(['Builds a road, halving the cost to move between this tile and other tiles with roads or railroads', 'A road can be upgraded into a railroad that allows trains to move through this tile',
                     'Costs 1 movement point'])
+        elif self.building_type == 'trading_post':
+            self.set_tooltip(['Builds a trading post, allowing merchant caravans to trade with an attached village', 'Can only be built in a village', 'Costs 1 movement point'])
         else:
             self.set_tooltip(['placeholder'])
 
@@ -1132,6 +1145,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                     text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                             elif self.building_type == 'infrastructure':
                                 self.construct()
+                            elif self.building_type == 'trading_post':
+                                if self.attached_tile.cell.has_village():
+                                    self.construct()
+                                else:
+                                    text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
                         else:
                             text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                     else:
@@ -1166,6 +1184,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             new_building = buildings.infrastructure_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, building_image_id, self.building_name, self.building_name,
                 ['strategic'], self.global_manager)
             #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
+        elif self.building_type == 'trading_post':
+            new_building = buildings.trading_post((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
         else:
             new_building = buildings.building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, self.building_type,
                 ['strategic'], self.global_manager)

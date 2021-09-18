@@ -317,6 +317,11 @@ mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordina
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
+#veteran icon image
+mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('mob_info_display_list').append(mob_free_image)
+
 #mob name label
 #actor_match_current_y -= 35
 mob_name_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
@@ -415,7 +420,10 @@ tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling
     scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
 
-
+#tile trading post image
+tile_free_trading_post_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'trading_post', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_trading_post_image)
 
 #tile terrain label
 #actor_match_current_y -= 35

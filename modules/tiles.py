@@ -334,12 +334,18 @@ class resource_icon(tile):
             else: #7-10
                 self.image_dict['small'] = 'scenery/resources/small/natives3.png'
                 self.image_dict['large'] = 'scenery/resources/natives3.png'
-                
-        if (not self.attached_tile.cell.contained_buildings['port'] == 'none') or (not self.attached_tile.cell.contained_buildings['resource'] == 'none') or (not self.attached_tile.cell.contained_buildings['infrastructure'] == 'none'):
-            #make small if building present
-            self.image.set_image('small')
-            self.image_dict['default'] = self.image_dict['small']
-        else:
+        building_present = False
+        for building_type in ['port', 'resource', 'infrastructure', 'trading_post']:
+            if not self.attached_tile.cell.contained_buildings[building_type] == 'none': #if any building present
+                self.image.set_image('small')
+                self.image_dict['default'] = self.image_dict['small']
+                building_present = True
+                break
+        #if (not self.attached_tile.cell.contained_buildings['port'] == 'none') or (not self.attached_tile.cell.contained_buildings['resource'] == 'none') or (not self.attached_tile.cell.contained_buildings['infrastructure'] == 'none'):
+        #    make small if building present
+        #    self.image.set_image('small')
+        #    self.image_dict['default'] = self.image_dict['small']
+        if not building_present:
             self.image.set_image('large')
             self.image_dict['default'] = self.image_dict['large']
 

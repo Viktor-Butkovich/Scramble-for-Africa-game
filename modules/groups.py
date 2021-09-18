@@ -30,6 +30,7 @@ class group(mob):
         '''
         self.worker = worker
         self.officer = officer
+        self.veteran = self.officer.veteran
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
@@ -40,7 +41,7 @@ class group(mob):
         self.worker.inventory_setup()
         self.officer.inventory_setup()
         self.select()
-        self.veteran = self.officer.veteran
+        #self.veteran = self.officer.veteran
         if self.veteran:
             self.set_name('Veteran expedition')
         self.veteran_icons = self.officer.veteran_icons
@@ -170,6 +171,7 @@ class caravan(group):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
+        self.can_trade = True
         self.inventory_capacity = 10
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
