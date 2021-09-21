@@ -71,6 +71,10 @@ class choice_button(button):
             self.y_change = self.notification.choice_info_dict['y_change']
         elif button_type == 'start trading':
             self.message = 'Start trading'
+        elif button_type == 'trade':
+            self.message = 'Trade'
+        elif button_type == 'stop trading':
+            self.message = 'Stop trading'
         elif button_type == 'end turn':
             self.message = 'End turn'
         elif button_type == 'none':
@@ -99,6 +103,10 @@ class choice_button(button):
             self.set_tooltip(['Recruits a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
         elif self.button_type == 'start trading':
             self.set_tooltip(['Starts trading, allowing a trade to be made for each population unit willing to trade'])
+        elif self.button_type == 'trade':
+            self.set_tooltip(['Trades'])
+        elif self.button_type == 'stop trading':
+            self.set_tooltip(['Stops trading'])
         elif self.button_type == 'exploration':
             self.set_tooltip(['Attempts an exploration for ' + str(self.cost) + ' money'])
         elif self.button_type == 'end turn':

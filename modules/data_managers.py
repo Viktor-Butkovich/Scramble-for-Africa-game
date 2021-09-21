@@ -189,6 +189,18 @@ class notification_manager_template():
             
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
+
+        elif notification_type == 'trade':
+            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, False, self.global_manager)
+
+        elif notification_type == 'final_trade': #removes dice when clicked
+            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, False, self.global_manager)
+
+        elif notification_type == 'commodity_trade': #gives commodity when clicked
+            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, True, self.global_manager)
                 
         elif notification_type == 'exploration':
             new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

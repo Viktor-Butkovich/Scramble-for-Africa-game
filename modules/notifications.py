@@ -178,15 +178,38 @@ class dice_rolling_notification(notification):
         else:
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
 
+class trade_notification(notification):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, gives_commodity, global_manager):
+        self.is_last = is_last
+        self.gives_commodity = gives_commodity
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        
+    def format_message(self):
+        '''
+        Input:
+            none
+        Output:
+            Same as superclass except for the last line, "Click to remove this notification", being removed to allow for a more specific message for the circumstances of the notification
+        '''
+        super().format_message()
+        self.message.pop(-1)
+        
+    def remove(self):
+        if self.gives_commodity:
+            trade_result = self.global_manager.get('trade_result')
+            if not trade_result[2] == 'none':
+                trade_result[0].change_inventory(trade_result[2], 1) #gives random commodity[2] to caravan[0]
+        super().remove()
+        if self.is_last:
+            copy_dice_list = self.global_manager.get('dice_list')
+            for current_die in copy_dice_list:
+                current_die.remove()
+
 class exploration_notification(notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
-        '''
-        Input:
-            Same as superclass
-        '''
         self.is_last = is_last
         if self.is_last:
             current_expedition = actor_utility.get_selected_list(global_manager)[0]

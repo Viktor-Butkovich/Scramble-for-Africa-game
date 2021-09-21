@@ -592,12 +592,16 @@ class button():
                     else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
                         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
-            elif self.button_type == 'none': #used as option in confirmation notifications, remove anything created by opening notification, like exploration mark, when pressed
-                if self.global_manager.get('ongoing_exploration'):
-                    for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
-                        current_exploration_mark.remove()
-                    self.global_manager.set('ongoing_exploration', False)
-                    self.global_manager.set('exploration_mark_list', [])
+            elif self.button_type == 'start trading':
+                caravan = self.notification.choice_info_dict['caravan']
+                caravan.willing_to_trade(self.notification)
+
+            elif self.button_type == 'trade':
+                caravan = self.notification.choice_info_dict['caravan']
+                caravan.trade(self.notification)
+
+            elif self.button_type == 'stop trading':
+                nothing = 0
                 
     def on_rmb_release(self):
         '''

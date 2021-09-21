@@ -1,4 +1,6 @@
 import time
+import random
+import math
 from .mobs import mob
 from .tiles import tile
 from .tiles import veteran_icon
@@ -173,6 +175,7 @@ class caravan(group):
         self.can_hold_commodities = True
         self.can_trade = True
         self.inventory_capacity = 10
+        self.trades_remaining = 0
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
@@ -180,22 +183,91 @@ class caravan(group):
         current_village = self.images[0].current_cell.village
         choice_info_dict = {'caravan': self, 'village': current_village}
         message = 'Are you sure you want to attempt to trade with the village of ' + current_village.name
-        message += "? Each population unit in the village has a chance of being willing to trade based on the village's aggressiveness. One trade will be possible for each willing population unit. In each trade, the caravan will give "
+        message += "? The villagers may be willing to trade. If they are willing to trade, 1 trade per 3 population will be possible, which is " + str(math.ceil(current_village.population / 3)) + " trades for "
+        message += str(current_village.population) + " population " + ". In each trade, the caravan will give "
         message += " a unit of consumer goods for a chance of gaining a random commodity in return. Additionally, each unit of consumer goods given has a chance of turning a population unit into an available worker."
         notification_tools.display_choice_notification(message, ['start trading', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-        #picking trade opens a trade notification if any are willing to trade, otherwise has a click out notification saying no more trades are possible
-        #trade notification, when opened, will be a choice notification saying that a pop is willing to trade and give option of stop trading or attempt trade.
-        #attempt trade will be a dice rolling notification that is clicked out of after finishing, showing results of trade.
-        #after clicking out of attempt trade, if any more population willing to trade, start another trade notification, otherwise show a click out notification saying no more trades are possible
-        #
-        #after a start trading notification or a trade dice roll notification, show if any are willing to trade: do none willing to trade notification or willing to trade notification
-        #types of notifications:
-        #start trading notification, gives option of start trading or do not trade at all
-        #willing to trade notification, choice trade or stop trading
-        #none willing to trade notification, click out notification
-        #trade dice roll notification, dice rolling notification
-        #after trade dice roll notification showing results, click out notification
+
+    def willing_to_trade(self, notification):
+        self.notification = notification
+        self.set_movement_points(0)
+        village = self.notification.choice_info_dict['village']
+        text = ("Checking if villagers are willing to trade: 4+ to succeed. If successful, 1 trade per 3 population: " + str(math.ceil(village.population / 3)) + " trades for " + str(village.population) + " population /n")
+        notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        roll_list = dice_utility.roll_to_list(6, "Trade roll", 4, 6, 1, self.global_manager)
+        self.display_trade_die((die_x, 440), roll_list[0])
+                        
+        text += roll_list[1]
+        roll_result = roll_list[0]
+                
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+
+        if roll_result >= 4:
+            self.trades_remaining = math.ceil(village.population / 3)
+            notification_tools.display_notification(text + "The villagers are willing to trade and " + str(self.trades_remaining) + " trades are possible. /nClick to start trading.", 'trade', self.global_manager)
+            choice_info_dict = {'caravan': self, 'village': village}
+            message = str(self.trades_remaining) + " more trades possible /n"
+            message += "Do you want to trade a unit of consumer goods for a chance of getting a random commodity and possible convincing a villager to become an available worker?"
+            notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        else:
+            notification_tools.display_notification(text + "No villagers are willing to trade. Click to close this notification. ", 'trade', self.global_manager)
+
+    def trade(self, notification):
+        #self.global_manager.set('ongoing_trade', True)
+        self.notification = notification
+        village = self.notification.choice_info_dict['village']
+        self.change_inventory('consumer goods', -1)
+        text = ("A unit of consumer goods has been given.")
+        text = ("Checking if trade is successful: 4+ to succeed. If successful, gain 1 random commodity /n")
+        notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+        roll_list = dice_utility.roll_to_list(6, "Trade roll", 4, 6, 1, self.global_manager)
+        self.display_trade_die((die_x, 440), roll_list[0])
+                        
+        text += roll_list[1]
+        roll_result = roll_list[0]
+                
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+        self.trades_remaining -= 1
+        commodity = 'none'
+        notification_type = 'none'
+        if roll_result >= 4:
+            commodity = random.choice(self.global_manager.get('collectable_resources'))
+            text += "You were successfully able to trade for a unit of " + commodity + ". /n"
+            notification_type = 'commodity_trade'
+        else:
+            text += "You were not able to trade for a random commodity. "
+            notification_type = 'trade'
+        if not self.trades_remaining == 0:
+            text += str(self.trades_remaining) + " more trades possible"
+        notification_tools.display_notification(text, notification_type, self.global_manager)
+        if self.trades_remaining > 0:
+            choice_info_dict = {'caravan': self, 'village': village}
+            message = str(self.trades_remaining) + " more trades possible /n"
+            message += "Do you want to trade a unit of consumer goods for a chance of getting a random commodity and possibly convincing a villager to become an available worker?"
+            notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        else:
+            notification_tools.display_notification(text + "No more trades are possible. Click to close this notification. ", 'trade', self.global_manager)
+        self.global_manager.set('trade_result', [self, roll_result, commodity]) #allows notification to give random commodity when clicked
         
+    def display_trade_die(self, coordinates, result):
+        '''
+        Input:
+            tuple of two int variables representing the pixel coordinates at which to display the die, int representing the final result that the die will roll
+        Output:
+            Creates a die object at the inputted coordinates that will roll, eventually stopping displaying the inputted result with an outline depending on the outcome.
+            If multiple dice are present, only the die with the highest result will be outlined, showing that it was chosen.
+        '''
+        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+
 class mission(group):
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
@@ -228,7 +300,8 @@ class expedition(group):
         '''
         result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
     def move(self, x_change, y_change):
         '''
