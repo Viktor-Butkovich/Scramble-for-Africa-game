@@ -182,18 +182,23 @@ class caravan(group):
     def start_trade(self):
         current_village = self.images[0].current_cell.village
         choice_info_dict = {'caravan': self, 'village': current_village}
-        message = 'Are you sure you want to attempt to trade with the village of ' + current_village.name
-        message += "? The villagers may be willing to trade. If they are willing to trade, 1 trade per 3 population will be possible, which is " + str(math.ceil(current_village.population / 3)) + " trades for "
-        message += str(current_village.population) + " population " + ". In each trade, the caravan will give "
-        message += " a unit of consumer goods for a chance of gaining a random commodity in return. Additionally, each unit of consumer goods given has a chance of turning a population unit into an available worker."
-        notification_tools.display_choice_notification(message, ['start trading', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        self.global_manager.set('ongoing_trade', True)
+        message = "Are you sure you want to attempt to trade with the village of " + current_village.name + "? /n /n"
+        message += "The villagers may not be willing to trade. /n /n"
+        message += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
+        message += "In each trade, the merchant trades consumer goods for items that may or may not be valuable. /n /n"
+        message += "Trading may also convince villagers to become available for hire as workers. "
+        notification_tools.display_choice_notification(message, ['start trading', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def willing_to_trade(self, notification):
         self.notification = notification
         self.set_movement_points(0)
         village = self.notification.choice_info_dict['village']
-        text = ("Checking if villagers are willing to trade: 4+ to succeed. If successful, 1 trade per 3 population: " + str(math.ceil(village.population / 3)) + " trades for " + str(village.population) + " population /n")
-        notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        text = ("The merchant attempts to convince the villagers to trade. /n /n")
+        if self.veteran:
+            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        else:
+            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'trade', self.global_manager)
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
@@ -207,21 +212,23 @@ class caravan(group):
 
         if roll_result >= 4:
             self.trades_remaining = math.ceil(village.population / 3)
-            notification_tools.display_notification(text + "The villagers are willing to trade and " + str(self.trades_remaining) + " trades are possible. /nClick to start trading.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /nThe merchant has " + str(self.get_inventory('consumer goods')) +
+                " consumer goods to sell. /n /nClick to start trading. /n /n", 'trade', self.global_manager)
             choice_info_dict = {'caravan': self, 'village': village}
-            message = str(self.trades_remaining) + " more trades possible /n"
-            message += "Do you want to trade a unit of consumer goods for a chance of getting a random commodity and possible convincing a villager to become an available worker?"
-            notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " times this turn. /n /n"
+            text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
+            text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
+            notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         else:
-            notification_tools.display_notification(text + "No villagers are willing to trade. Click to close this notification. ", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
     def trade(self, notification):
         #self.global_manager.set('ongoing_trade', True)
         self.notification = notification
         village = self.notification.choice_info_dict['village']
-        self.change_inventory('consumer goods', -1)
-        text = ("A unit of consumer goods has been given.")
-        text = ("Checking if trade is successful: 4+ to succeed. If successful, gain 1 random commodity /n")
+        #self.change_inventory('consumer goods', -1) done later in trade notification removal
+        text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
+        
         notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'trade', self.global_manager)
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
@@ -234,25 +241,31 @@ class caravan(group):
                 
         notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
         self.trades_remaining -= 1
+        num_consumer_goods = self.get_inventory('consumer goods') - 1 #consumer goods are actually lost when clicking out of notification, so subtract 1 here to show accurate number
         commodity = 'none'
         notification_type = 'none'
         if roll_result >= 4:
             commodity = random.choice(self.global_manager.get('collectable_resources'))
-            text += "You were successfully able to trade for a unit of " + commodity + ". /n"
-            notification_type = 'commodity_trade'
+            text += "/n The merchant managed to buy a unit of " + commodity + ". /n /n"
+            notification_type = 'successful_commodity_trade'
         else:
-            text += "You were not able to trade for a random commodity. "
-            notification_type = 'trade'
+            text += "/n The merchant bought items that turned out to be worthless. /n /n"
+            notification_type = 'failed_commodity_trade'
         if not self.trades_remaining == 0:
-            text += str(self.trades_remaining) + " more trades possible"
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times this turn /n /n"
+            text += "The merchant has " + str(num_consumer_goods) + " more consumer goods to sell /n /n"
         notification_tools.display_notification(text, notification_type, self.global_manager)
         if self.trades_remaining > 0:
             choice_info_dict = {'caravan': self, 'village': village}
-            message = str(self.trades_remaining) + " more trades possible /n"
-            message += "Do you want to trade a unit of consumer goods for a chance of getting a random commodity and possibly convincing a villager to become an available worker?"
+            message = "The villagers are willing to trade " + str(self.trades_remaining) + " more times this turn /n /n"
+            message += "Do you want to trade consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         else:
-            notification_tools.display_notification(text + "No more trades are possible. Click to close this notification. ", 'trade', self.global_manager)
+            if self.trades_remaining == 0:
+                text += "The villagers are not willing to trade any more this turn. /n /n"
+            if num_consumer_goods <= 0: #consumer goods are actually lost when user clicks out of
+                text += "The merchant does not have any more consumer goods to sell. /n /n"
+            notification_tools.display_notification(text + "No more trades are possible. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
         self.global_manager.set('trade_result', [self, roll_result, commodity]) #allows notification to give random commodity when clicked
         
     def display_trade_die(self, coordinates, result):
@@ -335,8 +348,8 @@ class expedition(group):
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
                 choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'none'], choice_info_dict,
-                    self.global_manager) #message, choices, choice_info_dict, global_manager
+                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'stop exploration'],
+                    choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 self.global_manager.set('ongoing_exploration', True)
                 for current_grid in self.grids:
                     coordinates = (0, 0)
@@ -456,11 +469,12 @@ class expedition(group):
         for current_die in copy_dice_list:
             current_die.remove()
         #copy_exploration_mark_list = self.global_manager.get('exploration_mark_list'): #exploration_mark_list
-        for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
-            current_exploration_mark.remove()
-        self.global_manager.set('exploration_mark_list', [])
-        self.exploration_mark_list = []
-        self.global_manager.set('ongoing_exploration', False)
+        #for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
+        #    current_exploration_mark.remove()
+        #self.global_manager.set('exploration_mark_list', [])
+        #self.exploration_mark_list = []
+        actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
+        #self.global_manager.set('ongoing_exploration', False)
 
 def create_group(worker, officer, global_manager):
     '''

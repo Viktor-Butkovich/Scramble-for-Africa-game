@@ -81,7 +81,7 @@ global_manager.set('terrain_colors',
     }
 )
 
-global_manager.set('commodity_types', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber', 'consumer goods'])
+global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('commodity_prices', {})
 
@@ -196,6 +196,7 @@ global_manager.set('choosing_destination', False)
 global_manager.set('choosing_destination_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
+global_manager.set('ongoing_trade', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')

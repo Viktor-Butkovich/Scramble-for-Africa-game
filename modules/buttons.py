@@ -600,8 +600,12 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
-            elif self.button_type == 'stop trading':
-                nothing = 0
+            elif self.button_type == 'stop exploration':
+                actor_utility.stop_exploration(self.global_manager)
+
+            elif self.button_type == 'stop trading': #in ['stop trading', 'none']:
+                self.global_manager.set('ongoing_trade', False)
+                #self.global_manager.set('ongoing_exploration', False)
                 
     def on_rmb_release(self):
         '''

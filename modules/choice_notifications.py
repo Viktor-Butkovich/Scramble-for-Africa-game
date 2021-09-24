@@ -69,6 +69,8 @@ class choice_button(button):
             self.expedition = self.notification.choice_info_dict['expedition']
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
+        elif button_type == 'stop exploration':
+            self.message = 'Do nothing'
         elif button_type == 'start trading':
             self.message = 'Start trading'
         elif button_type == 'trade':
@@ -100,19 +102,19 @@ class choice_button(button):
 
     def update_tooltip(self):
         if self.button_type == 'recruitment':
-            self.set_tooltip(['Recruits a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+            self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
         elif self.button_type == 'start trading':
-            self.set_tooltip(['Starts trading, allowing a trade to be made for each population unit willing to trade'])
+            self.set_tooltip(['Start trading, allowing a trade to be made for each population unit willing to trade'])
         elif self.button_type == 'trade':
-            self.set_tooltip(['Trades'])
+            self.set_tooltip(['Attempts to trade by giving consumer goods'])
         elif self.button_type == 'stop trading':
-            self.set_tooltip(['Stops trading'])
+            self.set_tooltip(['Stop trading'])
         elif self.button_type == 'exploration':
-            self.set_tooltip(['Attempts an exploration for ' + str(self.cost) + ' money'])
+            self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
         elif self.button_type == 'end turn':
-            self.set_tooltip(['Ends the current turn'])
+            self.set_tooltip(['End the current turn'])
         else:
-            self.set_tooltip(['Does nothing'])
+            self.set_tooltip(['Do nothing'])
 
 class recruitment_choice_button(choice_button):
     def __init__(self, coordinates, width, height, button_type, modes, image_id, notification, global_manager):
@@ -124,10 +126,6 @@ class recruitment_choice_button(choice_button):
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
                 new_explorer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.recruitment_type, self.global_manager)
-            #elif self.recruitment_type == 'engineer':
-            #    new_explorer = officers.engineer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Engineer', ['strategic', 'europe'], self.global_manager)
-            #elif self.recruitment_type == 'porter foreman':
-            #    new_porter_foreman = officers.porter_foreman((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Porter foreman', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

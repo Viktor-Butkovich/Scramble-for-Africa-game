@@ -190,17 +190,20 @@ class notification_manager_template():
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
 
-        elif notification_type == 'trade':
+        elif notification_type in ['stop_trade', 'trade', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
+            is_last = False
+            commodity_trade = False
+            commodity_trade_type = notification_type #for successful/failed_commodity_trade
+            stops_trade = False
+            if notification_type == 'stop_trade':
+                stops_trade = True
+            elif notification_type == 'final_trade':
+                is_last = True
+            elif notification_type in ['successful_commodity_trade', 'failed_commodity_trade']:
+                commodity_trade = True
+            trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade}
             new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, False, self.global_manager)
-
-        elif notification_type == 'final_trade': #removes dice when clicked
-            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, False, self.global_manager)
-
-        elif notification_type == 'commodity_trade': #gives commodity when clicked
-            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, True, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, trade_info_dict, self.global_manager)
                 
         elif notification_type == 'exploration':
             new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

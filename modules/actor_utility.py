@@ -2,6 +2,16 @@ import random
 
 from . import scaling
 
+def stop_exploration(global_manager):
+    for current_exploration_mark in global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
+        current_exploration_mark.remove()
+    global_manager.set('exploration_mark_list', [])
+    for current_mob in global_manager.get('mob_list'):
+        if current_mob.can_explore:
+            current_mob.exploration_mark_list = []
+    exploration_mark_list = []
+    global_manager.set('ongoing_exploration', False)
+
 def create_image_dict(stem):
     '''
     Input:

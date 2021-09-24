@@ -152,6 +152,8 @@ def action_possible(global_manager):
     '''
     if global_manager.get('ongoing_exploration'):
         return(False)
+    elif global_manager.get('ongoing_trade'):
+        return(False)
     elif global_manager.get('making_choice'):
         return(False)
     elif not global_manager.get('player_turn'):
@@ -354,69 +356,70 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
         If the user was not clicking a button, any mobs not just selected will be unselected. However, if shift is being held down, no mobs will be unselected.
     '''
-    if (not clicked_button) and action_possible(global_manager):#do not do selecting operations if user was trying to click a button
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        selected_new_mob = False
-        if (not global_manager.get('capital')):
-            actor_utility.deselect_all(global_manager)
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
-        #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+    if action_possible(global_manager) or global_manager.get('choosing_destination'):
+        if (not clicked_button and (not global_manager.get('choosing_destination'))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            selected_new_mob = False
+            if (not global_manager.get('capital')):
+                actor_utility.deselect_all(global_manager)
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+            #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+                        
+            #if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
+            for current_grid in global_manager.get('grid_list'):
+                if global_manager.get('current_game_mode') in current_grid.modes:
+                    for current_cell in current_grid.cell_list:
+                        if current_cell.touching_mouse():
+                            if len(current_cell.contained_mobs) > 0:
+                                selected_new_mob = True
+                                current_cell.contained_mobs[0].select()
+                                if current_grid == global_manager.get('minimap_grid'):
+                                    main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                    main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                    if not main_cell == 'none':
+                                        main_tile = main_cell.tile
+                                        if not main_tile == 'none':
+                                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
+                                else: #elif current_grid == global_manager.get('strategic_map_grid'):
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+            if selected_new_mob:
+                selected_list = actor_utility.get_selected_list(global_manager)
+                if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
+                    global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
                     
-        #if abs(global_manager.get('mouse_origin_x') - mouse_x) < 5 and abs(global_manager.get('mouse_origin_y') - mouse_y) < 5: #if clicked rather than mouse box drawn, only select top mob of cell
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
+            else:
+                click_move_minimap(global_manager)
+        elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
+            chooser = global_manager.get('choosing_destination_info_dict')['chooser']
+            #destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
+            chose_destination = False
+            for current_grid in global_manager.get('grid_list'): #destination_grids:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
-                        if len(current_cell.contained_mobs) > 0:
-                            selected_new_mob = True
-                            current_cell.contained_mobs[0].select()
-                            if current_grid == global_manager.get('minimap_grid'):
-                                main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
-                                if not main_cell == 'none':
-                                    main_tile = main_cell.tile
-                                    if not main_tile == 'none':
-                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
-                            else: #elif current_grid == global_manager.get('strategic_map_grid'):
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
-        if selected_new_mob:
-            selected_list = actor_utility.get_selected_list(global_manager)
-            if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
-                global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
-                
-        else:
+                        click_move_minimap(global_manager)
+                        target_cell = 'none'
+                        if current_cell.grid.is_abstract_grid:
+                            target_cell = current_cell
+                        else:
+                            target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) #center
+                        if not current_grid in chooser.grids:
+                            stopping = False
+                            if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
+                                destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
+                                if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_port()))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                    text_tools.print_to_screen("You can only send ships to coastal waters and coastal ports.", global_manager)
+                                    stopping = True
+                            chose_destination = True
+                            if not stopping:
+                                chooser.end_turn_destination = target_cell.tile
+                                global_manager.set('show_selection_outlines', True)
+                                global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                        else: #can not move to same continent
+                            text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
+            global_manager.set('choosing_destination', False)
+            global_manager.set('choosing_destination_info_dict', {})
+        elif not clicked_button:
             click_move_minimap(global_manager)
-    elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
-        chooser = global_manager.get('choosing_destination_info_dict')['chooser']
-        #destination_grids = global_manager.get('choosing_destination_info_dict')['destination_grids']
-        chose_destination = False
-        for current_grid in global_manager.get('grid_list'): #destination_grids:
-            for current_cell in current_grid.cell_list:
-                if current_cell.touching_mouse():
-                    click_move_minimap(global_manager)
-                    target_cell = 'none'
-                    if current_cell.grid.is_abstract_grid:
-                        target_cell = current_cell
-                    else:
-                        target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) #center
-                    if not current_grid in chooser.grids:
-                        stopping = False
-                        if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
-                            destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
-                            if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_port()))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
-                                text_tools.print_to_screen("You can only send ships to coastal waters and coastal ports.", global_manager)
-                                stopping = True
-                        chose_destination = True
-                        if not stopping:
-                            chooser.end_turn_destination = target_cell.tile
-                            global_manager.set('show_selection_outlines', True)
-                            global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
-                    else: #can not move to same continent
-                        text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
-        global_manager.set('choosing_destination', False)
-        global_manager.set('choosing_destination_info_dict', {})
-    elif not clicked_button:
-        click_move_minimap(global_manager)
 
 def click_move_minimap(global_manager): #move minimap to clicked tile
     mouse_x, mouse_y = pygame.mouse.get_pos()

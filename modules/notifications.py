@@ -104,6 +104,8 @@ class notification(label):
         Output:
             The notification is deleted when clicked
         '''
+        #self.global_manager.set('ongoing_exploration', False)
+        #self.global_manager.set('ongoing_trade', False)
         self.remove()
             
     def remove(self):
@@ -179,9 +181,29 @@ class dice_rolling_notification(notification):
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
 
 class trade_notification(notification):
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, gives_commodity, global_manager):
-        self.is_last = is_last
-        self.gives_commodity = gives_commodity
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, trade_info_dict, global_manager):
+        self.trade_info_dict = trade_info_dict
+        self.is_last = self.trade_info_dict['is_last']
+        self.gives_commodity = False
+        self.stops_trade = self.trade_info_dict['stops_trade']
+        self.is_commodity_trade = self.trade_info_dict['commodity_trade']
+        if self.is_commodity_trade:
+            self.commodity_trade_type = self.trade_info_dict['commodity_trade_type']
+            if self.commodity_trade_type == 'successful_commodity_trade':
+                self.gives_commodity = True
+        
+        self.notification_images = []
+        #explored_cell = current_expedition.destination_cell
+        #explored_tile = explored_cell.tile
+        #explored_terrain_image_id = explored_cell.tile.image_dict['default']
+        
+        #self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+        #    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        #if not explored_tile.resource_icon == 'none':
+        #    explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
+        #    self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+        #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         
     def format_message(self):
@@ -195,15 +217,23 @@ class trade_notification(notification):
         self.message.pop(-1)
         
     def remove(self):
-        if self.gives_commodity:
+        if self.is_commodity_trade:
             trade_result = self.global_manager.get('trade_result')
-            if not trade_result[2] == 'none':
-                trade_result[0].change_inventory(trade_result[2], 1) #gives random commodity[2] to caravan[0]
+            caravan = trade_result[0]
+            caravan.change_inventory('consumer goods', -1)
+            if self.gives_commodity:
+                commodity_gained = trade_result[2]
+                if not commodity_gained == 'none':
+                    caravan.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity 
         super().remove()
         if self.is_last:
-            copy_dice_list = self.global_manager.get('dice_list')
-            for current_die in copy_dice_list:
+            #copy_dice_list = self.global_manager.get('dice_list')
+            for current_die in self.global_manager.get('dice_list'): #copy_dice_list:
                 current_die.remove()
+            for current_image in self.notification_images:
+                current_image.remove()
+        if self.stops_trade:
+            self.global_manager.set('ongoing_trade', False)
 
 class exploration_notification(notification):
     '''

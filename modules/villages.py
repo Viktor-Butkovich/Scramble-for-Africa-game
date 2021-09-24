@@ -4,8 +4,8 @@ from . import village_name_generator
 
 class village():
     def __init__(self, cell):
-        self.aggressiveness = random.randrange(1, 11) #1-10
-        self.population = random.randrange(1, 11)
+        self.aggressiveness = random.randrange(1, 10) #1-9
+        self.population = random.randrange(1, 10) #1-9
         self.available_workers = 0
         self.attempted_trades = 0
         self.cell = cell
