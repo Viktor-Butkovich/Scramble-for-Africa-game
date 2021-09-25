@@ -6,7 +6,6 @@ from . import text_tools
 from . import utility
 from . import actor_utility
 from .actors import actor
-from .tiles import veteran_icon
 
 class mob(actor):
     '''
@@ -26,6 +25,7 @@ class mob(actor):
         self.in_group = False
         self.in_vehicle = False
         self.in_building = False
+        self.veteran = False
         self.actor_type = 'mob'
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}

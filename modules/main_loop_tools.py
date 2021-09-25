@@ -75,6 +75,11 @@ def update_display(global_manager): #to do: transfer if current game mode in mod
             for current_image in current_mob.images:
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
+            if current_mob.veteran:
+                for current_veteran_icon in current_mob.veteran_icons:
+                    current_veteran_icon.image.has_drawn = False #may have been drawn already but draw on top of other images
+                    current_veteran_icon.image.draw()
+                    current_veteran_icon.image.has_drawn = True
             if current_mob.can_show_tooltip():
                 #print(current_mob.images[0].current_cell)
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:

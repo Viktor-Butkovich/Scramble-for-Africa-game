@@ -546,7 +546,7 @@ class button():
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
-                    choice_info_dict = {}
+                    choice_info_dict = {'type': 'end turn'}
                     notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)

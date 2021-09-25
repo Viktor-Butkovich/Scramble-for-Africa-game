@@ -18,3 +18,11 @@ class village():
         tooltip_text.append("    Available workers: " + str(self.available_workers))
         tooltip_text.append("    Aggressiveness: " + str(self.aggressiveness))
         return(tooltip_text)
+
+    def get_aggressiveness_modifier(self): #modifier affects roll difficulty, not roll result
+        if self.aggressiveness <= 3: #1-3
+            return(-1)
+        elif self.aggressiveness <= 6: #4 - 6
+            return(0)
+        else: #7 - 9
+            return(1)

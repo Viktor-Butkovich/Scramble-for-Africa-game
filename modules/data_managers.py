@@ -190,7 +190,7 @@ class notification_manager_template():
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
 
-        elif notification_type in ['stop_trade', 'trade', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
+        elif notification_type in ['stop_trade', 'trade', 'trade_promotion', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
             is_last = False
             commodity_trade = False
             commodity_trade_type = notification_type #for successful/failed_commodity_trade
@@ -201,6 +201,8 @@ class notification_manager_template():
                 is_last = True
             elif notification_type in ['successful_commodity_trade', 'failed_commodity_trade']:
                 commodity_trade = True
+            elif notification_type == 'trade_promotion':
+                self.global_manager.get('trade_result')[0].promote() #promotes caravan
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade}
             new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, trade_info_dict, self.global_manager)

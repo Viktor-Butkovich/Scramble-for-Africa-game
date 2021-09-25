@@ -19,6 +19,9 @@ class choice_notification(notification):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.choice_buttons = []
         self.choice_info_dict = choice_info_dict
+        #if self.choice_info_dict['type'] == 'willing to trade': #if merchant rolls 6 on willing to trade, promote when notification shown
+        #    if self.choice_info_dict['promotes']:
+        #        self.choice_info_dict['caravan'].promote()
         for current_button_type_index in range(len(button_types)):
             button_type = button_types[current_button_type_index]
             if button_type == 'recruitment':

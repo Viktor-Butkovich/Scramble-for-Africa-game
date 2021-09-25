@@ -42,7 +42,8 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
     '''
     result = random.randrange(1, num_sides + 1)
     text = ""
-    text += (roll_type + ": " + str(requirement) + "+ required to succeed /n")
+    if not roll_type == 'second': #do not show this for the 2nd die rolled by a veteran
+        text += (roll_type + ": " + str(requirement) + "+ required to succeed /n")
     if result >= requirement:
         if result >= min_crit_success:
             text += "You rolled a " + str(result) + ": CRITICAL SUCCESS! /n"

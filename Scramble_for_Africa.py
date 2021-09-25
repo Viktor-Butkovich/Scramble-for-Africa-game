@@ -87,9 +87,9 @@ global_manager.set('commodity_prices', {})
 
 for current_commodity in global_manager.get('commodity_types'):
     if not current_commodity == 'consumer goods':
-        global_manager.get('commodity_prices')[current_commodity] = random.randrange(1, 6) #1-5
+        global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
     else:
-        global_manager.get('commodity_prices')[current_commodity] = 5
+        global_manager.get('commodity_prices')[current_commodity] = 2
 
 global_manager.set('resource_building_dict',
     {
