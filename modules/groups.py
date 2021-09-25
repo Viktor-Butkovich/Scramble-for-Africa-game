@@ -215,7 +215,7 @@ class caravan(group):
             notification_tools.display_notification(text + "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /nThe merchant has " + str(self.get_inventory('consumer goods')) +
                 " consumer goods to sell. /n /nClick to start trading. /n /n", 'trade', self.global_manager)
             choice_info_dict = {'caravan': self, 'village': village}
-            text += "The villagers are willing to trade " + str(self.trades_remaining) + " times this turn. /n /n"
+            text += "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /n"
             text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
@@ -252,12 +252,12 @@ class caravan(group):
             text += "/n The merchant bought items that turned out to be worthless. /n /n"
             notification_type = 'failed_commodity_trade'
         if not self.trades_remaining == 0:
-            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times this turn /n /n"
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
             text += "The merchant has " + str(num_consumer_goods) + " more consumer goods to sell /n /n"
         notification_tools.display_notification(text, notification_type, self.global_manager)
         if self.trades_remaining > 0:
             choice_info_dict = {'caravan': self, 'village': village}
-            message = "The villagers are willing to trade " + str(self.trades_remaining) + " more times this turn /n /n"
+            message = "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
             message += "Do you want to trade consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         else:

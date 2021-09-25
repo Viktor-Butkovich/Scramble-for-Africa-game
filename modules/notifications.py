@@ -196,13 +196,18 @@ class trade_notification(notification):
         #explored_cell = current_expedition.destination_cell
         #explored_tile = explored_cell.tile
         #explored_terrain_image_id = explored_cell.tile.image_dict['default']
-        
-        #self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-        #    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        #if not explored_tile.resource_icon == 'none':
-        #    explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-        #    self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-        #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+
+        if self.is_commodity_trade:
+            self.trade_result = global_manager.get('trade_result')
+            consumer_goods_y = 0
+            if self.commodity_trade_type == 'successful_commodity_trade':
+                consumer_goods_y = 500
+                self.notification_images.append(free_image('scenery/resources/' + self.trade_result[2] + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300, global_manager),
+                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            else:
+                consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
+            self.notification_images.append(free_image('scenery/resources/trade/sold consumer goods.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
+                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         
@@ -218,20 +223,20 @@ class trade_notification(notification):
         
     def remove(self):
         if self.is_commodity_trade:
-            trade_result = self.global_manager.get('trade_result')
-            caravan = trade_result[0]
+            #self.trade_result = self.global_manager.get('trade_result')
+            caravan = self.trade_result[0]
             caravan.change_inventory('consumer goods', -1)
             if self.gives_commodity:
-                commodity_gained = trade_result[2]
+                commodity_gained = self.trade_result[2]
                 if not commodity_gained == 'none':
                     caravan.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity 
         super().remove()
+        for current_image in self.notification_images:
+            current_image.remove()
         if self.is_last:
             #copy_dice_list = self.global_manager.get('dice_list')
             for current_die in self.global_manager.get('dice_list'): #copy_dice_list:
                 current_die.remove()
-            for current_image in self.notification_images:
-                current_image.remove()
         if self.stops_trade:
             self.global_manager.set('ongoing_trade', False)
 
