@@ -1,7 +1,5 @@
 from .buttons import button
 from .game_transitions import set_game_mode
-#from .mobs import explorer
-#from .mobs import worker
 from . import main_loop_tools
 from . import notification_tools
 from . import text_tools
@@ -61,7 +59,6 @@ class recruitment_button(button):
                 recruitment_type: string representing the type of unit recruited by this button
                 button_type is always set to 'recruitment'
         '''
-        #possible_recruitment_types = global_manger.#['European worker', 'explorer', 'ship']
         if recruitment_type in global_manager.get('recruitment_types'):
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
@@ -112,10 +109,8 @@ class buy_commodity_button(button):
         possible_commodity_types = global_manager.get('commodity_types')
         if commodity_type in possible_commodity_types:
             image_id = 'scenery/resources/buttons/' + commodity_type + '.png'
-            #self.mob_image_id = 'mobs/' + commodity_type + '/default.png'
         else:
             image_id = 'misc/default_button.png'
-            #self.mob_image_id = 'mobs/default/default.png'
         self.commodity_type = commodity_type
         self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
         global_manager.set(commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
@@ -138,10 +133,6 @@ class buy_commodity_button(button):
                     text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not purchase commodities', self.global_manager)
-            #if self.recruitment_type == 'explorer':
-            #    new_explorer = explorer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'Explorer', ['strategic', 'europe'], self.global_manager)
-            #elif self.recruitment_type == 'European worker':
-            #    new_worker = worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
 
     def update_tooltip(self):
         '''
@@ -153,10 +144,3 @@ class buy_commodity_button(button):
         self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
         self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])
         
-#create button that goes to slots in europe screen and matches mobs in the europe grid
-
-#create button that matches different things that can be purchased and purchases them when clicked
-
-#create button for each type of resources cargo that sells them and possibly allows you to sell a certain amount
-
-#create a way to move entities onto ships within this screen

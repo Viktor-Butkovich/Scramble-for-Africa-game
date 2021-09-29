@@ -25,10 +25,7 @@ class cell():
         self.pixel_x, self.pixel_y = self.grid.convert_coordinates((self.x, self.y))
         self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
-        #self.occupied = False
         self.grid.cell_list.append(self)
-        #self.adjacent_list = [] #list of 4 nearby cells, used for movement
-        #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'

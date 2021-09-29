@@ -21,7 +21,7 @@ def create_image_dict(stem):
     '''
     '''if stem is a certain value, add extra ones, such as special combat animations: only works for images in graphics/mobs'''
     stem = 'mobs/' + stem
-    stem += '/'#goes to that folder
+    stem += '/'
     image_dict = {}
     image_dict['default'] = stem + 'default.png'
     image_dict['right'] = stem + 'right.png'  
@@ -70,10 +70,6 @@ def can_split(global_manager):
 
 def can_embark_vehicle(global_manager): #if 1 vehicle and 1 non-vehicle selected
     selected_list = get_selected_list(global_manager)
-    #if len(selected_list) == 2:
-    #    if (selected_list[0].is_vehicle and selected_list[0].has_crew and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle and selected_list[1].has_crew):
-            #1 of each, vehicle must have crew
-    #        if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
     num_vehicles = 0
     vehicle = 'none'
     riders = []
@@ -158,10 +154,7 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
         Uses the calibrate function of each of the buttons and actors in the inputted info_display_list, causing them to reflect the appearance or information relating to the inputted actor 
     '''
     if info_display_list == global_manager.get('tile_info_display_list'):
-        #if not global_manager.get('displayed_tile') == 'none':
-        #    global_manager.get('displayed_tile').showing_calibrated_outline = False
         global_manager.set('displayed_tile', new_actor)
-        #global_manager.get('displayed_tile').showing_calibrated_outline = True
     elif info_display_list == global_manager.get('mob_info_display_list'):
         global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:

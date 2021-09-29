@@ -727,7 +727,6 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
             self.attached_mob = 'none'
             
         if len(self.old_contained_mobs) > self.index:
-            #if not self.global_manager.get('displayed_mob') == 'none':
             displayed_tile = self.global_manager.get('displayed_tile')
             if self.index == 0 and self.can_show() and not displayed_tile == 'none':
                 if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:

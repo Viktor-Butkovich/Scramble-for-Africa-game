@@ -98,7 +98,6 @@ class actor_match_background_image(free_image):
     def __init__(self, image_id, coordinates, width, height, modes, global_manager):
         super().__init__(image_id, coordinates, width, height, modes, global_manager)
         self.actor = 'none'
-        #self.outline_Rect = pygame.Rect(self.x - 2, self.y - self.height - 2, self.width + 4, self.height + 4)
 
     def calibrate(self, new_actor):
         self.actor = new_actor
@@ -484,13 +483,11 @@ class commodity_match_label(actor_match_label):
             matched_actor_type: string representing whether this label should match selected mobs or tiles
             global_manager: global_manager_template object
         '''
-        #self.actor = 'none'
         self.current_commodity = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', matched_actor_type, global_manager)
         self.showing_commodity = False
         self.commodity_index = commodity_index
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
-        #self.attached_buttons = []
         if matched_actor_type == 'mob':
             self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'misc/commodity_drop_button.png', self, global_manager))
             self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'misc/commodity_drop_all_button.png', self, global_manager))
@@ -502,7 +499,7 @@ class commodity_match_label(actor_match_label):
 
     def set_label(self, new_message):
         super().set_label(new_message)
-        if not self.actor == 'none': #self.setup_complete: #if not new_message == 'n/a':
+        if not self.actor == 'none':
             commodity_list = self.actor.get_held_commodities()
             if len(commodity_list) > self.commodity_index:
                 commodity = commodity_list[self.commodity_index]
@@ -1113,9 +1110,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
                         self.image.set_image('misc/railroad_button.png')
-                #elif self.building_type == 'port': #port and train station info never changes
-                #    self.building_name = 'port'
-                #    self.image.set_image('misc/
 
     def can_show(self):
         result = super().can_show()
@@ -1216,8 +1210,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             elif self.building_name == 'railroad':
                 building_image_id = 'buildings/infrastructure/railroad.png'
             new_building = buildings.infrastructure_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, building_image_id, self.building_name, self.building_name,
-                ['strategic'], self.global_manager)
-            #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
+                ['strategic'], self.global_manager) #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
         elif self.building_type == 'trading_post':
             new_building = buildings.trading_post((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
         else:

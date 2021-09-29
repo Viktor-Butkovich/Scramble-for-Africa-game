@@ -32,7 +32,6 @@ class actor():
         self.tooltip_text = []
         if self.can_hold_commodities:
             self.inventory_setup()
-        #self.removed = False
             
     def set_image(self, new_image):
         for current_image in self.images:
@@ -171,7 +170,6 @@ class actor():
         self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
         for current_image in self.images:
             self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
-        #self.removed = True
 
     def touching_mouse(self):
         '''
@@ -218,8 +216,6 @@ class actor():
 
         if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
             mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
-        #if (self.global_manager.get('display_height') - mouse_y) - (len(tooltip_image.tooltip_text) * self.global_manager.get('font_size') + 5 + tooltip_image.tooltip_outline_width) < 0:
-        #    mouse_y = self.global_manager.get('display_height') - tooltip_image.tooltip_box.height
         tooltip_image.tooltip_box.x = mouse_x
         tooltip_image.tooltip_box.y = mouse_y
         tooltip_image.tooltip_outline.x = tooltip_image.tooltip_box.x - tooltip_image.tooltip_outline_width

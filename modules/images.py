@@ -310,16 +310,11 @@ class infrastructure_connection_image(building_image):
         self.direction = direction
         self.global_manager.get('infrastructure_connection_list').append(self)
         self.change_with_other_images = False #determines whether set_image function of actor affects this image
-        #self.removed = False
 
     def update_roads(self):
-        #if not self.removed: #prevents images from previous infrastructure versions from causing errors, non-ideal solution
         own_tile_infrastructure_type = self.actor.infrastructure_type
         adjacent_cell = 'none'
-        #if not self.grid.is_mini_grid:
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
-        #else: #if on mini grid, use adjacent cell of main grid to get connection correct
-        #    adjacent_cell = self.actor.images[0].current_cell.tile.get_equivalent_tile().cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
             adjacent_tile_infrastructure = adjacent_cell.contained_buildings['infrastructure']
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
@@ -341,7 +336,6 @@ class infrastructure_connection_image(building_image):
             
     def remove(self):
         self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
-        #self.removed = True
         super().remove()
 
     def can_show(self):
@@ -412,8 +406,6 @@ class mob_image(actor_image):
             Returns whether this image should be shown. If it is attached to an officer or worker that is part of a group, it should not be shown.
             If it is not attached to an officer or worker in a group and it is at the front of a cell, it should be shown. Otherwise, it should not be shown.
         '''
-        #if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
-        #    return(False)
         if self.actor.in_vehicle or self.actor.in_group or self.actor.in_building:
             return(False)
         if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:

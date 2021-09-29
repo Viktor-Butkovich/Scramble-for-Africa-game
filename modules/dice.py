@@ -40,7 +40,6 @@ class die(button):
         self.in_notification = True #dice are attached to notifications and should be drawn over other buttons
 
     def on_click(self):
-        #if self.global_manager.get('ongoing_exploration') or self.global_manager.get('ongoing_trade'):
         if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
             self.global_manager.get('notification_list')[0].on_click()#self.start_rolling()
 

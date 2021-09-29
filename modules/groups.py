@@ -43,7 +43,6 @@ class group(mob):
         self.worker.inventory_setup()
         self.officer.inventory_setup()
         self.select()
-        #self.veteran = self.officer.veteran
         if self.veteran:
             self.set_name('Veteran expedition')
         self.veteran_icons = self.officer.veteran_icons
@@ -109,8 +108,6 @@ class group(mob):
         '''
         if self.can_hold_commodities:
             self.drop_inventory()
-        #self.officer.inventory = self.inventory
-        #self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
         self.worker.set_movement_points(self.movement_points)
@@ -223,7 +220,6 @@ class caravan(group):
 
         roll_result = 0
         if self.veteran:
-            #text += ("The veteran merchant can roll twice and pick the higher result /n")
                 
             first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, min_crit_success, max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
             self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, min_crit_success, max_crit_fail)
@@ -264,9 +260,6 @@ class caravan(group):
                 " consumer goods to sell. /n /nClick to start trading. /n /n", trade_type, self.global_manager)
             choice_info_dict = {'caravan': self, 'village': village, 'type': 'willing to trade'}
             text += "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /n"
-            #if (not self.veteran) and roll_result >= min_crit_success:
-            #    text += "The merchant negotiated well enough to become a veteran."
-            #    choice_info_dict['promotes'] = True
             text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
@@ -274,10 +267,8 @@ class caravan(group):
             notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
     def trade(self, notification):
-        #self.global_manager.set('ongoing_trade', True)
         self.notification = notification
         village = self.notification.choice_info_dict['village']
-        #self.change_inventory('consumer goods', -1) done later in trade notification removal
         text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
         roll_difficulty = 4
         if self.veteran:
@@ -291,8 +282,6 @@ class caravan(group):
 
         roll_result = 0
         if self.veteran:
-            #text += ("The veteran merchant can roll twice and pick the higher result /n /n")
-                
             first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, 0, self.global_manager) #0 requirement for critical fail means critical fails will not occur
             self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, 7, 0)
                                 
@@ -461,13 +450,10 @@ class expedition(group):
             notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
-            
-        #text += "/n"
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            #text += ("The veteran explorer can roll twice and pick the higher result /n")
                 
             first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
             self.display_exploration_die((die_x, 500), first_roll_list[0])
@@ -540,13 +526,7 @@ class expedition(group):
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
-        #copy_exploration_mark_list = self.global_manager.get('exploration_mark_list'): #exploration_mark_list
-        #for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
-        #    current_exploration_mark.remove()
-        #self.global_manager.set('exploration_mark_list', [])
-        #self.exploration_mark_list = []
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
-        #self.global_manager.set('ongoing_exploration', False)
 
 def create_group(worker, officer, global_manager):
     '''
