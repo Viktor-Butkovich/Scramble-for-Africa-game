@@ -243,11 +243,6 @@ SFA folder
 		class port
 		class resource_building
 
-        bars.py
-            imports pygame
-            class bar
-                class actor_bar
-
         actors.py
             imports pygame, text_tools, utility, actor_utility, scaling
             class actor
@@ -257,12 +252,6 @@ SFA folder
 	    def stop_exploration
             def create_image_dict
 	    def update_roads
-            def can_merge
-            def can_split
-	    def can_embark_vehicle
-	    def can_disembark_vehicle
-	    def can_crew_vehicle
-	    def can_uncrew_vehicle
             def get_selected_list
 	    def deselect_all
 	    def get_random_ocean_coordinates

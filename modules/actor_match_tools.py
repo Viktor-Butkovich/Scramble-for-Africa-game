@@ -23,7 +23,7 @@ class actor_match_free_image(free_image):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
             int width: Pixel width of this image
             int height: Pixel height of this image
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this image can appear
             string actor_image_type: Type of actor whose appearance will be copied by this image
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -115,7 +115,7 @@ class actor_match_infrastructure_connection_image(actor_match_free_image):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
             int width: Pixel width of this image
             int height: Pixel height of this image
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this image can appear
             string actor_image_type: Type of actor whose appearance will be copied by this image
             string direction: 'up', 'down', 'left', or 'right', side of tile that this image points to
             global_manager_template global_manager: Object that accesses shared variables
@@ -138,7 +138,7 @@ class actor_match_background_image(free_image):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
             int width: Pixel width of this image
             int height: Pixel height of this image
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this image can appear
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -198,7 +198,7 @@ class label_image(free_image):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
             int width: Pixel width of this image
             int height: Pixel height of this image
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this image can appear
             label attached_label: The label that this image is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -233,7 +233,7 @@ class actor_match_label(label):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
             int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
             int height: Pixel height of this label
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this label can appear
             string image_id: File path to the image used by this object
             string actor_label_type: Type of actor information shown by this label
             string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
@@ -477,7 +477,7 @@ class actor_match_label(label):
         Description:
             Sets this label's text to the inputted string. Also changes locations of attached buttons since the length of the label may change.
         Input:
-            string new_message: new text to set this label to
+            string new_message: New text to set this label to
         Output:
             None
         '''
@@ -496,7 +496,7 @@ class actor_match_label(label):
         Description:
             Sets this label's y position and that of its attached buttons
         Input:
-            int new_y: new y coordinate to set this label and its buttons to
+            int new_y: New y coordinate to set this label and its buttons to
         Output:
             None
         '''
@@ -544,11 +544,11 @@ class list_item_label(actor_match_label):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
             int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
             int height: Pixel height of this label
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this label can appear
             string image_id: File path to the image used by this object
             string actor_label_type: Type of actor information shown by this label
-            int list_index: index to determine which item of a list is reflected by this label
-            string list_type: type of list reflected by this lagel, such as a 'resource building' for a label type of 'building worker' to show that this label shows the workers attached to resource buildings but not other buildings
+            int list_index: Index to determine which item of a list is reflected by this label
+            string list_type: Type of list reflected by this lagel, such as a 'resource building' for a label type of 'building worker' to show that this label shows the workers attached to resource buildings but not other buildings
             string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -596,9 +596,9 @@ class building_workers_label(actor_match_label):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
             int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
             int height: Pixel height of this label
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this label can appear
             string image_id: File path to the image used by this object
-            string building_type: type of building this label shows the workers of, like 'resource building'
+            string building_type: Type of building this label shows the workers of, like 'resource building'
             string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -673,9 +673,9 @@ class commodity_match_label(actor_match_label):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
             int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
             int height: Pixel height of this label
-            string list modes: Game modes in which this image can appear
+            string list modes: Game modes during which this label can appear
             string image_id: File path to the image used by this object
-            int commodity_index: index to determine which item of an actor's inventory is reflected by this label
+            int commodity_index: Index to determine which item of an actor's inventory is reflected by this label
             string matched_actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -700,7 +700,7 @@ class commodity_match_label(actor_match_label):
         Description:
             Sets this label's text to the inputted string and changes locations of attached buttons since the length of the label may change. Also changes this label's attached image to match the commodity
         Input:
-            string new_message: new text to set this label to
+            string new_message: New text to set this label to
         Output:
             None
         '''
@@ -762,11 +762,11 @@ class label_button(button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string button_type: determines the function of this button, like 'end turn'
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string button_type: Determines the function of this button, like 'end turn'
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -802,10 +802,10 @@ class worker_crew_vehicle_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             string vehicle_type: 'train' or 'ship', determines what kind of vehicle this button crews
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -871,10 +871,10 @@ class pick_up_all_passengers_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -932,10 +932,10 @@ class crew_vehicle_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1000,10 +1000,10 @@ class uncrew_vehicle_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1062,10 +1062,10 @@ class merge_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1132,10 +1132,10 @@ class split_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1192,11 +1192,11 @@ class remove_worker_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
-            string building_type: determines type of building this button removes workers from, like 'resource building'
+            label attached_label: Label that this button is attached to
+            string building_type: Determines type of building this button removes workers from, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1247,10 +1247,10 @@ class disembark_vehicle_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1316,10 +1316,10 @@ class embark_vehicle_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             string vehicle_type: 'train' or 'ship', determines what kind of vehicle this button embarks
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -1391,10 +1391,10 @@ class cycle_passengers_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1450,11 +1450,11 @@ class worker_to_building_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string building_type: type of building this label attaches workers to, like 'resource building'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string building_type: Type of building this label attaches workers to, like 'resource building'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1552,10 +1552,10 @@ class trade_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1619,10 +1619,10 @@ class switch_theatre_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1686,10 +1686,10 @@ class build_train_button(label_button):
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
-            label attached_label: label that this button is attached to
+            label attached_label: Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1750,10 +1750,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
             int width: Pixel width of this button
             int height: Pixel height of this button
-            string keybind_id: determines the keybind id that activates this button, like 'pygame.K_n'
-            string list modes: Game modes in which this image can appear
-            label attached_label: label that this button is attached to
-            string building_type: type of building that this button builds, like 'resource building'
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            label attached_label: Label that this button is attached to
+            string building_type: Type of building that this button builds, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
