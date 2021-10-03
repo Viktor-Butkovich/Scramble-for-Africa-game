@@ -147,7 +147,7 @@ class porters(group):
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
-        self.inventory_capacity = 10
+        self.inventory_capacity = 9
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
@@ -173,7 +173,7 @@ class caravan(group):
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
         self.can_trade = True
-        self.inventory_capacity = 10
+        self.inventory_capacity = 9
         self.trades_remaining = 0
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing

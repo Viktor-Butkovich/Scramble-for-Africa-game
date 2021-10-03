@@ -7,19 +7,22 @@ from . import actor_utility
 
 class notification(label):
     '''
-    Label that disappear when clicked and prompts the user to click on it, can also have multiple lines
+    Label that has multiple lines, prompts the user to click on it, and disappears when clicked
     '''
-    
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
-            ideal_width: int representing the width that the notification will try to keep - each line of text will create a new line after the ideal width is reached
-            minimum_height: int representing the minimum height of the notification - if it has enough lines of text, its height will increase and the top of the notification will move up
-            modes: list of strings representing the game modes in which the notification can appear
-            image: string representing the file path to the notificaton's background image
-            message: string with lines separated by /n representing the text that will appear on the notification
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.global_manager.get('notification_list').append(self)
@@ -30,10 +33,12 @@ class notification(label):
 
     def draw(self):
         '''
+        Description:
+            Draws this notification and draws its text on top of it
         Input:
-            none
+            None
         Output:
-            Draws this label's image with its text
+            None
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             self.image.draw()
@@ -44,10 +49,13 @@ class notification(label):
                 
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
         '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Also
+                adds a prompt to close the notification at the end of the message
         Input:
             none
         Output:
-            Converts the notification's string message to a list of strings, with each string representing a line of text and having a length depending on the /n characters in the message and the notification's ideal width
+            None
         '''
         new_message = []
         next_line = ""
@@ -77,19 +85,23 @@ class notification(label):
                     
     def update_tooltip(self):
         '''
+        Description:
+            Sets this notification's tooltip to what it should be. By default, notifications prompt the player to close them
         Input:
-            none
+            None
         Output:
-            Sets this notification's tooltip to an appropriate message
+            None
         '''
         self.set_tooltip(["Click to remove this notification"])
 
     def set_label(self, new_message):
         '''
+        Description:
+            Sets each line of this notification's text to the corresponding item in the inputted list, adjusting width and height as needed
         Input:
-            string representing this label's new text
+            string list new_message: New text for this notification, with each item corresponding to a line of text
         Output:
-            Sets this label's text to a list based on the inputted string and changes its size as needed
+            None
         '''
         self.message = new_message
         self.format_message()
@@ -99,21 +111,24 @@ class notification(label):
 
     def on_click(self):
         '''
+        Description:
+            Controls this notification's behavior when clicked. By default, notifications are removed when clicked
         Input:
-            none
+            None
         Output:
-            The notification is deleted when clicked
+            None
         '''
-        #self.global_manager.set('ongoing_exploration', False)
-        #self.global_manager.set('ongoing_trade', False)
         self.remove()
             
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
+                if there is one
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         super().remove()
         notification_manager = self.global_manager.get('notification_manager')
@@ -129,43 +144,66 @@ class dice_rolling_notification(notification):
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            Same as superclass
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
 
     def format_message(self):
         '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
         Input:
             none
         Output:
-            Converts the notification's string message to a list of strings, with each string representing a line of text and having a length depending on the /n characters in the message and the notification's ideal width
-            The list created will not have a prompt to click on the notification, unlike the superclass
+            None
         '''
         super().format_message()
         self.message.pop(-1) #remove "Click to remove this notification"
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this notification's tooltip to what it should be. Dice rolling notifications tell the user to wait for the dice to finish rolling
+        Input:
+            None
+        Output:
+            None
+        '''
         self.set_tooltip(['Wait for the dice to finish rolling'])
 
     def on_click(self):
         '''
+        Description:
+            Controls this notification's behavior when clicked. Unlike superclass, dice rolling notifications are not removed when clicked
         Input:
-            none
+            None
         Output:
-            Dice rolling notifications do nothing when clicked, unlike the superclass
+            None
         '''
         nothing = 0 #does not remove self when clicked
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification is shown, if there is one. Dice rolling notifications are
+                removed when all dice finish rolling rather than when clicked. Upon removal, dice rolling notifications highlight the chosen die with a color corresponding to the roll's outcome
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification, if any, will be shown.
-            A dice rolling notification is removed when all of the dice finish rolling, rather than when the notification is clicked.
-            Additionally, if multiple dice are present, the dice rolling notification will highlight the highest result when the dice are finished rolling to show which die's result will be used. 
+            None
         '''
         super().remove()
         self.global_manager.set('current_dice_rolling_notification', 'none')
@@ -181,7 +219,29 @@ class dice_rolling_notification(notification):
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
 
 class trade_notification(notification):
+    '''
+    Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, trade_info_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            dictionary trade_info_dict: Contains information that affects this notification's behavior:
+                string key: 'is_last', boolean value: If True, this notification removes currently rolling dice when removed
+                string key: 'stops_trade', boolean value: If True, trading will stop when this notification is removed
+                string key: 'commodity_trade', boolean value: If True, this notification will show a transaction
+                string key: 'commodity_trade_type', string value: If equals 'successful_commodity_trade', the trade will be successful and a commodity will be given for the transaction
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''   
         self.trade_info_dict = trade_info_dict
         self.is_last = self.trade_info_dict['is_last']
         self.gives_commodity = False
@@ -193,9 +253,6 @@ class trade_notification(notification):
                 self.gives_commodity = True
         
         self.notification_images = []
-        #explored_cell = current_expedition.destination_cell
-        #explored_tile = explored_cell.tile
-        #explored_terrain_image_id = explored_cell.tile.image_dict['default']
 
         if self.is_commodity_trade:
             self.trade_result = global_manager.get('trade_result')
@@ -213,17 +270,28 @@ class trade_notification(notification):
         
     def format_message(self):
         '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
         Input:
             none
         Output:
-            Same as superclass except for the last line, "Click to remove this notification", being removed to allow for a more specific message for the circumstances of the notification
+            None
         '''
         super().format_message()
         self.message.pop(-1)
         
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. If this trade is a transaction,
+                consumer goods wil be lost upon removal. If this trade is also a successful transaction, a random commodity will be gained in return. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.is_commodity_trade:
-            #self.trade_result = self.global_manager.get('trade_result')
             caravan = self.trade_result[0]
             caravan.change_inventory('consumer goods', -1)
             if self.gives_commodity:
@@ -234,8 +302,7 @@ class trade_notification(notification):
         for current_image in self.notification_images:
             current_image.remove()
         if self.is_last:
-            #copy_dice_list = self.global_manager.get('dice_list')
-            for current_die in self.global_manager.get('dice_list'): #copy_dice_list:
+            for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
         if self.stops_trade:
             self.global_manager.set('ongoing_trade', False)
@@ -245,6 +312,21 @@ class exploration_notification(notification):
     Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last exploration notification. If it is the last, any side images will be removed when it is removed
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.is_last = is_last
         if self.is_last:
             current_expedition = actor_utility.get_selected_list(global_manager)[0]
@@ -262,21 +344,25 @@ class exploration_notification(notification):
 
     def format_message(self):
         '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
         Input:
             none
         Output:
-            Same as superclass except for the last line, "Click to remove this notification", being removed to allow for a more specific message for the circumstances of the notification
+            None
         '''
         super().format_message()
         self.message.pop(-1)
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification is shown, if there is one
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification, if any, will be shown.
-            Exploration notifications
+            None
         '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
@@ -290,7 +376,6 @@ class exploration_notification(notification):
             self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-
         if self.is_last:
             for current_image in self.notification_images:
                 current_image.remove()

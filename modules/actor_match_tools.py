@@ -763,7 +763,7 @@ class label_button(button):
             int width: Pixel width of this button
             int height: Pixel height of this button
             string button_type: Determines the function of this button, like 'end turn'
-            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
             string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
             label attached_label: Label that this button is attached to

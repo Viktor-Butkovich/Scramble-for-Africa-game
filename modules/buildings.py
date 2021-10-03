@@ -199,7 +199,7 @@ class train_station(building):
         '''
         super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)
         for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 5
+            current_image.current_cell.tile.inventory_capacity += 9
 
 class port(building):
     '''
@@ -222,7 +222,7 @@ class port(building):
         super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
         for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 5
+            current_image.current_cell.tile.inventory_capacity += 9
 
 class resource_building(building):
     '''
@@ -247,6 +247,8 @@ class resource_building(building):
         super().__init__(coordinates, grids, image_id, name, 'resource', modes, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.worker_capacity = 1 #improve with upgrades
+        for current_image in self.images:
+            current_image.current_cell.tile.inventory_capacity += 9
 
     def remove(self):
         '''

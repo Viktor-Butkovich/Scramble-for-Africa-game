@@ -233,7 +233,7 @@ class actor():
     def touching_mouse(self):
         '''
         Description:
-            Sets this image's tooltip to that of the actor in front of it
+            Returns whether any of this actor's images is colliding with the mouse
         Input:
             None
         Output:
@@ -261,7 +261,7 @@ class actor():
     def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
         Description:
-            Draws this actor's tooltip. The tooltip's location may vary when the tooltip is near the edge of the screen or if multiple tooltips are being shown
+            Draws this actor's tooltip when moused over. The tooltip's location may vary when the tooltip is near the edge of the screen or if multiple tooltips are being shown
         Input:
             boolean below_screen: Whether any of the currently showing tooltips would be below the bottom edge of the screen. If True, moves all tooltips up to prevent any from being below the screen
             boolean beyond_screen: Whether any of the currently showing tooltips would be beyond the right edge of the screen. If True, moves all tooltips to the left to prevent any from being beyond the screen

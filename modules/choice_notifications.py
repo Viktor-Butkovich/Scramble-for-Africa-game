@@ -13,6 +13,22 @@ class choice_notification(notification):
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, button_types, choice_info_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            string list button_types: List of strings that correspond to the button types of this notification's choice buttons, like ['end turn', 'none'] for an end turn button and a do nothing button
+            dictionary choice_info_dict: string keys corresponding to various values used by this notification's choice buttons when clicked
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         button_height = scaling.scale_height(50, global_manager)
         coordinates = (coordinates[0], coordinates[1] + button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
         minimum_height -= button_height
@@ -32,21 +48,49 @@ class choice_notification(notification):
 
     def format_message(self):
         '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
         Input:
             none
         Output:
-            Same as superclass except for the last line, "Click to remove this notification", being removed to allow for a more specific message for the circumstances of the notification
+            None
         '''
         super().format_message()
         self.message.pop(-1)
 
     def on_click(self):
+        '''
+        Description:
+            Controls this notification's behavior when clicked. Choice notifications do nothing when clicked, instead acting when their choice buttons are clicked
+        Input:
+            None
+        Output:
+            None
+        '''
         nothing = 0 #does not remove self when clicked
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this notification's tooltip to what it should be. Choice notifications prompt the user to click on one of its choice buttons to close it
+        Input:
+            None
+        Output:
+            None
+        '''
         self.set_tooltip(['Choose an option to close this notification'])
 
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification is shown, if there is one. Choice notifications are removed
+                when one of their choice buttons is clicked
+        Input:
+            None
+        Output:
+            None
+        '''
         self.global_manager.set('making_choice', False)
         super().remove()
         for current_choice_button in self.choice_buttons:
@@ -54,11 +98,26 @@ class choice_notification(notification):
 
 class choice_button(button):
     '''
-    Button with no keybind that is attached to a choice notification and removes its notification and all of its buttons when clicked
+    Button with no keybind that is attached to a choice notification and removes its notification when clicked
     '''
     def __init__(self, coordinates, width, height, button_type, modes, image_id, notification, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string button_type: Determines the function of this button, like 'end turn'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            choice_notification notification: notification to which this choice button is attached
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.notification = notification
-        if button_type == 'recruitment': #done before superclass init so that tooltip setup works correctly
+        if button_type == 'recruitment':
             self.message = 'Recruit'
             self.recruitment_type = self.notification.choice_info_dict['recruitment_type']
             self.cost = self.notification.choice_info_dict['cost']
@@ -90,17 +149,41 @@ class choice_button(button):
         self.in_notification = True
 
     def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. Choice buttons remove their notifications when clicked, along with the normal behaviors associated with their button_type
+        Input:
+            None
+        Output:
+            None
+        '''
         super().on_click()
         if self.can_show(): #copying conditions of superclass on_click to make sure that notification is only removed when effect of click is done
             self.notification.remove()
 
     def draw(self):
+        '''
+        Description:
+            Draws this button below its choice notification and draws a description of what it does on top of it
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.image.draw()
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.button_type == 'recruitment':
             self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
         elif self.button_type == 'start trading':
@@ -117,10 +200,36 @@ class choice_button(button):
             self.set_tooltip(['Do nothing'])
 
 class recruitment_choice_button(choice_button):
+    '''
+    choice_button that recruits a unit when clicked
+    '''
     def __init__(self, coordinates, width, height, button_type, modes, image_id, notification, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string button_type: Determines the function of this button, like 'end turn'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            choice_notification notification: notification to which this choice button is attached
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, button_type, modes, image_id, notification, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. Recruitment choice buttons recruit a unit, pay for the unit's cost, and remove their attached notification when clicked
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             self.global_manager.get('money_tracker').change(-1 * self.cost)
