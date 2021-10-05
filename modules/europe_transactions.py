@@ -7,13 +7,24 @@ from . import utility
 
 class european_hq_button(button):
     '''
-    A button that switches to the european headquarters screen, separated from buttons to reduce dependencies
+    A button that switches to the European Headquarters screen
     '''
     def __init__(self, coordinates, width, height, color, keybind_id, enters_europe, modes, image_id, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass but without button type, except:
-            enters_europe: boolean representing whether the button enters or leaves the europe game mode
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            boolean enters_europe: True if this button goes from the strategic game mode to the europe game mode, False if it does the opposite
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         button_type = 'europe_transactions'
         self.enters_europe = enters_europe
@@ -21,10 +32,12 @@ class european_hq_button(button):
 
     def on_click(self):
         '''
+        Description:
+            Controls this button's behavior when clicked. This type of button goes between the europe and strategic game modes
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when clicked. A european_hq_button will transfer between the europe and strategic game modes, depending on the type of european_hq_button.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -38,10 +51,12 @@ class european_hq_button(button):
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type. This type of button has a tooltip describing whether it enters or exits the europe game mode
         Input:
-            none
+            None
         Output:
-            Sets the button's tooltip to what it should be. A european_hq_button will have a tooltip describing whether it enters or exits the europe game mode.
+            None
         '''
         if self.enters_europe:
             self.set_tooltip(['Enters the European Company Headquarters screen'])
@@ -50,14 +65,23 @@ class european_hq_button(button):
 
 class recruitment_button(button):
     '''
-    Button that, when clicked, creates a new unit and places it in Europe. The unit created will depend on the button's recruitment type.
+    Button that creates a new unit with a type depending on recruitment_type and places it in Europe
     '''
     def __init__(self, coordinates, width, height, color, recruitment_type, keybind_id, modes, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass, except:
-                recruitment_type: string representing the type of unit recruited by this button
-                button_type is always set to 'recruitment'
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string recruitment_type: Type of unit recruited by this button, like 'explorer'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         if recruitment_type in global_manager.get('recruitment_types'):
             image_id = 'mobs/' + recruitment_type + '/button.png'
@@ -71,10 +95,12 @@ class recruitment_button(button):
 
     def on_click(self):
         '''
+        Description:
+            Controls this button's behavior when clicked. This type of button creates a new unit with a type depending on recruitment_type and places it in Europe
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when clicked. A recruitment button will create a new unit and place it in Europe. The unit created will depend on the button's recruitment type.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -91,20 +117,33 @@ class recruitment_button(button):
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type. This type of button has a tooltip describing the type of unit it recruits
         Input:
-            none
+            None
         Output:
-            Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
+            None
         '''
         self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + ' for ' + str(self.cost) + ' money.'])
 
 class buy_commodity_button(button):
+    '''
+    Button that buys a unit of commodity_type when clicked and has an image matching that of its commodity
+    '''
     def __init__(self, coordinates, width, height, color, commodity_type, modes, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass, except:
-                recruitment_type: string representing the type of unit recruited by this button
-                button_type is always set to 'recruitment'
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string commodity_type: Type of commmodity that this button buys, like 'consumer goods'
+            string list modes: Game modes during which this button can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         possible_commodity_types = global_manager.get('commodity_types')
         if commodity_type in possible_commodity_types:
@@ -118,10 +157,12 @@ class buy_commodity_button(button):
 
     def on_click(self):
         '''
+        Description:
+            Controls this button's behavior when clicked. This type of button buys a unit of the commodity_type commodity
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when clicked. A recruitment button will create a new unit and place it in Europe. The unit created will depend on the button's recruitment type.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -136,10 +177,12 @@ class buy_commodity_button(button):
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type. This type of button has a tooltip describing the commodity that it buys and its price
         Input:
-            none
+            None
         Output:
-            Sets the button's tooltip to what it should be. A recruitment button will have a tooltip describing the type of unit it recruits.
+            None
         '''
         self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
         self.set_tooltip(['Purchases 1 unit of ' + self.commodity_type + ' for ' + str(self.cost) + ' money.'])

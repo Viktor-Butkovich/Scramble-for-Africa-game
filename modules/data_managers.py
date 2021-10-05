@@ -6,41 +6,54 @@ from . import scaling
 
 class global_manager_template():
     '''
-    An object designed to manage a dictionary of shared variables and be passed between functions and objects as a simpler alternative to passing each variable or object separately
+    Object designed to manage a dictionary of shared variables and be passed between functions and objects as a simpler alternative to passing each variable or object separately
     '''
     def __init__(self):
         '''
+        Description:
+            Initializes this object
         Input:
-            none
+            None
+        Output:
+            None
         '''
         self.global_dict = {}
         
     def get(self, name):
         '''
+        Description:
+            Returns the value in this object's dictionary corresponding to the inputted key
         Input:
-            string name representing the name of an entry in this global_manager's dictionary
+            string name: Name of a key in this object's dictionary
         Output:
-            Returns the value corresponding to name's entry in this global_manager's dictionary
+            any type: The value corresponding to the inputted key's entry in this object's dictionary
         '''
         return(self.global_dict[name])
     
     def set(self, name, value):
         '''
+        Description:
+            Sets or initializes the inputted value for the inputted key in this object's dictionary
         Input:
-            string name representing the name of an entry to create/replace in this global_manager's dictionary, variable representing the value to set this entry to
+            string name: Name of the key in this object's dictionary to initialize/modify
+            any type value: Value corresponding to the new/modified key
         Output:
-            Creates/replaces an entry in this global_manager's dictionary based on the inputted name and value
+            None
         '''
         self.global_dict[name] = value
 
 class input_manager_template():
     '''
-    An object designed to manage the passing of typed input from the text box to different parts of the program
+    Object designed to manage the passing of typed input from the text box to different parts of the program
     '''
     def __init__(self, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            global_manager_template object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.previous_input = ''
@@ -51,10 +64,12 @@ class input_manager_template():
         
     def check_for_input(self):
         '''
+        Description:
+            Returns true if input was just being taken and is no longer being taken, showing that there is input ready. Otherwise, returns False.
         Input:
             None
         Output:
-            Returns True if input was just being taken and is no longer being taken, showing that there is input ready. Otherwise, returns False.
+            boolean: True if input was just being taken and is no longer being taken, showing that there is input ready. Otherwise, returns False.
         '''
         if self.old_taking_input == True and self.taking_input == False: 
             return(True)
@@ -63,10 +78,13 @@ class input_manager_template():
         
     def start_receiving_input(self, solicitant, message):
         '''
-        Input:
-            string representing the part of the program to sent input to, string representing the prompt for the user to enter input
-        Output:
+        Description:
             Displays the prompt for the user to enter input and prepares to receive input and send it to the part of the program requesting input
+        Input:
+            string solicitant: Represents the part of the program to send input to
+            string message: Prompt given to the player to enter input
+        Output:
+            None
         '''
         text_tools.print_to_screen(message, self.global_manager)
         self.send_input_to = solicitant
@@ -74,19 +92,23 @@ class input_manager_template():
         
     def update_input(self):
         '''
+        Description:
+            Updates whether this object is currently taking input
         Input:
-            none
+            None
         Output:
-            Updates whether the input_manager_template is currently taking input
+            None
         '''
         self.old_taking_input = self.taking_input
         
     def receive_input(self, received_input):
         '''
-        Input:
-            string representing the input entered by the user into the text box
-        Output:
+        Description:
             Sends the inputted string to the part of the program that initially requested input
+        Input:
+            String received_input: Input entered by the user into the text box
+        Output:
+            None
         '''
         if self.send_input_to == 'do something':
             if received_input == 'done':
@@ -96,12 +118,16 @@ class input_manager_template():
 
 class flavor_text_manager_template():
     '''
-    An object designed to read in flavor text and manage it, distributing it to other parts of the program when requested
+    Object that reads flavor text from .csv files and distributes it to other parts of the program when requested
     '''
     def __init__(self, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            global_manager_template object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.explorer_flavor_text_list = []
@@ -113,49 +139,127 @@ class flavor_text_manager_template():
                 
     def generate_flavor_text(self, subject):
         '''
-        Input:
-            string representing the type of flavor text to return
-        Output:
+        Description:
             Returns a random flavor text statement based on the inputted string
+        Input:
+            string subject: Represents the type of flavor text to return
+        Output:
+            string: Random flavor text statement of the inputted subject
         '''
         return(random.choice(self.subject_dict['explorer']))
 
 class value_tracker():
+    '''
+    Object that controls the value of a certain variable
+    '''
     def __init__(self, value_key, initial_value, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            string value_key: Key used to access this tracker's variable in the global manager
+            any type initial_value: Value that this tracker's variable is set to when initialized
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.global_manager = global_manager
         self.global_manager.set(value_key, initial_value)
         self.value_label = 'none'
         self.value_key = value_key
 
     def get(self):
+        '''
+        Description:
+            Returns the value of this tracker's variable
+        Input:
+            None
+        Output:
+            any type: Value of this tracker's variable
+        '''
         return(self.global_manager.get(self.value_key))
 
     def change(self, value_change):
+        '''
+        Description:
+            Changes the value of this tracker's variable by the inputted amount. Only works if this tracker's variable is a type that can be added to, like int, float, or string
+        Input:
+            various types value_change: Amount that this tracker's variable is changed. Must be the same type as this tracker's variable
+        Output:
+            None
+        '''
         self.global_manager.set(self.value_key, self.get() + value_change)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
     
     def set(self, new_value):
+        '''
+        Description:
+            Sets the value of this tracker's variable to the inputted amount
+        Input:
+            any type value_change: Value that this tracker's variable is set to
+        Output:
+            None
+        '''
         self.global_manager.set(self.value_key, initial_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
 class money_tracker(value_tracker):
+    '''
+    Value tracker that tracks money and causes the game to be lost when money runs out
+    '''
     def __init__(self, initial_value, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            any type initial_value: Value that the money variable is set to when initialized
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__('money', initial_value, global_manager)
 
     def change(self, value_change):
+        '''
+        Description:
+            Changes the money variable by the inputted amount
+        Input:
+            int value_change: Amount that the money variable is changed
+        Output:
+            None
+        '''
         super().change(value_change)
         if self.get() < 0:
             self.global_manager.set('crashed', True) #end game when money less than 0
 
     def set(self, new_value):
+        '''
+        Description:
+            Sets the money variable to the inputted amount
+        Input:
+            int value_change: Value that the money variable is set to
+        Output:
+            None
+        '''
         super().set(new_value)
         if self.get() < 0:
             self.global_manager.set('crashed', True) #end game when money less than 0
 
 class notification_manager_template():
+    '''
+    Object that controls the displaying of notifications
+    '''
     def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.notification_queue = []
         self.notification_type_queue = []
         self.choice_notification_choices_queue = []
@@ -164,6 +268,14 @@ class notification_manager_template():
         self.update_notification_layout()
 
     def update_notification_layout(self):
+        '''
+        Description:
+            Changes where notifications are displayed depending on the current game mode to avoid blocking relevant information
+        Input:
+            None
+        Output:
+            None
+        '''
         self.notification_width = 500
         self.notification_height = 500
         self.notification_y = 236
@@ -174,10 +286,12 @@ class notification_manager_template():
             
     def notification_to_front(self, message):
         '''
+        Description:
+            Displays a new notification with text matching the inputted string and a type based on what is in the front of this object's notification type queue
         Input:
-            string from the notification_queue representing the text of the new notification, global_manager_template object
+            string message: The text to put in the displayed notification
         Output:
-            Displays a new notification with text matching the inputted string. The type of notification is determined by first item of the notification_type_queue, a list of strings corresponding to the notification_queue.
+            None
         '''
         self.update_notification_layout()
         notification_type = self.notification_type_queue.pop(0)

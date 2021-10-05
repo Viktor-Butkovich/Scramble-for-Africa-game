@@ -2,12 +2,13 @@ import csv
 
 def read_csv(file_path):
     '''
+    Description:
+        Reads in .csv file and returns contents
     Input:
-        file path of .csv file as a string
+        string file_path: file path of .csv file
     Output:
-        Reads in .csv file, returning a list of lists of 1 string each, with each string being a line of the .csv file
+        string list list: list of lists containing 1 string each, with each string being a line of the .csv file
     '''
-    
     line_list = []
     file = open(file_path, 'r')
     csv_reader = csv.reader(file)

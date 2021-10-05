@@ -2,28 +2,41 @@ import pygame
 
 def rect_to_surface(rect):
     '''
+    Description:
+        Converts the inputted Rect to a Surface and returns it, allowing an image or text to be drawn on it
     Input:
-        a pygame Rect object
+        pygame.Rect rect: Rect to convert to a Surface
     Output:
-        Converts the inputted Rect to a pygame Surface and returns it, allowing an image or text to be drawn on it
+        pygame.Surface: Returns a version of the inputted Rect converted to a Surface
     '''
     return pygame.Surface((rect.width, rect.height))
 
 def display_image(image, x, y, global_manager):
     '''
-    Input:
-        a pygame image object, the pixel x coordinate at which to display the image, the pixel y coordinate at which to display the image, global_manager_template object
-    Output:
+    Description:
         Draws the inputted image at the inputted coordinates
+    Input:
+        pygame.image image: Image to be displayed
+        int x: Pixel x coordinate at which to display the image
+        int y: Pixel y coordinate at which to display the image
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
     '''
     global_manager.get('game_display').blit(image, (x, y))
 
 def display_image_angle(image, x, y, angle, global_manager):
     '''
+    Description:
+        Draws the inputted image at the inputted coordinates tilted at the inputted angle
     Input:
-        a pygame image object, the pixel x coordinate at which to display the image, the pixel y coordinate at which to display the image, the angle at which to draw the image global_manager_template object
+        pygame.image image: Image to be displayed
+        int x: Pixel x coordinate at which to display the image
+        int y: Pixel y coordinate at which to display the image
+        int angle: Angle in degrees at which to display the image
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Draws inputted image at the inputted coordinates, turned at the inputted angle
+        None
     '''
     topleft = (x, y)
     rotated_image = pygame.transform.rotate(image, angle)

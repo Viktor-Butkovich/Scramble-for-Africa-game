@@ -669,7 +669,7 @@ class button():
         Input:
             None
         Output:
-            None
+            boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
