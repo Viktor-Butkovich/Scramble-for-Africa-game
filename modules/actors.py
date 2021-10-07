@@ -196,7 +196,7 @@ class actor():
     def set_tooltip(self, new_tooltip):
         '''
         Description:
-            Sets this actor's tooltip to the inputted list, with each inputted list representing a line of the tooltip
+            Sets this actor's tooltip to the inputted list, with each item representing a line of the tooltip
         Input:
             string list new_tooltip: Lines for this actor's tooltip
         Output:
@@ -209,7 +209,7 @@ class actor():
     def update_tooltip(self):
         '''
         Description:
-            Sets this image's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this actor's name
+            Sets this actor's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this actor's name
         Input:
             None
         Output:
@@ -237,7 +237,7 @@ class actor():
         Input:
             None
         Output:
-            boolean: True if any of this actor's images is colliding with the mouse, otherwise return False
+            boolean: Returns True if any of this actor's images is colliding with the mouse, otherwise returns False
         '''
         for current_image in self.images:
             if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image

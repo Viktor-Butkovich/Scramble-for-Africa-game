@@ -6,10 +6,12 @@ from . import actor_utility
 
 def update_display(global_manager):
     '''
+    Description:
+        Draws all images and shapes and calls the functions to draw tooltips and the text box
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Draws all images and shapes and calls the drawing of the text box and tooltips
+        None
     '''
     actor_utility.order_actor_info_display(global_manager, global_manager.get('mob_ordered_label_list'), global_manager.get('mob_ordered_list_start_y')) #global manager, list to order, top y of list
     actor_utility.order_actor_info_display(global_manager, global_manager.get('tile_ordered_label_list'), global_manager.get('tile_ordered_list_start_y'))
@@ -141,10 +143,12 @@ def update_display(global_manager):
 
 def action_possible(global_manager):
     '''
+    Description:
+        Because of this function, ongoing events such as trading, exploring, and clicking on a movement destination prevent actions such as pressing buttons from being done except when required by the event
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Returns whether the player is allowed to do anything, preventing actions from being done before other actions are done
+        boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
     if global_manager.get('ongoing_exploration'):
         return(False)
@@ -160,10 +164,12 @@ def action_possible(global_manager):
 
 def draw_loading_screen(global_manager):
     '''
+    Description:
+        Draws the loading screen, occupying the entire screen and blocking objects when the game is loading
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Draws loading screen while the game is still loading
+        None
     '''
     global_manager.get('game_display').fill((125, 125, 125))
     global_manager.get('loading_image').draw()
@@ -173,10 +179,13 @@ def draw_loading_screen(global_manager):
 
 def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
     '''
+    Description:
+        Decides whether each of the inputted objects should have their tooltips drawn based on if they are covered by other objects. The tooltip of each chosen object is drawn in order with correct placement and spacing
     Input:
-        list of objects that can draw tooltips based on the mouse position and their status, global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
+        object list possible_tooltip_drawers: All objects that possess tooltips and are currently touching the mouse and being drawn
     Output:
-        Draws tooltips of objecst that can draw tooltips, with tooltips beyond the first appearing at progressively lower locations
+        None
     '''
     possible_tooltip_drawers_length = len(possible_tooltip_drawers)
     font_size = scaling.scale_width(global_manager.get('font_size'), global_manager)
@@ -256,11 +265,13 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
 
 def draw_text_box(global_manager):
     '''
+    Description:
+        Draws the text input and output box at the bottom left of the screen along with the text it contains
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Draws the text box and any text it contains
-    ''' 
+        None
+    '''
     greatest_width = scaling.scale_width(300, global_manager)
     max_screen_lines = (scaling.scale_height(global_manager.get('default_display_height') // global_manager.get('font_size'), global_manager)) - 1
     max_text_box_lines = (scaling.scale_height(global_manager.get('text_box_height') // global_manager.get('font_size'), global_manager)) - 1
@@ -302,10 +313,13 @@ def draw_text_box(global_manager):
 
 def manage_rmb_down(clicked_button, global_manager):
     '''
+    Description:
+        If the player is right clicking on a grid cell, cycles the order of the units in the cell. Otherwise, has same functionality as manage_lmb_down
     Input:
-        boolean representing whether a button was just clicked (not pressed), global_manager_template object
+        boolean clicked_button: True if this click clicked a button, otherwise False
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Does nothing if the user was clicking a button, cycles through the mobs in a clicked location if user was not clicking a button, changing which mob is shown
+        None
     '''
     stopping = False
     if (not clicked_button) and action_possible(global_manager):
@@ -329,15 +343,17 @@ def manage_rmb_down(clicked_button, global_manager):
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
-def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called when lmb/rmb is released rather than pressed, clarify
+def manage_lmb_down(clicked_button, global_manager):
     '''
+    Description:
+        If the player is choosing a movement destination and the player clicks on a cell, chooses that cell as the movement destination. If the player is choosing a movement destination but did not click a cell, cancels the movement
+            destination selection process. Otherwise, if the player clicks on a cell, selects the top mob in that cell if any are present and moves the minimap to that cell. If the player clicks on a button, calls the on_click function
+            of that button. If nothing was clicked, deselects the selected mob if any is selected
     Input:
-        boolean representing whether a button was just clicked (not pressed), global_manager_template object
+        boolean clicked_button: True if this click clicked a button, otherwise False
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Will do nothing if the user was clicking a button.
-        If the user was not clicking a button and a mouse box was being drawn, the mouse box will stop being drawn and all mobs within it will be selected.
-        If the user was not clicking a button, was not drawing a mouse box, and clicked on a cell, the top mob (the displayed one) in that cell will be selected.
-        If the user was not clicking a button, any mobs not just selected will be unselected. However, if shift is being held down, no mobs will be unselected.
+        None
     '''
     if action_possible(global_manager) or global_manager.get('choosing_destination'):
         if (not clicked_button and (not global_manager.get('choosing_destination'))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
@@ -400,7 +416,15 @@ def manage_lmb_down(clicked_button, global_manager): #to do: seems to be called 
         elif not clicked_button:
             click_move_minimap(global_manager)
 
-def click_move_minimap(global_manager): #move minimap to clicked tile
+def click_move_minimap(global_manager): 
+    '''
+    Description:
+        When a cell on the strategic map grid is clicked, centers the minimap on that cell
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     mouse_x, mouse_y = pygame.mouse.get_pos()
     breaking = False
     for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked

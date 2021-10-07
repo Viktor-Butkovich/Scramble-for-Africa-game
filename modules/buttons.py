@@ -62,7 +62,7 @@ class button():
     def update_tooltip(self):
         '''
         Description:
-            Sets this image's tooltip to what it should be, depending on its button_type
+            Sets this button's tooltip to what it should be, depending on its button_type
         Input:
             None
         Output:
@@ -349,7 +349,7 @@ class button():
         Input:
             None
         Output:
-            boolean: True if this button is colliding with the mouse, otherwise return False
+            boolean: Returns True if this button is colliding with the mouse, otherwise returns False
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
@@ -841,7 +841,7 @@ class same_tile_icon(button):
     def update_tooltip(self):
         '''
         Description:
-            Sets this image's tooltip to what it should be, depending on its button_type. This type of button copies the tooltip of its attached mob
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button copies the tooltip of its attached mob
         Input:
             None
         Output:

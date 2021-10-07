@@ -6,11 +6,12 @@ from . import text_tools
 
 def main_loop(global_manager):
     '''
+    Description:
+        Controls the main loop of the program, handling events such as mouse clicks and button presses, controlling timers, and drawing shapes and images. The program will end once this function stops
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Controls the main loop of the program, handling events such as mouse clicks and button presses, controlling timers, and drawing shapes and images.
-        The program will end once this function stops.
+        None
     '''
     while not global_manager.get('crashed'):
         if len(global_manager.get('notification_list')) == 0:

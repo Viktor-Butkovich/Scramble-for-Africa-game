@@ -16,19 +16,23 @@ from . import main_loop_tools
 
 class group(mob):
     '''
-    Mob that is created by a combination of a worker and officer, can have unique capabilities, and restores its worker and officer upon being disbanded
+    Mob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
-            grids: list of grid objects on which the mob's images will appear
-            image_id: string representing the file path to the mob's default image
-            name: string representing the mob's name
-            modes: list of strings representing the game modes in which the mob can appear
-            worker: worker object representing the worker that is part of this group
-            officer: officer object representing the officer that is part of this group
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.worker = worker
         self.officer = officer
@@ -55,6 +59,15 @@ class group(mob):
             self.set_movement_points(self.worker.movement_points)
 
     def promote(self):
+        '''
+        Description:
+            Promotes this group's officer to a veteran after performing various actions particularly well, improving the capabilities of groups the officer is attached to in the future. Creates a veteran star icon that follows this
+                group and its officer
+        Input:
+            None
+        Output:
+            None
+        '''
         self.veteran = True
         self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
         self.officer.set_name("Veteran " + self.officer.name.lower()) #Explorer to Veteran explorer
@@ -68,10 +81,14 @@ class group(mob):
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
+        Description:
+            Links this group to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when a group that was previously attached to another actor becomes independent and
+                visible, like when a group disembarks a ship. Also moves its officer and worker to the new grid
         Input:
-            grid object representing the grid to which the group is transferring, tuple of two int variables representing the coordinates to which the group will move on the new grid
+            grid new_grid: grid that this group is linked to
+            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
-            Moves this group and all of its images to the inputted grid at the inputted coordinates. A group will also move its attached officer, worker, and veteran icons to the new grid.
+            None
         '''
         if self.veteran:
             for current_veteran_icon in self.veteran_icons:
@@ -92,19 +109,23 @@ class group(mob):
 
     def update_tooltip(self): #to do: show carried commodities in tooltip
         '''
+        Description:
+            Sets this group's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this group's name, the names of its officer and worker, and its movement points
         Input:
-            none
+            None
         Output:
-            Sets this group's tooltip to what it should be. A group's tooltip shows the name of the group, its officer, its worker, and its movement points.
+            None
         '''
         self.set_tooltip(["Name: " + self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def disband(self):
         '''
+        Description:
+            Separates this group into its officer and worker, destroying the group
         Input:
-            none
+            None
         Output:
-            Separates this group into its components, giving its inventory to the officer and setting their number of movement points to that of the group
+            None
         '''
         if self.can_hold_commodities:
             self.drop_inventory()
@@ -120,21 +141,26 @@ class group(mob):
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Used when the group is being disbanded, since it does not
+                remove its worker or officer
         Input:
-            none
+            None
         Output:
-            Removes the group from relevant lists and prevents it from further appearing in or affecting the program.
-            However, a group will not automatically remove its officer and worker when removed, since disbanding a group removes the group but not its members - to remove the members, use the die function instead
+            None
         '''
         super().remove()
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
 
     def die(self):
         '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Unlike remove, this is used when the group dies because it
+                also removes its worker and officer
         Input:
-            none
+            None
         Output:
-            Removes the group and its members from relevant lists and prevents them from further appearing in or affecting the program.
+            None
         '''
         self.remove()
         self.officer.remove()
@@ -145,6 +171,21 @@ class porters(group):
     A group with a porter foreman officer that can hold commodities
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
         self.inventory_capacity = 9
@@ -153,22 +194,47 @@ class porters(group):
 
 class construction_gang(group):
     '''
-    A group with an engineer officer that is able to construct buildings
+    A group with an engineer officer that is able to construct buildings and trains
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_construct = True
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
 class caravan(group):
+    '''
+    A group with a merchant officer that is able to establish trading posts and trade with native villages
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
@@ -179,6 +245,15 @@ class caravan(group):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
     def start_trade(self):
+        '''
+        Description:
+            Used when the player clicks on the trade button, displays a choice notification that allows the player to trade or not. Choosing to trade starts the trading process and
+                consumes the caravan's movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         village = self.images[0].current_cell.village
         choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
         self.global_manager.set('ongoing_trade', True)
@@ -196,6 +271,15 @@ class caravan(group):
         notification_tools.display_choice_notification(message, ['start trading', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def willing_to_trade(self, notification):
+        '''
+        Description:
+            Used when the player decides to start trading, allows the player to roll a die to see if the villagers are willing to trade. If they are willing to trade, displays a choice notification that allows the player to start the
+                transaction process or not. Otherwise, stops the trading process
+        Input:
+            notification notification: the current trade notification, used to access information relating to the trade such as which village is being traded with
+        Output:
+            None
+        '''
         self.notification = notification
         self.set_movement_points(0)
         village = self.notification.choice_info_dict['village']
@@ -267,6 +351,15 @@ class caravan(group):
             notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
     def trade(self, notification):
+        '''
+        Description:
+            Used in each part of the transaction process, allows the player to sell a unit of consumer goods and roll a die to try to find commodities in return. After the transaction, if the villagers are able to trade more and the
+                caravan has more consumer goods to sell, displays a choice notification that allows the player to start another transaction or not. Otherwise, stops the trading process
+        Input:
+            notification notification: the current trade notification, used to access information relating to the trade such as which village is being traded with
+        Output:
+            None
+        '''
         self.notification = notification
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
@@ -330,11 +423,16 @@ class caravan(group):
         
     def display_trade_die(self, coordinates, result, difficulty, min_crit_success, max_crit_fail):
         '''
+        Description:
+            Creates a die object with preset colors and the inputted location, possible roll outcomes, and predetermined roll result to use for trade rolls
         Input:
-            tuple of two int variables representing the pixel coordinates at which to display the die, int representing the final result that the die will roll
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+            int difficulty: Minimum roll required for a success
+            int min_crit_success: Minimum roll require for a critical success
+            int max_crit_fail: Maximum roll required for a critical failure
         Output:
-            Creates a die object at the inputted coordinates that will roll, eventually stopping displaying the inputted result with an outline depending on the outcome.
-            If multiple dice are present, only the die with the highest result will be outlined, showing that it was chosen.
+            None
         '''
         result_outcome_dict = {'min_success': difficulty, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
@@ -342,10 +440,24 @@ class caravan(group):
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
 class mission(group):
+    '''
+    A group with a missionary officer and church volunteer workers that can build churches and convert native villages
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
 
@@ -355,8 +467,19 @@ class expedition(group):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.exploration_mark_list = []
@@ -365,11 +488,13 @@ class expedition(group):
 
     def display_exploration_die(self, coordinates, result):
         '''
+        Description:
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for exploration rolls
         Input:
-            tuple of two int variables representing the pixel coordinates at which to display the die, int representing the final result that the die will roll
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
         Output:
-            Creates a die object at the inputted coordinates that will roll, eventually stopping displaying the inputted result with an outline depending on the outcome.
-            If multiple dice are present, only the die with the highest result will be outlined, showing that it was chosen.
+            None
         '''
         result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
@@ -378,14 +503,15 @@ class expedition(group):
 
     def move(self, x_change, y_change):
         '''
+        Description:
+            Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. Also allows exploration when moving into unexplored areas. Attempting an exploration starts the
+                exploration process, which requires various dice rolls to succeed and can also result in the death of the expedition or the promotion of its explorer. A successful exploration uncovers the area and units to move into it
+                normally in the future
         Input:
-            Same as superclass
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
         Output:
-            Same as superclass when moving into explored areas.
-            When moving into explored areas, the expedition will attempt to explore there, showing a series of notifications and dice rolls.
-            An exploration will result in the death of the expedition, no change, exploring the area, or exploring the area and promoting to the expedition's officer to a veteran, depending on the dice roll's result.
-            Within the move function, an exploration's result will be determined. However, its outcome will not be shown until the last of the exploration notifications is shown, at which point the outcome is
-            shown through the complete_exploration function.
+            None
         '''
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('show_minimap_outlines', True)
@@ -424,6 +550,15 @@ class expedition(group):
             super().move(x_change, y_change)
 
     def start_exploration(self, x_change, y_change):
+        '''
+        Description:
+            Used when the player issues a move order into an unexplored area with an expedition, displays a choice notification that allows the player to explore or not. Choosing to explore starts the exploration process. This function
+                also determines the expedition's result, but the results are only shown to the player after a dice roll and the complete_exploration function
+        Input:
+            None
+        Output:
+            None
+        '''
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0
@@ -498,10 +633,13 @@ class expedition(group):
 
     def complete_exploration(self): #roll_result, x_change, y_change
         '''
+        Description:
+            Used when the player finishes rolling for an exploration, showing the exploration's results and making any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
+                points, promotes its explorer to a veteran on critical success. If not successful, the expedition consumes its movement points and dies on critical failure
         Input:
-            none
+            None
         Output:
-            Shows the outcome of an exploration attempt, which was previously determined in the move function
+            None
         '''
         exploration_result = self.global_manager.get('exploration_result')
         roll_result = exploration_result[1]
@@ -530,14 +668,14 @@ class expedition(group):
 
 def create_group(worker, officer, global_manager):
     '''
+    Description:
+        Creates a group out of the inputted worker and officer. The type of group formed depends on the officer's type. Upon joining a group, the component officer and worker will not be able to be seen or interacted with
+            independently until the group is disbanded
     Input:
-        worker object representing the worker that will join the group, officer object representing the officer that will join the group, global_manager_template object
+        worker worker: worker to create a group out of
+        officer officer: officer to create a group out of
     Output:
-        Causes the inputted officer to form a group with inputted worker.
-        The type of group formed will depend on the type of officer. An explorer officer will create an expedition, which is able to explore.
-        The formed group's inventory will be the combination of the inventories of the officer and the worker.
-        Upon joining a group, the worker and officer will be stored by the group and will not be able to be seen or selected.
-        Upon the disbanding of a group, its worker and officer will be restored and placed in the same tile as the group, with the officer being given the group's inventory.
+        None
     '''
     if officer.officer_type == 'explorer':
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)

@@ -53,7 +53,7 @@ class notification(label):
             Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Also
                 adds a prompt to close the notification at the end of the message
         Input:
-            none
+            None
         Output:
             None
         '''
@@ -84,7 +84,7 @@ class notification(label):
         self.message = new_message
                     
     def update_tooltip(self):
-        '''
+       '''
         Description:
             Sets this notification's tooltip to what it should be. By default, notifications prompt the player to close them
         Input:

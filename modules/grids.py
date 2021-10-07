@@ -413,7 +413,7 @@ class grid():
         Input:
             None
         Output:
-            boolean: True if this grid is colliding with the mouse, otherwise return False
+            boolean: Returns True if this grid is colliding with the mouse, otherwise returns False
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()):
             return(True)
