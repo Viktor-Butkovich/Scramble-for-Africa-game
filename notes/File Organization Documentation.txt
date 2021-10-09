@@ -71,7 +71,6 @@ SFA folder
                 class abstract_tile
 		class resource_icon
                 class veteran_icon
-                class overlay_tile
 
         text_tools.py
             imports pygame

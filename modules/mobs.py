@@ -320,7 +320,7 @@ class mob(actor):
         Input:
             None
         Output:
-            None
+            boolean: Returns True
         '''
         return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
 

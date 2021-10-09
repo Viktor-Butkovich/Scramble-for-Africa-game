@@ -139,7 +139,7 @@ class instructions_page(label):
         self.message = new_message
         
     def update_tooltip(self):
-       '''
+        '''
         Description:
             Sets this page's tooltip to what it should be. By default, instructions pages describe how to close the instructions or go to the next page
         Input:

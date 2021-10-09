@@ -1,6 +1,14 @@
 import random
 
 def create_village_name():
+    '''
+    Description:
+        Returns a randomly generated village name
+    Input:
+        None
+    Output:
+        string: Randomly generated village name
+    '''
     l = random.randrange(1, 4) + 1 + random.randrange(1, 4) + 1
     vname = ''
     ch = random.randrange(1, 6) + 1
@@ -16,8 +24,6 @@ def create_village_name():
         ch = random.randrange(1, 19) + 1
         if ch < 15:
             lm = lm * -1
-        #elif ch > 14 and ch < 19:
-        #    do nothing
         elif ch == 19:
             vname = add_space(vname)
         if lm == 1:
@@ -34,15 +40,36 @@ def create_village_name():
     return(final_vname)
 
 def add_space(base):
+    '''
+    Description:
+        Returns a version of the inputted string with a space added to it
+    Input:
+        string base: string to add a space to
+    Output:
+        string: Version of the inputted string with a space added to it
+    '''
     return(base + ' ')
 
 def add_vowel(base):
+    '''
+    Description:
+        Returns a version of the inputted string with a random vowel added to it, with the vowel being chosen from a weighted list
+    Input:
+        string base: string to add a vowel to
+    Output:
+        string: Version of the inputted string with a random vowel added to it
+    '''
     weighted_vowels = ['A', 'A', 'A', 'A', 'A', 'E', 'E', 'I', 'I', 'O', 'O', 'O', 'U', 'U']
     return(base + random.choice(weighted_vowels))
 
 def add_consonant(base):
+    '''
+    Description:
+        Returns a version of the inputted string with a random consonant added to it, with the consonant being chosen from a weighted list
+    Input:
+        string base: string to add a consonant to
+    Output:
+        string: Version of the inputted string with a random consonant added to it
+    '''
     weighted_consonants = ['B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N', 'P', 'Q', 'R', 'S', 'S', 'S', 'T', 'T', 'T', 'V', 'W', 'X', 'Y', 'Z']
     return(base + random.choice(weighted_consonants))
-
-#for i in range(1, 10):
-#    print(create_village_name())

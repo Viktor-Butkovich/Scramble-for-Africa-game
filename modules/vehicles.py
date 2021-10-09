@@ -6,7 +6,24 @@ from .mobs import mob
 from .buttons import button
 
 class vehicle(mob): #maybe reduce movement points of both vehicle and crew to the lower of the two
+    '''
+    Mob that requires an attached worker to function and can carry other mobs as passengers
+    '''
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string/string dictionary image_dict: dictionary of image type keys and file path values to the images used by this object in various situations, such as 'crewed': 'crewed_ship.png'
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            string/worker crew: Crew that this vehicles starts with. 'none' if this vehicle does not start with any crew
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.contained_mobs = []
         self.vehicle_type = 'vehicle'
         self.has_crew = False
@@ -23,6 +40,16 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
 
     def can_move(self, x_change, y_change):
+        '''
+        Description:
+            Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
+                are not able to move without a crew
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
+        '''
         if self.has_crew:
             return(super().can_move(x_change, y_change))
         else:
@@ -30,6 +57,14 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             return(False)
     
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         tooltip_list = ["Name: " + self.name]
         if self.has_crew:
             tooltip_list.append("Crew: " + self.crew.name)
@@ -48,6 +83,15 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
+        '''
+        Description:
+            Links this vehicle to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean. Also moves this vehicle's crew and its passengers
+        Input:
+            grid new_grid: grid that this vehicle is linked to
+            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
+        Output:
+            None
+        '''
         super().go_to_grid(new_grid, new_coordinates)
         for current_mob in (self.contained_mobs + [self.crew]): #make list of all mobs in vehicle
             current_mob.go_to_grid(new_grid, new_coordinates)
@@ -56,7 +100,24 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             current_mob.hide_images()
 
 class train(vehicle):
+    '''
+    Vehicle that can only move along railroads, has normal inventory capacity, and has 10 movement points
+    '''
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string/string dictionary image_dict: dictionary of image type keys and file path values to the images used by this object in various situations, such as 'crewed': 'crewed_ship.png'
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            string/worker crew: Crew that this vehicles starts with. 'none' if this vehicle does not start with any crew
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
         self.set_max_movement_points(10)
         self.has_infinite_movement = True
@@ -69,6 +130,16 @@ class train(vehicle):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def can_move(self, x_change, y_change):
+        '''
+        Description:
+            Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
+                are not able to move without a crew. Trains can only move along railroads
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
+        '''
         result = super().can_move(x_change, y_change)
         if result:
             if not (self.images[0].current_cell.has_railroad() and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_railroad()):
@@ -76,8 +147,25 @@ class train(vehicle):
                 return(False)
         return(result)
 
-class ship(vehicle): #prevent movement when there are mobs in this tile that are not in a ship
+class ship(vehicle):
+    '''
+    Vehicle that can only move in the water and into ports, can cross the ocean, has large inventory capacity, and has infinite movement points
+    '''
     def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string/string dictionary image_dict: dictionary of image type keys and file path values to the images used by this object in various situations, such as 'crewed': 'crewed_ship.png'
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            string/worker crew: Crew that this vehicles starts with. 'none' if this vehicle does not start with any crew
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
         self.set_max_movement_points(10)
         self.has_infinite_movement = True
@@ -90,7 +178,16 @@ class ship(vehicle): #prevent movement when there are mobs in this tile that are
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
 
-    def can_leave(self): #can not move away if leaving behind units that can't swim in water
+    def can_leave(self):
+        '''
+        Description:
+            Returns whether this mob is allowed to move away from its current cell. A ship can not move away when there are any mobs in its tile that can not move on water and are not in a ship, preventing ships from leaving behind
+                disembarking passengers
+        Input:
+            None
+        Output:
+            boolean: Returns False if this ship is in a water tile and there are any mobs in its tile that can not move on water and are not in a ship, otherwise returns True
+        '''
         if self.images[0].current_cell.terrain == 'water':
             for current_mob in self.images[0].current_cell.contained_mobs:
                 if not current_mob.can_swim:
@@ -98,7 +195,15 @@ class ship(vehicle): #prevent movement when there are mobs in this tile that are
                     return(False)
         return(True)
 
-    def can_travel(self): #if this mob is currently able to travel
+    def can_travel(self): 
+        '''
+        Description:
+            Returns whether this ship can cross the ocean, like going between Africa and Europe. Ships can only cross the ocean when they have a crew
+        Input:
+            None
+        Output:
+            boolean: Returs True if this ship has any crew, otherwise returns False
+        '''
         if self.has_crew:
             return(True)
         else:

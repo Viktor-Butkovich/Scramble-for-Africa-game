@@ -84,7 +84,7 @@ class notification(label):
         self.message = new_message
                     
     def update_tooltip(self):
-       '''
+        '''
         Description:
             Sets this notification's tooltip to what it should be. By default, notifications prompt the player to close them
         Input:

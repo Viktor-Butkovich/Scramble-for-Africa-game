@@ -11,14 +11,18 @@ class tile(actor): #to do: make terrain tiles a subclass
     '''
     def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: int tuple representing the coordinate location the tile will occupy on its grid
-            grid: grid object representing the grid on which the tile will appear
-            image: string representing a file path to the image used by the tile
-            name: string representing the tile's name
-            modes: list of string representing the game modes in which this tile can appear
-            show_terrain: boolean representing whether the tile should act as terrain
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid grid: grid in which this tile can appear
+            string image: File path to the image used by this object
+            string name: This tile's name
+            string list modes: Game modes during which this actor's images can appear
+            boolean show_terrain: True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.actor_type = 'tile'
         self.selection_outline_color = 'yellow'#'bright blue'
@@ -56,15 +60,40 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.update_tooltip()
 
     def update_resource_icon(self): #changes size of resource icon if building present
+        '''
+        Description:
+            Reduces the size of this tile's resouce icon when a building is present, allowing more icons to be shown on the tile at once
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.resource_icon == 'none':
             self.resource_icon.update_resource_icon()
 
     def draw_destination_outline(self): #called directly by mobs
+        '''
+        Description:
+            Draws an outline around this tile when the displayed mob has a pending movement order to move to this tile
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_image in self.images:
             outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (outline), current_image.outline_width)
 
     def draw_actor_match_outline(self, called_by_equivalent):
+        '''
+        Description:
+            Draws an outline around the displayed tile. If the tile is shown on a minimap, tells the equivalent tile to also draw an outline around the displayed tile
+        Input:
+            boolean called_by_equivalent: True if this function is being called by the equivalent tile on either the minimap grid or the strategaic map grid, otherwise False. Prevents infinite loops of equivalent tiles repeatedly
+                calling each other
+        Output:
+            None
+        '''
         if self.images[0].can_show():
             for current_image in self.images:
                 outline = self.cell.Rect#pygame.Rect(current_image.outline.x + 5, current_image.outline.y + 5, current_image.outline.width, current_image.outline.height)
@@ -74,11 +103,15 @@ class tile(actor): #to do: make terrain tiles a subclass
                     equivalent_tile.draw_actor_match_outline(True)
 
     def change_inventory(self, commodity, change):
+
         '''
+        Description:
+            Changes the number of commodities of a certain type held by this tile. Also ensures that the tile info display is updated correctly
         Input:
-            none
+            string commodity: Type of commodity to change the inventory of
+            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
         Output:
-            same as superclass, except, if this tile or its equivalent is currently being shown in the tile info display, updates the displayed commodities to reflect the change
+            None
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
@@ -89,10 +122,13 @@ class tile(actor): #to do: make terrain tiles a subclass
 
     def set_inventory(self, commodity, new_value):
         '''
+        Description:
+            Sets the number of commodities of a certain type held by this tile. Also ensures that the tile info display is updated correctly
         Input:
-            none
+            string commodity: Type of commodity to set the inventory of
+            int new_value: Amount of commodities of the inputted type to set inventory to
         Output:
-            same as superclass, except, if this tile or its equivalent is currently being shown in the tile info display, updates the displayed commodities to reflect the change
+            None
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
@@ -102,6 +138,14 @@ class tile(actor): #to do: make terrain tiles a subclass
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
 
     def get_main_grid_coordinates(self):
+        '''
+        Description:
+            Returns the coordinates cooresponding to this tile on the strategic map grid. If this tile is already on the strategic map grid, just returns this tile's coordinates
+        Input:
+            None
+        Output:
+            int tuple: Two 
+        '''
         if self.grid.is_mini_grid:
             return(self.grid.get_main_grid_coordinates(self.x, self.y))
         else:
@@ -109,24 +153,19 @@ class tile(actor): #to do: make terrain tiles a subclass
 
     def get_equivalent_tile(self):
         '''
+        Description:
+            Returns the corresponding minimap tile if this tile is on the strategic map grid or vice versa
         Input:
-            none
+            None
         Output:
-            Returns the tile's equivalent on the grid. The equivalent should have different grid coordinates, depending on the minimap's location, but represent the same cell on the strategic map grid.
-            A tile on the minimap grid will return its equivalent on the strategic map grid. A tile on the strategic map grid will return its equivalent on the minimap grid.
+            tile: tile on the corresponding tile on the grid attached to this tile's grid
         '''
         if self.grid == self.global_manager.get('minimap_grid'):
             main_x, main_y = self.grid.get_main_grid_coordinates(self.x, self.y)
-            #try:
             attached_cell = self.grid.attached_grid.find_cell(main_x, main_y)
             if not attached_cell == 'none':
                 return(attached_cell.tile)
             return('none')
-            #return(self.grid.attached_grid.find_cell(main_x, main_y).tile)
-            #except:
-            #    print("Minimap main grid conversion error, possibly when rmb near edge of map - (" + str(main_x) + ", " + str(main_y) + ")")
-            #    return('none')
-            
         elif self.grid == self.global_manager.get('strategic_map_grid'):
             mini_x, mini_y = self.grid.mini_grid.get_mini_grid_coordinates(self.x, self.y)
             equivalent_cell = self.grid.mini_grid.find_cell(mini_x, mini_y)
@@ -138,16 +177,17 @@ class tile(actor): #to do: make terrain tiles a subclass
             
     def set_visibility(self, new_visibility):
         '''
+        Description:
+            Sets the visibility of this tile to the inputted value. A visible tile's terrain and resource can be seen by the player.
         Input:
-            boolean representing the tile's new visibility status
+            boolean new_visibility: This tile's new visibility status
         Output:
-            Changes the tile's appearance to match whether it is now visible
+            None
         '''
         if new_visibility == True:
             image_name = 'default'
         else:
             image_name = 'hidden'
-            
         self.image.set_image(image_name)
         self.image.previous_idle_image = image_name
         if not self.resource_icon == 'none':
@@ -156,10 +196,12 @@ class tile(actor): #to do: make terrain tiles a subclass
             
     def set_resource(self, new_resource):
         '''
+        Description:
+            Sets the resource type of this tile to the inputted value, removing or creating resource icons as needed
         Input:
-            string representing the type of resource present in this terrain tile
+            string new_resource: The new resource type of this tile, like 'exotic wood'
         Output:
-            Sets this tile's resource to the inputted string, removing or creating resource icons when applicable
+            None
         '''
         if not self.resource_icon == 'none':
             self.resource_icon.remove()
@@ -180,10 +222,12 @@ class tile(actor): #to do: make terrain tiles a subclass
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
         '''
+        Description:
+            Sets the terrain type of this tile to the inputted value, changing its appearance as needed
         Input:
-            string representing the type of terrain that will fill this tile
+            string new_terrain: The new terrain type of this tile, like 'swamp'
         Output:
-            Sets this tile's terrain to the inputted string, changing its appearance when applicable
+            None
         '''
         if new_terrain == 'clear':
             self.image_dict['default'] = 'scenery/terrain/clear.png'
@@ -213,10 +257,13 @@ class tile(actor): #to do: make terrain tiles a subclass
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this tile's tooltip to what it should be whenever the player looks at the tooltip. If this tile is explored, sets tooltip to this tile's terrain and its resource, if any. Otherwise, sets tooltip to a description of how
+                this tile has not explored
         Input:
-            none
+            None
         Output:
-            Sets this tile's tooltip to reflect its visibility status, terrain, and resource type
+            None
         '''
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
@@ -234,32 +281,38 @@ class tile(actor): #to do: make terrain tiles a subclass
 
     def set_coordinates(self, x, y):
         '''
+        Description:
+            Sets this tile's grid coordinates to the inputted values
         Input:
-            Two int variables reflecting this tile's new grid coordinates
+            int x: new grid x coordinate
+            int y: new grid y coordinate
         Output:
-            Sets this tile's grid coordinates to the inputted int variables and changes its grid cell to the one it now occupies
+            None
         '''
         self.x = x
         self.y = y
-        #my_cell = self.grid.find_cell(self.x, self.y)
                 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         super().remove()
         self.global_manager.set('tile_list', utility.remove_from_list(self.global_manager.get('tile_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image)) #to do: see if this can be removed, should already be in actor
 
-    def can_show_tooltip(self): #tiles don't have tooltips, except for terrain tiles
+    def can_show_tooltip(self): #only terrain tiles have tooltips
         '''
+        Description:
+            Returns whether this tile's tooltip can be shown. Along with the superclass' requirements, only terrain tiles have tooltips and tiles outside of the strategic map boundaries on the minimap grid do not have tooltips
         Input:
-            none
+            None
         Output:
-            Returns whether this tile should show its tooltip. It should show its tooltip only if it is a terrain tile and when it can appear and is touching the mouse
+            None
         '''
         if self.show_terrain == True:
             if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes: #and not targeting_ability
@@ -274,34 +327,42 @@ class tile(actor): #to do: make terrain tiles a subclass
 
 class abstract_tile(tile):
     '''
-    tile for abstract grids that can have a tooltip but does not have terrain
+    tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image
     '''
     def __init__ (self, grid, image, name, modes, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            grid: grid object representing the grid on which the tile will appear
-            image: string representing a file path to the image used by the tile
-            name: string representing the tile's name
-            modes: list of string representing the game modes in which this tile can appear
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            grid grid: grid in which this tile can appear
+            string image: File path to the image used by this object
+            string name: This tile's name
+            string list modes: Game modes during which this actor's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__((0, 0), grid, image, name, modes, False, global_manager)
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this tile's tooltip to what it should be whenever the player looks at the tooltip. An abstract tile's tooltip is its name
         Input:
-            none
+            None
         Output:
-            Sets this tile's tooltip to reflect being part of an abstract grid
+            None
         '''
         self.set_tooltip([self.name])
 
     def can_show_tooltip(self):
         '''
+        Description:
+            Returns whether this tile's tooltip can be shown. Has default tooltip requirements of being visible and touching the mosue
         Input:
-            none
+            None
         Output:
-            Returns whether this tile should show its tooltip. It should show its tooltip only when it can appear and is touching the mouse. Unlike superclass, it does not require being a terrain tile.
+            None
         '''
         if self.touching_mouse() and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
@@ -309,7 +370,25 @@ class abstract_tile(tile):
             return(False)
 
 class resource_icon(tile):
+    '''
+    tile that appears above a terrain tile that has a resource and reflects the terrain tile's resource. Changes in size when buildings are built in its attached tile to allow more icons to be visible
+    '''
     def __init__(self, coordinates, grid, resource, name, modes, show_terrain, attached_tile, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid grid: grid in which this tile can appear
+            string resource: type of resource represented by this tile, like 'exotic wood'
+            string name: This tile's name
+            string list modes: Game modes during which this actor's images can appear
+            boolean show_terrain: True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
+            tile attached_tile: terrain tile whose resource is represented by this tile
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.attached_tile = attached_tile
         self.resource = resource
         default_image_id = 'scenery/resources/' + self.resource + '.png'
@@ -320,6 +399,12 @@ class resource_icon(tile):
         self.update_resource_icon()
 
     def update_resource_icon(self):
+        '''
+        Description:
+            Changes this resource icon's size when buildings are built in its attached tile to allow more icons to be visible. Also reflects the size of the native village if this icon represents a village
+        Input:
+            None
+        '''
         if self.resource == 'natives':
             attached_village = self.attached_tile.cell.village
             if attached_village.population == 0: #0
@@ -341,59 +426,32 @@ class resource_icon(tile):
                 self.image_dict['default'] = self.image_dict['small']
                 building_present = True
                 break
-        #if (not self.attached_tile.cell.contained_buildings['port'] == 'none') or (not self.attached_tile.cell.contained_buildings['resource'] == 'none') or (not self.attached_tile.cell.contained_buildings['infrastructure'] == 'none'):
-        #    make small if building present
-        #    self.image.set_image('small')
-        #    self.image_dict['default'] = self.image_dict['small']
         if not building_present:
             self.image.set_image('large')
             self.image_dict['default'] = self.image_dict['large']
 
 class veteran_icon(tile):
     '''
-    A tile that follows a veteran officer's image to show that it is a veteran officer
+    A tile that follows one of the images of a veteran officer or a group containing a veteran officer, designating that unit as a veteran
     '''
     def __init__(self, coordinates, grid, image, name, modes, show_terrain, actor, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: int tuple representing the coordinate location the tile will occupy on its grid
-            grid: grid object representing the grid on which the tile will appear
-            image: string representing a file path to the image used by the tile
-            name: string representing the tile's name
-            modes: list of string representing the game modes in which this tile can appear
-            show_terrain: boolean representing whether the tile should act as terrain
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid grid: grid in which this tile can appear
+            string image: File path to the image used by this object
+            string name: This tile's name
+            string list modes: Game modes during which this actor's images can appear
+            boolean show_terrain: True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
+            mob actor: mob to which this icon is attached. Can be a group or an officer
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grid, image, name, modes, show_terrain, global_manager)
         self.actor = actor
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
         self.images = [self.image]
-        
-class overlay_tile(tile):
-    '''
-    A tile that appears over other images, unlike most tiles
-    '''
-    def __init__(self, actor, width, height, grid, image_id, show_terrain, global_manager):
-        '''
-        Input:
-            actor: represents that actor that this tile will appear over
-            width: int representing the width in pixels of this tile
-            height: int representing the height in pixels of this tile
-            grid: grid object representing the grid on which the tile will appear
-            image_id: string representing a file path to the image used by the tile
-            show_terrain: boolean representing whether the tile should act as terrain
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
-        '''
-        super().__init__(actor, width, height, grid, image_id, show_terrain, global_manager)
-        self.global_manager.get('overlay_tile_list').append(self)
-        
-    def remove(self):
-        '''
-        Input:
-            none
-        Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
-        '''
-        super().remove()
-        self.global_manager.set('overlay_tile_list', utility.remove_from_list(self.global_manager.get('overlay_tile_list'), self))

@@ -9,8 +9,18 @@ class officer(mob):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, officer_type, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            Same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string image_id: File path to the image used by this object
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            string officer_type: Type of officer that this is, like 'explorer' or 'engineer'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         global_manager.get('officer_list').append(self)
@@ -22,10 +32,14 @@ class officer(mob):
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
+        Description:
+            Links this officer to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when an officer that was previously attached to another actor becomes independent and
+                visible, like when an explorer leaves an expedition. Also moves veteran icons to follow this officer
         Input:
-            Same as superclass
+            grid new_grid: grid that this officer is linked to
+            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
-            Same as superclass, except it also moves veteran icons to the new grid and coordinates
+            None
         '''
         if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
             for current_veteran_icon in self.veteran_icons:
@@ -42,10 +56,12 @@ class officer(mob):
 
     def can_show_tooltip(self):
         '''
+        Description:
+            Returns whether this officer's tooltip can be shown. Along with the superclass' requirements, officer tooltips can not be shown when attached to another actor, such as when part of a group
         Input:
-            none
+            None
         Output:
-            Same as superclass but only returns True if not part of a group
+            None
         '''
         if not (self.in_group or self.in_vehicle):
             return(super().can_show_tooltip())
@@ -54,78 +70,43 @@ class officer(mob):
 
     def join_group(self):
         '''
+        Description:
+            Hides this officer when joining a group, preventing it from being directly interacted with until the group is disbanded
         Input:
-            none
+            None
         Output:
-            Prevents this officer from being seen and interacted with, storing it as part of a group
+            None
         '''
         self.in_group = True
         self.selected = False
         self.hide_images()
-        #for current_image in self.images:
-        #    current_image.remove_from_cell()
 
     def leave_group(self, group):
         '''
+        Description:
+            Reveals this officer when its group is disbanded, allowing it to be directly interacted with. Also selects this officer, meaning that the officer will be selected rather than the worker when a group is disbanded
         Input:
-            group object from which this officer is leaving
+            group group: group from which this officer is leaving
         Output:
-            Allows this officer to be seen and interacted with, moving it to where the group was disbanded
+            None
         '''
         self.in_group = False
         self.x = group.x
         self.y = group.y
-        #for current_image in self.images:
-        #    current_image.add_to_cell()
         self.show_images()
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         super().remove()
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
-
-#class porter_foreman(officer):
-#    '''
-#    Officer that is considered a porter foreman
-#    '''
-#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-#        self.officer_type = 'porter foreman'
-
-#class explorer(officer):
-#    '''
-#    Officer that is considered an explorer
-#    '''
-#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-#        '''
-#        Input:
-#            Same as superclass
-#        '''
-#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-#        self.officer_type = 'explorer'
-
-#class engineer(officer):
-#    '''
-#    Officer that is considered an engineer
-#    '''
-#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-#        '''
-#        Input:
-#            Same as superclass
-#        '''
-#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
-#        #self.grid.find_cell(self.x, self.y).set_visibility(True)
-#        self.officer_type = 'engineer'
-
-#class merchant(officer):
-#    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-#        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
