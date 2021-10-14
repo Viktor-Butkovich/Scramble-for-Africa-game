@@ -187,7 +187,7 @@ class cell():
             Returns True if this cell contains a worker, otherwise returns False
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list'):
+            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
                 return(True)
         return(False)
 
@@ -201,7 +201,13 @@ class cell():
             string/worker: Returns the first worker in this cell, or 'none' if none are present
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list'):
+            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+                return(current_mob)
+        return('none')
+
+    def get_church_volunteers(self):
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.is_church_volunteers:
                 return(current_mob)
         return('none')
 

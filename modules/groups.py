@@ -439,9 +439,9 @@ class caravan(group):
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
-class mission(group):
+class missionaries(group):
     '''
-    A group with a missionary officer and church volunteer workers that can build churches and convert native villages
+    A group with a head missionary officer and church volunteer workers that can build churches and convert native villages
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
@@ -685,7 +685,7 @@ def create_group(worker, officer, global_manager):
         new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'merchant':
         new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'Caravan', officer.modes, worker, officer, global_manager)
-    elif officer.officer_type == 'missionary':
-        new_group = mission((officer.x, officer.y), officer.grids, 'mobs/missionary/mission.png', 'Mission', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'head missionary':
+        new_group = missionaries((officer.x, officer.y), officer.grids, 'mobs/head missionary/missionaries.png', 'Missionaries', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

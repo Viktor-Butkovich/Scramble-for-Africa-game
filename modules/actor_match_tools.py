@@ -1106,14 +1106,23 @@ class merge_button(label_button):
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            worker = officer.images[0].current_cell.get_worker()
+                            if officer.officer_type == 'head missionary': #if head missionary, look for church volunteers
+                                worker = officer.images[0].current_cell.get_church_volunteers()
+                            else:
+                                worker = officer.images[0].current_cell.get_worker()
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
-                            groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
+                            groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                         else:
-                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                            if (not officer == 'none') and officer.officer_type == 'head missionary':
+                                text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                            else:  
+                                text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                        if (not officer == 'none') and officer.officer_type == 'head missionary':
+                            text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                        else:  
+                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
             else:
