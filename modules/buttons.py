@@ -221,6 +221,8 @@ class button():
             self.set_tooltip(["Attempts to trade consumer goods for random commodities", "Can only be done at a trading post in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
                 "Costs an entire turn of movement points"])
+        elif self.button_type == 'religious campaign':
+            self.set_tooltip(["Placeholder religious campaign tooltip"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -617,6 +619,9 @@ class button():
                     else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
                         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
+            elif self.button_type == 'stop exploration':
+                actor_utility.stop_exploration(self.global_manager)
+
             elif self.button_type == 'start trading':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.willing_to_trade(self.notification)
@@ -625,11 +630,15 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
-            elif self.button_type == 'stop exploration':
-                actor_utility.stop_exploration(self.global_manager)
-
             elif self.button_type == 'stop trading':
                 self.global_manager.set('ongoing_trade', False)
+
+            elif self.button_type == 'start religious campaign':
+                head_missionary = self.notification.choice_info_dict['head missionary']
+                head_missionary.religious_campaign()
+                
+            elif self.button_type == 'stop religious campaign':
+                self.global_manager.set('ongoing_religious_campaign', False)
                 
     def on_rmb_release(self):
         '''

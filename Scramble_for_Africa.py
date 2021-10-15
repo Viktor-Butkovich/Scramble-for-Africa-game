@@ -197,6 +197,7 @@ global_manager.set('choosing_destination_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
+global_manager.set('ongoing_religious_campaign', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')

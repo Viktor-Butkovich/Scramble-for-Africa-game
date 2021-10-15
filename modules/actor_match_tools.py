@@ -269,6 +269,7 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
             self.attached_buttons.append(trade_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/trade_button.png', self, global_manager))
+            self.attached_buttons.append(religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/religious_campaign_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -1615,6 +1616,40 @@ class trade_button(label_button):
                     text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+
+class religious_campaign_button(label_button):
+    '''
+    Button that starts commands a head missionary to do a religious campaign in Europe
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'religious campaign', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary')):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a caravan to trade with a village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('europe_grid') in current_mob.grids:
+                    current_mob.start_religious_campaign()
+                else:
+                    text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
 
 class switch_theatre_button(label_button):
     '''

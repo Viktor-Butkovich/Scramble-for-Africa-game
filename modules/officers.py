@@ -2,6 +2,9 @@ from .mobs import mob
 from .tiles import veteran_icon
 from . import actor_utility
 from . import utility
+from . import notification_tools
+from . import text_tools
+
 
 class officer(mob):
     '''
@@ -110,3 +113,17 @@ class officer(mob):
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
+
+class head_missionary(officer):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        super().__init__(coordinates, grids, image_id, name, modes, 'head missionary', global_manager)
+
+    def start_religious_campaign(self): #called when player presses head missionary's start religious campaign button in Europe
+        choice_info_dict = {'head missionary': self,'type': 'start religious campaign'}
+        self.global_manager.set('ongoing_religious_campaign', True)
+        message = "Are you sure you want to start a religious campaign? /n /n"
+        notification_tools.display_choice_notification(message, ['start religious campaign', 'stop religious campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def religious_campaign(self): #called when start religious campaign clicked in choice notification
+        text_tools.print_to_screen('placeholder religious campaign', self.global_manager)
+        self.global_manager.set('ongoing_religious_campaign', False)
