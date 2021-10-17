@@ -175,7 +175,7 @@ class money_label(value_label):
         num_workers = self.global_manager.get('num_workers')
         worker_upkeep = self.global_manager.get('worker_upkeep')
         total_upkeep = num_workers * worker_upkeep
-        tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money")
+        tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money. Church volunteers cost no upkeep.")
         self.set_tooltip(tooltip_text)
 
 class commodity_prices_label(label):

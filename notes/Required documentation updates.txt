@@ -1,5 +1,10 @@
-workers.church_volunteer
+workers.church_volunteers
 cells.cell.get_church_volunteers
 actor_match_tools.religious_campaign_button
 officers.head_missionary
 officers imports
+notifications imports
+action_notifications.religious_campaign_notification
+action_notifications imports
+officers.promote
+Add documentation showing what each module does

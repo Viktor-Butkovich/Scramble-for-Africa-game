@@ -2,6 +2,7 @@ import random
 from . import csv_tools
 from . import notifications
 from . import choice_notifications
+from . import action_notifications
 from . import scaling
 
 class global_manager_template():
@@ -296,7 +297,7 @@ class notification_manager_template():
         self.update_notification_layout()
         notification_type = self.notification_type_queue.pop(0)
         if notification_type == 'roll':
-            new_notification = notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+            new_notification = action_notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
             
             for current_die in self.global_manager.get('dice_list'):
@@ -316,16 +317,24 @@ class notification_manager_template():
             elif notification_type == 'trade_promotion':
                 self.global_manager.get('trade_result')[0].promote() #promotes caravan
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade}
-            new_notification = notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+            new_notification = action_notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, trade_info_dict, self.global_manager)
                 
         elif notification_type == 'exploration':
-            new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+            new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_exploration':
-            new_notification = notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+            new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+
+        elif notification_type == 'religious_campaign':
+            new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+            
+        elif notification_type == 'final_religious_campaign':
+            new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
             
         elif notification_type == 'choice':
             choice_notification_choices = self.choice_notification_choices_queue.pop(0)

@@ -155,21 +155,9 @@ class worker(mob):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
         self.select()
 
-class church_volunteer(worker):
+class church_volunteers(worker):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this mob's images can appear
-            string image_id: File path to the image used by this object
-            string name: This mob's name
-            string list modes: Game modes during which this mob's images can appear
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
         

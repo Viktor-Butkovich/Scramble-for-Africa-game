@@ -1,9 +1,13 @@
 from .mobs import mob
 from .tiles import veteran_icon
+from . import workers
 from . import actor_utility
 from . import utility
 from . import notification_tools
 from . import text_tools
+from . import dice_utility
+from . import dice
+from . import scaling
 
 
 class officer(mob):
@@ -33,6 +37,19 @@ class officer(mob):
         self.officer_type = officer_type
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
 
+    def promote(self):
+        self.veteran = True
+        self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
+        for current_grid in self.grids:
+            if current_grid == self.global_manager.get('minimap_grid'):
+                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+            elif current_grid == self.global_manager.get('europe_grid'):
+                veteran_icon_x, veteran_icon_y = (0, 0)
+            else:
+                veteran_icon_x, veteran_icon_y = (self.x, self.y)
+            self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+
     def go_to_grid(self, new_grid, new_coordinates):
         '''
         Description:
@@ -53,6 +70,8 @@ class officer(mob):
             for current_grid in self.grids:
                 if current_grid == self.global_manager.get('minimap_grid'):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                elif current_grid == self.global_manager.get('europe_grid'):
+                    veteran_icon_x, veteran_icon_y = (0, 0)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
                 self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
@@ -126,4 +145,82 @@ class head_missionary(officer):
 
     def religious_campaign(self): #called when start religious campaign clicked in choice notification
         text_tools.print_to_screen('placeholder religious campaign', self.global_manager)
+
+        roll_result = 0
+        self.just_promoted = False
+        text = ""
+        text += "The head missionary tries to convince church volunteers to join your cause. /n /n"
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'religious_campaign', self.global_manager)
+        else:
+            text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", 4, 6, 1, self.global_manager)
+            self.display_religious_campaign_die((die_x, 500), first_roll_list[0])
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "second", 4, 6, 1, self.global_manager)
+            self.display_religious_campaign_die((die_x, 380), second_roll_list[0])
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", 4, 6, 1, self.global_manager)
+            self.display_religious_campaign_die((die_x, 440), roll_list[0])
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= 4: #4+ required on D6 for exploration
+            text += "You get a unit of church volunteers placeholder message /n"
+        else:
+            text += "You did not get a unit of church volunteers placeholder message /n"
+        if roll_result == 1:
+            text += "/nThe head missionary gives up placeholder message. /n" #actual 'death' occurs when religious campaign completes
+
+        if (not self.veteran) and roll_result == 6:
+            self.just_promoted = True
+            text += "This head missionary is now a veteran. /n"
+        if roll_result >= 4:
+            notification_tools.display_notification(text + "Click to remove this notification.", 'final_religious_campaign', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('religious_campaign_result', [self, roll_result])
+
+    def complete_religious_campaign(self):
+        roll_result = self.global_manager.get('religious_campaign_result')[1]
+        if roll_result >= 4: #if campaign succeeded
+            new_church_volunteers = workers.church_volunteers((0, 0), [self.global_manager.get('europe_grid')], 'mobs/church volunteers/default.png', 'Church volunteers', ['strategic', 'europe'], self.global_manager)
+            if roll_result == 6:
+                self.promote()
+            self.select()
+            for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
+                if not current_image.current_cell == 'none':
+                    while not self == current_image.current_cell.contained_mobs[0]:
+                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         self.global_manager.set('ongoing_religious_campaign', False)
+
+    def display_religious_campaign_die(self, coordinates, result):
+        '''
+        Description:
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for exploration rolls
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+        Output:
+            None
+        '''
+        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)

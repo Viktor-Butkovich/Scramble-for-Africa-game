@@ -36,11 +36,12 @@ class group(mob):
         '''
         self.worker = worker
         self.officer = officer
-        self.veteran = self.officer.veteran
+        #self.veteran = self.officer.veteran
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
+        self.veteran = self.officer.veteran
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -48,7 +49,7 @@ class group(mob):
         self.officer.inventory_setup()
         self.select()
         if self.veteran:
-            self.set_name('Veteran expedition')
+            self.set_name("Veteran " + self.name.lower())
         self.veteran_icons = self.officer.veteran_icons
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self
@@ -337,7 +338,7 @@ class caravan(group):
         if roll_result >= roll_difficulty:
             self.trades_remaining = math.ceil(village.population / 3)
             trade_type = 'trade'
-            if (not self.veteran) and roll_result >= min_crit_success:
+            if (not self.veteran) and roll_result >= min_crit_success: #promotion occurs when trade_promotion notification appears, in notification_to_front in notification_manager
                 text += "/nThe merchant negotiated well enough to become a veteran. /n"
                 trade_type = 'trade_promotion'
             notification_tools.display_notification(text + "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /nThe merchant has " + str(self.get_inventory('consumer goods')) +
@@ -623,7 +624,7 @@ class expedition(group):
         if (not self.veteran) and roll_result == 6:
             self.veteran = True
             self.just_promoted = True
-            text += "This explorer has become a veteran explorer. /n"
+            text += "This explorer is now a veteran. /n"
         if roll_result >= 4:
             self.destination_cell = future_cell
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)

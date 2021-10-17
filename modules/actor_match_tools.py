@@ -852,7 +852,7 @@ class worker_crew_vehicle_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.is_worker) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
+            if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.is_church_volunteers)) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
@@ -957,10 +957,10 @@ class crew_vehicle_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 vehicle = self.attached_label.actor
-                crew = 'none'
-                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-                    if contained_mob.is_worker:
-                        crew = contained_mob
+                crew = vehicle.images[0].current_cell.get_worker() #'none'
+                #for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                #    if contained_mob.is_worker:
+                #        crew = contained_mob
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
@@ -1506,7 +1506,7 @@ class worker_to_building_button(label_button):
         result = super().can_show()
         self.update_info()
         if result:
-            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker): #if selected but not worker, return false
+            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker and not self.attached_worker.is_church_volunteers): #if selected but not worker, return false
                 return(False)
         return(result)
     
