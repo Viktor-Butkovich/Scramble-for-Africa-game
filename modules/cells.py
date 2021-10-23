@@ -67,6 +67,11 @@ class cell():
             return(False)
         return(True)
 
+    def has_mission(self):
+        if self.contained_buildings['mission'] == 'none':
+            return(False)
+        return(True)
+
     def has_road(self):
         '''
         Description:
@@ -106,7 +111,7 @@ class cell():
         Output:
             None
         '''
-        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none', 'trading_post': 'none'}
+        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none', 'trading_post': 'none', 'mission': 'none'}
 
     def has_port(self):
         '''

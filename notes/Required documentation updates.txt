@@ -1,10 +1,17 @@
 workers.church_volunteers
 cells.cell.get_church_volunteers
+cells.has_mission
 actor_match_tools.religious_campaign_button
+actor_match_tools.convert_button
 officers.head_missionary
 officers imports
 notifications imports
 action_notifications.religious_campaign_notification
 action_notifications imports
 officers.promote
+buildings.trading_post
+groups.missionaries
+villages.village.change_aggressiveness
+villages.village.__init__
+villages imports
 Add documentation showing what each module does

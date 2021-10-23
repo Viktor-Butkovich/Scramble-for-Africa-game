@@ -1,12 +1,13 @@
 import random
 
 from . import village_name_generator
+from . import actor_utility
 
 class village():
     '''
     Object that represents a native village in a cell on the strategic map grid
     '''
-    def __init__(self, cell):
+    def __init__(self, cell, global_manager):
         '''
         Description:
             Initializes this object
@@ -21,6 +22,7 @@ class village():
         self.attempted_trades = 0
         self.cell = cell
         self.name = village_name_generator.create_village_name()
+        self.global_manager = global_manager
             
     def get_tooltip(self):
         '''
@@ -53,3 +55,12 @@ class village():
             return(0)
         else: #7 - 9
             return(1)
+
+    def change_aggressiveness(self, change):
+        self.aggressiveness += change
+        if self.aggressiveness > 9:
+            self.aggressiveness = 9
+        elif self.aggressiveness < 1:
+            self.aggressiveness = 1
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed aggressiveness value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)

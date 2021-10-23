@@ -461,6 +461,86 @@ class missionaries(group):
             None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_convert = True
+
+    def start_converting(self):
+        choice_info_dict = {'head missionary': self,'type': 'start converting'}
+        self.global_manager.set('ongoing_conversion', True)
+        message = "Are you sure you want to start converting natives? /n /n"
+        notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def convert(self):
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+        text = ""
+        text += "The missionaries try to convert the natives to their religion to reduce their aggressiveness. /n /n"
+        village = self.images[0].current_cell.village
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'convert', self.global_manager)
+        else:
+            text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'convert', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", 4, 6, 1, self.global_manager)
+            self.display_conversion_die((die_x, 500), first_roll_list[0])
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "second", 4, 6, 1, self.global_manager)
+            self.display_conversion_die((die_x, 380), second_roll_list[0])
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Conversion roll", 4, 6, 1, self.global_manager)
+            self.display_conversion_die((die_x, 440), roll_list[0])
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= 4: #4+ required on D6 for exploration
+            text += "Natives converted message /n"
+        else:
+            text += "Natives not converted message /n"
+        if roll_result == 1:
+            text += "/nThe natives attack you message /n" #actual 'death' occurs when religious campaign completes
+
+        if (not self.veteran) and roll_result == 6:
+            self.just_promoted = True
+            text += "The head missionary did well enough to become a veteran message /n"
+        if roll_result >= 4:
+            notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('conversion_result', [self, roll_result, village])
+
+    def complete_conversion(self):
+        roll_result = self.global_manager.get('conversion_result')[1]
+        if roll_result >= 4: #if campaign succeeded
+            self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
+            if roll_result == 6 and not self.veteran:
+                self.promote()
+            self.select()
+            for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
+                if not current_image.current_cell == 'none':
+                    while not self == current_image.current_cell.contained_mobs[0]:
+                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        self.global_manager.set('ongoing_conversion', False)
+        
+    def display_conversion_die(self, coordinates, result):
+        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
 class expedition(group):
     '''

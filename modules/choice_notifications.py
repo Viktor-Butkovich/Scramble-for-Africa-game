@@ -141,12 +141,18 @@ class choice_button(button):
             
         elif button_type == 'start religious campaign':
             self.message = 'Start campaign'
+
+        elif button_type == 'start converting':
+            self.message = 'Convert'
             
         elif button_type == 'stop trading':
             self.message = 'Stop trading'
             
         elif button_type == 'stop religious campaign':
             self.message = 'Stop campaign'
+
+        elif button_type == 'stop converting':
+            self.message = 'Stop converting'
             
         elif button_type == 'end turn':
             self.message = 'End turn'

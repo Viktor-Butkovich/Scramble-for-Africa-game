@@ -59,7 +59,7 @@ class actor_match_free_image(free_image):
                     self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type in ['port', 'train_station', 'trading_post']:
+            elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission']:
                 if not new_actor.cell.contained_buildings[self.actor_image_type] == 'none':
                     self.set_image('buildings/' + self.actor_image_type + '.png')
                 else:
@@ -267,8 +267,10 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'trading_post', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'mission', global_manager))
             self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
-            self.attached_buttons.append(trade_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/trade_button.png', self, global_manager))
+            self.attached_buttons.append(trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'misc/trade_button.png', self, global_manager))
+            self.attached_buttons.append(convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/convert_button.png', self, global_manager))
             self.attached_buttons.append(religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/religious_campaign_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
@@ -1602,18 +1604,46 @@ class trade_button(label_button):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
                     current_cell = current_mob.images[0].current_cell
-                    if current_cell.has_trading_post():
+                    if current_cell.has_village():
+                    #if current_cell.has_trading_post():
                         if current_mob.get_inventory('consumer goods') > 0:
                             #current_mob.set_movement_points(0) have confirmation message to ensure that player wants to trade before using movement points 
                             current_mob.start_trade()
                         else:
                             text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
-                    elif current_cell.has_village():
-                        text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
+                    #elif current_cell.has_village():
+                    #    text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Trading is only possible at a trading post in a village.", self.global_manager)
+                        text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+
+class convert_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'convert', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_convert):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points == current_mob.max_movement_points:
+                    current_cell = current_mob.images[0].current_cell
+                    if current_cell.has_village():
+                        current_mob.start_converting()
+                    else:
+                        text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
 
@@ -1645,7 +1675,10 @@ class religious_campaign_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
-                    current_mob.start_religious_campaign()
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        current_mob.start_religious_campaign()
+                    else:
+                        text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
             else:
@@ -1825,6 +1858,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = 'misc/trading_post_button.png'
             self.building_name = 'trading post'
             self.requirement = 'can_trade'
+        elif self.building_type == 'mission':
+            image_id = 'misc/mission_button.png'
+            self.building_name = 'mission'
+            self.requirement = 'can_convert'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
@@ -1880,6 +1917,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 can_create = self.attached_label.actor.can_construct
             elif self.requirement == 'can_trade':
                 can_create = self.attached_label.actor.can_trade
+            elif self.requirement == 'can_convert':
+                can_create = self.attached_label.actor.can_convert
             if (not can_create): #show if unit selected can create this building
                 return(False)
         return(result) 
@@ -1912,6 +1951,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     'Costs 1 movement point'])
         elif self.building_type == 'trading_post':
             self.set_tooltip(['Builds a trading post, allowing merchant caravans to trade with an attached village', 'Can only be built in a village', 'Costs 1 movement point'])
+        elif self.building_type == 'mission':
+            self.set_tooltip(['Builds a mission, allowing missionaries to convert an attached village', 'Can only be built in a village', 'Costs 1 movement point'])
         else:
             self.set_tooltip(['placeholder'])
 
@@ -1949,7 +1990,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                     text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                             elif self.building_type == 'infrastructure':
                                 self.construct()
-                            elif self.building_type == 'trading_post':
+                            elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                 if self.attached_tile.cell.has_village():
                                     self.construct()
                                 else:
@@ -1997,6 +2038,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 ['strategic'], self.global_manager) #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
         elif self.building_type == 'trading_post':
             new_building = buildings.trading_post((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
+        elif self.building_type == 'mission':
+            new_building = buildings.mission((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/mission.png', self.building_name, ['strategic'], self.global_manager)
         else:
             new_building = buildings.building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, self.building_type,
                 ['strategic'], self.global_manager)

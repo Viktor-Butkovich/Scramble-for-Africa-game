@@ -179,6 +179,23 @@ class trading_post(building):
         '''
         super().__init__(coordinates, grids, image_id, name, 'trading_post', modes, global_manager)
 
+class mission(building):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, grids, image_id, name, 'mission', modes, global_manager)
+
 class train_station(building):
     '''
     Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity

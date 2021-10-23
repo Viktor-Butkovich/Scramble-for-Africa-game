@@ -223,6 +223,8 @@ class button():
                 "Costs an entire turn of movement points"])
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Placeholder religious campaign tooltip"])
+        elif self.button_type == 'convert':
+            self.set_tooltip(["Placeholder convert tooltip"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -626,19 +628,26 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.willing_to_trade(self.notification)
 
+            elif self.button_type == 'start religious campaign':
+                head_missionary = self.notification.choice_info_dict['head missionary']
+                head_missionary.religious_campaign()
+
+            elif self.button_type == 'start converting':
+                head_missionary = self.notification.choice_info_dict['head missionary']
+                head_missionary.convert()
+
             elif self.button_type == 'trade':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
             elif self.button_type == 'stop trading':
                 self.global_manager.set('ongoing_trade', False)
-
-            elif self.button_type == 'start religious campaign':
-                head_missionary = self.notification.choice_info_dict['head missionary']
-                head_missionary.religious_campaign()
                 
             elif self.button_type == 'stop religious campaign':
                 self.global_manager.set('ongoing_religious_campaign', False)
+
+            elif self.button_type == 'stop converting':
+                self.global_manager.set('ongoing_conversion', False)
                 
     def on_rmb_release(self):
         '''

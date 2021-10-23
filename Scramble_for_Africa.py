@@ -198,6 +198,7 @@ global_manager.set('choosing_destination_info_dict', {})
 global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
+global_manager.set('ongoing_conversion', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')
@@ -426,6 +427,11 @@ global_manager.get('tile_info_display_list').append(tile_free_train_station_imag
 tile_free_trading_post_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'trading_post', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_trading_post_image)
+
+#tile trading post image
+tile_free_mission_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'mission', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_mission_image)
 
 #tile terrain label
 #actor_match_current_y -= 35

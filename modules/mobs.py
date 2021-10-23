@@ -41,6 +41,7 @@ class mob(actor):
         self.can_explore = False #if can attempt to explore unexplored areas
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
+        self.can_convert = False #if can convert natives or build missions
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
         self.travel_possible = False #if can switch theatres

@@ -145,9 +145,9 @@ class head_missionary(officer):
 
     def religious_campaign(self): #called when start religious campaign clicked in choice notification
         text_tools.print_to_screen('placeholder religious campaign', self.global_manager)
-
         roll_result = 0
         self.just_promoted = False
+        self.set_movement_points(0)
         text = ""
         text += "The head missionary tries to convince church volunteers to join your cause. /n /n"
         if not self.veteran:    
@@ -190,7 +190,7 @@ class head_missionary(officer):
 
         if (not self.veteran) and roll_result == 6:
             self.just_promoted = True
-            text += "This head missionary is now a veteran. /n"
+            text += "The head missionary did well enough to become a veteran message /n"
         if roll_result >= 4:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_religious_campaign', self.global_manager)
         else:
@@ -201,7 +201,7 @@ class head_missionary(officer):
         roll_result = self.global_manager.get('religious_campaign_result')[1]
         if roll_result >= 4: #if campaign succeeded
             new_church_volunteers = workers.church_volunteers((0, 0), [self.global_manager.get('europe_grid')], 'mobs/church volunteers/default.png', 'Church volunteers', ['strategic', 'europe'], self.global_manager)
-            if roll_result == 6:
+            if roll_result == 6 and not self.veteran:
                 self.promote()
             self.select()
             for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
