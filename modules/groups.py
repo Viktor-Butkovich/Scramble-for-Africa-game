@@ -242,6 +242,9 @@ class caravan(group):
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
+        self.current_trade_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
@@ -259,15 +262,37 @@ class caravan(group):
         choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
         self.global_manager.set('ongoing_trade', True)
         message = "Are you sure you want to attempt to trade with the village of " + village.name + "? /n /n"
-        difficulty_modifier = village.get_aggressiveness_modifier()
-        if difficulty_modifier == 1:
+
+        self.current_trade_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        #determine modifier here
+
+        if village.cell.contained_buildings['trading_post'] == 'none': #penalty for no trading post
+            self.current_trade_modifier -= 1
+            message += "Without an established trading post, the merchant will have difficulty convincing villagers to trade. /n /n"
+        
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
             message += "The villagers are hostile and are unlikely to be willing to trade. /n /n"
-        elif difficulty_modifier == 0:
-            message += "The villagers are wary of the merchant but may be willing to trade. /n /n"
-        elif difficulty_modifier == -1:
+        elif aggressiveness_modifier > 0:
             message += "The villagers are friendly and are likely to be willing to trade. /n /n"
-        message += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
-        message += "In each trade, the merchant trades consumer goods for items that may or may not be valuable. /n /n"
+        else:
+            message += "The villagers are wary of the merchant but may be willing to trade. /n /n"
+        self.current_trade_modifier += aggressiveness_modifier
+
+        if self.current_trade_modifier == 0: #1/6 death = moderate risk
+            message += "moderate risk message /n /n"
+        elif self.current_trade_modifier > 0: #0/6 = no risk
+            message += "low risk message /n /n"
+        elif self.current_trade_modifier == -1: #2/6 = high risk
+            message += "high risk message /n /n"
+        else: #3/6 or higher = extremely high risk
+            message += "extremely high risk message /n /n"
+        
+        self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_trade_modifier
+        message += "In each trade, the merchant trades 1 of his " + str(self.get_inventory('consumer goods')) + " consumer goods for items that may or may not be valuable. /n /n"
         message += "Trading may also convince villagers to become available for hire as workers. "
         notification_tools.display_choice_notification(message, ['start trading', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -285,20 +310,20 @@ class caravan(group):
         self.set_movement_points(0)
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to convince the villagers to trade. /n /n")
-        roll_difficulty = 4
-        min_crit_success = 6
-        max_crit_fail = 0
-        difficulty_modifier = village.get_aggressiveness_modifier()
-        if difficulty_modifier == 1:
-            text += ("The villagers are hostile and are less likely to be willing to trade. /n /n")
-        elif difficulty_modifier == -1:
-            text += ("The villagers are friendly and more likely to be willing to trade. /n /n")
-        roll_difficulty += difficulty_modifier #modifier adds to difficulty, not roll
+        #roll_difficulty = 4
+        #min_crit_success = 6
+        #max_crit_fail = 0
+        #difficulty_modifier = village.get_aggressiveness_modifier()
+        #if difficulty_modifier == 1:
+        #    text += ("The villagers are hostile and are less likely to be willing to trade. /n /n")
+        #elif difficulty_modifier == -1:
+        #    text += ("The villagers are friendly and more likely to be willing to trade. /n /n")
+        #roll_difficulty += difficulty_modifier #modifier adds to difficulty, not roll
         if self.veteran:
             text += ("The veteran merchant can roll twice and pick the higher result /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(roll_difficulty) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
         else:
-            notification_tools.display_notification(text + "Click to roll. " + str(roll_difficulty) + "+ required to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
@@ -306,28 +331,29 @@ class caravan(group):
         roll_result = 0
         if self.veteran:
                 
-            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, min_crit_success, max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, min_crit_success, max_crit_fail)
+            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 500), first_roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", roll_difficulty, min_crit_success, max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 380), second_roll_list[0], roll_difficulty, min_crit_success, max_crit_fail)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 380), second_roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
             result_outcome_dict = {}
             for i in range(1, 7):
-                if i >= min_crit_success:
-                    result_outcome_dict[i] = "CRITICAL SUCCESS"
-                elif i >= roll_difficulty:
-                    result_outcome_dict[i] = "SUCCESS"
-                elif i <= max_crit_fail:
-                    result_outcome_dict[i] = "CRITICAL FAILURE"
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
                 else:
-                    result_outcome_dict[i] = "FAILURE"
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, min_crit_success, max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 440), roll_list[0], roll_difficulty, min_crit_success, max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 440), roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
                             
             text += roll_list[1]
             roll_result = roll_list[0]
@@ -335,10 +361,10 @@ class caravan(group):
         self.global_manager.set('trade_result', [self, roll_result])
         notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
 
-        if roll_result >= roll_difficulty:
+        if roll_result >= self.current_min_success:
             self.trades_remaining = math.ceil(village.population / 3)
             trade_type = 'trade'
-            if (not self.veteran) and roll_result >= min_crit_success: #promotion occurs when trade_promotion notification appears, in notification_to_front in notification_manager
+            if (not self.veteran) and roll_result >= 6: #promotion occurs when trade_promotion notification appears, in notification_to_front in notification_manager
                 text += "/nThe merchant negotiated well enough to become a veteran. /n"
                 trade_type = 'trade_promotion'
             notification_tools.display_notification(text + "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /nThe merchant has " + str(self.get_inventory('consumer goods')) +
@@ -348,6 +374,9 @@ class caravan(group):
             text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        elif roll_result <= self.current_max_crit_fail:
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade and are angered enough to attack the caravan. /n /nEveryone in the caravan has died. /n /nClick to close this notification. ",
+                'stop_trade_attacked', self.global_manager)
         else:
             notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
@@ -361,34 +390,50 @@ class caravan(group):
         Output:
             None
         '''
+        self.current_trade_modifier = 0 #trading - getting good deals - is different from the willingness to trade roll and uses different modifiers
+        self.current_min_success = 4
+        self.current_max_crit_fail = 0 #0 requirement for critical fail means critical fails will not occur
+        #determine modifier here
+        self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_trade_modifier
+        
         self.notification = notification
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
-        roll_difficulty = 4
         if self.veteran:
             text += ("The veteran merchant can roll twice and pick the higher result /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(roll_difficulty) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
         else:
-            notification_tools.display_notification(text + "Click to roll. " + str(roll_difficulty) + "+ required to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         roll_result = 0
         if self.veteran:
-            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, 0, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, 7, 0)
+            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager)
+            self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", roll_difficulty, 7, 0, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 380), second_roll_list[0], roll_difficulty, 7, 0)
+            second_roll_list = dice_utility.roll_to_list(6, "second", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
+            self.display_trade_die((die_x, 380), second_roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, 0, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 440), roll_list[0], roll_difficulty, 7, 0)
+            roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 440), roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
                             
             text += roll_list[1]
             roll_result = roll_list[0]
@@ -398,7 +443,7 @@ class caravan(group):
         num_consumer_goods = self.get_inventory('consumer goods') - 1 #consumer goods are actually lost when clicking out of notification, so subtract 1 here to show accurate number
         commodity = 'none'
         notification_type = 'none'
-        if roll_result >= roll_difficulty:
+        if roll_result >= self.current_min_success:
             commodity = random.choice(self.global_manager.get('collectable_resources'))
             text += "/n The merchant managed to buy a unit of " + commodity + ". /n /n"
             notification_type = 'successful_commodity_trade'
@@ -422,7 +467,7 @@ class caravan(group):
             notification_tools.display_notification(text + "Click to close this notification. ", 'stop_trade', self.global_manager)
         self.global_manager.set('trade_result', [self, roll_result, commodity]) #allows notification to give random commodity when clicked
         
-    def display_trade_die(self, coordinates, result, difficulty, min_crit_success, max_crit_fail):
+    def display_trade_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
         '''
         Description:
             Creates a die object with preset colors and the inputted location, possible roll outcomes, and predetermined roll result to use for trade rolls
@@ -435,7 +480,7 @@ class caravan(group):
         Output:
             None
         '''
-        result_outcome_dict = {'min_success': difficulty, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
+        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
@@ -462,43 +507,94 @@ class missionaries(group):
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_convert = True
+        self.current_convert_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
 
     def start_converting(self):
-        choice_info_dict = {'head missionary': self,'type': 'start converting'}
-        self.global_manager.set('ongoing_conversion', True)
+        village = self.images[0].current_cell.village
+        self.current_convert_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
         message = "Are you sure you want to start converting natives? /n /n"
+        
+        if village.cell.contained_buildings['mission'] == 'none': #penalty for no mission
+            self.current_convert_modifier -= 1
+            message += "no mission penalty message /n"
+            
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
+            message += "high aggressiveness penalty message /n"
+        elif aggressiveness_modifier > 0:
+            message += "low aggressiveness bonus message /n"
+        self.current_convert_modifier += aggressiveness_modifier
+
+        population_modifier = village.get_population_modifier()
+        if population_modifier < 0:
+            message += "high population penalty message /n"
+        elif population_modifier > 0:
+            message += "low population bonus message /n"
+        self.current_convert_modifier += population_modifier
+
+        if self.current_convert_modifier == 0: #1/6 death = moderate risk
+            message += "moderate risk message /n"
+        elif self.current_convert_modifier > 0: #0/6 = no risk
+            message += "low risk message /n"
+        elif self.current_convert_modifier == -1: #2/6 = high risk
+            message += "high risk message /n"
+        else: #3/6 or higher = extremely high risk
+            message += "extremely high risk message"
+            
+            
+        self.current_min_success -= self.current_convert_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_convert_modifier
+        
+        choice_info_dict = {'head missionary': self,'type': 'start converting'}
+        self.current_convert_modifier = 0
+        self.global_manager.set('ongoing_conversion', True)
         notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        text = ""
-        text += "The missionaries try to convert the natives to their religion to reduce their aggressiveness. /n /n"
         village = self.images[0].current_cell.village
+        text = ""
+        text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
+
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'convert', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager)
         else:
             text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
-            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'convert', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", 4, 6, 1, self.global_manager)
+            first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_conversion_die((die_x, 500), first_roll_list[0])
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", 4, 6, 1, self.global_manager)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_conversion_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Conversion roll", 4, 6, 1, self.global_manager)
+            roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_conversion_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
@@ -507,17 +603,17 @@ class missionaries(group):
         notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager)
             
         text += "/n"
-        if roll_result >= 4: #4+ required on D6 for exploration
-            text += "Natives converted message /n"
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += "Natives converted message - aggressiveness reduced from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + " /n"
         else:
             text += "Natives not converted message /n"
-        if roll_result == 1:
+        if roll_result <= self.current_max_crit_fail:
             text += "/nThe natives attack you message /n" #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result == 6:
             self.just_promoted = True
             text += "The head missionary did well enough to become a veteran message /n"
-        if roll_result >= 4:
+        if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
@@ -525,7 +621,7 @@ class missionaries(group):
 
     def complete_conversion(self):
         roll_result = self.global_manager.get('conversion_result')[1]
-        if roll_result >= 4: #if campaign succeeded
+        if roll_result >= self.current_min_success: #if campaign succeeded
             self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
             if roll_result == 6 and not self.veteran:
                 self.promote()
@@ -534,10 +630,12 @@ class missionaries(group):
                 if not current_image.current_cell == 'none':
                     while not self == current_image.current_cell.contained_mobs[0]:
                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        if roll_result <= self.current_max_crit_fail:
+            self.die()
         self.global_manager.set('ongoing_conversion', False)
         
     def display_conversion_die(self, coordinates, result):
-        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
@@ -566,6 +664,9 @@ class expedition(group):
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
+        self.current_exploration_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
 
     def display_exploration_die(self, coordinates, result):
         '''
@@ -577,7 +678,7 @@ class expedition(group):
         Output:
             None
         '''
-        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
@@ -654,16 +755,24 @@ class expedition(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
+
+        self.current_exploration_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        #determine modifier here
+        self.current_min_success -= self.current_exploration_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_exploration_modifier
+        
         self.just_promoted = False
         text = ""
         text += "The expedition heads towards the " + direction + ". /n /n"
         text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
         
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'exploration', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager)
         else:
             text += ("The veteran explorer can roll twice and pick the higher result /n /n")
-            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
@@ -671,18 +780,28 @@ class expedition(group):
 
         if self.veteran:
                 
-            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 500), first_roll_list[0])
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", 4, 6, 1, self.global_manager)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
@@ -691,21 +810,21 @@ class expedition(group):
         notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
             
         text += "/n"
-        if roll_result >= 4: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default
             if not future_cell.resource == 'none':
                 text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
             else:
                 text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
         else:
             text += "You were not able to explore the tile. /n"
-        if roll_result == 1:
+        if roll_result <= self.current_max_crit_fail:
             text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
 
         if (not self.veteran) and roll_result == 6:
             self.veteran = True
             self.just_promoted = True
             text += "This explorer is now a veteran. /n"
-        if roll_result >= 4:
+        if roll_result >= self.current_min_success:
             self.destination_cell = future_cell
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
         else:
@@ -728,7 +847,7 @@ class expedition(group):
         y_change = exploration_result[3]
         future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
         died = False
-        if roll_result >= 4:
+        if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
             if not future_cell.terrain == 'water':
                 super().move(x_change, y_change)
@@ -739,7 +858,7 @@ class expedition(group):
             self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
-        elif roll_result == 1:
+        elif roll_result == self.current_max_crit_fail:
             self.die()
             died = True
         copy_dice_list = self.global_manager.get('dice_list')

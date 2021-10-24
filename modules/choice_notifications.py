@@ -206,27 +206,36 @@ class choice_button(button):
         '''
         if self.button_type == 'recruitment':
             self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+
+        elif self.button_type == 'end turn':
+            self.set_tooltip(['End the current turn'])
             
         elif self.button_type == 'exploration':
             self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
             
+        elif self.button_type == 'trade':
+            self.set_tooltip(['Attempt to trade by giving consumer goods'])
+
+            
         elif self.button_type == 'start trading':
             self.set_tooltip(['Start trading, allowing a trade to be made for each population unit willing to trade'])
+
+        elif self.button_type == 'start religious campaign':
+            self.set_tooltip(['Start a religious campaign, placeholder message'])
+
+        elif self.button_type == 'start converting':
+            self.set_tooltip(['Start converting placeholder message'])
             
-        elif self.button_type == 'trade':
-            self.set_tooltip(['Attempts to trade by giving consumer goods'])
             
         elif self.button_type == 'stop trading':
             self.set_tooltip(['Stop trading'])
 
-        elif self.button_type == 'start religious campaign':
-            self.set_tooltip(['Starts a religious campaign, placeholder message'])
-            
         elif self.button_type == 'stop religious campaign':
             self.set_tooltip(['Stop religious campaign'])
             
-        elif self.button_type == 'end turn':
-            self.set_tooltip(['End the current turn'])
+        elif self.button_type == 'stop converting':
+            self.set_tooltip(['Stop converting'])
+            
             
         else:
             self.set_tooltip(['Do nothing'])

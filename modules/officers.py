@@ -133,11 +133,23 @@ class officer(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
+    def die(self):
+        self.remove()
+
 class head_missionary(officer):
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         super().__init__(coordinates, grids, image_id, name, modes, 'head missionary', global_manager)
+        self.current_campaign_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
 
     def start_religious_campaign(self): #called when player presses head missionary's start religious campaign button in Europe
+        self.current_campaign_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        #determine modifier here
+        self.current_min_success -= self.current_campaign_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_campaign_modifier
         choice_info_dict = {'head missionary': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
         message = "Are you sure you want to start a religious campaign? /n /n"
@@ -151,28 +163,38 @@ class head_missionary(officer):
         text = ""
         text += "The head missionary tries to convince church volunteers to join your cause. /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
         else:
             text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
-            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", 4, 6, 1, self.global_manager)
+            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_religious_campaign_die((die_x, 500), first_roll_list[0])
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", 4, 6, 1, self.global_manager)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_religious_campaign_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", 4, 6, 1, self.global_manager)
+            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_religious_campaign_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
@@ -181,11 +203,11 @@ class head_missionary(officer):
         notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager)
             
         text += "/n"
-        if roll_result >= 4: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
             text += "You get a unit of church volunteers placeholder message /n"
         else:
             text += "You did not get a unit of church volunteers placeholder message /n"
-        if roll_result == 1:
+        if roll_result <= self.current_max_crit_fail:
             text += "/nThe head missionary gives up placeholder message. /n" #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result == 6:
@@ -199,7 +221,7 @@ class head_missionary(officer):
 
     def complete_religious_campaign(self):
         roll_result = self.global_manager.get('religious_campaign_result')[1]
-        if roll_result >= 4: #if campaign succeeded
+        if roll_result >= self.current_min_success: #if campaign succeeded
             new_church_volunteers = workers.church_volunteers((0, 0), [self.global_manager.get('europe_grid')], 'mobs/church volunteers/default.png', 'Church volunteers', ['strategic', 'europe'], self.global_manager)
             if roll_result == 6 and not self.veteran:
                 self.promote()
@@ -208,6 +230,8 @@ class head_missionary(officer):
                 if not current_image.current_cell == 'none':
                     while not self == current_image.current_cell.contained_mobs[0]:
                         current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        elif roll_result <= self.current_max_crit_fail:
+            self.die()
         self.global_manager.set('ongoing_religious_campaign', False)
 
     def display_religious_campaign_die(self, coordinates, result):
@@ -220,7 +244,7 @@ class head_missionary(officer):
         Output:
             None
         '''
-        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)

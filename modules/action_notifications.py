@@ -189,6 +189,7 @@ class trade_notification(notification):
         self.gives_commodity = False
         self.stops_trade = self.trade_info_dict['stops_trade']
         self.is_commodity_trade = self.trade_info_dict['commodity_trade']
+        self.dies = self.trade_info_dict['dies']
         if self.is_commodity_trade:
             self.commodity_trade_type = self.trade_info_dict['commodity_trade_type']
             if self.commodity_trade_type == 'successful_commodity_trade':
@@ -207,7 +208,8 @@ class trade_notification(notification):
                 consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
             self.notification_images.append(free_image('scenery/resources/trade/sold consumer goods.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        
+        elif self.dies:
+            self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         
     def format_message(self):
@@ -243,6 +245,9 @@ class trade_notification(notification):
         super().remove()
         for current_image in self.notification_images:
             current_image.remove()
+        if self.dies:
+            caravan = self.trade_result[0]
+            caravan.die()
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()

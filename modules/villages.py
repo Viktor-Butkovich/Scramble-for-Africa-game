@@ -50,11 +50,19 @@ class village():
             int: Returns -1 if this village's aggressiveness is between 0 and 3, returns 0 if this village's aggressiveness if between 4 and 6, otherwise returns 1
         '''
         if self.aggressiveness <= 3: #1-3
-            return(-1)
+            return(1)
         elif self.aggressiveness <= 6: #4 - 6
             return(0)
         else: #7 - 9
+            return(-1)
+
+    def get_population_modifier(self): #modifier affects roll difficulty, not roll result
+        if self.population <= 3: #1-3
             return(1)
+        elif self.population <= 6: #4 - 6
+            return(0)
+        else: #7 - 9
+            return(-1)
 
     def change_aggressiveness(self, change):
         self.aggressiveness += change

@@ -13,5 +13,7 @@ buildings.trading_post
 groups.missionaries
 villages.village.change_aggressiveness
 villages.village.__init__
+villages.get_population_modifier, villages.get_aggressiveness_modifier: make it so modifier affects result
 villages imports
+officers.officer.die
 Add documentation showing what each module does
