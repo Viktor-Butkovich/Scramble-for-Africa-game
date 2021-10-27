@@ -282,13 +282,13 @@ class caravan(group):
         self.current_trade_modifier += aggressiveness_modifier
 
         if self.current_trade_modifier == 0: #1/6 death = moderate risk
-            message += "moderate risk message /n /n"
+            message += "RISK: MODERATE /n /n"
         elif self.current_trade_modifier > 0: #0/6 = no risk
-            message += "low risk message /n /n"
+            message += "RISK: LOW /n /n"
         elif self.current_trade_modifier == -1: #2/6 = high risk
-            message += "high risk message /n /n"
+            message += "RISK: HIGH /n /n"
         else: #3/6 or higher = extremely high risk
-            message += "extremely high risk message /n /n"
+            message += "RISK: DEADLY /n /n"
         
         self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_trade_modifier
@@ -310,15 +310,6 @@ class caravan(group):
         self.set_movement_points(0)
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to convince the villagers to trade. /n /n")
-        #roll_difficulty = 4
-        #min_crit_success = 6
-        #max_crit_fail = 0
-        #difficulty_modifier = village.get_aggressiveness_modifier()
-        #if difficulty_modifier == 1:
-        #    text += ("The villagers are hostile and are less likely to be willing to trade. /n /n")
-        #elif difficulty_modifier == -1:
-        #    text += ("The villagers are friendly and more likely to be willing to trade. /n /n")
-        #roll_difficulty += difficulty_modifier #modifier adds to difficulty, not roll
         if self.veteran:
             text += ("The veteran merchant can roll twice and pick the higher result /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
@@ -375,8 +366,8 @@ class caravan(group):
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         elif roll_result <= self.current_max_crit_fail:
-            notification_tools.display_notification(text + "/nThe villagers are not willing to trade and are angered enough to attack the caravan. /n /nEveryone in the caravan has died. /n /nClick to close this notification. ",
-                'stop_trade_attacked', self.global_manager)
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nBelieving that the merchant seeks to trick them out of their valuables, the villagers the caravan. /n /nEveryone in the caravan " +
+                "has died. /n /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
         else:
             notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
@@ -516,35 +507,36 @@ class missionaries(group):
         self.current_convert_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
-        message = "Are you sure you want to start converting natives? /n /n"
-        
+        message = "Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n"
+                            
         if village.cell.contained_buildings['mission'] == 'none': #penalty for no mission
             self.current_convert_modifier -= 1
-            message += "no mission penalty message /n"
+            message += "Without an established mission, the missionaries will have difficulty converting the villagers. /n /n"
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
-            message += "high aggressiveness penalty message /n"
+            message += "The villagers are hostile and are unlikely to listen to the teachings of the missionaries. /n /n"
         elif aggressiveness_modifier > 0:
-            message += "low aggressiveness bonus message /n"
+            message += "The villagers are friendly and are likely to listen to the teachings of the missionaries. /n /n"
+        else:
+            message += "The villagers are wary of the missionaries but may be willing to listen to their teachings. /n /n"
         self.current_convert_modifier += aggressiveness_modifier
 
         population_modifier = village.get_population_modifier()
         if population_modifier < 0:
-            message += "high population penalty message /n"
+            message += "The high population of this village will require more effort to convert. /n"
         elif population_modifier > 0:
-            message += "low population bonus message /n"
+            message += "The low population of this village will require less effort to convert /n"
         self.current_convert_modifier += population_modifier
 
         if self.current_convert_modifier == 0: #1/6 death = moderate risk
-            message += "moderate risk message /n"
+            message += "RISK: MODERATE /n"
         elif self.current_convert_modifier > 0: #0/6 = no risk
-            message += "low risk message /n"
+            message += "RISK: LOW /n"
         elif self.current_convert_modifier == -1: #2/6 = high risk
-            message += "high risk message /n"
+            message += "RISK: HIGH /n"
         else: #3/6 or higher = extremely high risk
-            message += "extremely high risk message"
-            
+            message += "RISK: DEADLY"
             
         self.current_min_success -= self.current_convert_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_convert_modifier
@@ -604,15 +596,16 @@ class missionaries(group):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "Natives converted message - aggressiveness reduced from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + " /n"
+            text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + ". /n /n"
         else:
-            text += "Natives not converted message /n"
+            text += "The missionaries failed to make significant progress in converting the natives. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "/nThe natives attack you message /n" #actual 'death' occurs when religious campaign completes
+            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died. /n" 
 
         if (not self.veteran) and roll_result == 6:
             self.just_promoted = True
-            text += "The head missionary did well enough to become a veteran message /n"
+            text += "Interactions with the natives have given the head missionary insights into converting them and demonstrating connections between their beliefs and Christianity. The head missionary is now a veteran and will be more"
+            text += "successful in future ventures. "
         if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
         else:

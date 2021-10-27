@@ -487,6 +487,7 @@ class mini_grid(grid):
                     attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
                     current_cell.contained_mobs = attached_cell.contained_mobs
                     current_cell.contained_buildings = attached_cell.contained_buildings
+                    current_cell.village = attached_cell.village
                     current_cell.set_visibility(attached_cell.visible)
                     current_cell.set_terrain(attached_cell.terrain)
                     current_cell.set_resource(attached_cell.resource)

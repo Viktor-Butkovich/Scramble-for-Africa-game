@@ -1639,7 +1639,10 @@ class convert_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
-                        current_mob.start_converting()
+                        if current_cell.village.aggressiveness > 1:
+                            current_mob.start_converting()
+                        else:
+                            text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                     else:
                         text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
                 else:
