@@ -30,8 +30,8 @@ class choice_notification(notification):
             None
         '''
         button_height = scaling.scale_height(50, global_manager)
-        coordinates = (coordinates[0], coordinates[1] + button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
-        minimum_height -= button_height
+        #coordinates = (coordinates[0], coordinates[1]  button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
+        #minimum_height -= button_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.choice_buttons = []
         self.choice_info_dict = choice_info_dict
@@ -218,13 +218,13 @@ class choice_button(button):
 
             
         elif self.button_type == 'start trading':
-            self.set_tooltip(['Start trading, allowing a trade to be made for each population unit willing to trade'])
+            self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
 
         elif self.button_type == 'start religious campaign':
-            self.set_tooltip(['Start a religious campaign, placeholder message'])
+            self.set_tooltip(['Start a religious campaign, possibly convincing church volunteers to join you'])
 
         elif self.button_type == 'start converting':
-            self.set_tooltip(['Start converting placeholder message'])
+            self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
             
             
         elif self.button_type == 'stop trading':

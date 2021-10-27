@@ -411,11 +411,11 @@ class caravan(group):
 
         roll_result = 0
         if self.veteran:
-            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager)
-            self.display_trade_die((die_x, 500), first_roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
+            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager)
+            self.display_trade_die((die_x, 500), first_roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "second", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
-            self.display_trade_die((die_x, 380), second_roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
+            self.display_trade_die((die_x, 380), second_roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
@@ -432,8 +432,8 @@ class caravan(group):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Trade roll", roll_difficulty, 7, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
-            self.display_trade_die((die_x, 440), roll_list[0], roll_difficulty, 7, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 440), roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
                             
             text += roll_list[1]
             roll_result = roll_list[0]

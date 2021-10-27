@@ -1,9 +1,12 @@
 import random
+import pygame
+
 from . import csv_tools
 from . import notifications
 from . import choice_notifications
 from . import action_notifications
 from . import scaling
+from . import text_tools
 
 class global_manager_template():
     '''
@@ -268,7 +271,7 @@ class notification_manager_template():
         self.global_manager = global_manager
         self.update_notification_layout()
 
-    def update_notification_layout(self):
+    def update_notification_layout(self, notification_height = 0):
         '''
         Description:
             Changes where notifications are displayed depending on the current game mode to avoid blocking relevant information
@@ -278,12 +281,47 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        self.notification_height = 500
-        self.notification_y = 236
+        self.notification_height = 300#500#600
+        self.notification_y = 336#236#186
+        height_difference = notification_height - self.notification_height
+        if height_difference > 0: #if notification height greater than default notification height
+            self.notification_y -= (height_difference / 2) #lower by half of height change
+            self.notification_height += height_difference #increase height by height change
+            #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid').origin_x, self.global_manager) - (self.notification_width + 40))
         else: #show notifications in center on europe mode
             self.notification_x = 610
+
+    def get_notification_height(self, notification_text):
+        new_message = []
+        next_line = ""
+        next_word = ""
+        font_size = scaling.scale_width(25, self.global_manager)
+        font_name = self.global_manager.get('font_name')
+        font = pygame.font.SysFont(font_name, font_size)
+        for index in range(len(notification_text)):
+            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n"): #don't add if /n
+                if not (index > 0 and notification_text[index - 1] + notification_text[index] == "/n"): #if on n after /, skip
+                    next_word += notification_text[index]
+            if notification_text[index] == " ":
+                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                    new_message.append(next_line)
+                    next_line = ""
+                next_line += next_word
+                next_word = ""
+            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n": #don't check for /n if at last index
+                new_message.append(next_line)
+                next_line = ""
+                next_line += next_word
+                next_word = ""
+        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+            new_message.append(next_line)
+            next_line = ""
+        next_line += next_word
+        new_message.append(next_line)
+        new_message.append("Click to remove this notification.")
+        return(len(new_message) * font_size)#self.message = new_message
             
     def notification_to_front(self, message):
         '''
@@ -294,7 +332,7 @@ class notification_manager_template():
         Output:
             None
         '''
-        self.update_notification_layout()
+        self.update_notification_layout(self.get_notification_height(message))
         notification_type = self.notification_type_queue.pop(0)
         if notification_type == 'roll':
             new_notification = action_notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

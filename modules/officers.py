@@ -152,16 +152,15 @@ class head_missionary(officer):
         self.current_max_crit_fail -= self.current_campaign_modifier
         choice_info_dict = {'head missionary': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
-        message = "Are you sure you want to start a religious campaign? /n /n"
+        message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native villages. /n /n"
         notification_tools.display_choice_notification(message, ['start religious campaign', 'stop religious campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def religious_campaign(self): #called when start religious campaign clicked in choice notification
-        text_tools.print_to_screen('placeholder religious campaign', self.global_manager)
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
         text = ""
-        text += "The head missionary tries to convince church volunteers to join your cause. /n /n"
+        text += "The head missionary campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
         else:
@@ -204,15 +203,15 @@ class head_missionary(officer):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "You get a unit of church volunteers placeholder message /n"
+            text += "Inspired by the head missionary's message to save the heathens from their own ignorance, a group of church volunteers joins you. /n /n"
         else:
-            text += "You did not get a unit of church volunteers placeholder message /n"
+            text += "Whether by a lack of charisma, a reluctant audience, or a doomed cause, the head missionary fails to gather any volunteers. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "/nThe head missionary gives up placeholder message. /n" #actual 'death' occurs when religious campaign completes
+            text += "The head missionary is disturbed by the lack of faith of your country's people and decides to abandon your company. /n /n" #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result == 6:
             self.just_promoted = True
-            text += "The head missionary did well enough to become a veteran message /n"
+            text += "With fiery word and true belief in his cause, the head missionary becomes a veteran and will be more successful in future ventures. /n /n"
         if roll_result >= 4:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_religious_campaign', self.global_manager)
         else:
