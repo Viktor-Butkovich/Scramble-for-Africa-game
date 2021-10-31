@@ -31,9 +31,10 @@ SFA folder
 	workers.py
 	    imports mobs, actor_utility, utility
 	    class worker(mob)
+		class church_volunteers
 
 	villages.py
-	    imports random, village_name_generator
+	    imports random, village_name_generator, actor_utility
 	    class village
 
 	village_name_generator.py
@@ -90,15 +91,13 @@ SFA folder
 	    def unscale_height
 
 	officers.py
-	    imports mobs, tiles, actor_utility, utility
+	    imports mobs, tiles, workers, actor_utility, utility, notification_tools, text_tools, dice_utility, dice, scaling
 	    class officer(mob)
+		class head_missionary
 
         notifications.py
-            imports labels, images, text_tools, utility, scaling, actor_utility
+            imports labels, text_tools, utility, scaling
             class notification(label)
-                class dice_rolling_notification
-		class trade_notification
-                class exploration_notification
 
         notification_tools.py
             def display_notification
@@ -160,13 +159,12 @@ SFA folder
                     class veteran_icon_image
 
         groups.py
-            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, 
-		notification_tools, dice, scaling, main_loop_tols
+            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
             class group(mob)
 		class porters
 		class construction_gang
 		class caravan
-		class mission
+		class missionaries
                 class expedition
             def create_group
 
@@ -204,7 +202,7 @@ SFA folder
             class die
 
         data_managers.py
-            imports random, csv_tools, notifications, choice_notifications, scaling
+            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
             class global_manager_template
             class input_manager_template
             class flavor_text_manager_template
@@ -227,8 +225,7 @@ SFA folder
             class cell
 
         buttons.py
-            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, 
-		turn_management_tools, market_tools, notification_tools
+            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools
             class button
 		class cycle_same_tile_button
 		class same_tile_icon
@@ -238,6 +235,7 @@ SFA folder
 	    class building(actor)
 		class infrastructure_building
 		class trading_post
+		class mission
 		class train_station
 		class port
 		class resource_building
@@ -258,8 +256,7 @@ SFA folder
 	    def order_actor_info_display
 
         actor_match_tools.py
-            imports pygame, images, labels, buttons, buildings, main_loop_tools, scaling, actor_utility, text_tools, 
-		groups, vehicles
+            imports pygame, images, labels, buttons, buildings, main_loop_tools, scaling, actor_utility, text_tools, groups, vehicles
             class actor_match_free_image(free_image)
 		class actor_match_infrastructure_connection_image
 		class actor_match_background_image
@@ -282,6 +279,16 @@ SFA folder
 		class cycle_passengers_button
 		class worker_to_building_button
 		class trade_button
+		class convert_button
+		class religious_campaign_button
 		class switch_theatre_button
 		class build_train_button
 		class construction_button
+
+	action_notifications.py
+	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility, workers
+	    class dice_rolling_notification(notification)
+	    class exploration_notification(notification)
+	    class trade_notification_notification)
+	    class religious_campaign_notification(notification)
+    	    class conversion_notification(notification)

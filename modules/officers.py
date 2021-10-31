@@ -38,6 +38,14 @@ class officer(mob):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
 
     def promote(self):
+        '''
+        Description:
+            Promotes this officer to a veteran after performing various actions particularly well, improving the officer's future capabilities. Creates a veteran star icon that follows this officer
+        Input:
+            None
+        Output:
+            None
+        '''
         self.veteran = True
         self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
         for current_grid in self.grids:
@@ -134,16 +142,49 @@ class officer(mob):
             current_veteran_icon.remove()
 
     def die(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups, whose die and remove have different functionality
+        Input:
+            None
+        Output:
+            None
+        '''
         self.remove()
 
 class head_missionary(officer):
+    '''
+    Officer that can start religious campaigns and merge with church volunteers to form missionaries
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string image_id: File path to the image used by this object
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, 'head missionary', global_manager)
         self.current_campaign_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
 
-    def start_religious_campaign(self): #called when player presses head missionary's start religious campaign button in Europe
+    def start_religious_campaign(self): 
+        '''
+        Description:
+            Used when the player clicks on the start religious campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and
+            consumes the head missionary's movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         self.current_campaign_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
@@ -152,10 +193,32 @@ class head_missionary(officer):
         self.current_max_crit_fail -= self.current_campaign_modifier
         choice_info_dict = {'head missionary': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
-        message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native villages. /n /n"
+        message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native "
+        message += "villages. /n /n"
+        risk_value = -1 * self.current_campaign_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
+            
         notification_tools.display_choice_notification(message, ['start religious campaign', 'stop religious campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def religious_campaign(self): #called when start religious campaign clicked in choice notification
+        '''
+        Description:
+            Controls the religious campaign process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
@@ -219,6 +282,15 @@ class head_missionary(officer):
         self.global_manager.set('religious_campaign_result', [self, roll_result])
 
     def complete_religious_campaign(self):
+        '''
+        Description:
+            Used when the player finishes rolling for a religious campaign, showing the campaign's results and making any changes caused by the result. If successful, recruits church volunteers, promotes head missionary to a veteran on
+                critical success. If not successful, the head missionary consumes its movement points and dies on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('religious_campaign_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             new_church_volunteers = workers.church_volunteers((0, 0), [self.global_manager.get('europe_grid')], 'mobs/church volunteers/default.png', 'Church volunteers', ['strategic', 'europe'], self.global_manager)
@@ -236,7 +308,7 @@ class head_missionary(officer):
     def display_religious_campaign_die(self, coordinates, result):
         '''
         Description:
-            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for exploration rolls
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for religious campaign rolls
         Input:
             int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
             int result: Predetermined result that the die will end on after rolling

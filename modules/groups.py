@@ -281,14 +281,18 @@ class caravan(group):
             message += "The villagers are wary of the merchant but may be willing to trade. /n /n"
         self.current_trade_modifier += aggressiveness_modifier
 
-        if self.current_trade_modifier == 0: #1/6 death = moderate risk
-            message += "RISK: MODERATE /n /n"
-        elif self.current_trade_modifier > 0: #0/6 = no risk
-            message += "RISK: LOW /n /n"
-        elif self.current_trade_modifier == -1: #2/6 = high risk
-            message += "RISK: HIGH /n /n"
-        else: #3/6 or higher = extremely high risk
-            message += "RISK: DEADLY /n /n"
+        risk_value = -1 * self.current_trade_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
         
         self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_trade_modifier
@@ -366,7 +370,7 @@ class caravan(group):
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         elif roll_result <= self.current_max_crit_fail:
-            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nBelieving that the merchant seeks to trick them out of their valuables, the villagers the caravan. /n /nEveryone in the caravan " +
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n /nEveryone in the caravan " +
                 "has died. /n /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
         else:
             notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
@@ -445,11 +449,12 @@ class caravan(group):
             text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
             text += "The merchant has " + str(num_consumer_goods) + " more consumer goods to sell /n /n"
         notification_tools.display_notification(text, notification_type, self.global_manager)
+        text = ""
         if self.trades_remaining > 0 and num_consumer_goods > 0:
             choice_info_dict = {'caravan': self, 'village': village, 'type': 'trade'}
-            message = "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
-            message += "Do you want to trade consumer goods for items that may or may not be valuable?"
-            notification_tools.display_choice_notification(message, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
+            text += "Do you want to trade consumer goods for items that may or may not be valuable?"
+            notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         else:
             if self.trades_remaining == 0:
                 text += "The villagers are not willing to trade any more this turn. /n /n"
@@ -501,8 +506,18 @@ class missionaries(group):
         self.current_convert_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
 
     def start_converting(self):
+        '''
+        Description:
+            Used when the player clicks on the start converting button, displays a choice notification that allows the player to caonvert or not. Choosing to campaign starts the conversion process and consumes the missionaries'
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         village = self.images[0].current_cell.village
         self.current_convert_modifier = 0
         self.current_min_success = self.default_min_success
@@ -529,14 +544,18 @@ class missionaries(group):
             message += "The low population of this village will require less effort to convert /n"
         self.current_convert_modifier += population_modifier
 
-        if self.current_convert_modifier == 0: #1/6 death = moderate risk
-            message += "RISK: MODERATE /n"
-        elif self.current_convert_modifier > 0: #0/6 = no risk
-            message += "RISK: LOW /n"
-        elif self.current_convert_modifier == -1: #2/6 = high risk
-            message += "RISK: HIGH /n"
-        else: #3/6 or higher = extremely high risk
-            message += "RISK: DEADLY"
+        risk_value = -1 * self.current_convert_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
             
         self.current_min_success -= self.current_convert_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_convert_modifier
@@ -547,6 +566,14 @@ class missionaries(group):
         notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
+        '''
+        Description:
+            Controls the conversion process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
@@ -604,8 +631,8 @@ class missionaries(group):
 
         if (not self.veteran) and roll_result == 6:
             self.just_promoted = True
-            text += "Interactions with the natives have given the head missionary insights into converting them and demonstrating connections between their beliefs and Christianity. The head missionary is now a veteran and will be more"
-            text += "successful in future ventures. "
+            text += "The head missionary has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n /n"
+            text += "The head missionary is now a veteran and will be more successful in future ventures. /n /n"
         if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
         else:
@@ -613,6 +640,15 @@ class missionaries(group):
         self.global_manager.set('conversion_result', [self, roll_result, village])
 
     def complete_conversion(self):
+        '''
+        Description:
+            Used when the player finishes rolling for religious conversion, showing the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes head missionary to a
+                veteran on critical success. If not successful, the missionaries consume their movement points and die on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('conversion_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
@@ -628,6 +664,15 @@ class missionaries(group):
         self.global_manager.set('ongoing_conversion', False)
         
     def display_conversion_die(self, coordinates, result):
+        '''
+        Description:
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for religious conversion rolls
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+        Output:
+            None
+        '''
         result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
@@ -709,7 +754,29 @@ class expedition(group):
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
                 choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost, 'type': 'exploration'}
-                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'stop exploration'],
+                
+                self.current_exploration_modifier = 0
+                self.current_min_success = self.default_min_success
+                self.current_max_crit_fail = self.default_max_crit_fail
+                #determine modifier here
+                self.current_min_success -= self.current_exploration_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+                self.current_max_crit_fail -= self.current_exploration_modifier
+                message = ""
+
+                risk_value = -1 * self.current_exploration_modifier #modifier of -1 means risk value of 1
+                if self.veteran: #reduce risk if veteran
+                    risk_value -= 1
+
+                if risk_value < 0: #0/6 = no risk
+                    message = "RISK: LOW /n /n" + message  
+                elif risk_value == 0: #1/6 death = moderate risk
+                    message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+                elif risk_value == 1: #2/6 = high risk
+                    message = "RISK: HIGH /n /n" + message
+                elif risk_value > 1: #3/6 or higher = extremely high risk
+                    message = "RISK: DEADLY /n /n" + message
+                
+                notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attempt an exploration to the " + direction + "?", ['exploration', 'stop exploration'],
                     choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 self.global_manager.set('ongoing_exploration', True)
                 for current_grid in self.grids:
@@ -748,13 +815,6 @@ class expedition(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
-
-        self.current_exploration_modifier = 0
-        self.current_min_success = self.default_min_success
-        self.current_max_crit_fail = self.default_max_crit_fail
-        #determine modifier here
-        self.current_min_success -= self.current_exploration_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-        self.current_max_crit_fail -= self.current_exploration_modifier
         
         self.just_promoted = False
         text = ""

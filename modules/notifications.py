@@ -1,9 +1,7 @@
 from .labels import label
-#from .images import free_image
 from . import text_tools
 from . import utility
 from . import scaling
-#from . import actor_utility
 
 class notification(label):
     '''

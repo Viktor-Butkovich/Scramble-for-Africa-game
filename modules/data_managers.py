@@ -274,9 +274,9 @@ class notification_manager_template():
     def update_notification_layout(self, notification_height = 0):
         '''
         Description:
-            Changes where notifications are displayed depending on the current game mode to avoid blocking relevant information
+            Changes where notifications are displayed depending on the current game mode to avoid blocking relevant information. Also changes the height of the notification based on how much text it contains
         Input:
-            None
+            int notification_height = 0: Height in pixels of the notification text. If the notification text height is greater than the default notification height, the notification will scale its height to the text
         Output:
             None
         '''
@@ -294,6 +294,14 @@ class notification_manager_template():
             self.notification_x = 610
 
     def get_notification_height(self, notification_text):
+        '''
+        Description:
+            Returns the height in pixels of the inputted text if it were put in a notification
+        Input:
+            string notification_text: Text that will appear on the notification with lines separated by /n
+        Output:
+            int: height in pixels of the inputted text if it were put in a notification
+        '''
         new_message = []
         next_line = ""
         next_word = ""

@@ -156,7 +156,23 @@ class worker(mob):
         self.select()
 
 class church_volunteers(worker):
+    '''
+    Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string image_id: File path to the image used by this object
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True

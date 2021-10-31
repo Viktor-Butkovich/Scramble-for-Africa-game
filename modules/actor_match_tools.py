@@ -1621,10 +1621,36 @@ class trade_button(label_button):
                 text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
 
 class convert_button(label_button):
+    '''
+    Button that commands a missionaries to convert a native village
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'convert', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if (not self.attached_label.actor.can_convert):
@@ -1632,6 +1658,14 @@ class convert_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -1652,12 +1686,35 @@ class convert_button(label_button):
 
 class religious_campaign_button(label_button):
     '''
-    Button that starts commands a head missionary to do a religious campaign in Europe
+    Button that commands a head missionary to start a religious campaign in Europe
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'religious campaign', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a head missionary, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary')):
@@ -1667,7 +1724,7 @@ class religious_campaign_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a caravan to trade with a village
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a head missionary to start a religious campaign
         Input:
             None
         Output:
@@ -1953,9 +2010,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 self.set_tooltip(['Builds a road, halving the cost to move between this tile and other tiles with roads or railroads', 'A road can be upgraded into a railroad that allows trains to move through this tile',
                     'Costs 1 movement point'])
         elif self.building_type == 'trading_post':
-            self.set_tooltip(['Builds a trading post, allowing merchant caravans to trade with an attached village', 'Can only be built in a village', 'Costs 1 movement point'])
+            self.set_tooltip(['Builds a trading post, increasing the success chance and reducing the risk when caravans trade with the attached village', 'Can only be built in a village', 'Costs 1 movement point'])
         elif self.building_type == 'mission':
-            self.set_tooltip(['Builds a mission, allowing missionaries to convert an attached village', 'Can only be built in a village', 'Costs 1 movement point'])
+            self.set_tooltip(['Builds a mission, increasing the success chance and reducing the risk when missionaries convert the attached village', 'Can only be built in a village', 'Costs 1 movement point'])
         else:
             self.set_tooltip(['placeholder'])
 

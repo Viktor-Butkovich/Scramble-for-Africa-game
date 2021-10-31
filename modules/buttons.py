@@ -218,13 +218,15 @@ class button():
         elif self.button_type == 'cycle units':
             self.set_tooltip(["Selects the next unit that has movement remaining"])
         elif self.button_type == 'trade':
-            self.set_tooltip(["Attempts to trade consumer goods for random commodities", "Can only be done at a trading post in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
+            self.set_tooltip(["Attempts to trade with natives, paying consumer goods for random commodities", "Can only be done in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
-                "Costs an entire turn of movement points"])
+                "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
         elif self.button_type == 'religious campaign':
-            self.set_tooltip(["Placeholder religious campaign tooltip"])
+            self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
+                "If successful, recruits a free unit of church volunteers that can join with a head missionary to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
-            self.set_tooltip(["Placeholder convert tooltip"])
+            self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
+                "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
         else:
             self.set_tooltip(['placeholder'])
             

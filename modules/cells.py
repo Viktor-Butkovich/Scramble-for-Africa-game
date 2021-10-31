@@ -68,6 +68,14 @@ class cell():
         return(True)
 
     def has_mission(self):
+        '''
+        Description:
+            Returns whether this cell contains a mission
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a mission, otherwise returns True
+        '''
         if self.contained_buildings['mission'] == 'none':
             return(False)
         return(True)
@@ -199,7 +207,7 @@ class cell():
     def get_worker(self):
         '''
         Description:
-            Returns the first worker in this cell, or 'none' if none are present
+            Returns the first worker in this cell, or 'none' if none are present. Does not inclue church volunteers
         Input:
             None
         Output:
@@ -211,6 +219,14 @@ class cell():
         return('none')
 
     def get_church_volunteers(self):
+        '''
+        Description:
+            Returns the first church volunteer in this cell, or 'none' if none are present
+        Input:
+            None
+        Output:
+            string/church_volunteers: Returns the first church volunteer in this cell, or 'none' if none are present
+        '''
         for current_mob in self.contained_mobs:
             if current_mob in self.global_manager.get('worker_list') and current_mob.is_church_volunteers:
                 return(current_mob)

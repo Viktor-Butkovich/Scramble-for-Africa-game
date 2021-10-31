@@ -13,16 +13,45 @@ class village():
             Initializes this object
         Input:
             cell cell: cell on strategic map grid in which this village exists
+            global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.aggressiveness = random.randrange(1, 10) #1-9
-        self.population = random.randrange(1, 10) #1-9
+        self.set_initial_population()
+        self.set_initial_aggressiveness()
         self.available_workers = 0
         self.attempted_trades = 0
         self.cell = cell
         self.name = village_name_generator.create_village_name()
         self.global_manager = global_manager
+
+    def set_initial_population(self):
+        '''
+        Description:
+            Sets this village's population to a random number between 1 and 9
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.population = random.randrange(1, 10)
+    
+    def set_initial_aggressiveness(self):
+        '''
+        Description:
+            Sets this village's population to its aggressiveness, changed up, down, or not at all 9 times. Can not be less than 1 or greater than 9
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.aggressiveness = self.population
+        for i in range(1, 10): #9 iterations
+            self.aggressiveness += random.randrange(-1, 2) #-1, 0, or 1
+            if self.aggressiveness < 1:
+                self.aggressiveness = 1
+            elif self.aggressiveness > 9:
+                self.aggressiveness = 9
             
     def get_tooltip(self):
         '''
@@ -47,7 +76,7 @@ class village():
         Input:
             None
         Output:
-            int: Returns -1 if this village's aggressiveness is between 0 and 3, returns 0 if this village's aggressiveness if between 4 and 6, otherwise returns 1
+            int: Returns 1 if this village's aggressiveness is between 0 and 3, returns 0 if this village's aggressiveness if between 4 and 6, otherwise returns -1
         '''
         if self.aggressiveness <= 3: #1-3
             return(1)
@@ -57,6 +86,14 @@ class village():
             return(-1)
 
     def get_population_modifier(self): #modifier affects roll difficulty, not roll result
+        '''
+        Description:
+            Returns a modifier corresponding to this village's population with higher population causing lower modifiers. These modifiers affect the difficulty and reward level of actions relating to this village
+        Input:
+            None
+        Output:
+            int: Returns 1 if this village's aggressiveness is between 0 and 3, returns 0 if this village's aggressiveness if between 4 and 6, otherwise returns -1
+        '''
         if self.population <= 3: #1-3
             return(1)
         elif self.population <= 6: #4 - 6
@@ -65,6 +102,14 @@ class village():
             return(-1)
 
     def change_aggressiveness(self, change):
+        '''
+        Description:
+            Changes this village's aggressiveness by the inputted amount. Prevents the value from exiting the allowed range of 1-9 and updates the tile info display as applicable
+        Input:
+            int change: amount this village's aggressivness is changed by
+        Output:
+            None
+        '''
         self.aggressiveness += change
         if self.aggressiveness > 9:
             self.aggressiveness = 9
