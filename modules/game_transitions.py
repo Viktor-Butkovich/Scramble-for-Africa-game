@@ -6,10 +6,13 @@ from . import actor_utility
 
 def set_game_mode(new_game_mode, global_manager):
     '''
+    Description:
+        Changes the current game mode to the inputted game mode, changing which objects can be displayed and interacted with
     Input:
-        string representing the game mode to switch to, global_manager_template object
+        string new_game_mode: Game mode that this switches to, like 'strategic', global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Changes the game mode to the inputted game mode, changing which objects can be displayed and interacted with
+        None
     '''
     text_list = []
     previous_game_mode = global_manager.get('current_game_mode')
@@ -37,10 +40,12 @@ def set_game_mode(new_game_mode, global_manager):
     
 def create_strategic_map(global_manager):
     '''
+    Description:
+        Creates a tile attached to each cell of each grid and randomly sets resources and villages when applicable
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Creates a tile object for each grid cell and randomly sets their resources
+        None
     '''
     text_tools.print_to_screen('Creating map...', global_manager)
     main_loop_tools.update_display(global_manager)
@@ -55,10 +60,12 @@ def create_strategic_map(global_manager):
 
 def start_loading(global_manager):
     '''
+    Description:
+        Records when loading started and displays a loading screen when the program is launching or switching between game modes
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Records when loading started and start loading the game
+        None
     '''
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())

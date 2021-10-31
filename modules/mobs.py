@@ -1,12 +1,10 @@
 import pygame
 import time
-#import random #test showing how to add to inventory
 from . import images
 from . import text_tools
 from . import utility
 from . import actor_utility
 from .actors import actor
-from .tiles import veteran_icon
 
 class mob(actor):
     '''
@@ -14,18 +12,23 @@ class mob(actor):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
-            grids: list of grid objects on which the mob's images will appear
-            image_id: string representing the file path to the mob's default image
-            name: string representing the mob's name
-            modes: list of strings representing the game modes in which the mob can appear
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this mob's images can appear
+            string image_id: File path to the image used by this object
+            string name: This mob's name
+            string list modes: Game modes during which this mob's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.selected = False
         self.in_group = False
         self.in_vehicle = False
         self.in_building = False
+        self.veteran = False
         self.actor_type = 'mob'
         super().__init__(coordinates, grids, modes, global_manager)
         self.image_dict = {'default': image_id}
@@ -37,6 +40,8 @@ class mob(actor):
         self.set_name(name)
         self.can_explore = False #if can attempt to explore unexplored areas
         self.can_construct = False #if can construct buildings
+        self.can_trade = False #if can trade or create trading posts
+        self.can_convert = False #if can convert natives or build missions
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
         self.travel_possible = False #if can switch theatres
@@ -55,7 +60,15 @@ class mob(actor):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def get_movement_cost(self, x_change, y_change):
-        #local_infrastructure = self.images[0].current_cell.contained_buildings['infrastructure']
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Only works when one inputted amount is 0 and the other is 1 or -1, with 0 and -1 representing moving 1 cell downward
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
         local_cell = self.images[0].current_cell
         if local_cell.has_road() or local_cell.has_railroad(): #if not local_infrastructure == 'none':
             direction = 'non'
@@ -67,19 +80,34 @@ class mob(actor):
                 direction = 'up'
             elif y_change < 0:
                 direction = 'down'
-            #adjacent_infrastructure = self.images[0].current_cell.adjacent_cells[direction].contained_buildings['infrastructure']
             adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
             if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
                 return(self.movement_cost / 2.0)
         return(self.movement_cost)
 
     def adjacent_to_water(self):
+        '''
+        Description:
+            Returns whether any of the cells directly adjacent to this mob's cell has the water terrain. Otherwise, returns False
+        Input:
+            None
+        Output:
+            boolean: Returns True if any of the cells directly adjacent to this mob's cell has the water terrain. Otherwise, returns False
+        '''
         for current_cell in self.images[0].current_cell.adjacent_list:
             if current_cell.terrain == 'water':
                 return(True)
         return(False)
 
     def end_turn_move(self):
+        '''
+        Description:
+            If this mob has any pending movement orders at the end of the turn, this executes the movement. Currently used to move ships between Africa and Europe at the end of the turn
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.end_turn_destination == 'none':
             if self.grids[0] in self.end_turn_destination.grids: #if on same grid
                 nothing = 0 #do later
@@ -89,9 +117,25 @@ class mob(actor):
             self.end_turn_destination = 'none'
     
     def can_travel(self): #if can move between Europe, Africa, etc.
+        '''
+        Description:
+            Returns whether this mob can cross the ocean, like going between Africa and Europe. By default, mobs cannot cross the ocean, but subclasses like ship are able to return True
+        Input:
+            None
+        Output:
+            boolean: Returns True if this mob can cross the ocean, otherwise returns False
+        '''
         return(False) #different for subclasses
 
     def change_movement_points(self, change):
+        '''
+        Description:
+            Changes this mob's movement points by the inputted amount. Ensures that the mob info display is updated correctly and that whole number movement point amounts are not shown as decimals
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.has_infinite_movement:
             self.movement_points += change
             if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
@@ -100,6 +144,14 @@ class mob(actor):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_movement_points(self, new_value):
+        '''
+        Description:
+            Sets this mob's movement points to the inputted amount. Ensures that the mob info display is updated correctly and that whole number movement point amounts are not shown as decimals
+        Input:
+            None
+        Output:
+            None
+        '''
         self.movement_points = new_value
         if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
             self.movement_points = round(self.movement_points)
@@ -107,6 +159,14 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def reset_movement_points(self):
+        '''
+        Description:
+            Sets this mob's movement points to its maximum number of movement points at the end of the turn. Ensures that the mob info display is updated correctly and that whole number movement point amounts are not shown as decimals
+        Input:
+            None
+        Output:
+            None
+        '''
         self.movement_points = self.max_movement_points
         if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
             self.movement_points = round(self.movement_points)
@@ -114,15 +174,26 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_max_movement_points(self, new_value):
+        '''
+        Description:
+            Sets this mob's maximum number of movement points and changes its current movement points to the maximum amount
+        Input:
+            None
+        Output:
+            None
+        '''
         self.max_movement_points = new_value
         self.set_movement_points(new_value)
 
     def change_inventory(self, commodity, change):
         '''
+        Description:
+            Changes the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
         Input:
-            same as superclass
+            string commodity: Type of commodity to change the inventory of
+            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
         Output:
-            same as superclass, except, if currently being shown in the mob info display, updates the displayed commodities to reflect the change
+            None
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] += change
@@ -131,10 +202,13 @@ class mob(actor):
 
     def set_inventory(self, commodity, new_value):
         '''
+        Description:
+            Sets the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
         Input:
-            same as superclass
+            string commodity: Type of commodity to set the inventory of
+            int new_value: Amount of commodities of the inputted type to set inventory to
         Output:
-            same as superclass, except, if currently being shown in the mob info display, updates the displayed commodities to reflect the change
+            None
         '''
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
@@ -143,16 +217,19 @@ class mob(actor):
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
+        Description:
+            Links this mob to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when a mob that was previously attached to another actor becomes independent and visible,
+                like when a building's worker leaves
         Input:
-            grid object representing the grid to which the mob is transferring, tuple of two int variables representing the coordinates to which the mob will move on the new grid
+            grid new_grid: grid that this mob is linked to
+            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
-            Moves this mob and all of its images to the inputted grid at the inputted coordinates
+            None
         '''
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), new_grid.cell_list[0].tile)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), new_grid.cell_list[0].tile)
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
@@ -171,25 +248,27 @@ class mob(actor):
 
     def select(self):
         '''
+        Description:
+            Selects this mob, causing this mob to be shown in the mob display and causing a selection outline to appear around it 
         Input:
-            none
+            None
         Output:
-            Causes this mob to be selected and causes the selection outline timer to be reset, displaying it immediately
+            None
         '''
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
-        #if self.images[0].current_cell.contained_mobs[0] == self: #only calibrate actor info if top of stack
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def draw_outline(self):
         '''
+        Description:
+            Draws a flashing outline around this mob if it is selected
         Input:
-            none
+            None
         Output:
-            If selection outlines are currently allowed to appear and if this mob is showing, draw a selection outline around each of its images
+            None
         '''
         if self.global_manager.get('show_selection_outlines'):
             for current_image in self.images:
@@ -203,20 +282,24 @@ class mob(actor):
         
     def update_tooltip(self):
         '''
+        Description:
+            Sets this mob's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this actor's name and its movement points
         Input:
-            none
+            None
         Output:
-            Sets this mob's tooltip to its name and movement points
+            None
         '''
         self.set_tooltip(["Name: " + self.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
         
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob and drops any commodities it is carrying
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
             current_tile = self.images[0].current_cell.tile
@@ -232,14 +315,25 @@ class mob(actor):
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
     def can_leave(self):
+        '''
+        Description:
+            Returns whether this mob is allowed to move away from its current cell. By default, mobs can always allowed to move away from their current cells, but subclasses like ship are able to return False
+        Input:
+            None
+        Output:
+            boolean: Returns True
+        '''
         return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
 
     def can_move(self, x_change, y_change):
         '''
+        Description:
+            Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc.
         Input:
-            int representing the distance moved to the right from a proposed movement, int representing the distance moved upward from a proposed movement
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
         Output:
-            Returns whether the proposed movement would be possible
+            boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
@@ -279,10 +373,13 @@ class mob(actor):
 
     def move(self, x_change, y_change):
         '''
+        Description:
+            Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship
         Input:
-            int representing the distance moved to the right, int representing the distance moved upward
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
         Output:
-            Moves this mob x_change tiles to the right and y_change tiles upward
+            None
         '''
         self.end_turn_destination = 'none' #cancels planned movements
         self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change))
@@ -290,7 +387,6 @@ class mob(actor):
             current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
-        #self.inventory['coffee'] += 1 #test showing how to add to inventory
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
@@ -302,61 +398,107 @@ class mob(actor):
             else:
                 self.embark_vehicle(vehicle)
             vehicle.select()
-            
-        #self.change_inventory(random.choice(self.global_manager.get('commodity_types')), 1) #test showing how to add to inventory
 
     def touching_mouse(self):
         '''
+        Description:
+            Returns whether any of this mob's images is colliding with the mouse. Also ensures that no hidden images outside of the minimap are considered as colliding
         Input:
-            none
+            None
         Output:
-            Returns whether any of this mob's images are colliding with the mouse
+            boolean: True if any of this mob's images is colliding with the mouse, otherwise return False
         '''
         for current_image in self.images:
             if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
                 if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
                     return(True)
-        return(False) #return false if none touch mouse
+        return(False)
 
     def set_name(self, new_name):
         '''
+        Description:
+            Sets this mob's name. Also updates the mob info display to show the new name
         Input:
-            same as superclass
+            string new_name: Name to set this mob's name to
         Output:
-            same as superclass, except, if currently being shown in the mob info display, updates the displayed name 
+            None
         '''
         super().set_name(new_name)
         if self.global_manager.get('displayed_mob') == self: #self.selected:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this mob's tooltip can be shown. Along with the superclass' requirements, mob tooltips can not be shown when attached to another actor, such as when working in a building
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.in_vehicle or self.in_group or self.in_building:
             return(False)
         else:
             return(super().can_show_tooltip())
 
     def hide_images(self):
+        '''
+        Description:
+            Hides this mob's images, allowing it to be hidden but still stored at certain coordinates when it is attached to another actor or otherwise not visible
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_image in self.images:
             current_image.remove_from_cell()
 
     def show_images(self):
+        '''
+        Description:
+            Shows this mob's images at its stored coordinates, allowing it to be visible after being attached to another actor or otherwise not visible
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_image in self.images:
             current_image.add_to_cell()        
 
     def embark_vehicle(self, vehicle):
+        '''
+        Description:
+            Hides this mob and embarks it on the inputted vehicle as a passenger. Any commodities held by this mob are put on the vehicle if there is cargo space, or dropped in its tile if there is no cargo space
+        Input:
+            vehicle vehicle: vehicle that this mob becomes a passenger of
+        Output:
+            None
+        '''
         self.in_vehicle = True
         self.selected = False
+        for current_commodity in self.get_held_commodities(): #gives inventory to ship
+            num_held = self.get_inventory(current_commodity)
+            for current_commodity_unit in range(num_held):
+                if vehicle.get_inventory_remaining() > 0:
+                    vehicle.change_inventory(current_commodity, 1)
+                else:
+                    self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
         self.hide_images()
         vehicle.contained_mobs.append(self)
-        for current_commodity in self.global_manager.get('commodity_types'): #gives inventory to ship
-            vehicle.change_inventory(current_commodity, self.get_inventory(current_commodity))
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         vehicle.select()
-        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
 
     def disembark_vehicle(self, vehicle):
+        '''
+        Description:
+            Shows this mob and disembarks it from the inputted vehicle after being a passenger
+        Input:
+            vehicle vehicle: vehicle that this mob disembarks from
+        Output:
+            None
+        '''
         vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
         self.in_vehicle = False
         self.x = vehicle.x
@@ -368,5 +510,4 @@ class mob(actor):
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
-        #vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
 

@@ -2,17 +2,22 @@ import pygame
 
 class cell():
     '''
-    Represents one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
+    Object representing one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
     '''
     def __init__(self, x, y, width, height, grid, color, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            x: int representing the x_coordinate of this cell in its grid
-            y: int representing the y_coordinate of this cell in its grid
-            width: int representing the pixel width of this cell
-            height: int representing the pixel height of this cell
-            grid: grid object representing the grid that this cell is part of
-            color: tuple of three ints that represents the RGB color of this cell
+            int x: the x coordinate of this cell in its grid
+            int y: the y coordinate of this cell in its grid
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            grid grid: The grid that this cell is attached to
+            string color: Color in the color_dict dictionary for this cell when nothing is covering it
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.move_priority = 99
@@ -25,10 +30,7 @@ class cell():
         self.pixel_x, self.pixel_y = self.grid.convert_coordinates((self.x, self.y))
         self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
-        #self.occupied = False
         self.grid.cell_list.append(self)
-        #self.adjacent_list = [] #list of 4 nearby cells, used for movement
-        #self.diagonal_adjacent_list = [] #list of 8 nearby cells, used for melee attacks of opportunity
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'
@@ -39,56 +41,205 @@ class cell():
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
 
+    def has_village(self):
+        '''
+        Description:
+            Returns whether this cell contains a village
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a village, otherwise returns True
+        '''
+        if self.village == 'none':
+            return(False)
+        return(True)
+
+    def has_trading_post(self):
+        '''
+        Description:
+            Returns whether this cell contains a trading post
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a trading post, otherwise returns True
+        '''
+        if self.contained_buildings['trading_post'] == 'none':
+            return(False)
+        return(True)
+
+    def has_mission(self):
+        '''
+        Description:
+            Returns whether this cell contains a mission
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a mission, otherwise returns True
+        '''
+        if self.contained_buildings['mission'] == 'none':
+            return(False)
+        return(True)
+
     def has_road(self):
+        '''
+        Description:
+            Returns whether this cell contains a road
+        Input:
+            None
+        Output:
+            boolean: Returns True if this cell contains a road, otherwise returns False
+        '''
         if self.contained_buildings['infrastructure'] == 'none':
             return(False)
         if self.contained_buildings['infrastructure'].is_road:
             return(True)
+        return(False)
 
     def has_railroad(self):
+        '''
+        Description:
+            Returns whether this cell contains a railroad
+        Input:
+            None
+        Output:
+            boolean: Returns True if this cell contains a railroad, otherwise returns False
+        '''
         if self.contained_buildings['infrastructure'] == 'none':
             return(False)
         if self.contained_buildings['infrastructure'].is_railroad:
             return(True)
+        return(False)
 
     def reset_buildings(self):
-        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none'}
+        '''
+        Description:
+            Resets the values of this cell's dictionary of contained buildings to 'none', initializing the dictionary or removing existing buildings
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none', 'trading_post': 'none', 'mission': 'none'}
 
     def has_port(self):
+        '''
+        Description:
+            Returns whether this cell contains a port
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a port, otherwise returns True
+        '''
         if self.contained_buildings['port'] == 'none':
             return(False)
         return(True)
 
     def has_vehicle(self, vehicle_type):
+        '''
+        Description:
+            Returns whether this cell contains a crewed vehicle of the inputted type
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            boolean: Returns True if this cell contains a crewed vehicle of the inputted type, otherwise returns False
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
     def get_vehicle(self, vehicle_type):
+        '''
+        Description:
+            Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            string/vehicle: Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 
     def has_uncrewed_vehicle(self, vehicle_type):
+        '''
+        Description:
+            Returns whether this cell contains an uncrewed vehicle of the inputted type
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            boolean: Returns True if this cell contains an uncrewed vehicle of the inputted type, otherwise returns False
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
     def get_uncrewed_vehicle(self, vehicle_type):
+        '''
+        Description:
+            Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
+        Input:
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+        Output:
+            string/vehicle: Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 
+    def has_worker(self):
+        '''
+        Description:
+            Returns whether this cell contains a worker
+        Input:
+            None
+        Output:
+            Returns True if this cell contains a worker, otherwise returns False
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+                return(True)
+        return(False)
+
+    def get_worker(self):
+        '''
+        Description:
+            Returns the first worker in this cell, or 'none' if none are present. Does not inclue church volunteers
+        Input:
+            None
+        Output:
+            string/worker: Returns the first worker in this cell, or 'none' if none are present
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+                return(current_mob)
+        return('none')
+
+    def get_church_volunteers(self):
+        '''
+        Description:
+            Returns the first church volunteer in this cell, or 'none' if none are present
+        Input:
+            None
+        Output:
+            string/church_volunteers: Returns the first church volunteer in this cell, or 'none' if none are present
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.is_church_volunteers:
+                return(current_mob)
+        return('none')
+
     def set_visibility(self, new_visibility):
         '''
+        Description:
+            Sets the visibility of this cell and its attached tile to the inputted value. A visible cell's terrain and resource can be seen by the player.
         Input:
-            boolean representing the new visibility status of this cell
+            boolean new_visibility: This cell's new visibility status
         Output:
-            Sets the visibility status of this cell and its attached tile, if applicable, to the inputted boolean. A visible cell's terrain and resource can be seen by the player.
+            None
         '''
         self.visible = new_visibility
         if not self.tile == 'none':
@@ -96,20 +247,24 @@ class cell():
     
     def set_resource(self, new_resource):
         '''
+        Description:
+            Sets the resource type of this cell and its attached tile to the inputted value
         Input:
-            string representing the new resource in this cell
+            string new_resource: The new resource type of this cell and its attached tile, like 'exotic wood'
         Output:
-            Sets the resources of this cell and its tile to the inputted string
+            None
         '''
         self.resource = new_resource
         self.tile.set_resource(new_resource)
 
     def set_terrain(self, new_terrain):
         '''
+        Description:
+            Sets the terrain type of this cell and its attached tile to the inputted value
         Input:
-            string representing the new terrain in this cell
+            string new_terrain: The new terrain type of this cell and its attached tile, like 'swamp'
         Output:
-            Sets the terrain of this cell and its tile, if applicable, to the inputted string
+            None
         '''
         self.terrain = new_terrain
         if (not self.tile == 'none'):
@@ -118,10 +273,12 @@ class cell():
             
     def draw(self):
         '''
+        Description:
+            Draws this cell as a rectangle with a certain color on its grid, depending on this cell's color value
         Input:
             none
         Output:
-            Draws this cell in its place in its grid with its color attribute
+            None
         '''
         current_color = self.color
         red = current_color[0]
@@ -131,10 +288,12 @@ class cell():
 
     def show_num_mobs(self):
         '''
+        Description:
+            Draws a number showing how many mobs are in this cell if it contains multiple mobs, otherwise does nothing
         Input:
-            none
+            None
         Output:
-            Does nothing if there are not at least 2 mobs in this cell. If there are at least 2 mobs in this cell, this displays the number of mobs present in the bottom right corner of the cell.
+            None
         '''
         length = len(self.contained_mobs)
         if length >= 2 and not self.terrain == 'none':
@@ -149,41 +308,27 @@ class cell():
 
     def touching_mouse(self):
         '''
+        Description:
+            Returns True if this cell is colliding with the mouse, otherwise returns False
         Input:
-            none
+            None
         Output:
-            Returns whether this cell is colliding with the mouse
+            boolean: Returns True if this cell is colliding with the mouse, otherwise returns False
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()):
             return(True)
         else:
             return(False)
 
-    def has_worker(self):
-        '''
-        Input:
-            none
-        Output:
-            Returns whether a worker is present in this cell
-        '''
-        for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list'):
-                return(True)
-        return(False)
-
-    def get_worker(self):
-        '''
-        Input:
-            none
-        Output:
-            Returns the first worker present in this cell, or 'none' if no workers are present
-        '''
-        for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list'):
-                return(current_mob)
-        return('none')
-
     def find_adjacent_cells(self):
+        '''
+        Description:
+            Records a list of the cells directly adjacent to this cell. Also records these cells as values in a dictionary with string keys corresponding to their direction relative to this cell
+        Input:
+            None
+        Output:
+            None
+        '''
         adjacent_list = []
         if not self.x == 0:
             adjacent_cell = self.grid.find_cell(self.x - 1, self.y)

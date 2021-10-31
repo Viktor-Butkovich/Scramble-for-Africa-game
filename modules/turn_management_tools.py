@@ -5,10 +5,14 @@ from . import actor_utility
 from . import market_tools
 
 def end_turn(global_manager):
-    #for current_mob in global_manager.get('mob_list'):
-    #    current_mob.selected = False
-    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
-    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+    '''
+    Description:
+        Ends the turn, completing any pending movements, removing any commodities that can't be stored, and doing resource production
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     text_tools.print_to_screen("Ending turn", global_manager)
@@ -22,10 +26,17 @@ def end_turn(global_manager):
     for current_resource_building in global_manager.get('resource_building_list'):
         current_resource_building.produce()
     manage_upkeep(global_manager)
-    #do things that happen at end of turn
     start_turn(global_manager, False)
 
 def start_turn(global_manager, first_turn):
+    '''
+    Description:
+        Starts the turn, giving all units their maximum movement points and adjusting market prices
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     global_manager.set('player_turn', True)
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Starting turn", global_manager)
@@ -40,10 +51,16 @@ def start_turn(global_manager, first_turn):
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
-    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), global_manager.get('displayed_mob')) #update any tile/mob info that changed
-    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
 
 def manage_upkeep(global_manager):
+    '''
+    Description:
+        Pays upkeep for all units at the beginning of the turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     num_workers = global_manager.get('num_workers')
     worker_upkeep = global_manager.get('worker_upkeep')
     total_upkeep = num_workers * worker_upkeep

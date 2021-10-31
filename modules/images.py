@@ -7,17 +7,22 @@ from . import scaling
 
 class free_image():
     '''
-    Image unrelated to any actors or grids that appears on a part of the screen
+    Image unrelated to any actors or grids that appears at certain pixel coordinates
     '''
     def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
         '''
+        Description:
+            Initializes this object
         Input:
-            image_id: string representing the file path to this image's image file
-            coordinates: tuple of two int variables representing the pixel location of this image
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            modes: list of strings representing the game modes in which this image can appear
-            global_manager: global_manager_template object
+            string image_id: File path to the image used by this object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this button can appear
+            global_manager_template global_manager: Object that accesses shared variables
+            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.image_type = 'free'
@@ -33,20 +38,24 @@ class free_image():
         
     def draw(self):
         '''
+        Description:
+            Draws this image if it should currently be visible
         Input:
-            none
+            None
         Output:
-            Draws the image if the current game mode matches this image's game modes
+            None
         '''
         if self.can_show():
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
         Input:
-            none
+            None
         Output:
-            Returns whether the image should be shown. By default, free images always show if they are meant to be shown in the current game mode.
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
@@ -55,20 +64,24 @@ class free_image():
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
         self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
 
     def set_image(self, new_image):
         '''
+        Description:
+            Changes this image to reflect the inputted image file path
         Input:
-            string representing a file path for a new image file
+            string new_image: Image file path to change this image to
         Output:
-            Changes this image to match the image file represented by the inputted string
+            None
         '''
         self.image_id = new_image
         self.image = pygame.image.load('graphics/' + self.image_id)
@@ -76,23 +89,29 @@ class free_image():
 
 class loading_image_template(free_image):
     '''
-    Free image that covers all other objects and appears while the game is loading 
+    Image that occupies the entire screen, covering all other objects while the game is loading 
     '''
     def __init__(self, image_id, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            image_id: string representing the file path to this image's image file
-            global_manager: global_manager_template object
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self)) #different from other images, should only be drawn when directly requested
 
     def draw(self):
         '''
+        Description:
+            Draws this image. Unlike other images, a loading screen image will always be visible when draw() is called
         Input:
-            none
+            None
         Output:
-            Draws this image
+            None
         '''
         drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
@@ -102,13 +121,17 @@ class actor_image():
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            actor: actor object representing the actor to which this actor is attached
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            grid: grid object representing the grid to which this actor image is attached
-            image_description: string representing the file path to this image's image file
-            global_manager: global_manager_template object
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.image_type = 'actor'
@@ -137,10 +160,12 @@ class actor_image():
 
     def get_center_coordinates(self):
         '''
+        Description:
+            Returns the pixel coordinates of the center of this image's cell
         Input:
-            none
+            None
         Output:
-            Returns a tuple of two int variables representing the pixel coordinates at the center of this image's cell
+            int tuple: Two values representing x and y pixel coordinates of the center of this image's cell
         '''
         cell_width = self.grid.get_cell_width()
         cell_height = self.grid.get_cell_height()
@@ -148,17 +173,18 @@ class actor_image():
         
     def set_image(self, new_image_description):
         '''
+        Description:
+            Changes this image to reflect this image's actor's image_dict file path value for the inputted key
         Input:
-            string representing a the name of an image file, without the file path or .png
+            string new_image_description: Key in this image's actor's image_dict corresponding to this image's new appearance. For example, 'default' will change this actor_image to show the actor's default appearance
         Output:
-            Changes this image to match the image represented by the value of the inputted key to this image's actor's image dictionary
+            None
         '''
         self.last_image_switch = time.time()
-        #if new_image_description == 'default' or new_image_description == 'right' or new_image_description == 'left':
         self.previous_idle_image = new_image_description
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
-        try: #use if there are any image path issues to help with file troubleshooting, does not prevent an error from occuring
+        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
             self.image = pygame.image.load('graphics/' + self.image_id)
         except:
             print('graphics/' + self.image_id)
@@ -167,10 +193,12 @@ class actor_image():
         
     def draw(self):
         '''
+        Description:
+            Draws this image if it should currently be visible. Unlike free images, actor images appear at their actor's grid coordinates
         Input:
-            none
+            None
         Output:
-            Draws this image at its cell location if it currently supposed to be shown
+            None
         '''
         if self.can_show():
             if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
@@ -184,10 +212,12 @@ class actor_image():
         
     def go_to_cell(self, coordinates):
         '''
-        Input:
-            tuple of two int variables representing the grid coordinates of the cell to move to
-        Output:
+        Description:
             Moves this image to the pixel coordinates corresponding to the inputted grid coordinates
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on this image's grid
+        Output:
+            None
         '''
         self.x, self.y = self.grid.convert_coordinates(coordinates)
         self.Rect.x = self.x
@@ -197,10 +227,12 @@ class actor_image():
                 
     def set_tooltip(self, tooltip_text):
         '''
+        Description:
+            Sets this image's tooltip to the inputted list, with each item representing a line of the tooltip
         Input:
-            list of strings representing new tooltip text for this image, with each item being a separate line
+            string list tooltip_text: Lines for this actor's tooltip
         Output:
-            Changes this image's tooltip to match the inputted list
+            None
         '''
         self.tooltip_text = tooltip_text
         tooltip_width = 10 #minimum tooltip width
@@ -217,10 +249,12 @@ class actor_image():
 
     def touching_mouse(self):
         '''
-        Input:
-            none
-        Output:
+        Description:
             Returns whether this image is colliding with the mouse
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image is colliding with the mouse, otherwise returns False
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()):
             return(True)
@@ -229,32 +263,46 @@ class actor_image():
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
         Input:
-            none
+            None
         Output:
-            Returns whether this image should currently be shown
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
         else:
             return(False)
 
-    def remove(self): #different in subclasses
+    def remove(self):
+        '''
+        Description:
+            Remove generally removes the object from relevant lists and prevents it from further appearing in or affecting the program. However, the removal of actor images is handled by their actors, so no functionality is needed here
+        Input:
+            None
+        Output:
+            None
+        '''
         nothing = 0
 
 class building_image(actor_image):
     '''
-    actor_image attached to a building rather than an actor, gaining the ability to manage the cells in which this building is considered to be
+    actor image attached to a building rather than an actor, gaining the ability to manage the cells corresponding to this imaeg's building's coordinates
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            actor: actor object representing the actor to which this actor is attached
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            grid: grid object representing the grid to which this mob image is attached
-            image_description: string representing the file path to this image's image file
-            global_manager: global_manager_template object
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.current_cell = 'none'
@@ -263,21 +311,26 @@ class building_image(actor_image):
 
     def remove_from_cell(self):
         '''
+        Description:
+            Removes this image and its building from this image's cell
         Input:
-            none
+            None
         Output:
-            Remove's this image's mob from its cell, causing it to not be considered in the cell anymore. Does nothing if the image's mob is not already in a cell.
+            None
         '''
         if not self.current_cell == 'none':
-            self.current_cell.contained_buildings[self.actor.building_type] = 'none'# = utility.remove_from_list(self.current_cell.contained_buildings, self.actor)
+            self.current_cell.contained_buildings[self.actor.building_type] = 'none'
         self.current_cell = 'none'
 
     def add_to_cell(self):
         '''
+        Description:
+            Moves this image to the cell corresponding to its grid coordinates, causing this image's actor to be considered to be in the cell. Removes this image from its previous cell. Unlike go_to_cell, which handles pixel location,
+                this handles grid location
         Input:
-            none
+            None
         Output:
-            Adds this image's mob to the front of a cell, causing it to be considered as being in the cell and causing it to be drawn on top of other mobs in that cell. This automatically removes this image's mob from other cells.
+            None
         '''
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
             mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
@@ -285,7 +338,7 @@ class building_image(actor_image):
                 old_cell = self.current_cell
                 self.current_cell = self.grid.find_cell(mini_x, mini_y)
                 if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
-                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor #self.current_cell.contained_buildings.insert(0, self.actor)
+                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
             else:
                 self.remove_from_cell()
             self.go_to_cell((mini_x, mini_y))
@@ -293,33 +346,62 @@ class building_image(actor_image):
             self.remove_from_cell()
             self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
             if not self.actor in self.current_cell.contained_buildings:
-                self.current_cell.contained_buildings[self.actor.building_type] = self.actor#self.current_cell.contained_buildings.insert(0, self.actor)
+                self.current_cell.contained_buildings[self.actor.building_type] = self.actor
             self.go_to_cell((self.current_cell.x, self.current_cell.y))
             
     def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. By default, it can be shown when its building should be visible
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
+        '''
         if (not self.current_cell == 'none') and self.global_manager.get('current_game_mode') in self.modes:
             return(True)
         else:
             return(False)
 
-
 class infrastructure_connection_image(building_image):
+    '''
+    Building image representing a branch of a road or railroad connecting to an adjacent cell. Separate from the other branches and the crossroads. Always exists when a road or railroad is built, but onlt visible when there is a road
+        or railroad in an adjacent cell to connect to
+    '''
     def __init__(self, actor, width, height, grid, image_description, direction, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            string direction: Direction relative to this image of the cell with a road or railroad that this image connects to, 'up', 'down', 'left', 'right'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.showing_connection = False
         self.direction = direction
         self.global_manager.get('infrastructure_connection_list').append(self)
         self.change_with_other_images = False #determines whether set_image function of actor affects this image
-        #self.removed = False
 
     def update_roads(self):
-        #if not self.removed: #prevents images from previous infrastructure versions from causing errors, non-ideal solution
+        '''
+        Description:
+            Updates the visibility and appearance of this image depending on the roads or railroads present in adjacent cells. If the adjacent cell in this image's direction has a road or railroad, this image becomes visible and changes
+                its appearance to reflect whether the connection is a road or railroad
+        Input:
+            None
+        Output:
+            None
+        '''
         own_tile_infrastructure_type = self.actor.infrastructure_type
         adjacent_cell = 'none'
-        #if not self.grid.is_mini_grid:
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
-        #else: #if on mini grid, use adjacent cell of main grid to get connection correct
-        #    adjacent_cell = self.actor.images[0].current_cell.tile.get_equivalent_tile().cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
             adjacent_tile_infrastructure = adjacent_cell.contained_buildings['infrastructure']
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
@@ -340,29 +422,47 @@ class infrastructure_connection_image(building_image):
             self.showing_connection = False #do not show if adjacent cell does not exist 
             
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
         self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
-        #self.removed = True
         super().remove()
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
+        Input:
+            None
+        Output:
+            boolean: Returns False if there is no road or railroad connection from this image's cell to the adjacent cell in this image's direction, otherwise returns same as superclass
+        '''
         if self.showing_connection:
             return(super().can_show())
         return(False)
-        
-        
+            
 class mob_image(actor_image):
     '''
-    actor_image attached to a mob rather than an actor, gaining the ability to manage the cells in which this mob is considered to be
+    actor image attached to a mob rather than an actor, gaining the ability to manage the cells corresponding to this image's mob's coordinates
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            actor: actor object representing the actor to which this actor is attached
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            grid: grid object representing the grid to which this mob image is attached
-            image_description: string representing the file path to this image's image file
-            global_manager: global_manager_template object
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.current_cell = 'none'
@@ -371,10 +471,12 @@ class mob_image(actor_image):
         
     def remove_from_cell(self):
         '''
+        Description:
+            Removes this image and its mob from this image's cell
         Input:
-            none
+            None
         Output:
-            Remove's this image's mob from its cell, causing it to not be considered in the cell anymore. Does nothing if the image's mob is not already in a cell.
+            None
         '''
         if not self.current_cell == 'none':
             self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
@@ -382,10 +484,13 @@ class mob_image(actor_image):
 
     def add_to_cell(self):
         '''
+        Description:
+            Moves this image to the cell corresponding to its grid coordinates, causing this image's actor to be considered to be in the cell. Removes this image from its previous cell. Unlike go_to_cell, which handles pixel location,
+                this handles grid location
         Input:
-            none
+            None
         Output:
-            Adds this image's mob to the front of a cell, causing it to be considered as being in the cell and causing it to be drawn on top of other mobs in that cell. This automatically removes this image's mob from other cells.
+            None
         '''
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
             mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
@@ -406,14 +511,13 @@ class mob_image(actor_image):
             
     def can_show(self):
         '''
+        Description:
+            Returns whether this image can be shown. By default, it can be shown when its mob should be visible
         Input:
-            none
+            None
         Output:
-            Returns whether this image should be shown. If it is attached to an officer or worker that is part of a group, it should not be shown.
-            If it is not attached to an officer or worker in a group and it is at the front of a cell, it should be shown. Otherwise, it should not be shown.
+            boolean: Returns True if this image can appear during the current game mode and if its mob is not attached to another actor or behind another mob, otherwise returns False
         '''
-        #if (self.actor in self.global_manager.get('officer_list') or self.actor in self.global_manager.get('worker_list')) and self.actor.in_group:
-        #    return(False)
         if self.actor.in_vehicle or self.actor.in_group or self.actor.in_building:
             return(False)
         if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:
@@ -423,16 +527,20 @@ class mob_image(actor_image):
 
 class button_image(actor_image):
     '''
-    actor_image attached to a button rather than an actor, causing it to be located at a pixel coordinate location rather than within a grid cell
+    actor image attached to a button rather than an actor, causing it to be located at a pixel coordinate location where its button should be rather than within a grid cell
     '''
     def __init__(self, button, width, height, image_id, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            button: button object representing the button to which this image is attached
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            image_id: string representing the file path to this image's image file
-            global_manager: global_manager_template object
+            button button: button to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.image_type = 'button'
@@ -452,13 +560,15 @@ class button_image(actor_image):
 
     def update_state(self, new_x, new_y, new_width, new_height):
         '''
+        Description:
+            Changes this image's size and location to match its button when its button's size or location changes
         Input:
-            new_x: int representing the new pixel x coordinate of this image
-            new_y: int representing the new pixel y coordinate of this image
-            new_width: int representing the new pixel width of this image
-            new_height: int representing the new pixel height of this image
+            new_x: New pixel x coordinate for this image
+            new_y: New pixel y coordinate for this image
+            new_width: new pixel width for this image
+            new_height: new pixel height for this image
         Output:
-            Moves this image to the new location and changes its size based on the new width and height
+            None
         '''
         self.Rect = self.button.Rect
         self.outline.x = new_x - self.outline_width
@@ -469,10 +579,12 @@ class button_image(actor_image):
         
     def set_image(self, new_image_id):
         '''
+        Description:
+            Changes the image file reflected by this object
         Input:
-            string representing a file path for a new image file
+            string new_image_id: File path to the new image used by this object
         Output:
-            Changes this image to match the image file represented by the inputted string
+            None
         '''
         self.image_id = new_image_id
         try:
@@ -480,57 +592,72 @@ class button_image(actor_image):
         except:
             print('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        #self.Rect.width = self.width
         
     def draw(self):
         '''
+        Description:
+            Draws this image if it should currently be visible at the coordinates of its button
         Input:
-            none
+            None
         Output:
-            Draws this image where its button is located if its button is supposed to be shown and if the game mode is correct
+            None
         '''
-        if self.button.can_show(): #self.global_manager.get('current_game_mode') in self.button.modes should be in button.can_show()
+        if self.button.can_show():
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
         
-    def draw_tooltip(self): #button has tooltip already, so image doesn't need a new tooltip
+    def draw_tooltip(self):
         '''
+        Description:
+            Usually draws a tooltip when moused over. However, since buttons, unlike actors, manage their own tooltips, button images do not need any tooltip functionality
         Input:
-            none
+            None
         Output:
-            none, unlike superclass: while actor_images manage tooltips because actors do not manage tooltips, buttons do manage tooltips so button_images do not have to manage tooltips
+            None
         '''
-        i = 0
+        nothing = 0
         
     def set_tooltip(self, tooltip_text):
         '''
+        Description:
+            Usually sets an image's tooltip to the inputted list, with each item representing a line of the tooltip. However, since buttons, unlike actors, manage their own tooltips, button images do not need any tooltip functionality
         Input:
-            none
+            string list tooltip_text: Lines for this image's tooltip
         Output:
-            none, unlike superclass: while actor_images manage tooltips because actors do not manage tooltips, buttons do manage tooltips so button_images do not have to manage tooltips
+            None
         '''
         i = 0
 
 class tile_image(actor_image):
     '''
-    actor_image attached to a tile rather than an actor, causing it to use file paths rather than an image-dictionary-based image description system
+    actor_image attached to a tile rather than an actor, causing it to use file paths directly rather than an dictionary of image keys and file path values
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
         self.go_to_cell((self.actor.x, self.actor.y))
-        #self.outline = pygame.Rect(self.actor.x + 10, self.global_manager.get('display_height') - (self.actor.y + self.height) + 10, self.width, self.height)
 
     def go_to_cell(self, coordinates):
         '''
-        Input:
-            tuple of two int variables representing the grid coordinates of the cell to move to
-        Output:
+        Description:
             Moves this image to the pixel coordinates corresponding to the inputted grid coordinates
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on this image's grid
+        Output:
+            None
         '''
         self.x, self.y = self.grid.convert_coordinates(coordinates)
         self.Rect.x = self.x
@@ -540,31 +667,44 @@ class tile_image(actor_image):
         
     def draw(self):
         '''
+        Description:
+            Draws this image if it should currently be visible
         Input:
-            none
+            None
         Output:
-            Draws this image at its cell location
+            None
         '''
         self.go_to_cell((self.actor.x, self.actor.y))
         drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
 class veteran_icon_image(tile_image):
     '''
-    tile_image attached to a veteran_icon rather than a tile_image, allowing it to move around and follow an actor
+    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            actor actor: actor to which this image is attached
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
+            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(actor, width, height, grid, image_description, global_manager)
 
     def draw(self):
         '''
+        Description:
+            Draws this image if it should currently be visible
         Input:
-            none
+            None
         Output:
-            If not outside of this image's grid area and this image's actor can be shown, draw this image 
+            None
         '''
         if self.actor.actor.images[0].can_show() and self.can_show():
             if self.grid.is_mini_grid:
@@ -577,10 +717,12 @@ class veteran_icon_image(tile_image):
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this image can be shown. It should be visible whenever its officer or group is visible
         Input:
-            none
+            None
         Output:
-            If this image is part of a minimap and its coordinates are outside of the minimap's area, do not show it. Otherwise, use the same output as superclass.
+            boolean: Returns False if this image on the minimap grid but is not currently within its boundaries, otherwise returns same as superclass
         '''
         if self.grid == self.global_manager.get('minimap_grid') and not self.grid.is_on_mini_grid(self.actor.actor.x, self.actor.actor.y): #do not show if mob (veteran icon's actor) is off map
             return(False)

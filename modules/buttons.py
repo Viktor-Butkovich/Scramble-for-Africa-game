@@ -12,20 +12,24 @@ from . import notification_tools
 
 class button():
     '''
-    A button that will do something when clicked or when the corresponding key is pressed
+    An object does something when clicked or when the corresponding key is pressed
     '''
     def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of 2 integers for initial coordinate x and y values
-            width: int representing the width in pixels of the button
-            height: int representing the height in pixels of the button
-            color: string representing a color in the color_dict dictionary
-            button_type: string representing a subtype of button, such as a 'move up' button, determining its tooltip and behavior
-            keybind_id: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
-            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
-            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string button_type: Determines the function of this button, like 'end turn'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.has_released = True
@@ -57,10 +61,12 @@ class button():
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type
         Input:
-            none
+            None
         Output:
-            Calls the set_tooltip function with a list of strings that will each be a line in this button's tooltip.
+            None
         '''
         if self.button_type in ['move up', 'move down', 'move left', 'move right']:
             direction = 'none'
@@ -131,7 +137,10 @@ class button():
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
-            self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
+            if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary':
+                self.set_tooltip(["Merges this head missionary with church volunteers in the same tile to form a group of missionaries.", "Requires that a head missionary is selected in the same tile as church volunteers."])
+            else:
+                self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into its worker and officer."])
         elif self.button_type == 'crew': #clicked on vehicle side
@@ -208,15 +217,27 @@ class button():
             self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
         elif self.button_type == 'cycle units':
             self.set_tooltip(["Selects the next unit that has movement remaining"])
+        elif self.button_type == 'trade':
+            self.set_tooltip(["Attempts to trade with natives, paying consumer goods for random commodities", "Can only be done in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
+                "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
+                "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
+        elif self.button_type == 'religious campaign':
+            self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
+                "If successful, recruits a free unit of church volunteers that can join with a head missionary to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
+        elif self.button_type == 'convert':
+            self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
+                "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
         else:
             self.set_tooltip(['placeholder'])
             
     def set_keybind(self, new_keybind):
         '''
+        Description:
+            Records a string version of the inputted pygame key object, allowing in-game descriptions of keybind to be shown
         Input:
-            new_keybind: Pygame key object representing a key on the keyboard, such as pygame.K_a for a
+            pygame key object new_keybind: The keybind id that activates this button, like pygame.K_n
         Output:
-            Sets keybind_name to a string used in the tooltip that describes the key to which this button is bound.
+            None
         '''
         if new_keybind == pygame.K_a:
             self.keybind_name = 'a'
@@ -309,10 +330,12 @@ class button():
 
     def set_tooltip(self, tooltip_text):
         '''
+        Description:
+            Sets this actor's tooltip to the inputted list, with each inputted list representing a line of the tooltip
         Input:
-            tooltip_text: a list of strings representing the lines of the tooltip message
+            string list new_tooltip: Lines for this actor's tooltip
         Output:
-            Creates a tooltip message and the Pygame Rect objects (background and outline) required to display it.
+            None
         '''
         self.tooltip_text = tooltip_text
         if self.has_keybind:
@@ -330,10 +353,12 @@ class button():
 
     def touching_mouse(self):
         '''
+        Description:
+            Returns whether this button is colliding with the mouse
         Input:
-            none
+            None
         Output:
-            Returns whether this button and the mouse are colliding
+            boolean: Returns True if this button is colliding with the mouse, otherwise returns False
         '''
         if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
             return(True)
@@ -341,11 +366,14 @@ class button():
             return(False)
 
     def can_show_tooltip(self):
+
         '''
+        Description:
+            Returns whether this button's tooltip can be shown. By default, its tooltip can be shown when it is visible and colliding with the mouse
         Input:
-            none
+            None
         Output:
-            Returns whether the button's tooltip should be shown; its tooltip should be shown when the button is being displayed and is colliding with the mouse
+            None
         '''
         if self.touching_mouse() and self.can_show():
             return(True)
@@ -354,10 +382,12 @@ class button():
         
     def draw(self):
         '''
+        Description:
+            Draws this button with a description of its keybind if it has one, along with an outline if its keybind is being pressed
         Input:
-            none
+            None
         Output:
-            Draws this button with a description of its keybind if applicable, along with an outline if it's key is being pressed
+            None
         '''
         if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
             if self.showing_outline: 
@@ -373,10 +403,16 @@ class button():
 
     def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
         '''
+        Description:
+            Draws this button's tooltip when moused over. The tooltip's location may vary when the tooltip is near the edge of the screen or if multiple tooltips are being shown
         Input:
-            y_displacement: int describing how far the tooltip should be moved along the y axis to avoid blocking other tooltips
+            boolean below_screen: Whether any of the currently showing tooltips would be below the bottom edge of the screen. If True, moves all tooltips up to prevent any from being below the screen
+            boolean beyond_screen: Whether any of the currently showing tooltips would be beyond the right edge of the screen. If True, moves all tooltips to the left to prevent any from being beyond the screen
+            int height: Combined pixel height of all tooltips
+            int width: Pixel width of the widest tooltip
+            int y_displacement: How many pixels below the mouse this tooltip should be, depending on the order of the tooltips
         Output:
-            Draws the button's tooltip when the button is visible and colliding with the mouse. If multiple tooltips are showing, tooltips beyond the first will be moved down to avoid blocking other tooltips.
+            None
         '''
         if self.can_show():
             self.update_tooltip()
@@ -386,11 +422,6 @@ class button():
             if beyond_screen:
                 mouse_x = self.global_manager.get('display_width') - width
             mouse_y += y_displacement
-            
-            #if (mouse_x + self.tooltip_box.width) > self.global_manager.get('display_width'):
-            #    mouse_x = self.global_manager.get('display_width') - self.tooltip_box.width
-            #if (self.global_manager.get('display_height') - mouse_y) - (len(self.tooltip_text) * self.global_manager.get('font_size') + 5 + self.tooltip_outline_width) < 0:
-            #    mouse_y = self.global_manager.get('display_height') - self.tooltip_box.height
             self.tooltip_box.x = mouse_x
             self.tooltip_box.y = mouse_y
             self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
@@ -404,19 +435,23 @@ class button():
 
     def on_rmb_click(self):
         '''
+        Description:
+            Controls this button's behavior when right clicked. By default, the button's right click behavior is the same as its left click behavior.
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when right clicked. By default, the button's right click behavior is the same as its left click behavior.
+            None
         '''
         self.on_click()
 
     def on_click(self): #sell commodity, sell all commodity
         '''
+        Description:
+            Controls this button's behavior when left clicked. This behavior depends on the button's button_type
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when left clicked. This behavior depends on the button's button_type value.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -542,7 +577,7 @@ class button():
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
-                    choice_info_dict = {}
+                    choice_info_dict = {'type': 'end turn'}
                     notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)
@@ -588,56 +623,110 @@ class button():
                     else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
                         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
-            elif self.button_type == 'none': #used as option in confirmation notifications, remove anything created by opening notification, like exploration mark, when pressed
-                if self.global_manager.get('ongoing_exploration'):
-                    for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
-                        current_exploration_mark.remove()
-                    self.global_manager.set('ongoing_exploration', False)
-                    self.global_manager.set('exploration_mark_list', [])
+            elif self.button_type == 'stop exploration':
+                actor_utility.stop_exploration(self.global_manager)
+
+            elif self.button_type == 'start trading':
+                caravan = self.notification.choice_info_dict['caravan']
+                caravan.willing_to_trade(self.notification)
+
+            elif self.button_type == 'start religious campaign':
+                head_missionary = self.notification.choice_info_dict['head missionary']
+                head_missionary.religious_campaign()
+
+            elif self.button_type == 'start converting':
+                head_missionary = self.notification.choice_info_dict['head missionary']
+                head_missionary.convert()
+
+            elif self.button_type == 'trade':
+                caravan = self.notification.choice_info_dict['caravan']
+                caravan.trade(self.notification)
+
+            elif self.button_type == 'stop trading':
+                self.global_manager.set('ongoing_trade', False)
+                
+            elif self.button_type == 'stop religious campaign':
+                self.global_manager.set('ongoing_religious_campaign', False)
+
+            elif self.button_type == 'stop converting':
+                self.global_manager.set('ongoing_conversion', False)
                 
     def on_rmb_release(self):
         '''
+        Description:
+            Controls what this button does when right clicked and released. By default, buttons will stop showing their outlines when released.
         Input:
-            none
+            None
         Output:
-            Controls what the button does when right clicked and released. By default, buttons will stop showing their outlines when released.
+            None
         '''
-        self.on_release() #if any rmb buttons did something different on release, change in subclass
+        self.on_release()
                 
     def on_release(self):
         '''
+        Description:
+            Controls what this button does when left clicked and released. By default, buttons will stop showing their outlines when released.
         Input:
-            none
+            None
         Output:
-            Controls what the button does when left clicked and released. By default, buttons will stop showing their outlines when released.
+            None
         '''
         self.showing_outline = False
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
-            none
+            None
         Output:
-            Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+            None
         '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this button can be shown. By default, it can be shown during game modes in which this button can appear
         Input:
-            none
+            None
         Output:
-            Returns whether the button can currently be shown
+            boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
 
 class cycle_same_tile_button(button):
+    '''
+    Button that appears near the displayed tile and cycles the order of mobs displayed in a tile
+    '''
     def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, color, 'cycle tile mobs', 'none', modes, image_id, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button cycles the order of mobs displayed in a tile, moving the first one shown to the bototm and moving others up
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -650,6 +739,14 @@ class cycle_same_tile_button(button):
                 text_tools.print_to_screen("You are busy and can not cycle units.", self.global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the currently displayed tile contains 3 or less mobs. Otherwise, returns same as superclass
+        '''
         result = super().can_show()
         if result:
             displayed_tile = self.global_manager.get('displayed_tile')
@@ -659,8 +756,27 @@ class cycle_same_tile_button(button):
         return(False)
     
 
-class same_tile_icon(button):#shows all mobs in same tile as clickable icons
+class same_tile_icon(button):
+    '''
+    Button that appears near the displayed tile and selects mobs that are not currently at the top of the tile
+    '''
     def __init__(self, coordinates, width, height, color, modes, image_id, index, is_last, global_manager):
+        '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int width: Pixel width of this label
+            int height: Pixel height of this label
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            int index: Index to determine which item of the displayed tile's cell's list of contained mobs is selected by this button
+            boolean is_last: Whether this is the last of the displayed tile's selection icons. If it is last, it will show all mobs are not being shown rather than being attached to a specific mob
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.attached_mob = 'none'
         super().__init__(coordinates, width, height, color, 'same tile', 'none', modes, image_id, global_manager)
         self.old_contained_mobs = []#selected_list = []
@@ -672,10 +788,12 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
 
     def on_click(self):
         '''
+        Description:
+            Controls this button's behavior when clicked. This type of button selects the mob that it is currently attached to when clicked
         Input:
-            none
+            None
         Output:
-            Moves minimap to attached selected mob when clicked
+            None
         '''
         if self.can_show() and not self.is_last: #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             self.showing_outline = True
@@ -687,10 +805,12 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
                          
     def draw(self):
         '''
+        Description:
+            Draws this button and draws a copy of the this button's attached mob's image on top of it
         Input:
-            none
+            None
         Output:
-            Draws a copy of the attached selected mob's image at this button's location with the button's shape as a background
+            None
         '''
         if not self.global_manager.get('displayed_tile') == 'none':
             new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
@@ -715,7 +835,6 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
             self.attached_mob = 'none'
             
         if len(self.old_contained_mobs) > self.index:
-            #if not self.global_manager.get('displayed_mob') == 'none':
             displayed_tile = self.global_manager.get('displayed_tile')
             if self.index == 0 and self.can_show() and not displayed_tile == 'none':
                 if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
@@ -730,10 +849,12 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this button should be drawn
         Input:
-            none
+            None
         Output:
-            Returns True if this button has an attached selected mob - it is not visible when there is no attached selected mob
+            boolean: Returns False if this button is not attached to any mobs. Otherwise, returns same as superclass
         '''
         if self.attached_mob == 'none':
             return(False)
@@ -742,10 +863,12 @@ class same_tile_icon(button):#shows all mobs in same tile as clickable icons
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button copies the tooltip of its attached mob
         Input:
-            none
+            None
         Output:
-            Sets the button's tooltip to that of its attached selected mob
+            None
         '''
         if not self.can_show():
             self.set_tooltip([])

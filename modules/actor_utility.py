@@ -2,16 +2,35 @@ import random
 
 from . import scaling
 
+def stop_exploration(global_manager):
+    '''
+    Description:
+        Stops any ongoing explorations and removes exploration destination marks, used at end of exploration
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_exploration_mark in global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
+        current_exploration_mark.remove()
+    global_manager.set('exploration_mark_list', [])
+    for current_mob in global_manager.get('mob_list'):
+        if current_mob.can_explore:
+            current_mob.exploration_mark_list = []
+    exploration_mark_list = []
+    global_manager.set('ongoing_exploration', False)
+
 def create_image_dict(stem):
     '''
+    Description:
+        Creates a dictionary of image file paths for an actor to store and set its image to in different situations
     Input:
-        string representing the path to a folder of an actor's images
+        string stem: Path to an actor's image folder
     Output:
-        Returns a dictionary of key strings of descriptions of images and corresponding values of the images' file paths
+        string/string dictionary: String image description keys and string file path values, like 'left': 'explorer/left.png'
     '''
-    '''if stem is a certain value, add extra ones, such as special combat animations: only works for images in graphics/mobs'''
     stem = 'mobs/' + stem
-    stem += '/'#goes to that folder
+    stem += '/'
     image_dict = {}
     image_dict['default'] = stem + 'default.png'
     image_dict['right'] = stem + 'right.png'  
@@ -19,102 +38,25 @@ def create_image_dict(stem):
     return(image_dict)
 
 def update_roads(global_manager):
+    '''
+    Description:
+        Updates the road/railroad connections between tiles when a new one is built
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
         current_infrastructure_connection_image.update_roads()
-
-def can_merge(global_manager):
-    '''
-    Input:
-        global_manager_template object
-    Output:
-        Returns whether the player is able to merge a worker and an officer. A single worker and a single officer must be the only mobs selected to merge them into a group.
-        If the correct mobs are selected but they are in different locations, this will return True and the merge button will show, but pressing it will prompt the user to move them to the same location.
-    '''
-    selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 1:
-        officer_present = False
-        worker_present = False
-        for current_selected in selected_list:
-            if current_selected.is_officer: #if current_selected in global_manager.get('officer_list'):
-                officer_present = True
-                for current_mob in current_selected.images[0].current_cell.contained_mobs:
-                    if current_mob.is_worker: #if current_mob in global_manager.get('worker_list'):
-                        worker_present = True
-        if officer_present and worker_present:
-            return(True)
-        else:
-            return(False)
-    return(False)
-
-def can_split(global_manager):
-    '''
-    Input:
-        global_manager_template object
-    Output:
-        Returns whether the player is able to split a group. A single group and no other mobs must be selected to split the group.
-    '''
-    selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 1 and selected_list[0].is_group:
-        return(True)
-    return(False)
-
-def can_embark_vehicle(global_manager): #if 1 vehicle and 1 non-vehicle selected
-    selected_list = get_selected_list(global_manager)
-    #if len(selected_list) == 2:
-    #    if (selected_list[0].is_vehicle and selected_list[0].has_crew and not selected_list[1].is_vehicle) or ((not selected_list[0].is_vehicle) and selected_list[1].is_vehicle and selected_list[1].has_crew):
-            #1 of each, vehicle must have crew
-    #        if(selected_list[0].x == selected_list[1].x and selected_list[0].y == selected_list[1].y and selected_list[0].grids[0] in selected_list[1].grids): #if on same coordinates on same grid
-    num_vehicles = 0
-    vehicle = 'none'
-    riders = []
-    for current_mob in selected_list:
-        if current_mob.is_vehicle:
-            num_vehicles += 1
-            vehicle = current_mob
-        else:
-            riders.append(current_mob)
-    if num_vehicles == 1 and vehicle.has_crew and len(riders) > 0:
-        same_tile = True
-        for current_rider in riders:
-            if not (vehicle.x == current_rider.x and vehicle.y == current_rider.y and current_rider.grids[0] in vehicle.grids): #if not in same tile, stop
-                same_tile = False
-        if same_tile:
-            return(True)#later check to see if vehicle has room
-    return(False)
-
-def can_disembark_vehicle(global_manager): #if 1 vehicle with any contents is selected
-    selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 1:
-        if selected_list[0].is_vehicle:
-            if len(selected_list[0].contained_mobs) > 0: #or if any commodities carried
-                return(True)
-    return(False)
-
-def can_crew_vehicle(global_manager):
-    selected_list = get_selected_list(global_manager)
-
-    if len(selected_list) == 1 and selected_list[0].is_vehicle and not selected_list[0].has_crew: #if uncrewed vehicle is selected and in same tile as worker
-        vehicle = selected_list[0]
-        crew = 'none'
-        for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-            if contained_mob.is_worker:
-                crew = contained_mob
-        if not crew == 'none':
-            return(True) #later check to see if vehicle has room
-    return(False)
-
-def can_uncrew_vehicle(global_manager):
-    selected_list = get_selected_list(global_manager)
-    if len(selected_list) == 1 and selected_list[0].is_vehicle and selected_list[0].has_crew and len(selected_list[0].contained_mobs) == 0: #crew can only leave if has crew and no passengers
-        return(True)
-    return(False) 
     
 def get_selected_list(global_manager):
     '''
+    Description:
+        Returns a list of all currently selected units. Currently, the game will only have 1 selected unit at a time and this should be updated
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Returns a list of all selected mobs
+        mob list: All mobs that are currently selected
     '''
     selected_list = []
     for current_mob in global_manager.get('mob_list'):
@@ -124,16 +66,26 @@ def get_selected_list(global_manager):
 
 def deselect_all(global_manager):
     '''
+    Description:
+        Deselects all units. Currently, the game will only have 1 selected unit at a time and this should be updated.
     Input:
-        global_manager_template object
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
-        Deselects all selected mobs
+        None
     '''
     for current_mob in global_manager.get('mob_list'):
         if current_mob.selected:
             current_mob.selected = False
     
 def get_random_ocean_coordinates(global_manager):
+    '''
+    Description:
+        Returns a random set of coordinates from the ocean section of the strategic map
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        int tuple: Two values representing x and y coordinates
+    '''
     mob_list = global_manager.get('mob_list')
     mob_coordinate_list = []
     start_x = random.randrange(0, global_manager.get('strategic_map_grid').coordinate_width)
@@ -142,22 +94,34 @@ def get_random_ocean_coordinates(global_manager):
 
 def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     '''
+    Description:
+        Updates all relevant objects to display a certain mob or tile
     Input:
-        global_manager_template object, list of buttons and actors representing the objects that should be calibrated to the inputted actor, actor representing what the inputted buttons and actors should be calibrated to
+        global_manager_template global_manager: Object that accesses shared variables
+        button/actor list info_display_list: All buttons and actors that are updated when the displayed mob or tile changes. Can be 'tile_info_display_list' if the displayed tile is changing or 'mob_info_display_list' if the displayed
+            mob is changing
+        string new_actor: The new mob or tile that is displayed
     Output:
-        Uses the calibrate function of each of the buttons and actors in the inputted info_display_list, causing them to reflect the appearance or information relating to the inputted actor 
+        None
     '''
     if info_display_list == global_manager.get('tile_info_display_list'):
-        #if not global_manager.get('displayed_tile') == 'none':
-        #    global_manager.get('displayed_tile').showing_calibrated_outline = False
         global_manager.set('displayed_tile', new_actor)
-        #global_manager.get('displayed_tile').showing_calibrated_outline = True
     elif info_display_list == global_manager.get('mob_info_display_list'):
         global_manager.set('displayed_mob', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
 
 def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
+    '''
+    Description:
+        Changes locations of actor display labels to put all visible labels in order
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        actor_match_label list info_display_list: All actor match labels associated with either mobs or tiles to put in order
+        int default_y: y coordinate that the top label is moved to
+    Output:
+        None
+    '''
     current_y = default_y
     for current_label in info_display_list:
         if current_label.can_show():

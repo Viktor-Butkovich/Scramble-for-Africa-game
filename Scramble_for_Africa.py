@@ -81,15 +81,15 @@ global_manager.set('terrain_colors',
     }
 )
 
-global_manager.set('commodity_types', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber', 'consumer goods'])
+global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('commodity_prices', {})
 
 for current_commodity in global_manager.get('commodity_types'):
     if not current_commodity == 'consumer goods':
-        global_manager.get('commodity_prices')[current_commodity] = random.randrange(1, 6) #1-5
+        global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
     else:
-        global_manager.get('commodity_prices')[current_commodity] = 5
+        global_manager.get('commodity_prices')[current_commodity] = 2
 
 global_manager.set('resource_building_dict',
     {
@@ -125,7 +125,7 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'missionary'])
+global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'head missionary'])
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
 global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
@@ -196,6 +196,9 @@ global_manager.set('choosing_destination', False)
 global_manager.set('choosing_destination_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
+global_manager.set('ongoing_trade', False)
+global_manager.set('ongoing_religious_campaign', False)
+global_manager.set('ongoing_conversion', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')
@@ -317,6 +320,11 @@ mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordina
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
+#veteran icon image
+mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('mob_info_display_list').append(mob_free_image)
+
 #mob name label
 #actor_match_current_y -= 35
 mob_name_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
@@ -415,7 +423,15 @@ tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling
     scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
 
+#tile trading post image
+tile_free_trading_post_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'trading_post', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_trading_post_image)
 
+#tile trading post image
+tile_free_mission_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'mission', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_mission_image)
 
 #tile terrain label
 #actor_match_current_y -= 35

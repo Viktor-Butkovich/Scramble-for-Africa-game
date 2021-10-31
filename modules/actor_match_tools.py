@@ -17,13 +17,17 @@ class actor_match_free_image(free_image):
     '''
     def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel location of this image
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            modes: list of strings representing the game modes in which this image can appear
-            actor_image_type: string representing the type of actor whose appearance will be copied by this image
-            global_manager: global_manager_template object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this image can appear
+            string actor_image_type: Type of actor whose appearance will be copied by this image
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.actor_image_type = actor_image_type
         self.actor = 'none'
@@ -31,10 +35,12 @@ class actor_match_free_image(free_image):
 
     def calibrate(self, new_actor):
         '''
+        Description:
+            Sets this image to match the inputted object's appearance to show in the actor info display
         Input:
-            new_actor: actor object or string representing the actor whose appearance will be copied by this image. If resetting to an empty image, new_actor will equal 'none'.
+            string/actor new_actor: If this equals 'none', hides this image. Otherwise, causes this image will match this input's appearance
         Output:
-            Sets this image to match the inputted actor or string. If the input is 'none', it will be reset to an empty image. Otherwise, it will use the default appearance of the inputted actor.
+            None
         '''
         self.actor = new_actor
         if not new_actor == 'none':
@@ -53,14 +59,9 @@ class actor_match_free_image(free_image):
                     self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'port':
-                if not new_actor.cell.contained_buildings['port'] == 'none':
-                    self.set_image('buildings/port.png') #matches resource building
-                else:
-                    self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'train_station':
-                if not new_actor.cell.contained_buildings['train_station'] == 'none':
-                    self.set_image('buildings/train_station.png')
+            elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission']:
+                if not new_actor.cell.contained_buildings[self.actor_image_type] == 'none':
+                    self.set_image('buildings/' + self.actor_image_type + '.png')
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_middle':
@@ -78,38 +79,107 @@ class actor_match_free_image(free_image):
                         self.set_image('misc/empty.png')
                 else:
                     self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'veteran_icon':
+                if (self.actor.is_officer or self.actor.is_group) and self.actor.veteran:
+                    self.set_image('misc/veteran_icon.png')
+                else:
+                    self.set_image('misc/empty.png')
             else:
                 self.set_image(new_actor.image_dict['default'])
         else:
             self.set_image('misc/empty.png')
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this image should be drawn
+        Input:
+            None
+        Output:
+            boolean: False if there is no actor in the info display, otherwise returns same value as superclass
+        '''
         if self.actor == 'none':
             return(False)
         else:
             return(super().can_show())
 
 class actor_match_infrastructure_connection_image(actor_match_free_image):
+    '''
+    Image appearing on tile info display to show the road/railroad connections of the displayed tile
+    '''
     def __init__(self, coordinates, width, height, modes, actor_image_type, direction, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this image can appear
+            string actor_image_type: Type of actor whose appearance will be copied by this image
+            string direction: 'up', 'down', 'left', or 'right', side of tile that this image points to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.direction = direction
         super().__init__(coordinates, width, height, modes, actor_image_type, global_manager)
 
 class actor_match_background_image(free_image):
+    '''
+    Image appearing behind the displayed actor in the actor info display
+    '''
     def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            string image_id: File path to the image used by this object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this image can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(image_id, coordinates, width, height, modes, global_manager)
         self.actor = 'none'
-        #self.outline_Rect = pygame.Rect(self.x - 2, self.y - self.height - 2, self.width + 4, self.height + 4)
 
     def calibrate(self, new_actor):
+        '''
+        Description:
+            Updates which actor is in front of this image
+        Input:
+            string/actor new_actor: The displayed actor that goes in front of this image. If this equals 'none', there is no actor in front of it
+        Output:
+            None
+        '''
         self.actor = new_actor
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this image should be drawn
+        Input:
+            None
+        Output:
+            boolean: False if there is no actor in the info display, otherwise returns same value as superclass
+        '''
         if self.actor == 'none':
             return(False)
         else:
             return(super().can_show())
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to that of the actor in front of it
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.actor == 'none':
             tooltip_text = self.actor.tooltip_text
             self.set_tooltip(tooltip_text)
@@ -122,23 +192,29 @@ class label_image(free_image):
     '''
     def __init__(self, coordinates, width, height, modes, attached_label, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel location of this image
-            width: int representing the pixel width of this image
-            height: int representing the pixel height of this image
-            modes: list of strings representing the game modes in which this image can appear
-            attached_label: label object representing the label to which this image is attached.
-            global_manager: global_manager_template object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this image can appear
+            label attached_label: The label that this image is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.attached_label = attached_label
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this image should be drawn
         Input:
-            none
+            None
         Output:
-            Controls whether this image should be shown. This image is shown only when its attached label is shown. 
+            boolean: False if this image's label is not showing, otherwise returns same value as superclass
         '''
         if self.attached_label.can_show():
             return(super().can_show())
@@ -151,16 +227,21 @@ class actor_match_label(label):
     '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager):
         '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
         Input:
-            coordinates: tuple of 2 integers for initial coordinate x and y values
-            minimum_width: int representing the minimum width in pixels of the button. As the length of its message increases, the label's width will increase to accomodate it. 
-            height: int representing the height in pixels of the button
-            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
-            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
-            actor_image_type: string representing the type of information of a selected mob or tile that will be shown
-            global_manager: global_manager_template object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            string actor_label_type: Type of actor information shown by this label
+            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
-        message = ''#'default'
+        message = ''
         self.attached_buttons = []
         self.actor = 'none'
         self.actor_label_type = actor_label_type #name, terrain, resource, etc
@@ -185,7 +266,12 @@ class actor_match_label(label):
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'trading_post', global_manager))
+            self.attached_buttons.append(construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'mission', global_manager))
             self.attached_buttons.append(build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
+            self.attached_buttons.append(trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'misc/trade_button.png', self, global_manager))
+            self.attached_buttons.append(convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/convert_button.png', self, global_manager))
+            self.attached_buttons.append(religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/religious_campaign_button.png', self, global_manager))
         elif self.actor_label_type == 'resource':
             self.message_start = 'Resource: '
         elif self.actor_label_type == 'terrain':
@@ -229,6 +315,14 @@ class actor_match_label(label):
         self.calibrate('none')
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this label's tooltip based on the label's type and the information of the actor it is attached to
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.actor_label_type in ['building worker', 'current passenger']:
             if len(self.attached_list) > self.list_index:
                 self.attached_list[self.list_index].update_tooltip()
@@ -288,10 +382,12 @@ class actor_match_label(label):
 
     def calibrate(self, new_actor):
         '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
         Input:
-            new_actor: actor object or string representing the actor whose information will be shown by this label. If resetting to a default message, new_actor will equal 'none'.
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
         Output:
-            Sets this label's text to match the information of the inputted actor or string. If the input is 'none', it will be reset to a default message. Otherwise, it will show the information of the inputted actor.
+            None
         '''
         self.actor = new_actor
         if not new_actor == 'none':
@@ -380,6 +476,14 @@ class actor_match_label(label):
             self.set_label(self.message_start + 'n/a')
 
     def set_label(self, new_message):
+        '''
+        Description:
+            Sets this label's text to the inputted string. Also changes locations of attached buttons since the length of the label may change.
+        Input:
+            string new_message: New text to set this label to
+        Output:
+            None
+        '''
         super().set_label(new_message)
         x_displacement = 0
         for current_button_index in range(len(self.attached_buttons)):
@@ -391,6 +495,14 @@ class actor_match_label(label):
                 x_displacement += (current_button.width + 5)
 
     def set_y(self, new_y):
+        '''
+        Description:
+            Sets this label's y position and that of its attached buttons
+        Input:
+            int new_y: New y coordinate to set this label and its buttons to
+        Output:
+            None
+        '''
         self.y = new_y
         self.image.y = self.y
         self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)#self.y
@@ -401,38 +513,100 @@ class actor_match_label(label):
             current_button.outline.y = current_button.Rect.y - current_button.outline_width
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
+        '''
         result = super().can_show()
         if self.actor == 'none':
             return(False)
-        elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
+        elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and self.actor.grid.is_abstract_grid:
+        elif self.actor_label_type == 'resource' and self.actor.grid.is_abstract_grid: #do not show resource label on the Europe tile
             return(False)
-        elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle:
+        elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle: #do not show passenger or crew labels for non-vehicle mobs
             return(False)
-        elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building):
+        elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
         else:
             return(result)
 
-class list_item_label(actor_match_label): #attached to a certain list based on list type, has index of list that it shows
+class list_item_label(actor_match_label):
+    '''
+    Label that shows the information of a certain item in a list, like a train passenger among a list of passengers
+    '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, actor_type, global_manager):
+        '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            string actor_label_type: Type of actor information shown by this label
+            int list_index: Index to determine which item of a list is reflected by this label
+            string list_type: Type of list reflected by this lagel, such as a 'resource building' for a label type of 'building worker' to show that this label shows the workers attached to resource buildings but not other buildings
+            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.list_index = list_index
         self.list_type = list_type
         self.attached_list = []
         super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager)
 
     def calibrate(self, new_actor):
+        '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on one of the inputted actor's lists
+        Input:
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors
+        Output:
+            None
+        '''
         self.attached_list = []
         super().calibrate(new_actor)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as this label's list is long enough to contain this label's index, otherwise returns False
+        '''
         if len(self.attached_list) > self.list_index:
             return(super().can_show())
         return(False)
 
 class building_workers_label(actor_match_label):
+    '''
+    Label at the top of the list of workers in a building that shows how many workers are in it
+    '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+        '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            string building_type: Type of building this label shows the workers of, like 'resource building'
+            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.remove_worker_button = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
@@ -440,6 +614,14 @@ class building_workers_label(actor_match_label):
         self.showing = False
 
     def calibrate(self, new_actor):
+        '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
         self.actor = new_actor
         self.showing = False
         if not new_actor == 'none':
@@ -449,19 +631,35 @@ class building_workers_label(actor_match_label):
                 self.showing = True
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
+        '''
         if self.showing:
             return(super().can_show())
         else:
             return(False)
 
 class native_info_label(actor_match_label): #possible actor_label_types: native aggressiveness, native population, native available workers
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager):
-        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager)
-
+    '''
+    Label that shows the population, aggressiveness, or number of available workers in a displayed tile's village
+    '''
     def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as the displayed tile is explored and has a village, otherwise returns False
+        '''
         result = super().can_show()
         if result:
-            if (not self.actor.cell.village == 'none') and self.actor.cell.visible: #only show if village present and discovered
+            if (not self.actor.cell.village == 'none') and self.actor.cell.visible:
                 return(True)
         return(False)
         
@@ -472,23 +670,25 @@ class commodity_match_label(actor_match_label):
     '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, commodity_index, matched_actor_type, global_manager):
         '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
         Input:
-            coordinates: tuple of 2 integers for initial coordinate x and y values
-            minimum_width: int representing the minimum width in pixels of the button. As the length of its message increases, the label's width will increase to accomodate it. 
-            height: int representing the height in pixels of the button
-            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
-            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
-            commodity_index: int representing the part of an actor's inventory shown by this label. A commodity index of 0 would cause this label to match the first item in a selected actor's inventory.
-            matched_actor_type: string representing whether this label should match selected mobs or tiles
-            global_manager: global_manager_template object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            int commodity_index: Index to determine which item of an actor's inventory is reflected by this label
+            string matched_actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
-        #self.actor = 'none'
         self.current_commodity = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', matched_actor_type, global_manager)
         self.showing_commodity = False
         self.commodity_index = commodity_index
         self.commodity_image = label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
-        #self.attached_buttons = []
         if matched_actor_type == 'mob':
             self.attached_buttons.append(label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'misc/commodity_drop_button.png', self, global_manager))
             self.attached_buttons.append(label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'misc/commodity_drop_all_button.png', self, global_manager))
@@ -499,8 +699,16 @@ class commodity_match_label(actor_match_label):
             self.attached_buttons.append(label_button((self.x + ((self.height + 5) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', ['europe'], 'misc/commodity_sell_all_button.png', self, global_manager))
 
     def set_label(self, new_message):
+        '''
+        Description:
+            Sets this label's text to the inputted string and changes locations of attached buttons since the length of the label may change. Also changes this label's attached image to match the commodity
+        Input:
+            string new_message: New text to set this label to
+        Output:
+            None
+        '''
         super().set_label(new_message)
-        if not self.actor == 'none': #self.setup_complete: #if not new_message == 'n/a':
+        if not self.actor == 'none':
             commodity_list = self.actor.get_held_commodities()
             if len(commodity_list) > self.commodity_index:
                 commodity = commodity_list[self.commodity_index]
@@ -509,10 +717,12 @@ class commodity_match_label(actor_match_label):
 
     def calibrate(self, new_actor):
         '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
         Input:
-            new_actor: actor object or string representing the actor whose inventory will be shown by this label.
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
         Output:
-            Sets this label's text, image, and button to match a certain index of new_actor's inventory. If new_actor is 'none', the label and its attached image and button will not be shown.
+            None
         '''
         self.actor = new_actor
         if not new_actor == 'none':
@@ -531,10 +741,12 @@ class commodity_match_label(actor_match_label):
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this label should be drawn
         Input:
-            none
+            None
         Output:
-            Controls whether this label should be shown. This button is shown only when it is calibrated to an actor with an inventory size that includes this label's commodity index.
+            boolean: Returns False if this label's commodity_index is not in the attached actor's inventory. Otherwise, returns same value as superclass
         '''
         if not self.showing_commodity:
             return(False)
@@ -547,25 +759,33 @@ class label_button(button):
     '''
     def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of 2 integers for initial coordinate x and y values
-            width: int representing the width in pixels of the button
-            height: int representing the height in pixels of the button
-            button_type: string representing a subtype of button, such as a 'move up' button, determining its tooltip and behavior
-            modes: list of strings representing the game modes in which this button is visible, such as 'strategic' for a button appearing when on the strategic map
-            image_id: string representing the address of the button's image within the graphics folder such as 'misc/left_button.png' to represent SFA/graphics/misc/left_button.png
-            attached_label: label object representing the label to which this button is attached.
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string button_type: Determines the function of this button, like 'end turn'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.attached_label = attached_label
         super().__init__(coordinates, width, height, 'blue', button_type, keybind_id, modes, image_id, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this button should be drawn
         Input:
-            none
+            None
         Output:
-            Controls whether this button should be shown. This button is shown only when its attached label is shown. 
+            boolean: Returns same value as superclass if this button's label is showing, otherwise returns False. Exception for sell commodity buttons, which will not be not be able to sell consumer goods and will be hidden when
+                attached to an inventory label showing consumer goods
         '''
         if self.attached_label.can_show():
             if not ((self.button_type == 'sell commodity' or self.button_type == 'sell all commodity') and self.attached_label.current_commodity == 'consumer goods'):
@@ -573,13 +793,40 @@ class label_button(button):
         return(False)
 
 
-class worker_crew_vehicle_button(label_button): #appears on worker, finds ship to attach as crew
+class worker_crew_vehicle_button(label_button):
+    '''
+    Button that commands a worker to crew a vehicle in its tile
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, vehicle_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle this button crews
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = vehicle_type
         self.was_showing = False
         super().__init__(coordinates, width, height, 'worker to crew', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a worker to crew a vehicle in its tile
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
@@ -597,22 +844,56 @@ class worker_crew_vehicle_button(label_button): #appears on worker, finds ship t
                 text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if a worker is not selected or if its tile does not have an uncrewed vehicle of the correct type, otherwise returns False
+        '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.is_worker) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
-                result = False#return(False)
+            if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.is_church_volunteers)) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
+                result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
         self.was_showing = result
         return(result)
 
-class pick_up_all_passengers_button(label_button): #appears on ship, finds mobs to take as passengers
+class pick_up_all_passengers_button(label_button):
+    '''
+    Button that commands a vehicle to take all other mobs in its tile as passengers
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'pick up all passengers', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle to take all other mobs in its tile as passengers
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
@@ -625,6 +906,14 @@ class pick_up_all_passengers_button(label_button): #appears on ship, finds mobs 
                 text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
@@ -634,20 +923,46 @@ class pick_up_all_passengers_button(label_button): #appears on ship, finds mobs 
                 self.image.set_image('misc/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
-class crew_vehicle_button(label_button): #appears on ship, finds worker to attach as crew
+class crew_vehicle_button(label_button):
+    '''
+    Button that commands a vehicle to take a worker in its tile as crew. Also updates this button to reflect a train or ship depending on the selected vehicle
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'crew', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle to take a worker in its tile as crew
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 vehicle = self.attached_label.actor
-                crew = 'none'
-                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-                    if contained_mob.is_worker:
-                        crew = contained_mob
+                crew = vehicle.images[0].current_cell.get_worker() #'none'
+                #for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                #    if contained_mob.is_worker:
+                #        crew = contained_mob
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
@@ -659,6 +974,14 @@ class crew_vehicle_button(label_button): #appears on ship, finds worker to attac
                 text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected vehicle has crew, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if self.attached_label.actor.has_crew:
@@ -668,12 +991,38 @@ class crew_vehicle_button(label_button): #appears on ship, finds worker to attac
                 self.image.set_image('misc/crew_' + self.vehicle_type + '_button.png')
         return(result)
 
-class uncrew_vehicle_button(label_button): 
+class uncrew_vehicle_button(label_button):
+    '''
+    Button that commands a vehicle's crew to leave the vehicle
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'uncrew', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.has_crew:
@@ -684,6 +1033,14 @@ class uncrew_vehicle_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle's crew to leave the vehicle
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -698,12 +1055,35 @@ class uncrew_vehicle_button(label_button):
 
 class merge_button(label_button):
     '''
-    Button that, when pressed, merges a selected officer with a worker in the same tile
+    Button that merges a selected officer with a worker in the same tile to form a group
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'merge', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an officer, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_officer:
@@ -711,6 +1091,14 @@ class merge_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button merges a selected officer with a worker in the same tile to form a group
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
@@ -721,14 +1109,23 @@ class merge_button(label_button):
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            worker = officer.images[0].current_cell.get_worker()
+                            if officer.officer_type == 'head missionary': #if head missionary, look for church volunteers
+                                worker = officer.images[0].current_cell.get_church_volunteers()
+                            else:
+                                worker = officer.images[0].current_cell.get_worker()
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
-                            groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
+                            groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                         else:
-                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                            if (not officer == 'none') and officer.officer_type == 'head missionary':
+                                text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                            else:  
+                                text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                        if (not officer == 'none') and officer.officer_type == 'head missionary':
+                            text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                        else:  
+                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
             else:
@@ -737,12 +1134,35 @@ class merge_button(label_button):
 
 class split_button(label_button):
     '''
-    Button that, when pressed, splits a selected group into its officer and worker
+    Button that splits a selected group into its component officer and worker
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'split', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_group:
@@ -751,10 +1171,12 @@ class split_button(label_button):
 
     def on_click(self):
         '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button splits a selected group into its component officer and worker
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when clicked. The merge button requires that only a group is selected, and will cause the selected group to split into its officer and worker, destroying the group.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -764,18 +1186,45 @@ class split_button(label_button):
                     if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
                         displayed_mob.disband()
                     else:
-                        text_tools.print_to_screen("You can not split a group of porters that is carrying commodities.", self.global_manager)
+                        text_tools.print_to_screen("You can not split a unit that is carrying commodities.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Only a group can be split it into a worker and an officer.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
 class remove_worker_button(label_button):
+    '''
+    Button that removes a worker from a building
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, building_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string building_type: Determines type of building this button removes workers from, like 'resource building'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'remove worker', keybind_id, modes, image_id, attached_label, global_manager)
         self.building_type = building_type
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if there is not a corresponding worker to remove, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.attached_list[self.attached_label.list_index].in_building:
@@ -783,22 +1232,53 @@ class remove_worker_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes a worker from a building
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
-                #if len(self.attached_label.actor.cell.contained_mobs) > 0:
                 self.attached_label.attached_list[self.attached_label.list_index].leave_building(self.attached_label.actor.cell.contained_buildings[self.building_type])
-                #else:
-                #    text_tools.print_to_screen("You must select a building with workers to remove workers.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not remove a worker from a building.", self.global_manager)
 
 class disembark_vehicle_button(label_button):
+    '''
+    Button that disembarks a passenger from a vehicle
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'disembark', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
+        Input:
+            None
+        Output:
+            boolean: Returns False if there is not a corresponding passenger to disembark, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.attached_list[self.attached_label.list_index].in_vehicle:
@@ -810,6 +1290,14 @@ class disembark_vehicle_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button disembarks a passenger from a vehicle
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
@@ -823,25 +1311,51 @@ class disembark_vehicle_button(label_button):
                         if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
                             self.attached_label.actor.set_movement_points(0)
                         self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
-                    #label is attached to ship and has an attached list of its passengers - tells passenger of index to disembark ship
                 else:
                     text_tools.print_to_screen("You must select a " + self.vehicle_type + "with passengers to disembark passengers.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not disembark from a " + self.vehicle_type + ".", self.global_manager)
 
 class embark_vehicle_button(label_button):
+    '''
+    Button that commands a selected mob to embark a vehicle of the correct type in the same tile
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, vehicle_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string vehicle_type: 'train' or 'ship', determines what kind of vehicle this button embarks
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = vehicle_type
         self.was_showing = False
         super().__init__(coordinates, width, height, 'embark', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob can not embark vehicles or if there is no vehicle in the tile to embark, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
-                result = False#return(False)
+                result = False
             elif not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
-                result = False#return(False)
+                result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
@@ -849,6 +1363,14 @@ class embark_vehicle_button(label_button):
         return(result)
     
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a selected mob to embark a vehicle of the correct type in the same tile
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -870,11 +1392,37 @@ class embark_vehicle_button(label_button):
                 text_tools.print_to_screen("You are busy and can not embark a " + self.vehicle_type + ".", self.global_manager)
 
 class cycle_passengers_button(label_button):
+    '''
+    Button that cycles the order of passengers displayed in a vehicle
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'cycle passengers', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a vehicle or if the vehicle does not have enough passengers to cycle through, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_vehicle:
@@ -885,6 +1433,14 @@ class cycle_passengers_button(label_button):
         return(result)
     
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the order of passengers displayed in a vehicle
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -895,7 +1451,26 @@ class cycle_passengers_button(label_button):
                 text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
 
 class worker_to_building_button(label_button):
+    '''
+    Button that commands a worker to work in a certain type of building in its tile
+    '''
     def __init__(self, coordinates, width, height, keybind_id, building_type, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string building_type: Type of building this label attaches workers to, like 'resource building'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.building_type = building_type
         self.attached_worker = 'none'
         self.attached_building = 'none'
@@ -903,30 +1478,49 @@ class worker_to_building_button(label_button):
         super().__init__(coordinates, width, height, 'worker to resource', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
+        '''
+        Description:
+            Updates the building this button assigns workers to depending on the buildings present in this tile
+        Input:
+            None
+        Output:
+            None
+        '''
         self.attached_worker = self.attached_label.actor #selected_list[0]
         if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
             possible_attached_building = self.attached_worker.images[0].current_cell.contained_buildings[self.building_type]
             if (not possible_attached_building == 'none'): #and building has capacity
-                #attach to building if building of correct type present in same tile
                 self.attached_building = possible_attached_building
             else:
                 self.attached_building = 'none'
         else:
             self.attached_building = 'none'
-        
-    def draw(self):
-        #self.update_info()
-        super().draw()
     
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a worker, otherwise returns same as superclass
+        '''
         result = super().can_show()
         self.update_info()
         if result:
-            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker): #if selected but not worker, return false
+            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker and not self.attached_worker.is_church_volunteers): #if selected but not worker, return false
                 return(False)
         return(result)
     
-    def update_tooltip(self): #make sure that attached building is not none
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on the building it assigns workers to
+        Input:
+            None
+        Output:
+            None
+        '''
         if not (self.attached_worker == 'none' or self.attached_building == 'none'):
             if self.building_type == 'resource':
                 self.set_tooltip(['Assigns the selected worker to the ' + self.attached_building.name + ', producing ' + self.attached_building.resource_type + ' over time.'])
@@ -939,6 +1533,14 @@ class worker_to_building_button(label_button):
             self.set_tooltip(['placeholder'])
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a worker to work in a certain type of building in its tile
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             if not self.attached_building == 'none':
                 if self.attached_building.worker_capacity > len(self.attached_building.contained_workers): #if has extra space
@@ -950,16 +1552,229 @@ class worker_to_building_button(label_button):
             else:
                 text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
 
-class switch_theatre_button(label_button):
+class trade_button(label_button):
+    '''
+    Button that commands a caravan to trade with a village
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'trade', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of trading, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_trade):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a caravan to trade with a village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points == current_mob.max_movement_points:
+                    current_cell = current_mob.images[0].current_cell
+                    if current_cell.has_village():
+                    #if current_cell.has_trading_post():
+                        if current_mob.get_inventory('consumer goods') > 0:
+                            #current_mob.set_movement_points(0) have confirmation message to ensure that player wants to trade before using movement points 
+                            current_mob.start_trade()
+                        else:
+                            text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                    #elif current_cell.has_village():
+                    #    text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+
+class convert_button(label_button):
+    '''
+    Button that commands a missionaries to convert a native village
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'convert', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_convert):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points == current_mob.max_movement_points:
+                    current_cell = current_mob.images[0].current_cell
+                    if current_cell.has_village():
+                        if current_cell.village.aggressiveness > 1:
+                            current_mob.start_converting()
+                        else:
+                            text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+
+class religious_campaign_button(label_button):
+    '''
+    Button that commands a head missionary to start a religious campaign in Europe
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'religious campaign', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a head missionary, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary')):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a head missionary to start a religious campaign
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('europe_grid') in current_mob.grids:
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        current_mob.start_religious_campaign()
+                    else:
+                        text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
+
+class switch_theatre_button(label_button):
+    '''
+    Button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A destination is chosen when the player clicks a tile in another theatre.
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'switch theatre', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):      
         '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A
+                destination is chosen when the player clicks a tile in another theatre.
         Input:
-            none
+            None
         Output:
-            Controls the button's behavior when left clicked. Grid switching buttons require one mob to be selected and outside of this button's destination grid to be used, and move the selected mob to the destination grid when used.
+            None
         '''
         if self.can_show():
             self.showing_outline = True
@@ -983,10 +1798,12 @@ class switch_theatre_button(label_button):
 
     def can_show(self):
         '''
+        Description:
+            Returns whether this button should be drawn
         Input:
-            none
+            None
         Output:
-            Returns whether the button can currently be shown. A grid switching button is only shown when there is one mob selected and that mob is not on this button's destination grid.
+            boolean: Returns False if the selected mob is not capable of traveling between theatres, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
@@ -995,10 +1812,36 @@ class switch_theatre_button(label_button):
         return(result) 
 
 class build_train_button(label_button):
+    '''
+    Button that commands a construction gang to build a train at a train station
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'build train', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if (not self.attached_label.actor.can_construct): #if selected but not worker, return false
@@ -1006,6 +1849,14 @@ class build_train_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to build a train at a train station
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if self.attached_label.actor.movement_points >= 1:
@@ -1025,11 +1876,30 @@ class build_train_button(label_button):
                 text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
 
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
+    '''
+    Button that commands a mob to construct a certain type of building
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            label attached_label: Label that this button is attached to
+            string building_type: Type of building that this button builds, like 'resource building'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.building_type = building_type
         self.attached_mob = 'none'
         self.attached_tile = 'none'
         self.building_name = 'none'
+        self.requirement = 'can_construct'
         image_id = 'misc/default_button.png'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
@@ -1042,11 +1912,27 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             self.railroad_image_id = 'misc/railroad_button.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
-            image_id = 'misc/railroad_button.png'
+            image_id = 'misc/train_station_button.png'
             self.building_name = 'train station'
+        elif self.building_type == 'trading_post':
+            image_id = 'misc/trading_post_button.png'
+            self.building_name = 'trading post'
+            self.requirement = 'can_trade'
+        elif self.building_type == 'mission':
+            image_id = 'misc/mission_button.png'
+            self.building_name = 'mission'
+            self.requirement = 'can_convert'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
+        '''
+        Description:
+            Updates the exact kind of building constructed by this button depending on what is in the selected mob's tile, like building a road or upgrading a previously constructed road to a railroad
+        Input:
+            None
+        Output:
+            None
+        '''
         self.attached_mob = self.attached_label.actor #new_attached_mob
         if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
@@ -1073,19 +1959,39 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
                         self.image.set_image('misc/railroad_button.png')
-                #elif self.building_type == 'port': #port and train station info never changes
-                #    self.building_name = 'port'
-                #    self.image.set_image('misc/
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             self.update_info()
-            if (not self.attached_label.actor.can_construct): #if selected but not worker, return false
+            can_create = 'none'
+            if self.requirement == 'can_construct':
+                can_create = self.attached_label.actor.can_construct
+            elif self.requirement == 'can_trade':
+                can_create = self.attached_label.actor.can_trade
+            elif self.requirement == 'can_convert':
+                can_create = self.attached_label.actor.can_convert
+            if (not can_create): #show if unit selected can create this building
                 return(False)
         return(result) 
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on the type of building it constructs
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.building_type == 'resource':
             if self.attached_resource == 'none':
                 self.set_tooltip(['Builds a building that produces commodities over time', 'Can only be built in the same tile as a resource', 'Costs 1 movement point'])
@@ -1103,10 +2009,22 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             else:
                 self.set_tooltip(['Builds a road, halving the cost to move between this tile and other tiles with roads or railroads', 'A road can be upgraded into a railroad that allows trains to move through this tile',
                     'Costs 1 movement point'])
+        elif self.building_type == 'trading_post':
+            self.set_tooltip(['Builds a trading post, increasing the success chance and reducing the risk when caravans trade with the attached village', 'Can only be built in a village', 'Costs 1 movement point'])
+        elif self.building_type == 'mission':
+            self.set_tooltip(['Builds a mission, increasing the success chance and reducing the risk when missionaries convert the attached village', 'Can only be built in a village', 'Costs 1 movement point'])
         else:
             self.set_tooltip(['placeholder'])
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a mob to construct a certain type of building
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if self.attached_mob.movement_points >= 1:
@@ -1132,6 +2050,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                     text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                             elif self.building_type == 'infrastructure':
                                 self.construct()
+                            elif self.building_type == 'trading_post' or self.building_type == 'mission':
+                                if self.attached_tile.cell.has_village():
+                                    self.construct()
+                                else:
+                                    text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
                         else:
                             text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                     else:
@@ -1146,7 +2069,15 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
                     
             
-    def construct(self): #move stuff from on click here
+    def construct(self):
+        '''
+        Description:
+            Commands the selected mob to construct a certain type of building, depending on this button's building_type
+        Input:
+            None
+        Output:
+            None
+        '''
         self.attached_mob.set_movement_points(0)
         if not self.attached_mob.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
             self.attached_mob.images[0].current_cell.contained_buildings[self.building_type].remove()
@@ -1164,8 +2095,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             elif self.building_name == 'railroad':
                 building_image_id = 'buildings/infrastructure/railroad.png'
             new_building = buildings.infrastructure_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, building_image_id, self.building_name, self.building_name,
-                ['strategic'], self.global_manager)
-            #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
+                ['strategic'], self.global_manager) #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
+        elif self.building_type == 'trading_post':
+            new_building = buildings.trading_post((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
+        elif self.building_type == 'mission':
+            new_building = buildings.mission((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/mission.png', self.building_name, ['strategic'], self.global_manager)
         else:
             new_building = buildings.building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, self.building_type,
                 ['strategic'], self.global_manager)

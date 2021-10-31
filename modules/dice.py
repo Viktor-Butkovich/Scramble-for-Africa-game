@@ -10,16 +10,36 @@ class die(button):
     '''
     def __init__(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables that represents the pixel location of the bottom left of this die
-            width: int representing the width in pixels of this die
-            height: int representing the height in pixels of this die
-            modes: list of string representing the game modes in which this die can appear
-            num_sides: int representing the number of sides of the simulated die
-            result_outcome_dict: dictionary of string keys and int values that records the die results required for certain outcomes
-            outcome_color_dict: dictionary of string keys and int values that records the colors associated with certain die results
-            final_result: int representing the predetermined final result of this die roll
-            global_manager: global_manager_template object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string button_type: Determines the function of this button, like 'end turn'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this die
+            int width: Pixel width of this die
+            int height: Pixel height of this die
+            string list modes: Game modes during which this button can appear
+            int num_sides: Number of sides for this die
+            string/int dictionary result_outcome_dict: dictionary of string result type keys and int die result values determining which die results are successes/failures or critical successes/failures
+            string/int outcome_color_dict: dictionary of string color name keys and int die result values determining what colors are shown for certain die results
+            int final_result: Predetermined final result of this roll that the die will end on
+            global_manager_template global_manager: Object that accesses shared variables
+        Ouptut:
+            None
         '''
         self.result_outcome_dict = result_outcome_dict #min_success: 4, min_crit_success: 6, max_crit_fail: 1
         self.outcome_color_dict = outcome_color_dict #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
@@ -40,18 +60,26 @@ class die(button):
         self.in_notification = True #dice are attached to notifications and should be drawn over other buttons
 
     def on_click(self):
-        if self.global_manager.get('ongoing_exploration'):
-            if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
-                self.global_manager.get('notification_list')[0].on_click()#self.start_rolling()
+        '''
+        Description:
+            Controls this button's behavior when clicked. A die copies the on_click behavior of its attached notification, which should cause the die to start rolling
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
+            self.global_manager.get('notification_list')[0].on_click()#self.start_rolling()
 
     def update_tooltip(self):
         '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its button_type. If a die is not rolling yet, a description of the results required for different outcomes will be displayed. If a die is currently rolling, its
+                current value will be displayed. If a die is finished rolling, its final value and a description that it has finished rolling and whether its result was selected will be displayed.
         Input:
-            none
+            None
         Output:
-            Sets this die's tooltip to describe it. If the die is not rolling yet, the tooltip will describe the results required for different outcomes.
-            If the die is currently rolling, its current value will be displayed.
-            If the die is finished rolling, its final value will be displayed and a description that it has finished rolling and whether its outcome was chosen for the roll's purpose will be described.
+            None
         '''
         tooltip_list = []
         if self.rolls_completed == 0:
@@ -77,20 +105,24 @@ class die(button):
 
     def start_rolling(self):
         '''
+        Description:
+            Causes this die to start rolling, after which it will switch to a different side every roll_interval seconds   
         Input:
-            none
+            None
         Output:
-            Causes the die to start rolling, after which it will roll to a different side every roll_interval seconds
+            None
         '''
         self.last_roll = time.time()
         self.rolling = True
         
     def roll(self):
         '''
+        Description:
+            Rolls this die to a random face, or to the predetermined result if it is the last roll. When all dice finish rolling, dice rolling notifications will be removed
         Input:
-            none
+            None
         Output:
-            Rolls the die to a random face, or to the predetermined result if it is the last roll. When all dice finish rolling, dice rolling notifications will be removed.
+            None
         '''
         self.last_roll = time.time()
         if self.rolls_completed == self.num_rolls: #if last roll just happened, stop rolling - allows slight pause after last roll during which you don't know if it is the final one
@@ -122,11 +154,13 @@ class die(button):
 
     def draw(self):
         '''
+        Description:
+            If enough time has passed since the last roll and this die is still rolling, this will roll the die again. Additionally, this draws the die with a face corresponding to its current value. If the die is finished rolling and
+                its result was used, an outline with a color corresponding to the roll's result will be displayed.
         Input:
-            none
+            None
         Output:
-            If enough time has passed since the last roll and the die is still rolling, this will roll the die. Additionally, this draws the die, displaying its current value.
-            If it is finished rolling and it was chosen as the result to use for the roll's purpose, an outline with a color depending on the roll's outcome will be displayed.
+            None
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             if self.rolling and time.time() >= self.last_roll + self.roll_interval: #if roll_interval time has passed since last_roll
@@ -140,10 +174,12 @@ class die(button):
 
     def remove(self):
         '''
-        Input:
-            none
-        Output:
+        Description:
             Removes the object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
         '''
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))

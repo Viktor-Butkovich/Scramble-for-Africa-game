@@ -1,9 +1,14 @@
 def scale_coordinates(x, y, global_manager):
     '''
+    Description:
+        Returns a version of the inputted coordinates scaled to the player's screen resolution. For example, if the inputted coordinates are at the center of the program's default screen, the returned coordinates will be in the center
+            of the player's screen
     Input:
-        Two int variables representing unscaled coordinates, global_manager_template object
+        int x: Unscaled pixel x coordinate
+        int y: Unscaled pixel y coordinate
     Output:
-        Returns a tuple of two int variables representing coordinates scaled to the user's resolution
+        int: Scaled pixel x coordinate
+        int: Scaled pixel y coordinate
     '''
     x_ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
     y_ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
@@ -13,10 +18,12 @@ def scale_coordinates(x, y, global_manager):
 
 def scale_width(width, global_manager):
     '''
+    Description:
+        Returns a version of the inputted width scaled to the player's screen resolution. For example, if the inputted width is as wide as the program's default screen, the returned width will be as wide as the player's screen
     Input:
-        int representing unscaled pixel width, global_manager_template object. Also works for x coordinates alone rather than just widths
+        int width: Unscaled pixel width
     Output:
-        Returns an int pixel width scaled to the user's resolution
+        int: Scaled pixel width
     '''
     ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
     scaled_width = round(width * ratio)
@@ -24,10 +31,12 @@ def scale_width(width, global_manager):
 
 def scale_height(height, global_manager):
     '''
+    Description:
+        Returns a version of the inputted height scaled to the player's screen resolution. For example, if the inputted height is as tall as the program's default screen, the returned height will be as tall as the player's screen
     Input:
-        int representing unscaled pixel height, global_manager_template object. Also works for y coordinates alone rather than just heights
+        int height: Unscaled pixel height
     Output:
-        Returns an int pixel height scaled to the user's resolution
+        int: Scaled pixel height
     '''
     ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     scaled_height = round(height * ratio)
@@ -35,10 +44,12 @@ def scale_height(height, global_manager):
 
 def unscale_width(width, global_manager):
     '''
+    Description:
+        Returns a version of the inputted width scaled to the program's default screen resolution. For example, if the inputted width is as wide as the player's screen, the returned width will be as wide as the program's default screen
     Input:
-        int representing scaled pixel width, global_manager_template object. Also works for x coordinates alone rather than just widths
+        int width: Scaled pixel width
     Output:
-        Returns an int pixel width restored to the default game resolution
+        int: Unscaled pixel width
     '''
     ratio = global_manager.get('display_width')/global_manager.get('default_display_width')
     unscaled_width = round(width / ratio)
@@ -46,10 +57,13 @@ def unscale_width(width, global_manager):
 
 def unscale_height(height, global_manager):
     '''
+    Description:
+        Returns a version of the inputted height scaled to the program's default screen resolution. For example, if the inputted height is as tall as the player's screen, the returned height will be as tall as the program's default
+            screen
     Input:
-        int representing scaled pixel height, global_manager_template object. Also works for y coordinates alone rather than just heights
+        int height: Scaled pixel height
     Output:
-        Returns an int pixel height restored to the default game resolution
+        int: Unscaled pixel height
     '''
     ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     unscaled_height = round(height / ratio)

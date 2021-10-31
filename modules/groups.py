@@ -1,4 +1,6 @@
 import time
+import random
+import math
 from .mobs import mob
 from .tiles import tile
 from .tiles import veteran_icon
@@ -14,35 +16,40 @@ from . import main_loop_tools
 
 class group(mob):
     '''
-    Mob that is created by a combination of a worker and officer, can have unique capabilities, and restores its worker and officer upon being disbanded
+    Mob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            coordinates: tuple of two int variables representing the pixel coordinates of the bottom left of the notification
-            grids: list of grid objects on which the mob's images will appear
-            image_id: string representing the file path to the mob's default image
-            name: string representing the mob's name
-            modes: list of strings representing the game modes in which the mob can appear
-            worker: worker object representing the worker that is part of this group
-            officer: officer object representing the officer that is part of this group
-            global_manager: global_manager_template object used to manage a dictionary of shared variables
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.worker = worker
         self.officer = officer
+        #self.veteran = self.officer.veteran
         super().__init__(coordinates, grids, image_id, name, modes, global_manager)
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
+        self.veteran = self.officer.veteran
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
         self.select()
-        self.veteran = self.officer.veteran
         if self.veteran:
-            self.set_name('Veteran expedition')
+            self.set_name("Veteran " + self.name.lower())
         self.veteran_icons = self.officer.veteran_icons
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self
@@ -53,6 +60,16 @@ class group(mob):
             self.set_movement_points(self.worker.movement_points)
 
     def promote(self):
+        '''
+        Description:
+            Promotes this group's officer to a veteran after performing various actions particularly well, improving the capabilities of groups the officer is attached to in the future. Creates a veteran star icon that follows this
+                group and its officer
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.veteran = True
         self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
         self.officer.set_name("Veteran " + self.officer.name.lower()) #Explorer to Veteran explorer
         for current_grid in self.grids:
@@ -61,13 +78,18 @@ class group(mob):
             else:
                 veteran_icon_x, veteran_icon_y = (self.x, self.y)
             self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
+        Description:
+            Links this group to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when a group that was previously attached to another actor becomes independent and
+                visible, like when a group disembarks a ship. Also moves its officer and worker to the new grid
         Input:
-            grid object representing the grid to which the group is transferring, tuple of two int variables representing the coordinates to which the group will move on the new grid
+            grid new_grid: grid that this group is linked to
+            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
-            Moves this group and all of its images to the inputted grid at the inputted coordinates. A group will also move its attached officer, worker, and veteran icons to the new grid.
+            None
         '''
         if self.veteran:
             for current_veteran_icon in self.veteran_icons:
@@ -88,24 +110,26 @@ class group(mob):
 
     def update_tooltip(self): #to do: show carried commodities in tooltip
         '''
+        Description:
+            Sets this group's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this group's name, the names of its officer and worker, and its movement points
         Input:
-            none
+            None
         Output:
-            Sets this group's tooltip to what it should be. A group's tooltip shows the name of the group, its officer, its worker, and its movement points.
+            None
         '''
         self.set_tooltip(["Name: " + self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def disband(self):
         '''
+        Description:
+            Separates this group into its officer and worker, destroying the group
         Input:
-            none
+            None
         Output:
-            Separates this group into its components, giving its inventory to the officer and setting their number of movement points to that of the group
+            None
         '''
         if self.can_hold_commodities:
             self.drop_inventory()
-        #self.officer.inventory = self.inventory
-        #self.inventory_setup() #reset inventory to empty
         self.remove()
         self.worker.leave_group(self)
         self.worker.set_movement_points(self.movement_points)
@@ -118,21 +142,26 @@ class group(mob):
 
     def remove(self):
         '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Used when the group is being disbanded, since it does not
+                remove its worker or officer
         Input:
-            none
+            None
         Output:
-            Removes the group from relevant lists and prevents it from further appearing in or affecting the program.
-            However, a group will not automatically remove its officer and worker when removed, since disbanding a group removes the group but not its members - to remove the members, use the die function instead
+            None
         '''
         super().remove()
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
 
     def die(self):
         '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Unlike remove, this is used when the group dies because it
+                also removes its worker and officer
         Input:
-            none
+            None
         Output:
-            Removes the group and its members from relevant lists and prevents them from further appearing in or affecting the program.
+            None
         '''
         self.remove()
         self.officer.remove()
@@ -143,44 +172,511 @@ class porters(group):
     A group with a porter foreman officer that can hold commodities
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
-        self.inventory_capacity = 10
+        self.inventory_capacity = 9
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
 class construction_gang(group):
     '''
-    A group with an engineer officer that is able to construct buildings
+    A group with an engineer officer that is able to construct buildings and trains
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_construct = True
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
 class caravan(group):
+    '''
+    A group with a merchant officer that is able to establish trading posts and trade with native villages
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.can_hold_commodities = True
-        self.inventory_capacity = 10
+        self.can_trade = True
+        self.inventory_capacity = 9
+        self.trades_remaining = 0
+        self.current_trade_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
         self.inventory_setup()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
-class mission(group):
+    def start_trade(self):
+        '''
+        Description:
+            Used when the player clicks on the trade button, displays a choice notification that allows the player to trade or not. Choosing to trade starts the trading process and
+                consumes the caravan's movement points
+        Input:
+            None
+        Output:
+            None
+        '''
+        village = self.images[0].current_cell.village
+        choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
+        self.global_manager.set('ongoing_trade', True)
+        message = "Are you sure you want to attempt to trade with the village of " + village.name + "? /n /n"
+
+        self.current_trade_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        #determine modifier here
+
+        if village.cell.contained_buildings['trading_post'] == 'none': #penalty for no trading post
+            self.current_trade_modifier -= 1
+            message += "Without an established trading post, the merchant will have difficulty convincing villagers to trade. /n /n"
+        
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
+            message += "The villagers are hostile and are unlikely to be willing to trade. /n /n"
+        elif aggressiveness_modifier > 0:
+            message += "The villagers are friendly and are likely to be willing to trade. /n /n"
+        else:
+            message += "The villagers are wary of the merchant but may be willing to trade. /n /n"
+        self.current_trade_modifier += aggressiveness_modifier
+
+        risk_value = -1 * self.current_trade_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
+        
+        self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_trade_modifier
+        message += "In each trade, the merchant trades 1 of his " + str(self.get_inventory('consumer goods')) + " consumer goods for items that may or may not be valuable. /n /n"
+        message += "Trading may also convince villagers to become available for hire as workers. "
+        notification_tools.display_choice_notification(message, ['start trading', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+    def willing_to_trade(self, notification):
+        '''
+        Description:
+            Used when the player decides to start trading, allows the player to roll a die to see if the villagers are willing to trade. If they are willing to trade, displays a choice notification that allows the player to start the
+                transaction process or not. Otherwise, stops the trading process
+        Input:
+            notification notification: the current trade notification, used to access information relating to the trade such as which village is being traded with
+        Output:
+            None
+        '''
+        self.notification = notification
+        self.set_movement_points(0)
+        village = self.notification.choice_info_dict['village']
+        text = ("The merchant attempts to convince the villagers to trade. /n /n")
+        if self.veteran:
+            text += ("The veteran merchant can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        else:
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        roll_result = 0
+        if self.veteran:
+                
+            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 500), first_roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 380), second_roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 440), roll_list[0], self.current_min_success, 6, self.current_max_crit_fail)
+                            
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        self.global_manager.set('trade_result', [self, roll_result])
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+
+        if roll_result >= self.current_min_success:
+            self.trades_remaining = math.ceil(village.population / 3)
+            trade_type = 'trade'
+            if (not self.veteran) and roll_result >= 6: #promotion occurs when trade_promotion notification appears, in notification_to_front in notification_manager
+                text += "/nThe merchant negotiated well enough to become a veteran. /n"
+                trade_type = 'trade_promotion'
+            notification_tools.display_notification(text + "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /nThe merchant has " + str(self.get_inventory('consumer goods')) +
+                " consumer goods to sell. /n /nClick to start trading. /n /n", trade_type, self.global_manager)
+            choice_info_dict = {'caravan': self, 'village': village, 'type': 'willing to trade'}
+            text += "/nThe villagers are willing to trade " + str(self.trades_remaining) + " times. /n /n"
+            text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
+            text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
+            notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        elif roll_result <= self.current_max_crit_fail:
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n /nEveryone in the caravan " +
+                "has died. /n /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
+        else:
+            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
+
+    def trade(self, notification):
+        '''
+        Description:
+            Used in each part of the transaction process, allows the player to sell a unit of consumer goods and roll a die to try to find commodities in return. After the transaction, if the villagers are able to trade more and the
+                caravan has more consumer goods to sell, displays a choice notification that allows the player to start another transaction or not. Otherwise, stops the trading process
+        Input:
+            notification notification: the current trade notification, used to access information relating to the trade such as which village is being traded with
+        Output:
+            None
+        '''
+        self.current_trade_modifier = 0 #trading - getting good deals - is different from the willingness to trade roll and uses different modifiers
+        self.current_min_success = 4
+        self.current_max_crit_fail = 0 #0 requirement for critical fail means critical fails will not occur
+        #determine modifier here
+        self.current_min_success -= self.current_trade_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_trade_modifier
+        
+        self.notification = notification
+        village = self.notification.choice_info_dict['village']
+        text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
+        if self.veteran:
+            text += ("The veteran merchant can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+        else:
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        roll_result = 0
+        if self.veteran:
+            first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager)
+            self.display_trade_die((die_x, 500), first_roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
+            self.display_trade_die((die_x, 380), second_roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, 7, self.current_max_crit_fail, self.global_manager) #0 requirement for critical fail means critical fails will not occur
+            self.display_trade_die((die_x, 440), roll_list[0], self.current_min_success, 7, self.current_max_crit_fail)
+                            
+            text += roll_list[1]
+            roll_result = roll_list[0]
+                
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+        self.trades_remaining -= 1
+        num_consumer_goods = self.get_inventory('consumer goods') - 1 #consumer goods are actually lost when clicking out of notification, so subtract 1 here to show accurate number
+        commodity = 'none'
+        notification_type = 'none'
+        if roll_result >= self.current_min_success:
+            commodity = random.choice(self.global_manager.get('collectable_resources'))
+            text += "/n The merchant managed to buy a unit of " + commodity + ". /n /n"
+            notification_type = 'successful_commodity_trade'
+        else:
+            text += "/n The merchant bought items that turned out to be worthless. /n /n"
+            notification_type = 'failed_commodity_trade'
+        if not self.trades_remaining == 0:
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
+            text += "The merchant has " + str(num_consumer_goods) + " more consumer goods to sell /n /n"
+        notification_tools.display_notification(text, notification_type, self.global_manager)
+        text = ""
+        if self.trades_remaining > 0 and num_consumer_goods > 0:
+            choice_info_dict = {'caravan': self, 'village': village, 'type': 'trade'}
+            text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
+            text += "Do you want to trade consumer goods for items that may or may not be valuable?"
+            notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        else:
+            if self.trades_remaining == 0:
+                text += "The villagers are not willing to trade any more this turn. /n /n"
+            if num_consumer_goods <= 0: #consumer goods are actually lost when user clicks out of
+                text += "The merchant does not have any more consumer goods to sell. /n /n"
+            notification_tools.display_notification(text + "Click to close this notification. ", 'stop_trade', self.global_manager)
+        self.global_manager.set('trade_result', [self, roll_result, commodity]) #allows notification to give random commodity when clicked
+        
+    def display_trade_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
+        '''
+        Description:
+            Creates a die object with preset colors and the inputted location, possible roll outcomes, and predetermined roll result to use for trade rolls
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+            int difficulty: Minimum roll required for a success
+            int min_crit_success: Minimum roll require for a critical success
+            int max_crit_fail: Maximum roll required for a critical failure
+        Output:
+            None
+        '''
+        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+
+class missionaries(group):
+    '''
+    A group with a head missionary officer and church volunteer workers that can build churches and convert native villages
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        self.can_convert = True
+        self.current_convert_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
+
+    def start_converting(self):
+        '''
+        Description:
+            Used when the player clicks on the start converting button, displays a choice notification that allows the player to caonvert or not. Choosing to campaign starts the conversion process and consumes the missionaries'
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
+        village = self.images[0].current_cell.village
+        self.current_convert_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        message = "Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n"
+                            
+        if village.cell.contained_buildings['mission'] == 'none': #penalty for no mission
+            self.current_convert_modifier -= 1
+            message += "Without an established mission, the missionaries will have difficulty converting the villagers. /n /n"
+            
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
+            message += "The villagers are hostile and are unlikely to listen to the teachings of the missionaries. /n /n"
+        elif aggressiveness_modifier > 0:
+            message += "The villagers are friendly and are likely to listen to the teachings of the missionaries. /n /n"
+        else:
+            message += "The villagers are wary of the missionaries but may be willing to listen to their teachings. /n /n"
+        self.current_convert_modifier += aggressiveness_modifier
+
+        population_modifier = village.get_population_modifier()
+        if population_modifier < 0:
+            message += "The high population of this village will require more effort to convert. /n"
+        elif population_modifier > 0:
+            message += "The low population of this village will require less effort to convert /n"
+        self.current_convert_modifier += population_modifier
+
+        risk_value = -1 * self.current_convert_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
+            
+        self.current_min_success -= self.current_convert_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_convert_modifier
+        
+        choice_info_dict = {'head missionary': self,'type': 'start converting'}
+        self.current_convert_modifier = 0
+        self.global_manager.set('ongoing_conversion', True)
+        notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def convert(self):
+        '''
+        Description:
+            Controls the conversion process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+        village = self.images[0].current_cell.village
+        text = ""
+        text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
+
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager)
+        else:
+            text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
+            self.display_conversion_die((die_x, 500), first_roll_list[0])
+                                
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
+            self.display_conversion_die((die_x, 380), second_roll_list[0])
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
+            self.display_conversion_die((die_x, 440), roll_list[0])
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + ". /n /n"
+        else:
+            text += "The missionaries failed to make significant progress in converting the natives. /n /n"
+        if roll_result <= self.current_max_crit_fail:
+            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died. /n" 
+
+        if (not self.veteran) and roll_result == 6:
+            self.just_promoted = True
+            text += "The head missionary has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n /n"
+            text += "The head missionary is now a veteran and will be more successful in future ventures. /n /n"
+        if roll_result >= self.current_min_success:
+            notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('conversion_result', [self, roll_result, village])
+
+    def complete_conversion(self):
+        '''
+        Description:
+            Used when the player finishes rolling for religious conversion, showing the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes head missionary to a
+                veteran on critical success. If not successful, the missionaries consume their movement points and die on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = self.global_manager.get('conversion_result')[1]
+        if roll_result >= self.current_min_success: #if campaign succeeded
+            self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
+            if roll_result == 6 and not self.veteran:
+                self.promote()
+            self.select()
+            for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
+                if not current_image.current_cell == 'none':
+                    while not self == current_image.current_cell.contained_mobs[0]:
+                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        if roll_result <= self.current_max_crit_fail:
+            self.die()
+        self.global_manager.set('ongoing_conversion', False)
+        
+    def display_conversion_die(self, coordinates, result):
+        '''
+        Description:
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for religious conversion rolls
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+        Output:
+            None
+        '''
+        result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
 class expedition(group):
     '''
@@ -188,36 +684,54 @@ class expedition(group):
     '''
     def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            same as superclass
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this group's images can appear
+            string image_id: File path to the image used by this object
+            string name: this group's name
+            string list modes: Game modes during which this group's images can appear
+            worker worker: worker component of this group
+            officer officer: officer component of this group
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
+        self.current_exploration_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
 
     def display_exploration_die(self, coordinates, result):
         '''
+        Description:
+            Creates a die object with preset colors and possible roll outcomes and the inputted location and predetermined roll result to use for exploration rolls
         Input:
-            tuple of two int variables representing the pixel coordinates at which to display the die, int representing the final result that the die will roll
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
         Output:
-            Creates a die object at the inputted coordinates that will roll, eventually stopping displaying the inputted result with an outline depending on the outcome.
-            If multiple dice are present, only the die with the highest result will be outlined, showing that it was chosen.
+            None
         '''
-        result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 1}
+        result_outcome_dict = {'min_success': self.current_min_success, 'min_crit_success': 6, 'max_crit_fail': self.current_max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6, result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic'], 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
 
     def move(self, x_change, y_change):
         '''
+        Description:
+            Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. Also allows exploration when moving into unexplored areas. Attempting an exploration starts the
+                exploration process, which requires various dice rolls to succeed and can also result in the death of the expedition or the promotion of its explorer. A successful exploration uncovers the area and units to move into it
+                normally in the future
         Input:
-            Same as superclass
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
         Output:
-            Same as superclass when moving into explored areas.
-            When moving into explored areas, the expedition will attempt to explore there, showing a series of notifications and dice rolls.
-            An exploration will result in the death of the expedition, no change, exploring the area, or exploring the area and promoting to the expedition's officer to a veteran, depending on the dice roll's result.
-            Within the move function, an exploration's result will be determined. However, its outcome will not be shown until the last of the exploration notifications is shown, at which point the outcome is
-            shown through the complete_exploration function.
+            None
         '''
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('show_minimap_outlines', True)
@@ -239,9 +753,31 @@ class expedition(group):
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
-                choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost}
-                notification_tools.display_choice_notification('Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'none'], choice_info_dict,
-                    self.global_manager) #message, choices, choice_info_dict, global_manager
+                choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost, 'type': 'exploration'}
+                
+                self.current_exploration_modifier = 0
+                self.current_min_success = self.default_min_success
+                self.current_max_crit_fail = self.default_max_crit_fail
+                #determine modifier here
+                self.current_min_success -= self.current_exploration_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+                self.current_max_crit_fail -= self.current_exploration_modifier
+                message = ""
+
+                risk_value = -1 * self.current_exploration_modifier #modifier of -1 means risk value of 1
+                if self.veteran: #reduce risk if veteran
+                    risk_value -= 1
+
+                if risk_value < 0: #0/6 = no risk
+                    message = "RISK: LOW /n /n" + message  
+                elif risk_value == 0: #1/6 death = moderate risk
+                    message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+                elif risk_value == 1: #2/6 = high risk
+                    message = "RISK: HIGH /n /n" + message
+                elif risk_value > 1: #3/6 or higher = extremely high risk
+                    message = "RISK: DEADLY /n /n" + message
+                
+                notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attempt an exploration to the " + direction + "?", ['exploration', 'stop exploration'],
+                    choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 self.global_manager.set('ongoing_exploration', True)
                 for current_grid in self.grids:
                     coordinates = (0, 0)
@@ -256,6 +792,15 @@ class expedition(group):
             super().move(x_change, y_change)
 
     def start_exploration(self, x_change, y_change):
+        '''
+        Description:
+            Used when the player issues a move order into an unexplored area with an expedition, displays a choice notification that allows the player to explore or not. Choosing to explore starts the exploration process. This function
+                also determines the expedition's result, but the results are only shown to the player after a dice roll and the complete_exploration function
+        Input:
+            None
+        Output:
+            None
+        '''
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0
@@ -270,37 +815,46 @@ class expedition(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
+        
         self.just_promoted = False
         text = ""
         text += "The expedition heads towards the " + direction + ". /n /n"
         text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
         
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. 4+ required to succeed.", 'exploration', self.global_manager)
-        else:    
-            notification_tools.display_notification(text + "Click to roll. 4+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager)
+        else:
+            text += ("The veteran explorer can roll twice and pick the higher result /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
-            
-        #text += "/n"
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            text += ("The veteran explorer can roll twice and pick the higher result /n")
                 
-            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 500), first_roll_list[0])
                                 
-            second_roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 380), second_roll_list[0])
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
-            result_outcome_dict = {1: "CRITICAL FAILURE", 2: "FAILURE", 3: "FAILURE", 4: "SUCCESS", 5: "SUCCESS", 6: "CRITICAL SUCCESS"}
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i == 6:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Exploration roll", 4, 6, 1, self.global_manager)
+            roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, 6, self.current_max_crit_fail, self.global_manager)
             self.display_exploration_die((die_x, 440), roll_list[0])
                 
             text += roll_list[1]
@@ -309,21 +863,21 @@ class expedition(group):
         notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
             
         text += "/n"
-        if roll_result >= 4: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default
             if not future_cell.resource == 'none':
                 text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
             else:
                 text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
         else:
             text += "You were not able to explore the tile. /n"
-        if roll_result == 1:
+        if roll_result <= self.current_max_crit_fail:
             text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
 
         if (not self.veteran) and roll_result == 6:
             self.veteran = True
             self.just_promoted = True
-            text += "This explorer has become a veteran explorer. /n"
-        if roll_result >= 4:
+            text += "This explorer is now a veteran. /n"
+        if roll_result >= self.current_min_success:
             self.destination_cell = future_cell
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
         else:
@@ -332,10 +886,13 @@ class expedition(group):
 
     def complete_exploration(self): #roll_result, x_change, y_change
         '''
+        Description:
+            Used when the player finishes rolling for an exploration, showing the exploration's results and making any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
+                points, promotes its explorer to a veteran on critical success. If not successful, the expedition consumes its movement points and dies on critical failure
         Input:
-            none
+            None
         Output:
-            Shows the outcome of an exploration attempt, which was previously determined in the move function
+            None
         '''
         exploration_result = self.global_manager.get('exploration_result')
         roll_result = exploration_result[1]
@@ -343,7 +900,7 @@ class expedition(group):
         y_change = exploration_result[3]
         future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
         died = False
-        if roll_result >= 4:
+        if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
             if not future_cell.terrain == 'water':
                 super().move(x_change, y_change)
@@ -354,29 +911,24 @@ class expedition(group):
             self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
-        elif roll_result == 1:
+        elif roll_result == self.current_max_crit_fail:
             self.die()
             died = True
         copy_dice_list = self.global_manager.get('dice_list')
         for current_die in copy_dice_list:
             current_die.remove()
-        #copy_exploration_mark_list = self.global_manager.get('exploration_mark_list'): #exploration_mark_list
-        for current_exploration_mark in self.global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
-            current_exploration_mark.remove()
-        self.global_manager.set('exploration_mark_list', [])
-        self.exploration_mark_list = []
-        self.global_manager.set('ongoing_exploration', False)
+        actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
 def create_group(worker, officer, global_manager):
     '''
+    Description:
+        Creates a group out of the inputted worker and officer. The type of group formed depends on the officer's type. Upon joining a group, the component officer and worker will not be able to be seen or interacted with
+            independently until the group is disbanded
     Input:
-        worker object representing the worker that will join the group, officer object representing the officer that will join the group, global_manager_template object
+        worker worker: worker to create a group out of
+        officer officer: officer to create a group out of
     Output:
-        Causes the inputted officer to form a group with inputted worker.
-        The type of group formed will depend on the type of officer. An explorer officer will create an expedition, which is able to explore.
-        The formed group's inventory will be the combination of the inventories of the officer and the worker.
-        Upon joining a group, the worker and officer will be stored by the group and will not be able to be seen or selected.
-        Upon the disbanding of a group, its worker and officer will be restored and placed in the same tile as the group, with the officer being given the group's inventory.
+        None
     '''
     if officer.officer_type == 'explorer':
         new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
@@ -386,7 +938,7 @@ def create_group(worker, officer, global_manager):
         new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'merchant':
         new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'Caravan', officer.modes, worker, officer, global_manager)
-    elif officer.officer_type == 'missionary':
-        new_group = mission((officer.x, officer.y), officer.grids, 'mobs/missionary/mission.png', 'Mission', officer.modes, worker, officer, global_manager)
+    elif officer.officer_type == 'head missionary':
+        new_group = missionaries((officer.x, officer.y), officer.grids, 'mobs/head missionary/missionaries.png', 'Missionaries', officer.modes, worker, officer, global_manager)
     else:
         new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)

@@ -11,6 +11,20 @@ class building(actor):
     Actor that exists in cells of multiple grids in front of tiles and behind mobs that can not be clicked
     '''
     def __init__(self, coordinates, grids, image_id, name, building_type, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string building_type: Type of building, like 'port'
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.actor_type = 'building'
         self.building_type = building_type
         super().__init__(coordinates, grids, modes, global_manager)
@@ -29,6 +43,14 @@ class building(actor):
         self.is_port = False #used to determine if port is in a tile to move there
 
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also removes this building from the tiles it occupies
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = 'none'
             current_image.remove_from_cell()
@@ -37,6 +59,14 @@ class building(actor):
         self.global_manager.set('building_list', utility.remove_from_list(self.global_manager.get('building_list'), self))
 
     def update_tooltip(self): #should be shown below mob tooltips
+        '''
+        Description:
+            Sets this image's tooltip to what it should be whenever the player looks at the tooltip. For buildings, sets tooltip to a description of the building
+        Input:
+            None
+        Output:
+            None
+        '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
             tooltip_text.append("Worker capacity: " + str(len(self.contained_workers)) + '/' + str(self.worker_capacity))
@@ -62,10 +92,12 @@ class building(actor):
 
     def touching_mouse(self):
         '''
+        Description:
+            Returns whether any of this building's images is colliding with the mouse
         Input:
-            none
+            None
         Output:
-            Returns whether any of this building's images are colliding with the mouse
+            boolean: Returns True if any of this building's images is colliding with the mouse, otherwise returns False
         '''
         for current_image in self.images:
             if current_image.change_with_other_images: #don't show tooltips for road connection images, only the base road building images
@@ -75,7 +107,24 @@ class building(actor):
         return(False)
 
 class infrastructure_building(building):
+    '''
+    Building that eases movement between tiles and is a road or railroad. Has images that show connections with other tiles that have roads or railroads
+    '''
     def __init__(self, coordinates, grids, image_id, name, infrastructure_type, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string infrastructure_type: Type of infrastructure, 'road' or 'railroad'
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.infrastructure_type = infrastructure_type
         if self.infrastructure_type == 'railroad':
             self.is_road = False
@@ -110,30 +159,134 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
 
-class train_station(building):
+class trading_post(building):
+    '''
+    Building in a village that allows trade with the village
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, grids, image_id, name, 'trading_post', modes, global_manager)
+
+class mission(building):
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, grids, image_id, name, 'mission', modes, global_manager)
+
+class train_station(building):
+    '''
+    Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity
+    '''
+    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)
         for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 5
+            current_image.current_cell.tile.inventory_capacity += 9
 
 class port(building):
+    '''
+    Building adjacent to water that allows ships to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
+    '''
     def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
         for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 5
+            current_image.current_cell.tile.inventory_capacity += 9
 
 class resource_building(building):
+    '''
+    Building in a resource tile that allows workers to attach to this building to produce commodities over time
+    '''
     def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
+            grid list grids: grids in which this actor's images can appear
+            string image_id: File path to the image used by this object
+            string name: Name of this building
+            string resource_type: Type of resource produced by this building, like 'exotic wood'
+            string list modes: Game modes during which this building's images can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.resource_type = resource_type
         super().__init__(coordinates, grids, image_id, name, 'resource', modes, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.worker_capacity = 1 #improve with upgrades
+        for current_image in self.images:
+            current_image.current_cell.tile.inventory_capacity += 9
 
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, and removes it from the tiles it occupies
+        Input:
+            None
+        Output:
+            None
+        '''
         self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
         super().remove()
 
     def produce(self):
+        '''
+        Description:
+            Produces 1 commodity each turn for each worker working in this building
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_worker in self.contained_workers:
             self.images[0].current_cell.tile.change_inventory(self.resource_type, 1)
