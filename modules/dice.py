@@ -1,3 +1,5 @@
+#Contains functionality for dice icons
+
 import pygame
 import time
 import random

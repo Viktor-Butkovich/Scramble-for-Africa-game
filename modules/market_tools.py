@@ -1,3 +1,5 @@
+#Contains functions that manage market prices and sale of commodities
+
 import random
 from . import text_tools
 from . import utility

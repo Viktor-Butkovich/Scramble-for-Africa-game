@@ -1,3 +1,5 @@
+#Contains functionality for objects that manage notifications, variables, files, etc.
+
 import random
 import pygame
 

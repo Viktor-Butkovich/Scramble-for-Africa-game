@@ -1,3 +1,5 @@
+#Contains functions used when switching between parts of the game, like loading screen display
+
 import time
 from . import main_loop_tools
 from . import text_tools

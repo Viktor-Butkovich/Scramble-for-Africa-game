@@ -1,3 +1,5 @@
+#Contains functionality for choice notifications
+
 import pygame
 from .buttons import button
 from .notifications import notification

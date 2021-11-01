@@ -1,3 +1,5 @@
+#Contains functionality for icons that follow the mouse pointer
+
 import pygame
 
 from .images import free_image

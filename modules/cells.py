@@ -1,3 +1,5 @@
+#Contains functionality for grid cells
+
 import pygame
 
 class cell():

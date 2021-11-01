@@ -1,3 +1,5 @@
+#Contains functionality for villages
+
 import random
 
 from . import village_name_generator
@@ -39,15 +41,26 @@ class village():
     def set_initial_aggressiveness(self):
         '''
         Description:
-            Sets this village's population to its aggressiveness, changed up, down, or not at all 9 times. Can not be less than 1 or greater than 9
+            Sets this village's population to its aggressiveness changed randomly. Change based on 9 rolls of D6, decrease on 1-2, increase on 5-6, roll again on 1 or 6
         Input:
             None
         Output:
             None
         '''
         self.aggressiveness = self.population
-        for i in range(1, 10): #9 iterations
-            self.aggressiveness += random.randrange(-1, 2) #-1, 0, or 1
+        remaining_rolls = 9
+        while remaining_rolls > 0:
+            remaining_rolls -= 1
+            roll = random.randrange(1, 7)
+            if roll <= 2: #1-2
+                self.aggressiveness -= 1
+                if roll == 1:
+                    remaining_rolls += 1
+            #3-4 does nothing
+            elif roll >= 5: #5-6
+                self.aggressiveness += 1
+                if roll == 6:
+                    remaining_rolls += 1
             if self.aggressiveness < 1:
                 self.aggressiveness = 1
             elif self.aggressiveness > 9:

@@ -1,3 +1,5 @@
+#Contains functions used in the game's main loop and event management
+
 import pygame
 import time
 from . import scaling

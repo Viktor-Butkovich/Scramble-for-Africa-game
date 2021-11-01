@@ -1,3 +1,5 @@
+#Contains functionality for buttons relating to the European headquarters screen
+
 from .buttons import button
 from .game_transitions import set_game_mode
 from . import main_loop_tools

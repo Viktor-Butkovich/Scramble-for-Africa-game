@@ -1,3 +1,5 @@
+#Contains functions that manage what happens at the end of each turn, like worker upkeep and price changes
+
 import random
 
 from . import text_tools

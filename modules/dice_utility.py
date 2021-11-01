@@ -1,3 +1,5 @@
+#Contains functions that control the results and messages of dice rolls
+
 import random
 from . import text_tools
 

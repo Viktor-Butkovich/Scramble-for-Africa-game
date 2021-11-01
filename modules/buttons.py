@@ -1,3 +1,5 @@
+#Contains functionality for buttons
+
 import pygame
 import time
 from . import images

@@ -1,3 +1,5 @@
+#Contains functionality for tiles and other cell icons
+
 import pygame
 from . import images
 from . import utility

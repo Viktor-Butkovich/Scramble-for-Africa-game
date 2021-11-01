@@ -1,3 +1,5 @@
+#Contains miscellaneous functions, like removing an item from a list or finding the distance between 2 points
+
 def find_object_distance(first, second):
     '''
     Description:

@@ -1,3 +1,5 @@
+#Contains functionality for buildings
+
 import pygame
 from .actors import actor
 from .buttons import button

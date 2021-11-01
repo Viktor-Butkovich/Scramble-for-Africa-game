@@ -1,3 +1,5 @@
+#Contains functionality for mobs
+
 import pygame
 import time
 from . import images

@@ -1,3 +1,5 @@
+#Contains functionality for officer units
+
 from .mobs import mob
 from .tiles import veteran_icon
 from . import workers

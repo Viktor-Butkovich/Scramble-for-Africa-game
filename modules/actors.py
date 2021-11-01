@@ -1,3 +1,5 @@
+#Contains functionality for actors
+
 import pygame
 from . import text_tools
 from . import utility

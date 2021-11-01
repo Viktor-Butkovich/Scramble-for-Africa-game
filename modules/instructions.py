@@ -1,3 +1,5 @@
+#Contains functionality for instructions pages
+
 from .labels import label
 from .buttons import button
 from . import scaling

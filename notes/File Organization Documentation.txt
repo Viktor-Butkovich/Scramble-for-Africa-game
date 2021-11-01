@@ -19,18 +19,19 @@ SFA folder
 
     notes folder
 	File Organization Documentation.txt
+	Required Documentation Updates.txt
 
     __init__.py
 
     Scramble_for_Africa.py
-        imports pygame, time, random, scaling, main_loop, notification_tools, images, buttons, game_transitions, grids, data_managers, actor_utility, groups, europe_transactions, labels, actor_match_tools, instructions, 
+        imports pygame, time, random, scaling, main_loop, notification_tools, images, buttons, game_transitions, grids, data_managers, actor_utility, groups, europe_transactions, labels, actor_display_tools, instructions, 
 	    turn_management_tools, vehicles, buildings, mouse_followers
         
     modules folder
 
 	workers.py
 	    imports mobs, actor_utility, utility
-	    class worker(mob)
+	    class worker(mobs.mob)
 		class church_volunteers
 
 	villages.py
@@ -46,7 +47,7 @@ SFA folder
 
 	vehicles.py
 	    imports text_tools, utility, actor_utility, main_loop_tools, mobs, buttons
-	    class vehicle(mob)
+	    class vehicle(mobs.mob)
 		class train
 		class ship
 
@@ -68,7 +69,7 @@ SFA folder
 
         tiles.py
             imports pygame, images, utility, actor_utility, villages, actors
-            class tile(actor)
+            class tile(actors.actor)
                 class abstract_tile
 		class resource_icon
                 class veteran_icon
@@ -92,12 +93,12 @@ SFA folder
 
 	officers.py
 	    imports mobs, tiles, workers, actor_utility, utility, notification_tools, text_tools, dice_utility, dice, scaling
-	    class officer(mob)
+	    class officer(mobs.mob)
 		class head_missionary
 
         notifications.py
             imports labels, text_tools, utility, scaling
-            class notification(label)
+            class notification(labels.label)
 
         notification_tools.py
             def display_notification
@@ -106,11 +107,11 @@ SFA folder
 
 	mouse_followers.py
 	    imports pygame, images
-	    class mouse_follower(free_image)
+	    class mouse_follower(images.free_image)
 
         mobs.py
             imports pygame, time, images, text_tools, utility, actor_utility, actors
-            class mob(actor)
+            class mob(actors.actor)
 
 	market_tools.py
 	    imports random, text_tools, utility
@@ -135,15 +136,15 @@ SFA folder
 
         labels.py
             imports pygame, buttons, scaling, text_tools, utility
-            class label(button)
+            class label(buttons.button)
 		class value_label
 		class money_label
 		class commodity_prices_label
 
         instructions.py
             imports labels, buttons, scaling, text_tools
-	    class instructions_button(button)
-	    class instructions_page(label)
+	    class instructions_button(buttons.button)
+	    class instructions_page(labels.label)
             def display_instructions_page
 
         images.py
@@ -160,7 +161,7 @@ SFA folder
 
         groups.py
             imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
-            class group(mob)
+            class group(mobs.mob)
 		class porters
 		class construction_gang
 		class caravan
@@ -182,9 +183,9 @@ SFA folder
 
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, utility
-            class european_hq_button(button)
-            class recruitment_button(button)
-	    class buy_commodity_button(button)
+            class european_hq_button(buttons.button)
+            class recruitment_button(buttons.button)
+	    class buy_commodity_button(buttons.button)
 
         drawing_tools.py
             imports pygame
@@ -216,8 +217,8 @@ SFA folder
 
 	choice_notifications.py
 	    imports pygame, buttons, notifications, mobs, vehicles, text_tools, scaling, workers, officers
-	    class choice_notification(notification)
-	    class choice_button(button)
+	    class choice_notification(notifications.notification)
+	    class choice_button(buttons.button)
 		class recruitment_choice_button
 
         cells.py
@@ -232,7 +233,7 @@ SFA folder
 
 	buildings.py
 	    imports pygame, actors, buttons, utility, images, actor_utility, text_tools
-	    class building(actor)
+	    class building(actors.actor)
 		class infrastructure_building
 		class trading_post
 		class mission
@@ -255,40 +256,47 @@ SFA folder
             def calibrate_actor_info_display
 	    def order_actor_info_display
 
-        actor_match_tools.py
-            imports pygame, images, labels, buttons, buildings, main_loop_tools, scaling, actor_utility, text_tools, groups, vehicles
-            class actor_match_free_image(free_image)
-		class actor_match_infrastructure_connection_image
-		class actor_match_background_image
-            class label_image(free_image)
-            class actor_match_label(label)
-		class list_item_label
-		class building_workers_label
-		class native_info_label
-	        class commodity_match_label
-	    class label_button(button)
-		class worker_crew_vehicle_button
-		class pick_up_all_passengers_button
-		class crew_vehicle_button
-		class uncrew_vehicle_button
-		class merge_button
-		class split_button
-		class remove_worker_button
-		class disembark_vehicle_button
-		class embark_vehicle_button
-		class cycle_passengers_button
-		class worker_to_building_button
-		class trade_button
-		class convert_button
-		class religious_campaign_button
-		class switch_theatre_button
-		class build_train_button
-		class construction_button
+	actor_display_tools folder
+	    labels.py
+		imports pygame, modules.labels, buttons, images
+		class actor_display_label(modules.labels.label)
+		    class list_item_label
+		    class building_workers_label
+		    class native_info_label
+		    class commodity_display_label
+
+	    images.py
+		imports modules.images
+		class actor_display_free_image(modules.images.free_image)
+		    class actor_display_infrastructure_connection_image
+		    class actor_display_background_image
+		class label_image(modules.images.free_image)
+
+	    buttons.py
+		imports modules.buttons, modules.buildings, modules.main_loop_tools, modules.actor_tuility, modules.text_tools, modules.groups, modules.vehicles
+	        class label_button(modules.buttons.button)
+		    class worker_crew_vehicle_button
+		    class pick_up_all_passengers_button
+		    class crew_vehicle_button
+		    class uncrew_vehicle_button
+		    class merge_button
+		    class split_button
+		    class remove_worker_button
+		    class disembark_vehicle_button
+		    class embark_vehicle_button
+		    class cycle_passengers_button
+		    class worker_to_building_button
+		    class trade_button
+		    class convert_button
+		    class religious_campaign_button
+		    class switch_theatre_button
+		    class build_train_button
+		    class construction_button
 
 	action_notifications.py
 	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility, workers
-	    class dice_rolling_notification(notification)
-	    class exploration_notification(notification)
-	    class trade_notification_notification)
-	    class religious_campaign_notification(notification)
-    	    class conversion_notification(notification)
+	    class dice_rolling_notification(notifications.notification)
+	    class exploration_notification(notifications.notification)
+	    class trade_notification_notification(notifications.notification)
+	    class religious_campaign_notification(notifications.notification)
+    	    class conversion_notification(notifications.notification)

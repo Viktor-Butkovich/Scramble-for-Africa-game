@@ -1,3 +1,5 @@
+#Contains miscellaneous functions relating to actor functionality
+
 import random
 
 from . import scaling

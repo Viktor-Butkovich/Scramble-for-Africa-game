@@ -1,3 +1,5 @@
+#Contains functions that control the display of new notifications
+
 def display_notification(message, notification_type, global_manager): #default, exploration, or roll
     '''
     Description:

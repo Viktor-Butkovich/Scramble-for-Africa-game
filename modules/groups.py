@@ -1,3 +1,5 @@
+#Contains functionality for group units
+
 import time
 import random
 import math
