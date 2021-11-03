@@ -1330,29 +1330,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         Output:
             None
         '''
-        self.attached_mob.set_movement_points(0)
-        if not self.attached_mob.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
-            self.attached_mob.images[0].current_cell.contained_buildings[self.building_type].remove()
+        building_info_dict = {}
+        building_info_dict['building_type'] = self.building_type
+        building_info_dict['building_name'] = self.building_name
         if self.building_type == 'resource':
-            new_building = buildings.resource_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, self.attached_resource,
-                ['strategic'], self.global_manager)
-        elif self.building_type == 'port':
-            new_building = buildings.port((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, ['strategic'], self.global_manager)
-        elif self.building_type == 'train_station':
-            new_building = buildings.train_station((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/train_station.png', self.building_name, ['strategic'], self.global_manager)
-        elif self.building_type == 'infrastructure':
-            building_image_id = 'none'
-            if self.building_name == 'road':
-                building_image_id = 'buildings/infrastructure/road.png'
-            elif self.building_name == 'railroad':
-                building_image_id = 'buildings/infrastructure/railroad.png'
-            new_building = buildings.infrastructure_building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, building_image_id, self.building_name, self.building_name,
-                ['strategic'], self.global_manager) #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
-        elif self.building_type == 'trading_post':
-            new_building = buildings.trading_post((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
-        elif self.building_type == 'mission':
-            new_building = buildings.mission((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/mission.png', self.building_name, ['strategic'], self.global_manager)
-        else:
-            new_building = buildings.building((self.attached_mob.x, self.attached_mob.y), self.attached_mob.grids, 'buildings/port.png', self.building_name, self.building_type,
-                ['strategic'], self.global_manager)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_mob.images[0].current_cell.tile)
+            building_info_dict['attached_resource'] = self.attached_resource
+        self.attached_mob.start_construction(building_info_dict)
