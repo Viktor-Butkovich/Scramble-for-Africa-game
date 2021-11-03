@@ -172,8 +172,6 @@ global_manager.set('tile_ordered_label_list', [])
 global_manager.set('displayed_tile', 'none')
 global_manager.set('dice_list', [])
 global_manager.set('end_turn_selected_mob', 'none')
-#global_manager.set('notification_queue', [])
-#global_manager.set('notification_type_queue', [])
 pygame.key.set_repeat(300, 200)
 global_manager.set('crashed', False)
 global_manager.set('lmb_down', False)
@@ -185,12 +183,6 @@ global_manager.set('show_grid_lines', True)
 global_manager.set('show_text_box', True)
 global_manager.set('show_selection_outlines', True)
 global_manager.set('show_minimap_outlines', True)
-#global_manager.set('mouse_origin_x', 0)
-#global_manager.set('mouse_origin_y', 0)
-#global_manager.set('mouse_destination_x', 0)
-#mouse_destination_y = 0
-#global_manager.set('mouse_destination_y', 0)
-#global_manager.set('making_mouse_box', False)
 global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
@@ -200,6 +192,7 @@ global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
 global_manager.set('ongoing_conversion', False)
+global_manager.set('ongoing_construction', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')
@@ -210,7 +203,6 @@ global_manager.set('ctrl', 'up')
 global_manager.set('start_time', time.time())
 global_manager.set('current_time', time.time())
 global_manager.set('last_selection_outline_switch', time.time())
-#global_manager.set('last_minimap_outline_switch', time.time())
 mouse_moved_time = time.time()
 global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
@@ -271,7 +263,7 @@ europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x -
 
 end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic'], 'misc/end_turn_button.png', global_manager)
 
-button_start_x = 500#600#x position of leftmost button
+button_start_x = 500#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
@@ -293,9 +285,6 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
     'expand text box', pygame.K_j, ['strategic', 'europe'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
-
-#toggle_grid_lines_button = button.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager),
-#    scaling.scale_height(50, global_manager), 'blue', 'cycle units', pygame.K_g, ['strategic'], 'misc/cycle_units_button.png', global_manager)
 
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
@@ -394,7 +383,6 @@ tile_free_infrastructure_image = actor_display_images.actor_display_free_image(s
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_middle', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_image)
 
-#make actor_display_free_image subclass that requires a direction parameter
 #tile infrastructure connection up image
 tile_free_infrastructure_up_image = actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'up', global_manager) #coordinates, width, height, modes, global_manager
@@ -471,7 +459,7 @@ global_manager.get('tile_info_display_list').append(native_population_label) #at
 native_available_workers_label = actor_display_labels.native_info_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'native available workers', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(native_available_workers_label)
-    #elif i == 1: #aggressiveness, at same level as second curent worker label
+
 native_aggressiveness_label = actor_display_labels.native_info_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'native aggressiveness', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(native_aggressiveness_label)
@@ -515,14 +503,9 @@ for recruitment_index in range(len(global_manager.get('recruitment_types'))):
 new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
     scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#self, coordinates, width, height, color, commodity_type, modes, global_manager
 
-#new_ship = vehicles.ship((0, 0), [global_manager.get('europe_grid')], 'mobs/ship/default.png', 'ship', ['strategic', 'europe'], global_manager) #coordinates, grids, image_id, name, modes, global_manager
-
 global_manager.get('minimap_grid').calibrate(2, 2)
-#actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
 
 turn_management_tools.start_turn(global_manager, True)
-
-#test_building = buildings.building((0, 0), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'misc/default_button.png', 'building',  ['strategic'], global_manager) #coordinates, grids, image_id, name, modes, global_manager
 
 main_loop.main_loop(global_manager)
 pygame.quit()

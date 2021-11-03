@@ -640,6 +640,10 @@ class button():
                 head_missionary = self.notification.choice_info_dict['head missionary']
                 head_missionary.convert()
 
+            elif self.button_type == 'start construction':
+                constructor = self.notification.choice_info_dict['constructor']
+                constructor.construct()
+
             elif self.button_type == 'trade':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
@@ -652,6 +656,9 @@ class button():
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
+
+            elif self.button_type == 'stop construction':
+                self.global_manager.set('ongoing_construction', False)
                 
     def on_rmb_release(self):
         '''
@@ -698,6 +705,7 @@ class button():
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             return(True)
+        return(False)
 
 class cycle_same_tile_button(button):
     '''

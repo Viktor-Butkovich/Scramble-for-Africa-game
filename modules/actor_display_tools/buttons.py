@@ -1,7 +1,6 @@
 #Contains functionality for actor display buttons
 
 from ..buttons import button
-from .. import buildings
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
@@ -1115,8 +1114,8 @@ class build_train_button(label_button):
                     if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                         if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                             if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
-                                new_train = vehicles.train((self.attached_label.actor.x, self.attached_label.actor.y), self.attached_label.actor.grids, image_dict, 'train', ['strategic'], 'none', self.global_manager)
+                                #image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
+                                self.construct() #new_train = vehicles.train((self.attached_label.actor.x, self.attached_label.actor.y), self.attached_label.actor.grids, image_dict, 'train', ['strategic'], 'none', self.global_manager)
                             else:
                                 text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
                         else:
@@ -1126,6 +1125,12 @@ class build_train_button(label_button):
             else:
                 text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
                 text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+
+    def construct(self):
+        building_info_dict = {}
+        building_info_dict['building_type'] = 'train'
+        building_info_dict['building_name'] = 'train'
+        self.attached_label.actor.start_construction(building_info_dict)
 
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
