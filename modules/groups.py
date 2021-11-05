@@ -178,6 +178,10 @@ class group(mob):
     def start_construction(self, building_info_dict):
         self.building_type = building_info_dict['building_type']
         self.building_name = building_info_dict['building_name']
+        if self.building_type == 'resource':
+            self.attached_resource = building_info_dict['attached_resource']
+        else:
+            self.attached_resource = ''
         
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
@@ -190,7 +194,9 @@ class group(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
-        message = "Are you sure you want to start constructing a ? /n /nIf successful, something will be built placeholder" #change to match each building
+        message = "Are you sure you want to start constructing a ? /n /n"
+        message += "This attempt will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
+        message += "If successful, something will be built placeholder" #change to match each building
             
         notification_tools.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -198,6 +204,7 @@ class group(mob):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type])
         text = ""
         text += "The " + self.name + " attempts to construct a " + self.building_name + " placeholder. /n /n"
         if not self.veteran:    
@@ -267,8 +274,8 @@ class group(mob):
                 if not self.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
                     self.images[0].current_cell.contained_buildings[self.building_type].remove()
             if self.building_type == 'resource':
-                attached_resource = building_info_dict['attached_resource']
-                new_building = buildings.resource_building((self.x, self.y), self.grids, self.global_manager.get('resource_building_dict')[attached_resource], self.building_name, attached_resource, ['strategic'], self.global_manager)
+                new_building = buildings.resource_building((self.x, self.y), self.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, self.attached_resource, ['strategic'],
+                    self.global_manager)
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'
                 if self.building_name == 'road':

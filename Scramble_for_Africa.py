@@ -92,6 +92,20 @@ for current_commodity in global_manager.get('commodity_types'):
     else:
         global_manager.get('commodity_prices')[current_commodity] = 2
 
+#building type: price
+global_manager.set('building_prices',
+    {
+    'resource': 2,
+    'infrastructure': 1,
+    'port': 3,
+    'train_station': 2,
+    'trading_post': 1,
+    'mission': 1,
+    'train': 1
+    }
+)
+
+
 global_manager.set('resource_building_dict',
     {
     'coffee': 'buildings/plantation.png',
