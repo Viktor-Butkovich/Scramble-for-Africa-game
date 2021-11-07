@@ -26,6 +26,7 @@ class village():
         self.cell = cell
         self.name = village_name_generator.create_village_name()
         self.global_manager = global_manager
+        self.global_manager.get('village_list').append(self)
 
     def set_initial_population(self):
         '''
@@ -113,6 +114,23 @@ class village():
             return(0)
         else: #7 - 9
             return(-1)
+
+    def change_population(self, change):
+        '''
+        Description:
+            Changes this village's population by the inputted amount. Prevents the value from exiting the allowed range of 1-9 and updates the tile info display as applicable
+        Input:
+            int change: amount this village's population is changed by
+        Output:
+            None
+        '''
+        self.population += change
+        if self.population > 9:
+            self.population = 9
+        elif self.population < 1:
+            self.population = 1
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''

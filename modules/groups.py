@@ -258,7 +258,7 @@ class group(mob):
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager)
         else:
-            text += ("The " + self.officer.name + " can roll twice and pick the higher result /n /n")
+            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
@@ -523,7 +523,7 @@ class caravan(group):
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to convince the villagers to trade. /n /n")
         if self.veteran:
-            text += ("The veteran merchant can roll twice and pick the higher result /n /n")
+            text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
         else:
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
@@ -577,11 +577,17 @@ class caravan(group):
             text += "The merchant has " + str(self.get_inventory('consumer goods')) + " consumer goods to sell. /n /n"
             text += "Do you want to start trading consumer goods for items that may or may not be valuable?"
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-        elif roll_result <= self.current_max_crit_fail:
-            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n /nEveryone in the caravan " +
-                "has died. /n /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
         else:
-            notification_tools.display_notification(text + "/nThe villagers are not willing to trade. /n /nClick to close this notification. ", 'stop_trade', self.global_manager)
+            text += "/nThe villagers are not willing to trade. /n"
+            if roll_result <= self.current_max_crit_fail:
+                text += " /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n"
+                text += " /nEveryone in the caravan has died "
+                if not village.cell.contained_buildings['trading_post'] == 'none':
+                    text += "and the trading post has been destroyed"
+                text += ". /n"
+                notification_tools.display_notification(text + " /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
+            else:
+                notification_tools.display_notification(text + " /nClick to close this notification. ", 'stop_trade', self.global_manager)
 
     def trade(self, notification):
         '''
@@ -607,7 +613,7 @@ class caravan(group):
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
         if self.veteran:
-            text += ("The veteran merchant can roll twice and pick the higher result /n /n")
+            text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
         else:
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
@@ -777,7 +783,7 @@ class missionaries(group):
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager)
         else:
-            text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
+            text += ("The veteran head missionary can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
@@ -818,16 +824,19 @@ class missionaries(group):
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
             text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + ". /n /n"
         else:
-            text += "The missionaries failed to make significant progress in converting the natives. /n /n"
+            text += "The missionaries made little progress in converting the natives. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died. /n" 
+            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died "
+            if not village.cell.contained_buildings['mission'] == 'none':
+                text += "and the mission building has been destroyed."
+            text += ". /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "The head missionary has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n /n"
-            text += "The head missionary is now a veteran and will be more successful in future ventures. /n /n"
+            text += " /nThe head missionary has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
+            text += " /nThe head missionary is now a veteran and will be more successful in future ventures. /n"
         if roll_result >= self.current_min_success:
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_conversion', self.global_manager)
+            notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('conversion_result', [self, roll_result, village])
@@ -843,12 +852,15 @@ class missionaries(group):
             None
         '''
         roll_result = self.global_manager.get('conversion_result')[1]
+        village = self.global_manager.get('conversion_result')[2]
         if roll_result >= self.current_min_success: #if campaign succeeded
-            self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
+            village.change_aggressiveness(-1)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         if roll_result <= self.current_max_crit_fail:
             self.die()
+            if not village.cell.contained_buildings['mission'] == 'none':
+                village.cell.contained_buildings['mission'].remove()
         self.global_manager.set('ongoing_conversion', False)
 
 class expedition(group):
@@ -982,7 +994,7 @@ class expedition(group):
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager)
         else:
-            text += ("The veteran explorer can roll twice and pick the higher result /n /n")
+            text += ("The veteran explorer can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)

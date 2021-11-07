@@ -53,12 +53,20 @@ class building(actor):
         Output:
             None
         '''
+        tiles = []
         for current_image in self.images:
+            if not current_image.current_cell == 'none':
+                tiles.append(current_image.current_cell.tile)
             current_image.current_cell.contained_buildings[self.building_type] = 'none'
             current_image.remove_from_cell()
             current_image.remove()
         super().remove()
         self.global_manager.set('building_list', utility.remove_from_list(self.global_manager.get('building_list'), self))
+        for current_tile in tiles:
+            current_tile.update_resource_icon()
+        if self.global_manager.get('displayed_tile') in tiles: #if currently displayed, update tile to show building removal
+            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), tiles[0])
 
     def update_tooltip(self): #should be shown below mob tooltips
         '''

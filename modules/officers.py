@@ -233,7 +233,7 @@ class head_missionary(officer):
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
         else:
-            text += ("The veteran head missionary can roll twice and pick the higher result /n /n")
+            text += ("The veteran head missionary can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)

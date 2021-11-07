@@ -167,6 +167,7 @@ global_manager.set('background_image_list', [])
 global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
+global_manager.set('village_list', [])
 global_manager.set('building_list', [])
 global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
@@ -277,7 +278,7 @@ europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x -
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue', pygame.K_ESCAPE, False,
     ['europe'], 'misc/exit_european_hq_button.png', global_manager)
 
-end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic'], 'misc/end_turn_button.png', global_manager)
+end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'], 'misc/end_turn_button.png', global_manager)
 
 button_start_x = 500#x position of leftmost button
 button_separation = 60#x separation between each button

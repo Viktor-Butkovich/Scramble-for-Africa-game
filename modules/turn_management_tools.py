@@ -47,6 +47,19 @@ def start_turn(global_manager, first_turn):
         current_mob.reset_movement_points()
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
+    for current_village in global_manager.get('village_list'):
+        roll = random.randrange(1, 7)
+        if roll <= 2: #1-2
+            current_village.change_aggressiveness(-1)
+        #3-4 does nothing
+        elif roll >= 5: #5-6
+            current_village.change_aggressiveness(1)
+
+        roll = random.randrange(1, 7)
+        second_roll = random.randrange(1, 7)
+        if roll == 6 and second_roll == 6:
+            current_village.change_population(1)
+            
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
     if not end_turn_selected_mob == 'none':
         end_turn_selected_mob.select()
