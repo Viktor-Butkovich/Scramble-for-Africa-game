@@ -229,6 +229,8 @@ class button():
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
+        elif self.button_type == 'new game':
+            self.set_tooltip(["Starts a new game"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -624,6 +626,9 @@ class button():
                         cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
                     else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
                         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
+
+            elif self.button_type == 'new game':
+                self.global_manager.get('save_load_manager').new_game()
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
