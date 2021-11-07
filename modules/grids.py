@@ -1,3 +1,5 @@
+#Contains functionality for grids
+
 import random
 import pygame
 from . import cells

@@ -1,3 +1,5 @@
+#Contains functionality for tiles and other cell icons
+
 import pygame
 from . import images
 from . import utility
@@ -420,7 +422,7 @@ class resource_icon(tile):
                 self.image_dict['small'] = 'scenery/resources/small/natives3.png'
                 self.image_dict['large'] = 'scenery/resources/natives3.png'
         building_present = False
-        for building_type in ['port', 'resource', 'infrastructure', 'trading_post']:
+        for building_type in self.global_manager.get('building_types'):
             if not self.attached_tile.cell.contained_buildings[building_type] == 'none': #if any building present
                 self.image.set_image('small')
                 self.image_dict['default'] = self.image_dict['small']

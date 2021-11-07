@@ -1,3 +1,5 @@
+#Contains functionality for mobs
+
 import pygame
 import time
 from . import images
@@ -289,7 +291,7 @@ class mob(actor):
         Output:
             None
         '''
-        self.set_tooltip(["Name: " + self.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
+        self.set_tooltip(["Name: " + self.name.capitalize(), "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
         
 
     def remove(self):

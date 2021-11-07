@@ -1,3 +1,5 @@
+#Contains functions used in the game's main loop and event management
+
 import pygame
 import time
 from . import scaling
@@ -157,6 +159,8 @@ def action_possible(global_manager):
     elif global_manager.get('ongoing_religious_campaign'):
         return(False)
     elif global_manager.get('ongoing_conversion'):
+        return(False)
+    elif global_manager.get('ongoing_construction'):
         return(False)
     elif global_manager.get('making_choice'):
         return(False)

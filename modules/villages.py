@@ -1,3 +1,5 @@
+#Contains functionality for villages
+
 import random
 
 from . import village_name_generator
@@ -24,6 +26,7 @@ class village():
         self.cell = cell
         self.name = village_name_generator.create_village_name()
         self.global_manager = global_manager
+        self.global_manager.get('village_list').append(self)
 
     def set_initial_population(self):
         '''
@@ -39,15 +42,26 @@ class village():
     def set_initial_aggressiveness(self):
         '''
         Description:
-            Sets this village's population to its aggressiveness, changed up, down, or not at all 9 times. Can not be less than 1 or greater than 9
+            Sets this village's population to its aggressiveness changed randomly. Change based on 9 rolls of D6, decrease on 1-2, increase on 5-6, roll again on 1 or 6
         Input:
             None
         Output:
             None
         '''
         self.aggressiveness = self.population
-        for i in range(1, 10): #9 iterations
-            self.aggressiveness += random.randrange(-1, 2) #-1, 0, or 1
+        remaining_rolls = 9
+        while remaining_rolls > 0:
+            remaining_rolls -= 1
+            roll = random.randrange(1, 7)
+            if roll <= 2: #1-2
+                self.aggressiveness -= 1
+                if roll == 1:
+                    remaining_rolls += 1
+            #3-4 does nothing
+            elif roll >= 5: #5-6
+                self.aggressiveness += 1
+                if roll == 6:
+                    remaining_rolls += 1
             if self.aggressiveness < 1:
                 self.aggressiveness = 1
             elif self.aggressiveness > 9:
@@ -100,6 +114,23 @@ class village():
             return(0)
         else: #7 - 9
             return(-1)
+
+    def change_population(self, change):
+        '''
+        Description:
+            Changes this village's population by the inputted amount. Prevents the value from exiting the allowed range of 1-9 and updates the tile info display as applicable
+        Input:
+            int change: amount this village's population is changed by
+        Output:
+            None
+        '''
+        self.population += change
+        if self.population > 9:
+            self.population = 9
+        elif self.population < 1:
+            self.population = 1
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''

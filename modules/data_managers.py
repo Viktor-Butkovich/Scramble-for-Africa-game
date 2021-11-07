@@ -1,3 +1,5 @@
+#Contains functionality for objects that manage notifications, variables, files, etc.
+
 import random
 import pygame
 
@@ -392,6 +394,14 @@ class notification_manager_template():
             
         elif notification_type == 'final_conversion':
             new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+
+        elif notification_type == 'construction':
+            new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+            
+        elif notification_type == 'final_construction':
+            new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
             
         elif notification_type == 'choice':

@@ -1,3 +1,5 @@
+#Contains functions that manage the text box and other miscellaneous text display utility
+
 import pygame
 
 def message_width(message, fontsize, font_name):

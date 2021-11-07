@@ -1,3 +1,5 @@
+#Contains functionality for worker units
+
 from .mobs import mob
 from . import actor_utility
 from . import utility

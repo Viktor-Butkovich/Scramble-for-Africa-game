@@ -1,3 +1,5 @@
+#Contains functionality for labels
+
 import pygame
 from .buttons import button
 from . import scaling

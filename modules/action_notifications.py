@@ -1,3 +1,5 @@
+#Contains functionality for multi-step notifications
+
 from .labels import label
 from .images import free_image
 from .notifications import notification
@@ -247,7 +249,9 @@ class trade_notification(notification):
             current_image.remove()
         if self.dies:
             caravan = self.trade_result[0]
-            caravan.die()
+            if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
+                caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
+            caravan.die() 
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
@@ -391,3 +395,53 @@ class conversion_notification(notification):
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
                 current_image.remove()
+
+class construction_notification(notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            current_constructor = actor_utility.get_selected_list(global_manager)[0]
+            self.notification_images = []
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
+        Input:
+            none
+        Output:
+            None
+        '''
+        super().format_message()
+        self.message.pop(-1)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            self.global_manager.get('construction_result')[0].complete_construction()
+            
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])

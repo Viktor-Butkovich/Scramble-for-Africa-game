@@ -1,3 +1,5 @@
+#Contains functionality for choice notifications
+
 import pygame
 from .buttons import button
 from .notifications import notification
@@ -30,8 +32,6 @@ class choice_notification(notification):
             None
         '''
         button_height = scaling.scale_height(50, global_manager)
-        #coordinates = (coordinates[0], coordinates[1]  button_height)#coordinates[1] += button_height #raises notification and reduces its height to make room for choice buttons, causing the notification and its buttons to take up the inputted area together
-        #minimum_height -= button_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.choice_buttons = []
         self.choice_info_dict = choice_info_dict
@@ -133,35 +133,21 @@ class choice_button(button):
         elif button_type == 'stop exploration':
             self.message = 'Do nothing'
             
-        elif button_type == 'start trading':
-            self.message = 'Start trading'
-            
-        elif button_type == 'trade':
-            self.message = 'Trade'
-            
         elif button_type == 'start religious campaign':
             self.message = 'Start campaign'
 
         elif button_type == 'start converting':
             self.message = 'Convert'
             
-        elif button_type == 'stop trading':
-            self.message = 'Stop trading'
-            
         elif button_type == 'stop religious campaign':
             self.message = 'Stop campaign'
-
-        elif button_type == 'stop converting':
-            self.message = 'Stop converting'
-            
-        elif button_type == 'end turn':
-            self.message = 'End turn'
             
         elif button_type == 'none':
             self.message = 'Do nothing'
-            
+    
         else:
-            self.message = button_type
+            self.message = button_type.capitalize() #stop trading -> Stop trading
+            
         super().__init__(coordinates, width, height, 'blue', button_type, 'none', modes, image_id, global_manager)
         self.font_size = scaling.scale_width(25, global_manager)
         self.font_name = self.global_manager.get('font_name')#"Times New Roman"
@@ -226,19 +212,8 @@ class choice_button(button):
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
             
-            
-        elif self.button_type == 'stop trading':
-            self.set_tooltip(['Stop trading'])
-
-        elif self.button_type == 'stop religious campaign':
-            self.set_tooltip(['Stop religious campaign'])
-            
-        elif self.button_type == 'stop converting':
-            self.set_tooltip(['Stop converting'])
-            
-            
         else:
-            self.set_tooltip(['Do nothing'])
+            self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']
 
 class recruitment_choice_button(choice_button):
     '''
@@ -276,9 +251,9 @@ class recruitment_choice_button(choice_button):
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
                 if self.recruitment_type == 'head missionary':
-                    new_officer = officers.head_missionary((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.global_manager)
+                    new_officer = officers.head_missionary((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.global_manager)
                 else:
-                    new_officer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.recruitment_type, self.global_manager)
+                    new_officer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.recruitment_type, self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':

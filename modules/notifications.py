@@ -1,3 +1,5 @@
+#Contains functionality for notifications
+
 from .labels import label
 from . import text_tools
 from . import utility

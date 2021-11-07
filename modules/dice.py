@@ -1,3 +1,5 @@
+#Contains functionality for dice icons
+
 import pygame
 import time
 import random
@@ -9,22 +11,6 @@ class die(button):
     A die with a predetermined result that will appear, show random rolling, and end with the predetermined result and an outline with a color based on the result
     '''
     def __init__(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string button_type: Determines the function of this button, like 'end turn'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
         '''
         Description:
             Initializes this object
@@ -50,7 +36,11 @@ class die(button):
         self.rolling = False
         self.last_roll = 0
         self.highlighted = False
-        super().__init__(coordinates, width, height, 'green', 'label', 'none', modes, 'misc/dice/' + str(self.result_outcome_dict['min_success']) + '.png', global_manager)
+        if self.result_outcome_dict['min_success'] <= 6:
+            image_id = 'misc/dice/' + str(self.result_outcome_dict['min_success']) + '.png'
+        else:
+            image_id = 'misc/dice/impossible.png'
+        super().__init__(coordinates, width, height, 'green', 'label', 'none', modes, image_id, global_manager)
         global_manager.get('dice_list').append(self)
         self.final_result = final_result
         self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
@@ -83,7 +73,10 @@ class die(button):
         '''
         tooltip_list = []
         if self.rolls_completed == 0:
-            tooltip_list.append(str(self.result_outcome_dict['min_success']) + '+ required for success')
+            if self.result_outcome_dict['min_success'] <= 6:
+                tooltip_list.append(str(self.result_outcome_dict['min_success']) + '+ required for success')
+            else:
+                tooltip_list.append(str('Success is impossible'))
             if not self.result_outcome_dict['min_crit_success'] > self.num_sides: #do not mention critical success if impossible 
                 if self.result_outcome_dict['min_crit_success'] == self.num_sides:
                     tooltip_list.append(str(self.result_outcome_dict['min_crit_success']) + ' required for critical success')

@@ -1,3 +1,5 @@
+#Contains functionality for actors
+
 import pygame
 from . import text_tools
 from . import utility
@@ -215,7 +217,7 @@ class actor():
         Output:
             None
         '''
-        self.set_tooltip([self.name])
+        self.set_tooltip([self.name.capitalize()])
         
     def remove(self):
         '''

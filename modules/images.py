@@ -1,3 +1,5 @@
+#Contains functionality for images
+
 import pygame
 import time
 from . import utility

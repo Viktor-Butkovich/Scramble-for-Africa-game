@@ -1,3 +1,5 @@
+#Contains functions that control the display of images
+
 import pygame
 
 def rect_to_surface(rect):

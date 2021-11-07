@@ -14,7 +14,8 @@ import modules.actor_utility as actor_utility
 import modules.groups as groups
 import modules.europe_transactions as europe_transactions
 import modules.labels as labels
-import modules.actor_match_tools as actor_match_tools
+import modules.actor_display_tools.images as actor_display_images
+import modules.actor_display_tools.labels as actor_display_labels
 import modules.instructions as instructions
 import modules.turn_management_tools as turn_management_tools
 import modules.vehicles as vehicles
@@ -91,6 +92,20 @@ for current_commodity in global_manager.get('commodity_types'):
     else:
         global_manager.get('commodity_prices')[current_commodity] = 2
 
+#building type: price
+global_manager.set('building_prices',
+    {
+    'resource': 2,
+    'infrastructure': 1,
+    'port': 3,
+    'train_station': 2,
+    'trading_post': 1,
+    'mission': 1,
+    'train': 1
+    }
+)
+
+
 global_manager.set('resource_building_dict',
     {
     'coffee': 'buildings/plantation.png',
@@ -125,6 +140,8 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
+global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
+
 global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'head missionary'])
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
 global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
@@ -150,6 +167,7 @@ global_manager.set('background_image_list', [])
 global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
+global_manager.set('village_list', [])
 global_manager.set('building_list', [])
 global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
@@ -171,8 +189,6 @@ global_manager.set('tile_ordered_label_list', [])
 global_manager.set('displayed_tile', 'none')
 global_manager.set('dice_list', [])
 global_manager.set('end_turn_selected_mob', 'none')
-#global_manager.set('notification_queue', [])
-#global_manager.set('notification_type_queue', [])
 pygame.key.set_repeat(300, 200)
 global_manager.set('crashed', False)
 global_manager.set('lmb_down', False)
@@ -184,12 +200,6 @@ global_manager.set('show_grid_lines', True)
 global_manager.set('show_text_box', True)
 global_manager.set('show_selection_outlines', True)
 global_manager.set('show_minimap_outlines', True)
-#global_manager.set('mouse_origin_x', 0)
-#global_manager.set('mouse_origin_y', 0)
-#global_manager.set('mouse_destination_x', 0)
-#mouse_destination_y = 0
-#global_manager.set('mouse_destination_y', 0)
-#global_manager.set('making_mouse_box', False)
 global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
@@ -199,6 +209,7 @@ global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
 global_manager.set('ongoing_conversion', False)
+global_manager.set('ongoing_construction', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')
@@ -209,7 +220,6 @@ global_manager.set('ctrl', 'up')
 global_manager.set('start_time', time.time())
 global_manager.set('current_time', time.time())
 global_manager.set('last_selection_outline_switch', time.time())
-#global_manager.set('last_minimap_outline_switch', time.time())
 mouse_moved_time = time.time()
 global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
@@ -268,9 +278,9 @@ europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x -
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue', pygame.K_ESCAPE, False,
     ['europe'], 'misc/exit_european_hq_button.png', global_manager)
 
-end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic'], 'misc/end_turn_button.png', global_manager)
+end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'], 'misc/end_turn_button.png', global_manager)
 
-button_start_x = 500#600#x position of leftmost button
+button_start_x = 500#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
@@ -293,185 +303,185 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
 expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
     'expand text box', pygame.K_j, ['strategic', 'europe'], 'misc/text_box_size_button.png', global_manager) #'none' for no keybind
 
-#toggle_grid_lines_button = button.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 170, global_manager), scaling.scale_width(50, global_manager),
-#    scaling.scale_height(50, global_manager), 'blue', 'cycle units', pygame.K_g, ['strategic'], 'misc/cycle_units_button.png', global_manager)
-
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
 
 cylce_units_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'misc/cycle_units_button.png', global_manager)
 
-actor_match_top_y = global_manager.get('default_display_height') - 205
-actor_match_current_y = actor_match_top_y
-global_manager.set('mob_ordered_list_start_y', actor_match_current_y)
+actor_display_top_y = global_manager.get('default_display_height') - 205
+actor_display_current_y = actor_display_top_y
+global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
+
 #mob background image
-mob_free_image_background = actor_match_tools.actor_match_background_image('misc/mob_background.png', scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager),
+mob_free_image_background = actor_display_images.actor_display_background_image('misc/mob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
 global_manager.get('mob_info_display_list').append(mob_free_image_background)
 
 #mob background image's tooltip
-mob_free_image_background_tooltip = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
+mob_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
     ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'mob', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image_background_tooltip)
 
 #mob image
-mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
 #veteran icon image
-mob_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
 #mob name label
-#actor_match_current_y -= 35
-mob_name_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic', 'europe'], 'misc/default_label.png', 'name', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('mob_info_display_list').append(mob_name_label)
 
+#mob group officer label
+mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['strategic', 'europe'], 'misc/default_label.png', 'officer', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('mob_info_display_list').append(mob_name_label)
+
+#mob group worker label
+mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['strategic', 'europe'], 'misc/default_label.png', 'worker', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('mob_info_display_list').append(mob_name_label)
 
 #mob movement points label
-#actor_match_current_y -= 35
-mob_movement_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager),
+mob_movement_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'movement', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 
 global_manager.get('mob_info_display_list').append(mob_movement_label)
 
-#actor_match_current_y -= 35
-mob_crew_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager),
+#mob vehicle crew label
+mob_crew_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'crew', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('mob_info_display_list').append(mob_crew_label)
 
-#actor_match_current_y -= 35
-mob_passengers_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager),
+#mob vehicle passengers list label
+mob_passengers_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'passengers', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('mob_info_display_list').append(mob_passengers_label)
 
 for i in range(0, 3): #0, 1, 2
-    #actor_match_current_y -= 35
-    current_passenger_label = actor_match_tools.list_item_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    #mob vehicle label for each passenger
+    current_passenger_label = actor_display_labels.list_item_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic', 'europe'], 'misc/default_label.png', 'current passenger', i, 'ship', 'mob', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
     global_manager.get('mob_info_display_list').append(current_passenger_label)
 
 #tile background image
-actor_match_current_y = global_manager.get('default_display_height') - 580
-global_manager.set('tile_ordered_list_start_y', actor_match_current_y)
-tile_free_image_background = actor_match_tools.actor_match_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager),
+actor_display_current_y = global_manager.get('default_display_height') - 580
+global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
+tile_free_image_background = actor_display_images.actor_display_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)
 global_manager.get('tile_info_display_list').append(tile_free_image_background)
 
-cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_match_current_y + 95, global_manager),
+cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_display_current_y + 95, global_manager),
         scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/cycle_passengers_down.png', global_manager)
 for i in range(0, 3): #add button to cycle through
-    same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (32 * i), global_manager),
+    same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * i), global_manager),
         scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i, False, global_manager)
-same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_match_current_y + 95 - (32 * (i + 1)), global_manager),
+same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * (i + 1)), global_manager),
     scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'misc/default_button.png', i + 1, True, global_manager)
 
 #tile background image's tooltip
-tile_free_image_background_tooltip = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
+tile_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
     ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
 #tile terrain image
-tile_free_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'terrain', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_image)
 
 #tile infrastructure image
-tile_free_infrastructure_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_infrastructure_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_middle', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_image)
 
-#make actor_match_free_image subclass that requires a direction parameter
 #tile infrastructure connection up image
-tile_free_infrastructure_up_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_infrastructure_up_image = actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'up', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_up_image)
 #tile infrastructure connection down image
-tile_free_infrastructure_down_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_infrastructure_down_image = actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'down', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_down_image)
 #tile infrastructure connection right image
-tile_free_infrastructure_right_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_infrastructure_right_image = actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'right', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_right_image)
 #tile infrastructure connection left image
-tile_free_infrastructure_left_image = actor_match_tools.actor_match_infrastructure_connection_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_infrastructure_left_image = actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'left', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_left_image)
 
 #tile resource image
-tile_free_resource_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_resource_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_image)
 
 #tile resource building image
-tile_free_resource_building_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_resource_building_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'resource building', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_resource_building_image)
 
 #tile port image
-tile_free_port_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_port_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'port', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_port_image)
 
 #tile train station image
-tile_free_train_station_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_train_station_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'train_station', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_train_station_image)
 
 #tile trading post image
-tile_free_trading_post_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_trading_post_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'trading_post', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_trading_post_image)
 
 #tile trading post image
-tile_free_mission_image = actor_match_tools.actor_match_free_image(scaling.scale_coordinates(5, actor_match_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+tile_free_mission_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'mission', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_mission_image)
 
 #tile terrain label
-#actor_match_current_y -= 35
-tile_terrain_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager),
+tile_terrain_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'terrain', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_terrain_label)
 
 #tile resource label
-#actor_match_current_y -= 35
-tile_resource_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(0, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager),
+tile_resource_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
 #tile resource building workers label
-#actor_match_current_y -= 35
-building_workers_label = actor_match_tools.building_workers_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+building_workers_label = actor_display_labels.building_workers_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(building_workers_label)
 
 for i in range(0, 3): #0, 1, 2
-    #actor_match_current_y -= 35
-    building_worker_label = actor_match_tools.list_item_label(scaling.scale_coordinates(50, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    building_worker_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
     global_manager.get('tile_info_display_list').append(building_worker_label)
     #if i == 0: #available workers, at same level as first current worker label
 
 #tile village population label
-native_population_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+native_population_label = actor_display_labels.native_info_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'native population', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(native_population_label) #at same level as workers label
 
-native_available_workers_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+native_available_workers_label = actor_display_labels.native_info_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'native available workers', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(native_available_workers_label)
-    #elif i == 1: #aggressiveness, at same level as second curent worker label
-native_aggressiveness_label = actor_match_tools.native_info_label(scaling.scale_coordinates(25, actor_match_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+
+native_aggressiveness_label = actor_display_labels.native_info_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'native aggressiveness', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(native_aggressiveness_label)
 
-actor_match_current_y -= 35
+actor_display_current_y -= 35
 
 commodity_prices_x, commodity_prices_y = (870, 100)
 commodity_prices_height = 30 + (30 * len(global_manager.get('commodity_types')))
@@ -482,25 +492,25 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
     new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 35,
         commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(40, global_manager), scaling.scale_height(40, global_manager), ['europe'], global_manager)
 
-mob_inventory_capacity_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager), scaling.scale_width(10, global_manager),
+mob_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'mob inventory capacity', 'mob', global_manager)
 global_manager.get('mob_info_display_list').append(mob_inventory_capacity_label)
 for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected mob
-    new_commodity_match_label = actor_match_tools.commodity_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (150 + (35 * (current_index))), global_manager),
+    new_commodity_display_label = actor_display_labels.commodity_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (150 + (35 * (current_index))), global_manager),
         scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', current_index, 'mob', global_manager)
 
 
-    global_manager.get('mob_info_display_list').append(new_commodity_match_label)
+    global_manager.get('mob_info_display_list').append(new_commodity_display_label)
 
-tile_inventory_capacity_label = actor_match_tools.actor_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 455, global_manager), scaling.scale_width(10, global_manager),
+tile_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 455, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'tile inventory capacity', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(tile_inventory_capacity_label)
 for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected tile
-    new_commodity_match_label = actor_match_tools.commodity_match_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (490 + (35 * (current_index))), global_manager),
+    new_commodity_display_label = actor_display_labels.commodity_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (490 + (35 * (current_index))), global_manager),
         scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', current_index, 'tile', global_manager)
         #coordinates, ideal_width, minimum_height, modes, image_id, commodity_index, global_manager
     
-    global_manager.get('tile_info_display_list').append(new_commodity_match_label)
+    global_manager.get('tile_info_display_list').append(new_commodity_display_label)
 
 buy_button_y = 0#140
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
@@ -510,14 +520,9 @@ for recruitment_index in range(len(global_manager.get('recruitment_types'))):
 new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
     scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#self, coordinates, width, height, color, commodity_type, modes, global_manager
 
-#new_ship = vehicles.ship((0, 0), [global_manager.get('europe_grid')], 'mobs/ship/default.png', 'ship', ['strategic', 'europe'], global_manager) #coordinates, grids, image_id, name, modes, global_manager
-
 global_manager.get('minimap_grid').calibrate(2, 2)
-#actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
 
 turn_management_tools.start_turn(global_manager, True)
-
-#test_building = buildings.building((0, 0), [global_manager.get('strategic_map_grid'), global_manager.get('minimap_grid')], 'misc/default_button.png', 'building',  ['strategic'], global_manager) #coordinates, grids, image_id, name, modes, global_manager
 
 main_loop.main_loop(global_manager)
 pygame.quit()

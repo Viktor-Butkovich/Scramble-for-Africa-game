@@ -1,3 +1,5 @@
+#Contains functions that randomly generate village names
+
 import random
 
 def create_village_name():

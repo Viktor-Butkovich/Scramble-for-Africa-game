@@ -1,3 +1,5 @@
+#Contains functionality for grid cells
+
 import pygame
 
 class cell():
@@ -119,7 +121,25 @@ class cell():
         Output:
             None
         '''
-        self.contained_buildings = {'resource': 'none', 'port': 'none', 'infrastructure': 'none', 'train_station': 'none', 'trading_post': 'none', 'mission': 'none'}
+        self.contained_buildings = {}
+        for current_building_type in self.global_manager.get('building_types'):
+            self.contained_buildings[current_building_type] = 'none'
+
+    def get_buildings(self):
+        '''
+        Description:
+            Returns a list of the buildings contained in this cell
+        Input:
+            None
+        Output:
+            building list contained_buildings_list: buildings contained in this cell
+        '''
+        contained_buildings_list = []
+        for current_building_type in self.global_manager.get('building_types'):
+            if not self.contained_buildings[current_building_type] == 'none':
+                contained_buildings_list.append(self.contained_buildings[current_building_type])
+        return(contained_buildings_list)
+        
 
     def has_port(self):
         '''

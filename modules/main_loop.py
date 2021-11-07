@@ -1,3 +1,5 @@
+#Contains game's main loop
+
 import time
 import pygame
 from . import main_loop_tools

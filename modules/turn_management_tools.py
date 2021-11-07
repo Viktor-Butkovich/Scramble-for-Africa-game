@@ -1,3 +1,5 @@
+#Contains functions that manage what happens at the end of each turn, like worker upkeep and price changes
+
 import random
 
 from . import text_tools
@@ -45,9 +47,23 @@ def start_turn(global_manager, first_turn):
         current_mob.reset_movement_points()
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
+    for current_village in global_manager.get('village_list'):
+        roll = random.randrange(1, 7)
+        if roll <= 2: #1-2
+            current_village.change_aggressiveness(-1)
+        #3-4 does nothing
+        elif roll >= 5: #5-6
+            current_village.change_aggressiveness(1)
+
+        roll = random.randrange(1, 7)
+        second_roll = random.randrange(1, 7)
+        if roll == 6 and second_roll == 6:
+            current_village.change_population(1)
+            
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
     if not end_turn_selected_mob == 'none':
         end_turn_selected_mob.select()
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
