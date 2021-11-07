@@ -160,7 +160,7 @@ SFA folder
                     class veteran_icon_image
 
         groups.py
-            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
+            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools, buildings, vehicles
             class group(mobs.mob)
 		class porters
 		class construction_gang
@@ -273,7 +273,7 @@ SFA folder
 		class label_image(modules.images.free_image)
 
 	    buttons.py
-		imports modules.buttons, modules.buildings, modules.main_loop_tools, modules.actor_tuility, modules.text_tools, modules.groups, modules.vehicles
+		imports modules.buttons, modules.main_loop_tools, modules.actor_utility, modules.text_tools, modules.groups
 	        class label_button(modules.buttons.button)
 		    class worker_crew_vehicle_button
 		    class pick_up_all_passengers_button
@@ -300,3 +300,4 @@ SFA folder
 	    class trade_notification_notification(notifications.notification)
 	    class religious_campaign_notification(notifications.notification)
     	    class conversion_notification(notifications.notification)
+	    class construction_notification(notifications.notification)

@@ -67,17 +67,17 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         Output:
             None
         '''
-        tooltip_list = ["Name: " + self.name]
+        tooltip_list = ["Name: " + self.name.capitalize()]
         if self.has_crew:
-            tooltip_list.append("Crew: " + self.crew.name)
+            tooltip_list.append("Crew: " + self.crew.name.capitalize())
         else:
-            tooltip_list.append("Crew: none")
+            tooltip_list.append("Crew: None")
             tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
             
         if len(self.contained_mobs) > 0:
             tooltip_list.append("Passengers: ")
             for current_mob in self.contained_mobs:
-                tooltip_list.append('    ' + current_mob.name)
+                tooltip_list.append('    ' + current_mob.name.capitalize())
         else:
             tooltip_list.append("No passengers")
             

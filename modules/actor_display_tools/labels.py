@@ -116,7 +116,7 @@ class actor_display_label(label):
                 if self.actor.has_crew:
                     name_list = [self.message_start]
                     for current_passenger in self.actor.contained_mobs:
-                        name_list.append("    " + current_passenger.name)
+                        name_list.append("    " + current_passenger.name.capitalize())
                     if len(name_list) == 1:
                         name_list[0] = self.message_start + ' none'
                     self.set_tooltip(name_list)
@@ -133,6 +133,12 @@ class actor_display_label(label):
             if not self.actor == 'none':
                 self.actor.update_tooltip()
                 tooltip_text = self.actor.tooltip_text
+                if self.actor.actor_type == 'tile': #show tooltips of buildings in tile
+                    for current_building in self.actor.cell.get_buildings():
+                        current_building.update_tooltip()
+                        tooltip_text.append('')
+                        tooltip_text += current_building.tooltip_text
+                    
                 self.set_tooltip(tooltip_text)
         elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
             tooltip_text = [self.message]
@@ -173,7 +179,7 @@ class actor_display_label(label):
         self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
-                self.set_label(self.message_start + str(new_actor.name))
+                self.set_label(self.message_start + new_actor.name.capitalize())
                 
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
@@ -217,7 +223,7 @@ class actor_display_label(label):
                         self.attached_building = new_actor.cell.contained_buildings['resource']
                         self.attached_list = self.attached_building.contained_workers
                         if len(self.attached_list) > self.list_index:
-                            self.set_label(self.message_start + self.attached_list[self.list_index].name)
+                            self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
                     else:
                         self.attached_building = 'none'
                         self.attached_list = []
@@ -225,7 +231,7 @@ class actor_display_label(label):
             elif self.actor_label_type == 'crew':
                 if self.actor.is_vehicle:
                     if self.actor.has_crew:
-                        self.set_label(self.message_start + self.actor.crew.name)
+                        self.set_label(self.message_start + self.actor.crew.name.capitalize())
                     else:
                         self.set_label(self.message_start + 'none')
                         
@@ -244,14 +250,14 @@ class actor_display_label(label):
                     if len(self.actor.contained_mobs) > 0:
                         self.attached_list = new_actor.contained_mobs
                         if len(self.attached_list) > self.list_index:
-                            self.set_label(self.message_start + self.attached_list[self.list_index].name)
+                            self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
 
             elif self.actor_label_type in ['worker', 'officer']:
                 if self.actor.is_group:
                     if self.actor_label_type == 'worker':
-                        self.set_label(self.message_start + str(self.actor.worker.name))
+                        self.set_label(self.message_start + str(self.actor.worker.name.capitalize()))
                     else:
-                        self.set_label(self.message_start + str(self.actor.officer.name))
+                        self.set_label(self.message_start + str(self.actor.officer.name.capitalize()))
             
             elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
                 if (not self.actor.cell.village == 'none') and self.actor.cell.visible: #if village present

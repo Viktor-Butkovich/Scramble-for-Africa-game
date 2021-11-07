@@ -50,6 +50,7 @@ def start_turn(global_manager, first_turn):
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
     if not end_turn_selected_mob == 'none':
         end_turn_selected_mob.select()
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))

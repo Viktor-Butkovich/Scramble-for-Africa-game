@@ -49,7 +49,7 @@ class officer(mob):
             None
         '''
         self.veteran = True
-        self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
+        self.set_name("veteran " + self.name)
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -290,7 +290,7 @@ class head_missionary(officer):
     def complete_religious_campaign(self):
         '''
         Description:
-            Used when the player finishes rolling for a religious campaign, showing the campaign's results and making any changes caused by the result. If successful, recruits church volunteers, promotes head missionary to a veteran on
+            Used when the player finishes rolling for a religious campaign, shows the campaign's results and making any changes caused by the result. If successful, recruits church volunteers, promotes head missionary to a veteran on
                 critical success. If not successful, the head missionary consumes its movement points and dies on critical failure
         Input:
             None
@@ -312,6 +312,18 @@ class head_missionary(officer):
         self.global_manager.set('ongoing_religious_campaign', False)
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
+        '''
+        Description:
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+            int min_success: Minimum roll required for a success
+            int min_crit_success: Minimum roll required for a critical success
+            int max_crit_fail: Maximum roll required for a critical failure
+        Output:
+            None
+        '''
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,

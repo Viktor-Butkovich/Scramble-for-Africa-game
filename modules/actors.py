@@ -217,7 +217,7 @@ class actor():
         Output:
             None
         '''
-        self.set_tooltip([self.name])
+        self.set_tooltip([self.name.capitalize()])
         
     def remove(self):
         '''

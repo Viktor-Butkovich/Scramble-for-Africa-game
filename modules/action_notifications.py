@@ -395,6 +395,9 @@ class conversion_notification(notification):
                 current_image.remove()
 
 class construction_notification(notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
         self.is_last = is_last
         if self.is_last: #if last, show result

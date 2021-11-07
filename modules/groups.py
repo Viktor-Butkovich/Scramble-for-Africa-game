@@ -78,8 +78,8 @@ class group(mob):
             None
         '''
         self.veteran = True
-        self.set_name("Veteran " + self.name.lower()) # Expedition to Veteran expedition
-        self.officer.set_name("Veteran " + self.officer.name.lower()) #Explorer to Veteran explorer
+        self.set_name("veteran " + self.name)
+        self.officer.set_name("veteran " + self.officer.name)
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -125,7 +125,8 @@ class group(mob):
         Output:
             None
         '''
-        self.set_tooltip(["Name: " + self.name, '    Officer: ' + self.officer.name, '    Worker: ' + self.worker.name, "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
+        self.set_tooltip(["Name: " + self.name.capitalize(), '    Officer: ' + self.officer.name.capitalize(), '    Worker: ' + self.worker.name.capitalize(),
+            "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def disband(self):
         '''
@@ -176,6 +177,18 @@ class group(mob):
         self.worker.remove()
 
     def start_construction(self, building_info_dict):
+        '''
+        Description
+            Used when the player clicks on a construct building or train button, displays a choice notification that allows the player to construct it or not. Choosing to construct starts the construction process, costs an amount based
+                on the building built, and consumes the caravan's movement points
+        Input:
+            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
+                string building_type: type of building, like 'resource'
+                string building_name: name of building, like 'ivory camp'
+                string attached_resource: optional, type of resource building produces, like 'ivory'
+        Output:
+            None
+        '''
         self.building_type = building_info_dict['building_type']
         self.building_name = building_info_dict['building_name']
         if self.building_type == 'resource':
@@ -194,19 +207,54 @@ class group(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
-        message = "Are you sure you want to start constructing a ? /n /n"
-        message += "This attempt will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
-        message += "If successful, something will be built placeholder" #change to match each building
+        message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
+        message += "The planning and materials will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
+        message += "If successful, a " + self.building_name + " will be built. " #change to match each building
+        if self.building_type == 'resource':
+            message += "Each work crew attached to a " + self.building_name + " produces 1 unit of " + self.attached_resource + " each turn. "
+            message += "It also expands the tile's warehouse capacity."
+        elif self.building_type == 'infrastructure':
+            if self.building_name == 'road':
+                message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad."
+            elif self.building_name == 'railroad':
+                message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
+                message += "It is also required for trains to move and for a train station to be built."
+        elif self.building_type == 'port':
+            message += "A port allows ships to enter the tile. It also expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for ships traveling between theatres."
+            if self.y == 1:
+                message += "A port built here would be adjacent to the ocean."
+            else:
+                message += "A port built here would not be adjacent to the ocean."
+        elif self.building_type == 'train_station':
+            message += "A train station is required for a train to pick up or drop off cargo and passengers. It also expands the tile's warehouse capacity. A train can only be built at a train station."
+        elif self.building_type == 'trading_post':
+            message += "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
+        elif self.building_type == 'mission':
+            message += "A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting."
+        elif self.building_type == 'train':
+            message += "A train is a unit that can carry commodities and passengers at high speed along railroads. It can only exchange cargo at a train station and must stop moving for the rest of the turn after dropping off cargo. "
+            message += "It also requires an attached worker as crew to function."
+        else:
+            message += "Placeholder building description"
+        message += " /n /n"
             
         notification_tools.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def construct(self):
+        '''
+        Description:
+            Controls the construction process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
         self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type])
         text = ""
-        text += "The " + self.name + " attempts to construct a " + self.building_name + " placeholder. /n /n"
+        text += "The " + self.name + " attempts to construct a " + self.building_name + ". /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager)
         else:
@@ -249,15 +297,15 @@ class group(mob):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "construction succeeded placeholder. /n"
+            text += "The " + self.name + " successfully constructed the " + self.building_name + ". /n"
         else:
-            text += "construction failed placeholder. /n"
+            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the construction of the " + self.building_name + ". /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "construction critical success placeholder. /n /n"
+            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
         if roll_result >= 4:
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_construction', self.global_manager)
+            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('construction_result', [self, roll_result])
@@ -265,6 +313,15 @@ class group(mob):
 
         
     def complete_construction(self):
+        '''
+        Description:
+            Used when the player finishes rolling for construction, shows the construction's results and making any changes caused by the result. If successful, the building is constructed, promotes engineer to a veteran on critical
+                success
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('construction_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             if roll_result >= self.current_min_crit_success and not self.veteran:
@@ -301,6 +358,18 @@ class group(mob):
         self.global_manager.set('ongoing_construction', False)
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
+        '''
+        Description:
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+            int min_success: Minimum roll required for a success
+            int min_crit_success: Minimum roll required for a critical success
+            int max_crit_fail: Maximum roll required for a critical failure
+        Output:
+            None
+        '''
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
@@ -766,8 +835,8 @@ class missionaries(group):
     def complete_conversion(self):
         '''
         Description:
-            Used when the player finishes rolling for religious conversion, showing the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes head missionary to a
-                veteran on critical success. If not successful, the missionaries consume their movement points and die on critical failure
+            Used when the player finishes rolling for religious conversion, shows the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes head missionary to a
+                veteran on critical success. Missionaries die on critical failure
         Input:
             None
         Output:
@@ -778,11 +847,6 @@ class missionaries(group):
             self.global_manager.get('conversion_result')[2].change_aggressiveness(-1) #village
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
-            #self.select()
-            #for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
-            #    if not current_image.current_cell == 'none':
-            #        while not self == current_image.current_cell.contained_mobs[0]:
-            #            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         if roll_result <= self.current_max_crit_fail:
             self.die()
         self.global_manager.set('ongoing_conversion', False)
@@ -981,7 +1045,7 @@ class expedition(group):
     def complete_exploration(self): #roll_result, x_change, y_change
         '''
         Description:
-            Used when the player finishes rolling for an exploration, showing the exploration's results and making any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
+            Used when the player finishes rolling for an exploration, shows the exploration's results and making any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
                 points, promotes its explorer to a veteran on critical success. If not successful, the expedition consumes its movement points and dies on critical failure
         Input:
             None
@@ -1025,14 +1089,14 @@ def create_group(worker, officer, global_manager):
         None
     '''
     if officer.officer_type == 'explorer':
-        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'Expedition', officer.modes, worker, officer, global_manager)
+        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'expedition', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'engineer':
-        new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'Construction gang', officer.modes, worker, officer, global_manager)
+        new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'construction gang', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'porter foreman':
-        new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'Porters', officer.modes, worker, officer, global_manager)
+        new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'porters', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'merchant':
-        new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'Caravan', officer.modes, worker, officer, global_manager)
+        new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'caravan', officer.modes, worker, officer, global_manager)
     elif officer.officer_type == 'head missionary':
-        new_group = missionaries((officer.x, officer.y), officer.grids, 'mobs/head missionary/missionaries.png', 'Missionaries', officer.modes, worker, officer, global_manager)
+        new_group = missionaries((officer.x, officer.y), officer.grids, 'mobs/head missionary/missionaries.png', 'missionaries', officer.modes, worker, officer, global_manager)
     else:
-        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'Expedition', officer.modes, worker, officer, global_manager)
+        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'expedition', officer.modes, worker, officer, global_manager)

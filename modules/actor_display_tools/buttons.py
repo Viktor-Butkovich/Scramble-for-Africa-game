@@ -5,7 +5,6 @@ from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
 from .. import groups
-from .. import vehicles
 
 class label_button(button):
     '''
@@ -1129,6 +1128,14 @@ class build_train_button(label_button):
                 text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
 
     def construct(self):
+        '''
+        Description:
+            Commands the selected mob to construct a train
+        Input:
+            None
+        Output:
+            None
+        '''
         building_info_dict = {}
         building_info_dict['building_type'] = 'train'
         building_info_dict['building_name'] = 'train'

@@ -140,6 +140,8 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
+global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
+
 global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'head missionary'])
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
 global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})

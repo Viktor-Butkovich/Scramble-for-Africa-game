@@ -251,9 +251,9 @@ class recruitment_choice_button(choice_button):
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
                 if self.recruitment_type == 'head missionary':
-                    new_officer = officers.head_missionary((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.global_manager)
+                    new_officer = officers.head_missionary((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.global_manager)
                 else:
-                    new_officer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type.capitalize(), ['strategic', 'europe'], self.recruitment_type, self.global_manager)
+                    new_officer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.recruitment_type, self.global_manager)
             elif self.recruitment_type == 'European worker':
                 new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
             elif self.recruitment_type == 'ship':
