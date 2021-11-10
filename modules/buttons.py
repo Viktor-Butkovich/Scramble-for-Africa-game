@@ -232,6 +232,10 @@ class button():
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
+        elif self.button_type == 'save game':
+            self.set_tooltip(["Saves this game"])
+        elif self.button_type == 'load game':
+            self.set_tooltip(["Loads a saved game"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -630,6 +634,12 @@ class button():
 
             elif self.button_type == 'new game':
                 self.global_manager.get('save_load_manager').new_game()
+
+            elif self.button_type == 'save game':
+                self.global_manager.get('save_load_manager').save_game('save1.pickle')
+
+            elif self.button_type == 'load game':
+                self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
             elif self.button_type == 'main menu':
                 game_transitions.to_main_menu(self.global_manager)

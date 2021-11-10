@@ -45,6 +45,12 @@ def change_price(changed_commodity, num_change, global_manager):
         global_manager.get('commodity_prices')[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
 
+def set_price(changed_commodity, new_value, global_manager):
+    global_manager.get('commodity_prices')[changed_commodity] = new_value
+    if global_manager.get('commodity_prices')[changed_commodity] < 1:
+        global_manager.get('commodity_prices')[changed_commodity] = 1
+    global_manager.get('commodity_prices_label').update_label()
+
 def sell(seller, sold_commodity, num_sold, global_manager):
     '''
     Description:

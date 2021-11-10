@@ -270,6 +270,10 @@ end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.
 new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
     scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'misc/new_game_button.png', global_manager)
 
+load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 125, global_manager),
+    scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'load game', pygame.K_l, ['main_menu'], 'misc/load_game_button.png', global_manager)
+
+
 
 button_start_x = 500#x position of leftmost button
 button_separation = 60#x separation between each button
@@ -297,8 +301,11 @@ expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_mana
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
 
-main_menu_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 135, global_manager), scaling.scale_width(50, global_manager),
+main_menu_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'main menu', 'none', ['strategic', 'europe'], 'misc/exit_european_hq_button.png', global_manager)
+
+save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe'], 'misc/save_game_button.png', global_manager)
 
 cylce_units_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'misc/cycle_units_button.png', global_manager)

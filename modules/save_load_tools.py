@@ -1,4 +1,5 @@
 import random
+import pickle
 
 from . import scaling
 from . import notification_tools
@@ -6,10 +7,35 @@ from . import game_transitions
 from . import grids
 from . import data_managers
 from . import turn_management_tools
+from . import text_tools
+from . import market_tools
 
 class save_load_manager():
     def __init__(self, global_manager):
         self.global_manager = global_manager
+        self.set_copied_elements()
+
+    def set_copied_elements(self):
+        self.copied_elements = []
+        #self.copied_elements.append('strategic_map_grid')
+        #self.copied_elements.append('minimap_grid')
+        #self.copied_elements.append('europe_grid')
+        self.copied_elements.append('money')
+        self.copied_elements.append('turn')
+        self.copied_elements.append('commodity_prices')
+        #self.copied_elements.append('grid_list')
+        #self.copied_elements.append('abstract_grid_list')
+        #self.copied_elements.append('actor_list')
+        #self.copied_elements.append('mob_list')
+        #self.copied_elements.append('village_list')
+        #self.copied_elements.append('building_list')
+        #self.copied_elements.append('resource_building_list')
+        #self.copied_elements.append('infrastructure_connection_list')
+        #self.copied_elements.append('worker_list')
+        #self.copied_elements.append('group_list')
+        #self.copied_elements.append('tile_list')
+        self.copied_elements.append('num_workers')
+        self.copied_elements.append('worker_upkeep')
         
     def new_game(self):
         strategic_grid_height = 300#450
@@ -43,9 +69,9 @@ class save_load_manager():
 
         for current_commodity in self.global_manager.get('commodity_types'):
             if not current_commodity == 'consumer goods':
-                self.global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
+                market_tools.set_price(current_commodity, random.randrange(2, 6), self.global_manager) #2-5
             else:
-                self.global_manager.get('commodity_prices')[current_commodity] = 2
+                market_tools.set_price(current_commodity, 2, self.global_manager)
 
         self.global_manager.get('money_tracker').set(100)
         self.global_manager.get('turn_tracker').set(0)
@@ -53,4 +79,50 @@ class save_load_manager():
         self.global_manager.set('player_turn', True)
 
         turn_management_tools.start_turn(self.global_manager, True)
-                
+        
+    def save_game(self, file_path): #name.pickle file
+        file_path = 'save_games/' + file_path
+        saved_global_manager = data_managers.global_manager_template()
+        for current_element in self.copied_elements: #save necessary data into new global manager
+            #print(self.global_manager.get(current_element))
+            #print(current_element)
+            saved_global_manager.set(current_element, self.global_manager.get(current_element))
+        #print(saved_global_manager.global_dict)
+        with open(file_path, 'wb') as handle: #write wb, read rb
+            pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
+            
+        text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
+
+    def load_game(self, file_path):
+        try:
+            file_path = 'save_games/' + file_path
+            with open(file_path, 'rb') as handle:
+                new_global_manager = pickle.load(handle)
+        except:
+            text_tools.print_to_screen("The " + file_path + " file does not exist.", self.global_manager)
+            return()
+        for current_element in self.copied_elements:
+            self.global_manager.set(current_element, new_global_manager.get(current_element))
+
+        game_transitions.set_game_mode('strategic', self.global_manager)
+        self.global_manager.get('minimap_grid').calibrate(2, 2)
+        #turn_management_tools.start_turn(self.global_manager, True)
+
+'''
+To save grid:
+save contents of each grid cell in a list of dictionaries: for each cell, have a dictionary with terrain, resource, village pop/aggressiveness/available_workers if applicable
+make version of grid init function that takes cell list and creates that cell at the correct location and with the correct terrain and resource. If there is a village, record village attributes and make one
+
+to save buildings:
+make list of dictionaries with building type, location
+
+to save mobs:
+make list of dictionaries with unit type, location, veteran status, if group/in vehicle/in building make them first and attach upon creation somehow
+
+Save these lists in the dictionary dumped into file and retrive them while loading
+
+these should cover everything: each of these object types will need changes to initialization to allow feeding a dictionary and setting up initial state as alternative to normal initialization
+Maybe change initialization for actors and grids to take a list of inputs and an initialization type string: depending on initialization type, call different init function with input list, within each init function set relevant values
+to different list items
+consider making input lists dictionaries instead
+'''
