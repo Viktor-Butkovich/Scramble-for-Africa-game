@@ -89,10 +89,7 @@ global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exo
 global_manager.set('commodity_prices', {})
 
 for current_commodity in global_manager.get('commodity_types'):
-    if not current_commodity == 'consumer goods':
-        global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
-    else:
-        global_manager.get('commodity_prices')[current_commodity] = 2
+    global_manager.get('commodity_prices')[current_commodity] = 0
 
 #building type: price
 global_manager.set('building_prices',
@@ -104,7 +101,7 @@ global_manager.set('building_prices',
     'trading_post': 1,
     'mission': 1,
     'train': 1
-    }
+   } 
 )
 
 
@@ -166,7 +163,7 @@ global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
 global_manager.set('background_image_list', [])
-global_manager.set('bar_list', [])
+#global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('village_list', [])
@@ -299,6 +296,9 @@ expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_mana
 
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
+
+main_menu_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 135, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), 'blue', 'main menu', 'none', ['strategic', 'europe'], 'misc/exit_european_hq_button.png', global_manager)
 
 cylce_units_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'misc/cycle_units_button.png', global_manager)

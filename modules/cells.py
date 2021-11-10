@@ -367,3 +367,4 @@ class cell():
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['up'] = adjacent_cell
         self.adjacent_list = adjacent_list
+

@@ -4,6 +4,7 @@ import random
 import pygame
 from . import cells
 from . import actor_utility
+from . import utility
 
 class grid():
     '''
@@ -436,6 +437,18 @@ class grid():
         else:
             return(False)
 
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('grid_list', utility.remove_from_list(self.global_manager.get('grid_list'), self))
+
+        
 class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed

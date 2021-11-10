@@ -11,6 +11,7 @@ from . import utility
 from . import turn_management_tools
 from . import market_tools
 from . import notification_tools
+from . import game_transitions
 
 class button():
     '''
@@ -629,6 +630,9 @@ class button():
 
             elif self.button_type == 'new game':
                 self.global_manager.get('save_load_manager').new_game()
+
+            elif self.button_type == 'main menu':
+                game_transitions.to_main_menu(self.global_manager)
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)

@@ -4,6 +4,7 @@ import random
 
 from . import village_name_generator
 from . import actor_utility
+from . import utility
 
 class village():
     '''
@@ -27,6 +28,17 @@ class village():
         self.name = village_name_generator.create_village_name()
         self.global_manager = global_manager
         self.global_manager.get('village_list').append(self)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
     def set_initial_population(self):
         '''

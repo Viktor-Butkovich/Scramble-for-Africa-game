@@ -9,6 +9,7 @@ from . import choice_notifications
 from . import action_notifications
 from . import scaling
 from . import text_tools
+from . import game_transitions
 
 class global_manager_template():
     '''
@@ -207,7 +208,7 @@ class value_tracker():
         Output:
             None
         '''
-        self.global_manager.set(self.value_key, initial_value)
+        self.global_manager.set(self.value_key, new_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
@@ -238,7 +239,8 @@ class money_tracker(value_tracker):
         '''
         super().change(value_change)
         if self.get() < 0:
-            self.global_manager.set('crashed', True) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager) #end game when money less than 0
+            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def set(self, new_value):
         '''
@@ -251,7 +253,8 @@ class money_tracker(value_tracker):
         '''
         super().set(new_value)
         if self.get() < 0:
-            self.global_manager.set('crashed', True) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager) #end game when money less than 0
+            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
 class notification_manager_template():
     '''

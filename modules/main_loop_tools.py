@@ -57,10 +57,6 @@ def update_display(global_manager):
         for current_image in mob_image_list:
             current_image.draw()
             current_image.has_drawn = True
-                    
-        for current_bar in global_manager.get('bar_list'):
-            if global_manager.get('current_game_mode') in current_bar.modes:
-                current_bar.draw()
                 
         for current_overlay_tile in global_manager.get('overlay_tile_list'):
             if global_manager.get('current_game_mode') in current_overlay_tile.image.modes:

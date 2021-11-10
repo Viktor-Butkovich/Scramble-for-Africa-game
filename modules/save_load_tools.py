@@ -1,3 +1,5 @@
+import random
+
 from . import scaling
 from . import notification_tools
 from . import game_transitions
@@ -38,6 +40,17 @@ class save_load_manager():
         game_transitions.create_strategic_map(self.global_manager)
 
         self.global_manager.get('minimap_grid').calibrate(2, 2)
+
+        for current_commodity in self.global_manager.get('commodity_types'):
+            if not current_commodity == 'consumer goods':
+                self.global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
+            else:
+                self.global_manager.get('commodity_prices')[current_commodity] = 2
+
+        self.global_manager.get('money_tracker').set(100)
+        self.global_manager.get('turn_tracker').set(0)
+
+        self.global_manager.set('player_turn', True)
 
         turn_management_tools.start_turn(self.global_manager, True)
                 
