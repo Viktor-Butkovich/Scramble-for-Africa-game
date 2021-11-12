@@ -11,12 +11,12 @@ from . import dice_utility
 from . import dice
 from . import scaling
 
-
 class officer(mob):
     '''
     Mob that is considered an officer and can join groups and become a veteran
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, officer_type, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, officer_type, global_manager):
         '''
         Description:
             Initializes this object
@@ -31,13 +31,24 @@ class officer(mob):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         global_manager.get('officer_list').append(self)
-        self.veteran = False
         self.veteran_icons = []
         self.is_officer = True
-        self.officer_type = officer_type
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
+        self.officer_type = input_dict['officer_type']
+        if not from_save:
+            self.veteran = False
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
+        else:
+            self.veteran = input_dict['veteran']
+            if self.veteran:
+                self.promote()
+
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['officer_type'] = self.officer_type
+        save_dict['veteran'] = self.veteran
+        return(save_dict)
 
     def promote(self):
         '''
@@ -57,7 +68,15 @@ class officer(mob):
                 veteran_icon_x, veteran_icon_y = (0, 0)
             else:
                 veteran_icon_x, veteran_icon_y = (self.x, self.y)
-            self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
+            input_dict = {}
+            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+            input_dict['grid'] = current_grid
+            input_dict['image'] = 'misc/veteran_icon.png'
+            input_dict['name'] = 'veteran icon'
+            input_dict['modes'] = ['strategic', 'europe']
+            input_dict['show_terrain'] = False
+            input_dict['actor'] = self 
+            self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -84,7 +103,15 @@ class officer(mob):
                     veteran_icon_x, veteran_icon_y = (0, 0)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic'], False, self, self.global_manager))
+                input_dict = {}
+                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                input_dict['grid'] = current_grid
+                input_dict['image'] = 'misc/veteran_icon.png'
+                input_dict['name'] = 'veteran icon'
+                input_dict['modes'] = ['strategic', 'europe']
+                input_dict['show_terrain'] = False
+                input_dict['actor'] = self 
+                self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
 
     def can_show_tooltip(self):
         '''
@@ -158,7 +185,8 @@ class head_missionary(officer):
     '''
     Officer that can start religious campaigns and merge with church volunteers to form missionaries
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -172,7 +200,8 @@ class head_missionary(officer):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, 'head missionary', global_manager)
+        input_dict['officer_type'] = 'head missionary'
+        super().__init__(from_save, input_dict, global_manager)
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -299,7 +328,13 @@ class head_missionary(officer):
         '''
         roll_result = self.global_manager.get('religious_campaign_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
-            new_church_volunteers = workers.church_volunteers((0, 0), [self.global_manager.get('europe_grid')], 'mobs/church volunteers/default.png', 'Church volunteers', ['strategic', 'europe'], self.global_manager)
+            input_dict = {}
+            input_dict['coordinates'] = (0, 0)
+            input_dict['grids'] = [self.global_manager.get('europe_grid')]
+            input_dict['image'] = 'mobs/church volunteers/default.png'
+            input_dict['name'] = 'Church volunteers'
+            input_dict['modes'] = ['strategic', 'europe']
+            new_church_volunteers = workers.church_volunteers(False, input_dict, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()

@@ -22,7 +22,8 @@ class group(mob):
     '''
     Mob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
@@ -38,10 +39,12 @@ class group(mob):
         Output:
             None
         '''
-        self.worker = worker
-        self.officer = officer
+        if not from_save:
+            self.worker = input_dict['worker']
+            self.officer = input_dict['officer']
+        #else: #create worker and officer through recruitment manager
         #self.veteran = self.officer.veteran
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
@@ -51,21 +54,28 @@ class group(mob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        self.select()
-        if self.veteran:
-            self.set_name("Veteran " + self.name.lower())
+        if not from_save:
+            self.select()
+            if self.veteran:
+                self.set_name("Veteran " + self.name.lower())
         self.veteran_icons = self.officer.veteran_icons
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.actor = self
         self.global_manager.get('group_list').append(self)
-        if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
-            self.set_movement_points(self.officer.movement_points)
-        else:
-            self.set_movement_points(self.worker.movement_points)
+        if not from_save:
+            if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
+                self.set_movement_points(self.officer.movement_points)
+            else:
+                self.set_movement_points(self.worker.movement_points)
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
+
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['worker'] = self.worker.to_save_dict()
+        save_dict['officer'] = self.worker.to_save_dict()
 
     def promote(self):
         '''
@@ -85,7 +95,15 @@ class group(mob):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
             else:
                 veteran_icon_x, veteran_icon_y = (self.x, self.y)
-            self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
+            input_dict = {}
+            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+            input_dict['grid'] = current_grid
+            input_dict['image'] = 'misc/veteran_icon.png'
+            input_dict['name'] = 'veteran icon'
+            input_dict['modes'] = ['strategic', 'europe']
+            input_dict['show_terrain'] = False
+            input_dict['actor'] = self 
+            self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -110,7 +128,15 @@ class group(mob):
                     veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                 else:
                     veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                self.veteran_icons.append(veteran_icon((veteran_icon_x, veteran_icon_y), current_grid, 'misc/veteran_icon.png', 'veteran icon', ['strategic', 'europe'], False, self, self.global_manager))
+                input_dict = {}
+                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                input_dict['grid'] = current_grid
+                input_dict['image'] = 'misc/veteran_icon.png'
+                input_dict['name'] = 'veteran icon'
+                input_dict['modes'] = ['strategic', 'europe']
+                input_dict['show_terrain'] = False
+                input_dict['actor'] = self 
+                self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
         self.officer.join_group() #hides images self.worker.hide_images()#
         self.worker.go_to_grid(new_grid, new_coordinates)
@@ -327,33 +353,51 @@ class group(mob):
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.set_movement_points(0)
+
+            input_dict = {}
+            input_dict['coordinates'] = (self.x, self.y)
+            input_dict['grids'] = self.grids
+            input_dict['name'] = self.building_name
+            input_dict['modes'] = ['strategic']
+            
             if not self.building_type == 'train':
                 if not self.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
                     self.images[0].current_cell.contained_buildings[self.building_type].remove()
             if self.building_type == 'resource':
-                new_building = buildings.resource_building((self.x, self.y), self.grids, self.global_manager.get('resource_building_dict')[self.attached_resource], self.building_name, self.attached_resource, ['strategic'],
-                    self.global_manager)
+                input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
+                input_dict['resource_type'] = self.attached_resource
+                
+                new_building = buildings.resource_building(False, input_dict, self.global_manager)
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'
                 if self.building_name == 'road':
                     building_image_id = 'buildings/infrastructure/road.png'
                 elif self.building_name == 'railroad':
                     building_image_id = 'buildings/infrastructure/railroad.png'
-                new_building = buildings.infrastructure_building((self.x, self.y), self.grids, building_image_id, self.building_name, self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = building_image_id
+                input_dict['infrastructure_type'] = self.building_name
+                new_building = buildings.infrastructure_building(False, input_dict, self.global_manager)
                     #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
             elif self.building_type == 'port':
-                new_building = buildings.port((self.x, self.y), self.grids, 'buildings/port.png', self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = 'buildings/port.png'
+                new_building = buildings.port(False, input_dict, self.global_manager)
             elif self.building_type == 'train_station':
-                new_building = buildings.train_station((self.x, self.y), self.grids, 'buildings/train_station.png', self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = 'buildings/train_station.png'
+                new_building = buildings.train_station(False, input_dict, self.global_manager)
             elif self.building_type == 'trading_post':
-                new_building = buildings.trading_post((self.x, self.y), self.grids, 'buildings/trading_post.png', self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = 'buildings/trading_post.png'
+                new_building = buildings.trading_post(False, input_dict, self.global_manager)
             elif self.building_type == 'mission':
-                new_building = buildings.mission((self.x, self.y), self.grids, 'buildings/mission.png', self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = 'buildings/mission.png'
+                new_building = buildings.mission(False, input_dict, self.global_manager)
             elif self.building_type == 'train':
                 image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
-                new_train = vehicles.train((self.x, self.y), self.grids, image_dict, 'train', ['strategic'], 'none', self.global_manager)
+                input_dict['image_dict'] = image_dict
+                input_dict['crew'] = 'none'
+                new_train = vehicles.train(False, input_dict, self.global_manager)
             else:
-                new_building = buildings.building((self.x, self.y), self.grids, 'buildings/' + self.building_type + '.png', self.building_name, ['strategic'], self.global_manager)
+                input_dict['image'] = 'buildings/' + self.building_type + '.png'
+                new_building = buildings.building(False, input_dict, self.global_manager)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
         self.global_manager.set('ongoing_construction', False)
 
@@ -379,7 +423,8 @@ class porters(group):
     '''
     A group with a porter foreman officer that can hold commodities
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
@@ -395,17 +440,19 @@ class porters(group):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.can_hold_commodities = True
         self.inventory_capacity = 9
-        self.inventory_setup()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+        if not from_save:
+            self.inventory_setup()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
 class construction_gang(group):
     '''
     A group with an engineer officer that is able to construct buildings and trains
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
@@ -421,15 +468,17 @@ class construction_gang(group):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.can_construct = True
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
 class caravan(group):
     '''
     A group with a merchant officer that is able to establish trading posts and trade with native villages
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
@@ -445,13 +494,14 @@ class caravan(group):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.can_hold_commodities = True
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
-        self.inventory_setup()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+        if not from_save:
+            self.inventory_setup()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
 
     def start_trade(self):
         '''
@@ -684,7 +734,8 @@ class missionaries(group):
     '''
     A group with a head missionary officer and church volunteer workers that can build churches and convert native villages
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
@@ -700,9 +751,10 @@ class missionaries(group):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.can_convert = True
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
 
     def start_converting(self):
         '''
@@ -867,7 +919,7 @@ class expedition(group):
     '''
     A group with an explorer officer that is able to explore
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
@@ -883,7 +935,7 @@ class expedition(group):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, worker, officer, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
@@ -955,7 +1007,14 @@ class expedition(group):
                         coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
                     else:
                         coordinates = (self.x + x_change, self.y + y_change)
-                    self.global_manager.get('exploration_mark_list').append(tile(coordinates, current_grid, 'misc/exploration_x/' + direction + '_x.png', 'exploration mark', ['strategic'], False, self.global_manager))
+                    input_dict = {}
+                    input_dict['coordinates'] = coordinates
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/exploration_x/' + direction + '_x.png'
+                    input_dict['name'] = 'exploration mark'
+                    input_dict['modes'] = ['strategic']
+                    input_dict['show_terrain'] = False
+                    self.global_manager.get('exploration_mark_list').append(tile(False, input_dict, self.global_manager))
             else:
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
@@ -1100,15 +1159,34 @@ def create_group(worker, officer, global_manager):
     Output:
         None
     '''
+    input_dict = {}
+    input_dict['coordinates'] = (officer.x, officer.y)
+    input_dict['grids'] = officer.grids
+    input_dict['worker'] = worker
+    input_dict['officer'] = officer
+    input_dict['modes'] = ['strategic', 'europe']
+    
     if officer.officer_type == 'explorer':
-        new_group = expedition((officer.x, officer.y), officer.grids, 'mobs/explorer/expedition.png', 'expedition', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/explorer/expedition.png'
+        input_dict['name'] = 'expedition'
+        new_group = expedition(False, input_dict, global_manager)
     elif officer.officer_type == 'engineer':
-        new_group = construction_gang((officer.x, officer.y), officer.grids, 'mobs/engineer/construction_gang.png', 'construction gang', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/engineer/construction_gang.png'
+        input_dict['name'] = 'construction gang'
+        new_group = construction_gang(False, input_dict, global_manager)
     elif officer.officer_type == 'porter foreman':
-        new_group = porters((officer.x, officer.y), officer.grids, 'mobs/porter foreman/porters.png', 'porters', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/porter foreman/porters.png'
+        input_dict['name'] = 'porters'
+        new_group = porters(False, input_dict, global_manager)
     elif officer.officer_type == 'merchant':
-        new_group = caravan((officer.x, officer.y), officer.grids, 'mobs/merchant/caravan.png', 'caravan', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/merchant/caravan.png'
+        input_dict['name'] = 'caravan'
+        new_group = caravan(False, input_dict, global_manager)
     elif officer.officer_type == 'head missionary':
-        new_group = missionaries((officer.x, officer.y), officer.grids, 'mobs/head missionary/missionaries.png', 'missionaries', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/head missionary/missionaries.png'
+        input_dict['name'] = 'missionaries'
+        new_group = missionaries(False, input_dict, global_manager)
     else:
-        new_group = group((officer.x, officer.y), officer.grids, 'mobs/default/default.png', 'expedition', officer.modes, worker, officer, global_manager)
+        input_dict['image'] = 'mobs/default/default.png'
+        input_dict['name'] = 'expedition'
+        new_group = group(False, input_dict, global_manager)

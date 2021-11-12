@@ -58,10 +58,22 @@ def create_strategic_map(global_manager):
 
     for current_grid in global_manager.get('grid_list'):
         if current_grid in global_manager.get('abstract_grid_list'): #if europe grid
-            new_terrain = tiles.abstract_tile(current_grid, current_grid.tile_image_id, current_grid.name, ['strategic', 'europe'], global_manager)
+            input_dict = {}
+            input_dict['grid'] = current_grid
+            input_dict['image'] = current_grid.tile_image_id
+            input_dict['name'] = current_grid.name
+            input_dict['modes'] = ['strategic', 'europe']
+            new_terrain = tiles.abstract_tile(False, input_dict, global_manager)
         else:
+            input_dict = {}
+            input_dict['grid'] = current_grid
+            input_dict['image'] = 'misc/empty.png'
+            input_dict['name'] = 'default'
+            input_dict['modes'] = ['strategic']
+            input_dict['show_terrain'] = True
             for current_cell in current_grid.cell_list:
-                new_terrain = tiles.tile((current_cell.x, current_cell.y), current_grid, 'misc/empty.png', 'default', ['strategic'], True, global_manager)
+                input_dict['coordinates'] = (current_cell.x, current_cell.y)
+                new_terrain = tiles.tile(False, input_dict, global_manager)
             current_grid.set_resources()
 
 def start_loading(global_manager):

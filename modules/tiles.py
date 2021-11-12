@@ -11,7 +11,8 @@ class tile(actor): #to do: make terrain tiles a subclass
     '''
     An actor that appears under other actors and occupies a grid cell, being able to act as a passive icon, resource, terrain, or a hidden area
     '''
-    def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grid, image, name, modes, show_terrain, global_manager): #show_terrain is like a subclass, true is terrain tile, false is non-terrain tile
         '''
         Description:
             Initializes this object
@@ -29,13 +30,14 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.actor_type = 'tile'
         self.selection_outline_color = 'yellow'#'bright blue'
         self.actor_match_outline_color = 'white'
-        super().__init__(coordinates, [grid], modes, global_manager)
-        self.set_name(name)
+        input_dict['grids'] = [input_dict['grid']] #give actor a 1-item list of grids as input
+        super().__init__(from_save, input_dict, global_manager)
+        self.set_name(input_dict['name'])
         self.global_manager.get('tile_list').append(self)
-        self.image_dict = {'default': image}
-        self.image = images.tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
+        self.image_dict = {'default': input_dict['image']}
+        self.image = images.tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), input_dict['grid'], 'default', global_manager)
         self.images = [self.image] #tiles only appear on 1 grid, but have a list of images defined to be more consistent with other actor subclasses
-        self.show_terrain = show_terrain
+        self.show_terrain = input_dict['show_terrain']
         self.cell = self.grid.find_cell(self.x, self.y)
         if self.show_terrain:
             self.cell.tile = self
@@ -219,7 +221,17 @@ class tile(actor): #to do: make terrain tiles a subclass
                         self.cell.village = equivalent_tile.cell.village
                 if not village_exists: #make new village if village not present
                     self.cell.village = villages.village(self.cell, self.global_manager)
-            self.resource_icon = resource_icon((self.x, self.y), self.grid, self.cell.resource, 'resource icon', ['strategic'], False, self, self.global_manager)
+                    
+            #self.resource_icon = resource_icon((self.x, self.y), self.grid, self.cell.resource, 'resource icon', ['strategic'], False, self, self.global_manager)
+            input_dict = {}
+            input_dict['coordinates'] = (self.x, self.y)
+            input_dict['grid'] = self.grid
+            input_dict['resource'] = self.cell.resource
+            input_dict['name'] = 'resource icon'
+            input_dict['modes'] = ['strategic']
+            input_dict['show_terrain'] = False
+            input_dict['attached_tile'] = self
+            self.resource_icon = resource_icon(False, input_dict, self.global_manager)
         self.set_visibility(self.cell.visible)
             
     def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
@@ -331,7 +343,8 @@ class abstract_tile(tile):
     '''
     tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image
     '''
-    def __init__ (self, grid, image, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__ (self, grid, image, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -344,7 +357,9 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        super().__init__((0, 0), grid, image, name, modes, False, global_manager)
+        input_dict['coordinates'] = (0, 0)
+        input_dict['show_terrain'] = False
+        super().__init__(from_save, input_dict, global_manager)
 
     def update_tooltip(self):
         '''
@@ -375,7 +390,8 @@ class resource_icon(tile):
     '''
     tile that appears above a terrain tile that has a resource and reflects the terrain tile's resource. Changes in size when buildings are built in its attached tile to allow more icons to be visible
     '''
-    def __init__(self, coordinates, grid, resource, name, modes, show_terrain, attached_tile, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grid, resource, name, modes, show_terrain, attached_tile, global_manager):
         '''
         Description:
             Initializes this object
@@ -390,12 +406,13 @@ class resource_icon(tile):
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
-        '''
-        self.attached_tile = attached_tile
-        self.resource = resource
+        ''' 
+        self.attached_tile = input_dict['attached_tile']
+        self.resource = input_dict['resource']
         default_image_id = 'scenery/resources/' + self.resource + '.png'
         small_image_id = 'scenery/resources/small/' + self.resource + '.png'
-        super().__init__(coordinates, grid, default_image_id, name, modes, show_terrain, global_manager)
+        input_dict['image'] = default_image_id
+        super().__init__(from_save, input_dict, global_manager)
         self.image_dict['small'] = small_image_id
         self.image_dict['large'] = default_image_id
         self.update_resource_icon()
@@ -436,7 +453,8 @@ class veteran_icon(tile):
     '''
     A tile that follows one of the images of a veteran officer or a group containing a veteran officer, designating that unit as a veteran
     '''
-    def __init__(self, coordinates, grid, image, name, modes, show_terrain, actor, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grid, image, name, modes, show_terrain, actor, global_manager):
         '''
         Description:
             Initializes this object
@@ -452,8 +470,8 @@ class veteran_icon(tile):
         Output:
             None
         '''
-        super().__init__(coordinates, grid, image, name, modes, show_terrain, global_manager)
-        self.actor = actor
+        super().__init__(from_save, input_dict, global_manager)
+        self.actor = input_dict['actor']
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), grid, 'default', global_manager)
+        self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), self.grid, 'default', global_manager)
         self.images = [self.image]

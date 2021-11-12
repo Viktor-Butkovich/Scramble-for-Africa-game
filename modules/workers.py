@@ -8,7 +8,8 @@ class worker(mob):
     '''
     Mob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -22,12 +23,13 @@ class worker(mob):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def can_show_tooltip(self):
         '''
@@ -161,7 +163,8 @@ class church_volunteers(worker):
     '''
     Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -175,7 +178,7 @@ class church_volunteers(worker):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
         

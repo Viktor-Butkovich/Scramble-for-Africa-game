@@ -164,6 +164,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('choosing_destination'):
         return(False)
+    elif global_manager.get('making_choice'):
+        return(False)
     return(True)
 
 def draw_loading_screen(global_manager):

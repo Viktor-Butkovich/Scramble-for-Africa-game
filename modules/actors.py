@@ -10,7 +10,8 @@ class actor():
     '''
     Object that can exist within certain coordinates on one or more grids and can optionally be able to hold an inventory of commodities
     '''
-    def __init__(self, coordinates, grids, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -23,21 +24,62 @@ class actor():
             None
         '''
         self.global_manager = global_manager
+        self.from_save = from_save
         global_manager.get('actor_list').append(self)
-        self.modes = modes
-        self.grids = grids
-        self.grid = grids[0]
-        self.x, self.y = coordinates
-        self.name = ''
-        self.set_name('placeholder')
+        self.modes = input_dict['modes']
+        if self.from_save:
+            self.grid = self.global_manager.get(input_dict['grid_type'])
+            self.grids = [self.grid]
+            if not self.grid.mini_grid == 'none':
+                self.grids.append(self.grid.mini_grid)
+            self.set_name(input_dict['name'])
+        else:
+            self.grids = input_dict['grids']
+            self.grid = self.grids[0]
+            self.set_name('placeholder')
+        self.x, self.y = input_dict['coordinates']
+        #self.name = ''
+        #self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
         self.selected = False
         self.can_hold_commodities = False
         self.can_hold_infinite_commodities = False
         self.inventory_capacity = 0
         self.tooltip_text = []
-        if self.can_hold_commodities:
-            self.inventory_setup()
+        if self.from_save:
+            self.inventory = save_dict['inventory']
+        #if self.can_hold_commodities:
+        #    self.inventory_setup()
+
+    def to_save_dict(self):
+        save_dict = {}
+        
+        init_type = ''
+        if self.actor_type == 'mob':
+            if self.is_worker:
+                if not self.is_church_volunteers:
+                    init_type = 'worker'
+                else:
+                    init_type = 'church_volunteers'
+            elif self.is_vehicle:
+                init_type = self.vehicle_type
+            elif self.is_officer:
+                init_type = self.officer_type
+        elif self.actor_type == 'tile':
+            init_type = 'tile'
+        elif self.actor_type == 'building':
+            init_type = 'building'
+        save_dict['init_type'] = init_type
+        
+        save_dict['coordinates'] = (self.x, self.y)
+        save_dict['modes'] = self.modes
+        if self.grid == self.global_manager.get('strategic_map_grid'):
+            save_dict['grid_type'] = 'strategic_map_grid'
+        elif self.grid == self.global_manager.get('europe_grid'):
+            save_dict['grid_type'] = 'europe_grid'
+        save_dict['name'] = self.name
+        save_dict['inventory'] = self.inventory
+        return(save_dict)
             
     def set_image(self, new_image):
         '''

@@ -230,6 +230,8 @@ class button():
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
+        elif self.button_type == 'main menu':
+            self.set_tooltip(["Exits to main menu", "Does not automatically save the game"])
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
         elif self.button_type == 'save game':

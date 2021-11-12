@@ -247,16 +247,28 @@ class recruitment_choice_button(choice_button):
             None
         '''
         if self.can_show():
+            input_dict = {}
+            input_dict['coordinates'] = (0, 0)
+            input_dict['grids'] = [self.global_manager.get('europe_grid')]
+            input_dict['image'] = self.mob_image_id
+            
+            input_dict['modes'] = ['strategic', 'europe']
             self.showing_outline = True
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
+                input_dict['name'] = self.recruitment_type
                 if self.recruitment_type == 'head missionary':
-                    new_officer = officers.head_missionary((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.global_manager)
+                    new_officer = officers.head_missionary(False, input_dict, self.global_manager)
                 else:
-                    new_officer = officers.officer((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, self.recruitment_type, ['strategic', 'europe'], self.recruitment_type, self.global_manager)
+                    input_dict['officer_type'] = self.recruitment_type
+                    new_officer = officers.officer(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'European worker':
-                new_worker = workers.worker((0, 0), [self.global_manager.get('europe_grid')], self.mob_image_id, 'European worker', ['strategic', 'europe'], self.global_manager)
+                input_dict['name'] = 'European worker'
+                new_worker = workers.worker(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'ship':
                 image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
-                new_ship = vehicles.ship((0, 0), [self.global_manager.get('europe_grid')], image_dict, 'ship', ['strategic', 'europe'], 'none', self.global_manager)
+                input_dict['image_dict'] = image_dict
+                input_dict['name'] = 'ship'
+                input_dict['crew'] = 'none'
+                new_ship = vehicles.ship(False, input_dict, self.global_manager)
         super().on_click()

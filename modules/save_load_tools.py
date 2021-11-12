@@ -88,9 +88,20 @@ class save_load_manager():
             #print(current_element)
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
         #print(saved_global_manager.global_dict)
+
+        #still need to save grid cell contents with inventories, terrain, and resource/village info, should be saved and loaded in before actors
+            
+        saved_actor_dicts = []
+        for current_mob in self.global_manager.get('mob_list'):
+            saved_actor_dicts.append(current_mob.to_save_dict())
+        for current_building in self.global_manager.get('building_list'):
+            saved_actor_dicts.append(current_building.to_save_dict())
+
+        print(saved_actor_dicts)
+
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
-            
+            pickle.dump(saved_actor_dicts, handle)
         text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
 
     def load_game(self, file_path):
@@ -98,11 +109,13 @@ class save_load_manager():
             file_path = 'save_games/' + file_path
             with open(file_path, 'rb') as handle:
                 new_global_manager = pickle.load(handle)
+                saved_actor_dicts = pickle.load(handle)
         except:
             text_tools.print_to_screen("The " + file_path + " file does not exist.", self.global_manager)
             return()
         for current_element in self.copied_elements:
             self.global_manager.set(current_element, new_global_manager.get(current_element))
+
 
         game_transitions.set_game_mode('strategic', self.global_manager)
         self.global_manager.get('minimap_grid').calibrate(2, 2)

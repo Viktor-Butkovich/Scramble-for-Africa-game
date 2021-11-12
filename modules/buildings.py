@@ -12,7 +12,8 @@ class building(actor):
     '''
     Actor that exists in cells of multiple grids in front of tiles and behind mobs that can not be clicked
     '''
-    def __init__(self, coordinates, grids, image_id, name, building_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, building_type, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -28,21 +29,30 @@ class building(actor):
             None
         '''
         self.actor_type = 'building'
-        self.building_type = building_type
-        super().__init__(coordinates, grids, modes, global_manager)
-        self.image_dict = {'default': image_id}
+        self.building_type = input_dict['building_type']
+        super().__init__(from_save, input_dict, global_manager)
+        self.image_dict = {'default': input_dict['image']}
         self.images = []
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
                 self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
         global_manager.get('building_list').append(self)
-        self.set_name(name)
+        self.set_name(input_dict['name'])
         self.worker_capacity = 0 #default
         self.contained_workers = []
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
+
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['building_type'] = self.building_type
+        save_dict['contained_workers'] = [] #list of dictionaries for each worker, on load a building creates all of its passengers and embarks them
+        for current_worker in self.contained_workers:
+            save_dict['contained_workers'].append(current_worker.to_save_dict())
+
+        return(save_dict)
 
     def remove(self):
         '''
@@ -120,7 +130,8 @@ class infrastructure_building(building):
     '''
     Building that eases movement between tiles and is a road or railroad. Has images that show connections with other tiles that have roads or railroads
     '''
-    def __init__(self, coordinates, grids, image_id, name, infrastructure_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, infrastructure_type, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -135,14 +146,15 @@ class infrastructure_building(building):
         Output:
             None
         '''
-        self.infrastructure_type = infrastructure_type
+        self.infrastructure_type = input_dict['infrastructure_type']
         if self.infrastructure_type == 'railroad':
             self.is_road = False
             self.is_railroad = True
         elif self.infrastructure_type == 'road':
             self.is_railroad = False
             self.is_road = True
-        super().__init__(coordinates, grids, image_id, name, 'infrastructure', modes, global_manager)
+        input_dict['building_type'] = 'infrastructure'
+        super().__init__(from_save, input_dict, global_manager)
         self.image_dict['left_road'] = 'buildings/infrastructure/left_road.png'
         self.image_dict['right_road'] = 'buildings/infrastructure/right_road.png'
         self.image_dict['down_road'] = 'buildings/infrastructure/down_road.png'
@@ -173,7 +185,8 @@ class trading_post(building):
     '''
     Building in a village that allows trade with the village
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -187,10 +200,12 @@ class trading_post(building):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'trading_post', modes, global_manager)
+        input_dict['building_type'] = 'trading_post'
+        super().__init__(from_save, input_dict, global_manager)
 
 class mission(building):
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -204,13 +219,15 @@ class mission(building):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'mission', modes, global_manager)
+        input_dict['building_type'] = 'mission'
+        super().__init__(from_save, input_dict, global_manager)
 
 class train_station(building):
     '''
     Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -224,7 +241,8 @@ class train_station(building):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)
+        input_dict['building_type'] = 'train_station'
+        super().__init__(from_save, input_dict, global_manager)
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
@@ -232,7 +250,8 @@ class port(building):
     '''
     Building adjacent to water that allows ships to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -246,7 +265,8 @@ class port(building):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
+        input_dict['building_type'] = 'port'
+        super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
@@ -255,7 +275,8 @@ class resource_building(building):
     '''
     Building in a resource tile that allows workers to attach to this building to produce commodities over time
     '''
-    def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):
         '''
         Description:
             Initializes this object
@@ -270,12 +291,15 @@ class resource_building(building):
         Output:
             None
         '''
-        self.resource_type = resource_type
-        super().__init__(coordinates, grids, image_id, name, 'resource', modes, global_manager)
+        self.resource_type = input_dict['resource_type']
+        input_dict['building_type'] = 'resource'
+        super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.worker_capacity = 1 #improve with upgrades
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
+
+        #when loading from save, go through contained workers and initialize them and put them in this building
 
     def remove(self):
         '''

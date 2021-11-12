@@ -9,3 +9,24 @@ game_transitions.to_main_menu
 grids imports
 save games folder
 market_tools.set_price
+actors.actor.to_save_dict
+actors.actor.__init__
+tiles.tile.__init__
+tiles.resource_icon.__init__
+tiles.abstract_tile.__init__
+tiles.veteran_icon.__init__
+mobs.mob.__init__
+mobs.mob.to_save_dict
+workers.worker.__init__
+workers.church_volunteers.__init__
+officers.officer.__init__
+officers.head_missionary.__init__
+officers.officer.to_save_dict
+vehicles.vehicle.__init__
+vehicles.vehicle.to_save_dict
+vehicles.train.__init__
+vehicles.ship.__init__
+All group variants.__init__
+groups.group.to_save_dict
+All building variants.__init__
+buildings.building.to_save_dict

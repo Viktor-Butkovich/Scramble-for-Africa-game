@@ -11,7 +11,8 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
     '''
     Mob that requires an attached worker to function and can carry other mobs as passengers
     '''
-    def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         '''
         Description:
             Initializes this object
@@ -26,20 +27,36 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         Output:
             None
         '''
-        self.contained_mobs = []
+        #self.contained_mobs = []
         self.vehicle_type = 'vehicle'
         self.has_crew = False
-        super().__init__(coordinates, grids, image_dict['default'], name, modes, global_manager)
-        self.image_dict = image_dict #should have default and uncrewed
+        input_dict['image'] = input_dict['image_dict']['default']
+        self.contained_mobs = []
+        super().__init__(from_save, input_dict, global_manager)
+        self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
-        self.crew = crew
+        if not from_save:
+            self.crew = input_dict['crew']
+            if self.crew == 'none':
+                self.has_crew = False
+                self.set_image('uncrewed')
+            else:
+                self.has_crew = True
+                self.set_image('uncrewed')
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
+        #else: #create crew and passengers through recruitment_manager and embark them
+            
+
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
         if self.crew == 'none':
-            self.has_crew = False
-            self.set_image('uncrewed')
+            save_dict['crew'] = 'none'
         else:
-            self.has_crew = True
-            self.set_image('uncrewed')
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
+            save_dict['crew'] = self.crew.to_save_dict()
+        save_dict['passenger_dicts'] = [] #list of dictionaries for each passenger, on load a vehicle creates all of its passengers and embarks them
+        for current_mob in self.passengers:
+            save_dict['passengers_dicts'].append(current_mob.to_save_dict())
+        return(save_dict)
 
     def can_move(self, x_change, y_change):
         '''
@@ -105,7 +122,8 @@ class train(vehicle):
     '''
     Vehicle that can only move along railroads, has normal inventory capacity, and has 10 movement points
     '''
-    def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         '''
         Description:
             Initializes this object
@@ -120,7 +138,7 @@ class train(vehicle):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.set_max_movement_points(10)
         self.has_infinite_movement = True
         self.vehicle_type = 'train'
@@ -128,8 +146,9 @@ class train(vehicle):
         self.can_walk = True
         self.can_hold_commodities = True
         self.inventory_capacity = 9
-        self.inventory_setup()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        if not from_save:
+            self.inventory_setup()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def can_move(self, x_change, y_change):
         '''
@@ -153,7 +172,8 @@ class ship(vehicle):
     '''
     Vehicle that can only move in the water and into ports, can cross the ocean, has large inventory capacity, and has infinite movement points
     '''
-    def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, coordinates, grids, image_dict, name, modes, crew, global_manager):
         '''
         Description:
             Initializes this object
@@ -168,7 +188,7 @@ class ship(vehicle):
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_dict, name, modes, crew, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.set_max_movement_points(10)
         self.has_infinite_movement = True
         self.vehicle_type = 'ship'
@@ -177,8 +197,9 @@ class ship(vehicle):
         self.travel_possible = True #if this mob would ever be able to travel
         self.can_hold_commodities = True
         self.inventory_capacity = 27
-        self.inventory_setup()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
+        if not from_save:
+            self.inventory_setup()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
 
     def can_leave(self):
         '''
