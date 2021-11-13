@@ -28,6 +28,7 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             None
         '''
         #self.contained_mobs = []
+        self.initializing = True #when mobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
         self.vehicle_type = 'vehicle'
         self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']
@@ -44,8 +45,14 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
                 self.has_crew = True
                 self.set_image('uncrewed')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
-        #else: #create crew and passengers through recruitment_manager and embark them
-            
+        else: #create crew and passengers through recruitment_manager and embark them
+            if input_dict['crew'] == 'none':
+                self.crew = 'none'
+            else:
+                self.crew = self.global_manager.get('actor_creation_manager').create(True, input_dict['crew'], self.global_manager)
+            for current_passenger in input_dict['passenger_dicts']:
+                self.contained_mobs.append(self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager))
+        self.initializing = False
 
     def to_save_dict(self):
         save_dict = super().to_save_dict()

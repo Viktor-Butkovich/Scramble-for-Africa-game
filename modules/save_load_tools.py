@@ -125,6 +125,7 @@ class save_load_manager():
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
+            pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
         text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
 
@@ -165,10 +166,10 @@ class save_load_manager():
                 input_dict['modes'] = ['strategic']
                 input_dict['strategic_grid'] = True
                 input_dict['grid_line_width'] = 2
-                strategic_map_grid = grids.grid(False, input_dict, self.global_manager)
+                strategic_map_grid = grids.grid(True, input_dict, self.global_manager)
                 self.global_manager.set('strategic_map_grid', strategic_map_grid)
                 
-            elif current_grid['grid_type'] == 'europe_grid':
+            elif current_grid_dict['grid_type'] == 'europe_grid':
                 input_dict['origin_coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
                 input_dict['pixel_width'] = scaling.scale_width(120, self.global_manager)
                 input_dict['pixel_height'] = scaling.scale_height(120, self.global_manager)
@@ -178,7 +179,7 @@ class save_load_manager():
                 input_dict['tile_image_id'] = 'locations/europe.png' 
                 input_dict['grid_line_width'] = 3
                 input_dict['name'] = 'Europe'
-                europe_grid = grids.abstract_grid(False, input_dict, self.global_manager)
+                europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                 self.global_manager.set('europe_grid', europe_grid)
 
         input_dict = {}
@@ -195,12 +196,20 @@ class save_load_manager():
         input_dict['attached_grid'] = strategic_map_grid
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
+
+        self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+
+        #load actors
+        for current_actor_dict in saved_actor_dicts:
+            self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
+            
         
         game_transitions.set_game_mode('strategic', self.global_manager)
+        game_transitions.create_strategic_map(self.global_manager)
+        
         self.global_manager.get('minimap_grid').calibrate(2, 2)
         #turn_management_tools.start_turn(self.global_manager, True)
 
-        #load actors
         
 '''
 To save grid:

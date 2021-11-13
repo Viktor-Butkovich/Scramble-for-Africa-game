@@ -47,6 +47,10 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
             self.inventory_setup()
+            if self.cell.grid.from_save: #load in saved inventory from cell
+                for current_commodity in self.global_manager.get('commodity_types'):
+                    if current_commodity in self.cell.save_dict['inventory']:
+                        self.set_inventory(current_commodity, self.cell.save_dict['inventory'][current_commodity])
         elif self.name == 'Europe': #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
@@ -57,6 +61,10 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.can_hold_infinite_commodities = True
             self.inventory_setup()
             self.terrain = 'none'
+            if self.cell.grid.from_save: #load in saved inventory from cell
+                for current_commodity in self.global_manager.get('commodity_types'):
+                    if current_commodity in self.cell.save_dict['inventory']:
+                        self.set_inventory(current_commodity, self.cell.save_dict['inventory'][current_commodity])
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
         else:
@@ -221,7 +229,14 @@ class tile(actor): #to do: make terrain tiles a subclass
                         self.cell.village = equivalent_tile.cell.village
                 if not village_exists: #make new village if village not present
                     input_dict = {'cell': self.cell}
-                    self.cell.village = villages.village(False, input_dict, self.global_manager)
+                    if self.cell.grid.from_save:
+                        input_dict['name'] = self.cell.save_dict['village_name']
+                        input_dict['population'] = self.cell.save_dict['village_population']
+                        input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
+                        input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
+                        self.cell.village = villages.village(True, input_dict, self.global_manager)
+                    else:
+                        self.cell.village = villages.village(False, input_dict, self.global_manager)
                     
             #self.resource_icon = resource_icon((self.x, self.y), self.grid, self.cell.resource, 'resource icon', ['strategic'], False, self, self.global_manager)
             input_dict = {}

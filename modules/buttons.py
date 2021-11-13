@@ -826,13 +826,16 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if self.can_show() and not self.is_last: #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-            self.showing_outline = True
-            self.attached_mob.select() 
-            for current_image in self.attached_mob.images: #move mob to front of each stack it is in
-                if not current_image.current_cell == 'none':
-                    while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
-                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        if self.can_show() and (not self.is_last):
+            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+                self.showing_outline = True
+                self.attached_mob.select() 
+                for current_image in self.attached_mob.images: #move mob to front of each stack it is in
+                    if not current_image.current_cell == 'none':
+                        while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
+                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+            else:
+                text_tools.print_to_screen("You are busy and can not select a different unit", self.global_manager)
                          
     def draw(self):
         '''

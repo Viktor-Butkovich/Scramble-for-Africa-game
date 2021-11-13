@@ -42,7 +42,10 @@ class group(mob):
         if not from_save:
             self.worker = input_dict['worker']
             self.officer = input_dict['officer']
-        #else: #create worker and officer through recruitment manager
+        else:
+            self.worker = global_manager.get('actor_creation_manager').create(True, input_dict['worker'], global_manager)
+            self.officer = global_manager.get('actor_creation_manager').create(True, input_dict['officer'], global_manager)
+            
         #self.veteran = self.officer.veteran
         super().__init__(from_save, input_dict, global_manager)
         self.worker.join_group()

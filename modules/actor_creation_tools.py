@@ -53,6 +53,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.port(from_save, input_dict, global_manager)
         elif init_type == 'resource':
             new_actor = buildings.resource_building(from_save, input_dict, global_manager)
+        return(new_actor)
 
     def create_group(self, worker, officer, global_manager): #use when merging groups. At beginning of game, instead of using this, create a group which creates its worker and officer and merges them
         '''
@@ -80,7 +81,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             else:
                 name += ' '
         input_dict['name'] = name
-        self.create(False, input_dict, global_manager)
+        return(self.create(False, input_dict, global_manager))
         '''
         if officer.officer_type == 'explorer':
             input_dict['image'] = 'mobs/explorer/expedition.png'

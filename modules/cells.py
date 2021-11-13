@@ -6,7 +6,7 @@ class cell():
     '''
     Object representing one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
     '''
-    def __init__(self, x, y, width, height, grid, color, global_manager):
+    def __init__(self, x, y, width, height, grid, color, save_dict, global_manager):
         '''
         Description:
             Initializes this object
@@ -38,13 +38,19 @@ class cell():
         self.village = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
-        self.set_visibility(False)
+        #self.set_visibility(False)
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
+        if not save_dict == 'none':
+            self.save_dict = save_dict
+            self.set_visibility(save_dict['visible'])
+        else:
+            self.set_visibility(False)
 
     def to_save_dict(self):
         save_dict = {}
+        save_dict['coordinates'] = (self.x, self.y)
         save_dict['visible'] = self.visible
         save_dict['terrain'] = self.terrain
         save_dict['resource'] = self.resource

@@ -47,7 +47,8 @@ class actor():
         self.inventory_capacity = 0
         self.tooltip_text = []
         if self.from_save:
-            self.inventory = save_dict['inventory']
+            self.inventory = input_dict['inventory']
+    
         else:
             self.inventory = {}
         #if self.can_hold_commodities:

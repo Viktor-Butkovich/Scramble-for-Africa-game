@@ -36,10 +36,13 @@ class building(actor):
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
                 self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
-        global_manager.get('building_list').append(self)
+        self.global_manager.get('building_list').append(self)
         self.set_name(input_dict['name'])
         self.worker_capacity = 0 #default
         self.contained_workers = []
+        if from_save:
+            for current_worker in input_dict['contained_workers']:
+                self.global_manager.get('actor_creation_manager').create(True, current_worker, self.global_manager).work_building(self)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()

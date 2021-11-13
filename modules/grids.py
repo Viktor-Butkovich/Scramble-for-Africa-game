@@ -33,6 +33,7 @@ class grid():
         self.global_manager = global_manager
         self.global_manager.get('grid_list').append(self)
         self.grid_line_width = input_dict['grid_line_width']
+        self.from_save = from_save
         self.is_mini_grid = False
         self.is_abstract_grid = False
         self.attached_grid = 'none'
@@ -90,9 +91,6 @@ class grid():
         for current_cell in self.cell_list:
             save_dict['cell_list'].append(current_cell.to_save_dict())
         return(save_dict)
-
-    def load_cells(self, cell_list): #list of dictionaries with cell data, create cells
-        nothing = 0
                     
     def draw(self):
         '''
@@ -241,6 +239,14 @@ class grid():
                 self.create_cell(x, y)
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
+
+    def load_cells(self, cell_list): #list of dictionaries with cell data, create cells
+        for current_cell_dict in cell_list:
+            x, y = current_cell_dict['coordinates']
+            new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], current_cell_dict, self.global_manager)
+        for current_cell in self.cell_list:
+            current_cell.find_adjacent_cells()
+            current_cell.set_terrain(current_cell.save_dict['terrain'])
             
     def create_cell(self, x, y):
         '''
@@ -252,7 +258,7 @@ class grid():
         Output:
             None
         '''
-        new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], self.global_manager)
+        new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], 'none', self.global_manager)
 
     def make_resource_list(self, terrain): #should be changed to return dictionary with frequencies of each resource and a list of each resource present, avoiding unnecessary 100+ item lists
         '''
@@ -356,12 +362,16 @@ class grid():
         Output:
             None
         '''
-        resource_list_dict = {}
-        for terrain in self.global_manager.get('terrain_list'):
-            resource_list_dict[terrain] = self.make_resource_list(terrain)
-        resource_list_dict['water'] = self.make_resource_list('water')
-        for cell in self.cell_list:
-            cell.set_resource(random.choice(resource_list_dict[cell.terrain]))
+        if self.from_save:
+            for cell in self.cell_list:
+                cell.set_resource(cell.save_dict['resource'])
+        else:
+            resource_list_dict = {}
+            for terrain in self.global_manager.get('terrain_list'):
+                resource_list_dict[terrain] = self.make_resource_list(terrain)
+            resource_list_dict['water'] = self.make_resource_list('water')
+            for cell in self.cell_list:
+                cell.set_resource(random.choice(resource_list_dict[cell.terrain]))
             
     def make_random_terrain_worm(self, min_len, max_len, possible_terrains):
         '''

@@ -1,4 +1,4 @@
-#note: prevent switching selected mob with contained_mob icons while busy
+#to do: when loading inventory, fill in empty inventory slots
 
 import pygame
 import time

@@ -62,8 +62,8 @@ class mob(actor):
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination_coordinates']
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
-                self.set_movement_points(input_dict['movement_points'])
-                self.update_tooltip()
+            self.set_movement_points(input_dict['movement_points'])
+            self.update_tooltip()
         else:
             self.end_turn_destination = 'none'
             self.reset_movement_points()
@@ -83,6 +83,7 @@ class mob(actor):
             elif self.grid == self.global_manager.get('europe_grid'):
                 save_dict['end_turn_destination_grid_type'] = 'europe_grid'
             save_dict['end_turn_destination_coordinates'] = (self.end_turn_destination.x, self.end_turn_destination.y)
+        save_dict['image'] = self.image_dict['default']
         return(save_dict)
         
 
@@ -515,7 +516,8 @@ class mob(actor):
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
-        vehicle.select()
+        if not vehicle.initializing: #don't selecte vehicle if loading in at start of game
+            vehicle.select()
 
     def disembark_vehicle(self, vehicle):
         '''
