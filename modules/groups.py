@@ -15,8 +15,8 @@ from . import notification_tools
 from . import dice
 from . import scaling
 from . import main_loop_tools
-from . import buildings
-from . import vehicles
+#from . import buildings
+#from . import vehicles
 
 class group(mob):
     '''
@@ -71,11 +71,13 @@ class group(mob):
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
+        self.group_type = 'none'
 
     def to_save_dict(self):
         save_dict = super().to_save_dict()
         save_dict['worker'] = self.worker.to_save_dict()
-        save_dict['officer'] = self.worker.to_save_dict()
+        save_dict['officer'] = self.officer.to_save_dict()
+        return(save_dict)
 
     def promote(self):
         '''
@@ -359,7 +361,7 @@ class group(mob):
             input_dict['grids'] = self.grids
             input_dict['name'] = self.building_name
             input_dict['modes'] = ['strategic']
-            
+            input_dict['init_type'] = self.building_type
             if not self.building_type == 'train':
                 if not self.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
                     self.images[0].current_cell.contained_buildings[self.building_type].remove()
@@ -367,7 +369,7 @@ class group(mob):
                 input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
                 input_dict['resource_type'] = self.attached_resource
                 
-                new_building = buildings.resource_building(False, input_dict, self.global_manager)
+                #new_building = buildings.resource_building(False, input_dict, self.global_manager)
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'
                 if self.building_name == 'road':
@@ -376,28 +378,29 @@ class group(mob):
                     building_image_id = 'buildings/infrastructure/railroad.png'
                 input_dict['image'] = building_image_id
                 input_dict['infrastructure_type'] = self.building_name
-                new_building = buildings.infrastructure_building(False, input_dict, self.global_manager)
+                #new_building = buildings.infrastructure_building(False, input_dict, self.global_manager)
                     #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
             elif self.building_type == 'port':
                 input_dict['image'] = 'buildings/port.png'
-                new_building = buildings.port(False, input_dict, self.global_manager)
+                #new_building = buildings.port(False, input_dict, self.global_manager)
             elif self.building_type == 'train_station':
                 input_dict['image'] = 'buildings/train_station.png'
-                new_building = buildings.train_station(False, input_dict, self.global_manager)
+                #new_building = buildings.train_station(False, input_dict, self.global_manager)
             elif self.building_type == 'trading_post':
                 input_dict['image'] = 'buildings/trading_post.png'
-                new_building = buildings.trading_post(False, input_dict, self.global_manager)
+                #new_building = buildings.trading_post(False, input_dict, self.global_manager)
             elif self.building_type == 'mission':
                 input_dict['image'] = 'buildings/mission.png'
-                new_building = buildings.mission(False, input_dict, self.global_manager)
+                #new_building = buildings.mission(False, input_dict, self.global_manager)
             elif self.building_type == 'train':
                 image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['crew'] = 'none'
-                new_train = vehicles.train(False, input_dict, self.global_manager)
+                #new_train = vehicles.train(False, input_dict, self.global_manager)
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
-                new_building = buildings.building(False, input_dict, self.global_manager)
+                #new_building = buildings.building(False, input_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
         self.global_manager.set('ongoing_construction', False)
 
@@ -443,6 +446,7 @@ class porters(group):
         super().__init__(from_save, input_dict, global_manager)
         self.can_hold_commodities = True
         self.inventory_capacity = 9
+        self.group_type = 'porters'
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
@@ -470,6 +474,7 @@ class construction_gang(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.can_construct = True
+        self.group_type = 'construction_gang'
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
@@ -499,6 +504,7 @@ class caravan(group):
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
+        self.group_type = 'caravan'
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
@@ -753,6 +759,7 @@ class missionaries(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.can_convert = True
+        self.group_type = 'missionaries'
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
 
@@ -939,6 +946,7 @@ class expedition(group):
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
+        self.group_type = 'expedition'
 
     def move(self, x_change, y_change):
         '''
@@ -1147,46 +1155,3 @@ class expedition(group):
         for current_die in copy_dice_list:
             current_die.remove()
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
-
-def create_group(worker, officer, global_manager):
-    '''
-    Description:
-        Creates a group out of the inputted worker and officer. The type of group formed depends on the officer's type. Upon joining a group, the component officer and worker will not be able to be seen or interacted with
-            independently until the group is disbanded
-    Input:
-        worker worker: worker to create a group out of
-        officer officer: officer to create a group out of
-    Output:
-        None
-    '''
-    input_dict = {}
-    input_dict['coordinates'] = (officer.x, officer.y)
-    input_dict['grids'] = officer.grids
-    input_dict['worker'] = worker
-    input_dict['officer'] = officer
-    input_dict['modes'] = ['strategic', 'europe']
-    
-    if officer.officer_type == 'explorer':
-        input_dict['image'] = 'mobs/explorer/expedition.png'
-        input_dict['name'] = 'expedition'
-        new_group = expedition(False, input_dict, global_manager)
-    elif officer.officer_type == 'engineer':
-        input_dict['image'] = 'mobs/engineer/construction_gang.png'
-        input_dict['name'] = 'construction gang'
-        new_group = construction_gang(False, input_dict, global_manager)
-    elif officer.officer_type == 'porter foreman':
-        input_dict['image'] = 'mobs/porter foreman/porters.png'
-        input_dict['name'] = 'porters'
-        new_group = porters(False, input_dict, global_manager)
-    elif officer.officer_type == 'merchant':
-        input_dict['image'] = 'mobs/merchant/caravan.png'
-        input_dict['name'] = 'caravan'
-        new_group = caravan(False, input_dict, global_manager)
-    elif officer.officer_type == 'head missionary':
-        input_dict['image'] = 'mobs/head missionary/missionaries.png'
-        input_dict['name'] = 'missionaries'
-        new_group = missionaries(False, input_dict, global_manager)
-    else:
-        input_dict['image'] = 'mobs/default/default.png'
-        input_dict['name'] = 'expedition'
-        new_group = group(False, input_dict, global_manager)

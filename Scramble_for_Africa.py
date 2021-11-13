@@ -1,3 +1,5 @@
+#note: prevent switching selected mob with contained_mob icons while busy
+
 import pygame
 import time
 import random
@@ -22,6 +24,7 @@ import modules.vehicles as vehicles
 import modules.buildings as buildings
 import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
+import modules.actor_creation_tools as actor_creation_tools
 
 pygame.init()
 
@@ -141,7 +144,16 @@ global_manager.set('resource_types', global_manager.get('commodity_types') + ['n
 
 global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'head missionary'])
+global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary'])
+global_manager.set('officer_group_type_dict',
+    {
+    'explorer': 'expedition',
+    'engineer': 'construction_gang',
+    'porter_foreman': 'porters',
+    'merchant': 'caravan',
+    'head_missionary': 'missionaries'
+    }
+)
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
 global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
@@ -228,6 +240,8 @@ global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_temp
 global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
+global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
+
 
 strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu'], global_manager)
 #europe_background_image = images.free_image('misc/europe_background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['europe'], global_manager)

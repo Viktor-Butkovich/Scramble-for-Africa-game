@@ -2,7 +2,7 @@
 
 from .mobs import mob
 from .tiles import veteran_icon
-from . import workers
+#from . import workers
 from . import actor_utility
 from . import utility
 from . import notification_tools
@@ -200,7 +200,7 @@ class head_missionary(officer):
         Output:
             None
         '''
-        input_dict['officer_type'] = 'head missionary'
+        input_dict['officer_type'] = 'head_missionary'
         super().__init__(from_save, input_dict, global_manager)
         self.current_roll_modifier = 0
         self.default_min_success = 4
@@ -331,10 +331,12 @@ class head_missionary(officer):
             input_dict = {}
             input_dict['coordinates'] = (0, 0)
             input_dict['grids'] = [self.global_manager.get('europe_grid')]
-            input_dict['image'] = 'mobs/church volunteers/default.png'
+            input_dict['image'] = 'mobs/church_volunteers/default.png'
             input_dict['name'] = 'Church volunteers'
             input_dict['modes'] = ['strategic', 'europe']
-            new_church_volunteers = workers.church_volunteers(False, input_dict, self.global_manager)
+            input_dict['init_type'] = 'church_volunteers'
+            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            #new_church_volunteers = workers.church_volunteers(False, input_dict, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()

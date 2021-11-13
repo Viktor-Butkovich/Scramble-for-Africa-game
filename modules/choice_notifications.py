@@ -4,11 +4,11 @@ import pygame
 from .buttons import button
 from .notifications import notification
 from . import mobs
-from . import vehicles
+#from . import vehicles
 from . import text_tools
 from . import scaling
-from . import workers
-from . import officers
+#from . import workers
+#from . import officers
 
 class choice_notification(notification):
     '''
@@ -251,24 +251,33 @@ class recruitment_choice_button(choice_button):
             input_dict['coordinates'] = (0, 0)
             input_dict['grids'] = [self.global_manager.get('europe_grid')]
             input_dict['image'] = self.mob_image_id
-            
             input_dict['modes'] = ['strategic', 'europe']
             self.showing_outline = True
             self.global_manager.get('money_tracker').change(-1 * self.cost)
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
-                input_dict['name'] = self.recruitment_type
-                if self.recruitment_type == 'head missionary':
-                    new_officer = officers.head_missionary(False, input_dict, self.global_manager)
-                else:
-                    input_dict['officer_type'] = self.recruitment_type
-                    new_officer = officers.officer(False, input_dict, self.global_manager)
+                name = ''
+                for character in self.recruitment_type:
+                    if not character == '_':
+                        name += character
+                    else:
+                        name += ' '
+                input_dict['name'] = name
+                input_dict['init_type'] = self.recruitment_type
+                #if self.recruitment_type == 'head_missionary':
+                    #new_officer = officers.head_missionary(False, input_dict, self.global_manager)
+                #else:
+                input_dict['officer_type'] = self.recruitment_type
+                #new_officer = officers.officer(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'European worker':
                 input_dict['name'] = 'European worker'
-                new_worker = workers.worker(False, input_dict, self.global_manager)
+                input_dict['init_type'] = 'worker'
+                #new_worker = workers.worker(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'ship':
                 image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['name'] = 'ship'
                 input_dict['crew'] = 'none'
-                new_ship = vehicles.ship(False, input_dict, self.global_manager)
+                input_dict['init_type'] = 'ship'
+                #new_ship = vehicles.ship(False, input_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         super().on_click()

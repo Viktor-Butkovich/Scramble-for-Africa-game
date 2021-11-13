@@ -10,7 +10,8 @@ class grid():
     '''
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, strategic_grid, grid_line_width, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, strategic_grid, grid_line_width, global_manager):
         '''
         Description:
             Initializes this object
@@ -31,49 +32,67 @@ class grid():
         '''
         self.global_manager = global_manager
         self.global_manager.get('grid_list').append(self)
-        self.grid_line_width = grid_line_width
+        self.grid_line_width = input_dict['grid_line_width']
         self.is_mini_grid = False
         self.is_abstract_grid = False
         self.attached_grid = 'none'
-        self.modes = modes
-        self.origin_x, self.origin_y = origin_coordinates
-        self.coordinate_width = coordinate_width
-        self.coordinate_height = coordinate_height
-        self.pixel_width = pixel_width
-        self.pixel_height = pixel_height
+        self.modes = input_dict['modes']
+        self.origin_x, self.origin_y = input_dict['origin_coordinates']
+        self.coordinate_width = input_dict['coordinate_width']
+        self.coordinate_height = input_dict['coordinate_height']
+        self.pixel_width = input_dict['pixel_width']
+        self.pixel_height = input_dict['pixel_height']
         self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
-        self.internal_line_color = internal_line_color
-        self.external_line_color = external_line_color
+        self.internal_line_color = input_dict['internal_line_color']
+        self.external_line_color = input_dict['external_line_color']
         self.cell_list = []
         self.mini_grid = 'none'
-        self.create_cells()
-        if strategic_grid:
-            area = self.coordinate_width * self.coordinate_height
-            num_worms = area // 5
-            for i in range(num_worms):
-                self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
-            for cell in self.cell_list:
-                if cell.y == 0:
-                    cell.set_terrain('water')
-            num_rivers = random.randrange(2, 4)
-            valid = False
-            while not valid:
-                valid = True
-                start_x_list = []
-                for i in range(num_rivers):
-                    start_x_list.append(random.randrange(0, self.coordinate_width))
-                for index in range(len(start_x_list)):
-                    for other_index in range(len(start_x_list)):
-                        if not index == other_index:
-                            if abs(start_x_list[index] - start_x_list[other_index]) < 3:
-                                valid = False
-            
-            for start_x in start_x_list:
-                self.make_random_river_worm(round(coordinate_height * 0.75), round(coordinate_height * 1.25), start_x)
+        if not from_save:
+            self.create_cells()
+            if input_dict['strategic_grid']:
+                area = self.coordinate_width * self.coordinate_height
+                num_worms = area // 5
+                for i in range(num_worms):
+                    self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
+                for cell in self.cell_list:
+                    if cell.y == 0:
+                        cell.set_terrain('water')
+                num_rivers = random.randrange(2, 4)
+                valid = False
+                while not valid:
+                    valid = True
+                    start_x_list = []
+                    for i in range(num_rivers):
+                        start_x_list.append(random.randrange(0, self.coordinate_width))
+                    for index in range(len(start_x_list)):
+                        for other_index in range(len(start_x_list)):
+                            if not index == other_index:
+                                if abs(start_x_list[index] - start_x_list[other_index]) < 3:
+                                    valid = False
                 
-            for cell in self.cell_list:
-                if cell.y == 0 or cell.y == 1:
-                    cell.set_visibility(True)
+                for start_x in start_x_list:
+                    self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
+                    
+                for cell in self.cell_list:
+                    if cell.y == 0 or cell.y == 1:
+                        cell.set_visibility(True)
+        else:
+            self.saved_cell_list = input_dict['cell_list']
+            self.load_cells(input_dict['cell_list'])
+
+    def to_save_dict(self):
+        save_dict = {}
+        if self.global_manager.get('strategic_map_grid') == self:
+            save_dict['grid_type'] = 'strategic_map_grid'
+        else:
+            save_dict['grid_type'] = 'default'
+        save_dict['cell_list'] = []
+        for current_cell in self.cell_list:
+            save_dict['cell_list'].append(current_cell.to_save_dict())
+        return(save_dict)
+
+    def load_cells(self, cell_list): #list of dictionaries with cell data, create cells
+        nothing = 0
                     
     def draw(self):
         '''
@@ -453,7 +472,8 @@ class mini_grid(grid):
     '''
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed
     '''
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
         '''
         Description:
             Initializes this object
@@ -472,9 +492,11 @@ class mini_grid(grid):
         Output:
             None
         '''
-        super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
+        input_dict['strategic_grid'] = False
+        super().__init__(from_save, input_dict, global_manager)
+        #super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
         self.is_mini_grid = True
-        self.attached_grid = attached_grid
+        self.attached_grid = input_dict['attached_grid']
         self.attached_grid.mini_grid = self
         self.center_x = 0
         self.center_y = 0
@@ -619,7 +641,8 @@ class abstract_grid(grid):
     '''
     1-cell grid that is not directly connected to the primary strategic grid but can be moved to by mobs from the strategic grid and vice versa
     '''
-    def __init__(self, origin_coordinates, pixel_width, pixel_height, internal_line_color, external_line_color, modes, grid_line_width, tile_image_id, name, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, origin_coordinates, pixel_width, pixel_height, internal_line_color, external_line_color, modes, grid_line_width, tile_image_id, name, global_manager):
         '''
         Description:
             Initializes this object
@@ -637,10 +660,20 @@ class abstract_grid(grid):
         Output:
             None
         '''
-        super().__init__(origin_coordinates, pixel_width, pixel_height, 1, 1, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
+        input_dict['coordinate_width'] = 1
+        input_dict['coordinate_height'] = 1
+        input_dict['strategic_grid'] = False
+        super().__init__(from_save, input_dict, global_manager)
         self.is_abstract_grid = True
-        self.name = name
+        self.name = input_dict['name']
         self.global_manager.get('abstract_grid_list').append(self)
-        self.tile_image_id = tile_image_id
+        self.tile_image_id = input_dict['tile_image_id']
         self.cell_list[0].set_visibility(True)
 
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        if self.global_manager.get('europe_grid') == self:
+            save_dict['grid_type'] = 'europe_grid'
+        else:
+            save_dict['grid_type'] = 'default'
+        return(save_dict)

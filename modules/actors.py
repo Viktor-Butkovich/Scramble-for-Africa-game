@@ -48,6 +48,8 @@ class actor():
         self.tooltip_text = []
         if self.from_save:
             self.inventory = save_dict['inventory']
+        else:
+            self.inventory = {}
         #if self.can_hold_commodities:
         #    self.inventory_setup()
 
@@ -65,10 +67,12 @@ class actor():
                 init_type = self.vehicle_type
             elif self.is_officer:
                 init_type = self.officer_type
+            elif self.is_group:
+                init_type = self.group_type
         elif self.actor_type == 'tile':
             init_type = 'tile'
         elif self.actor_type == 'building':
-            init_type = 'building'
+            init_type = self.building_type
         save_dict['init_type'] = init_type
         
         save_dict['coordinates'] = (self.x, self.y)
@@ -78,7 +82,12 @@ class actor():
         elif self.grid == self.global_manager.get('europe_grid'):
             save_dict['grid_type'] = 'europe_grid'
         save_dict['name'] = self.name
-        save_dict['inventory'] = self.inventory
+        saved_inventory = {}
+        if self.can_hold_commodities: #only save inventory if not empty
+            for current_commodity in self.global_manager.get('commodity_types'):
+               if self.inventory[current_commodity] > 0:
+                   saved_inventory[current_commodity] = self.inventory[current_commodity]
+        save_dict['inventory'] = saved_inventory
         return(save_dict)
             
     def set_image(self, new_image):

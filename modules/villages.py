@@ -10,7 +10,8 @@ class village():
     '''
     Object that represents a native village in a cell on the strategic map grid
     '''
-    def __init__(self, cell, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, cell, global_manager):
         '''
         Description:
             Initializes this object
@@ -20,12 +21,18 @@ class village():
         Output:
             None
         '''
-        self.set_initial_population()
-        self.set_initial_aggressiveness()
-        self.available_workers = 0
-        self.attempted_trades = 0
-        self.cell = cell
-        self.name = village_name_generator.create_village_name()
+        if not from_save:
+            self.set_initial_population()
+            self.set_initial_aggressiveness()
+            self.available_workers = 0
+            self.attempted_trades = 0
+            self.name = village_name_generator.create_village_name()
+        else:
+            self.name = input_dict['name']
+            self.population = input_dict['population']
+            self.aggressiveness = input_dict['aggressiveness']
+            self.available_workers = input_dict['available_workers']
+        self.cell = input_dict['cell']
         self.global_manager = global_manager
         self.global_manager.get('village_list').append(self)
 

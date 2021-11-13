@@ -54,8 +54,8 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
         else:
             save_dict['crew'] = self.crew.to_save_dict()
         save_dict['passenger_dicts'] = [] #list of dictionaries for each passenger, on load a vehicle creates all of its passengers and embarks them
-        for current_mob in self.passengers:
-            save_dict['passengers_dicts'].append(current_mob.to_save_dict())
+        for current_mob in self.contained_mobs:
+            save_dict['passenger_dicts'].append(current_mob.to_save_dict())
         return(save_dict)
 
     def can_move(self, x_change, y_change):

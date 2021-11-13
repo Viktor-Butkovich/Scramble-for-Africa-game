@@ -220,7 +220,8 @@ class tile(actor): #to do: make terrain tiles a subclass
                         village_exists = True
                         self.cell.village = equivalent_tile.cell.village
                 if not village_exists: #make new village if village not present
-                    self.cell.village = villages.village(self.cell, self.global_manager)
+                    input_dict = {'cell': self.cell}
+                    self.cell.village = villages.village(False, input_dict, self.global_manager)
                     
             #self.resource_icon = resource_icon((self.x, self.y), self.grid, self.cell.resource, 'resource icon', ['strategic'], False, self, self.global_manager)
             input_dict = {}

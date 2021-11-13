@@ -43,6 +43,26 @@ class cell():
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
 
+    def to_save_dict(self):
+        save_dict = {}
+        save_dict['visible'] = self.visible
+        save_dict['terrain'] = self.terrain
+        save_dict['resource'] = self.resource
+
+        saved_inventory = {}
+        if self.tile.can_hold_commodities: #only save inventory if not empty
+            for current_commodity in self.global_manager.get('commodity_types'):
+               if self.tile.inventory[current_commodity] > 0:
+                   saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
+        save_dict['inventory'] = saved_inventory
+        
+        if self.resource == 'natives':
+            save_dict['village_name'] = self.village.name
+            save_dict['village_population'] = self.village.population
+            save_dict['village_aggressiveness'] = self.village.aggressiveness
+            save_dict['village_available_workers'] = self.village.available_workers
+        return(save_dict)
+
     def has_village(self):
         '''
         Description:

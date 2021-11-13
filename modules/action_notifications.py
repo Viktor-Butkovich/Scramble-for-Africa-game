@@ -282,7 +282,7 @@ class religious_campaign_notification(notification):
         if self.is_last: #if last, show result
             current_head_missionary = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
-            self.notification_images.append(free_image('mobs/church volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
