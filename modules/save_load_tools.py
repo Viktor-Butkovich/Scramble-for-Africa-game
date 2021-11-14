@@ -20,7 +20,6 @@ class save_load_manager():
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
         self.copied_elements.append('commodity_prices')
-        self.copied_elements.append('num_workers')
         self.copied_elements.append('worker_upkeep')
         
     def new_game(self):
@@ -110,18 +109,18 @@ class save_load_manager():
             if not current_grid.is_mini_grid: #minimap grid doesn't need to be saved
                 saved_grid_dicts.append(current_grid.to_save_dict())
 
-        print(saved_grid_dicts)
+        #print(saved_grid_dicts)
         
         #still need to save grid cell contents with inventories, terrain, and resource/village info, should be saved and loaded in before actors
             
         saved_actor_dicts = []
         for current_mob in self.global_manager.get('mob_list'):
-            if not (current_mob.in_group or current_mob.in_vehicle or current_mob.in_group): #containers save their contents and load them in, contents don't need to be saved/loaded separately
+            if not (current_mob.in_group or current_mob.in_vehicle or current_mob.in_building): #containers save their contents and load them in, contents don't need to be saved/loaded separately
                 saved_actor_dicts.append(current_mob.to_save_dict())
         for current_building in self.global_manager.get('building_list'):
             saved_actor_dicts.append(current_building.to_save_dict())
 
-        print(saved_actor_dicts)
+        #print(saved_actor_dicts)
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
@@ -144,6 +143,9 @@ class save_load_manager():
         #load variables
         for current_element in self.copied_elements:
             self.global_manager.set(current_element, new_global_manager.get(current_element))
+        self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
+        self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
+
 
         #load grids
         strategic_grid_height = 300
@@ -196,16 +198,16 @@ class save_load_manager():
         input_dict['attached_grid'] = strategic_map_grid
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
+        self.global_manager.get('minimap_grid').calibrate(2, 2)
 
         self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+        
+        game_transitions.set_game_mode('strategic', self.global_manager)
+        game_transitions.create_strategic_map(self.global_manager)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
-            
-        
-        game_transitions.set_game_mode('strategic', self.global_manager)
-        game_transitions.create_strategic_map(self.global_manager)
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)
         #turn_management_tools.start_turn(self.global_manager, True)

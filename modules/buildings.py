@@ -52,9 +52,9 @@ class building(actor):
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
         save_dict['contained_workers'] = [] #list of dictionaries for each worker, on load a building creates all of its passengers and embarks them
+        save_dict['image'] = self.image_dict['default']
         for current_worker in self.contained_workers:
             save_dict['contained_workers'].append(current_worker.to_save_dict())
-
         return(save_dict)
 
     def remove(self):
@@ -184,6 +184,11 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
 
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['infrastructure_type'] = self.infrastructure_type
+        return(save_dict)
+
 class trading_post(building):
     '''
     Building in a village that allows trade with the village
@@ -302,7 +307,10 @@ class resource_building(building):
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
-        #when loading from save, go through contained workers and initialize them and put them in this building
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['resource_type'] = self.resource_type
+        return(save_dict)
 
     def remove(self):
         '''

@@ -42,7 +42,7 @@ class officer(mob):
         else:
             self.veteran = input_dict['veteran']
             if self.veteran:
-                self.promote()
+                self.load_veteran()
 
     def to_save_dict(self):
         save_dict = super().to_save_dict()
@@ -77,7 +77,15 @@ class officer(mob):
             input_dict['show_terrain'] = False
             input_dict['actor'] = self 
             self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+
+    def load_veteran(self):
+        name = self.name
+        self.promote()
+        self.set_name(name)
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

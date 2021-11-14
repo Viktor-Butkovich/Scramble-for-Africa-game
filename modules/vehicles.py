@@ -49,13 +49,15 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
             if input_dict['crew'] == 'none':
                 self.crew = 'none'
             else:
-                self.crew = self.global_manager.get('actor_creation_manager').create(True, input_dict['crew'], self.global_manager)
+                self.global_manager.get('actor_creation_manager').create(True, input_dict['crew'], self.global_manager).crew_vehicle(self) #creates worker and merges it as crew
             for current_passenger in input_dict['passenger_dicts']:
-                self.contained_mobs.append(self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager))
+                self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
+                
         self.initializing = False
 
     def to_save_dict(self):
         save_dict = super().to_save_dict()
+        save_dict['image_dict'] = self.image_dict
         if self.crew == 'none':
             save_dict['crew'] = 'none'
         else:
@@ -104,8 +106,11 @@ class vehicle(mob): #maybe reduce movement points of both vehicle and crew to th
                 tooltip_list.append('    ' + current_mob.name.capitalize())
         else:
             tooltip_list.append("No passengers")
-            
-        tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+
+        if not self.has_infinite_movement:
+            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+        else:
+            tooltip_list.append("Movement points: infinite")
         self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -156,6 +161,8 @@ class train(vehicle):
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        else:
+            self.load_inventory(input_dict['inventory'])
 
     def can_move(self, x_change, y_change):
         '''
@@ -207,6 +214,8 @@ class ship(vehicle):
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
+        else:
+            self.load_inventory(input_dict['inventory'])
 
     def can_leave(self):
         '''

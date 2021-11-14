@@ -48,9 +48,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.can_hold_commodities = True
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
-                for current_commodity in self.global_manager.get('commodity_types'):
-                    if current_commodity in self.cell.save_dict['inventory']:
-                        self.set_inventory(current_commodity, self.cell.save_dict['inventory'][current_commodity])
+                self.load_inventory(self.cell.save_dict['inventory'])
         elif self.name == 'Europe': #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
@@ -62,9 +60,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory_setup()
             self.terrain = 'none'
             if self.cell.grid.from_save: #load in saved inventory from cell
-                for current_commodity in self.global_manager.get('commodity_types'):
-                    if current_commodity in self.cell.save_dict['inventory']:
-                        self.set_inventory(current_commodity, self.cell.save_dict['inventory'][current_commodity])
+                self.load_inventory(self.cell.save_dict['inventory'])
         elif self.name == 'resource icon':
             self.image_dict['hidden'] = 'misc/empty.png'
         else:

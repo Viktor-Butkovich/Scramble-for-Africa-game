@@ -46,11 +46,10 @@ class actor():
         self.can_hold_infinite_commodities = False
         self.inventory_capacity = 0
         self.tooltip_text = []
-        if self.from_save:
-            self.inventory = input_dict['inventory']
-    
-        else:
-            self.inventory = {}
+        #if self.from_save:
+        #    self.inventory = input_dict['inventory']
+        #else:
+        self.inventory = {}
         #if self.can_hold_commodities:
         #    self.inventory_setup()
 
@@ -110,6 +109,13 @@ class actor():
         elif self.actor_type == 'tile':
             if self.global_manager.get('displayed_tile') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+
+    def load_inventory(self, inventory_dict):
+        for current_commodity in self.global_manager.get('commodity_types'):
+            if current_commodity in inventory_dict:
+                self.set_inventory(current_commodity, inventory_dict[current_commodity])
+            else:
+                self.set_inventory(current_commodity, 0)
 
     def inventory_setup(self):
         '''

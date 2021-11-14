@@ -57,11 +57,13 @@ class mob(actor):
         self.movement_cost = 1
         self.has_infinite_movement = False
         if from_save:
-            self.end_turn_destination = input_dict['end_turn_destination']
-            if not self.end_turn_destination == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
-                end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination_coordinates']
+            #self.end_turn_destination = input_dict['end_turn_destination']
+            if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
+                end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
+            else:
+                self.end_turn_destination = 'none'
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
         else:
@@ -80,9 +82,9 @@ class mob(actor):
         else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
             if self.end_turn_destination.grid == self.global_manager.get('strategic_map_grid'):
                 save_dict['end_turn_destination_grid_type'] = 'strategic_map_grid'
-            elif self.grid == self.global_manager.get('europe_grid'):
+            elif self.end_turn_destination.grid == self.global_manager.get('europe_grid'):
                 save_dict['end_turn_destination_grid_type'] = 'europe_grid'
-            save_dict['end_turn_destination_coordinates'] = (self.end_turn_destination.x, self.end_turn_destination.y)
+            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['image'] = self.image_dict['default']
         return(save_dict)
         
@@ -317,7 +319,13 @@ class mob(actor):
         Output:
             None
         '''
-        self.set_tooltip(["Name: " + self.name.capitalize(), "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
+        tooltip_list = []
+        tooltip_list.append("Name: " + self.name.capitalize())
+        if not self.has_infinite_movement:
+            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+        else:
+            tooltip_list.append("Movement points: infinite")
+        self.set_tooltip(tooltip_list)
         
 
     def remove(self):
@@ -516,7 +524,7 @@ class mob(actor):
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
-        if not vehicle.initializing: #don't selecte vehicle if loading in at start of game
+        if not vehicle.initializing: #don't select vehicle if loading in at start of game
             vehicle.select()
 
     def disembark_vehicle(self, vehicle):

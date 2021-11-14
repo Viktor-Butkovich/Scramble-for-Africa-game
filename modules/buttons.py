@@ -638,13 +638,16 @@ class button():
                 self.global_manager.get('save_load_manager').new_game()
 
             elif self.button_type == 'save game':
-                self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                if main_loop_tools.action_possible(self.global_manager):
+                    self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                else:
+                    text_tools.print_to_screen("You are busy and can not save the game", self.global_manager)
 
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
             elif self.button_type == 'main menu':
-                game_transitions.to_main_menu(self.global_manager)
+                game_transitions.to_main_menu(self.global_manager, False)
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)

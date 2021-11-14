@@ -95,6 +95,7 @@ class group(mob):
         self.veteran = True
         self.set_name("veteran " + self.name)
         self.officer.set_name("veteran " + self.officer.name)
+        self.officer.veteran = True
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -109,7 +110,8 @@ class group(mob):
             input_dict['show_terrain'] = False
             input_dict['actor'] = self 
             self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -453,6 +455,8 @@ class porters(group):
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+        else:
+            self.load_inventory(input_dict['inventory'])
 
 class construction_gang(group):
     '''
@@ -511,6 +515,8 @@ class caravan(group):
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
+        else:
+            self.load_inventory(input_dict['inventory'])
 
     def start_trade(self):
         '''

@@ -65,7 +65,8 @@ class worker(mob):
             if not current_image.current_cell == 'none':
                 while not moved_mob == current_image.current_cell.contained_mobs[0]:
                     current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-        vehicle.select()
+        if not vehicle.initializing: #don't select vehicle if loading in at start of game
+            vehicle.select()
 
     def uncrew_vehicle(self, vehicle):
         '''
@@ -182,3 +183,14 @@ class church_volunteers(worker):
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
         
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1) #cancels out decrease of superclass

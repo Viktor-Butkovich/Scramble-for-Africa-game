@@ -239,7 +239,7 @@ class money_tracker(value_tracker):
         '''
         super().change(value_change)
         if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def set(self, new_value):
@@ -253,7 +253,7 @@ class money_tracker(value_tracker):
         '''
         super().set(new_value)
         if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
 class notification_manager_template():

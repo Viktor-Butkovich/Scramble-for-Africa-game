@@ -36,3 +36,4 @@ grids.grid.load_cells
 cells.cell.to_save_dict
 actor_creation_tools
 choice_notifications imports
+actors.actor.load_inventory
