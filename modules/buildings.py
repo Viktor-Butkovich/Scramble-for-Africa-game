@@ -12,37 +12,69 @@ class building(actor):
     '''
     Actor that exists in cells of multiple grids in front of tiles and behind mobs that can not be clicked
     '''
-    def __init__(self, coordinates, grids, image_id, name, building_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager): 
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string building_type: Type of building, like 'port'
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'building_type': string value - Type of building, like 'port'
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.actor_type = 'building'
-        self.building_type = building_type
-        super().__init__(coordinates, grids, modes, global_manager)
-        self.image_dict = {'default': image_id}
+        self.building_type = input_dict['building_type']
+        super().__init__(from_save, input_dict, global_manager)
+        self.image_dict = {'default': input_dict['image']}
         self.images = []
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
                 self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
-        global_manager.get('building_list').append(self)
-        self.set_name(name)
+        self.global_manager.get('building_list').append(self)
+        self.set_name(input_dict['name'])
         self.worker_capacity = 0 #default
         self.contained_workers = []
+        if from_save:
+            for current_worker in input_dict['contained_workers']:
+                self.global_manager.get('actor_creation_manager').create(True, current_worker, self.global_manager).work_building(self)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this building's images can appear
+                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
+                'building_type': string value - Type of building, like 'port'
+                'image': string value - File path to the image used by this object
+                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['building_type'] = self.building_type
+        save_dict['contained_workers'] = [] #list of dictionaries for each worker, on load a building creates all of its passengers and embarks them
+        save_dict['image'] = self.image_dict['default']
+        for current_worker in self.contained_workers:
+            save_dict['contained_workers'].append(current_worker.to_save_dict())
+        return(save_dict)
 
     def remove(self):
         '''
@@ -66,7 +98,6 @@ class building(actor):
             current_tile.update_resource_icon()
         if self.global_manager.get('displayed_tile') in tiles: #if currently displayed, update tile to show building removal
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), tiles[0])
 
     def update_tooltip(self): #should be shown below mob tooltips
         '''
@@ -120,29 +151,33 @@ class infrastructure_building(building):
     '''
     Building that eases movement between tiles and is a road or railroad. Has images that show connections with other tiles that have roads or railroads
     '''
-    def __init__(self, coordinates, grids, image_id, name, infrastructure_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string infrastructure_type: Type of infrastructure, 'road' or 'railroad'
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'infrastructure_type': string value - Type of infrastructure, like 'road', or 'railroad'
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.infrastructure_type = infrastructure_type
+        self.infrastructure_type = input_dict['infrastructure_type']
         if self.infrastructure_type == 'railroad':
             self.is_road = False
             self.is_railroad = True
         elif self.infrastructure_type == 'road':
             self.is_railroad = False
             self.is_road = True
-        super().__init__(coordinates, grids, image_id, name, 'infrastructure', modes, global_manager)
+        input_dict['building_type'] = 'infrastructure'
+        super().__init__(from_save, input_dict, global_manager)
         self.image_dict['left_road'] = 'buildings/infrastructure/left_road.png'
         self.image_dict['right_road'] = 'buildings/infrastructure/right_road.png'
         self.image_dict['down_road'] = 'buildings/infrastructure/down_road.png'
@@ -169,62 +204,97 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
 
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this building's images can appear
+                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
+                'building_type': string value - Type of building, like 'infrastructure'
+                'image': string value - File path to the image used by this object
+                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+                'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['infrastructure_type'] = self.infrastructure_type
+        return(save_dict)
+
 class trading_post(building):
     '''
     Building in a village that allows trade with the village
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'trading_post', modes, global_manager)
+        input_dict['building_type'] = 'trading_post'
+        super().__init__(from_save, input_dict, global_manager)
 
 class mission(building):
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'mission', modes, global_manager)
+        input_dict['building_type'] = 'mission'
+        super().__init__(from_save, input_dict, global_manager)
 
 class train_station(building):
     '''
     Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'train_station', modes, global_manager)
+        input_dict['building_type'] = 'train_station'
+        super().__init__(from_save, input_dict, global_manager)
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
@@ -232,21 +302,25 @@ class port(building):
     '''
     Building adjacent to water that allows ships to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, 'port', modes, global_manager)
+        input_dict['building_type'] = 'port'
+        super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
@@ -255,27 +329,54 @@ class resource_building(building):
     '''
     Building in a resource tile that allows workers to attach to this building to produce commodities over time
     '''
-    def __init__(self, coordinates, grids, image_id, name, resource_type, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string image_id: File path to the image used by this object
-            string name: Name of this building
-            string resource_type: Type of resource produced by this building, like 'exotic wood'
-            string list modes: Game modes during which this building's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.resource_type = resource_type
-        super().__init__(coordinates, grids, image_id, name, 'resource', modes, global_manager)
+        self.resource_type = input_dict['resource_type']
+        input_dict['building_type'] = 'resource'
+        super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.worker_capacity = 1 #improve with upgrades
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this building's images can appear
+                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
+                'building_type': string value - Type of building, like 'infrastructure'
+                'image': string value - File path to the image used by this object
+                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+                'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['resource_type'] = self.resource_type
+        return(save_dict)
 
     def remove(self):
         '''

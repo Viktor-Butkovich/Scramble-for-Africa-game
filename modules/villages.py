@@ -4,29 +4,54 @@ import random
 
 from . import village_name_generator
 from . import actor_utility
+from . import utility
 
 class village():
     '''
     Object that represents a native village in a cell on the strategic map grid
     '''
-    def __init__(self, cell, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
+        #def __init__(self, cell, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            cell cell: cell on strategic map grid in which this village exists
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'name': string value - Required if from save, starting name of village
+                'population': int value - Required if from save, starting population of village
+                'aggressiveness': int value - Required if from save, starting aggressiveness
+                'available_workers': int value - Required if from save, starting number of available workers
+                'cell': cell value - cell on strategic map grid in which this village exists
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.set_initial_population()
-        self.set_initial_aggressiveness()
-        self.available_workers = 0
-        self.attempted_trades = 0
-        self.cell = cell
-        self.name = village_name_generator.create_village_name()
+        if not from_save:
+            self.set_initial_population()
+            self.set_initial_aggressiveness()
+            self.available_workers = 0
+            self.attempted_trades = 0
+            self.name = village_name_generator.create_village_name()
+        else:
+            self.name = input_dict['name']
+            self.population = input_dict['population']
+            self.aggressiveness = input_dict['aggressiveness']
+            self.available_workers = input_dict['available_workers']
+        self.cell = input_dict['cell']
         self.global_manager = global_manager
         self.global_manager.get('village_list').append(self)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
     def set_initial_population(self):
         '''

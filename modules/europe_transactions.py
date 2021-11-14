@@ -86,12 +86,24 @@ class recruitment_button(button):
             None
         '''
         if recruitment_type in global_manager.get('recruitment_types'):
+            #image_keyword = ''
+            #for character in recruitment_type:
+            #    if not character == '_':
+            #        image_keyword += character
+            #    else:
+            #        image_keyword += ' '
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
         else:
             image_id = 'misc/default_button.png'
             self.mob_image_id = 'mobs/default/default.png'
         self.recruitment_type = recruitment_type
+        self.recruitment_name = ''
+        for character in self.recruitment_type:
+            if not character == '_':
+                self.recruitment_name += character
+            else:
+                self.recruitment_name += ' '
         self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
         super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
 
@@ -109,8 +121,8 @@ class recruitment_button(button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                    notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + '? ' +
-                                                                   utility.generate_capitalized_article(self.recruitment_type) + ' ' + self.recruitment_type + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
+                    notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_name) + ' ' + self.recruitment_name + '? ' +
+                                                                   utility.generate_capitalized_article(self.recruitment_name) + ' ' + self.recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
                                                                    ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)

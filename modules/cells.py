@@ -6,7 +6,7 @@ class cell():
     '''
     Object representing one cell of a grid corresponding to one of its coordinates, able to contain terrain, resources, mobs, and tiles
     '''
-    def __init__(self, x, y, width, height, grid, color, global_manager):
+    def __init__(self, x, y, width, height, grid, color, save_dict, global_manager):
         '''
         Description:
             Initializes this object
@@ -17,6 +17,7 @@ class cell():
             int height: Pixel height of this button
             grid grid: The grid that this cell is attached to
             string color: Color in the color_dict dictionary for this cell when nothing is covering it
+            string or dictionary save_dict: Equals 'none' if creating new grid, equals dictionary of saved information necessary to recreate this cell if loading grid
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -38,10 +39,52 @@ class cell():
         self.village = 'none'
         self.terrain = 'none'
         self.set_terrain('clear')
-        self.set_visibility(False)
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
+        if not save_dict == 'none':
+            self.save_dict = save_dict
+            self.set_visibility(save_dict['visible'])
+        else:
+            self.set_visibility(False)
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'visible': boolean value - Whether this cell is visible or not
+                'terrain': string value - Terrain type of this cell and its tile, like 'swamp'
+                'resource': string value - Resource type of this cell and its tile, like 'exotic wood'
+                'inventory': string/string dictionary value - Version of the inventory dictionary of this cell's tile only containing commodity types with 1+ units held
+                'village_name': Only saved if resource is natives, name of this cell's village
+                'village_population': Only saved if resource is natives, population of this cell's village
+                'village_aggressiveness': Only saved if resource is natives, aggressiveness of this cell's village
+                'village_available_workers': Only saved if resource is natives, how many workers this cell's village has
+        '''
+        save_dict = {}
+        save_dict['coordinates'] = (self.x, self.y)
+        save_dict['visible'] = self.visible
+        save_dict['terrain'] = self.terrain
+        save_dict['resource'] = self.resource
+
+        saved_inventory = {}
+        if self.tile.can_hold_commodities: #only save inventory if not empty
+            for current_commodity in self.global_manager.get('commodity_types'):
+               if self.tile.inventory[current_commodity] > 0:
+                   saved_inventory[current_commodity] = self.tile.inventory[current_commodity]
+        save_dict['inventory'] = saved_inventory
+        
+        if self.resource == 'natives':
+            save_dict['village_name'] = self.village.name
+            save_dict['village_population'] = self.village.population
+            save_dict['village_aggressiveness'] = self.village.aggressiveness
+            save_dict['village_available_workers'] = self.village.available_workers
+        return(save_dict)
 
     def has_village(self):
         '''
@@ -367,3 +410,4 @@ class cell():
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['up'] = adjacent_cell
         self.adjacent_list = adjacent_list
+

@@ -4,27 +4,23 @@ import random
 
 import modules.scaling as scaling
 import modules.main_loop as main_loop
-import modules.notification_tools as notification_tools
 import modules.images as images
 import modules.buttons as buttons
 import modules.game_transitions as game_transitions
-import modules.grids as grids
 import modules.data_managers as data_managers
-import modules.actor_utility as actor_utility
-import modules.groups as groups
 import modules.europe_transactions as europe_transactions
 import modules.labels as labels
 import modules.actor_display_tools.images as actor_display_images
 import modules.actor_display_tools.labels as actor_display_labels
 import modules.instructions as instructions
-import modules.turn_management_tools as turn_management_tools
-import modules.vehicles as vehicles
-import modules.buildings as buildings
 import modules.mouse_followers as mouse_followers
+import modules.save_load_tools as save_load_tools
+import modules.actor_creation_tools as actor_creation_tools
 
 pygame.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
+global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
 global_manager.set('europe_grid', 'none')
 resolution_finder = pygame.display.Info()
 global_manager.set('default_display_width', 1728)#all parts of game made to be at default and scaled to display
@@ -87,10 +83,7 @@ global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exo
 global_manager.set('commodity_prices', {})
 
 for current_commodity in global_manager.get('commodity_types'):
-    if not current_commodity == 'consumer goods':
-        global_manager.get('commodity_prices')[current_commodity] = random.randrange(2, 6) #2-5
-    else:
-        global_manager.get('commodity_prices')[current_commodity] = 2
+    global_manager.get('commodity_prices')[current_commodity] = 0
 
 #building type: price
 global_manager.set('building_prices',
@@ -102,7 +95,7 @@ global_manager.set('building_prices',
     'trading_post': 1,
     'mission': 1,
     'train': 1
-    }
+   } 
 )
 
 
@@ -142,7 +135,16 @@ global_manager.set('resource_types', global_manager.get('commodity_types') + ['n
 
 global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'porter foreman', 'merchant', 'head missionary'])
+global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary'])
+global_manager.set('officer_group_type_dict',
+    {
+    'explorer': 'expedition',
+    'engineer': 'construction_gang',
+    'porter_foreman': 'porters',
+    'merchant': 'caravan',
+    'head_missionary': 'missionaries'
+    }
+)
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
 global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
@@ -164,7 +166,7 @@ global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
 global_manager.set('background_image_list', [])
-global_manager.set('bar_list', [])
+#global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('village_list', [])
@@ -229,8 +231,10 @@ global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_temp
 global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
+global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 
-strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe'], global_manager)
+
+strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu'], global_manager)
 #europe_background_image = images.free_image('misc/europe_background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['europe'], global_manager)
 global_manager.get('background_image_list').append(strategic_background_image)
 strategic_grid_height = 300#450
@@ -238,29 +242,15 @@ strategic_grid_width = 320#480
 mini_grid_height = 600#450
 mini_grid_width = 640#480
 
-strategic_map_grid = grids.grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (strategic_grid_width + 100), global_manager.get('default_display_height') - (strategic_grid_height + 25), global_manager),
-    scaling.scale_width(strategic_grid_width, global_manager), scaling.scale_height(strategic_grid_height, global_manager), 16, 15, 'black', 'black', ['strategic'], True, 2, global_manager)
-global_manager.set('strategic_map_grid', strategic_map_grid)
-
-minimap_grid = grids.mini_grid(scaling.scale_coordinates(global_manager.get('default_display_width') - (mini_grid_width + 100), global_manager.get('default_display_height') - (strategic_grid_height + mini_grid_height + 50),
-    global_manager), scaling.scale_width(mini_grid_width, global_manager), scaling.scale_height(mini_grid_height, global_manager), 5, 5, 'black', 'bright red', ['strategic'], global_manager.get('strategic_map_grid'), 3, global_manager)
-global_manager.set('minimap_grid', minimap_grid)
-
-global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
-notification_tools.show_tutorial_notifications(global_manager)
+global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
 
 europe_grid_x = global_manager.get('default_display_width') - (strategic_grid_width + 340)
 europe_grid_y = global_manager.get('default_display_height') - (strategic_grid_height + 25)
-europe_grid = grids.abstract_grid(scaling.scale_coordinates(europe_grid_x, europe_grid_y, global_manager), scaling.scale_width(120, global_manager), scaling.scale_height(120, global_manager), 'black',
-    'black', ['strategic', 'europe'], 3, 'locations/europe.png', 'Europe', global_manager)
-
-global_manager.set('europe_grid', europe_grid)
 
 global_manager.set('mob_ordered_list_start_y', 0)
 global_manager.set('tile_ordered_list_start_y', 0)
 
-game_transitions.set_game_mode('strategic', global_manager)
-game_transitions.create_strategic_map(global_manager)
+game_transitions.set_game_mode('main_menu', global_manager)
 
 global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
 
@@ -278,7 +268,17 @@ europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x -
 europe_transactions.european_hq_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue', pygame.K_ESCAPE, False,
     ['europe'], 'misc/exit_european_hq_button.png', global_manager)
 
-end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'], 'misc/end_turn_button.png', global_manager)
+end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
+    global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'],
+    'misc/end_turn_button.png', global_manager)
+
+new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
+    scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'misc/new_game_button.png', global_manager)
+
+load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 125, global_manager),
+    scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'load game', pygame.K_l, ['main_menu'], 'misc/load_game_button.png', global_manager)
+
+
 
 button_start_x = 500#x position of leftmost button
 button_separation = 60#x separation between each button
@@ -305,6 +305,12 @@ expand_text_box_button = buttons.button(scaling.scale_coordinates(0, global_mana
 
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'misc/instructions.png', global_manager)
+
+main_menu_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), 'blue', 'main menu', 'none', ['strategic', 'europe'], 'misc/exit_european_hq_button.png', global_manager)
+
+save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe'], 'misc/save_game_button.png', global_manager)
 
 cylce_units_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'misc/cycle_units_button.png', global_manager)
@@ -519,10 +525,6 @@ for recruitment_index in range(len(global_manager.get('recruitment_types'))):
 
 new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
     scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#self, coordinates, width, height, color, commodity_type, modes, global_manager
-
-global_manager.get('minimap_grid').calibrate(2, 2)
-
-turn_management_tools.start_turn(global_manager, True)
 
 main_loop.main_loop(global_manager)
 pygame.quit()

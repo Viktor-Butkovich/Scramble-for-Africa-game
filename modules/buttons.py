@@ -11,6 +11,7 @@ from . import utility
 from . import turn_management_tools
 from . import market_tools
 from . import notification_tools
+from . import game_transitions
 
 class button():
     '''
@@ -229,6 +230,14 @@ class button():
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
+        elif self.button_type == 'main menu':
+            self.set_tooltip(["Exits to main menu", "Does not automatically save the game"])
+        elif self.button_type == 'new game':
+            self.set_tooltip(["Starts a new game"])
+        elif self.button_type == 'save game':
+            self.set_tooltip(["Saves this game"])
+        elif self.button_type == 'load game':
+            self.set_tooltip(["Loads a saved game"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -625,6 +634,21 @@ class button():
                     else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
                         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
+            elif self.button_type == 'new game':
+                self.global_manager.get('save_load_manager').new_game()
+
+            elif self.button_type == 'save game':
+                if main_loop_tools.action_possible(self.global_manager):
+                    self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                else:
+                    text_tools.print_to_screen("You are busy and can not save the game", self.global_manager)
+
+            elif self.button_type == 'load game':
+                self.global_manager.get('save_load_manager').load_game('save1.pickle')
+
+            elif self.button_type == 'main menu':
+                game_transitions.to_main_menu(self.global_manager)
+
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -805,13 +829,16 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if self.can_show() and not self.is_last: #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-            self.showing_outline = True
-            self.attached_mob.select() 
-            for current_image in self.attached_mob.images: #move mob to front of each stack it is in
-                if not current_image.current_cell == 'none':
-                    while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
-                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        if self.can_show() and (not self.is_last):
+            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+                self.showing_outline = True
+                self.attached_mob.select() 
+                for current_image in self.attached_mob.images: #move mob to front of each stack it is in
+                    if not current_image.current_cell == 'none':
+                        while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
+                            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+            else:
+                text_tools.print_to_screen("You are busy and can not select a different unit", self.global_manager)
                          
     def draw(self):
         '''

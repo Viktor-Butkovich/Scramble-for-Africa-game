@@ -4,7 +4,7 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
-from .. import groups
+#from .. import groups
 
 class label_button(button):
     '''
@@ -359,20 +359,21 @@ class merge_button(label_button):
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            if officer.officer_type == 'head missionary': #if head missionary, look for church volunteers
+                            if officer.officer_type == 'head_missionary': #if head missionary, look for church volunteers
                                 worker = officer.images[0].current_cell.get_church_volunteers()
                             else:
                                 worker = officer.images[0].current_cell.get_worker()
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
-                            groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
+                            #groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
+                            self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
                         else:
-                            if (not officer == 'none') and officer.officer_type == 'head missionary':
+                            if (not officer == 'none') and officer.officer_type == 'head_missionary':
                                 text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
                             else:  
                                 text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        if (not officer == 'none') and officer.officer_type == 'head missionary':
+                        if (not officer == 'none') and officer.officer_type == 'head_missionary':
                             text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
                         else:  
                             text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
@@ -792,15 +793,19 @@ class worker_to_building_button(label_button):
             None
         '''
         if self.can_show():
-            if not self.attached_building == 'none':
-                if self.attached_building.worker_capacity > len(self.attached_building.contained_workers): #if has extra space
-                    self.showing_outline = True
-                    self.attached_worker.work_building(self.attached_building)
+            if main_loop_tools.action_possible(self.global_manager):
+                if not self.attached_building == 'none':
+                    if self.attached_building.worker_capacity > len(self.attached_building.contained_workers): #if has extra space
+                        self.showing_outline = True
+                        self.attached_worker.work_building(self.attached_building)
+                    else:
+                        text_tools.print_to_screen("This building is at its worker capacity.", self.global_manager)
+                        text_tools.print_to_screen("Upgrade the building to add more worker capacity.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("This building is at its worker capacity.", self.global_manager)
-                    text_tools.print_to_screen("Upgrade the building to add more worker capacity.", self.global_manager)
+                    text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
             else:
-                text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not attach a worker to a building.", self.global_manager)
+            
 
 class trade_button(label_button):
     '''
@@ -932,7 +937,7 @@ class convert_button(label_button):
                 else:
                     text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not convert.", self.global_manager)
 
 class religious_campaign_button(label_button):
     '''
@@ -967,7 +972,7 @@ class religious_campaign_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary')):
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head_missionary')):
                 return(False)
         return(result)
 
@@ -1108,24 +1113,27 @@ class build_train_button(label_button):
             None
         '''
         if self.can_show():
-            self.showing_outline = True
-            if self.attached_label.actor.movement_points >= 1:
-                    if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
-                        if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                            if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
-                                    self.construct()
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_label.actor.movement_points >= 1:
+                        if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
+                            if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
+                                if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
+                                        self.construct()
+                                    else:
+                                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
                                 else:
-                                    text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
+                                    text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
                             else:
                                 text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
                         else:
                             text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
-                    else:
-                        text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
             else:
-                text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
-                text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not build a train.", self.global_manager)
 
     def construct(self):
         '''
@@ -1308,51 +1316,53 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             None
         '''
         if self.can_show():
-            self.showing_outline = True
-            if self.attached_mob.movement_points >= 1:
-                if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type]:
-                    current_building = self.attached_tile.cell.contained_buildings[self.building_type]
-                    if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
-                        if not self.global_manager.get('europe_grid') in self.attached_mob.grids:
-                            if not self.attached_tile.cell.terrain == 'water':
-                                if self.building_type == 'resource':
-                                    if not self.attached_resource == 'none':
-                                        self.construct()
-                                    else:
-                                        text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
-                                elif self.building_type == 'port':
-                                    if self.attached_mob.adjacent_to_water():
-                                        if not self.attached_mob.images[0].current_cell.terrain == 'water':
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type]:
+                        current_building = self.attached_tile.cell.contained_buildings[self.building_type]
+                        if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
+                            if not self.global_manager.get('europe_grid') in self.attached_mob.grids:
+                                if not self.attached_tile.cell.terrain == 'water':
+                                    if self.building_type == 'resource':
+                                        if not self.attached_resource == 'none':
                                             self.construct()
-                                    else:
-                                        text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
-                                elif self.building_type == 'train_station':
-                                    if self.attached_tile.cell.has_railroad():
+                                        else:
+                                            text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
+                                    elif self.building_type == 'port':
+                                        if self.attached_mob.adjacent_to_water():
+                                            if not self.attached_mob.images[0].current_cell.terrain == 'water':
+                                                self.construct()
+                                        else:
+                                            text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
+                                    elif self.building_type == 'train_station':
+                                        if self.attached_tile.cell.has_railroad():
+                                            self.construct()
+                                        else:
+                                            text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
+                                    elif self.building_type == 'infrastructure':
                                         self.construct()
-                                    else:
-                                        text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
-                                elif self.building_type == 'infrastructure':
-                                    self.construct()
-                                elif self.building_type == 'trading_post' or self.building_type == 'mission':
-                                    if self.attached_tile.cell.has_village():
-                                        self.construct()
-                                    else:
-                                        text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
+                                    elif self.building_type == 'trading_post' or self.building_type == 'mission':
+                                        if self.attached_tile.cell.has_village():
+                                            self.construct()
+                                        else:
+                                            text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
+                                else:
+                                    text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                             else:
-                                text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
+                                text_tools.print_to_screen("This building can not be built in Europe.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("This building can not be built in Europe.", self.global_manager)
+                            if self.building_type == 'infrastructure': #if railroad
+                                text_tools.print_to_screen("This tile already contains a railroad.", self.global_manager)
+                            else:
+                                text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
                     else:
-                        if self.building_type == 'infrastructure': #if railroad
-                            text_tools.print_to_screen("This tile already contains a railroad.", self.global_manager)
-                        else:
-                            text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')[self.building_type]) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')[self.building_type]) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
+                    text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
             else:
-                text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
-                text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
-                    
+                text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)
             
     def construct(self):
         '''

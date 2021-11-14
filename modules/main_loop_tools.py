@@ -57,10 +57,6 @@ def update_display(global_manager):
         for current_image in mob_image_list:
             current_image.draw()
             current_image.has_drawn = True
-                    
-        for current_bar in global_manager.get('bar_list'):
-            if global_manager.get('current_game_mode') in current_bar.modes:
-                current_bar.draw()
                 
         for current_overlay_tile in global_manager.get('overlay_tile_list'):
             if global_manager.get('current_game_mode') in current_overlay_tile.image.modes:
@@ -141,7 +137,7 @@ def update_display(global_manager):
         if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
-        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
+        #global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
 
 def action_possible(global_manager):
     '''
@@ -168,6 +164,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('choosing_destination'):
         return(False)
+    elif global_manager.get('making_choice'):
+        return(False)
     return(True)
 
 def draw_loading_screen(global_manager):
@@ -182,7 +180,7 @@ def draw_loading_screen(global_manager):
     global_manager.get('game_display').fill((125, 125, 125))
     global_manager.get('loading_image').draw()
     pygame.display.update()    
-    if global_manager.get('loading_start_time') + 2 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
+    if global_manager.get('loading_start_time') + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
         global_manager.set('loading', False)
 
 def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):

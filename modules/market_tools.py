@@ -45,6 +45,22 @@ def change_price(changed_commodity, num_change, global_manager):
         global_manager.get('commodity_prices')[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
 
+def set_price(changed_commodity, new_value, global_manager):
+    '''
+    Description:
+        Sets the price of the inputted commodity to the inputted amount
+    Input:
+        string changed_commodity: Type of commodity whose price changes, like 'exotic wood'
+        int new_value: New price of the inputted commodity
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    global_manager.get('commodity_prices')[changed_commodity] = new_value
+    if global_manager.get('commodity_prices')[changed_commodity] < 1:
+        global_manager.get('commodity_prices')[changed_commodity] = 1
+    global_manager.get('commodity_prices_label').update_label()
+
 def sell(seller, sold_commodity, num_sold, global_manager):
     '''
     Description:

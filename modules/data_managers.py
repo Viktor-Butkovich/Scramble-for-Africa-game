@@ -9,6 +9,7 @@ from . import choice_notifications
 from . import action_notifications
 from . import scaling
 from . import text_tools
+from . import game_transitions
 
 class global_manager_template():
     '''
@@ -207,7 +208,7 @@ class value_tracker():
         Output:
             None
         '''
-        self.global_manager.set(self.value_key, initial_value)
+        self.global_manager.set(self.value_key, new_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
@@ -238,7 +239,8 @@ class money_tracker(value_tracker):
         '''
         super().change(value_change)
         if self.get() < 0:
-            self.global_manager.set('crashed', True) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
+            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def set(self, new_value):
         '''
@@ -251,7 +253,8 @@ class money_tracker(value_tracker):
         '''
         super().set(new_value)
         if self.get() < 0:
-            self.global_manager.set('crashed', True) #end game when money less than 0
+            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
+            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
 class notification_manager_template():
     '''
@@ -291,7 +294,7 @@ class notification_manager_template():
             self.notification_height += height_difference #increase height by height change
             #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-            self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid').origin_x, self.global_manager) - (self.notification_width + 40))
+            self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid_origin_x'), self.global_manager) - (self.notification_width + 40))
         else: #show notifications in center on europe mode
             self.notification_x = 610
 

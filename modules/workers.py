@@ -8,26 +8,32 @@ class worker(mob):
     '''
     Mob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this mob's images can appear
-            string image_id: File path to the image used by this object
-            string name: This mob's name
-            string list modes: Game modes during which this mob's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def can_show_tooltip(self):
         '''
@@ -63,7 +69,8 @@ class worker(mob):
             if not current_image.current_cell == 'none':
                 while not moved_mob == current_image.current_cell.contained_mobs[0]:
                     current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
-        vehicle.select()
+        if not vehicle.initializing: #don't select vehicle if loading in at start of game
+            vehicle.select()
 
     def uncrew_vehicle(self, vehicle):
         '''
@@ -161,21 +168,37 @@ class church_volunteers(worker):
     '''
     Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns
     '''
-    def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
+    def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this mob's images can appear
-            string image_id: File path to the image used by this object
-            string name: This mob's name
-            string list modes: Game modes during which this mob's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, grids, image_id, name, modes, global_manager)
+        super().__init__(from_save, input_dict, global_manager)
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
         
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1) #cancels out decrease of superclass
