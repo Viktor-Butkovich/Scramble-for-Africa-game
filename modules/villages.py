@@ -16,7 +16,13 @@ class village():
         Description:
             Initializes this object
         Input:
-            cell cell: cell on strategic map grid in which this village exists
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'name': string value - Required if from save, starting name of village
+                'population': int value - Required if from save, starting population of village
+                'aggressiveness': int value - Required if from save, starting aggressiveness
+                'available_workers': int value - Required if from save, starting number of available workers
+                'cell': cell value - cell on strategic map grid in which this village exists
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None

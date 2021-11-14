@@ -89,7 +89,16 @@ def start_loading(global_manager):
     global_manager.set('loading_start_time', time.time())
     main_loop_tools.update_display(global_manager)
 
-def to_main_menu(global_manager, override):
+def to_main_menu(global_manager, override = False):
+    '''
+    Description:
+        Exits the game to the main menu without saving
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean override = False: If True, forces game to exit to main menu regardless of current game circumstances
+    Output:
+        None
+    '''
     if main_loop_tools.action_possible(global_manager) or override: #if game over, go to main menu regardless of circumstances
         set_game_mode('main_menu', global_manager)
         for current_actor in global_manager.get('actor_list'):

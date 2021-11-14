@@ -11,21 +11,23 @@ class grid():
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, strategic_grid, grid_line_width, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple origin_coordinates: Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-            int pixel_width: Pixel width of this grid
-            int pixel_height: Pixel height of this grid
-            int coordinate_width: Number of columns in this grid
-            int coordinate_height: Number of rows in this grid
-            string internal_line_color: Color in the color_dict dictionary for lines between cells, like 'bright blue'
-            string external_line_color: Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
-            string list modes: Game modes during which this grid can appear
-            boolean strategic_grid: True if this grid is the primary strategic map of the game, False if it is a different grid, like the minimap or the Europe grid
-            int grid_line_width: Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'pixel_width': int value - Pixel width of this grid
+                'pixel_height': int value - Pixel height of this grid
+                'coordinate_width': int value - Number of columns in this grid
+                'coordinate_height': int value - Number of rows in this grid
+                'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
+                'external_line_color': string value - Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
+                'list modes': string list value - Game modes during which this grid can appear
+                'strategic_grid': boolean value - True if this grid is the primary strategic map of the game, False if it is a different grid, like the minimap or the Europe grid
+                'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
+                'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -82,6 +84,16 @@ class grid():
             self.load_cells(input_dict['cell_list'])
 
     def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
+        '''
         save_dict = {}
         if self.global_manager.get('strategic_map_grid') == self:
             save_dict['grid_type'] = 'strategic_map_grid'
@@ -240,7 +252,15 @@ class grid():
         for current_cell in self.cell_list:
             current_cell.find_adjacent_cells()
 
-    def load_cells(self, cell_list): #list of dictionaries with cell data, create cells
+    def load_cells(self, cell_list):
+        '''
+        Description:
+            Creates this grid's cells with correct resources and terrain based on the inputted saved information
+        Input:
+            dictionary list cell_list: list of dictionaries of saved information necessary to recreate each cell in this grid
+        Output:
+            None
+        '''
         for current_cell_dict in cell_list:
             x, y = current_cell_dict['coordinates']
             new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], current_cell_dict, self.global_manager)
@@ -483,28 +503,29 @@ class mini_grid(grid):
     Grid that zooms in on a small area of a larger attached grid, centered on a certain cell of the attached grid. Which cell is being centered on can be changed
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, attached_grid, grid_line_width, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple origin_coordinates: Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-            int pixel_width: Pixel width of this grid
-            int pixel_height: Pixel height of this grid
-            int coordinate_width: Number of columns in this grid
-            int coordinate_height: Number of rows in this grid
-            string internal_line_color: Color in the color_dict dictionary for lines between cells, like 'bright blue'
-            string external_line_color: Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
-            string list modes: Game modes during which this grid can appear
-            grid attached_grid: grid to which this grid is attached
-            int grid_line_width: Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'pixel_width': int value - Pixel width of this grid
+                'pixel_height': int value - Pixel height of this grid
+                'coordinate_width': int value - Number of columns in this grid
+                'coordinate_height': int value - Number of rows in this grid
+                'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
+                'external_line_color': string value - Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
+                'list modes': string list value - Game modes during which this grid can appear
+                'attached_grid': grid value - grid to which this grid is attached
+                'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
+                'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['strategic_grid'] = False
         super().__init__(from_save, input_dict, global_manager)
-        #super().__init__(origin_coordinates, pixel_width, pixel_height, coordinate_width, coordinate_height, internal_line_color, external_line_color, modes, False, grid_line_width, global_manager)
         self.is_mini_grid = True
         self.attached_grid = input_dict['attached_grid']
         self.attached_grid.mini_grid = self
@@ -652,20 +673,22 @@ class abstract_grid(grid):
     1-cell grid that is not directly connected to the primary strategic grid but can be moved to by mobs from the strategic grid and vice versa
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, origin_coordinates, pixel_width, pixel_height, internal_line_color, external_line_color, modes, grid_line_width, tile_image_id, name, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple origin_coordinates: Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-            int pixel_width: Pixel width of this grid
-            int pixel_height: Pixel height of this grid
-            string internal_line_color: Color in the color_dict dictionary for lines between cells, like 'bright blue'
-            string external_line_color: Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
-            string list modes: Game modes during which this grid can appear
-            int grid_line_width: Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
-            string tile_image_id: File path to the image used by this grid's tile
-            string name: Name of this grid
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'pixel_width': int value - Pixel width of this grid
+                'pixel_height': int value - Pixel height of this grid
+                'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
+                'external_line_color': string value - Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
+                'list modes': string list value - Game modes during which this grid can appear
+                'grid_line_width': int value - Pixel width of lines between cells. Lines on the outside of the grid are one pixel thicker
+                'cell_list': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each cell in this grid
+                'tile_image_id': File path to the image used by this grid's tile
+                'name': Name of this grid
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -681,6 +704,16 @@ class abstract_grid(grid):
         self.cell_list[0].set_visibility(True)
 
     def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'grid_type': string value - String matching the global manager key of this grid, used to initialize the correct type of grid on loading
+                'cell_list': dictionary list value - list of dictionaries of saved information necessary to recreate each cell in this grid
+        '''
         save_dict = super().to_save_dict()
         if self.global_manager.get('europe_grid') == self:
             save_dict['grid_type'] = 'europe_grid'

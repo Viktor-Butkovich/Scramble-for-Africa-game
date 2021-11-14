@@ -3,12 +3,8 @@
 import pygame
 from .buttons import button
 from .notifications import notification
-from . import mobs
-#from . import vehicles
 from . import text_tools
 from . import scaling
-#from . import workers
-#from . import officers
 
 class choice_notification(notification):
     '''

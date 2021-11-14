@@ -11,14 +11,15 @@ class actor():
     Object that can exist within certain coordinates on one or more grids and can optionally be able to hold an inventory of commodities
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, modes, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this actor's images can appear
-            string list modes: Game modes during which this actor's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grid': grid value - grid in which this tile can appear
+                'modes': string list value - Game modes during which this actor's images can appear
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -38,24 +39,30 @@ class actor():
             self.grid = self.grids[0]
             self.set_name('placeholder')
         self.x, self.y = input_dict['coordinates']
-        #self.name = ''
-        #self.set_name('placeholder')
         self.set_coordinates(self.x, self.y)
         self.selected = False
         self.can_hold_commodities = False
         self.can_hold_infinite_commodities = False
         self.inventory_capacity = 0
         self.tooltip_text = []
-        #if self.from_save:
-        #    self.inventory = input_dict['inventory']
-        #else:
         self.inventory = {}
-        #if self.can_hold_commodities:
-        #    self.inventory_setup()
 
     def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this actor's images can appear
+                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+        '''
         save_dict = {}
-        
         init_type = ''
         if self.actor_type == 'mob':
             if self.is_worker:
@@ -111,6 +118,14 @@ class actor():
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
 
     def load_inventory(self, inventory_dict):
+        '''
+        Description:
+            Sets this actor's inventory to a dictionary with a string key for each commodity type and an int value for how much of that commodity is held, matching the inventory of the original saved actor
+        Input:
+            string/int dictionary inventory_dict: Dictionary with string keys for each commodity type saved and int values for how much of that commodity is held. No entries required for commodities with 0 units
+        Output:
+            None
+        '''
         for current_commodity in self.global_manager.get('commodity_types'):
             if current_commodity in inventory_dict:
                 self.set_inventory(current_commodity, inventory_dict[current_commodity])

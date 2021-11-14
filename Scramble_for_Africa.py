@@ -1,27 +1,18 @@
-#to do: when loading inventory, fill in empty inventory slots
-
 import pygame
 import time
 import random
 
 import modules.scaling as scaling
 import modules.main_loop as main_loop
-import modules.notification_tools as notification_tools
 import modules.images as images
 import modules.buttons as buttons
 import modules.game_transitions as game_transitions
-import modules.grids as grids
 import modules.data_managers as data_managers
-import modules.actor_utility as actor_utility
-import modules.groups as groups
 import modules.europe_transactions as europe_transactions
 import modules.labels as labels
 import modules.actor_display_tools.images as actor_display_images
 import modules.actor_display_tools.labels as actor_display_labels
 import modules.instructions as instructions
-import modules.turn_management_tools as turn_management_tools
-import modules.vehicles as vehicles
-import modules.buildings as buildings
 import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
@@ -29,7 +20,7 @@ import modules.actor_creation_tools as actor_creation_tools
 pygame.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
-global_manager.set('save_load_manager', save_load_tools.save_load_manager(global_manager))
+global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
 global_manager.set('europe_grid', 'none')
 resolution_finder = pygame.display.Info()
 global_manager.set('default_display_width', 1728)#all parts of game made to be at default and scaled to display

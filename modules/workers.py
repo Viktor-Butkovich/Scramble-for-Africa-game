@@ -9,16 +9,20 @@ class worker(mob):
     Mob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this mob's images can appear
-            string image_id: File path to the image used by this object
-            string name: This mob's name
-            string list modes: Game modes during which this mob's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -165,16 +169,20 @@ class church_volunteers(worker):
     Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this mob's images can appear
-            string image_id: File path to the image used by this object
-            string name: This mob's name
-            string list modes: Game modes during which this mob's images can appear
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None

@@ -1,3 +1,5 @@
+#Contains functionality for creating new instances of mobs and buildings
+
 from . import actors
 from . import mobs
 from . import workers
@@ -7,10 +9,32 @@ from . import vehicles
 from . import buildings
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
+    '''
+    Object that creates new mobs and buildings based on inputted values
+    '''
     def __init__(self):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            None
+        Output:
+            None
+        '''
         nothing = 0
         
     def create(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes a mob or building based on inputted values
+        Input:
+            boolean from_save: True if the object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
+                'init_type': string value - Always required, determines type of object created
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            actor: Returns the mob or building that was created
+        '''
         init_type = input_dict['init_type']
 
         #mobs
@@ -82,29 +106,3 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 name += ' '
         input_dict['name'] = name
         return(self.create(False, input_dict, global_manager))
-        '''
-        if officer.officer_type == 'explorer':
-            input_dict['image'] = 'mobs/explorer/expedition.png'
-            input_dict['name'] = 'expedition'
-            new_group = expedition(False, input_dict, global_manager)
-        elif officer.officer_type == 'engineer':
-            input_dict['image'] = 'mobs/engineer/construction_gang.png'
-            input_dict['name'] = 'construction gang'
-            new_group = construction_gang(False, input_dict, global_manager)
-        elif officer.officer_type == 'porter_foreman':
-            input_dict['image'] = 'mobs/porter foreman/porters.png'
-            input_dict['name'] = 'porters'
-            new_group = porters(False, input_dict, global_manager)
-        elif officer.officer_type == 'merchant':
-            input_dict['image'] = 'mobs/merchant/caravan.png'
-            input_dict['name'] = 'caravan'
-            new_group = caravan(False, input_dict, global_manager)
-        elif officer.officer_type == 'head_missionary':
-            input_dict['image'] = 'mobs/head missionary/missionaries.png'
-            input_dict['name'] = 'missionaries'
-            new_group = missionaries(False, input_dict, global_manager)
-        else:
-            input_dict['image'] = 'mobs/default/default.png'
-            input_dict['name'] = 'expedition'
-            new_group = group(False, input_dict, global_manager)
-        '''

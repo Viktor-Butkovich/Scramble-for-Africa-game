@@ -1,3 +1,5 @@
+#Contains functionality for creating new games, saving, and loading
+
 import random
 import pickle
 
@@ -10,12 +12,31 @@ from . import turn_management_tools
 from . import text_tools
 from . import market_tools
 
-class save_load_manager():
+class save_load_manager_template():
+    '''
+    Object that controls creating new games, saving, and loading
+    '''
     def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.global_manager = global_manager
         self.set_copied_elements()
 
     def set_copied_elements(self):
+        '''
+        Description:
+            Determines which variables should be saved and loaded
+        Input:
+            None
+        Output:
+            None
+        '''
         self.copied_elements = []
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
@@ -23,10 +44,18 @@ class save_load_manager():
         self.copied_elements.append('worker_upkeep')
         
     def new_game(self):
-        strategic_grid_height = 300#450
-        strategic_grid_width = 320#480
-        mini_grid_height = 600#450
-        mini_grid_width = 640#480
+        '''
+        Description:
+            Creates a new game and leaves the main menu
+        Input:
+            None
+        Output:
+            None
+        '''
+        strategic_grid_height = 300
+        strategic_grid_width = 320
+        mini_grid_height = 600
+        mini_grid_width = 640
 
         input_dict = {}
         input_dict['origin_coordinates'] = scaling.scale_coordinates(self.global_manager.get('default_display_width') - (strategic_grid_width + 100), self.global_manager.get('default_display_height') - (strategic_grid_height + 25),
@@ -95,23 +124,24 @@ class save_load_manager():
 
         turn_management_tools.start_turn(self.global_manager, True)
         
-    def save_game(self, file_path): #name.pickle file
+    def save_game(self, file_path):
+        '''
+        Description:
+            Saves the game in the file corresponding to the inputted file path
+        Input:
+            None
+        Output:
+            None
+        '''
         file_path = 'save_games/' + file_path
         saved_global_manager = data_managers.global_manager_template()
         for current_element in self.copied_elements: #save necessary data into new global manager
-            #print(self.global_manager.get(current_element))
-            #print(current_element)
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
-        #print(saved_global_manager.global_dict)
 
         saved_grid_dicts = []
         for current_grid in self.global_manager.get('grid_list'):
             if not current_grid.is_mini_grid: #minimap grid doesn't need to be saved
                 saved_grid_dicts.append(current_grid.to_save_dict())
-
-        #print(saved_grid_dicts)
-        
-        #still need to save grid cell contents with inventories, terrain, and resource/village info, should be saved and loaded in before actors
             
         saved_actor_dicts = []
         for current_mob in self.global_manager.get('mob_list'):
@@ -120,8 +150,6 @@ class save_load_manager():
         for current_building in self.global_manager.get('building_list'):
             saved_actor_dicts.append(current_building.to_save_dict())
 
-        #print(saved_actor_dicts)
-
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
             pickle.dump(saved_grid_dicts, handle)
@@ -129,6 +157,14 @@ class save_load_manager():
         text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
 
     def load_game(self, file_path):
+        '''
+        Description:
+            Loads a saved game from the file corresponding to the inputted file path
+        Input:
+            None
+        Output:
+            None
+        '''
         #load file
         try:
             file_path = 'save_games/' + file_path
@@ -145,7 +181,6 @@ class save_load_manager():
             self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
-
 
         #load grids
         strategic_grid_height = 300
@@ -210,24 +245,3 @@ class save_load_manager():
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)
-        #turn_management_tools.start_turn(self.global_manager, True)
-
-        
-'''
-To save grid:
-save contents of each grid cell in a list of dictionaries: for each cell, have a dictionary with terrain, resource, village pop/aggressiveness/available_workers if applicable
-make version of grid init function that takes cell list and creates that cell at the correct location and with the correct terrain and resource. If there is a village, record village attributes and make one
-
-to save buildings:
-make list of dictionaries with building type, location
-
-to save mobs:
-make list of dictionaries with unit type, location, veteran status, if group/in vehicle/in building make them first and attach upon creation somehow
-
-Save these lists in the dictionary dumped into file and retrive them while loading
-
-these should cover everything: each of these object types will need changes to initialization to allow feeding a dictionary and setting up initial state as alternative to normal initialization
-Maybe change initialization for actors and grids to take a list of inputs and an initialization type string: depending on initialization type, call different init function with input list, within each init function set relevant values
-to different list items
-consider making input lists dictionaries instead
-'''

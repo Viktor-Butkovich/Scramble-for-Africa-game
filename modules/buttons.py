@@ -647,7 +647,7 @@ class button():
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
             elif self.button_type == 'main menu':
-                game_transitions.to_main_menu(self.global_manager, False)
+                game_transitions.to_main_menu(self.global_manager)
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)

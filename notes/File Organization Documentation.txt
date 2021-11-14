@@ -17,6 +17,9 @@ SFA folder
     text folder
         flavor_explorer.csv
 
+    save_games folder
+	save1.pickle
+
     notes folder
 	File Organization Documentation.txt
 	Required Documentation Updates.txt
@@ -24,8 +27,7 @@ SFA folder
     __init__.py
 
     Scramble_for_Africa.py
-        imports pygame, time, random, scaling, main_loop, notification_tools, images, buttons, game_transitions, grids, data_managers, actor_utility, groups, europe_transactions, labels, actor_display_tools, instructions, 
-	    turn_management_tools, vehicles, buildings, mouse_followers
+        imports pygame, time, random, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tools
         
     modules folder
 
@@ -35,7 +37,7 @@ SFA folder
 		class church_volunteers
 
 	villages.py
-	    imports random, village_name_generator, actor_utility
+	    imports random, village_name_generator, actor_utility, utility
 	    class village
 
 	village_name_generator.py
@@ -90,6 +92,10 @@ SFA folder
             def scale_height
 	    def unscale_width
 	    def unscale_height
+
+	save_load_tools.py
+	    imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools
+	    class save_load_manager_template
 
 	officers.py
 	    imports mobs, tiles, workers, actor_utility, utility, notification_tools, text_tools, dice_utility, dice, scaling
@@ -160,7 +166,7 @@ SFA folder
                     class veteran_icon_image
 
         groups.py
-            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools, buildings, vehicles
+            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
             class group(mobs.mob)
 		class porters
 		class construction_gang
@@ -170,7 +176,7 @@ SFA folder
             def create_group
 
         grids.py
-            imports random, pygame, cells, actor_utility
+            imports random, pygame, cells, actor_utility, utility
             class grid
                 class mini_grid
                 class abstract_grid
@@ -180,6 +186,7 @@ SFA folder
             def set_game_mode
             def create_strategic_map
             def start_loading
+	    def to_main_menu
 
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, utility
@@ -203,7 +210,7 @@ SFA folder
             class die
 
         data_managers.py
-            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
+            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, game_transitions
             class global_manager_template
             class input_manager_template
             class flavor_text_manager_template
@@ -216,7 +223,7 @@ SFA folder
             def read_csv
 
 	choice_notifications.py
-	    imports pygame, buttons, notifications, mobs, vehicles, text_tools, scaling, workers, officers
+	    imports pygame, buttons, notifications, text_tools, scaling
 	    class choice_notification(notifications.notification)
 	    class choice_button(buttons.button)
 		class recruitment_choice_button
@@ -226,7 +233,7 @@ SFA folder
             class cell
 
         buttons.py
-            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools
+            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools
             class button
 		class cycle_same_tile_button
 		class same_tile_icon
@@ -292,6 +299,10 @@ SFA folder
 		    class switch_theatre_button
 		    class build_train_button
 		    class construction_button
+
+	actor_creation_tools.py
+	    imports actors, mobs, workers, officers, groups, vehicles, buildings
+	    class actor_creation_manager_template
 
 	action_notifications.py
 	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility, workers

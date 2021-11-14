@@ -15,26 +15,28 @@ from . import notification_tools
 from . import dice
 from . import scaling
 from . import main_loop_tools
-#from . import buildings
-#from . import vehicles
 
 class group(mob):
     '''
     Mob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -45,8 +47,6 @@ class group(mob):
         else:
             self.worker = global_manager.get('actor_creation_manager').create(True, input_dict['worker'], global_manager)
             self.officer = global_manager.get('actor_creation_manager').create(True, input_dict['officer'], global_manager)
-            
-        #self.veteran = self.officer.veteran
         super().__init__(from_save, input_dict, global_manager)
         self.worker.join_group()
         self.officer.join_group()
@@ -77,6 +77,26 @@ class group(mob):
         self.group_type = 'none'
 
     def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this actor's images can appear
+                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - How many movement points this actor currently has
+                'image': string value - File path to the image used by this object
+                'worker': dictionary value - dictionary of the saved information necessary to recreate the worker
+                'officer': dictionary value - dictionary of the saved information necessary to recreate the officer
+        '''
         save_dict = super().to_save_dict()
         save_dict['worker'] = self.worker.to_save_dict()
         save_dict['officer'] = self.officer.to_save_dict()
@@ -373,8 +393,6 @@ class group(mob):
             if self.building_type == 'resource':
                 input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
                 input_dict['resource_type'] = self.attached_resource
-                
-                #new_building = buildings.resource_building(False, input_dict, self.global_manager)
             elif self.building_type == 'infrastructure':
                 building_image_id = 'none'
                 if self.building_name == 'road':
@@ -383,28 +401,20 @@ class group(mob):
                     building_image_id = 'buildings/infrastructure/railroad.png'
                 input_dict['image'] = building_image_id
                 input_dict['infrastructure_type'] = self.building_name
-                #new_building = buildings.infrastructure_building(False, input_dict, self.global_manager)
-                    #coordinates, grids, image_id, name, infrastructure_type, modes, global_manager
             elif self.building_type == 'port':
                 input_dict['image'] = 'buildings/port.png'
-                #new_building = buildings.port(False, input_dict, self.global_manager)
             elif self.building_type == 'train_station':
                 input_dict['image'] = 'buildings/train_station.png'
-                #new_building = buildings.train_station(False, input_dict, self.global_manager)
             elif self.building_type == 'trading_post':
                 input_dict['image'] = 'buildings/trading_post.png'
-                #new_building = buildings.trading_post(False, input_dict, self.global_manager)
             elif self.building_type == 'mission':
                 input_dict['image'] = 'buildings/mission.png'
-                #new_building = buildings.mission(False, input_dict, self.global_manager)
             elif self.building_type == 'train':
                 image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['crew'] = 'none'
-                #new_train = vehicles.train(False, input_dict, self.global_manager)
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
-                #new_building = buildings.building(False, input_dict, self.global_manager)
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
         self.global_manager.set('ongoing_construction', False)
@@ -432,18 +442,22 @@ class porters(group):
     A group with a porter foreman officer that can hold commodities
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -463,18 +477,22 @@ class construction_gang(group):
     A group with an engineer officer that is able to construct buildings and trains
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -490,18 +508,22 @@ class caravan(group):
     A group with a merchant officer that is able to establish trading posts and trade with native villages
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -750,18 +772,22 @@ class missionaries(group):
     A group with a head missionary officer and church volunteer workers that can build churches and convert native villages
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, coordinates, grids, image_id, name, modes, worker, officer, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -940,13 +966,18 @@ class expedition(group):
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates on one of the game grids
-            grid list grids: grids in which this group's images can appear
-            string image_id: File path to the image used by this object
-            string name: this group's name
-            string list modes: Game modes during which this group's images can appear
-            worker worker: worker component of this group
-            officer officer: officer component of this group
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
