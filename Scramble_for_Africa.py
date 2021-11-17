@@ -78,6 +78,11 @@ global_manager.set('terrain_colors',
     }
 )
 
+global_manager.set('minister_types', ['general', 'bishop', 'merchant', 'explorer', 'engineer', 'factor', 'prosecutor'])
+global_manager.set('current_ministers', {})
+for current_minister_type in global_manager.get('minister_types'):
+    global_manager.get('current_ministers')[current_minister_type] = 'none'
+
 global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('commodity_prices', {})
@@ -160,13 +165,13 @@ global_manager.set('instructions_list', [])
 instructions_message = "Placeholder instructions, use += to add"
 global_manager.get('instructions_list').append(instructions_message)
 
+global_manager.set('minister_list', [])
 global_manager.set('grid_list', [])
 global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
 global_manager.set('background_image_list', [])
-#global_manager.set('bar_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('village_list', [])
