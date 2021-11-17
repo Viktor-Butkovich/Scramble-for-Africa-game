@@ -156,7 +156,8 @@ class save_load_manager_template():
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
-        print(saved_minister_dicts)
+            print(current_minister.name + ', ' + current_minister.current_position + ', ' + str(current_minister.get_skill_modifier()))
+        #print(saved_minister_dicts)
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
@@ -254,7 +255,7 @@ class save_load_manager_template():
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
 
-        print(saved_minister_dicts)
+        #print(saved_minister_dicts)
         for current_minister_dict in saved_minister_dicts:
             minister_tools.load_minister(current_minister_dict, self.global_manager)
         

@@ -78,11 +78,6 @@ global_manager.set('terrain_colors',
     }
 )
 
-global_manager.set('minister_types', ['general', 'bishop', 'merchant', 'explorer', 'engineer', 'factor', 'prosecutor'])
-global_manager.set('current_ministers', {})
-for current_minister_type in global_manager.get('minister_types'):
-    global_manager.get('current_ministers')[current_minister_type] = 'none'
-
 global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
 global_manager.set('commodity_prices', {})
@@ -140,6 +135,22 @@ global_manager.set('resource_types', global_manager.get('commodity_types') + ['n
 
 global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
 
+global_manager.set('minister_types', ['General', 'Bishop', 'Minister of Trade', 'Minister of Geography', 'Minister of Engineering', 'Minister of Production', 'Minister of Transportation', 'Prosecutor'])
+global_manager.set('type_minister_dict',
+    {
+    'military': 'General',
+    'religion': 'Bishop',
+    'trade': 'Minister of Trade',
+    'exploration': 'Minister of Geography',
+    'construction': 'Minister of Engineering',
+    'production': 'Minister of Production',
+    'transportation': 'Minister of Transportation',
+    }
+)
+global_manager.set('current_ministers', {})
+for current_minister_type in global_manager.get('minister_types'):
+    global_manager.get('current_ministers')[current_minister_type] = 'none'
+
 global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary'])
 global_manager.set('officer_group_type_dict',
     {
@@ -148,6 +159,27 @@ global_manager.set('officer_group_type_dict',
     'porter_foreman': 'porters',
     'merchant': 'caravan',
     'head_missionary': 'missionaries'
+    }
+)
+
+type_minister_dict = global_manager.get('type_minister_dict')
+global_manager.set('officer_minister_dict',
+    {
+    'explorer': type_minister_dict['exploration'],
+    'engineer': type_minister_dict['construction'],
+    'porter_foreman': type_minister_dict['transportation'],
+    'merchant': type_minister_dict['trade'],
+    'head_missionary': type_minister_dict['religion']
+    }
+)
+
+global_manager.set('group_minister_dict',
+    {
+    'expedition': type_minister_dict['exploration'],
+    'construction_gang': type_minister_dict['construction'],
+    'porters': type_minister_dict['transportation'],
+    'caravan': type_minister_dict['trade'],
+    'missionaries': type_minister_dict['religion']
     }
 )
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])

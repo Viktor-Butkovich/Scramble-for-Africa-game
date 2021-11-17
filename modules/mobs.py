@@ -60,6 +60,7 @@ class mob(actor):
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
+        self.set_controlling_minister_type('none')
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
@@ -76,6 +77,16 @@ class mob(actor):
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
+    def set_controlling_minister_type(self, new_type):
+        self.controlling_minister_type = new_type
+        self.update_controlling_minister()
+
+    def update_controlling_minister(self):
+        if self.controlling_minister_type == 'none':
+            self.controlling_minister = 'none'
+        else:
+            self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
 
     def to_save_dict(self):
         '''

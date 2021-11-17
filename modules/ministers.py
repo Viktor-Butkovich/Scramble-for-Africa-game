@@ -60,7 +60,7 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
         if skill <= 2: #1-2
             return(-1)
         elif skill <= 4: #3-4
-            return(-1)
+            return(0)
         else: #5-6
             return(1)
 

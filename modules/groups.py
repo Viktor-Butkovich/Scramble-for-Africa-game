@@ -74,7 +74,14 @@ class group(mob):
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
-        self.group_type = 'none'
+        self.set_group_type('none')
+
+    def set_group_type(self, new_type):
+        self.group_type = new_type
+        if not new_type == 'none':
+            self.set_controlling_minister_type(self.global_manager.get('group_minister_dict')[self.group_type])
+        else:
+            self.set_controlling_minister_type('none')
 
     def to_save_dict(self):
         '''
@@ -253,7 +260,10 @@ class group(mob):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = 0 #construction shouldn't have critical failures
         self.current_min_crit_success = self.default_min_crit_success
+
         #determine modifier here
+        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+        
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
@@ -465,7 +475,7 @@ class porters(group):
         super().__init__(from_save, input_dict, global_manager)
         self.can_hold_commodities = True
         self.inventory_capacity = 9
-        self.group_type = 'porters'
+        self.set_group_type('porters')
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
@@ -499,7 +509,7 @@ class construction_gang(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.can_construct = True
-        self.group_type = 'construction_gang'
+        self.set_group_type('construction_gang')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
@@ -533,7 +543,7 @@ class caravan(group):
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
-        self.group_type = 'caravan'
+        self.set_group_type('caravan')
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
@@ -559,7 +569,9 @@ class caravan(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
+
         #determine modifier here
+        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
 
         if village.cell.contained_buildings['trading_post'] == 'none': #penalty for no trading post
             self.current_roll_modifier -= 1
@@ -690,7 +702,10 @@ class caravan(group):
         self.current_min_success = 4
         self.current_max_crit_fail = 0 #0 requirement for critical fail means critical fails will not occur
         self.current_min_crit_success = 7 #no critical successes
+        
         #determine modifier here
+        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+        
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
@@ -794,7 +809,7 @@ class missionaries(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.can_convert = True
-        self.group_type = 'missionaries'
+        self.set_group_type('missionaries')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
 
@@ -834,6 +849,8 @@ class missionaries(group):
         elif population_modifier > 0:
             message += "The low population of this village will require less effort to convert /n"
         self.current_roll_modifier += population_modifier
+
+        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
@@ -986,7 +1003,7 @@ class expedition(group):
         self.exploration_mark_list = []
         self.exploration_cost = 2
         self.can_explore = True
-        self.group_type = 'expedition'
+        self.set_group_type('expedition')
 
     def move(self, x_change, y_change):
         '''
@@ -1026,7 +1043,10 @@ class expedition(group):
                 self.current_min_success = self.default_min_success
                 self.current_max_crit_fail = self.default_max_crit_fail
                 self.current_min_crit_success = self.default_min_crit_success
+                
                 #determine modifier here
+                self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+                
                 self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
                 self.current_max_crit_fail -= self.current_roll_modifier
                 if self.current_min_success > self.current_min_crit_success:
@@ -1188,7 +1208,7 @@ class expedition(group):
             self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
             self.promote()
-        elif roll_result == self.current_max_crit_fail:
+        elif roll_result <= self.current_max_crit_fail:
             self.die()
             died = True
         copy_dice_list = self.global_manager.get('dice_list')

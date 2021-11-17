@@ -40,6 +40,7 @@ class officer(mob):
         self.veteran_icons = []
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
+        self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
         if not from_save:
             self.veteran = False
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
@@ -266,7 +267,10 @@ class head_missionary(officer):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
+        
         #determine modifier here
+        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+        
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:

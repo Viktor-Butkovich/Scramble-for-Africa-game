@@ -32,6 +32,7 @@ class worker(mob):
         self.is_worker = True
         self.is_church_volunteers = False
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
+        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
@@ -188,6 +189,7 @@ class church_volunteers(worker):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
+        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
         
