@@ -5,3 +5,5 @@ save_load_tools imports
 groups.group.set_group_type
 mobs.mob.set_controlling_minister_type
 mobs.mob.update_controlling_minister
+dice_utility.roll
+dice_utility.roll_to_list

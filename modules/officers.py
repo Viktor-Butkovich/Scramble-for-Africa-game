@@ -269,7 +269,7 @@ class head_missionary(officer):
         self.current_min_crit_success = self.default_min_crit_success
         
         #determine modifier here
-        self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
         
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
@@ -319,10 +319,13 @@ class head_missionary(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-                                
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager)
+
+            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -340,7 +343,8 @@ class head_missionary(officer):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager)
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]

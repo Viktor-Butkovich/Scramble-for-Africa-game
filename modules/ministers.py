@@ -30,6 +30,47 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
         save_dict['corruption'] = self.corruption
         return(save_dict)
 
+    def roll(self, num_sides, min_success, max_crit_fail, predetermined_corruption = False):
+        min_result = 1
+        max_result = num_sides
+        result = random.randrange(1, num_sides + 1)
+        print('rolling')
+        print('default result: ' + str(result))
+        if random.randrange(1, 3) == 1: #1/2
+            result += self.get_skill_modifier()
+        print('skill modified result: ' + str(result))
+
+        if predetermined_corruption or self.check_corruption(): #true if stealing
+            print('stealing')
+            result = random.randrange(max_crit_fail + 1, min_success) #if crit fail on 1 and success on 4+, do random.randrange(2, 4), pick between 2 and 3
+            print('reported result: ' + str(result))
+        else:
+            print('not stealing')
+
+        if result < min_result:
+            result = min_result
+        elif result > max_result:
+            result = max_result
+
+        #if corrupt, chance to choose random non-critical failure result
+            
+        return(result)
+
+    def roll_to_list(self, num_sides, min_success, max_crit_fail, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
+        results = []
+        if self.check_corruption():
+            corrupt_index = random.randrange(0, num_dice)
+            for i in range(num_dice):
+                if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly and make it the corrupt result, making it a non-critical failure
+                    results.append(self.roll(num_sides, min_success, max_crit_fail, True))
+                else: #for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
+                    results.append(self.roll(num_sides, min_success, 0, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
+        else: #if not corrupt, just roll twice
+            for i in range(num_dice):
+                results.append(self.roll(num_sides, min_success, max_crit_fail))
+        return(results)
+            
+
     def appoint(self, new_position):
         if not self.current_position == 'none':
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
@@ -46,7 +87,7 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
         self.corruption = random.randrange(1, 7) #1-7
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
             
-    def check_corruption(self):
+    def check_corruption(self): #returns true if stealing for this roll
         if random.randrange(1, 7) >= self.corruption_threshold:
             return(True)
         else:
