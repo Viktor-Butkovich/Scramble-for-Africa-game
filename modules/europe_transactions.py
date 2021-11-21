@@ -138,7 +138,7 @@ class recruitment_button(button):
         Output:
             None
         '''
-        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_type + ' for ' + str(self.cost) + ' money.'])
+        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'])
 
 class buy_commodity_button(button):
     '''

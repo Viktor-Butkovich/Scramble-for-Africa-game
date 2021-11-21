@@ -3,6 +3,7 @@
 import pygame
 
 from ..labels import label
+from ..images import minister_type_image
 from . import buttons
 from . import images
 
@@ -28,6 +29,7 @@ class actor_display_label(label):
         '''
         message = ''
         self.attached_buttons = []
+        self.attached_images = []
         self.actor = 'none'
         self.actor_label_type = actor_label_type #name, terrain, resource, etc
         self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
@@ -91,6 +93,9 @@ class actor_display_label(label):
             self.message_start = 'Available workers: '
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+        elif self.actor_label_type == 'minister':
+            self.message_start = 'Minister: '
+            self.attached_images.append(minister_type_image((self.x - self.height, self.y), self.height, self.height, self.modes, 'none', self, global_manager))
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -137,8 +142,7 @@ class actor_display_label(label):
                     for current_building in self.actor.cell.get_buildings():
                         current_building.update_tooltip()
                         tooltip_text.append('')
-                        tooltip_text += current_building.tooltip_text
-                    
+                        tooltip_text += current_building.tooltip_text  
                 self.set_tooltip(tooltip_text)
         elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
             tooltip_text = [self.message]
@@ -163,6 +167,16 @@ class actor_display_label(label):
                         tooltip_text.append("This tile currently contains " + str(self.actor.get_inventory_used()) + " commodities")
                         tooltip_text.append("This tile can retain a maximum of " + str(self.actor.inventory_capacity) + " commodities.")
                         tooltip_text.append("If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost.")
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'minister':
+            tooltip_text = []
+            if not self.actor == 'none':
+                tooltip_text.append(self.actor.controlling_minister.current_position + ' ' + self.actor.controlling_minister.name + ' controls this unit.')
+                tooltip_text.append('When you command this unit, the ' + self.actor.controlling_minister.current_position + ' executes the order.')
+                self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
+                self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
+                self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
+                self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -272,6 +286,10 @@ class actor_display_label(label):
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
+            elif self.actor_label_type == 'minister':
+                if not self.actor.controlling_minister == 'none':
+                    self.set_label(self.message_start + self.actor.controlling_minister.name)
+                    self.attached_images[0].calibrate(self.actor.controlling_minister)
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -313,6 +331,11 @@ class actor_display_label(label):
             current_button.y = self.y
             current_button.Rect.y = self.global_manager.get('display_height') - (current_button.y + current_button.height)
             current_button.outline.y = current_button.Rect.y - current_button.outline_width
+        for current_image in self.attached_images:
+            current_image.y = self.global_manager.get('display_height') - self.y
+            current_image.Rect.y = current_image.y - current_image.height
+            #current_image.Rect.y = self.y
+            #current_image.y = self.global_manager.get('display_height') - (current_image.y + current_image.height)
 
     def can_show(self):
         '''

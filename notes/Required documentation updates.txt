@@ -7,3 +7,7 @@ mobs.mob.set_controlling_minister_type
 mobs.mob.update_controlling_minister
 dice_utility.roll
 dice_utility.roll_to_list
+actor_display_tools.images.actor_display_background_image changed to tooltip_free_image
+actor_display_tools.images.tooltip_free_image description
+images.minister_type_image
+imagse.tooltip_free_image

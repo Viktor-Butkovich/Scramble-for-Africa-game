@@ -147,6 +147,17 @@ global_manager.set('type_minister_dict',
     'transportation': 'Minister of Transportation',
     }
 )
+global_manager.set('minister_type_dict',
+    {
+    'General': 'military',
+    'Bishop': 'religion',
+    'Minister of Trade': 'trade',
+    'Minister of Geography': 'exploration',
+    'Minister of Engineering': 'construction',
+    'Minister of Production': 'production',
+    'Minister of Transportation': 'transportation',
+    }
+)
 global_manager.set('current_ministers', {})
 for current_minister_type in global_manager.get('minister_types'):
     global_manager.get('current_ministers')[current_minister_type] = 'none'
@@ -203,6 +214,7 @@ global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
+global_manager.set('minister_type_image_list', [])
 global_manager.set('background_image_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
@@ -357,7 +369,7 @@ actor_display_current_y = actor_display_top_y
 global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
 #mob background image
-mob_free_image_background = actor_display_images.actor_display_background_image('misc/mob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+mob_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
 global_manager.get('mob_info_display_list').append(mob_free_image_background)
 
@@ -380,6 +392,11 @@ global_manager.get('mob_info_display_list').append(mob_free_image)
 mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic', 'europe'], 'misc/default_label.png', 'name', 'mob', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('mob_info_display_list').append(mob_name_label)
+
+#mob controlling minister label
+mob_minister_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(30, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['strategic', 'europe'], 'misc/default_label.png', 'minister', 'mob', global_manager)
+global_manager.get('mob_info_display_list').append(mob_minister_label)
 
 #mob group officer label
 mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
@@ -416,7 +433,7 @@ for i in range(0, 3): #0, 1, 2
 #tile background image
 actor_display_current_y = global_manager.get('default_display_height') - 580
 global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
-tile_free_image_background = actor_display_images.actor_display_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)
 global_manager.get('tile_info_display_list').append(tile_free_image_background)
 

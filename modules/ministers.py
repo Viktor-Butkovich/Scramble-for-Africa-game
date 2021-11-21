@@ -1,6 +1,7 @@
 import random
 
 from . import utility
+from . import actor_utility
 
 class minister(): #general, bishop, merchant, explorer, engineer, factor, prosecutor
     def __init__(self, from_save, input_dict, global_manager):
@@ -76,6 +77,11 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
+        for current_minister_type_image in self.global_manager.get('minister_type_image_list'):
+            if current_minister_type_image.minister_type == new_position:
+                current_minister_type_image.calibrate(self)
+        if not self.global_manager.get('displayed_mob') == 'none':
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #update minister label
 
     def skill_setup(self):
         self.general_skill = random.randrange(1, 4) #1-3, general skill as in all fields, not military

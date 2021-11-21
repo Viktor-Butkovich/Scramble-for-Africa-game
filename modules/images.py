@@ -86,8 +86,135 @@ class free_image():
             None
         '''
         self.image_id = new_image
-        self.image = pygame.image.load('graphics/' + self.image_id)
+        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+            self.image = pygame.image.load('graphics/' + self.image_id)
+        except:
+            print('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+    def can_show_tooltip(self):
+        return(False)
+
+class tooltip_free_image(free_image):
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
+        super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
+        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height)
+        self.tooltip_text = []
+        self.update_tooltip()
+
+    def set_tooltip(self, tooltip_text):
+        '''
+        Description:
+            Sets this actor's tooltip to the inputted list, with each inputted list representing a line of the tooltip
+        Input:
+            string list new_tooltip: Lines for this actor's tooltip
+        Output:
+            None
+        '''
+        self.tooltip_text = tooltip_text
+        tooltip_width = 0
+        font_name = self.global_manager.get('font_name')
+        font_size = self.global_manager.get('font_size')
+        for text_line in tooltip_text:
+            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
+        self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
+        self.tooltip_outline_width = 1
+        self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
+
+    def update_tooltip(self):
+        self.tooltip_text = []
+
+    def touching_mouse(self):
+        '''
+        Description:
+            Returns whether this button is colliding with the mouse
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button is colliding with the mouse, otherwise returns False
+        '''
+        if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
+            return(True)
+        else:
+            return(False)
+
+    def can_show_tooltip(self):
+
+        '''
+        Description:
+            Returns whether this button's tooltip can be shown. By default, its tooltip can be shown when it is visible and colliding with the mouse
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.touching_mouse() and self.can_show():
+            return(True)
+        else:
+            return(False)
+
+    def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
+        '''
+        Description:
+            Draws this button's tooltip when moused over. The tooltip's location may vary when the tooltip is near the edge of the screen or if multiple tooltips are being shown
+        Input:
+            boolean below_screen: Whether any of the currently showing tooltips would be below the bottom edge of the screen. If True, moves all tooltips up to prevent any from being below the screen
+            boolean beyond_screen: Whether any of the currently showing tooltips would be beyond the right edge of the screen. If True, moves all tooltips to the left to prevent any from being beyond the screen
+            int height: Combined pixel height of all tooltips
+            int width: Pixel width of the widest tooltip
+            int y_displacement: How many pixels below the mouse this tooltip should be, depending on the order of the tooltips
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.update_tooltip()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if below_screen:
+                mouse_y = self.global_manager.get('display_height') + 10 - height
+            if beyond_screen:
+                mouse_x = self.global_manager.get('display_width') - width
+            mouse_y += y_displacement
+            self.tooltip_box.x = mouse_x
+            self.tooltip_box.y = mouse_y
+            self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
+            self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            for text_line_index in range(len(self.tooltip_text)):
+                text_line = self.tooltip_text[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                    (text_line_index * self.global_manager.get('font_size'))))
+
+class minister_type_image(tooltip_free_image):
+    def __init__(self, coordinates, width, height, modes, minister_type, attached_label, global_manager):
+        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
+        self.minister_type = minister_type #position, like General
+        self.attached_label = attached_label
+        self.global_manager.get('minister_type_image_list').append(self)
+
+    def calibrate(self, new_minister):
+        #minister_type = new_actor.controlling_minister_type #position, like General
+        self.minister_type = new_minister.current_position
+        keyword = self.global_manager.get('minister_type_dict')[self.minister_type] #type, like military
+        self.tooltip_text = []
+        self.tooltip_text.append('This is ' + new_minister.name + ', your ' + self.minister_type + '.')
+        self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.minister_type + ' is responsible for executing the action.')
+        self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
+        self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
+        self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
+        self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
+        self.set_image('ministers/icons/' + keyword + '.png')
+
+    def update_tooltip(self):
+        self.set_tooltip(self.tooltip_text)
+
+    def can_show(self):
+        if not self.attached_label == 'none':
+            return(self.attached_label.can_show())
+        else:
+            return(super().can_show())
 
 class loading_image_template(free_image):
     '''

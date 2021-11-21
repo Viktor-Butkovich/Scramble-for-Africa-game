@@ -118,6 +118,8 @@ def update_display(global_manager):
             if current_free_image.to_front: #draw on top if free image should be in front
                 current_free_image.draw()
                 current_free_image.has_drawn = True
+            if current_free_image.can_show_tooltip():
+                possible_tooltip_drawers = [current_free_image]
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)

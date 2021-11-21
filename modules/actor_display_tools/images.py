@@ -116,7 +116,7 @@ class actor_display_infrastructure_connection_image(actor_display_free_image):
         self.direction = direction
         super().__init__(coordinates, width, height, modes, actor_image_type, global_manager)
 
-class actor_display_background_image(free_image):
+class mob_background_image(free_image):
     '''
     Image appearing behind the displayed actor in the actor info display
     '''
