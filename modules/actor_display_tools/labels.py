@@ -33,6 +33,7 @@ class actor_display_label(label):
         self.actor = 'none'
         self.actor_label_type = actor_label_type #name, terrain, resource, etc
         self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
+        self.image_y_displacement = 0
         super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
         if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #except for certain types, all actor match labels should be in mob/tile_ordered_label_list
             if self.actor_type == 'mob':
@@ -95,7 +96,8 @@ class actor_display_label(label):
             self.message_start = 'Inventory: '
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
-            self.attached_images.append(minister_type_image((self.x - self.height, self.y), self.height, self.height, self.modes, 'none', self, global_manager))
+            self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
+            self.image_y_displacement = 5
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -332,8 +334,8 @@ class actor_display_label(label):
             current_button.Rect.y = self.global_manager.get('display_height') - (current_button.y + current_button.height)
             current_button.outline.y = current_button.Rect.y - current_button.outline_width
         for current_image in self.attached_images:
-            current_image.y = self.global_manager.get('display_height') - self.y
-            current_image.Rect.y = current_image.y - current_image.height
+            current_image.y = self.global_manager.get('display_height') - self.y + self.image_y_displacement
+            current_image.Rect.y = current_image.y - current_image.height + self.image_y_displacement
             #current_image.Rect.y = self.y
             #current_image.y = self.global_manager.get('display_height') - (current_image.y + current_image.height)
 

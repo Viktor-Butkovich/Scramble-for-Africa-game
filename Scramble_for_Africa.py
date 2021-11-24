@@ -162,7 +162,7 @@ global_manager.set('current_ministers', {})
 for current_minister_type in global_manager.get('minister_types'):
     global_manager.get('current_ministers')[current_minister_type] = 'none'
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary'])
+global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
     'explorer': 'expedition',
@@ -394,7 +394,7 @@ mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordina
 global_manager.get('mob_info_display_list').append(mob_name_label)
 
 #mob controlling minister label
-mob_minister_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(30, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+mob_minister_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(40, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic', 'europe'], 'misc/default_label.png', 'minister', 'mob', global_manager)
 global_manager.get('mob_info_display_list').append(mob_minister_label)
 
