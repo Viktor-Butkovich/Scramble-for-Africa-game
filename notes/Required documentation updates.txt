@@ -12,3 +12,9 @@ actor_display_tools.images.tooltip_free_image description
 images.minister_type_image
 images.tooltip_free_image
 use driver for porter foreman, evangelist for head missionary
+buttons.switch_game_mode_button
+utility.copy_list
+remove europe_transactions.european_hq_button
+graphics organization
+notifications.notification superclass
+labels.multi_line_label

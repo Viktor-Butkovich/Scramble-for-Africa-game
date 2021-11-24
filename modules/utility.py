@@ -43,6 +43,12 @@ def remove_from_list(received_list, item_to_remove):
             output_list.append(item)
     return(output_list)
 
+def copy_list(received_list): #allows setting to new list by copying data instead of just pointer
+    return_list = []
+    for item in received_list:
+        return_list.append(item)
+    return(return_list)
+        
 def toggle(variable):
     '''
     Description:

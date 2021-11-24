@@ -272,3 +272,80 @@ class commodity_prices_label(label):
         '''
         self.set_tooltip(self.message)
 
+class multi_line_label(label):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        self.ideal_width = ideal_width
+        self.minimum_height = minimum_height
+        self.original_y = coordinates[1]
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def draw(self):
+        if self.global_manager.get('current_game_mode') in self.modes:
+            self.image.draw()
+            for text_line_index in range(len(self.message)):
+                text_line = self.message[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                    (self.y + self.height - (text_line_index * self.font_size))))
+
+    def update_tooltip(self):
+        '''
+        Input:
+            none
+        Output:
+            Sets this label's tooltip to be the same as the text it displays
+        '''
+        self.set_tooltip(self.message)
+
+    def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Also
+                adds a prompt to close the notification at the end of the message
+        Input:
+            None
+        Output:
+            None
+        '''
+        new_message = []
+        next_line = ""
+        next_word = ""
+        for index in range(len(self.message)):
+            if not ((not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == "/n"): #don't add if /n
+                if not (index > 0 and self.message[index - 1] + self.message[index] == "/n"): #if on n after /, skip
+                    next_word += self.message[index]
+            if self.message[index] == " ":
+                if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+                    new_message.append(next_line)
+                    next_line = ""
+                next_line += next_word
+                next_word = ""
+            elif (not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == "/n": #don't check for /n if at last index
+                new_message.append(next_line)
+                next_line = ""
+                next_line += next_word
+                next_word = ""
+        if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+            new_message.append(next_line)
+            next_line = ""
+        next_line += next_word
+        new_message.append(next_line)
+        self.message = new_message
+        new_height = len(new_message) * scaling.scale_width(25, self.global_manager) #font size
+        if new_height > self.minimum_height:
+            self.height = new_height
+
+    def set_label(self, new_message):
+        '''
+        Description:
+            Sets each line of this notification's text to the corresponding item in the inputted list, adjusting width and height as needed
+        Input:
+            string list new_message: New text for this notification, with each item corresponding to a line of text
+        Output:
+            None
+        '''
+        self.message = new_message
+        self.format_message()
+        for text_line in self.message:
+            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
+                self.width = text_tools.message_width(text_line, self.font_size, self.font_name)
+        self.image.update_state(self.x, self.y, self.width, self.height)

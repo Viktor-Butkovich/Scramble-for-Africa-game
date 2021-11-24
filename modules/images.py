@@ -99,6 +99,7 @@ class tooltip_free_image(free_image):
     def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
         super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
         self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height)
+        self.Rect.y = self.y - self.height
         self.tooltip_text = []
         self.update_tooltip()
 
@@ -201,10 +202,10 @@ class minister_type_image(tooltip_free_image):
         self.tooltip_text = []
         self.tooltip_text.append('This is ' + new_minister.name + ', your ' + self.minister_type + '.')
         self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.minister_type + ' is responsible for executing the action.')
-        self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
-        self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
-        self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
-        self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
+        #self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
+        #self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
+        #self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
+        #self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
         self.set_image('ministers/icons/' + keyword + '.png')
 
     def update_tooltip(self):
@@ -704,8 +705,10 @@ class button_image(actor_image):
             None
         '''
         self.Rect = self.button.Rect
+        self.width = new_width
+        self.height = new_height
         self.outline.x = new_x - self.outline_width
-        self.outline.y = display_height - (new_y + new_height + self.outline_width)
+        self.outline.y = self.global_manager.get('display_height') - (new_y + new_height + self.outline_width)
         self.outline.width = new_width + (2 * self.outline_width)
         self.outline.height = new_height + (self.outline_width * 2)
         self.set_image(self.image_id)

@@ -230,8 +230,6 @@ class button():
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
-        elif self.button_type == 'main menu':
-            self.set_tooltip(["Exits to main menu", "Does not automatically save the game"])
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
         elif self.button_type == 'save game':
@@ -646,9 +644,6 @@ class button():
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
-            elif self.button_type == 'main menu':
-                game_transitions.to_main_menu(self.global_manager)
-
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -849,54 +844,41 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if not self.global_manager.get('displayed_tile') == 'none':
-            new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
-            if not new_contained_mobs == self.old_contained_mobs:
-                self.old_contained_mobs = []
-                for current_item in new_contained_mobs:
-                    self.old_contained_mobs.append(current_item)
-                if self.is_last and len(new_contained_mobs) > self.index:
-                    self.attached_mob = 'last'
-                    self.image.set_image('misc/extra_selected_button.png')
-                    name_list = []
-                    for current_mob_index in range(len(self.old_contained_mobs)):
-                        if current_mob_index > self.index - 1:
-                            name_list.append(self.old_contained_mobs[current_mob_index].name)
-                    self.name_list = name_list
-                    
-                elif len(self.old_contained_mobs) > self.index:
-                    self.attached_mob = self.old_contained_mobs[self.index]
-                    self.image.set_image(self.attached_mob.images[0].image_id)
-        else:
-            self.image.set_image('misc/empty.png')
-            self.attached_mob = 'none'
-            
-        if len(self.old_contained_mobs) > self.index:
-            displayed_tile = self.global_manager.get('displayed_tile')
-            if self.index == 0 and self.can_show() and not displayed_tile == 'none':
-                if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
-                else:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-            super().draw()
+        if self.can_show():
+            if not self.global_manager.get('displayed_tile') == 'none':
+                new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
+                if not new_contained_mobs == self.old_contained_mobs:
+                    self.old_contained_mobs = []
+                    for current_item in new_contained_mobs:
+                        self.old_contained_mobs.append(current_item)
+                    if self.is_last and len(new_contained_mobs) > self.index:
+                        self.attached_mob = 'last'
+                        self.image.set_image('misc/extra_selected_button.png')
+                        name_list = []
+                        for current_mob_index in range(len(self.old_contained_mobs)):
+                            if current_mob_index > self.index - 1:
+                                name_list.append(self.old_contained_mobs[current_mob_index].name)
+                        self.name_list = name_list
+                        
+                    elif len(self.old_contained_mobs) > self.index:
+                        self.attached_mob = self.old_contained_mobs[self.index]
+                        self.image.set_image(self.attached_mob.images[0].image_id)
+            else:
+                self.image.set_image('misc/empty.png')
+                self.attached_mob = 'none'
+                
+            if len(self.old_contained_mobs) > self.index:
+                displayed_tile = self.global_manager.get('displayed_tile')
+                if self.index == 0 and self.can_show() and not displayed_tile == 'none':
+                    if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                    else:
+                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+                super().draw()
 
-        else:
-            self.image.set_image('misc/empty.png')
-            self.attached_mob = 'none'
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if this button is not attached to any mobs. Otherwise, returns same as superclass
-        '''
-        if self.attached_mob == 'none':
-            return(False)
-        else:
-            return(True)
+            else:
+                self.image.set_image('misc/empty.png')
+                self.attached_mob = 'none'
 
     def update_tooltip(self):
         '''
@@ -915,3 +897,35 @@ class same_tile_icon(button):
             else:
                 self.attached_mob.update_tooltip()
                 self.set_tooltip(self.attached_mob.tooltip_text + ["Click to select this unit"])
+
+class switch_game_mode_button(button):
+    def __init__(self, coordinates, width, height, color, keybind_id, to_mode, modes, image_id, global_manager):
+        #to_mode: which mode this button switches to. If it equals 'previous', switches to previous game mode
+        button_type = 'switch_game_mode'
+        self.to_mode = to_mode
+        self.to_mode_tooltip_dict = {}
+        self.to_mode_tooltip_dict['main menu'] = ["Exits to the main menu", "Does not automatically save the game"]
+        self.to_mode_tooltip_dict['strategic'] = ["Enters the strategic map screen"]
+        self.to_mode_tooltip_dict['europe'] = ["Enters the European headquarters screen"]
+        self.to_mode_tooltip_dict['ministers'] = ["Enters the minister conference room screen"]
+        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.to_mode == 'main menu':
+                    game_transitions.to_main_menu(self.global_manager)
+                if not self.to_mode == 'previous':
+                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                else:
+                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
+
+    def update_tooltip(self):
+        if self.to_mode == 'previous':
+            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.global_manager.get('previous_game_mode')]))
+        else:
+            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
+

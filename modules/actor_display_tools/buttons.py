@@ -4,7 +4,6 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
-#from .. import groups
 
 class label_button(button):
     '''
@@ -173,7 +172,7 @@ class pick_up_all_passengers_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/embark_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
 class crew_vehicle_button(label_button):
@@ -238,7 +237,7 @@ class crew_vehicle_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/crew_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/crew_' + self.vehicle_type + '_button.png')
         return(result)
 
 class uncrew_vehicle_button(label_button):
@@ -279,7 +278,7 @@ class uncrew_vehicle_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'):
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/uncrew_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/uncrew_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -537,7 +536,7 @@ class disembark_vehicle_button(label_button):
             old_vehicle_type = self.vehicle_type
             self.vehicle_type = self.attached_label.actor.vehicle_type
             if not self.vehicle_type == old_vehicle_type and not self.vehicle_type == 'none': #if changed
-                self.image.set_image('misc/disembark_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/disembark_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -1174,7 +1173,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_tile = 'none'
         self.building_name = 'none'
         self.requirement = 'can_construct'
-        image_id = 'misc/default_button.png'
+        image_id = 'buttons/default_button.png'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
             image_id = global_manager.get('resource_building_button_dict')['none']
@@ -1182,18 +1181,18 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = 'buildings/buttons/port.png'
             self.building_name = 'port'
         elif self.building_type == 'infrastructure':
-            self.road_image_id = 'misc/road_button.png'
-            self.railroad_image_id = 'misc/railroad_button.png'
+            self.road_image_id = 'buttons/road_button.png'
+            self.railroad_image_id = 'buttons/railroad_button.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
-            image_id = 'misc/train_station_button.png'
+            image_id = 'buttons/train_station_button.png'
             self.building_name = 'train station'
         elif self.building_type == 'trading_post':
-            image_id = 'misc/trading_post_button.png'
+            image_id = 'buttons/trading_post_button.png'
             self.building_name = 'trading post'
             self.requirement = 'can_trade'
         elif self.building_type == 'mission':
-            image_id = 'misc/mission_button.png'
+            image_id = 'buttons/mission_button.png'
             self.building_name = 'mission'
             self.requirement = 'can_convert'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
@@ -1229,10 +1228,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
                     if current_infrastructure == 'none':
                         self.building_name = 'road'
-                        self.image.set_image('misc/road_button.png')
+                        self.image.set_image('buttons/road_button.png')
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
-                        self.image.set_image('misc/railroad_button.png')
+                        self.image.set_image('buttons/railroad_button.png')
 
     def can_show(self):
         '''
