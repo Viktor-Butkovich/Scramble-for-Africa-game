@@ -11,7 +11,7 @@ from . import data_managers
 from . import turn_management_tools
 from . import text_tools
 from . import market_tools
-from . import minister_tools
+from . import minister_utility
 
 class save_load_manager_template():
     '''
@@ -123,7 +123,7 @@ class save_load_manager_template():
 
         self.global_manager.set('player_turn', True)
 
-        minister_tools.create_placeholder_ministers(self.global_manager)
+        minister_utility.create_placeholder_ministers(self.global_manager)
 
         turn_management_tools.start_turn(self.global_manager, True)
         
@@ -257,6 +257,6 @@ class save_load_manager_template():
 
         #print(saved_minister_dicts)
         for current_minister_dict in saved_minister_dicts:
-            minister_tools.load_minister(current_minister_dict, self.global_manager)
+            minister_utility.load_minister(current_minister_dict, self.global_manager)
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)

@@ -5,6 +5,7 @@ from . import actor_utility
 
 class minister(): #general, bishop, merchant, explorer, engineer, factor, prosecutor
     def __init__(self, from_save, input_dict, global_manager):
+        self.actor_type = 'minister' #used for actor display labels and images
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         if from_save:
@@ -16,11 +17,23 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
             self.specific_skills = input_dict['specific_skills']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
+            self.image_id = input_dict['image_id']
         else:
             self.name = self.global_manager.get('flavor_text_manager').generate_flavor_text('minister_names')
             self.skill_setup()
             self.corruption_setup()
             self.current_position = 'none'
+            self.image_id = random.choice(self.global_manager.get('minister_portraits'))
+        self.update_tooltip()
+
+    def update_tooltip(self):
+        self.tooltip_text = []
+        if not self.current_position == 'none':
+            keyword = self.global_manager.get('minister_type_dict')[self.current_position] #type, like military
+            self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
+            self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.current_position + ' is responsible for executing the action.')
+        else:
+            self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
 
     def to_save_dict(self):
         save_dict = {}
@@ -29,6 +42,7 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
         save_dict['corruption'] = self.corruption
+        save_dict['image_id'] = self.image_id
         return(save_dict)
 
     def roll(self, num_sides, min_success, max_crit_fail, predetermined_corruption = False):

@@ -1,6 +1,7 @@
 import pygame
 import time
 import random
+import os
 
 import modules.scaling as scaling
 import modules.main_loop as main_loop
@@ -164,6 +165,16 @@ global_manager.set('current_ministers', {})
 for current_minister_type in global_manager.get('minister_types'):
     global_manager.get('current_ministers')[current_minister_type] = 'none'
 
+minister_portraits = [] #put all images in graphics/minister/portraits folder in list
+for file_name in os.listdir('graphics/ministers/portraits'):
+    if file_name.endswith('.png'): 
+        minister_portraits.append('ministers/portraits/' + file_name)
+        continue
+    else:
+        continue
+global_manager.set('minister_portraits', minister_portraits)
+
+
 global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
@@ -236,6 +247,8 @@ global_manager.set('notification_list', [])
 global_manager.set('label_list', [])
 global_manager.set('mob_info_display_list', [])
 global_manager.set('mob_ordered_label_list', [])
+global_manager.set('minister_info_display_list', [])
+global_manager.set('minister_ordered_label_list', [])
 global_manager.set('displayed_mob', 'none')
 global_manager.set('tile_info_display_list', [])
 global_manager.set('tile_ordered_label_list', [])
@@ -300,6 +313,7 @@ europe_grid_y = global_manager.get('default_display_height') - (strategic_grid_h
 
 global_manager.set('mob_ordered_list_start_y', 0)
 global_manager.set('tile_ordered_list_start_y', 0)
+global_manager.set('minister_ordered_list_start_y', 0)
 
 global_manager.set('current_game_mode', 'main menu') #initial previous game mode
 game_transitions.set_game_mode('main_menu', global_manager)
@@ -372,6 +386,34 @@ save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('
 
 cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
+
+
+minister_display_top_y = global_manager.get('default_display_height') - 205
+minister_display_current_y = minister_display_top_y
+global_manager.set('minister_ordered_list_start_y', minister_display_current_y)
+
+#minister background image
+minister_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    scaling.scale_height(125, global_manager), ['ministers'], global_manager)
+global_manager.get('minister_info_display_list').append(minister_free_image_background)
+
+#minister background image's tooltip
+minister_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
+    ['ministers'], 'misc/empty.png', 'tooltip', 'minister', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
+global_manager.get('minister_info_display_list').append(minister_free_image_background_tooltip)
+
+#minister image
+minister_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, minister_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['ministers'], 'minister_default', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('minister_info_display_list').append(minister_free_image)
+
+minister_display_current_y -= 35
+
+#minister name label
+minister_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['ministers'], 'misc/default_label.png', 'minister_name', 'minister', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('minister_info_display_list').append(minister_name_label)
+
 
 actor_display_top_y = global_manager.get('default_display_height') - 205
 actor_display_current_y = actor_display_top_y
@@ -609,4 +651,8 @@ minister_description_width = 800
 minister_description_label = labels.multi_line_label(scaling.scale_coordinates(global_manager.get('default_display_width') / 2 - (minister_description_width / 2), table_height + 10, global_manager),
     minister_description_width, 0, ['ministers'], 'misc/default_notification.png', minister_description_message, global_manager) #coordinates, ideal_width, minimum_height, modes, image, message, global_manager
 main_loop.main_loop(global_manager)
+
+#actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), tile) to calibrate actor display to a tile
+#actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), mob) to calibrate actor display to a tile
+#minister_utility.calibrate_minister_info_display(global_manager, minister) to calibrate minister display to a minister
 pygame.quit()

@@ -196,16 +196,10 @@ class minister_type_image(tooltip_free_image):
         self.global_manager.get('minister_type_image_list').append(self)
 
     def calibrate(self, new_minister):
-        #minister_type = new_actor.controlling_minister_type #position, like General
         self.minister_type = new_minister.current_position
         keyword = self.global_manager.get('minister_type_dict')[self.minister_type] #type, like military
-        self.tooltip_text = []
-        self.tooltip_text.append('This is ' + new_minister.name + ', your ' + self.minister_type + '.')
-        self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.minister_type + ' is responsible for executing the action.')
-        #self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
-        #self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
-        #self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
-        #self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
+        new_minister.update_tooltip()
+        self.tooltip_text = new_minister.tooltip_text
         self.set_image('ministers/icons/' + keyword + '.png')
 
     def update_tooltip(self):

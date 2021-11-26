@@ -98,6 +98,8 @@ class actor_display_label(label):
             self.message_start = 'Minister: '
             self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
             self.image_y_displacement = 5
+        elif self.actor_label_type == 'minister_name':
+            self.message_start = 'Name: '
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -194,7 +196,7 @@ class actor_display_label(label):
         '''
         self.actor = new_actor
         if not new_actor == 'none':
-            if self.actor_label_type == 'name':
+            if self.actor_label_type in ['name', 'minister_name']:
                 self.set_label(self.message_start + new_actor.name.capitalize())
                 
             elif self.actor_label_type == 'terrain':

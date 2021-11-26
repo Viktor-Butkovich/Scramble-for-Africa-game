@@ -604,10 +604,10 @@ class embark_vehicle_button(label_button):
         if result:
             if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
                 result = False
-            elif not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
+            elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
-            self.was_showing = result
+            self.was_showing = result2
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
         self.was_showing = result
         return(result)
