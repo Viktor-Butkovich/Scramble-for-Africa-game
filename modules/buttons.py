@@ -237,6 +237,8 @@ class button():
             self.set_tooltip(["Saves this game"])
         elif self.button_type == 'load game':
             self.set_tooltip(["Loads a saved game"])
+        elif self.button_type == 'cycle available ministers':
+            self.set_tooltip(["Cycles through the ministers available to be appointed"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -933,16 +935,20 @@ class switch_game_mode_button(button):
 class minister_portrait_image(button): #image of minister's portrait - button subclass because can be clicked to select minister
     def __init__(self, coordinates, width, height, modes, minister_type, global_manager):
         self.default_image_id = 'ministers/empty_portrait.png'
-        super().__init__(coordinates, width, height, 'blue', 'minister_portrait', 'none', modes, self.default_image_id, global_manager)
+        super().__init__(coordinates, width, height, 'blue', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
         self.minister_type = minister_type #position, like General
+        if self.minister_type == 'none': #if available minister portrait
+            self.global_manager.get('available_minister_portrait_list').append(self)
+        else:
+            self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
         self.global_manager.get('minister_image_list').append(self)
-        self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
         self.calibrate('none')
 
     def draw(self):
         if self.can_show(): #draw outline around portrait if minister selected
-            if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+            if not self.current_minister == 'none':
+                if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
         super().draw()
 
     def on_click(self):
@@ -954,9 +960,37 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
             self.image.set_image(new_minister.image_id)
         else:
-            self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
+            if self.minister_type == 'none': #if available minister portrait
+                self.tooltip_text = ['There is no available minister in this slot.']
+            else: #if appointed minister portrait
+                self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
             self.image.set_image(self.default_image_id)
         self.current_minister = new_minister
 
     def update_tooltip(self):
         self.set_tooltip(self.tooltip_text)
+
+class cycle_available_ministers_button(button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, direction, global_manager):
+        self.direction = direction
+        super().__init__(coordinates, width, height, 'blue', 'cycle available ministers', keybind_id, modes, image_id, global_manager)
+
+    def can_show(self):
+        if self.direction == 'left':
+            if self.global_manager.get('available_minister_left_index') > -1:
+                return(super().can_show())
+            else:
+                return(False)
+        elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
+            if not self.global_manager.get('available_minister_left_index') + 3 > len(self.global_manager.get('available_minister_list')):
+                return(super().can_show())
+            else:
+                return(False)
+
+    def on_click(self):
+        if self.direction == 'left':
+            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+        if self.direction == 'right':
+            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
+        minister_utility.update_available_minister_display(self.global_manager)
+        

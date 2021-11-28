@@ -2,28 +2,36 @@ import random
 
 from . import utility
 from . import actor_utility
+from . import minister_utility
 
-class minister(): #general, bishop, merchant, explorer, engineer, factor, prosecutor
+class minister():
     def __init__(self, from_save, input_dict, global_manager):
         self.actor_type = 'minister' #used for actor display labels and images
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
+        self.tooltip_text = []
         if from_save:
             self.name = input_dict['name']
             self.current_position = input_dict['current_position']
-            if not self.current_position == 'none':
-                self.global_manager.get('current_ministers')[self.current_position] = self
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
             self.image_id = input_dict['image_id']
+            if not self.current_position == 'none':
+                self.appoint(self.current_position)
+                #self.global_manager.get('current_ministers')[self.current_position] = self
+            else:
+                self.global_manager.get('available_minister_list').append(self)
+                minister_utility.update_available_minister_display(self.global_manager)
         else:
             self.name = self.global_manager.get('flavor_text_manager').generate_flavor_text('minister_names')
             self.skill_setup()
             self.corruption_setup()
             self.current_position = 'none'
+            self.global_manager.get('available_minister_list').append(self)
             self.image_id = random.choice(self.global_manager.get('minister_portraits'))
+            minister_utility.update_available_minister_display(self.global_manager)
         self.update_tooltip()
 
     def update_tooltip(self):
@@ -91,6 +99,8 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
+        self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
+        minister_utility.update_available_minister_display(self.global_manager)
         for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
@@ -128,8 +138,10 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
     def remove(self):
         if not self.current_position == 'none':
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
-            for current_minister_type_image in self.global_manager.get('minister_image_list'):
-                if current_minister_type_image.minister_type == self.current_position:
-                    current_minister_type_image.calibrate('none')
+            for current_minister_image in self.global_manager.get('minister_image_list'):
+                if current_minister_image.minister_type == self.current_position:
+                    current_minister_image.calibrate('none')
             self.current_position = 'none'
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
+        self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
+        minister_utility.update_available_minister_display(self.global_manager)

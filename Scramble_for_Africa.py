@@ -222,12 +222,14 @@ instructions_message = "Placeholder instructions, use += to add"
 global_manager.get('instructions_list').append(instructions_message)
 
 global_manager.set('minister_list', [])
+global_manager.set('available_minister_list', [])
 global_manager.set('grid_list', [])
 global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
 global_manager.set('minister_image_list', [])
+global_manager.set('available_minister_portrait_list', [])
 global_manager.set('background_image_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
@@ -292,12 +294,12 @@ global_manager.set('mouse_moved_time', time.time())
 old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
 global_manager.set('old_mouse_x', old_mouse_x)
 global_manager.set('old_mouse_y', old_mouse_y)
+global_manager.set('available_minister_left_index', 0)
 global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
 global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
 global_manager.set('current_game_mode', 'none')
 global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
 global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
-
 
 strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers'], global_manager)
 #europe_background_image = images.free_image('misc/europe_background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['europe'], global_manager)
@@ -383,7 +385,7 @@ instructions_button = instructions.instructions_button(scaling.scale_coordinates
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
 
 save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
-    scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe'], 'buttons/save_game_button.png', global_manager)
+    scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
 cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
@@ -641,7 +643,7 @@ minister_table = images.free_image('misc/minister_table.png', scaling.scale_coor
     scaling.scale_height(table_height, global_manager), ['ministers'], global_manager)
 
 position_icon_width = 125
-for current_index in range(0, 8): #creates an icon at each part of the table for the minister
+for current_index in range(0, 8): #creates an office icon and a portrait at a section of the table for each minister
     if current_index <= 3: #left side
         images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) + 10, current_index * 200, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
@@ -652,6 +654,21 @@ for current_index in range(0, 8): #creates an icon at each part of the table for
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
         buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
+
+available_minister_display_x = global_manager.get('default_display_width')
+available_minister_display_y = 500
+cycle_left_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), pygame.K_w, ['ministers'], 'buttons/cycle_ministers_up_button.png', 'left', global_manager)
+
+for i in range(0, 3):
+    available_minister_display_y -= (position_icon_width + 10)
+    current_portrait = buttons.minister_portrait_image(scaling.scale_coordinates(available_minister_display_x - position_icon_width, available_minister_display_y, global_manager),
+        scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], 'none', global_manager)
+
+available_minister_display_y -= 60                     
+cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
+    scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
+
 
 minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
 minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."

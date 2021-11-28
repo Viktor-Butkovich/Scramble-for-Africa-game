@@ -112,6 +112,8 @@ def to_main_menu(global_manager, override = False):
             current_grid.remove()
         for current_village in global_manager.get('village_list'):
             current_village.remove()
+        for current_minister in global_manager.get('minister_list'):
+            current_minister.remove()
         for current_notification in global_manager.get('notification_list'):
             current_notification.remove()
         for current_die in global_manager.get('dice_list'):

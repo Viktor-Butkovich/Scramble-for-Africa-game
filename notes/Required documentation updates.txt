@@ -22,3 +22,7 @@ main imports
 buttons imports
 buttons.minister_portrait_image
 main_loop_tools imports
+actor_creation_tools imports
+actor_creation_tools.actor_creation_manager_template.create_placeholder_ministers
+actor_creation_tools.actor_creation_manager_template.load_minister
+buttons.cycle_available_ministers_button

@@ -1,4 +1,4 @@
-#Contains functionality for creating new instances of mobs and buildings
+#Contains functionality for creating new instances of mobs, buildings, and ministers
 
 from . import actors
 from . import mobs
@@ -7,6 +7,7 @@ from . import officers
 from . import groups
 from . import vehicles
 from . import buildings
+from . import ministers
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -106,3 +107,13 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 name += ' '
         input_dict['name'] = name
         return(self.create(False, input_dict, global_manager))
+
+    def create_placeholder_ministers(self, global_manager):
+        for current_minister_type in global_manager.get('minister_types'):
+            new_minister = ministers.minister(False, {}, global_manager)
+            new_minister.appoint(current_minister_type)
+        for i in range(0, 10):
+            new_minister = ministers.minister(False, {}, global_manager)
+
+    def load_minister(self, input_dict, global_manager):
+        new_minister = ministers.minister(True, input_dict, global_manager)

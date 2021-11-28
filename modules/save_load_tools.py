@@ -123,7 +123,9 @@ class save_load_manager_template():
 
         self.global_manager.set('player_turn', True)
 
-        minister_utility.create_placeholder_ministers(self.global_manager)
+        self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
+
+        self.global_manager.set('available_minister_left_index', 0)
 
         turn_management_tools.start_turn(self.global_manager, True)
         
@@ -157,7 +159,6 @@ class save_load_manager_template():
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
             print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
-        #print(saved_minister_dicts)
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
@@ -192,6 +193,7 @@ class save_load_manager_template():
             self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
+        self.global_manager.set('available_minister_left_index', 0)
 
         #load grids
         strategic_grid_height = 300
@@ -257,6 +259,6 @@ class save_load_manager_template():
 
         #print(saved_minister_dicts)
         for current_minister_dict in saved_minister_dicts:
-            minister_utility.load_minister(current_minister_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)
