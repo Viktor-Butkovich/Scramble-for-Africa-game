@@ -5,6 +5,7 @@ import time
 from . import scaling
 from . import text_tools
 from . import actor_utility
+from . import minister_utility
 
 def update_display(global_manager):
     '''
@@ -370,7 +371,10 @@ def manage_lmb_down(clicked_button, global_manager):
             selected_new_mob = False
             if (not global_manager.get('capital')):
                 actor_utility.deselect_all(global_manager)
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+            if global_manager.get('current_game_mode') == 'ministers':
+                minister_utility.calibrate_minister_info_display(global_manager, 'none')
+            else:
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:

@@ -227,7 +227,7 @@ global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
 global_manager.set('free_image_list', [])
-global_manager.set('minister_type_image_list', [])
+global_manager.set('minister_image_list', [])
 global_manager.set('background_image_list', [])
 global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
@@ -250,6 +250,7 @@ global_manager.set('mob_ordered_label_list', [])
 global_manager.set('minister_info_display_list', [])
 global_manager.set('minister_ordered_label_list', [])
 global_manager.set('displayed_mob', 'none')
+global_manager.set('displayed_minister', 'none')
 global_manager.set('tile_info_display_list', [])
 global_manager.set('tile_ordered_label_list', [])
 global_manager.set('displayed_tile', 'none')
@@ -413,6 +414,11 @@ minister_display_current_y -= 35
 minister_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['ministers'], 'misc/default_label.png', 'minister_name', 'minister', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('minister_info_display_list').append(minister_name_label)
+
+#minister office label
+minister_office_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['ministers'], 'misc/default_label.png', 'minister_office', 'minister', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+global_manager.get('minister_info_display_list').append(minister_office_label)
 
 
 actor_display_top_y = global_manager.get('default_display_height') - 205
@@ -639,9 +645,13 @@ for current_index in range(0, 8): #creates an icon at each part of the table for
     if current_index <= 3: #left side
         images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) + 10, current_index * 200, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
+        buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200, global_manager),
+            scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
     else:
         images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width - 10, (current_index - 4) * 200, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
+        buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200, global_manager),
+            scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
 
 minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
 minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."

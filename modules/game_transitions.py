@@ -47,6 +47,7 @@ def set_game_mode(new_game_mode, global_manager):
     for current_mob in global_manager.get('mob_list'):
         current_mob.selected = False
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #remove any actor info from display when deselecting
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
     
 def create_strategic_map(global_manager):
     '''

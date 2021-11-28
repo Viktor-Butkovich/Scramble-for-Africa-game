@@ -12,6 +12,7 @@ from . import turn_management_tools
 from . import market_tools
 from . import notification_tools
 from . import game_transitions
+from . import minister_utility
 
 class button():
     '''
@@ -853,7 +854,7 @@ class same_tile_icon(button):
                         self.old_contained_mobs.append(current_item)
                     if self.is_last and len(new_contained_mobs) > self.index:
                         self.attached_mob = 'last'
-                        self.image.set_image('misc/extra_selected_button.png')
+                        self.image.set_image('buttons/extra_selected_button.png')
                         name_list = []
                         for current_mob_index in range(len(self.old_contained_mobs)):
                             if current_mob_index > self.index - 1:
@@ -929,3 +930,33 @@ class switch_game_mode_button(button):
         else:
             self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
 
+class minister_portrait_image(button): #image of minister's portrait - button subclass because can be clicked to select minister
+    def __init__(self, coordinates, width, height, modes, minister_type, global_manager):
+        self.default_image_id = 'ministers/empty_portrait.png'
+        super().__init__(coordinates, width, height, 'blue', 'minister_portrait', 'none', modes, self.default_image_id, global_manager)
+        self.minister_type = minister_type #position, like General
+        self.global_manager.get('minister_image_list').append(self)
+        self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
+        self.calibrate('none')
+
+    def draw(self):
+        if self.can_show(): #draw outline around portrait if minister selected
+            if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+        super().draw()
+
+    def on_click(self):
+        if not self.current_minister == 'none':
+            minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+
+    def calibrate(self, new_minister):
+        if not new_minister == 'none':
+            self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
+            self.image.set_image(new_minister.image_id)
+        else:
+            self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
+            self.image.set_image(self.default_image_id)
+        self.current_minister = new_minister
+
+    def update_tooltip(self):
+        self.set_tooltip(self.tooltip_text)

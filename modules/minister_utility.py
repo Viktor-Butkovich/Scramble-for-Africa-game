@@ -10,7 +10,7 @@ def create_placeholder_ministers(global_manager):
     for current_minister_type in global_manager.get('minister_types'):
         new_minister = ministers.minister(False, {}, global_manager)
         new_minister.appoint(current_minister_type)
-    calibrate_minister_info_display(global_manager, global_manager.get('current_ministers')['General']) #placeholder
+    #calibrate_minister_info_display(global_manager, global_manager.get('current_ministers')['General']) #placeholder
 
 def load_minister(input_dict, global_manager):
     new_minister = ministers.minister(True, input_dict, global_manager)

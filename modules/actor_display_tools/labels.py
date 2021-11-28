@@ -35,11 +35,9 @@ class actor_display_label(label):
         self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
         self.image_y_displacement = 0
         super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
-        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #except for certain types, all actor match labels should be in mob/tile_ordered_label_list
-            if self.actor_type == 'mob':
-                self.global_manager.get('mob_ordered_label_list').append(self)
-            elif self.actor_type == 'tile':
-                self.global_manager.get('tile_ordered_label_list').append(self)
+        #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
+        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #certain types of labels, like inventory capacity, are not ordered on the side of the screen and stay at set positions
+            self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
             self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/merge_button.png', self, global_manager))
@@ -100,6 +98,8 @@ class actor_display_label(label):
             self.image_y_displacement = 5
         elif self.actor_label_type == 'minister_name':
             self.message_start = 'Name: '
+        elif self.actor_label_type == 'minister_office':
+            self.message_start = 'Office: '
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -175,12 +175,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             tooltip_text = []
             if not self.actor == 'none':
-                tooltip_text.append(self.actor.controlling_minister.current_position + ' ' + self.actor.controlling_minister.name + ' controls this unit.')
-                tooltip_text.append('When you command this unit, the ' + self.actor.controlling_minister.current_position + ' executes the order.')
-                self.tooltip_text.append("Each minister has hidden skill and corruption levels.")
-                self.tooltip_text.append("A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls.")
-                self.tooltip_text.append("A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll.")
-                self.tooltip_text.append("If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels.")
+                self.actor.update_tooltip()
+                tooltip_text = self.actor.controlling_minister.tooltip_text
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -196,9 +192,8 @@ class actor_display_label(label):
         '''
         self.actor = new_actor
         if not new_actor == 'none':
-            if self.actor_label_type in ['name', 'minister_name']:
+            if self.actor_label_type == 'name':
                 self.set_label(self.message_start + new_actor.name.capitalize())
-                
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
                     self.set_label('Europe')
@@ -294,6 +289,10 @@ class actor_display_label(label):
                 if not self.actor.controlling_minister == 'none':
                     self.set_label(self.message_start + self.actor.controlling_minister.name)
                     self.attached_images[0].calibrate(self.actor.controlling_minister)
+            elif self.actor_label_type == 'minister_name':
+                self.set_label(self.message_start + new_actor.name)
+            elif self.actor_label_type == 'minister_office':
+                self.set_label(self.message_start + new_actor.current_position)
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -338,8 +337,6 @@ class actor_display_label(label):
         for current_image in self.attached_images:
             current_image.y = self.global_manager.get('display_height') - self.y + self.image_y_displacement
             current_image.Rect.y = current_image.y - current_image.height + self.image_y_displacement
-            #current_image.Rect.y = self.y
-            #current_image.y = self.global_manager.get('display_height') - (current_image.y + current_image.height)
 
     def can_show(self):
         '''

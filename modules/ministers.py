@@ -31,7 +31,7 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
         if not self.current_position == 'none':
             keyword = self.global_manager.get('minister_type_dict')[self.current_position] #type, like military
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
-            self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.current_position + ' is responsible for executing the action.')
+            #self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.current_position + ' is responsible for executing the action.')
         else:
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
 
@@ -91,7 +91,7 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
-        for current_minister_type_image in self.global_manager.get('minister_type_image_list'):
+        for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
         if not self.global_manager.get('displayed_mob') == 'none':
@@ -128,5 +128,8 @@ class minister(): #general, bishop, merchant, explorer, engineer, factor, prosec
     def remove(self):
         if not self.current_position == 'none':
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
+            for current_minister_type_image in self.global_manager.get('minister_image_list'):
+                if current_minister_type_image.minister_type == self.current_position:
+                    current_minister_type_image.calibrate('none')
             self.current_position = 'none'
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
