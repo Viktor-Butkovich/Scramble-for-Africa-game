@@ -109,9 +109,9 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         return(self.create(False, input_dict, global_manager))
 
     def create_placeholder_ministers(self, global_manager):
-        for current_minister_type in global_manager.get('minister_types'):
-            new_minister = ministers.minister(False, {}, global_manager)
-            new_minister.appoint(current_minister_type)
+        #for current_minister_type in global_manager.get('minister_types'):
+        #    new_minister = ministers.minister(False, {}, global_manager)
+        #    new_minister.appoint(current_minister_type)
         for i in range(0, 10):
             new_minister = ministers.minister(False, {}, global_manager)
 

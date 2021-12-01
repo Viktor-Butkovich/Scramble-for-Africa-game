@@ -145,11 +145,17 @@ class flavor_text_manager_template():
             self.explorer_flavor_text_list.append(line[0])
         self.subject_dict['explorer'] = self.explorer_flavor_text_list
         
-        self.minister_names_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_minister_names.csv')
+        self.minister_first_names_flavor_text_list = []
+        current_flavor_text = csv_tools.read_csv('text/flavor_minister_first_names.csv')
         for line in current_flavor_text:
-            self.minister_names_flavor_text_list.append(line[0])
-        self.subject_dict['minister_names'] = self.minister_names_flavor_text_list
+            self.minister_first_names_flavor_text_list.append(line[0])
+        self.subject_dict['minister_first_names'] = self.minister_first_names_flavor_text_list
+
+        self.minister_last_names_flavor_text_list = []
+        current_flavor_text = csv_tools.read_csv('text/flavor_minister_last_names.csv')
+        for line in current_flavor_text:
+            self.minister_last_names_flavor_text_list.append(line[0])
+        self.subject_dict['minister_last_names'] = self.minister_last_names_flavor_text_list
                 
     def generate_flavor_text(self, subject):
         '''
@@ -161,6 +167,9 @@ class flavor_text_manager_template():
             string: Random flavor text statement of the inputted subject
         '''
         return(random.choice(self.subject_dict[subject]))
+
+    def generate_minister_name(self):
+        return(self.generate_flavor_text('minister_first_names') + ' ' + self.generate_flavor_text('minister_last_names'))
 
 class value_tracker():
     '''

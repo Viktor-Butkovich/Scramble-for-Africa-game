@@ -607,7 +607,7 @@ class embark_vehicle_button(label_button):
             elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
-            self.was_showing = result2
+            self.was_showing = result
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
         self.was_showing = result
         return(result)
@@ -1378,3 +1378,45 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         if self.building_type == 'resource':
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
+
+class appoint_minister_button(label_button):
+    def __init__(self, coordinates, width, height, attached_label, appoint_type, global_manager):
+        self.appoint_type = appoint_type
+        super().__init__(coordinates, width, height, 'appoint minister', 'none', ['ministers'], 'ministers/icons/' + global_manager.get('minister_type_dict')[self.appoint_type] + '.png', attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if (not displayed_minister == 'none') and displayed_minister.current_position == 'none': #if there is an available minister displayed
+                if self.global_manager.get('current_ministers')[self.appoint_type] == 'none': #if the position that this button appoints is available
+                    return(True)
+        return(False)
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                appointed_minister = self.global_manager.get('displayed_minister')
+                appointed_minister.appoint(self.appoint_type)
+            else:
+                text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
+
+class remove_minister_button(label_button):
+    def __init__(self, coordinates, width, height, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'remove minister', 'none', ['ministers'], 'buttons/remove_minister_button.png', attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if (not displayed_minister == 'none') and (not displayed_minister.current_position == 'none'): #if there is an available minister displayed
+                return(True)
+        return(False)
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                appointed_minister = self.global_manager.get('displayed_minister')
+                appointed_minister.appoint('none')
+            else:
+                text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)

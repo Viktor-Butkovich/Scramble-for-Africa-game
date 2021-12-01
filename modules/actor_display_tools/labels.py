@@ -100,6 +100,9 @@ class actor_display_label(label):
             self.message_start = 'Name: '
         elif self.actor_label_type == 'minister_office':
             self.message_start = 'Office: '
+            self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height, self.height, self, global_manager))
+            for current_position in global_manager.get('minister_types'):
+                self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height, self.height, self, current_position, global_manager))
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')

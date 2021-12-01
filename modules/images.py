@@ -197,31 +197,32 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
 
     def calibrate(self, new_minister):
         if not new_minister == 'none':
-            self.minister_type = new_minister.current_position
-            keyword = self.global_manager.get('minister_type_dict')[self.minister_type] #type, like military
-            new_minister.update_tooltip()
-            self.tooltip_text = []
-            if keyword == 'prosecution':
-                self.tooltip_text.append('Rather than controlling units, a prosecutor controls the process of investigating and removing ministers suspected to be corrupt.')
-            else:
-                self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.minister_type + ' is responsible for executing the action.')#new_minister.tooltip_text
-                if keyword == 'military':
-                    self.tooltip_text.append("Military-oriented units include military officers and European battalions.")
-                elif keyword == 'religion':
-                    self.tooltip_text.append("Religion-oriented units include evangelists, church volunteers, and missionaries.")
-                elif keyword == 'trade':
-                    self.tooltip_text.append("Trade-oriented units include merchants and caravans.")
-                    self.tooltip_text.append("The " + self.minister_type + " also controls the purchase and sale of goods in Europe.")
-                elif keyword == 'exploration':
-                    self.tooltip_text.append("Exploration-oriented units include explorers, expeditions, hunters, and safaris.")
-                elif keyword == 'construction':
-                    self.tooltip_text.append("Construction-oriented units include engineers and construction gangs.")
-                elif keyword == 'production':
-                    self.tooltip_text.append("Production-oriented units include work crews, foremen, and workers not attached to other units.")
-                elif keyword == 'transportation':
-                    self.tooltip_text.append("Transportation-oriented units include ships, trains, drivers, and porters.")
-                    self.tooltip_text.append("The " + self.minister_type + " also ensures that goods are not lost in transport or storage.")
-            self.set_image('ministers/icons/' + keyword + '.png')
+            self.minister_type = new_minister.current_position#new_minister.current_position
+            if not self.minister_type == 'none':
+                keyword = self.global_manager.get('minister_type_dict')[self.minister_type] #type, like military
+                #new_minister.update_tooltip()
+                self.tooltip_text = []
+                if keyword == 'prosecution':
+                    self.tooltip_text.append('Rather than controlling units, a prosecutor controls the process of investigating and removing ministers suspected to be corrupt.')
+                else:
+                    self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + self.minister_type + ' is responsible for executing the action.')#new_minister.tooltip_text
+                    if keyword == 'military':
+                        self.tooltip_text.append("Military-oriented units include military officers and European battalions.")
+                    elif keyword == 'religion':
+                        self.tooltip_text.append("Religion-oriented units include evangelists, church volunteers, and missionaries.")
+                    elif keyword == 'trade':
+                        self.tooltip_text.append("Trade-oriented units include merchants and caravans.")
+                        self.tooltip_text.append("The " + self.minister_type + " also controls the purchase and sale of goods in Europe.")
+                    elif keyword == 'exploration':
+                        self.tooltip_text.append("Exploration-oriented units include explorers, expeditions, hunters, and safaris.")
+                    elif keyword == 'construction':
+                        self.tooltip_text.append("Construction-oriented units include engineers and construction gangs.")
+                    elif keyword == 'production':
+                        self.tooltip_text.append("Production-oriented units include work crews, foremen, and workers not attached to other units.")
+                    elif keyword == 'transportation':
+                        self.tooltip_text.append("Transportation-oriented units include ships, trains, drivers, and porters.")
+                        self.tooltip_text.append("The " + self.minister_type + " also ensures that goods are not lost in transport or storage.")
+                self.set_image('ministers/icons/' + keyword + '.png')
             
     def update_tooltip(self):
         self.set_tooltip(self.tooltip_text)

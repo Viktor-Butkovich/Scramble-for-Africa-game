@@ -25,7 +25,7 @@ class minister():
                 self.global_manager.get('available_minister_list').append(self)
                 minister_utility.update_available_minister_display(self.global_manager)
         else:
-            self.name = self.global_manager.get('flavor_text_manager').generate_flavor_text('minister_names')
+            self.name = self.global_manager.get('flavor_text_manager').generate_minister_name()
             self.skill_setup()
             self.corruption_setup()
             self.current_position = 'none'
@@ -94,18 +94,27 @@ class minister():
         return(results)
             
 
-    def appoint(self, new_position):
-        if not self.current_position == 'none':
+    def appoint(self, new_position): #bug: when appoint('none') is called, the minister is still considered the controlling minister of the relevant units
+        old_position = self.current_position
+        if not self.current_position == 'none': #if removing, set old position to none
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
-        self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-        minister_utility.update_available_minister_display(self.global_manager)
+        if not new_position == 'none': #if appointing
+            self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
+            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 2:
+                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display up because available minister was removed
+        else:
+            self.global_manager.get('available_minister_list').append(self)
+            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display to newly fired minister
         for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
-        if not self.global_manager.get('displayed_mob') == 'none':
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #update minister label
+            elif current_minister_type_image.minister_type == old_position:
+                current_minister_type_image.calibrate('none')
+        if self.global_manager.get('displayed_minister') == self:
+            minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
+        minister_utility.update_available_minister_display(self.global_manager)
 
     def skill_setup(self):
         self.general_skill = random.randrange(1, 4) #1-3, general skill as in all fields, not military

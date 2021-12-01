@@ -239,6 +239,10 @@ class button():
             self.set_tooltip(["Loads a saved game"])
         elif self.button_type == 'cycle available ministers':
             self.set_tooltip(["Cycles through the ministers available to be appointed"])
+        elif self.button_type == 'appoint minister':
+            self.set_tooltip(["Appoints this minister as " + self.appoint_type])
+        elif self.button_type == 'remove minister':
+            self.set_tooltip(["Removes this minister from their current office"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -957,6 +961,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
 
     def calibrate(self, new_minister):
         if not new_minister == 'none':
+            new_minister.update_tooltip()
             self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
             self.image.set_image(new_minister.image_id)
         else:
@@ -993,4 +998,5 @@ class cycle_available_ministers_button(button):
         if self.direction == 'right':
             self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
         minister_utility.update_available_minister_display(self.global_manager)
+        self.global_manager.get('available_minister_portrait_list')[1].on_click() #select new middle portrait
         
