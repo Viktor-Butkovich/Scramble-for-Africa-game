@@ -37,6 +37,20 @@ class free_image():
         self.to_front = to_front
         self.global_manager.get('image_list').append(self)
         self.global_manager.get('free_image_list').append(self)
+        self.Rect = 'none'
+
+    def set_y(self, attached_label): #called by actor display labels
+        '''
+        Description:
+            Sets this image's y position to be at the same height as the inputted label
+        Input:
+            actor_display_label attached_label: Label to match this image's y position with
+        Output:
+            None
+        '''
+        self.y = self.global_manager.get('display_height') - attached_label.y + attached_label.image_y_displacement
+        if not self.Rect == 'none':
+            self.Rect.y = self.y - self.height + attached_label.image_y_displacement
         
     def draw(self):
         '''
@@ -86,8 +100,288 @@ class free_image():
             None
         '''
         self.image_id = new_image
-        self.image = pygame.image.load('graphics/' + self.image_id)
+        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+            self.image = pygame.image.load('graphics/' + self.image_id)
+        except:
+            print('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this image's tooltip can currently be shown. By default, free images do not have tooltips and this always returns False
+        Input:
+            None
+        Output:
+            Returns whether this image's tooltip can currently be shown
+        '''
+        return(False)
+
+class tooltip_free_image(free_image):
+    '''
+    Free image that has a tooltip when moused over
+    '''
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager, to_front = False):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            string image_id: File path to the image used by this object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this button can appear
+            global_manager_template global_manager: Object that accesses shared variables
+            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+        Output:
+            None
+        '''
+        super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
+        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height)
+        self.Rect.y = self.y - self.height
+        self.tooltip_text = []
+        self.update_tooltip()
+
+    def set_tooltip(self, tooltip_text):
+        '''
+        Description:
+            Sets this image's tooltip to the inputted list, with each inputted list representing a line of the tooltip
+        Input:
+            string list new_tooltip: Lines for this image's tooltip
+        Output:
+            None
+        '''
+        self.tooltip_text = tooltip_text
+        tooltip_width = 0
+        font_name = self.global_manager.get('font_name')
+        font_size = self.global_manager.get('font_size')
+        for text_line in tooltip_text:
+            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+        tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
+        self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
+        self.tooltip_outline_width = 1
+        self.tooltip_outline = pygame.Rect(self.x - self.tooltip_outline_width, self.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its subclass. By default, tooltip free images do not have any tooltip text
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.tooltip_text = []
+
+    def touching_mouse(self):
+        '''
+        Description:
+            Returns whether this image is colliding with the mouse
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image is colliding with the mouse, otherwise returns False
+        '''
+        if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
+            return(True)
+        else:
+            return(False)
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this image's tooltip can currently be shown. By default, its tooltip can be shown when it is visible and colliding with the mouse
+        Input:
+            None
+        Output:
+            Returns whether this image's tooltip can currently be shown
+        '''
+        if self.touching_mouse() and self.can_show():
+            return(True)
+        else:
+            return(False)
+
+    def draw_tooltip(self, below_screen, beyond_screen, height, width, y_displacement):
+        '''
+        Description:
+            Draws this image's tooltip when moused over. The tooltip's location may vary when the tooltip is near the edge of the screen or if multiple tooltips are being shown
+        Input:
+            boolean below_screen: Whether any of the currently showing tooltips would be below the bottom edge of the screen. If True, moves all tooltips up to prevent any from being below the screen
+            boolean beyond_screen: Whether any of the currently showing tooltips would be beyond the right edge of the screen. If True, moves all tooltips to the left to prevent any from being beyond the screen
+            int height: Combined pixel height of all tooltips
+            int width: Pixel width of the widest tooltip
+            int y_displacement: How many pixels below the mouse this tooltip should be, depending on the order of the tooltips
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.update_tooltip()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if below_screen:
+                mouse_y = self.global_manager.get('display_height') + 10 - height
+            if beyond_screen:
+                mouse_x = self.global_manager.get('display_width') - width
+            mouse_y += y_displacement
+            self.tooltip_box.x = mouse_x
+            self.tooltip_box.y = mouse_y
+            self.tooltip_outline.x = self.tooltip_box.x - self.tooltip_outline_width
+            self.tooltip_outline.y = self.tooltip_box.y - self.tooltip_outline_width
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.tooltip_outline)
+            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
+            for text_line_index in range(len(self.tooltip_text)):
+                text_line = self.tooltip_text[text_line_index]
+                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                    (text_line_index * self.global_manager.get('font_size'))))
+
+class minister_type_image(tooltip_free_image): #image of minister type icon
+    '''
+    Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister
+    '''
+    def __init__(self, coordinates, width, height, modes, minister_type, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this button can appear
+            string minister_type: Minister office whose icon is always represented by this image, or 'none' if the icon can change
+            actor_display_label/string attached_label: Actor display label that this image appears next to, or 'none' if not attached to a label
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.current_minister = 'none'
+        super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
+        self.warning_image = warning_image(self, global_manager) #displays warning when no minister present
+        self.attached_label = attached_label
+        self.minister_type = minister_type #position, like General
+        if not self.minister_type == 'none':
+            self.calibrate(global_manager.get('current_ministers')[self.minister_type]) #calibrate to current minister or none if no current minister
+        self.global_manager.get('minister_image_list').append(self)
+
+    def calibrate(self, new_minister):
+        '''
+        Description:
+            Attaches this image to the inputted minister and updates this image's appearance to the minister's office icon
+        Input:
+            string/minister new_minister: The displayed minister whose information is matched by this label. If this equals 'none', the label is detached from any minister and is hidden
+        Output:
+            None
+        '''
+        self.current_minister = new_minister
+        if not new_minister == 'none':
+            self.minister_type = new_minister.current_position#new_minister.current_position
+        current_minister_type = self.minister_type
+        if (not self.attached_label == 'none') and (not self.attached_label.actor == 'none'):
+            current_minister_type = self.attached_label.actor.controlling_minister_type
+        if not current_minister_type == 'none':
+            keyword = self.global_manager.get('minister_type_dict')[current_minister_type] #type, like military
+            self.tooltip_text = []
+            if keyword == 'prosecution':
+                self.tooltip_text.append('Rather than controlling units, a prosecutor controls the process of investigating and removing ministers suspected to be corrupt.')
+            else:
+                self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + current_minister_type + ' is responsible for executing the action.')#new_minister.tooltip_text
+                if keyword == 'military':
+                    self.tooltip_text.append("Military-oriented units include military officers and European battalions.")
+                elif keyword == 'religion':
+                    self.tooltip_text.append("Religion-oriented units include evangelists, church volunteers, and missionaries.")
+                elif keyword == 'trade':
+                    self.tooltip_text.append("Trade-oriented units include merchants and caravans.")
+                    self.tooltip_text.append("The " + current_minister_type + " also controls the purchase and sale of goods in Europe.")
+                elif keyword == 'exploration':
+                    self.tooltip_text.append("Exploration-oriented units include explorers, expeditions, hunters, and safaris.")
+                elif keyword == 'construction':
+                    self.tooltip_text.append("Construction-oriented units include engineers and construction gangs.")
+                elif keyword == 'production':
+                    self.tooltip_text.append("Production-oriented units include work crews, foremen, and workers not attached to other units.")
+                elif keyword == 'transportation':
+                    self.tooltip_text.append("Transportation-oriented units include ships, trains, drivers, and porters.")
+                    self.tooltip_text.append("The " + current_minister_type + " also ensures that goods are not lost in transport or storage.")
+            if new_minister == 'none':
+                self.tooltip_text.append("There is currently no " + current_minister_type + " appointed, so " + keyword + "-oriented actions are not possible.")
+            self.set_image('ministers/icons/' + keyword + '.png')
+
+    def set_y(self, attached_label):
+        '''
+        Description:
+            Sets this image's y position and that of its warning image to be at the same height as the inputted label
+        Input:
+            actor_display_label attached_label: Label to match this image's y position and that of its warning image with
+        Output:
+            None
+        '''
+        super().set_y(attached_label)
+        self.warning_image.set_y(attached_label)
+
+    def can_show_warning(self):
+        '''
+        Description:
+            Returns whether this image should display its warning image over itself. It should be shown when this image is visible and there is no minister in the office it is attached to
+        Input:
+            None
+        Output:
+            Returns whether this image should display its warning image
+        '''
+        if self.can_show() and self.current_minister == 'none':
+            return(True)
+        return(False)
+            
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its subclass. A minister type image's tooltip describes what the office of its office icon does
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_tooltip(self.tooltip_text)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. If not attached to label, returns same as superclass. Otherwise, returns True if the attached label is showing or False if it is not showing
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can currently appear, otherwise returns False
+        '''
+        if not self.attached_label == 'none':
+            return(self.attached_label.can_show())
+        else:
+            return(super().can_show())
+
+class warning_image(free_image):
+    '''
+    Image that appears over the image it is attached to under certain conditions to draw attention from the player
+    '''
+    def __init__(self, attached_image, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            image attached_image: Image that this warning appears over under certain conditions
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.attached_image = attached_image
+        super().__init__('misc/warning_icon.png', (self.attached_image.x, global_manager.get('display_height') - self.attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
+            global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. A warning image is shown when the image it is attached to says to show a warning
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can currently appear, otherwise returns False
+        '''
+        return(self.attached_image.can_show_warning())
 
 class loading_image_template(free_image):
     '''
@@ -577,8 +871,10 @@ class button_image(actor_image):
             None
         '''
         self.Rect = self.button.Rect
+        self.width = new_width
+        self.height = new_height
         self.outline.x = new_x - self.outline_width
-        self.outline.y = display_height - (new_y + new_height + self.outline_width)
+        self.outline.y = self.global_manager.get('display_height') - (new_y + new_height + self.outline_width)
         self.outline.width = new_width + (2 * self.outline_width)
         self.outline.height = new_height + (self.outline_width * 2)
         self.set_image(self.image_id)

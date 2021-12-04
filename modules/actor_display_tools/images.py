@@ -75,6 +75,8 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/veteran_icon.png')
                 else:
                     self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'minister_default':
+                self.set_image(new_actor.image_id)
             else:
                 self.set_image(new_actor.image_dict['default'])
         else:
@@ -116,7 +118,7 @@ class actor_display_infrastructure_connection_image(actor_display_free_image):
         self.direction = direction
         super().__init__(coordinates, width, height, modes, actor_image_type, global_manager)
 
-class actor_display_background_image(free_image):
+class mob_background_image(free_image):
     '''
     Image appearing behind the displayed actor in the actor info display
     '''

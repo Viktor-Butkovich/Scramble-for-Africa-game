@@ -3,6 +3,7 @@
 import pygame
 
 from ..labels import label
+from ..images import minister_type_image
 from . import buttons
 from . import images
 
@@ -28,49 +29,49 @@ class actor_display_label(label):
         '''
         message = ''
         self.attached_buttons = []
+        self.attached_images = []
         self.actor = 'none'
         self.actor_label_type = actor_label_type #name, terrain, resource, etc
         self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
+        self.image_y_displacement = 0
         super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
-        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #except for certain types, all actor match labels should be in mob/tile_ordered_label_list
-            if self.actor_type == 'mob':
-                self.global_manager.get('mob_ordered_label_list').append(self)
-            elif self.actor_type == 'tile':
-                self.global_manager.get('tile_ordered_label_list').append(self)
+        #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
+        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #certain types of labels, like inventory capacity, are not ordered on the side of the screen and stay at set positions
+            self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/merge_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.split_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/split_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'misc/embark_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.worker_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'misc/worker_to_building_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'misc/switch_theatre_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/merge_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.split_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'buttons/split_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'buttons/embark_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'buttons/embark_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, 'ship', global_manager))
+            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_train_button.png', self, 'train', global_manager))
+            self.attached_buttons.append(buttons.worker_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'buttons/worker_to_building_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, self, 'mission', global_manager))
-            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'misc/build_train_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'misc/trade_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/convert_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'misc/religious_campaign_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height, self.height, pygame.K_y, self.modes, 'buttons/build_train_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
             self.attached_building = 'none'
-            self.attached_buttons.append(buttons.remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'misc/remove_worker_button.png', self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'buttons/remove_worker_button.png', self, 'resource', global_manager))
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
-            self.attached_buttons.append(buttons.crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'misc/crew_ship_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.uncrew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'misc/uncrew_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.uncrew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_n, self.modes, 'buttons/uncrew_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
-            self.attached_buttons.append(buttons.cycle_passengers_button((self.x, self.y), self.height, self.height, pygame.K_4, self.modes, 'misc/cycle_passengers_down.png', self, global_manager))
-            self.attached_buttons.append(buttons.pick_up_all_passengers_button((self.x, self.y), self.height, self.height, pygame.K_z, self.modes, 'misc/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.cycle_passengers_button((self.x, self.y), self.height, self.height, pygame.K_4, self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
+            self.attached_buttons.append(buttons.pick_up_all_passengers_button((self.x, self.y), self.height, self.height, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
             keybind = 'none'
@@ -80,7 +81,7 @@ class actor_display_label(label):
                 keybind = pygame.K_2
             elif self.list_index == 2:
                 keybind = pygame.K_3
-            self.attached_buttons.append(buttons.disembark_vehicle_button((self.x, self.y), self.height, self.height, keybind, self.modes, 'misc/disembark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.disembark_vehicle_button((self.x, self.y), self.height, self.height, keybind, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
         elif self.actor_label_type == 'native aggressiveness':
@@ -91,6 +92,17 @@ class actor_display_label(label):
             self.message_start = 'Available workers: '
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+        elif self.actor_label_type == 'minister':
+            self.message_start = 'Minister: '
+            self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
+            self.image_y_displacement = 5
+        elif self.actor_label_type == 'minister_name':
+            self.message_start = 'Name: '
+        elif self.actor_label_type == 'minister_office':
+            self.message_start = 'Office: '
+            self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height, self.height, self, global_manager))
+            for current_position in global_manager.get('minister_types'):
+                self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height, self.height, self, current_position, global_manager))
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -137,8 +149,7 @@ class actor_display_label(label):
                     for current_building in self.actor.cell.get_buildings():
                         current_building.update_tooltip()
                         tooltip_text.append('')
-                        tooltip_text += current_building.tooltip_text
-                    
+                        tooltip_text += current_building.tooltip_text  
                 self.set_tooltip(tooltip_text)
         elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
             tooltip_text = [self.message]
@@ -164,6 +175,16 @@ class actor_display_label(label):
                         tooltip_text.append("This tile can retain a maximum of " + str(self.actor.inventory_capacity) + " commodities.")
                         tooltip_text.append("If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost.")
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'minister':
+            tooltip_text = []
+            if not self.actor == 'none':
+                self.actor.update_tooltip()
+                if not self.actor.controlling_minister == 'none':
+                    tooltip_text = self.actor.controlling_minister.tooltip_text
+                else:
+                    tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
+                                    "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -172,7 +193,7 @@ class actor_display_label(label):
         Description:
             Attaches this label to the inputted actor and updates this label's information based on the inputted actor
         Input:
-            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
         Output:
             None
         '''
@@ -180,7 +201,6 @@ class actor_display_label(label):
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + new_actor.name.capitalize())
-                
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
                     self.set_label('Europe')
@@ -272,6 +292,14 @@ class actor_display_label(label):
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
+            elif self.actor_label_type == 'minister':
+                if not self.actor.controlling_minister == 'none':
+                    self.set_label(self.message_start + self.actor.controlling_minister.name)
+                self.attached_images[0].calibrate(self.actor.controlling_minister)
+            elif self.actor_label_type == 'minister_name':
+                self.set_label(self.message_start + new_actor.name)
+            elif self.actor_label_type == 'minister_office':
+                self.set_label(self.message_start + new_actor.current_position)
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -310,9 +338,9 @@ class actor_display_label(label):
         self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)#self.y
         self.image.Rect = self.Rect    
         for current_button in self.attached_buttons:
-            current_button.y = self.y
-            current_button.Rect.y = self.global_manager.get('display_height') - (current_button.y + current_button.height)
-            current_button.outline.y = current_button.Rect.y - current_button.outline_width
+            current_button.set_y(self)
+        for current_image in self.attached_images:
+            current_image.set_y(self)
 
     def can_show(self):
         '''
@@ -494,16 +522,16 @@ class commodity_display_label(actor_display_label):
         self.commodity_index = commodity_index
         self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
         if matched_actor_type == 'mob':
-            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'misc/commodity_drop_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'misc/commodity_drop_all_button.png', self,
+            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'buttons/commodity_drop_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'buttons/commodity_drop_all_button.png', self,
                 global_manager))
         elif matched_actor_type == 'tile':
-            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'pick up commodity', 'none', self.modes, 'misc/commodity_pick_up_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'pick up all commodity', 'none', self.modes, 'misc/commodity_pick_up_all_button.png',
+            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'pick up commodity', 'none', self.modes, 'buttons/commodity_pick_up_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 5), self.y), self.height, self.height, 'pick up all commodity', 'none', self.modes, 'buttons/commodity_pick_up_all_button.png',
                 self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 5) * 2), self.y), self.height, self.height, 'sell commodity', 'none', ['europe'], 'misc/commodity_sell_button.png', self,
+            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 5) * 2), self.y), self.height, self.height, 'sell commodity', 'none', ['europe'], 'buttons/commodity_sell_button.png', self,
                 global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 5) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', ['europe'], 'misc/commodity_sell_all_button.png', self,
+            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 5) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', ['europe'], 'buttons/commodity_sell_all_button.png', self,
                 global_manager))
 
     def set_label(self, new_message):

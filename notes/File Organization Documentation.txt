@@ -8,7 +8,9 @@ SFA folder
 
     graphics folder
 	buildings
+	buttons
         locations
+	ministers
         misc
         mobs
         scenery
@@ -16,6 +18,8 @@ SFA folder
 
     text folder
         flavor_explorer.csv
+	flavor_minister_first_names.csv
+	flavor_minister_last_names.csv
 
     save_games folder
 	save1.pickle
@@ -27,7 +31,7 @@ SFA folder
     __init__.py
 
     Scramble_for_Africa.py
-        imports pygame, time, random, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tools
+        imports pygame, time, random, os, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tools
         
     modules folder
 
@@ -94,17 +98,17 @@ SFA folder
 	    def unscale_height
 
 	save_load_tools.py
-	    imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools
+	    imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools, minister_utility
 	    class save_load_manager_template
 
 	officers.py
 	    imports mobs, tiles, workers, actor_utility, utility, notification_tools, text_tools, dice_utility, dice, scaling
 	    class officer(mobs.mob)
-		class head_missionary
+		class evangelist
 
         notifications.py
             imports labels, text_tools, utility, scaling
-            class notification(labels.label)
+            class notification(labels.multi_line_label)
 
         notification_tools.py
             def display_notification
@@ -119,6 +123,16 @@ SFA folder
             imports pygame, time, images, text_tools, utility, actor_utility, actors
             class mob(actors.actor)
 
+	ministers.py
+	    imports random, utility, actor_utility, minister_utility
+	    class minister
+
+	minister_utility.py
+	    def check_corruption
+	    def get_skill_modifier
+	    def calibrate_minister_info_display
+	    def update_available_minister_display
+
 	market_tools.py
 	    imports random, text_tools, utility
 	    def adjust_prices
@@ -126,7 +140,7 @@ SFA folder
 	    def sell
 
         main_loop_tools.py
-            imports pygame, time, scaling, text_tools, actor_utility
+            imports pygame, time, scaling, text_tools, actor_utility, minister_utility
             def update_display
             def action_possible
             def draw_loading_screen
@@ -146,6 +160,7 @@ SFA folder
 		class value_label
 		class money_label
 		class commodity_prices_label
+		class multi_line_label
 
         instructions.py
             imports labels, buttons, scaling, text_tools
@@ -156,6 +171,9 @@ SFA folder
         images.py
             imports pygame, time, utility, drawing_tools, text_tools, scaling
             class free_image
+		class tooltip_free_image
+		    class minister_type_image
+		class warning_image
                 class loading_image_template
             class actor_image
 		class building_image
@@ -190,7 +208,6 @@ SFA folder
 
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, utility
-            class european_hq_button(buttons.button)
             class recruitment_button(buttons.button)
 	    class buy_commodity_button(buttons.button)
 
@@ -233,10 +250,13 @@ SFA folder
             class cell
 
         buttons.py
-            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools
+            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility
             class button
 		class cycle_same_tile_button
 		class same_tile_icon
+		class switch_game_mode_button
+		class minister_portrait_image
+		class cycle_available_ministers_button
 
 	buildings.py
 	    imports pygame, actors, buttons, utility, images, actor_utility, text_tools
@@ -263,6 +283,19 @@ SFA folder
             def calibrate_actor_info_display
 	    def order_actor_info_display
 
+	actor_creation_tools.py
+	    imports actors, mobs, workers, officers, groups, vehicles, buildings, ministers
+	    class actor_creation_manager_template
+
+	action_notifications.py
+	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility, workers
+	    class dice_rolling_notification(notifications.notification)
+	    class exploration_notification(notifications.notification)
+	    class trade_notification_notification(notifications.notification)
+	    class religious_campaign_notification(notifications.notification)
+    	    class conversion_notification(notifications.notification)
+	    class construction_notification(notifications.notification)
+
 	actor_display_tools folder
 	    labels.py
 		imports pygame, modules.labels, buttons, images
@@ -276,7 +309,7 @@ SFA folder
 		imports modules.images
 		class actor_display_free_image(modules.images.free_image)
 		    class actor_display_infrastructure_connection_image
-		    class actor_display_background_image
+		    class mob_background_image
 		class label_image(modules.images.free_image)
 
 	    buttons.py
@@ -299,16 +332,3 @@ SFA folder
 		    class switch_theatre_button
 		    class build_train_button
 		    class construction_button
-
-	actor_creation_tools.py
-	    imports actors, mobs, workers, officers, groups, vehicles, buildings
-	    class actor_creation_manager_template
-
-	action_notifications.py
-	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility, workers
-	    class dice_rolling_notification(notifications.notification)
-	    class exploration_notification(notifications.notification)
-	    class trade_notification_notification(notifications.notification)
-	    class religious_campaign_notification(notifications.notification)
-    	    class conversion_notification(notifications.notification)
-	    class construction_notification(notifications.notification)

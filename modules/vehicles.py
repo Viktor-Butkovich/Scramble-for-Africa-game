@@ -57,8 +57,8 @@ class vehicle(mob):
                 self.global_manager.get('actor_creation_manager').create(True, input_dict['crew'], self.global_manager).crew_vehicle(self) #creates worker and merges it as crew
             for current_passenger in input_dict['passenger_dicts']:
                 self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
-                
         self.initializing = False
+        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
     def to_save_dict(self):
         '''

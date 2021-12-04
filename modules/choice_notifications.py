@@ -259,21 +259,15 @@ class recruitment_choice_button(choice_button):
                         name += ' '
                 input_dict['name'] = name
                 input_dict['init_type'] = self.recruitment_type
-                #if self.recruitment_type == 'head_missionary':
-                    #new_officer = officers.head_missionary(False, input_dict, self.global_manager)
-                #else:
                 input_dict['officer_type'] = self.recruitment_type
-                #new_officer = officers.officer(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'European worker':
                 input_dict['name'] = 'European worker'
                 input_dict['init_type'] = 'worker'
-                #new_worker = workers.worker(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'ship':
                 image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['name'] = 'ship'
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'ship'
-                #new_ship = vehicles.ship(False, input_dict, self.global_manager)
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         super().on_click()

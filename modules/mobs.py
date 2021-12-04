@@ -60,6 +60,7 @@ class mob(actor):
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
+        self.set_controlling_minister_type('none')
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
@@ -76,6 +77,50 @@ class mob(actor):
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
+    def check_if_minister_appointed(self):
+        '''
+        Description:
+            Returns whether there is currently an appointed minister to control this unit
+        Input:
+            None
+        Output:
+            boolean: Returns whether there is currently an appointed minister to control this unit
+        '''
+        if not self.controlling_minister == 'none':
+            return(True)
+        else:
+            keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
+            text_tools.print_to_screen("", self.global_manager)
+            text_tools.print_to_screen("You can not do " + keyword + " actions because a " + self.controlling_minister_type + " has not been appointed", self.global_manager)
+            text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", self.global_manager)
+            return(False)
+
+    def set_controlling_minister_type(self, new_type):
+        '''
+        Description:
+            Sets the type of minister that controls this unit, like "Minister of Trade"
+        Input:
+            Type of minister to control this unit, like "Minister of Trade"
+        Output:
+            None
+        '''
+        self.controlling_minister_type = new_type
+        self.update_controlling_minister()
+
+    def update_controlling_minister(self):
+        '''
+        Description:
+            Sets the minister that controls this unit to the one occupying the office that has authority over this unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.controlling_minister_type == 'none':
+            self.controlling_minister = 'none'
+        else:
+            self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
 
     def to_save_dict(self):
         '''

@@ -4,7 +4,6 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
-#from .. import groups
 
 class label_button(button):
     '''
@@ -173,7 +172,7 @@ class pick_up_all_passengers_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/embark_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
 class crew_vehicle_button(label_button):
@@ -238,7 +237,7 @@ class crew_vehicle_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/crew_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/crew_' + self.vehicle_type + '_button.png')
         return(result)
 
 class uncrew_vehicle_button(label_button):
@@ -279,7 +278,7 @@ class uncrew_vehicle_button(label_button):
                 return(False)
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'):
                 self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('misc/uncrew_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/uncrew_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -359,7 +358,7 @@ class merge_button(label_button):
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            if officer.officer_type == 'head_missionary': #if head missionary, look for church volunteers
+                            if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
                                 worker = officer.images[0].current_cell.get_church_volunteers()
                             else:
                                 worker = officer.images[0].current_cell.get_worker()
@@ -368,13 +367,13 @@ class merge_button(label_button):
                             #groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                             self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
                         else:
-                            if (not officer == 'none') and officer.officer_type == 'head_missionary':
-                                text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                            if (not officer == 'none') and officer.officer_type == 'evangelist':
+                                text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
                             else:  
                                 text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        if (not officer == 'none') and officer.officer_type == 'head_missionary':
-                            text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                        if (not officer == 'none') and officer.officer_type == 'evangelist':
+                            text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
                         else:  
                             text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
@@ -537,7 +536,7 @@ class disembark_vehicle_button(label_button):
             old_vehicle_type = self.vehicle_type
             self.vehicle_type = self.attached_label.actor.vehicle_type
             if not self.vehicle_type == old_vehicle_type and not self.vehicle_type == 'none': #if changed
-                self.image.set_image('misc/disembark_' + self.vehicle_type + '_button.png')
+                self.image.set_image('buttons/disembark_' + self.vehicle_type + '_button.png')
         return(result)
 
     def on_click(self):
@@ -605,7 +604,7 @@ class embark_vehicle_button(label_button):
         if result:
             if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
                 result = False
-            elif not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
+            elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
@@ -860,14 +859,11 @@ class trade_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
-                    #if current_cell.has_trading_post():
                         if current_mob.get_inventory('consumer goods') > 0:
-                            #current_mob.set_movement_points(0) have confirmation message to ensure that player wants to trade before using movement points 
-                            current_mob.start_trade()
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_trade()
                         else:
                             text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
-                    #elif current_cell.has_village():
-                    #    text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
                     else:
                         text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                 else:
@@ -929,7 +925,8 @@ class convert_button(label_button):
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
                         if current_cell.village.aggressiveness > 1:
-                            current_mob.start_converting()
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_converting()
                         else:
                             text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                     else:
@@ -941,7 +938,7 @@ class convert_button(label_button):
 
 class religious_campaign_button(label_button):
     '''
-    Button that commands a head missionary to start a religious campaign in Europe
+    Button that commands an evangelist to start a religious campaign in Europe
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -968,18 +965,18 @@ class religious_campaign_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not a head missionary, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not an evangelist, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head_missionary')):
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist')):
                 return(False)
         return(result)
 
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a head missionary to start a religious campaign
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands an evangelist to start a religious campaign
         Input:
             None
         Output:
@@ -991,7 +988,8 @@ class religious_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        current_mob.start_religious_campaign()
+                        if current_mob.check_if_minister_appointed():
+                            current_mob.start_religious_campaign()
                     else:
                         text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1120,7 +1118,8 @@ class build_train_button(label_button):
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
-                                        self.construct()
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            self.construct()
                                     else:
                                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
                                 else:
@@ -1174,7 +1173,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_tile = 'none'
         self.building_name = 'none'
         self.requirement = 'can_construct'
-        image_id = 'misc/default_button.png'
+        image_id = 'buttons/default_button.png'
         if self.building_type == 'resource':
             self.attached_resource = 'none'
             image_id = global_manager.get('resource_building_button_dict')['none']
@@ -1182,18 +1181,18 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = 'buildings/buttons/port.png'
             self.building_name = 'port'
         elif self.building_type == 'infrastructure':
-            self.road_image_id = 'misc/road_button.png'
-            self.railroad_image_id = 'misc/railroad_button.png'
+            self.road_image_id = 'buttons/road_button.png'
+            self.railroad_image_id = 'buttons/railroad_button.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
-            image_id = 'misc/train_station_button.png'
+            image_id = 'buttons/train_station_button.png'
             self.building_name = 'train station'
         elif self.building_type == 'trading_post':
-            image_id = 'misc/trading_post_button.png'
+            image_id = 'buttons/trading_post_button.png'
             self.building_name = 'trading post'
             self.requirement = 'can_trade'
         elif self.building_type == 'mission':
-            image_id = 'misc/mission_button.png'
+            image_id = 'buttons/mission_button.png'
             self.building_name = 'mission'
             self.requirement = 'can_convert'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
@@ -1229,10 +1228,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
                     if current_infrastructure == 'none':
                         self.building_name = 'road'
-                        self.image.set_image('misc/road_button.png')
+                        self.image.set_image('buttons/road_button.png')
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
-                        self.image.set_image('misc/railroad_button.png')
+                        self.image.set_image('buttons/railroad_button.png')
 
     def can_show(self):
         '''
@@ -1326,25 +1325,30 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                 if not self.attached_tile.cell.terrain == 'water':
                                     if self.building_type == 'resource':
                                         if not self.attached_resource == 'none':
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
                                     elif self.building_type == 'port':
                                         if self.attached_mob.adjacent_to_water():
                                             if not self.attached_mob.images[0].current_cell.terrain == 'water':
-                                                self.construct()
+                                                if self.attached_label.actor.check_if_minister_appointed():
+                                                    self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
                                     elif self.building_type == 'train_station':
                                         if self.attached_tile.cell.has_railroad():
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                                     elif self.building_type == 'infrastructure':
-                                        self.construct()
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            self.construct()
                                     elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                         if self.attached_tile.cell.has_village():
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
                                 else:
@@ -1379,3 +1383,109 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         if self.building_type == 'resource':
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
+
+class appoint_minister_button(label_button):
+    '''
+    Button that appoints the selected minister to the office corresponding to this button
+    '''
+    def __init__(self, coordinates, width, height, attached_label, appoint_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            string appoint_type: Office that this button appoints ministers to, like "Minister of Trade"
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.appoint_type = appoint_type
+        super().__init__(coordinates, width, height, 'appoint minister', 'none', ['ministers'], 'ministers/icons/' + global_manager.get('minister_type_dict')[self.appoint_type] + '.png', attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the minister office that this button is attached to is open, otherwise returns False
+        '''
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if (not displayed_minister == 'none') and displayed_minister.current_position == 'none': #if there is an available minister displayed
+                if self.global_manager.get('current_ministers')[self.appoint_type] == 'none': #if the position that this button appoints is available
+                    return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button appoints the selected minister to the office corresponding to this button
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                appointed_minister = self.global_manager.get('displayed_minister')
+                appointed_minister.appoint(self.appoint_type)
+            else:
+                text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
+
+class remove_minister_button(label_button):
+    '''
+    Button that removes the selected minister from their current office
+    '''
+    def __init__(self, coordinates, width, height, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'remove minister', 'none', ['ministers'], 'buttons/remove_minister_button.png', attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the selected minister is currently in an office, otherise returns False
+        '''
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if (not displayed_minister == 'none') and (not displayed_minister.current_position == 'none'): #if there is an available minister displayed
+                return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
+                ministers
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                appointed_minister = self.global_manager.get('displayed_minister')
+                appointed_minister.appoint('none')
+            else:
+                text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)

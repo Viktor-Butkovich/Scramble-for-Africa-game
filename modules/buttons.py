@@ -12,6 +12,7 @@ from . import turn_management_tools
 from . import market_tools
 from . import notification_tools
 from . import game_transitions
+from . import minister_utility
 
 class button():
     '''
@@ -61,6 +62,19 @@ class button():
         self.confirming = False
         self.being_pressed = False
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
+
+    def set_y(self, attached_label): #called by actor display labels to move to their y position
+        '''
+        Description:
+            Sets this button's y position to be at the same height as the inputted label
+        Input:
+            actor_display_label attached_label: Label to match this button's y position with
+        Output:
+            None
+        '''
+        self.y = attached_label.y
+        self.Rect.y = self.global_manager.get('display_height') - (attached_label.y + self.height)
+        self.outline.y = self.Rect.y - self.outline_width
 
     def update_tooltip(self):
         '''
@@ -140,8 +154,8 @@ class button():
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
         elif self.button_type == 'merge':
-            if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head missionary':
-                self.set_tooltip(["Merges this head missionary with church volunteers in the same tile to form a group of missionaries.", "Requires that a head missionary is selected in the same tile as church volunteers."])
+            if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist':
+                self.set_tooltip(["Merges this evangelist with church volunteers in the same tile to form a group of missionaries.", "Requires that an evangelist is selected in the same tile as church volunteers."])
             else:
                 self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
         elif self.button_type == 'split':
@@ -226,18 +240,22 @@ class button():
                 "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
-                "If successful, recruits a free unit of church volunteers that can join with a head missionary to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
+                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
-        elif self.button_type == 'main menu':
-            self.set_tooltip(["Exits to main menu", "Does not automatically save the game"])
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
         elif self.button_type == 'save game':
             self.set_tooltip(["Saves this game"])
         elif self.button_type == 'load game':
             self.set_tooltip(["Loads a saved game"])
+        elif self.button_type == 'cycle available ministers':
+            self.set_tooltip(["Cycles through the ministers available to be appointed"])
+        elif self.button_type == 'appoint minister':
+            self.set_tooltip(["Appoints this minister as " + self.appoint_type])
+        elif self.button_type == 'remove minister':
+            self.set_tooltip(["Removes this minister from their current office"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -521,61 +539,63 @@ class button():
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
-                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'drop all commodity':
-                        num_commodity = displayed_mob.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            can_drop_off = True
-                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                                can_drop_off = False
-                                text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
-                            if can_drop_off:
-                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                                displayed_tile.change_inventory(commodity, num_commodity)
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
-                                    displayed_mob.set_movement_points(0)
-                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                    text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
-                                    text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                        displayed_mob = self.global_manager.get('displayed_mob')
+                        displayed_tile = self.global_manager.get('displayed_tile')
+                        commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                        num_commodity = 1
+                        if self.button_type == 'drop all commodity':
+                            num_commodity = displayed_mob.get_inventory(commodity)
+                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                            if displayed_mob in displayed_tile.cell.contained_mobs:
+                                can_drop_off = True
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                    can_drop_off = False
+                                    text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
+                                if can_drop_off:
+                                    displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                                    displayed_tile.change_inventory(commodity, num_commodity)
+                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                                        displayed_mob.set_movement_points(0)
+                                    if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                        text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                        text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                            else:
+                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
-                    else:
-                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
+                            text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
                 
             elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
-                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'pick up all commodity':
-                        num_commodity = displayed_tile.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            if displayed_mob.can_hold_commodities:
-                                can_pick_up = True
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                                    can_pick_up = False
-                                    text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
-                                if can_pick_up:
-                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                        displayed_mob.change_inventory(commodity, num_commodity)
-                                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
-                                    else:
-                                        text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                            str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                        displayed_mob = self.global_manager.get('displayed_mob')
+                        displayed_tile = self.global_manager.get('displayed_tile')
+                        commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                        num_commodity = 1
+                        if self.button_type == 'pick up all commodity':
+                            num_commodity = displayed_tile.get_inventory(commodity)
+                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                            if displayed_mob in displayed_tile.cell.contained_mobs:
+                                if displayed_mob.can_hold_commodities:
+                                    can_pick_up = True
+                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                        can_pick_up = False
+                                        text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
+                                    if can_pick_up:
+                                        if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                            displayed_mob.change_inventory(commodity, num_commodity)
+                                            displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                        else:
+                                            text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
+                                                str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                else:
+                                    text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                             else:
-                                text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
+                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
-                    else:
-                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
+                            text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
 
@@ -597,15 +617,16 @@ class button():
                 turn_management_tools.end_turn(self.global_manager)
 
             elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                num_present = self.attached_label.actor.get_inventory(commodity)
-                num_sold = 0
-                if self.button_type == 'sell commodity':
-                    num_sold = 1
-                else:
-                    num_sold = num_present
-                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+                if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+                    commodity_list = self.attached_label.actor.get_held_commodities()
+                    commodity = commodity_list[self.attached_label.commodity_index]
+                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    num_sold = 0
+                    if self.button_type == 'sell commodity':
+                        num_sold = 1
+                    else:
+                        num_sold = num_present
+                    market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
 
             elif self.button_type == 'cycle units':
                 mob_list = self.global_manager.get('mob_list')
@@ -646,9 +667,6 @@ class button():
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
-            elif self.button_type == 'main menu':
-                game_transitions.to_main_menu(self.global_manager)
-
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -657,12 +675,12 @@ class button():
                 caravan.willing_to_trade(self.notification)
 
             elif self.button_type == 'start religious campaign':
-                head_missionary = self.notification.choice_info_dict['head missionary']
-                head_missionary.religious_campaign()
+                evangelist = self.notification.choice_info_dict['evangelist']
+                evangelist.religious_campaign()
 
             elif self.button_type == 'start converting':
-                head_missionary = self.notification.choice_info_dict['head missionary']
-                head_missionary.convert()
+                evangelist = self.notification.choice_info_dict['evangelist']
+                evangelist.convert()
 
             elif self.button_type == 'start construction':
                 constructor = self.notification.choice_info_dict['constructor']
@@ -839,6 +857,20 @@ class same_tile_icon(button):
                             current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
             else:
                 text_tools.print_to_screen("You are busy and can not select a different unit", self.global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if there is no tile selected, otherwise returns same as superclass
+        '''
+        if not self.global_manager.get('displayed_tile') == 'none':
+            return(super().can_show())
+        else:
+            return(False)
                          
     def draw(self):
         '''
@@ -849,54 +881,41 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if not self.global_manager.get('displayed_tile') == 'none':
-            new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
-            if not new_contained_mobs == self.old_contained_mobs:
-                self.old_contained_mobs = []
-                for current_item in new_contained_mobs:
-                    self.old_contained_mobs.append(current_item)
-                if self.is_last and len(new_contained_mobs) > self.index:
-                    self.attached_mob = 'last'
-                    self.image.set_image('misc/extra_selected_button.png')
-                    name_list = []
-                    for current_mob_index in range(len(self.old_contained_mobs)):
-                        if current_mob_index > self.index - 1:
-                            name_list.append(self.old_contained_mobs[current_mob_index].name)
-                    self.name_list = name_list
-                    
-                elif len(self.old_contained_mobs) > self.index:
-                    self.attached_mob = self.old_contained_mobs[self.index]
-                    self.image.set_image(self.attached_mob.images[0].image_id)
-        else:
-            self.image.set_image('misc/empty.png')
-            self.attached_mob = 'none'
-            
-        if len(self.old_contained_mobs) > self.index:
-            displayed_tile = self.global_manager.get('displayed_tile')
-            if self.index == 0 and self.can_show() and not displayed_tile == 'none':
-                if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
-                else:
-                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-            super().draw()
+        if self.can_show():
+            if not self.global_manager.get('displayed_tile') == 'none':
+                new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
+                if not new_contained_mobs == self.old_contained_mobs:
+                    self.old_contained_mobs = []
+                    for current_item in new_contained_mobs:
+                        self.old_contained_mobs.append(current_item)
+                    if self.is_last and len(new_contained_mobs) > self.index:
+                        self.attached_mob = 'last'
+                        self.image.set_image('buttons/extra_selected_button.png')
+                        name_list = []
+                        for current_mob_index in range(len(self.old_contained_mobs)):
+                            if current_mob_index > self.index - 1:
+                                name_list.append(self.old_contained_mobs[current_mob_index].name)
+                        self.name_list = name_list
+                        
+                    elif len(self.old_contained_mobs) > self.index:
+                        self.attached_mob = self.old_contained_mobs[self.index]
+                        self.image.set_image(self.attached_mob.images[0].image_id)
+            else:
+                self.image.set_image('misc/empty.png')
+                self.attached_mob = 'none'
+                
+            if len(self.old_contained_mobs) > self.index:
+                displayed_tile = self.global_manager.get('displayed_tile')
+                if self.index == 0 and self.can_show() and not displayed_tile == 'none':
+                    if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                    else:
+                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+                super().draw()
 
-        else:
-            self.image.set_image('misc/empty.png')
-            self.attached_mob = 'none'
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if this button is not attached to any mobs. Otherwise, returns same as superclass
-        '''
-        if self.attached_mob == 'none':
-            return(False)
-        else:
-            return(True)
+            else:
+                self.image.set_image('misc/empty.png')
+                self.attached_mob = 'none'
 
     def update_tooltip(self):
         '''
@@ -915,3 +934,216 @@ class same_tile_icon(button):
             else:
                 self.attached_mob.update_tooltip()
                 self.set_tooltip(self.attached_mob.tooltip_text + ["Click to select this unit"])
+
+class switch_game_mode_button(button):
+    '''
+    Button that switches between game modes, like from the strategic map to the minister conference room
+    '''
+    def __init__(self, coordinates, width, height, color, keybind_id, to_mode, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string to_mode: game mode that this button switches to. If this equals 'previous', it switches to the previous game mode rather than a preset one
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        button_type = 'switch_game_mode'
+        self.to_mode = to_mode
+        self.to_mode_tooltip_dict = {}
+        self.to_mode_tooltip_dict['main menu'] = ["Exits to the main menu", "Does not automatically save the game"]
+        self.to_mode_tooltip_dict['strategic'] = ["Enters the strategic map screen"]
+        self.to_mode_tooltip_dict['europe'] = ["Enters the European headquarters screen"]
+        self.to_mode_tooltip_dict['ministers'] = ["Enters the minister conference room screen"]
+        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button transtions from the current game mode to either the previous game mode or one specified on button initialization
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.to_mode == 'main menu':
+                    game_transitions.to_main_menu(self.global_manager)
+                if not self.to_mode == 'previous':
+                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                else:
+                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button describes which game mode it switches to
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.to_mode == 'previous':
+            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.global_manager.get('previous_game_mode')]))
+        else:
+            self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
+
+class minister_portrait_image(button): #image of minister's portrait - button subclass because can be clicked to select minister
+    '''
+    Button that can be calibrated to a minister to show that minister's portrait and selects the minister when clicked
+    '''
+    def __init__(self, coordinates, width, height, modes, minister_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string list modes: Game modes during which this button can appear
+            string minister_type: Minister office that this button is linked to, causing this button to always be connected to the minister in that office. If this equals 'none', this can be calibrated to an available minister
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.default_image_id = 'ministers/empty_portrait.png'
+        super().__init__(coordinates, width, height, 'gray', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
+        self.minister_type = minister_type #position, like General
+        if self.minister_type == 'none': #if available minister portrait
+            self.global_manager.get('available_minister_portrait_list').append(self)
+        else:
+            self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
+        self.global_manager.get('minister_image_list').append(self)
+        self.calibrate('none')
+
+    def draw(self):
+        '''
+        Description:
+            Draws this button's image along with a white background and, if currently selected, a flashing green outline
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show(): #draw outline around portrait if minister selected
+            if not self.current_minister == 'none':
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
+                if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+        super().draw()
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button selects its attached minister when clicked
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.current_minister == 'none':
+            minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+
+    def calibrate(self, new_minister):
+        '''
+        Description:
+            Attaches this button to the inputted minister and updates this button's image to that of the minister
+        Input:
+            string/minister new_minister: The minister whose information is matched by this button. If this equals 'none', this button is detached from any ministers
+        Output:
+            None
+        '''
+        if not new_minister == 'none':
+            new_minister.update_tooltip()
+            self.tooltip_text = new_minister.tooltip_text #[self.minister_type + ' ' + new_minister.name]
+            self.image.set_image(new_minister.image_id)
+        else:
+            if self.minister_type == 'none': #if available minister portrait
+                self.tooltip_text = ['There is no available minister in this slot.']
+            else: #if appointed minister portrait
+                self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
+            self.image.set_image(self.default_image_id)
+        self.current_minister = new_minister
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button copies the tooltip text of its attached minister, or says there is no attached minister if there is none attached
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_tooltip(self.tooltip_text)
+
+class cycle_available_ministers_button(button):
+    '''
+    Button that cycles through the ministers available to be appointed
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, direction, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            string direction: If this equals 'right', this button cycles forward in the list of available ministers. If this equals 'left', this button cycles backwards in the list of available ministers
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.direction = direction
+        super().__init__(coordinates, width, height, 'blue', 'cycle available ministers', keybind_id, modes, image_id, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if clicking this button would move more than 1 past the edge of the list of available ministers, otherwise returns same as superclass
+        '''
+        if self.direction == 'left':
+            if self.global_manager.get('available_minister_left_index') > -1:
+                return(super().can_show())
+            else:
+                return(False)
+        elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
+            if not self.global_manager.get('available_minister_left_index') + 3 > len(self.global_manager.get('available_minister_list')):
+                return(super().can_show())
+            else:
+                return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button changes the range of available ministers that are displayed depending on its direction
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.direction == 'left':
+            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+        if self.direction == 'right':
+            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
+        minister_utility.update_available_minister_display(self.global_manager)
+        self.global_manager.get('available_minister_portrait_list')[1].on_click() #select new middle portrait
+        

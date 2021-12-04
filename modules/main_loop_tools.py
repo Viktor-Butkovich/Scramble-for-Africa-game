@@ -5,6 +5,7 @@ import time
 from . import scaling
 from . import text_tools
 from . import actor_utility
+from . import minister_utility
 
 def update_display(global_manager):
     '''
@@ -17,6 +18,7 @@ def update_display(global_manager):
     '''
     actor_utility.order_actor_info_display(global_manager, global_manager.get('mob_ordered_label_list'), global_manager.get('mob_ordered_list_start_y')) #global manager, list to order, top y of list
     actor_utility.order_actor_info_display(global_manager, global_manager.get('tile_ordered_label_list'), global_manager.get('tile_ordered_list_start_y'))
+    actor_utility.order_actor_info_display(global_manager, global_manager.get('minister_ordered_label_list'), global_manager.get('minister_ordered_list_start_y'))
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
         draw_loading_screen(global_manager)
@@ -118,6 +120,8 @@ def update_display(global_manager):
             if current_free_image.to_front: #draw on top if free image should be in front
                 current_free_image.draw()
                 current_free_image.has_drawn = True
+            if current_free_image.can_show_tooltip():
+                possible_tooltip_drawers = [current_free_image]
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
@@ -137,7 +141,24 @@ def update_display(global_manager):
         if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
-        #global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
+
+def check_if_minister_appointed(minister_type, global_manager):
+    '''
+    Description:
+        Checks if there is a minister appointed in the inputted office and prints a warning if there is not one, used to explain why the player can't do an action
+    Input:
+        string minister_type: minister office to check the occupancy of, like "Minister of Trade"
+    Output:
+        boolean: Returns whether there is a minister appointed in the inputted office
+    '''
+    if not global_manager.get('current_ministers')[minister_type] == 'none':
+        return(True)
+    else:
+        keyword = global_manager.get('minister_type_dict')[minister_type]
+        text_tools.print_to_screen("", global_manager)
+        text_tools.print_to_screen("You can not do " + keyword + " actions because a " + minister_type + " has not been appointed", global_manager)
+        text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", global_manager)
+        return(False)
 
 def action_possible(global_manager):
     '''
@@ -367,7 +388,10 @@ def manage_lmb_down(clicked_button, global_manager):
             selected_new_mob = False
             if (not global_manager.get('capital')):
                 actor_utility.deselect_all(global_manager)
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+            if global_manager.get('current_game_mode') == 'ministers':
+                minister_utility.calibrate_minister_info_display(global_manager, 'none')
+            else:
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
