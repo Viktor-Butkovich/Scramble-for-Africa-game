@@ -1053,52 +1053,53 @@ class expedition(group):
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
-                choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost, 'type': 'exploration'}
-                
-                self.current_roll_modifier = 0
-                self.current_min_success = self.default_min_success
-                self.current_max_crit_fail = self.default_max_crit_fail
-                self.current_min_crit_success = self.default_min_crit_success
-                
-                #determine modifier here
-                #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
-                
-                self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-                self.current_max_crit_fail -= self.current_roll_modifier
-                if self.current_min_success > self.current_min_crit_success:
-                    self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-                message = ""
+                if self.check_if_minister_appointed():
+                    choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost, 'type': 'exploration'}
+                    
+                    self.current_roll_modifier = 0
+                    self.current_min_success = self.default_min_success
+                    self.current_max_crit_fail = self.default_max_crit_fail
+                    self.current_min_crit_success = self.default_min_crit_success
+                    
+                    #determine modifier here
+                    #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
+                    
+                    self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+                    self.current_max_crit_fail -= self.current_roll_modifier
+                    if self.current_min_success > self.current_min_crit_success:
+                        self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+                    message = ""
 
-                risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
-                if self.veteran: #reduce risk if veteran
-                    risk_value -= 1
+                    risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+                    if self.veteran: #reduce risk if veteran
+                        risk_value -= 1
 
-                if risk_value < 0: #0/6 = no risk
-                    message = "RISK: LOW /n /n" + message  
-                elif risk_value == 0: #1/6 death = moderate risk
-                    message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
-                elif risk_value == 1: #2/6 = high risk
-                    message = "RISK: HIGH /n /n" + message
-                elif risk_value > 1: #3/6 or higher = extremely high risk
-                    message = "RISK: DEADLY /n /n" + message
-                
-                notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attempt an exploration to the " + direction + "?", ['exploration', 'stop exploration'],
-                    choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-                self.global_manager.set('ongoing_exploration', True)
-                for current_grid in self.grids:
-                    coordinates = (0, 0)
-                    if current_grid.is_mini_grid:
-                        coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-                    else:
-                        coordinates = (self.x + x_change, self.y + y_change)
-                    input_dict = {}
-                    input_dict['coordinates'] = coordinates
-                    input_dict['grid'] = current_grid
-                    input_dict['image'] = 'misc/exploration_x/' + direction + '_x.png'
-                    input_dict['name'] = 'exploration mark'
-                    input_dict['modes'] = ['strategic']
-                    input_dict['show_terrain'] = False
-                    self.global_manager.get('exploration_mark_list').append(tile(False, input_dict, self.global_manager))
+                    if risk_value < 0: #0/6 = no risk
+                        message = "RISK: LOW /n /n" + message  
+                    elif risk_value == 0: #1/6 death = moderate risk
+                        message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+                    elif risk_value == 1: #2/6 = high risk
+                        message = "RISK: HIGH /n /n" + message
+                    elif risk_value > 1: #3/6 or higher = extremely high risk
+                        message = "RISK: DEADLY /n /n" + message
+                    
+                    notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attempt an exploration to the " + direction + "?", ['exploration', 'stop exploration'],
+                        choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    self.global_manager.set('ongoing_exploration', True)
+                    for current_grid in self.grids:
+                        coordinates = (0, 0)
+                        if current_grid.is_mini_grid:
+                            coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+                        else:
+                            coordinates = (self.x + x_change, self.y + y_change)
+                        input_dict = {}
+                        input_dict['coordinates'] = coordinates
+                        input_dict['grid'] = current_grid
+                        input_dict['image'] = 'misc/exploration_x/' + direction + '_x.png'
+                        input_dict['name'] = 'exploration mark'
+                        input_dict['modes'] = ['strategic']
+                        input_dict['show_terrain'] = False
+                        self.global_manager.get('exploration_mark_list').append(tile(False, input_dict, self.global_manager))
             else:
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally

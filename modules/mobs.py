@@ -78,6 +78,16 @@ class mob(actor):
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
+    def check_if_minister_appointed(self):
+        if not self.controlling_minister == 'none':
+            return(True)
+        else:
+            keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
+            text_tools.print_to_screen("", self.global_manager)
+            text_tools.print_to_screen("You can not do " + keyword + " actions because a " + self.controlling_minister_type + " has not been appointed", self.global_manager)
+            text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", self.global_manager)
+            return(False)
+
     def set_controlling_minister_type(self, new_type):
         self.controlling_minister_type = new_type
         self.update_controlling_minister()

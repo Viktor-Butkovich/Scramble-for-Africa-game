@@ -859,14 +859,11 @@ class trade_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
-                    #if current_cell.has_trading_post():
                         if current_mob.get_inventory('consumer goods') > 0:
-                            #current_mob.set_movement_points(0) have confirmation message to ensure that player wants to trade before using movement points 
-                            current_mob.start_trade()
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_trade()
                         else:
                             text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
-                    #elif current_cell.has_village():
-                    #    text_tools.print_to_screen("This village does not have a trading post to trade in.", self.global_manager)
                     else:
                         text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                 else:
@@ -928,7 +925,8 @@ class convert_button(label_button):
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
                         if current_cell.village.aggressiveness > 1:
-                            current_mob.start_converting()
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_converting()
                         else:
                             text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                     else:
@@ -990,7 +988,8 @@ class religious_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        current_mob.start_religious_campaign()
+                        if current_mob.check_if_minister_appointed():
+                            current_mob.start_religious_campaign()
                     else:
                         text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1119,7 +1118,8 @@ class build_train_button(label_button):
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
-                                        self.construct()
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            self.construct()
                                     else:
                                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
                                 else:
@@ -1325,25 +1325,30 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                 if not self.attached_tile.cell.terrain == 'water':
                                     if self.building_type == 'resource':
                                         if not self.attached_resource == 'none':
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
                                     elif self.building_type == 'port':
                                         if self.attached_mob.adjacent_to_water():
                                             if not self.attached_mob.images[0].current_cell.terrain == 'water':
-                                                self.construct()
+                                                if self.attached_label.actor.check_if_minister_appointed():
+                                                    self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
                                     elif self.building_type == 'train_station':
                                         if self.attached_tile.cell.has_railroad():
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
                                     elif self.building_type == 'infrastructure':
-                                        self.construct()
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            self.construct()
                                     elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                         if self.attached_tile.cell.has_village():
-                                            self.construct()
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
                                 else:

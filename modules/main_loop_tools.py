@@ -143,6 +143,16 @@ def update_display(global_manager):
         pygame.display.update()
         #global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
 
+def check_if_minister_appointed(minister_type, global_manager):
+    if not global_manager.get('current_ministers')[minister_type] == 'none':
+        return(True)
+    else:
+        keyword = global_manager.get('minister_type_dict')[minister_type]
+        text_tools.print_to_screen("", global_manager)
+        text_tools.print_to_screen("You can not do " + keyword + " actions because a " + minister_type + " has not been appointed", global_manager)
+        text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", global_manager)
+        return(False)
+
 def action_possible(global_manager):
     '''
     Description:

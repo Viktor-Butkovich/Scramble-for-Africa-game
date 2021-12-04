@@ -100,6 +100,8 @@ class minister():
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
+        for current_mob in self.global_manager.get('mob_list'):
+            current_mob.update_controlling_minister()
         if not new_position == 'none': #if appointing
             self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
             if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 2:
@@ -114,6 +116,7 @@ class minister():
                 current_minister_type_image.calibrate('none')
         if self.global_manager.get('displayed_minister') == self:
             minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
+        #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob'))
         minister_utility.update_available_minister_display(self.global_manager)
 
     def skill_setup(self):

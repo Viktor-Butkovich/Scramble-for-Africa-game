@@ -3,6 +3,7 @@ ministers
 flavor_minister_names
 save_load_tools imports
 groups.group.set_group_type
+mobs.mob.check_if_minister_appointed
 mobs.mob.set_controlling_minister_type
 mobs.mob.update_controlling_minister
 dice_utility.roll
@@ -11,6 +12,8 @@ actor_display_tools.images.actor_display_background_image changed to tooltip_fre
 actor_display_tools.images.tooltip_free_image description
 images.minister_type_image
 images.tooltip_free_image
+images.warning_image
+images.free_image.set_y
 use driver for porter foreman, evangelist for head missionary
 buttons.switch_game_mode_button
 utility.copy_list
@@ -28,4 +31,6 @@ actor_creation_tools.actor_creation_manager_template.load_minister
 buttons.cycle_available_ministers_button
 actor_display_tools.appoint_minister_button
 actor_display_tools.remove_minister_button
-data_manager.flavor_text_manager_template.generate_minister_name6:38 PM 11/30/2021
+data_manager.flavor_text_manager_template.generate_minister_name
+buttons.button.set_y
+main_loop_tools.check_if_minister_appointed

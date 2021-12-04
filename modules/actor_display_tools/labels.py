@@ -179,7 +179,11 @@ class actor_display_label(label):
             tooltip_text = []
             if not self.actor == 'none':
                 self.actor.update_tooltip()
-                tooltip_text = self.actor.controlling_minister.tooltip_text
+                if not self.actor.controlling_minister == 'none':
+                    tooltip_text = self.actor.controlling_minister.tooltip_text
+                else:
+                    tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
+                                    "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -291,7 +295,7 @@ class actor_display_label(label):
             elif self.actor_label_type == 'minister':
                 if not self.actor.controlling_minister == 'none':
                     self.set_label(self.message_start + self.actor.controlling_minister.name)
-                    self.attached_images[0].calibrate(self.actor.controlling_minister)
+                self.attached_images[0].calibrate(self.actor.controlling_minister)
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)
             elif self.actor_label_type == 'minister_office':
@@ -334,12 +338,9 @@ class actor_display_label(label):
         self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)#self.y
         self.image.Rect = self.Rect    
         for current_button in self.attached_buttons:
-            current_button.y = self.y
-            current_button.Rect.y = self.global_manager.get('display_height') - (current_button.y + current_button.height)
-            current_button.outline.y = current_button.Rect.y - current_button.outline_width
+            current_button.set_y(self)
         for current_image in self.attached_images:
-            current_image.y = self.global_manager.get('display_height') - self.y + self.image_y_displacement
-            current_image.Rect.y = current_image.y - current_image.height + self.image_y_displacement
+            current_image.set_y(self)
 
     def can_show(self):
         '''

@@ -63,6 +63,11 @@ class button():
         self.being_pressed = False
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
 
+    def set_y(self, attached_label): #called by actor display labels to move to their y position
+        self.y = attached_label.y
+        self.Rect.y = self.global_manager.get('display_height') - (attached_label.y + self.height)
+        self.outline.y = self.Rect.y - self.outline_width
+
     def update_tooltip(self):
         '''
         Description:
@@ -526,61 +531,63 @@ class button():
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
-                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'drop all commodity':
-                        num_commodity = displayed_mob.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            can_drop_off = True
-                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                                can_drop_off = False
-                                text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
-                            if can_drop_off:
-                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                                displayed_tile.change_inventory(commodity, num_commodity)
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
-                                    displayed_mob.set_movement_points(0)
-                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                    text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
-                                    text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                        displayed_mob = self.global_manager.get('displayed_mob')
+                        displayed_tile = self.global_manager.get('displayed_tile')
+                        commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                        num_commodity = 1
+                        if self.button_type == 'drop all commodity':
+                            num_commodity = displayed_mob.get_inventory(commodity)
+                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                            if displayed_mob in displayed_tile.cell.contained_mobs:
+                                can_drop_off = True
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                    can_drop_off = False
+                                    text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
+                                if can_drop_off:
+                                    displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                                    displayed_tile.change_inventory(commodity, num_commodity)
+                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                                        displayed_mob.set_movement_points(0)
+                                    if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                        text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                        text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)
+                            else:
+                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
-                    else:
-                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
+                            text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
                 
             elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    displayed_mob = self.global_manager.get('displayed_mob')
-                    displayed_tile = self.global_manager.get('displayed_tile')
-                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
-                    num_commodity = 1
-                    if self.button_type == 'pick up all commodity':
-                        num_commodity = displayed_tile.get_inventory(commodity)
-                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                        if displayed_mob in displayed_tile.cell.contained_mobs:
-                            if displayed_mob.can_hold_commodities:
-                                can_pick_up = True
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                                    can_pick_up = False
-                                    text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
-                                if can_pick_up:
-                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                        displayed_mob.change_inventory(commodity, num_commodity)
-                                        displayed_tile.change_inventory(commodity, -1 * num_commodity)
-                                    else:
-                                        text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                            str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                        displayed_mob = self.global_manager.get('displayed_mob')
+                        displayed_tile = self.global_manager.get('displayed_tile')
+                        commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                        num_commodity = 1
+                        if self.button_type == 'pick up all commodity':
+                            num_commodity = displayed_tile.get_inventory(commodity)
+                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                            if displayed_mob in displayed_tile.cell.contained_mobs:
+                                if displayed_mob.can_hold_commodities:
+                                    can_pick_up = True
+                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                        can_pick_up = False
+                                        text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
+                                    if can_pick_up:
+                                        if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                            displayed_mob.change_inventory(commodity, num_commodity)
+                                            displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                        else:
+                                            text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
+                                                str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                else:
+                                    text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                             else:
-                                text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
+                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
-                    else:
-                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
+                            text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
                 else:
                      text_tools.print_to_screen("You are busy and can not transfer commodities.", self.global_manager)
 
@@ -602,15 +609,16 @@ class button():
                 turn_management_tools.end_turn(self.global_manager)
 
             elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-                commodity_list = self.attached_label.actor.get_held_commodities()
-                commodity = commodity_list[self.attached_label.commodity_index]
-                num_present = self.attached_label.actor.get_inventory(commodity)
-                num_sold = 0
-                if self.button_type == 'sell commodity':
-                    num_sold = 1
-                else:
-                    num_sold = num_present
-                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+                if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+                    commodity_list = self.attached_label.actor.get_held_commodities()
+                    commodity = commodity_list[self.attached_label.commodity_index]
+                    num_present = self.attached_label.actor.get_inventory(commodity)
+                    num_sold = 0
+                    if self.button_type == 'sell commodity':
+                        num_sold = 1
+                    else:
+                        num_sold = num_present
+                    market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
 
             elif self.button_type == 'cycle units':
                 mob_list = self.global_manager.get('mob_list')
