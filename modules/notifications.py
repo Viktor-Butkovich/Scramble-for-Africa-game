@@ -7,7 +7,7 @@ from . import scaling
 
 class notification(multi_line_label):
     '''
-    Label that has multiple lines, prompts the user to click on it, and disappears when clicked
+    Multi-line label that prompts the user to click on it, and disappears when clicked
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
         '''
@@ -26,26 +26,8 @@ class notification(multi_line_label):
         '''
         self.global_manager = global_manager
         self.global_manager.get('notification_list').append(self)
-        #self.ideal_width = ideal_width
-        #self.minimum_height = minimum_height
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.in_notification = True
-
-#    def draw(self):
-#        '''
-#        Description:
-#            Draws this notification and draws its text on top of it
-#        Input:
-#            None
-#        Output:
-#            None
-#        '''
-#        if self.global_manager.get('current_game_mode') in self.modes:
-#            self.image.draw()
-#            for text_line_index in range(len(self.message)):
-#                text_line = self.message[text_line_index]
-#                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
-#                    (self.y + self.height - (text_line_index * self.font_size))))
                 
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
         super().format_message()
@@ -61,21 +43,6 @@ class notification(multi_line_label):
             None
         '''
         self.set_tooltip(["Click to remove this notification"])
-
-    #def set_label(self, new_message):
-    #    '''
-    #    Description:
-    #        Sets each line of this notification's text to the corresponding item in the inputted list, adjusting width and height as needed
-    #    Input:
-    #        string list new_message: New text for this notification, with each item corresponding to a line of text
-    #    Output:
-    #        None
-    #    '''
-    #    self.message = new_message
-    #    self.format_message()
-    #    for text_line in self.message:
-    #        if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
-    #            self.width = text_tools.message_width(text_line, self.font_size, self.font_name)
 
     def on_click(self):
         '''

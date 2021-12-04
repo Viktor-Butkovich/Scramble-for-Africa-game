@@ -169,6 +169,14 @@ class flavor_text_manager_template():
         return(random.choice(self.subject_dict[subject]))
 
     def generate_minister_name(self):
+        '''
+        Description:
+            Generates and returns a random combination of minister first and last names
+        Input:
+            None
+        Output:
+            string: Returns a random combination of minister first and last names
+        '''
         return(self.generate_flavor_text('minister_first_names') + ' ' + self.generate_flavor_text('minister_last_names'))
 
 class value_tracker():

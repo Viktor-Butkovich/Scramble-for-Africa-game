@@ -193,7 +193,7 @@ class actor_display_label(label):
         Description:
             Attaches this label to the inputted actor and updates this label's information based on the inputted actor
         Input:
-            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
         Output:
             None
         '''

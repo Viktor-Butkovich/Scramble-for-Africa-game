@@ -175,14 +175,14 @@ for file_name in os.listdir('graphics/ministers/portraits'):
 global_manager.set('minister_portraits', minister_portraits)
 
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'porter_foreman', 'merchant', 'head_missionary']) #change to driver
+global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'merchant', 'evangelist']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
     'explorer': 'expedition',
     'engineer': 'construction_gang',
-    'porter_foreman': 'porters',
+    'driver': 'porters',
     'merchant': 'caravan',
-    'head_missionary': 'missionaries'
+    'evangelist': 'missionaries'
     }
 )
 
@@ -191,9 +191,9 @@ global_manager.set('officer_minister_dict',
     {
     'explorer': type_minister_dict['exploration'],
     'engineer': type_minister_dict['construction'],
-    'porter_foreman': type_minister_dict['transportation'],
+    'driver': type_minister_dict['transportation'],
     'merchant': type_minister_dict['trade'],
-    'head_missionary': type_minister_dict['religion']
+    'evangelist': type_minister_dict['religion']
     }
 )
 
@@ -379,7 +379,7 @@ right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (
 
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
-    'expand text box', pygame.K_j, ['strategic', 'europe'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
+    'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
 
 instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
@@ -490,7 +490,7 @@ for i in range(0, 3): #0, 1, 2
     global_manager.get('mob_info_display_list').append(current_passenger_label)
 
 #tile background image
-actor_display_current_y = global_manager.get('default_display_height') - 580
+actor_display_current_y = global_manager.get('default_display_height') - (580 + 35)
 global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
 tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager)

@@ -1,17 +1,50 @@
-#from . import ministers
+#Contains miscellaneous functions relating to minister functionality
 
 def check_corruption(minister_type, global_manager):
+    '''
+    Description:
+        Returns whether the minister in the inputted office would lie about the result of a given roll
+    Input:
+        string minister_type: Minister office to check the corruption of, like Minister of Trade
+    Description:
+        boolean: Returns whether the minister in the inputted office would lie about the result of a given roll
+    '''
     return(global_manager.get('current_ministers')[minister_type].check_corruption)
 
 def get_skill_modifier(minister_type, global_manager):
+    '''
+    Description:
+        Returns the skill-based dice roll modifier of the minister in the inputted office
+    Input:
+        string 'minister_type': Minister office to check the corruption of, like Minister of Trade
+    Output:
+        int: Returns the skill-based dice roll modifier of the minister in the inputted office, between -1 and 1
+    '''
     return(global_manager.get('current_ministers')[minister_type].get_skill_modifier)
 
 def calibrate_minister_info_display(global_manager, new_minister):
+    '''
+    Description:
+        Updates all relevant objects to display the inputted minister
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string new_minister: The new minister that is displayed
+    Output:
+        None
+    '''
     global_manager.set('displayed_minister', new_minister)
     for current_object in global_manager.get('minister_info_display_list'):
         current_object.calibrate(new_minister)
 
 def update_available_minister_display(global_manager):
+    '''
+    Description:
+        Updates the display of available ministers to be hired, displaying 3 of them in order based on the current display index
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     available_minister_portrait_list = global_manager.get('available_minister_portrait_list')
     available_minister_left_index = global_manager.get('available_minister_left_index')
     available_minister_list = global_manager.get('available_minister_list')

@@ -79,6 +79,14 @@ class mob(actor):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def check_if_minister_appointed(self):
+        '''
+        Description:
+            Returns whether there is currently an appointed minister to control this unit
+        Input:
+            None
+        Output:
+            boolean: Returns whether there is currently an appointed minister to control this unit
+        '''
         if not self.controlling_minister == 'none':
             return(True)
         else:
@@ -89,10 +97,26 @@ class mob(actor):
             return(False)
 
     def set_controlling_minister_type(self, new_type):
+        '''
+        Description:
+            Sets the type of minister that controls this unit, like "Minister of Trade"
+        Input:
+            Type of minister to control this unit, like "Minister of Trade"
+        Output:
+            None
+        '''
         self.controlling_minister_type = new_type
         self.update_controlling_minister()
 
     def update_controlling_minister(self):
+        '''
+        Description:
+            Sets the minister that controls this unit to the one occupying the office that has authority over this unit
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.controlling_minister_type == 'none':
             self.controlling_minister = 'none'
         else:

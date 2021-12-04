@@ -14,6 +14,7 @@ def roll(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, glo
         int min_crit_success: Minimum value required for the roll to critically succed
         max_crit_fail: Maximum value required for the roll to critically fail
         global_manager_template global_manager: Object that accesses shared variables
+        string/int result = 'none': If value passed, the die will roll to a predetermined result
     Output:
         int: Returns the random value rolled
     '''
@@ -43,6 +44,7 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
         int min_crit_success: Minimum value required for the roll to critically succed
         max_crit_fail: Maximum value required for the roll to critically fail
         global_manager_template global_manager: Object that accesses shared variables
+        string/int result = 'none': If value passed, the die will roll to a predetermined result
     Output:
         int/string list: List representing the roll's outcome, with the first item being the roll's int result and the second item being a string description of the roll
     '''

@@ -222,7 +222,7 @@ class officer(mob):
         '''
         self.remove()
 
-class head_missionary(officer):
+class evangelist(officer):
     '''
     Officer that can start religious campaigns and merge with church volunteers to form missionaries
     '''
@@ -246,7 +246,7 @@ class head_missionary(officer):
         Output:
             None
         '''
-        input_dict['officer_type'] = 'head_missionary'
+        input_dict['officer_type'] = 'evangelist'
         super().__init__(from_save, input_dict, global_manager)
         self.current_roll_modifier = 0
         self.default_min_success = 4
@@ -256,8 +256,8 @@ class head_missionary(officer):
     def start_religious_campaign(self): 
         '''
         Description:
-            Used when the player clicks on the start religious campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and
-            consumes the head missionary's movement points
+            Used when the player clicks on the start religious campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and consumes the evangelist's
+                movement points
         Input:
             None
         Output:
@@ -268,14 +268,11 @@ class head_missionary(officer):
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
         
-        #determine modifier here
-        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
-        
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-        choice_info_dict = {'head missionary': self,'type': 'start religious campaign'}
+        choice_info_dict = {'evangelist': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
         message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native "
         message += "villages. /n /n"
@@ -307,11 +304,11 @@ class head_missionary(officer):
         self.just_promoted = False
         self.set_movement_points(0)
         text = ""
-        text += "The head missionary campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
+        text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
         else:
-            text += ("The veteran head missionary can roll twice and pick the higher result. /n /n")
+            text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
@@ -354,15 +351,15 @@ class head_missionary(officer):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "Inspired by the head missionary's message to save the heathens from their own ignorance, a group of church volunteers joins you. /n /n"
+            text += "Inspired by the evangelist's message to save the heathens from their own ignorance, a group of church volunteers joins you. /n /n"
         else:
-            text += "Whether by a lack of charisma, a reluctant audience, or a doomed cause, the head missionary fails to gather any volunteers. /n /n"
+            text += "Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to gather any volunteers. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "The head missionary is disturbed by the lack of faith of your country's people and decides to abandon your company. /n /n" #actual 'death' occurs when religious campaign completes
+            text += "The evangelist is disturbed by the lack of faith of your country's people and decides to abandon your company. /n /n" #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "With fiery word and true belief in his cause, the head missionary becomes a veteran and will be more successful in future ventures. /n /n"
+            text += "With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n"
         if roll_result >= 4:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_religious_campaign', self.global_manager)
         else:
@@ -372,8 +369,8 @@ class head_missionary(officer):
     def complete_religious_campaign(self):
         '''
         Description:
-            Used when the player finishes rolling for a religious campaign, shows the campaign's results and making any changes caused by the result. If successful, recruits church volunteers, promotes head missionary to a veteran on
-                critical success. If not successful, the head missionary consumes its movement points and dies on critical failure
+            Used when the player finishes rolling for a religious campaign, shows the campaign's results and making any changes caused by the result. If successful, recruits church volunteers, promotes evangelist to a veteran on
+                critical success. If not successful, the evangelist consumes its movement points and dies on critical failure
         Input:
             None
         Output:

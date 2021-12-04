@@ -358,7 +358,7 @@ class merge_button(label_button):
                     for current_selected in selected_list:
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
-                            if officer.officer_type == 'head_missionary': #if head missionary, look for church volunteers
+                            if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
                                 worker = officer.images[0].current_cell.get_church_volunteers()
                             else:
                                 worker = officer.images[0].current_cell.get_worker()
@@ -367,13 +367,13 @@ class merge_button(label_button):
                             #groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                             self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
                         else:
-                            if (not officer == 'none') and officer.officer_type == 'head_missionary':
-                                text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                            if (not officer == 'none') and officer.officer_type == 'evangelist':
+                                text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
                             else:  
                                 text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
-                        if (not officer == 'none') and officer.officer_type == 'head_missionary':
-                            text_tools.print_to_screen("You must select a head missionary in the same tile as church volunteers to create a group.", self.global_manager)
+                        if (not officer == 'none') and officer.officer_type == 'evangelist':
+                            text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
                         else:  
                             text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
@@ -938,7 +938,7 @@ class convert_button(label_button):
 
 class religious_campaign_button(label_button):
     '''
-    Button that commands a head missionary to start a religious campaign in Europe
+    Button that commands an evangelist to start a religious campaign in Europe
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -965,18 +965,18 @@ class religious_campaign_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not a head missionary, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not an evangelist, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'head_missionary')):
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist')):
                 return(False)
         return(result)
 
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a head missionary to start a religious campaign
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands an evangelist to start a religious campaign
         Input:
             None
         Output:
@@ -1385,11 +1385,35 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_mob.start_construction(building_info_dict)
 
 class appoint_minister_button(label_button):
+    '''
+    Button that appoints the selected minister to the office corresponding to this button
+    '''
     def __init__(self, coordinates, width, height, attached_label, appoint_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            string appoint_type: Office that this button appoints ministers to, like "Minister of Trade"
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.appoint_type = appoint_type
         super().__init__(coordinates, width, height, 'appoint minister', 'none', ['ministers'], 'ministers/icons/' + global_manager.get('minister_type_dict')[self.appoint_type] + '.png', attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the minister office that this button is attached to is open, otherwise returns False
+        '''
         if super().can_show():
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and displayed_minister.current_position == 'none': #if there is an available minister displayed
@@ -1398,6 +1422,14 @@ class appoint_minister_button(label_button):
         return(False)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button appoints the selected minister to the office corresponding to this button
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
@@ -1407,10 +1439,33 @@ class appoint_minister_button(label_button):
                 text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
 
 class remove_minister_button(label_button):
+    '''
+    Button that removes the selected minister from their current office
+    '''
     def __init__(self, coordinates, width, height, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'remove minister', 'none', ['ministers'], 'buttons/remove_minister_button.png', attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the selected minister is currently in an office, otherise returns False
+        '''
         if super().can_show():
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and (not displayed_minister.current_position == 'none'): #if there is an available minister displayed
@@ -1418,6 +1473,15 @@ class remove_minister_button(label_button):
         return(False)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
+                ministers
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True

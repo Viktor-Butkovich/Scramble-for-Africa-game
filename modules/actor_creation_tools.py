@@ -50,8 +50,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type == 'ship':
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
-            if init_type == 'head_missionary':
-                new_actor = officers.head_missionary(from_save, input_dict, global_manager)
+            if init_type == 'evangelist':
+                new_actor = officers.evangelist(from_save, input_dict, global_manager)
             else:
                 new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'porters':
@@ -109,11 +109,31 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         return(self.create(False, input_dict, global_manager))
 
     def create_placeholder_ministers(self, global_manager):
-        #for current_minister_type in global_manager.get('minister_types'):
-        #    new_minister = ministers.minister(False, {}, global_manager)
-        #    new_minister.appoint(current_minister_type)
+        '''
+        Description:
+            Creates 10 non-appointed ministers at the start of the game
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         for i in range(0, 10):
             new_minister = ministers.minister(False, {}, global_manager)
 
     def load_minister(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes a minister based on the inputted values
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'name': string value - The minister's name
+                'current_position': string value - Office that the minister is currently occupying, or 'none' if no office occupied
+                'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
+                'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
+                'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
+                'image_id': string value - File path to the image used by the minister
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         new_minister = ministers.minister(True, input_dict, global_manager)

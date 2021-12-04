@@ -77,6 +77,14 @@ class group(mob):
         self.set_group_type('none')
 
     def set_group_type(self, new_type):
+        '''
+        Description:
+            Sets this group's type to the inputted value, determining its capabilities and which minister controls it
+        Input:
+            string new_type: Type to set this group to, like 'missionaries'
+        Output:
+            None
+        '''
         self.group_type = new_type
         if not new_type == 'none':
             self.set_controlling_minister_type(self.global_manager.get('group_minister_dict')[self.group_type])
@@ -260,9 +268,6 @@ class group(mob):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = 0 #construction shouldn't have critical failures
         self.current_min_crit_success = self.default_min_crit_success
-
-        #determine modifier here
-        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
         
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
@@ -453,7 +458,7 @@ class group(mob):
 
 class porters(group):
     '''
-    A group with a porter foreman officer that can hold commodities
+    A group with a driver officer that can hold commodities
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -573,9 +578,6 @@ class caravan(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
-
-        #determine modifier here
-        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
 
         if village.cell.contained_buildings['trading_post'] == 'none': #penalty for no trading post
             self.current_roll_modifier -= 1
@@ -711,9 +713,6 @@ class caravan(group):
         self.current_max_crit_fail = 0 #0 requirement for critical fail means critical fails will not occur
         self.current_min_crit_success = 7 #no critical successes
         
-        #determine modifier here
-        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
-        
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
         if self.current_min_success > self.current_min_crit_success:
@@ -734,11 +733,9 @@ class caravan(group):
         roll_result = 0
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)      
+    
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1]) #7 requirement for crit success - can't promote from trade deal, only willingness to trade roll
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
@@ -796,7 +793,7 @@ class caravan(group):
 
 class missionaries(group):
     '''
-    A group with a head missionary officer and church volunteer workers that can build churches and convert native villages
+    A group with an evangelist officer and church volunteer workers that can build churches and convert native villages
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -862,8 +859,6 @@ class missionaries(group):
             message += "The low population of this village will require less effort to convert /n"
         self.current_roll_modifier += population_modifier
 
-        #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
-
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
@@ -882,7 +877,7 @@ class missionaries(group):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         
-        choice_info_dict = {'head missionary': self,'type': 'start converting'}
+        choice_info_dict = {'evanglist': self,'type': 'start converting'}
         self.current_roll_modifier = 0
         self.global_manager.set('ongoing_conversion', True)
         notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
@@ -906,7 +901,7 @@ class missionaries(group):
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager)
         else:
-            text += ("The veteran head missionary can roll twice and pick the higher result. /n /n")
+            text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
@@ -915,11 +910,9 @@ class missionaries(group):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
-
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)            
+           
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
@@ -960,8 +953,8 @@ class missionaries(group):
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe head missionary has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
-            text += " /nThe head missionary is now a veteran and will be more successful in future ventures. /n"
+            text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
+            text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
         if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
@@ -971,8 +964,8 @@ class missionaries(group):
     def complete_conversion(self):
         '''
         Description:
-            Used when the player finishes rolling for religious conversion, shows the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes head missionary to a
-                veteran on critical success. Missionaries die on critical failure
+            Used when the player finishes rolling for religious conversion, shows the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes evangelist to a veteran on
+                critical success. Missionaries die on critical failure
         Input:
             None
         Output:
@@ -1061,9 +1054,6 @@ class expedition(group):
                     self.current_max_crit_fail = self.default_max_crit_fail
                     self.current_min_crit_success = self.default_min_crit_success
                     
-                    #determine modifier here
-                    #self.current_roll_modifier += self.controlling_minister.get_skill_modifier()
-                    
                     self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
                     self.current_max_crit_fail -= self.current_roll_modifier
                     if self.current_min_success > self.current_min_crit_success:
@@ -1147,11 +1137,9 @@ class expedition(group):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 

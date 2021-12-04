@@ -141,9 +141,16 @@ def update_display(global_manager):
         if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
-        #global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 3)
 
 def check_if_minister_appointed(minister_type, global_manager):
+    '''
+    Description:
+        Checks if there is a minister appointed in the inputted office and prints a warning if there is not one, used to explain why the player can't do an action
+    Input:
+        string minister_type: minister office to check the occupancy of, like "Minister of Trade"
+    Output:
+        boolean: Returns whether there is a minister appointed in the inputted office
+    '''
     if not global_manager.get('current_ministers')[minister_type] == 'none':
         return(True)
     else:
