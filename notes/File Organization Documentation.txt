@@ -187,6 +187,7 @@ SFA folder
             imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
             class group(mobs.mob)
 		class porters
+		class work_crew
 		class construction_gang
 		class caravan
 		class missionaries
@@ -301,7 +302,7 @@ SFA folder
 		imports pygame, modules.labels, buttons, images
 		class actor_display_label(modules.labels.label)
 		    class list_item_label
-		    class building_workers_label
+		    class building_work_crews_label
 		    class native_info_label
 		    class commodity_display_label
 
@@ -321,11 +322,11 @@ SFA folder
 		    class uncrew_vehicle_button
 		    class merge_button
 		    class split_button
-		    class remove_worker_button
+		    class remove_work_crew_button
 		    class disembark_vehicle_button
 		    class embark_vehicle_button
 		    class cycle_passengers_button
-		    class worker_to_building_button
+		    class work_crew_to_building_button
 		    class trade_button
 		    class convert_button
 		    class religious_campaign_button

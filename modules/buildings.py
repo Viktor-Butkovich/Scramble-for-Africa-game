@@ -25,7 +25,7 @@ class building(actor):
                 'name': string value - Required if from save, this building's name
                 'building_type': string value - Type of building, like 'port'
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -40,11 +40,11 @@ class building(actor):
                 self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
         self.global_manager.get('building_list').append(self)
         self.set_name(input_dict['name'])
-        self.worker_capacity = 0 #default
-        self.contained_workers = []
+        self.work_crew_capacity = 0 #default
+        self.contained_work_crews = []
         if from_save:
-            for current_worker in input_dict['contained_workers']:
-                self.global_manager.get('actor_creation_manager').create(True, current_worker, self.global_manager).work_building(self)
+            for current_work_crew in input_dict['contained_work_crews']:
+                self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
@@ -66,14 +66,14 @@ class building(actor):
                 'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
                 'building_type': string value - Type of building, like 'port'
                 'image': string value - File path to the image used by this object
-                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
         '''
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
-        save_dict['contained_workers'] = [] #list of dictionaries for each worker, on load a building creates all of its passengers and embarks them
+        save_dict['contained_work_crews'] = [] #list of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
         save_dict['image'] = self.image_dict['default']
-        for current_worker in self.contained_workers:
-            save_dict['contained_workers'].append(current_worker.to_save_dict())
+        for current_work_crew in self.contained_work_crews:
+            save_dict['contained_work_crews'].append(current_work_crew.to_save_dict())
         return(save_dict)
 
     def remove(self):
@@ -110,14 +110,14 @@ class building(actor):
         '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
-            tooltip_text.append("Worker capacity: " + str(len(self.contained_workers)) + '/' + str(self.worker_capacity))
-            if len(self.contained_workers) == 0:
-                tooltip_text.append("Workers: none")
+            tooltip_text.append("Work crew capacity: " + str(len(self.contained_work_crews)) + '/' + str(self.work_crew_capacity))
+            if len(self.contained_work_crews) == 0:
+                tooltip_text.append("Work crews: none")
             else:
-                tooltip_text.append("Workers: ")
-            for current_worker in self.contained_workers:
-                tooltip_text.append("    " + current_worker.name)
-            tooltip_text.append("Produces 1 unit of " + self.resource_type + " per attached worker per turn")
+                tooltip_text.append("Work crews: ")
+            for current_work_crew in self.contained_work_crews:
+                tooltip_text.append("    " + current_work_crew.name)
+            tooltip_text.append("Produces 1 unit of " + self.resource_type + " per attached work crew per turn")
         elif self.building_type == 'port':
             tooltip_text.append("Allows ships to enter this tile")
         elif self.building_type == 'infrastructure':
@@ -164,7 +164,7 @@ class infrastructure_building(building):
                 'name': string value - Required if from save, this building's name
                 'infrastructure_type': string value - Type of infrastructure, like 'road', or 'railroad'
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -220,7 +220,7 @@ class infrastructure_building(building):
                 'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
                 'building_type': string value - Type of building, like 'infrastructure'
                 'image': string value - File path to the image used by this object
-                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
         '''
         save_dict = super().to_save_dict()
@@ -243,7 +243,7 @@ class trading_post(building):
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -264,7 +264,7 @@ class mission(building):
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -288,7 +288,7 @@ class train_station(building):
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -314,7 +314,7 @@ class port(building):
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this building's name
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -327,7 +327,7 @@ class port(building):
 
 class resource_building(building):
     '''
-    Building in a resource tile that allows workers to attach to this building to produce commodities over time
+    Building in a resource tile that allows work crews to attach to this building to produce commodities over time
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -342,7 +342,7 @@ class resource_building(building):
                 'name': string value - Required if from save, this building's name
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
                 'modes': string list value - Game modes during which this building's images can appear
-                'contained_workers': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -351,7 +351,7 @@ class resource_building(building):
         input_dict['building_type'] = 'resource'
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        self.worker_capacity = 1 #improve with upgrades
+        self.work_crew_capacity = 1 #improve with upgrades
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
@@ -371,7 +371,7 @@ class resource_building(building):
                 'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
                 'building_type': string value - Type of building, like 'infrastructure'
                 'image': string value - File path to the image used by this object
-                'contained_workers': dictionary list value - list of dictionaries of saved information necessary to recreate each worker working in this building
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
         '''
         save_dict = super().to_save_dict()
@@ -393,11 +393,11 @@ class resource_building(building):
     def produce(self):
         '''
         Description:
-            Produces 1 commodity each turn for each worker working in this building
+            Produces 1 commodity each turn for each work crew working in this building
         Input:
             None
         Output:
             None
         '''
-        for current_worker in self.contained_workers:
+        for current_work_crew in self.contained_work_crews:
             self.images[0].current_cell.tile.change_inventory(self.resource_type, 1)

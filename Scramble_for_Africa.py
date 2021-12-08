@@ -175,12 +175,13 @@ for file_name in os.listdir('graphics/ministers/portraits'):
 global_manager.set('minister_portraits', minister_portraits)
 
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'merchant', 'evangelist']) #change to driver
+global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
     'explorer': 'expedition',
     'engineer': 'construction_gang',
     'driver': 'porters',
+    'foreman': 'work_crew',
     'merchant': 'caravan',
     'evangelist': 'missionaries'
     }
@@ -192,6 +193,7 @@ global_manager.set('officer_minister_dict',
     'explorer': type_minister_dict['exploration'],
     'engineer': type_minister_dict['construction'],
     'driver': type_minister_dict['transportation'],
+    'foreman': type_minister_dict['production'],
     'merchant': type_minister_dict['trade'],
     'evangelist': type_minister_dict['religion']
     }
@@ -202,6 +204,7 @@ global_manager.set('group_minister_dict',
     'expedition': type_minister_dict['exploration'],
     'construction_gang': type_minister_dict['construction'],
     'porters': type_minister_dict['transportation'],
+    'work_crew': type_minister_dict['production'],
     'caravan': type_minister_dict['trade'],
     'missionaries': type_minister_dict['religion']
     }
@@ -577,14 +580,14 @@ tile_resource_label = actor_display_labels.actor_display_label(scaling.scale_coo
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
 #tile resource building workers label
-building_workers_label = actor_display_labels.building_workers_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+building_work_crews_label = actor_display_labels.building_work_crews_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
-global_manager.get('tile_info_display_list').append(building_workers_label)
+global_manager.get('tile_info_display_list').append(building_work_crews_label)
 
 for i in range(0, 3): #0, 1, 2
-    building_worker_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    building_work_crew_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
-    global_manager.get('tile_info_display_list').append(building_worker_label)
+    global_manager.get('tile_info_display_list').append(building_work_crew_label)
     #if i == 0: #available workers, at same level as first current worker label
 
 #tile village population label
@@ -631,11 +634,11 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
 
 buy_button_y = 0#140
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
-    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index + 1)), global_manager), scaling.scale_width(100, global_manager),
+    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index)), global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), 'blue', global_manager.get('recruitment_types')[recruitment_index], 'none', ['europe'], global_manager)
 
-new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
-    scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#coordinates, width, height, color, commodity_type, modes, global_manager
+new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1375, buy_button_y, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
+    'consumer goods', ['europe'], global_manager)#coordinates, width, height, color, commodity_type, modes, global_manager
 
 table_width = 400
 table_height = 800

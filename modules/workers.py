@@ -134,37 +134,6 @@ class worker(mob):
         self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
         self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
 
-    def work_building(self, building):
-        '''
-        Description:
-            Orders this worker to work in the inputted building, attaching this worker to the building and allowing the building to function. A resource production building with an attached worker produces a commodity every turn
-        Input:
-            building building: building to which this worker is attached
-        Output:
-            None
-        '''
-        self.in_building = True
-        self.selected = False
-        self.hide_images()
-        building.contained_workers.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.images[0].current_cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
-
-    def leave_building(self, building):
-        '''
-        Description:
-            Orders this worker to stop working in the inputted building, making this worker independent from the building and preventing the building from functioning
-        Input:
-            building building: building to which this worker is no longer attached
-        Output:
-            None
-        '''
-        self.in_building = False
-        self.show_images()
-        building.contained_workers = utility.remove_from_list(building.contained_workers, self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
-        self.select()
-
 class church_volunteers(worker):
     '''
     Worker with no cost that can join with a head missionary to form missionaries, created through religious campaigns

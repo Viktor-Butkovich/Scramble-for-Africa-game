@@ -55,6 +55,7 @@ class mob(actor):
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
+        self.is_work_crew = False
         self.is_group = False
         
         self.max_movement_points = 1

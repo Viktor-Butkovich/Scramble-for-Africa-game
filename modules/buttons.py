@@ -395,7 +395,6 @@ class button():
             return(False)
 
     def can_show_tooltip(self):
-
         '''
         Description:
             Returns whether this button's tooltip can be shown. By default, its tooltip can be shown when it is visible and colliding with the mouse
@@ -867,10 +866,24 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected, otherwise returns same as superclass
         '''
-        if not self.global_manager.get('displayed_tile') == 'none':
+        if (not self.global_manager.get('displayed_tile') == 'none'):
             return(super().can_show())
         else:
             return(False)
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this button's tooltip can be shown. A same tile icon has the the normal requirements for a tooltip to be shown, along with requiring that it is attached to a unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if super().can_show_tooltip():
+            if not self.attached_mob == 'none':
+                return(True)
+        return(False)
                          
     def draw(self):
         '''
