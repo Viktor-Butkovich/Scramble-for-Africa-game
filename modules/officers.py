@@ -211,17 +211,6 @@ class officer(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
-    def die(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups, whose die and remove have different functionality
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.remove()
-
 class evangelist(officer):
     '''
     Officer that can start religious campaigns and merge with church volunteers to form missionaries

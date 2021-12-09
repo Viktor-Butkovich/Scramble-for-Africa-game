@@ -417,6 +417,18 @@ class mob(actor):
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
+    def die(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups/vehicles, whose die and remove have different
+                functionalities
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
+
     def can_leave(self):
         '''
         Description:

@@ -256,6 +256,8 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
+        elif self.button_type == 'fire':
+            self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -666,6 +668,10 @@ class button():
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
+            elif self.button_type == 'fire':
+                fired_unit = self.global_manager.get('displayed_mob')
+                fired_unit.die()
+
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -846,7 +852,7 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if self.can_show() and (not self.is_last):
+        if self.can_show() and (not self.is_last) and (not self.attached_mob == 'none'):
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.showing_outline = True
                 self.attached_mob.select() 
@@ -947,6 +953,42 @@ class same_tile_icon(button):
             else:
                 self.attached_mob.update_tooltip()
                 self.set_tooltip(self.attached_mob.tooltip_text + ["Click to select this unit"])
+
+class fire_unit_button(button):
+    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+        self.attached_mob = 'none'
+        super().__init__(coordinates, width, height, color, 'fire unit', 'none', modes, image_id, global_manager)
+        self.old_contained_mobs = []#selected_list = []
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+                self.showing_outline = True
+                message = "Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game."
+                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+                #self.attached_mob.die()
+            else:
+                text_tools.print_to_screen("You are busy and can not fire a unit", self.global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            if not self.attached_mob == self.global_manager.get('displayed_mob'):
+                self.attached_mob = self.global_manager.get('displayed_mob')
+            if not self.attached_mob == 'none':
+                return(True)
+        return(False)
+
+    def update_tooltip(self):
+        if not self.can_show():
+            self.set_tooltip([])
+        else:
+            tooltip_text = ["Click to fire this unit"]
+            if self.attached_mob.is_group or self.attached_mob.is_worker:
+                tooltip_text.append("Once fired, this unit will cost no longer cost upkeep")
+            elif self.attached_mob.is_vehicle:
+                tooltip_text.append("Firing this unit will also fire all of its passengers.")
+            self.set_tooltip(tooltip_text)
+
 
 class switch_game_mode_button(button):
     '''

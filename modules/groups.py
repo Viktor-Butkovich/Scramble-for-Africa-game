@@ -240,9 +240,9 @@ class group(mob):
         Output:
             None
         '''
-        self.remove()
-        self.officer.remove()
-        self.worker.remove()
+        super().die()
+        self.officer.die()
+        self.worker.die()
 
     def start_construction(self, building_info_dict):
         '''

@@ -60,6 +60,13 @@ class vehicle(mob):
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
+    def die(self):
+        super().die()
+        for current_passenger in self.contained_mobs:
+            current_passenger.die()
+        if not self.crew == 'none':
+            self.crew.die()
+
     def to_save_dict(self):
         '''
         Description:

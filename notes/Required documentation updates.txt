@@ -1,1 +1,3 @@
-none
+buttons.fire_unit_button
+vehicles.vehicle.die
+mobs.mob.die
