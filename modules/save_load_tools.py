@@ -263,5 +263,6 @@ class save_load_manager_template():
             self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
         self.global_manager.set('available_minister_left_index', 0)
         minister_utility.update_available_minister_display(self.global_manager)
+        self.global_manager.get('commodity_prices_label').update_label()
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)

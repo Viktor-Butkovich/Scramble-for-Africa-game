@@ -4,6 +4,7 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
+from .. import game_transitions
 
 class label_button(button):
     '''
@@ -998,6 +999,38 @@ class religious_campaign_button(label_button):
                     text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
+
+class advertising_campaign_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'religious campaign', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('europe_grid') in current_mob.grids:
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        if current_mob.check_if_minister_appointed():
+                            if not self.global_manager.get('current_game_mode') == 'europe':
+                                game_transitions.set_game_mode('europe', self.global_manager)
+                                current_mob.select()
+                            text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
+                            self.global_manager.set('choosing_advertised_commodity', True)
+                            #current_mob.start_religious_campaign()
+                    else:
+                        text_tools.print_to_screen("An advertising campaign requires an entire turn of movement points.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Advertising campaigns are only possible in Europe", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start an advertising campaign.", self.global_manager)
 
 class switch_theatre_button(label_button):
     '''

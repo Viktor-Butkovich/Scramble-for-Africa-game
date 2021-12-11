@@ -129,13 +129,15 @@ class choice_button(button):
         elif button_type == 'stop exploration':
             self.message = 'Do nothing'
             
-        elif button_type == 'start religious campaign':
+        elif button_type == 'start religious campaign' or button_type == 'start advertising campaign':
             self.message = 'Start campaign'
+            if button_type == 'start advertising campaign':
+                self.commodity = self.notification.choice_info_dict['commodity']
 
         elif button_type == 'start converting':
             self.message = 'Convert'
             
-        elif button_type == 'stop religious campaign':
+        elif button_type == 'stop religious campaign' or button_type == 'stop advertising campaign':
             self.message = 'Stop campaign'
             
         elif button_type == 'none':
@@ -204,6 +206,9 @@ class choice_button(button):
 
         elif self.button_type == 'start religious campaign':
             self.set_tooltip(['Start a religious campaign, possibly convincing church volunteers to join you'])
+
+        elif self.button_type == 'start advertising campaign':
+            self.set_tooltip(['Starts an advertising campaign for ' + self.commodity])
 
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])

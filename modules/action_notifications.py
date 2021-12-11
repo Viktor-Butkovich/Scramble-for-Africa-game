@@ -328,6 +328,46 @@ class religious_campaign_notification(notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
+class advertising_campaign_notification(notification):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            current_merchant = actor_utility.get_selected_list(global_manager)[0]
+            self.notification_images = []
+            self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_advertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500,
+                global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            self.notification_images.append(free_image('scenery/resources/plus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500, global_manager),
+                scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
+            self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_unadvertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 300,
+                global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            self.notification_images.append(free_image('scenery/resources/minus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 300, global_manager),
+                scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def format_message(self):
+        super().format_message()
+        self.message.pop(-1)
+
+    def remove(self):
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            self.global_manager.get('advertising_campaign_result')[0].complete_advertising_campaign()
+            
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
+            for current_image in self.notification_images:
+                current_image.remove()
+
 class conversion_notification(notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a religious conversion attempt when the last notification is removed

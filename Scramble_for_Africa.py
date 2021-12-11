@@ -276,10 +276,13 @@ global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
 global_manager.set('choosing_destination_info_dict', {})
+global_manager.set('choosing_advertised_commodity', False)
+global_manager.set('choosing_advertised_commodity_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
+global_manager.set('ongoing_advertising_campaign', False)
 global_manager.set('ongoing_conversion', False)
 global_manager.set('ongoing_construction', False)
 
@@ -613,8 +616,10 @@ commodity_prices_width = 200
 global_manager.set('commodity_prices_label', labels.commodity_prices_label(scaling.scale_coordinates(commodity_prices_x, commodity_prices_y, global_manager), scaling.scale_width(200, global_manager),
     scaling.scale_height(commodity_prices_height, global_manager), ['europe'], 'misc/commodity_prices_label.png', global_manager))
 for current_index in range(len(global_manager.get('commodity_types'))): #commodity prices in Europe
-    new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 35,
-        commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(40, global_manager), scaling.scale_height(40, global_manager), ['europe'], global_manager)
+    #new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 35,
+    #    commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(40, global_manager), scaling.scale_height(40, global_manager), ['europe'], global_manager)
+    new_commodity_button = buttons.commodity_button(scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(30, global_manager),
+        scaling.scale_height(30, global_manager), ['europe'], 'scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', global_manager.get('commodity_types')[current_index], global_manager)
 
 mob_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'mob inventory capacity', 'mob', global_manager)

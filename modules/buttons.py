@@ -55,6 +55,7 @@ class button():
         self.color = self.global_manager.get('color_dict')[color]
         self.outline_width = 2
         self.showing_outline = False
+        self.showing_background = True
         self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
         self.tooltip_text = []
@@ -422,7 +423,8 @@ class button():
         if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
             if self.showing_outline: 
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
+            if self.showing_background:
+                pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
@@ -683,6 +685,10 @@ class button():
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.religious_campaign()
 
+            elif self.button_type == 'start advertising campaign':
+                merchant = self.notification.choice_info_dict['merchant']
+                merchant.advertising_campaign()
+
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.convert()
@@ -700,6 +706,9 @@ class button():
                 
             elif self.button_type == 'stop religious campaign':
                 self.global_manager.set('ongoing_religious_campaign', False)
+
+            elif self.button_type == 'stop advertising campaign':
+                self.global_manager.set('ongoing_advertising_campaign', False)
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
@@ -1201,4 +1210,22 @@ class cycle_available_ministers_button(button):
             self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('available_minister_portrait_list')[1].on_click() #select new middle portrait
+
+class commodity_button(button):
+    def __init__(self, coordinates, width, height, modes, image_id, commodity, global_manager):
+        self.commodity = commodity
+        super().__init__(coordinates, width, height, 'blue', 'commodity selection', 'none', modes, image_id, global_manager)
+        self.showing_background = False
+        self.outline.width = 0
+        self.outline.height = 0
+        self.outline.x = 0
+        self.outline.y = 0
+
+    def on_click(self):
+        if self.global_manager.get('choosing_advertised_commodity'):
+            self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
+            self.global_manager.set('choosing_advertised_commodity', False)
+
+    def can_show_tooltip(self):
+        return(False)
         

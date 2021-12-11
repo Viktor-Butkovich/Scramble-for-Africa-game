@@ -1,4 +1,5 @@
 #Contains functionality for officer units
+import random
 
 from .mobs import mob
 from .tiles import veteran_icon
@@ -6,6 +7,7 @@ from . import actor_utility
 from . import utility
 from . import notification_tools
 from . import text_tools
+from . import market_tools
 from . import dice_utility
 from . import dice
 from . import scaling
@@ -211,6 +213,24 @@ class officer(mob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
+    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
+        '''
+        Description:
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+        Input:
+            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+            int result: Predetermined result that the die will end on after rolling
+            int min_success: Minimum roll required for a success
+            int min_crit_success: Minimum roll required for a critical success
+            int max_crit_fail: Maximum roll required for a critical failure
+        Output:
+            None
+        '''
+        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
+        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)            
+
 class evangelist(officer):
     '''
     Officer that can start religious campaigns and merge with church volunteers to form missionaries
@@ -387,20 +407,122 @@ class evangelist(officer):
             self.die()
         self.global_manager.set('ongoing_religious_campaign', False)
 
-    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
-        '''
-        Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
-        Input:
-            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-            int result: Predetermined result that the die will end on after rolling
-            int min_success: Minimum roll required for a success
-            int min_crit_success: Minimum roll required for a critical success
-            int max_crit_fail: Maximum roll required for a critical failure
-        Output:
-            None
-        '''
-        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+class merchant(officer):
+    def __init__(self, from_save, input_dict, global_manager):
+        input_dict['officer_type'] = 'merchant'
+        super().__init__(from_save, input_dict, global_manager)
+        self.current_roll_modifier = 0
+        self.default_min_success = 4
+        self.default_max_crit_fail = 1
+        self.default_min_crit_success = 6
+
+    def start_advertising_campaign(self, target_commodity): 
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'merchant': self, 'type': 'start advertising campaign', 'commodity': target_commodity}
+        self.global_manager.set('ongoing_advertising_campaign', True)
+        message = "Are you sure you want to start an advertising campaign for " + target_commodity + "? /n /n"
+        risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
+
+        self.current_advertised_commodity = target_commodity
+        self.current_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
+        while (self.current_unadvertised_commodity == 'consumer goods') or (self.current_unadvertised_commodity == self.current_advertised_commodity) or (self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity] == 1):
+            self.current_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
+        notification_tools.display_choice_notification(message, ['start advertising campaign', 'stop advertising campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+    def advertising_campaign(self): #called when start commodity icon clicked
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+        text = ""
+        text += "Merchant campaigns message. /n /n"
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager)
+        else:
+            text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i >= self.current_min_crit_success:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += "Success message. The price of " + self.current_advertised_commodity + " increased by 1 to " + str(self.global_manager.get('commodity_prices')[self.current_advertised_commodity] + 1) + " and the price of "
+            text += self.current_unadvertised_commodity + " decreased by 1 to " + str(self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity] - 1) + ". /n /n"
+        else:
+            text += "Fail message. /n /n"
+        if roll_result <= self.current_max_crit_fail:
+            text += "Crit fail message. /n /n" #actual 'death' occurs when advertising campaign completes
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += "Crit success message. /n /n"
+        if roll_result >= 4:
+            notification_tools.display_notification(text + "Click to remove this notification.", 'final_advertising_campaign', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('advertising_campaign_result', [self, roll_result])
+
+    def complete_advertising_campaign(self):
+        roll_result = self.global_manager.get('advertising_campaign_result')[1]
+        if roll_result >= self.current_min_success: #if campaign succeeded
+            #change prices
+            market_tools.change_price(self.current_advertised_commodity, 1, self.global_manager)
+            market_tools.change_price(self.current_unadvertised_commodity, -1, self.global_manager)
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+            self.select()
+        elif roll_result <= self.current_max_crit_fail:
+            self.die()
+        self.global_manager.set('ongoing_advertising_campaign', False)

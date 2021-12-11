@@ -58,6 +58,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
             self.attached_buttons.append(buttons.religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building worker':

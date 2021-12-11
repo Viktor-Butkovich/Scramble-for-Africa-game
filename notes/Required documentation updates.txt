@@ -1,3 +1,9 @@
 buttons.fire_unit_button
 vehicles.vehicle.die
 mobs.mob.die
+officers.merchant
+officers imports
+actor_display_tools/buttons.advertising_campaign_button
+actor_display_tools/buttons imports
+buttons.commodity_button
+action_notifications.advertising_campaign_notifications
