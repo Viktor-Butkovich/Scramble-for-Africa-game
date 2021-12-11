@@ -175,6 +175,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_religious_campaign'):
         return(False)
+    elif global_manager.get('ongoing_advertising_campaign'):
+        return(False)
     elif global_manager.get('ongoing_conversion'):
         return(False)
     elif global_manager.get('ongoing_construction'):
@@ -184,6 +186,8 @@ def action_possible(global_manager):
     elif not global_manager.get('player_turn'):
         return(False)
     elif global_manager.get('choosing_destination'):
+        return(False)
+    elif global_manager.get('choosing_advertised_commodity'):
         return(False)
     elif global_manager.get('making_choice'):
         return(False)
@@ -382,8 +386,8 @@ def manage_lmb_down(clicked_button, global_manager):
     Output:
         None
     '''
-    if action_possible(global_manager) or global_manager.get('choosing_destination'):
-        if (not clicked_button and (not global_manager.get('choosing_destination'))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
+    if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity'):
+        if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
             mouse_x, mouse_y = pygame.mouse.get_pos()
             selected_new_mob = False
             if (not global_manager.get('capital')):
@@ -443,6 +447,9 @@ def manage_lmb_down(clicked_button, global_manager):
                             text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
             global_manager.set('choosing_destination', False)
             global_manager.set('choosing_destination_info_dict', {})
+        elif (not clicked_button) and global_manager.get('choosing_advertised_commodity'):
+            global_manager.set('choosing_advertised_commodity', False)
+            global_manager.set('choosing_advertised_commodity_info_dict', {})
         elif not clicked_button:
             click_move_minimap(global_manager)
 

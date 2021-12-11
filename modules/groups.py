@@ -240,9 +240,9 @@ class group(mob):
         Output:
             None
         '''
-        self.remove()
-        self.officer.remove()
-        self.worker.remove()
+        super().die()
+        self.officer.die()
+        self.worker.die()
 
     def start_construction(self, building_info_dict):
         '''
@@ -490,6 +490,69 @@ class porters(group):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
+
+class work_crew(group):
+    '''
+    A group with a foreman officer that can work in buildings
+    '''
+    def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(from_save, input_dict, global_manager)
+        self.is_work_crew = True
+        self.set_group_type('work_crew')
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new button available
+
+    def work_building(self, building):
+        '''
+        Description:
+            Orders this work crew to work in the inputted building, attaching this work crew to the building and allowing the building to function. A resource production building with an attached work crew produces a commodity every
+                turn
+        Input:
+            building building: building to which this work crew is attached
+        Output:
+            None
+        '''
+        self.in_building = True
+        self.selected = False
+        self.hide_images()
+        building.contained_work_crews.append(self)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
+
+    def leave_building(self, building):
+        '''
+        Description:
+            Orders this work crew to stop working in the inputted building, making this work crew independent from the building and preventing the building from functioning
+        Input:
+            building building: building to which this work crew is no longer attached
+        Output:
+            None
+        '''
+        self.in_building = False
+        self.show_images()
+        building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
+        self.select()
 
 class construction_gang(group):
     '''

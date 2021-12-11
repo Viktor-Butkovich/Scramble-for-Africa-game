@@ -60,6 +60,21 @@ class vehicle(mob):
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
+    def die(self):
+        '''
+        Description:
+            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Also removes all of this vehicle's passengers
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().die()
+        for current_passenger in self.contained_mobs:
+            current_passenger.die()
+        if not self.crew == 'none':
+            self.crew.die()
+
     def to_save_dict(self):
         '''
         Description:

@@ -46,7 +46,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_b, self.modes, 'buttons/embark_train_button.png', self, 'train', global_manager))
             self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, 'ship', global_manager))
             self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.worker_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'buttons/worker_to_building_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
             self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
@@ -58,12 +58,13 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
             self.attached_buttons.append(buttons.religious_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
             self.attached_building = 'none'
-            self.attached_buttons.append(buttons.remove_worker_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'buttons/remove_worker_button.png', self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.remove_work_crew_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'buttons/remove_work_crew_button.png', self, 'resource', global_manager))
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
             self.attached_buttons.append(buttons.crew_vehicle_button((self.x, self.y), self.height, self.height, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, global_manager))
@@ -241,7 +242,7 @@ class actor_display_label(label):
                 if self.list_type == 'resource building':
                     if not new_actor.cell.contained_buildings['resource'] == 'none':
                         self.attached_building = new_actor.cell.contained_buildings['resource']
-                        self.attached_list = self.attached_building.contained_workers
+                        self.attached_list = self.attached_building.contained_work_crews
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
                     else:
@@ -419,9 +420,9 @@ class list_item_label(actor_display_label):
             return(super().can_show())
         return(False)
 
-class building_workers_label(actor_display_label):
+class building_work_crews_label(actor_display_label):
     '''
-    Label at the top of the list of workers in a building that shows how many workers are in it
+    Label at the top of the list of work crews in a building that shows how many work crews are in it
     '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
         '''
@@ -439,7 +440,7 @@ class building_workers_label(actor_display_label):
         Output:
             None
         '''
-        self.remove_worker_button = 'none'
+        self.remove_work_crew_button = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
         self.attached_building = 'none'
@@ -459,7 +460,7 @@ class building_workers_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.contained_buildings[self.building_type]
             if not self.attached_building == 'none':
-                self.set_label("Workers: " + str(len(self.attached_building.contained_workers)) + '/' + str(self.attached_building.worker_capacity))
+                self.set_label("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.work_crew_capacity))
                 self.showing = True
 
     def can_show(self):

@@ -55,6 +55,7 @@ class mob(actor):
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
+        self.is_work_crew = False
         self.is_group = False
         
         self.max_movement_points = 1
@@ -415,6 +416,18 @@ class mob(actor):
             current_image.remove_from_cell()
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+
+    def die(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups/vehicles, whose die and remove have different
+                functionalities
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
 
     def can_leave(self):
         '''

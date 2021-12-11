@@ -4,6 +4,7 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import text_tools
+from .. import game_transitions
 
 class label_button(button):
     '''
@@ -442,9 +443,9 @@ class split_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
-class remove_worker_button(label_button):
+class remove_work_crew_button(label_button):
     '''
-    Button that removes a worker from a building
+    Button that removes a work crew from a building
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, building_type, global_manager):
         '''
@@ -473,7 +474,7 @@ class remove_worker_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if there is not a corresponding worker to remove, otherwise returns same as superclass
+            boolean: Returns False if there is not a corresponding work crew to remove, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
@@ -484,7 +485,7 @@ class remove_worker_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes a worker from a building
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes a work crew from a building
         Input:
             None
         Output:
@@ -495,7 +496,7 @@ class remove_worker_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.attached_list[self.attached_label.list_index].leave_building(self.attached_label.actor.cell.contained_buildings[self.building_type])
             else:
-                text_tools.print_to_screen("You are busy and can not remove a worker from a building.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not remove a work crew from a building.", self.global_manager)
 
 class disembark_vehicle_button(label_button):
     '''
@@ -700,9 +701,9 @@ class cycle_passengers_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
 
-class worker_to_building_button(label_button):
+class work_crew_to_building_button(label_button):
     '''
-    Button that commands a worker to work in a certain type of building in its tile
+    Button that commands a work crew to work in a certain type of building in its tile
     '''
     def __init__(self, coordinates, width, height, keybind_id, building_type, modes, image_id, attached_label, global_manager):
         '''
@@ -722,7 +723,7 @@ class worker_to_building_button(label_button):
             None
         '''
         self.building_type = building_type
-        self.attached_worker = 'none'
+        self.attached_work_crew = 'none'
         self.attached_building = 'none'
         self.building_type = building_type
         super().__init__(coordinates, width, height, 'worker to resource', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
@@ -736,9 +737,11 @@ class worker_to_building_button(label_button):
         Output:
             None
         '''
-        self.attached_worker = self.attached_label.actor #selected_list[0]
-        if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
-            possible_attached_building = self.attached_worker.images[0].current_cell.contained_buildings[self.building_type]
+        #self.attached_worker = self.attached_label.actor #selected_list[0]
+        self.attached_work_crew = self.attached_label.actor
+        #if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
+        if (not self.attached_work_crew == 'none') and self.attached_work_crew.is_work_crew:
+            possible_attached_building = self.attached_work_crew.images[0].current_cell.contained_buildings[self.building_type]
             if (not possible_attached_building == 'none'): #and building has capacity
                 self.attached_building = possible_attached_building
             else:
@@ -753,12 +756,12 @@ class worker_to_building_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not a worker, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not a work crew, otherwise returns same as superclass
         '''
         result = super().can_show()
         self.update_info()
         if result:
-            if (not self.attached_worker == 'none') and not (self.attached_worker.is_worker and not self.attached_worker.is_church_volunteers): #if selected but not worker, return false
+            if (not self.attached_work_crew == 'none') and not (self.attached_work_crew.is_work_crew): #if selected but not worker, return false
                 return(False)
         return(result)
     
@@ -771,21 +774,21 @@ class worker_to_building_button(label_button):
         Output:
             None
         '''
-        if not (self.attached_worker == 'none' or self.attached_building == 'none'):
+        if not (self.attached_work_crew == 'none' or self.attached_building == 'none'):
             if self.building_type == 'resource':
-                self.set_tooltip(['Assigns the selected worker to the ' + self.attached_building.name + ', producing ' + self.attached_building.resource_type + ' over time.'])
+                self.set_tooltip(['Assigns the selected work crew to the ' + self.attached_building.name + ', producing ' + self.attached_building.resource_type + ' over time.'])
             else:
                 self.set_tooltip(['placeholder'])
-        elif not self.attached_worker == 'none':
+        elif not self.attached_work_crew == 'none':
             if self.building_type == 'resource':
-                self.set_tooltip(['Assigns the selected worker to a resource building, producing resources over time.'])
+                self.set_tooltip(['Assigns the selected work crew to a resource building, producing commodities over time.'])
         else:
             self.set_tooltip(['placeholder'])
 
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a worker to work in a certain type of building in its tile
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a work crew to work in a certain type of building in its tile
         Input:
             None
         Output:
@@ -794,16 +797,16 @@ class worker_to_building_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 if not self.attached_building == 'none':
-                    if self.attached_building.worker_capacity > len(self.attached_building.contained_workers): #if has extra space
+                    if self.attached_building.work_crew_capacity > len(self.attached_building.contained_work_crews): #if has extra space
                         self.showing_outline = True
-                        self.attached_worker.work_building(self.attached_building)
+                        self.attached_work_crew.work_building(self.attached_building)
                     else:
-                        text_tools.print_to_screen("This building is at its worker capacity.", self.global_manager)
-                        text_tools.print_to_screen("Upgrade the building to add more worker capacity.", self.global_manager)
+                        text_tools.print_to_screen("This building is at its work crew capacity.", self.global_manager)
+                        text_tools.print_to_screen("Upgrade the building to add more work crew capacity.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("This worker must be in the same tile as a resource production building to work in it", self.global_manager)
+                    text_tools.print_to_screen("This work crew must be in the same tile as a resource production building to work in it", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not attach a worker to a building.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not attach a work crew to a building.", self.global_manager)
             
 
 class trade_button(label_button):
@@ -997,6 +1000,73 @@ class religious_campaign_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
 
+class advertising_campaign_button(label_button):
+    '''
+    Button that starts advertising campaign commodity selection
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'advertising campaign', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an merchant, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button starts advertising campaign commodity selection, starting an advertising campaign for the selected
+                commodity when one is clicked
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('europe_grid') in current_mob.grids:
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        if current_mob.check_if_minister_appointed():
+                            if not self.global_manager.get('current_game_mode') == 'europe':
+                                game_transitions.set_game_mode('europe', self.global_manager)
+                                current_mob.select()
+                            text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
+                            self.global_manager.set('choosing_advertised_commodity', True)
+                            #current_mob.start_religious_campaign()
+                    else:
+                        text_tools.print_to_screen("An advertising campaign requires an entire turn of movement points.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Advertising campaigns are only possible in Europe", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start an advertising campaign.", self.global_manager)
+
 class switch_theatre_button(label_button):
     '''
     Button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A destination is chosen when the player clicks a tile in another theatre.
@@ -1060,7 +1130,7 @@ class switch_theatre_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.travel_possible): #if selected but not worker, return false
+            if (not self.attached_label.actor.travel_possible): 
                 return(False)
         return(result) 
 
@@ -1097,7 +1167,7 @@ class build_train_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.can_construct): #if selected but not worker, return false
+            if (not self.attached_label.actor.can_construct):
                 return(False)
         return(result)
 

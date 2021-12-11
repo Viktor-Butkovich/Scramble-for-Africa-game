@@ -175,12 +175,13 @@ for file_name in os.listdir('graphics/ministers/portraits'):
 global_manager.set('minister_portraits', minister_portraits)
 
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'merchant', 'evangelist']) #change to driver
+global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
     'explorer': 'expedition',
     'engineer': 'construction_gang',
     'driver': 'porters',
+    'foreman': 'work_crew',
     'merchant': 'caravan',
     'evangelist': 'missionaries'
     }
@@ -192,6 +193,7 @@ global_manager.set('officer_minister_dict',
     'explorer': type_minister_dict['exploration'],
     'engineer': type_minister_dict['construction'],
     'driver': type_minister_dict['transportation'],
+    'foreman': type_minister_dict['production'],
     'merchant': type_minister_dict['trade'],
     'evangelist': type_minister_dict['religion']
     }
@@ -202,6 +204,7 @@ global_manager.set('group_minister_dict',
     'expedition': type_minister_dict['exploration'],
     'construction_gang': type_minister_dict['construction'],
     'porters': type_minister_dict['transportation'],
+    'work_crew': type_minister_dict['production'],
     'caravan': type_minister_dict['trade'],
     'missionaries': type_minister_dict['religion']
     }
@@ -273,10 +276,13 @@ global_manager.set('making_choice', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
 global_manager.set('choosing_destination_info_dict', {})
+global_manager.set('choosing_advertised_commodity', False)
+global_manager.set('choosing_advertised_commodity_info_dict', {})
 
 global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
+global_manager.set('ongoing_advertising_campaign', False)
 global_manager.set('ongoing_conversion', False)
 global_manager.set('ongoing_construction', False)
 
@@ -358,24 +364,24 @@ load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager
 
 
 
-button_start_x = 500#x position of leftmost button
+button_start_x = 650#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
 left_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move left', pygame.K_a, ['strategic', 'europe'], 'buttons/left_button.png', global_manager)
+    'move left', pygame.K_a, ['strategic'], 'buttons/left_button.png', global_manager)
 current_button_number += 1
 
 down_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move down', pygame.K_s, ['strategic', 'europe'], 'buttons/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
+    'move down', pygame.K_s, ['strategic'], 'buttons/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
 
 
 up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move up', pygame.K_w, ['strategic', 'europe'], 'buttons/up_button.png', global_manager)
+    'move up', pygame.K_w, ['strategic'], 'buttons/up_button.png', global_manager)
 current_button_number += 1
 
 right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move right', pygame.K_d, ['strategic', 'europe'], 'buttons/right_button.png', global_manager)
+    'move right', pygame.K_d, ['strategic'], 'buttons/right_button.png', global_manager)
 
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
@@ -389,7 +395,6 @@ save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('
 
 cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
     'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
-
 
 minister_display_top_y = global_manager.get('default_display_height') - 205
 minister_display_current_y = minister_display_top_y
@@ -446,6 +451,9 @@ global_manager.get('mob_info_display_list').append(mob_free_image)
 mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
+
+fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
+    scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
 
 #mob name label
 mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
@@ -577,14 +585,14 @@ tile_resource_label = actor_display_labels.actor_display_label(scaling.scale_coo
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
 #tile resource building workers label
-building_workers_label = actor_display_labels.building_workers_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+building_work_crews_label = actor_display_labels.building_work_crews_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
-global_manager.get('tile_info_display_list').append(building_workers_label)
+global_manager.get('tile_info_display_list').append(building_work_crews_label)
 
 for i in range(0, 3): #0, 1, 2
-    building_worker_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    building_work_crew_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
-    global_manager.get('tile_info_display_list').append(building_worker_label)
+    global_manager.get('tile_info_display_list').append(building_work_crew_label)
     #if i == 0: #available workers, at same level as first current worker label
 
 #tile village population label
@@ -608,8 +616,8 @@ commodity_prices_width = 200
 global_manager.set('commodity_prices_label', labels.commodity_prices_label(scaling.scale_coordinates(commodity_prices_x, commodity_prices_y, global_manager), scaling.scale_width(200, global_manager),
     scaling.scale_height(commodity_prices_height, global_manager), ['europe'], 'misc/commodity_prices_label.png', global_manager))
 for current_index in range(len(global_manager.get('commodity_types'))): #commodity prices in Europe
-    new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 35,
-        commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(40, global_manager), scaling.scale_height(40, global_manager), ['europe'], global_manager)
+    new_commodity_button = buttons.commodity_button(scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(30, global_manager),
+        scaling.scale_height(30, global_manager), ['europe'], 'scenery/resources/large/' + global_manager.get('commodity_types')[current_index] + '.png', global_manager.get('commodity_types')[current_index], global_manager)
 
 mob_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'mob inventory capacity', 'mob', global_manager)
@@ -631,11 +639,11 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
 
 buy_button_y = 0#140
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
-    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index + 1)), global_manager), scaling.scale_width(100, global_manager),
+    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index)), global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), 'blue', global_manager.get('recruitment_types')[recruitment_index], 'none', ['europe'], global_manager)
 
-new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500, buy_button_y, global_manager), scaling.scale_width(100, global_manager),
-    scaling.scale_height(100, global_manager), 'blue', 'consumer goods', ['europe'], global_manager)#coordinates, width, height, color, commodity_type, modes, global_manager
+new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1375, buy_button_y, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
+    'consumer goods', ['europe'], global_manager)#coordinates, width, height, color, commodity_type, modes, global_manager
 
 table_width = 400
 table_height = 800

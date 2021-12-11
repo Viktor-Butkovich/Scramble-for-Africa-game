@@ -55,6 +55,7 @@ class button():
         self.color = self.global_manager.get('color_dict')[color]
         self.outline_width = 2
         self.showing_outline = False
+        self.showing_background = True
         self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
         self.tooltip_text = []
@@ -256,6 +257,8 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
+        elif self.button_type == 'fire':
+            self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -395,7 +398,6 @@ class button():
             return(False)
 
     def can_show_tooltip(self):
-
         '''
         Description:
             Returns whether this button's tooltip can be shown. By default, its tooltip can be shown when it is visible and colliding with the mouse
@@ -421,7 +423,8 @@ class button():
         if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
             if self.showing_outline: 
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-            pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
+            if self.showing_background:
+                pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image
                 message = self.keybind_name
@@ -667,6 +670,10 @@ class button():
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
+            elif self.button_type == 'fire':
+                fired_unit = self.global_manager.get('displayed_mob')
+                fired_unit.die()
+
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -677,6 +684,10 @@ class button():
             elif self.button_type == 'start religious campaign':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.religious_campaign()
+
+            elif self.button_type == 'start advertising campaign':
+                merchant = self.notification.choice_info_dict['merchant']
+                merchant.advertising_campaign()
 
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
@@ -695,6 +706,9 @@ class button():
                 
             elif self.button_type == 'stop religious campaign':
                 self.global_manager.set('ongoing_religious_campaign', False)
+
+            elif self.button_type == 'stop advertising campaign':
+                self.global_manager.set('ongoing_advertising_campaign', False)
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
@@ -847,7 +861,7 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if self.can_show() and (not self.is_last):
+        if self.can_show() and (not self.is_last) and (not self.attached_mob == 'none'):
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.showing_outline = True
                 self.attached_mob.select() 
@@ -867,10 +881,24 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected, otherwise returns same as superclass
         '''
-        if not self.global_manager.get('displayed_tile') == 'none':
+        if (not self.global_manager.get('displayed_tile') == 'none'):
             return(super().can_show())
         else:
             return(False)
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this button's tooltip can be shown. A same tile icon has the the normal requirements for a tooltip to be shown, along with requiring that it is attached to a unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if super().can_show_tooltip():
+            if not self.attached_mob == 'none':
+                return(True)
+        return(False)
                          
     def draw(self):
         '''
@@ -934,6 +962,82 @@ class same_tile_icon(button):
             else:
                 self.attached_mob.update_tooltip()
                 self.set_tooltip(self.attached_mob.tooltip_text + ["Click to select this unit"])
+
+class fire_unit_button(button):
+    '''
+    Button that fires the selected unit, removing it from the game as if it died
+    '''
+    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.attached_mob = 'none'
+        super().__init__(coordinates, width, height, color, 'fire unit', 'none', modes, image_id, global_manager)
+        self.old_contained_mobs = []#selected_list = []
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button fires the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+                self.showing_outline = True
+                message = "Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game."
+                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+                #self.attached_mob.die()
+            else:
+                text_tools.print_to_screen("You are busy and can not fire a unit", self.global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if there is a selected unit, otherwise returns False
+        '''
+        if super().can_show():
+            if not self.attached_mob == self.global_manager.get('displayed_mob'):
+                self.attached_mob = self.global_manager.get('displayed_mob')
+            if not self.attached_mob == 'none':
+                return(True)
+        return(False)
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button describes how firing units works
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.can_show():
+            self.set_tooltip([])
+        else:
+            tooltip_text = ["Click to fire this unit"]
+            if self.attached_mob.is_group or self.attached_mob.is_worker:
+                tooltip_text.append("Once fired, this unit will cost no longer cost upkeep")
+            elif self.attached_mob.is_vehicle:
+                tooltip_text.append("Firing this unit will also fire all of its passengers.")
+            self.set_tooltip(tooltip_text)
 
 class switch_game_mode_button(button):
     '''
@@ -1146,4 +1250,57 @@ class cycle_available_ministers_button(button):
             self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('available_minister_portrait_list')[1].on_click() #select new middle portrait
+
+class commodity_button(button):
+    '''
+    Button appearing near commodity prices label that can be clicked as a target for advertising campaigns
+    '''
+    def __init__(self, coordinates, width, height, modes, image_id, commodity, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string list modes: Game modes during which this button can appear
+            string commodity: Commodity that this button corresponds to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.commodity = commodity
+        super().__init__(coordinates, width, height, 'blue', 'commodity selection', 'none', modes, image_id, global_manager)
+        self.showing_background = False
+        self.outline.width = 0
+        self.outline.height = 0
+        self.outline.x = 0
+        self.outline.y = 0
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. When the player is choosing a target for an advertising campaign, clicking on this button starts an advertising campaign for this button's commodity
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.global_manager.get('choosing_advertised_commodity'):
+            if self.commodity == 'consumer goods':
+                text_tools.print_to_screen("You can not advertise consumer goods.", self.global_manager)
+            else:
+                self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
+                self.global_manager.set('choosing_advertised_commodity', False)
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this button's tooltip can be shown. A commodity button never shows a tooltip
+        Input:
+            None
+        Output:
+            None
+        '''
+        return(False)
         

@@ -52,10 +52,14 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type in global_manager.get('officer_types'):
             if init_type == 'evangelist':
                 new_actor = officers.evangelist(from_save, input_dict, global_manager)
+            elif init_type == 'merchant':
+                new_actor = officers.merchant(from_save, input_dict, global_manager)
             else:
                 new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'porters':
             new_actor = groups.porters(from_save, input_dict, global_manager)
+        elif init_type == 'work_crew':
+            new_actor = groups.work_crew(from_save, input_dict, global_manager)
         elif init_type == 'construction_gang':
             new_actor = groups.construction_gang(from_save, input_dict, global_manager)
         elif init_type == 'caravan':
