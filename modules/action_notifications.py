@@ -329,26 +329,62 @@ class religious_campaign_notification(notification):
                 current_image.remove()
 
 class advertising_campaign_notification(notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of an advertising campaign when the last notification is removed
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last advertising campaign notification. If it is the last, any side images will be removed when it is removed
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
             current_merchant = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_advertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500,
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            self.notification_images.append(free_image('scenery/resources/plus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500, global_manager),
+            self.notification_images.append(free_image('scenery/resources/plus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 600, global_manager),
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
             self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_unadvertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 300,
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            self.notification_images.append(free_image('scenery/resources/minus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 300, global_manager),
+            self.notification_images.append(free_image('scenery/resources/minus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 400, global_manager),
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
     def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
+        Input:
+            none
+        Output:
+            None
+        '''
         super().format_message()
         self.message.pop(-1)
 
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as recruiting a unit, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))

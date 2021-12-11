@@ -408,7 +408,29 @@ class evangelist(officer):
         self.global_manager.set('ongoing_religious_campaign', False)
 
 class merchant(officer):
+    '''
+    Officer that can start advertising campaigns and merge with workers to form a caravan
+    '''
     def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'veteran': boolean value - Required if from save, whether this officer is a veteran
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         input_dict['officer_type'] = 'merchant'
         super().__init__(from_save, input_dict, global_manager)
         self.current_roll_modifier = 0
@@ -416,7 +438,16 @@ class merchant(officer):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
 
-    def start_advertising_campaign(self, target_commodity): 
+    def start_advertising_campaign(self, target_commodity):
+        '''
+        Description:
+            Used when the player clicks on the start advertising campaign button and then clicks a commodity button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign
+                process and consumes the merchant's movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
@@ -428,7 +459,7 @@ class merchant(officer):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'merchant': self, 'type': 'start advertising campaign', 'commodity': target_commodity}
         self.global_manager.set('ongoing_advertising_campaign', True)
-        message = "Are you sure you want to start an advertising campaign for " + target_commodity + "? /n /n"
+        message = "Are you sure you want to start an advertising campaign for " + target_commodity + "? If successful, the price of " + target_commodity + " will increase, decreasing the price of another random commodity. /n /n"
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
@@ -449,11 +480,19 @@ class merchant(officer):
         notification_tools.display_choice_notification(message, ['start advertising campaign', 'stop advertising campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def advertising_campaign(self): #called when start commodity icon clicked
+        '''
+        Description:
+            Controls the advertising campaign process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''  
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
         text = ""
-        text += "Merchant campaigns message. /n /n"
+        text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager)
         else:
@@ -466,7 +505,7 @@ class merchant(officer):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
@@ -498,16 +537,21 @@ class merchant(officer):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "Success message. The price of " + self.current_advertised_commodity + " increased by 1 to " + str(self.global_manager.get('commodity_prices')[self.current_advertised_commodity] + 1) + " and the price of "
-            text += self.current_unadvertised_commodity + " decreased by 1 to " + str(self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity] - 1) + ". /n /n"
+            increase = 1
+            if roll_result >= self.current_min_crit_success:
+                increase += 1
+            advertised_original_price = self.global_manager.get('commodity_prices')[self.current_advertised_commodity]
+            unadvertised_original_price = self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity]
+            text += "The merchant successfully advertised for " + self.current_advertised_commodity + ", increasing its price from " + str(advertised_original_price) + " to "
+            text += str(advertised_original_price + increase) + ". The price of " + self.current_unadvertised_commodity + " decreased from " + str(unadvertised_original_price) + " to " + str(unadvertised_original_price - 1) + ". /n /n"
         else:
-            text += "Fail message. /n /n"
-        if roll_result <= self.current_max_crit_fail:
-            text += "Crit fail message. /n /n" #actual 'death' occurs when advertising campaign completes
+            text += "The merchant failed to increase the popularity of " + self.current_advertised_commodity + ". /n /n"
+        #if roll_result <= self.current_max_crit_fail:
+        #    text += "Crit fail message. /n /n" #can't die from advertising campaign
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "Crit success message. /n /n"
+            text += "The advertising campaign was so successful that the value of " + self.current_advertised_commodity + " increased by 2 instead of 1. /n /n"
         if roll_result >= 4:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_advertising_campaign', self.global_manager)
         else:
@@ -515,14 +559,24 @@ class merchant(officer):
         self.global_manager.set('advertising_campaign_result', [self, roll_result])
 
     def complete_advertising_campaign(self):
+        '''
+        Description:
+            Used when the player finishes rolling for an advertising, shows the campaign's results and making any changes caused by the result. If successful, increases target commodity price and decreases other commodity price,
+                promotes merchant to veteran and increasing more on critical success. If not successful, the evangelist consumes its movement points and dies on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('advertising_campaign_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             #change prices
-            market_tools.change_price(self.current_advertised_commodity, 1, self.global_manager)
+            increase = 1
+            if roll_result >= self.current_min_crit_success:
+                increase += 1
+            market_tools.change_price(self.current_advertised_commodity, increase, self.global_manager)
             market_tools.change_price(self.current_unadvertised_commodity, -1, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()
-        elif roll_result <= self.current_max_crit_fail:
-            self.die()
         self.global_manager.set('ongoing_advertising_campaign', False)

@@ -102,9 +102,10 @@ SFA folder
 	    class save_load_manager_template
 
 	officers.py
-	    imports mobs, tiles, workers, actor_utility, utility, notification_tools, text_tools, dice_utility, dice, scaling
+	    imports mobs, tiles, actor_utility, utility, notification_tools, text_tools, market_tools, dice_utility, dice, scaling
 	    class officer(mobs.mob)
 		class evangelist
+		class merchant
 
         notifications.py
             imports labels, text_tools, utility, scaling
@@ -294,6 +295,7 @@ SFA folder
 	    class exploration_notification(notifications.notification)
 	    class trade_notification_notification(notifications.notification)
 	    class religious_campaign_notification(notifications.notification)
+	    class advertising_campaign_notification(notifications.notification)
     	    class conversion_notification(notifications.notification)
 	    class construction_notification(notifications.notification)
 
@@ -314,7 +316,7 @@ SFA folder
 		class label_image(modules.images.free_image)
 
 	    buttons.py
-		imports modules.buttons, modules.main_loop_tools, modules.actor_utility, modules.text_tools, modules.groups
+		imports modules.buttons, modules.main_loop_tools, modules.actor_utility, modules.text_tools, modules.game_transitions
 	        class label_button(modules.buttons.button)
 		    class worker_crew_vehicle_button
 		    class pick_up_all_passengers_button
@@ -330,6 +332,7 @@ SFA folder
 		    class trade_button
 		    class convert_button
 		    class religious_campaign_button
+		    class advertising_campaign_button
 		    class switch_theatre_button
 		    class build_train_button
 		    class construction_button

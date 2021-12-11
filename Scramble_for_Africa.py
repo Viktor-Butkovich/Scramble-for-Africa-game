@@ -364,24 +364,24 @@ load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager
 
 
 
-button_start_x = 500#x position of leftmost button
+button_start_x = 650#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
 left_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move left', pygame.K_a, ['strategic', 'europe'], 'buttons/left_button.png', global_manager)
+    'move left', pygame.K_a, ['strategic'], 'buttons/left_button.png', global_manager)
 current_button_number += 1
 
 down_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move down', pygame.K_s, ['strategic', 'europe'], 'buttons/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
+    'move down', pygame.K_s, ['strategic'], 'buttons/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
 
 
 up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move up', pygame.K_w, ['strategic', 'europe'], 'buttons/up_button.png', global_manager)
+    'move up', pygame.K_w, ['strategic'], 'buttons/up_button.png', global_manager)
 current_button_number += 1
 
 right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-    'move right', pygame.K_d, ['strategic', 'europe'], 'buttons/right_button.png', global_manager)
+    'move right', pygame.K_d, ['strategic'], 'buttons/right_button.png', global_manager)
 
 
 expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
@@ -616,10 +616,8 @@ commodity_prices_width = 200
 global_manager.set('commodity_prices_label', labels.commodity_prices_label(scaling.scale_coordinates(commodity_prices_x, commodity_prices_y, global_manager), scaling.scale_width(200, global_manager),
     scaling.scale_height(commodity_prices_height, global_manager), ['europe'], 'misc/commodity_prices_label.png', global_manager))
 for current_index in range(len(global_manager.get('commodity_types'))): #commodity prices in Europe
-    #new_commodity_image = images.free_image('scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', scaling.scale_coordinates(commodity_prices_x - 35,
-    #    commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(40, global_manager), scaling.scale_height(40, global_manager), ['europe'], global_manager)
     new_commodity_button = buttons.commodity_button(scaling.scale_coordinates(commodity_prices_x - 35, commodity_prices_y + commodity_prices_height - 65 - (30 * current_index), global_manager), scaling.scale_width(30, global_manager),
-        scaling.scale_height(30, global_manager), ['europe'], 'scenery/resources/' + global_manager.get('commodity_types')[current_index] + '.png', global_manager.get('commodity_types')[current_index], global_manager)
+        scaling.scale_height(30, global_manager), ['europe'], 'scenery/resources/large/' + global_manager.get('commodity_types')[current_index] + '.png', global_manager.get('commodity_types')[current_index], global_manager)
 
 mob_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'mob inventory capacity', 'mob', global_manager)
