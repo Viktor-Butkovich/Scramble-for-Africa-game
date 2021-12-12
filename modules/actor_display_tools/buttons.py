@@ -701,6 +701,37 @@ class cycle_passengers_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
 
+class cycle_work_crews_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'cycle work crews', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.cell.contained_buildings['resource']:
+                return(False)
+            elif not len(self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews) > 3: #only show if building with 3+ work crews
+                return(False)
+        return(result)
+    
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the order of passengers displayed in a vehicle
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                moved_mob = self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.pop(0)
+                self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_label.actor) #updates tile info display list to show changed work crew order
+            else:
+                text_tools.print_to_screen("You are busy and can not cycle work crews.", self.global_manager)
+
 class work_crew_to_building_button(label_button):
     '''
     Button that commands a work crew to work in a certain type of building in its tile
@@ -797,12 +828,12 @@ class work_crew_to_building_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 if not self.attached_building == 'none':
-                    if self.attached_building.work_crew_capacity > len(self.attached_building.contained_work_crews): #if has extra space
+                    if self.attached_building.scale > len(self.attached_building.contained_work_crews): #if has extra space
                         self.showing_outline = True
                         self.attached_work_crew.work_building(self.attached_building)
                     else:
                         text_tools.print_to_screen("This building is at its work crew capacity.", self.global_manager)
-                        text_tools.print_to_screen("Upgrade the building to add more work crew capacity.", self.global_manager)
+                        text_tools.print_to_screen("Upgrade the building's scale to increase work crew capacity.", self.global_manager)
                 else:
                     text_tools.print_to_screen("This work crew must be in the same tile as a resource production building to work in it", self.global_manager)
             else:

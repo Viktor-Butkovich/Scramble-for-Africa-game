@@ -186,6 +186,15 @@ class actor_display_label(label):
                     tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
                                     "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'building workers':
+            tooltip_text = [self.message]
+            tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang.")
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'building productivity':
+            tooltip_text = [self.message]
+            tooltip_text.append("Each work crew attached to this building can produce up to the building productivity in commodities each turn.")
+            tooltip_text.append("Increase work crew productivity by upgrading the building's efficiency with a construction gang.")
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -441,10 +450,11 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
+        self.showing = False
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
         self.attached_building = 'none'
-        self.showing = False
+        #self.showing = False
 
     def calibrate(self, new_actor):
         '''
@@ -460,7 +470,7 @@ class building_work_crews_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.contained_buildings[self.building_type]
             if not self.attached_building == 'none':
-                self.set_label("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.work_crew_capacity))
+                self.set_label("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 self.showing = True
 
     def can_show(self):
@@ -472,6 +482,30 @@ class building_work_crews_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
         '''
+        if self.showing:
+            return(super().can_show())
+        else:
+            return(False)
+
+class building_productivity_label(actor_display_label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+        self.remove_work_crew_button = 'none'
+        self.showing = False
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building productivity', actor_type, global_manager)
+        self.building_type = building_type
+        self.attached_building = 'none'
+        #self.showing = False
+
+    def calibrate(self, new_actor):
+        self.actor = new_actor
+        self.showing = False
+        if not new_actor == 'none':
+            self.attached_building = new_actor.cell.contained_buildings[self.building_type]
+            if not self.attached_building == 'none':
+                self.set_label("Productivity: " + str(self.attached_building.efficiency))
+                self.showing = True
+
+    def can_show(self):
         if self.showing:
             return(super().can_show())
         else:

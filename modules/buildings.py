@@ -351,7 +351,8 @@ class resource_building(building):
         input_dict['building_type'] = 'resource'
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        self.work_crew_capacity = 1 #improve with upgrades
+        self.scale = 1
+        self.efficiency = 1
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
@@ -390,6 +391,15 @@ class resource_building(building):
         self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
         super().remove()
 
+    def can_upgrade(self, upgrade_type):
+        if upgrade_type == 'scale': #quantitative
+            if self.scale < 6:
+                return(True)
+        elif upgrade_type == 'efficiency':
+            if self.efficiency < 6:
+                return(True)
+        return(False)
+
     def produce(self):
         '''
         Description:
@@ -400,4 +410,6 @@ class resource_building(building):
             None
         '''
         for current_work_crew in self.contained_work_crews:
-            self.images[0].current_cell.tile.change_inventory(self.resource_type, 1)
+            for current_index in range(self.efficiency):
+                #if current_work_crew.
+                self.images[0].current_cell.tile.change_inventory(self.resource_type, 1)

@@ -584,12 +584,17 @@ tile_resource_label = actor_display_labels.actor_display_label(scaling.scale_coo
     scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
+#tile resource building productivity label
+building_productivity_label = actor_display_labels.building_productivity_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
+global_manager.get('tile_info_display_list').append(building_productivity_label)
+
 #tile resource building workers label
 building_work_crews_label = actor_display_labels.building_work_crews_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(building_work_crews_label)
 
-for i in range(0, 3): #0, 1, 2
+for i in range(0, 3): #3 labels
     building_work_crew_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, global_manager
     global_manager.get('tile_info_display_list').append(building_work_crew_label)

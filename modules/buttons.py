@@ -197,7 +197,7 @@ class button():
                 self.set_tooltip(['none'])
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
-                self.set_tooltip(["Detaches 1 worker from this " + self.attached_label.attached_building.name])
+                self.set_tooltip(["Detaches this work crew from the " + self.attached_label.attached_building.name])
             else:
                 self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
@@ -223,6 +223,13 @@ class button():
             if self.can_show():
                 for current_passenger in self.attached_label.actor.contained_mobs:
                     tooltip_text.append("    " + current_passenger.name)
+            self.set_tooltip(tooltip_text)
+        elif self.button_type == 'cycle work crews':
+            tooltip_text = ["Cycles through this  building's work crews"]
+            tooltip_text.append("Work crews: " )
+            if self.can_show():
+                for current_work_crew in self.attached_label.actor.cell.contained_buildings['resource'].contained_mobs:
+                    tooltip_text.append("    " + current_work_crew.name)
             self.set_tooltip(tooltip_text)
         elif self.button_type == 'cycle tile mobs':
             tooltip_text = ["Cycles through this tile's units"]
