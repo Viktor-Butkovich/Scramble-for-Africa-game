@@ -554,6 +554,20 @@ class work_crew(group):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
         self.select()
 
+    def attempt_production(self, building):
+        for current_attempt in range(building.efficiency):
+            if self.veteran:
+                results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice
+                roll_result = max(results[0], results[1])
+            else:
+                roll_result = self.controlling_minister.roll(6, 4, 0)
+                
+            if roll_result >= 4: #4+ required on D6 for exploration
+                building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
+
+            if (not self.veteran) and roll_result >= 6:
+                self.promote()
+
 class construction_gang(group):
     '''
     A group with an engineer officer that is able to construct buildings and trains

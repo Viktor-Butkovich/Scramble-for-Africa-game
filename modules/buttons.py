@@ -228,7 +228,7 @@ class button():
             tooltip_text = ["Cycles through this  building's work crews"]
             tooltip_text.append("Work crews: " )
             if self.can_show():
-                for current_work_crew in self.attached_label.actor.cell.contained_buildings['resource'].contained_mobs:
+                for current_work_crew in self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews:
                     tooltip_text.append("    " + current_work_crew.name)
             self.set_tooltip(tooltip_text)
         elif self.button_type == 'cycle tile mobs':
@@ -618,8 +618,16 @@ class button():
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
-                    choice_info_dict = {'type': 'end turn'}
-                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    stopping = False
+                    for current_position in self.global_manager.get('minister_types'):
+                        if self.global_manager.get("current_ministers")[current_position] == 'none':
+                            stopping = True
+                    if stopping:
+                        text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
+                    else:
+                        choice_info_dict = {'type': 'end turn'}
+                        notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)
     
@@ -1297,8 +1305,16 @@ class commodity_button(button):
             if self.commodity == 'consumer goods':
                 text_tools.print_to_screen("You can not advertise consumer goods.", self.global_manager)
             else:
-                self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
-                self.global_manager.set('choosing_advertised_commodity', False)
+                can_advertise = False
+                for current_commodity in self.global_manager.get('collectable_resources'):
+                    if (not current_commodity == self.commodity) and self.global_manager.get('commodity_prices')[current_commodity] > 1:
+                        can_advertise = True
+                        break
+                if can_advertise:
+                    self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
+                    self.global_manager.set('choosing_advertised_commodity', False)
+                else:
+                    text_tools.print_to_screen("You can not advertise " + self.commodity + " because all other commodities are already at the minimum price.", self.global_manager)
 
     def can_show_tooltip(self):
         '''

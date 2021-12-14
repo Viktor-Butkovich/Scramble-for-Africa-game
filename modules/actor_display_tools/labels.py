@@ -61,6 +61,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
+        elif self.actor_label_type == 'building workers':
+            self.message_start = 'Work crews: '
+            self.attached_buttons.append(buttons.cycle_work_crews_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
             self.attached_building = 'none'
@@ -189,6 +192,12 @@ class actor_display_label(label):
         elif self.actor_label_type == 'building workers':
             tooltip_text = [self.message]
             tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang.")
+            if (not self.attached_building == 'none'):
+                tooltip_text.append("Work crews: ")
+                for current_work_crew in self.attached_building.contained_work_crews:
+                    tooltip_text.append("    " + current_work_crew.name.capitalize())
+                if len(self.attached_building.contained_work_crews) == 0:
+                    tooltip_text[-1] += 'none'
             self.set_tooltip(tooltip_text)
         elif self.actor_label_type == 'building productivity':
             tooltip_text = [self.message]
@@ -451,9 +460,9 @@ class building_work_crews_label(actor_display_label):
         '''
         self.remove_work_crew_button = 'none'
         self.showing = False
+        self.attached_building = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
-        self.attached_building = 'none'
         #self.showing = False
 
     def calibrate(self, new_actor):
@@ -470,7 +479,7 @@ class building_work_crews_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.contained_buildings[self.building_type]
             if not self.attached_building == 'none':
-                self.set_label("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
+                self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 self.showing = True
 
     def can_show(self):

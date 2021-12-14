@@ -703,15 +703,22 @@ class cycle_passengers_button(label_button):
 
 class cycle_work_crews_button(label_button):
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.previous_showing_result = False
         super().__init__(coordinates, width, height, 'cycle work crews', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
         result = super().can_show()
         if result:
-            if not self.attached_label.actor.cell.contained_buildings['resource']:
+            if self.attached_label.actor.cell.contained_buildings['resource'] == 'none':
+                self.previous_showing_result = False
                 return(False)
             elif not len(self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews) > 3: #only show if building with 3+ work crews
+                self.previous_showing_result = False
                 return(False)
+        if self.previous_showing_result == False and result == True:
+            self.previous_showing_result = result
+            self.attached_label.set_label(self.attached_label.message) #update label to update this button's location
+        self.previous_showing_result = result
         return(result)
     
     def on_click(self):

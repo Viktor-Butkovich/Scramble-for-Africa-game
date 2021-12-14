@@ -349,10 +349,10 @@ class resource_building(building):
         '''
         self.resource_type = input_dict['resource_type']
         input_dict['building_type'] = 'resource'
-        super().__init__(from_save, input_dict, global_manager)
-        global_manager.get('resource_building_list').append(self)
         self.scale = 1
         self.efficiency = 1
+        super().__init__(from_save, input_dict, global_manager)
+        global_manager.get('resource_building_list').append(self)
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
 
@@ -401,15 +401,5 @@ class resource_building(building):
         return(False)
 
     def produce(self):
-        '''
-        Description:
-            Produces 1 commodity each turn for each work crew working in this building
-        Input:
-            None
-        Output:
-            None
-        '''
         for current_work_crew in self.contained_work_crews:
-            for current_index in range(self.efficiency):
-                #if current_work_crew.
-                self.images[0].current_cell.tile.change_inventory(self.resource_type, 1)
+            current_work_crew.attempt_production(self)
