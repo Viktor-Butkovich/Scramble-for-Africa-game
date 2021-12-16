@@ -513,7 +513,9 @@ class mob(actor):
             else:
                 self.embark_vehicle(vehicle)
             vehicle.select()
-
+        if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        
     def touching_mouse(self):
         '''
         Description:

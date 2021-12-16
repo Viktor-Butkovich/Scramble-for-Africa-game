@@ -317,6 +317,7 @@ class group(mob):
         Output:
             None
         '''
+        self.current_construction_type = 'default'
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
@@ -380,8 +381,7 @@ class group(mob):
             notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])
-        
+        self.global_manager.set('construction_result', [self, roll_result])  
 
         
     def complete_construction(self):
@@ -436,6 +436,7 @@ class group(mob):
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
         self.global_manager.set('ongoing_construction', False)
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
@@ -598,6 +599,112 @@ class construction_gang(group):
         self.set_group_type('construction_gang')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
+
+    def start_upgrade(self, building_info_dict):
+        self.upgrade_type = building_info_dict['upgrade_type']
+        self.building_name = building_info_dict['building_name']
+        self.upgraded_building = building_info_dict['upgraded_building']
+        
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'constructor': self, 'type': 'start upgrade'}
+        self.global_manager.set('ongoing_construction', True)
+        message = "Are you sure you want to start upgrading the " + self.building_name + "'s " + self.upgrade_type + "? /n /n"
+        message += "The planning and materials will cost " + str(self.upgraded_building.get_upgrade_cost()) + " money.  Each upgrade to a building increases the cost of all future upgrades for that building. /n /n"
+        if self.upgrade_type == 'efficiency':
+            message += "If successful, each work crew attached to this " + self.building_name + " will be able to make an additional attempt to produce commodities each turn."
+        elif self.upgrade_type == 'scale':
+            message += "If successful, the maximum number of work crews able to be attached to this " + self.building_name + " will increase by 1"
+        else:
+            message += "Placeholder upgrade description"
+        message += " /n /n"
+            
+        notification_tools.display_choice_notification(message, ['start upgrade', 'stop upgrade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+    def upgrade(self):
+        self.current_construction_type = 'upgrade'
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.upgraded_building.get_upgrade_cost() * -1)
+        text = ""
+        text += "The " + self.name + " attempts to upgrade the " + self.building_name + "'s " + self.upgrade_type + ". /n /n"
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager)
+        else:
+            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+
+            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i >= self.current_min_crit_success:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager)
+            
+        text += "/n"
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += "The " + self.name + " successfully upgraded the " + self.building_name + "'s " + self.upgrade_type + ". /n"
+        else:
+            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the upgrade. /n"
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
+        if roll_result >= 4:
+            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('construction_result', [self, roll_result])  
+
+        
+    def complete_upgrade(self):
+        roll_result = self.global_manager.get('construction_result')[1]
+        if roll_result >= self.current_min_success: #if campaign succeeded
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+            self.set_movement_points(0)
+            self.upgraded_building.upgrade(self.upgrade_type)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show building upgrade
+        self.global_manager.set('ongoing_construction', False)
 
 class caravan(group):
     '''

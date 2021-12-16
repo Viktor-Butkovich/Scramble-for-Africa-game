@@ -517,7 +517,10 @@ class construction_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
-            self.global_manager.get('construction_result')[0].complete_construction()
-            
+            if self.global_manager.get('construction_result')[0].current_construction_type == 'default':
+                self.global_manager.get('construction_result')[0].complete_construction()
+            elif self.global_manager.get('construction_result')[0].current_construction_type == 'upgrade':
+                self.global_manager.get('construction_result')[0].complete_upgrade()
+    
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])

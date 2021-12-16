@@ -351,10 +351,16 @@ class resource_building(building):
         input_dict['building_type'] = 'resource'
         self.scale = 1
         self.efficiency = 1
+        self.num_upgrades = 0
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
         for current_image in self.images:
             current_image.current_cell.tile.inventory_capacity += 9
+        if from_save:
+            while self.scale < input_dict['scale']:
+                self.upgrade('scale')
+            while self.efficiency < input_dict['efficiency']:
+                self.upgrade('efficiency')
 
     def to_save_dict(self):
         '''
@@ -377,6 +383,8 @@ class resource_building(building):
         '''
         save_dict = super().to_save_dict()
         save_dict['resource_type'] = self.resource_type
+        save_dict['scale'] = self.scale
+        save_dict['efficiency'] = self.efficiency
         return(save_dict)
 
     def remove(self):
@@ -400,6 +408,16 @@ class resource_building(building):
                 return(True)
         return(False)
 
+    def upgrade(self, upgrade_type):
+        if upgrade_type == 'scale':
+            self.scale += 1
+        elif upgrade_type == 'efficiency':
+            self.efficiency += 1
+        self.num_upgrades += 1
+
+    def get_upgrade_cost(self):
+        return(2 * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+    
     def produce(self):
         for current_work_crew in self.contained_work_crews:
             current_work_crew.attempt_production(self)

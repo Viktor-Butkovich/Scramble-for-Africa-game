@@ -1360,8 +1360,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 can_create = self.attached_label.actor.can_trade
             elif self.requirement == 'can_convert':
                 can_create = self.attached_label.actor.can_convert
-            if (not can_create): #show if unit selected can create this building
+            if not can_create: #show if unit selected can create this building
                 return(False)
+            if not self.attached_tile == 'none':
+                if (not self.attached_tile.cell.contained_buildings[self.building_type] == 'none') and not self.building_type == 'infrastructure': #if building already present, do not show
+                    return(False)
         return(result) 
 
     def update_tooltip(self):
@@ -1491,6 +1494,90 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         if self.building_type == 'resource':
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
+
+class upgrade_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, base_building_type, upgrade_type, global_manager): #base_building_type = 'resource', upgrade_type = 'efficiency'
+        self.base_building_type = base_building_type
+        self.upgrade_type = upgrade_type
+        self.attached_mob = 'none'
+        self.attached_tile = 'none'
+        self.attached_building = 'none'
+        image_id = 'buttons/upgrade_' + self.upgrade_type + '_button.png'
+        super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+
+    def update_info(self):
+        '''
+        Description:
+            Updates the exact kind of building constructed by this button depending on what is in the selected mob's tile, like building a road or upgrading a previously constructed road to a railroad
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.attached_mob = self.attached_label.actor #new_attached_mob
+        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+            self.attached_tile = self.attached_mob.images[0].current_cell.tile
+            if self.attached_mob.can_construct:
+                if not self.attached_tile.cell.contained_buildings[self.base_building_type] == 'none':
+                    self.attached_building = self.attached_tile.cell.contained_buildings[self.base_building_type]
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            self.update_info()
+            if (not self.attached_label.actor.can_construct): #show if unit selected can create this building
+                return(False)
+            if self.attached_building == 'none' or not self.attached_building.can_upgrade(self.upgrade_type):
+                return(False)
+        return(result) 
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on the type of building it constructs
+        Input:
+            None
+        Output:
+            None
+        '''
+        message = []
+        if not self.attached_building == 'none':
+            if self.upgrade_type == 'scale':
+                message.append("Increases the maximum number of work crews that can be attached to this " + self.attached_building.name + " from " + str(self.attached_building.scale) + " to " + str(self.attached_building.scale + 1) + ".")
+            elif self.upgrade_type == 'efficiency':
+                message.append("Increases the number of " + self.attached_building.resource_type + " production attempts made by work crews attached to this " + self.attached_building.name + " from " + str(self.attached_building.efficiency) + " to " + str(self.attached_building.efficiency + 1) + " per turn.")
+            else:
+                message.append('placeholder')
+            message.append('Attempting to upgrade costs ' + str(self.attached_building.get_upgrade_cost()) + ' money and increases with each future upgrade to this building.')
+        self.set_tooltip(message)
+        
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.attached_building.get_upgrade_cost():
+                        building_info_dict = {}
+                        building_info_dict['upgrade_type'] = self.upgrade_type
+                        building_info_dict['building_name'] = self.attached_building.name
+                        building_info_dict['upgraded_building'] = self.attached_building
+                        self.attached_mob.start_upgrade(building_info_dict)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.attached_building.get_upgrade_cost()) + " money needed to upgrade this building.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough movement points to upgrade a building.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start upgrading.", self.global_manager)
 
 class appoint_minister_button(label_button):
     '''

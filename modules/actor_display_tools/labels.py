@@ -49,6 +49,8 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
             self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height, pygame.K_k, self.modes, self, 'resource', 'scale', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height, pygame.K_l, self.modes, self, 'resource', 'efficiency', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
@@ -199,10 +201,10 @@ class actor_display_label(label):
                 if len(self.attached_building.contained_work_crews) == 0:
                     tooltip_text[-1] += 'none'
             self.set_tooltip(tooltip_text)
-        elif self.actor_label_type == 'building productivity':
+        elif self.actor_label_type == 'building efficiency':
             tooltip_text = [self.message]
-            tooltip_text.append("Each work crew attached to this building can produce up to the building productivity in commodities each turn.")
-            tooltip_text.append("Increase work crew productivity by upgrading the building's efficiency with a construction gang.")
+            tooltip_text.append("Each work crew attached to this building can produce up to the building efficiency in commodities each turn.")
+            tooltip_text.append("Increase work crew efficiency by upgrading the building's efficiency with a construction gang.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -496,11 +498,11 @@ class building_work_crews_label(actor_display_label):
         else:
             return(False)
 
-class building_productivity_label(actor_display_label):
+class building_efficiency_label(actor_display_label):
     def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
         self.remove_work_crew_button = 'none'
         self.showing = False
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building productivity', actor_type, global_manager)
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building efficiency', actor_type, global_manager)
         self.building_type = building_type
         self.attached_building = 'none'
         #self.showing = False
@@ -511,7 +513,7 @@ class building_productivity_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.contained_buildings[self.building_type]
             if not self.attached_building == 'none':
-                self.set_label("Productivity: " + str(self.attached_building.efficiency))
+                self.set_label("Efficiency: " + str(self.attached_building.efficiency))
                 self.showing = True
 
     def can_show(self):
