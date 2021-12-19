@@ -8,3 +8,7 @@ actor_display_tools/upgrade_button
 actor_display_tools/labels.building_productivity_label changed to efficiency
 turn_management_tools.manage_production
 turn_management_tools imports
+villages.village.recruit_worker
+groups.caravan.complete_trade
+villages.village.change_available_workers
+actor_display_tools.buttons.hire_village_workers_button

@@ -53,6 +53,18 @@ class village():
         '''
         self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
+    def recruit_worker(self):
+        input_dict = {}
+        input_dict['coordinates'] = (self.cell.x, self.cell.y)
+        input_dict['grids'] = [self.cell.grid]
+        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['modes'] = ['strategic', 'europe']
+        input_dict['name'] = 'African worker'
+        input_dict['init_type'] = 'worker'
+        self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
+        self.change_population(-1)
+        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
     def set_initial_population(self):
         '''
         Description:
@@ -139,6 +151,11 @@ class village():
             return(0)
         else: #7 - 9
             return(-1)
+
+    def change_available_workers(self, change):
+        self.available_workers += change
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)    
 
     def change_population(self, change):
         '''

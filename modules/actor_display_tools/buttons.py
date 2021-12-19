@@ -1684,3 +1684,24 @@ class remove_minister_button(label_button):
                 appointed_minister.appoint('none')
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
+
+class hire_village_workers_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'hire village worker', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            attached_village = self.global_manager.get('displayed_tile').cell.village
+            if not attached_village == 'none':
+                if attached_village.available_workers > 0:
+                    return(True)
+        return(False)
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                attached_village = self.global_manager.get('displayed_tile').cell.village
+                attached_village.recruit_worker()
+            else:
+                text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)

@@ -204,12 +204,17 @@ class trade_notification(notification):
             consumer_goods_y = 0
             if self.commodity_trade_type == 'successful_commodity_trade':
                 consumer_goods_y = 500
+                min_y = 300
                 self.notification_images.append(free_image('scenery/resources/' + self.trade_result[2] + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, 300, global_manager),
                     scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             else:
                 consumer_goods_y = 400 #either have icon at 300 and 500 or a single icon at 400
+                min_y = 400
             self.notification_images.append(free_image('scenery/resources/trade/sold consumer goods.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            if self.trade_result[3]: #if gets available worker
+                self.notification_images.append(free_image('mobs/African worker/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
+                    scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
         elif self.dies:
             self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
@@ -239,19 +244,22 @@ class trade_notification(notification):
         '''
         if self.is_commodity_trade:
             caravan = self.trade_result[0]
-            caravan.change_inventory('consumer goods', -1)
-            if self.gives_commodity:
-                commodity_gained = self.trade_result[2]
-                if not commodity_gained == 'none':
-                    caravan.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity 
+            caravan.complete_trade(self.gives_commodity, self.dies, self.trade_result)
+        #if self.is_commodity_trade:
+            #caravan = self.trade_result[0]
+            #caravan.change_inventory('consumer goods', -1)
+            #if self.gives_commodity:
+            #    commodity_gained = self.trade_result[2]
+            #    if not commodity_gained == 'none':
+            #        caravan.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity 
         super().remove()
         for current_image in self.notification_images:
             current_image.remove()
-        if self.dies:
-            caravan = self.trade_result[0]
-            if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
-                caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
-            caravan.die() 
+        #if self.dies:
+            #caravan = self.trade_result[0]
+        #    if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
+        #        caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
+        #    caravan.die() 
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()

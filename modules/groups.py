@@ -960,6 +960,10 @@ class caravan(group):
         else:
             text += "/n The merchant bought items that turned out to be worthless. /n /n"
             notification_type = 'failed_commodity_trade'
+        gets_worker = False
+        if random.randrange(1, 7) >= 4: #half chance of getting worker
+            text += "Drawn to the Western lifestyle by consumer goods, some of the villagers are now available to be hired by your company. /n /n"
+            gets_worker = True
         if not self.trades_remaining == 0:
             text += "The villagers are willing to trade " + str(self.trades_remaining) + " more times /n /n"
             text += "The merchant has " + str(num_consumer_goods) + " more consumer goods to sell /n /n"
@@ -976,7 +980,20 @@ class caravan(group):
             if num_consumer_goods <= 0: #consumer goods are actually lost when user clicks out of
                 text += "The merchant does not have any more consumer goods to sell. /n /n"
             notification_tools.display_notification(text + "Click to close this notification. ", 'stop_trade', self.global_manager)
-        self.global_manager.set('trade_result', [self, roll_result, commodity]) #allows notification to give random commodity when clicked
+        self.global_manager.set('trade_result', [self, roll_result, commodity, gets_worker]) #allows notification to give random commodity when clicked
+
+    def complete_trade(self, gives_commodity, dies, trade_result):
+        if trade_result[3]: #if gets worker
+            self.notification.choice_info_dict['village'].change_available_workers(1)
+        self.change_inventory('consumer goods', -1)
+        if gives_commodity:
+            commodity_gained = trade_result[2]
+            if not commodity_gained == 'none':
+                self.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity
+        if dies:
+            if not self.images[0].current_cell.contained_buildings['trading_post'] == 'none': #destroy trading post when caravan attacked
+                self.images[0].current_cell.contained_buildings['trading_post'].remove()
+            self.die() 
 
 class missionaries(group):
     '''

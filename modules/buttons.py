@@ -249,6 +249,9 @@ class button():
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
+        elif self.button_type == 'advertising campaign':
+            self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
+                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
@@ -266,6 +269,9 @@ class button():
             self.set_tooltip(["Removes this minister from their current office"])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
+        elif self.button_type == 'hire village worker':
+            self.set_tooltip(["Hires villagers as workers, reducing the village's population. ", "If fired, the workers will return to their village."])
+
         else:
             self.set_tooltip(['placeholder'])
             

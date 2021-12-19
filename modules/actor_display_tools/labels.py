@@ -96,6 +96,7 @@ class actor_display_label(label):
             self.message_start = 'Total population: '
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
+            self.attached_buttons.append(buttons.hire_village_workers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'mobs/African worker/button.png', self, global_manager))
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
         elif self.actor_label_type == 'minister':

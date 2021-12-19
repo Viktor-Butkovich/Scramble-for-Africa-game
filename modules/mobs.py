@@ -79,6 +79,38 @@ class mob(actor):
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this actor's images can appear
+                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - How many movement points this actor currently has
+                'image': string value - File path to the image used by this object
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['movement_points'] = self.movement_points
+        if self.end_turn_destination == 'none':
+            save_dict['end_turn_destination'] = 'none'
+        else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
+            if self.end_turn_destination.grid == self.global_manager.get('strategic_map_grid'):
+                save_dict['end_turn_destination_grid_type'] = 'strategic_map_grid'
+            elif self.end_turn_destination.grid == self.global_manager.get('europe_grid'):
+                save_dict['end_turn_destination_grid_type'] = 'europe_grid'
+            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
+        save_dict['image'] = self.image_dict['default']
+        return(save_dict)
+
     def check_if_minister_appointed(self):
         '''
         Description:
@@ -122,39 +154,6 @@ class mob(actor):
             self.controlling_minister = 'none'
         else:
             self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
-
-    def to_save_dict(self):
-        '''
-        Description:
-            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
-        Input:
-            None
-        Output:
-            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': string value - File path to the image used by this object
-        '''
-        save_dict = super().to_save_dict()
-        save_dict['movement_points'] = self.movement_points
-        if self.end_turn_destination == 'none':
-            save_dict['end_turn_destination'] = 'none'
-        else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-            if self.end_turn_destination.grid == self.global_manager.get('strategic_map_grid'):
-                save_dict['end_turn_destination_grid_type'] = 'strategic_map_grid'
-            elif self.end_turn_destination.grid == self.global_manager.get('europe_grid'):
-                save_dict['end_turn_destination_grid_type'] = 'europe_grid'
-            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
-        save_dict['image'] = self.image_dict['default']
-        return(save_dict)
-        
 
     def get_movement_cost(self, x_change, y_change):
         '''
