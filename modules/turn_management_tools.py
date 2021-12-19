@@ -5,6 +5,7 @@ import random
 from . import text_tools
 from . import actor_utility
 from . import market_tools
+from . import notification_tools
 
 def end_turn(global_manager):
     '''
@@ -25,8 +26,7 @@ def end_turn(global_manager):
         while current_tile.get_inventory_used() > current_tile.inventory_capacity:
             discarded_commodity = random.choice(current_tile.get_held_commodities())
             current_tile.change_inventory(discarded_commodity, -1)
-    for current_resource_building in global_manager.get('resource_building_list'):
-        current_resource_building.produce()
+    manage_production(global_manager)
     manage_upkeep(global_manager)
     start_turn(global_manager, False)
 
@@ -67,6 +67,29 @@ def start_turn(global_manager, first_turn):
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+
+def manage_production(global_manager):
+    #global_manager.set('commodities_produced', {})
+    global_manager.set('attempted_commodities', [])
+    for current_commodity in global_manager.get('collectable_resources'):
+        global_manager.get('commodities_produced')[current_commodity] = 0
+    for current_resource_building in global_manager.get('resource_building_list'):
+        current_resource_building.produce()
+    attempted_commodities = global_manager.get('attempted_commodities')
+    displayed_commodities = []
+    if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
+        notification_text = "Production report: /n /n "
+        while len(displayed_commodities) < len(attempted_commodities):
+            max_produced = 0
+            max_commodity = 'none'
+            for current_commodity in attempted_commodities:
+                if not current_commodity in displayed_commodities:
+                    if global_manager.get('commodities_produced')[current_commodity] >= max_produced:
+                        max_commodity = current_commodity
+                        max_produced = global_manager.get('commodities_produced')[current_commodity]
+            displayed_commodities.append(max_commodity)
+            notification_text += (max_commodity.capitalize() + ": " + str(max_produced) + ' /n ')
+        notification_tools.display_notification(notification_text, 'default', global_manager)       
 
 def manage_upkeep(global_manager):
     '''

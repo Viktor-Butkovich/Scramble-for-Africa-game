@@ -556,6 +556,8 @@ class work_crew(group):
         self.select()
 
     def attempt_production(self, building):
+        if not building.resource_type in self.global_manager.get('attempted_commodities'):
+            self.global_manager.get('attempted_commodities').append(building.resource_type)
         for current_attempt in range(building.efficiency):
             if self.veteran:
                 results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice
@@ -565,6 +567,7 @@ class work_crew(group):
                 
             if roll_result >= 4: #4+ required on D6 for exploration
                 building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
+                self.global_manager.get('commodities_produced')[building.resource_type] += 1
 
             if (not self.veteran) and roll_result >= 6:
                 self.promote()

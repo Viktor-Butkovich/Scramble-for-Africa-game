@@ -86,6 +86,10 @@ global_manager.set('commodity_prices', {})
 for current_commodity in global_manager.get('commodity_types'):
     global_manager.get('commodity_prices')[current_commodity] = 0
 
+global_manager.set('commodities_produced', {})
+for current_commodity in global_manager.get('collectable_resources'):
+    global_manager.get('commodities_produced')[current_commodity] = 0
+
 #building type: price
 global_manager.set('building_prices',
     {

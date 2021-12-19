@@ -6,3 +6,5 @@ buildings.resource_building.to_save_dict
 buildings.resource_building
 actor_display_tools/upgrade_button
 actor_display_tools/labels.building_productivity_label changed to efficiency
+turn_management_tools.manage_production
+turn_management_tools imports
