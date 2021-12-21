@@ -53,12 +53,17 @@ class village():
         '''
         self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
+    def can_recruit_worker(self):
+        if self.available_workers > 0:
+            return(True)
+        return(False)
+
     def recruit_worker(self):
         input_dict = {}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid]
+        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African worker/default.png'
-        input_dict['modes'] = ['strategic', 'europe']
+        input_dict['modes'] = ['strategic']
         input_dict['name'] = 'African worker'
         input_dict['init_type'] = 'worker'
         self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
@@ -169,9 +174,10 @@ class village():
         self.population += change
         if self.population > 9:
             self.population = 9
-        elif self.population < 1:
-            self.population = 1
+        elif self.population < 0:
+            self.population = 0
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            self.cell.tile.update_resource_icon()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):

@@ -78,6 +78,9 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if not self.resource_icon == 'none':
             self.resource_icon.update_resource_icon()
+            equivalent_tile = self.get_equivalent_tile()
+            if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
+                equivalent_tile.resource_icon.update_resource_icon()
 
     def draw_destination_outline(self): #called directly by mobs
         '''

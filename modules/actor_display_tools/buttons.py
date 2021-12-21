@@ -900,11 +900,14 @@ class trade_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     current_cell = current_mob.images[0].current_cell
                     if current_cell.has_village():
-                        if current_mob.get_inventory('consumer goods') > 0:
-                            if current_mob.check_if_minister_appointed():
-                                current_mob.start_trade()
+                        if current_cell.village.population > 0:
+                            if current_mob.get_inventory('consumer goods') > 0:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_trade()
+                            else:
+                                text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                            text_tools.print_to_screen("Trading is only possible in a village with population above 0.", self.global_manager)
                     else:
                         text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                 else:
@@ -1693,7 +1696,7 @@ class hire_village_workers_button(label_button):
         if super().can_show():
             attached_village = self.global_manager.get('displayed_tile').cell.village
             if not attached_village == 'none':
-                if attached_village.available_workers > 0:
+                if attached_village.can_recruit_worker():
                     return(True)
         return(False)
 

@@ -244,7 +244,9 @@ class trade_notification(notification):
         '''
         if self.is_commodity_trade:
             caravan = self.trade_result[0]
-            caravan.complete_trade(self.gives_commodity, self.dies, self.trade_result)
+            caravan.complete_trade(self.gives_commodity, self.trade_result)
+        #if self.dies:
+            
         #if self.is_commodity_trade:
             #caravan = self.trade_result[0]
             #caravan.change_inventory('consumer goods', -1)
@@ -255,11 +257,11 @@ class trade_notification(notification):
         super().remove()
         for current_image in self.notification_images:
             current_image.remove()
-        #if self.dies:
-            #caravan = self.trade_result[0]
-        #    if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
-        #        caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
-        #    caravan.die() 
+        if self.dies:
+            caravan = self.trade_result[0]
+            if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
+                caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
+            caravan.die() 
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()

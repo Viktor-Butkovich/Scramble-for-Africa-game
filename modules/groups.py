@@ -961,7 +961,7 @@ class caravan(group):
             text += "/n The merchant bought items that turned out to be worthless. /n /n"
             notification_type = 'failed_commodity_trade'
         gets_worker = False
-        if random.randrange(1, 7) >= 4: #half chance of getting worker
+        if (not village.population == village.available_workers) and random.randrange(1, 7) >= 4: #half chance of getting worker
             text += "Drawn to the Western lifestyle by consumer goods, some of the villagers are now available to be hired by your company. /n /n"
             gets_worker = True
         if not self.trades_remaining == 0:
@@ -982,7 +982,7 @@ class caravan(group):
             notification_tools.display_notification(text + "Click to close this notification. ", 'stop_trade', self.global_manager)
         self.global_manager.set('trade_result', [self, roll_result, commodity, gets_worker]) #allows notification to give random commodity when clicked
 
-    def complete_trade(self, gives_commodity, dies, trade_result):
+    def complete_trade(self, gives_commodity, trade_result):
         if trade_result[3]: #if gets worker
             self.notification.choice_info_dict['village'].change_available_workers(1)
         self.change_inventory('consumer goods', -1)
@@ -990,10 +990,6 @@ class caravan(group):
             commodity_gained = trade_result[2]
             if not commodity_gained == 'none':
                 self.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity
-        if dies:
-            if not self.images[0].current_cell.contained_buildings['trading_post'] == 'none': #destroy trading post when caravan attacked
-                self.images[0].current_cell.contained_buildings['trading_post'].remove()
-            self.die() 
 
 class missionaries(group):
     '''
