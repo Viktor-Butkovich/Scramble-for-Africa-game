@@ -90,20 +90,6 @@ global_manager.set('commodities_produced', {})
 for current_commodity in global_manager.get('collectable_resources'):
     global_manager.get('commodities_produced')[current_commodity] = 0
 
-#building type: price
-global_manager.set('building_prices',
-    {
-    'resource': 2,
-    'infrastructure': 1,
-    'port': 3,
-    'train_station': 2,
-    'trading_post': 1,
-    'mission': 1,
-    'train': 1
-   } 
-)
-
-
 global_manager.set('resource_building_dict',
     {
     'coffee': 'buildings/plantation.png',
@@ -218,6 +204,34 @@ global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
     global_manager.get('recruitment_costs')[current_officer] = 5
 
+global_manager.set('worker_upkeep_fluctuation_amount', 0.1)
+global_manager.set('base_upgrade_price', 2) #times # upgrades + 1: 2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+global_manager.set('commodity_min_starting_price', 2)
+global_manager.set('commodity_max_starting_price', 5)
+global_manager.set('consumer_goods_starting_price', 2)
+
+global_manager.set('action_prices',
+    {
+    'exploration': 2,
+    'convert': 0,
+    'religious_campaign': 0,
+    'advertising_campaign': 0,
+    'trade': 0
+    }
+)
+
+global_manager.set('building_prices',
+    {
+    'resource': 2,
+    'infrastructure': 1,
+    'port': 3,
+    'train_station': 2,
+    'trading_post': 1,
+    'mission': 1,
+    'train': 1
+   } 
+)
+
 global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
 global_manager.set('button_list', [])
 global_manager.set('current_instructions_page', 'none')
@@ -246,8 +260,14 @@ global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
-global_manager.set('num_workers', 0)
-global_manager.set('worker_upkeep', 1)
+#global_manager.set('num_workers', 0)
+global_manager.set('num_european_workers', 0)
+global_manager.set('num_african_workers', 0)
+global_manager.set('initial_african_worker_upkeep', 1)
+global_manager.set('initial_european_worker_upkeep', 1)
+global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
+global_manager.set('european_worker_upkeep', 0)
+#global_manager.set('worker_upkeep', 1)
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
 global_manager.set('exploration_mark_list', [])

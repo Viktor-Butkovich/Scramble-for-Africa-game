@@ -84,3 +84,18 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     new_price = global_manager.get('commodity_prices')[sold_commodity]
     if new_price < sell_price:
         text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
+
+def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
+    if random.randrange(1, 7) >= 4: #half chance of change
+        current_price = global_manager.get(worker_type.lower() + '_worker_upkeep')
+        if change_type == 'increase':
+            changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+            global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
+            text_tools.print_to_screen("Hiring " + utility.generate_article(worker_type) + " " + worker_type + " worker increased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        elif change_type == 'decrease':
+            changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+            if changed_price > 0:
+                global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
+                text_tools.print_to_screen("Adding " + utility.generate_article(worker_type) + " " + worker_type + " worker to the labor pool decreased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            
+            

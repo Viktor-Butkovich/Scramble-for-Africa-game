@@ -42,7 +42,8 @@ class save_load_manager_template():
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
         self.copied_elements.append('commodity_prices')
-        self.copied_elements.append('worker_upkeep')
+        self.copied_elements.append('african_worker_upkeep')
+        self.copied_elements.append('european_worker_upkeep')
         
     def new_game(self):
         '''
@@ -114,9 +115,9 @@ class save_load_manager_template():
 
         for current_commodity in self.global_manager.get('commodity_types'):
             if not current_commodity == 'consumer goods':
-                market_tools.set_price(current_commodity, random.randrange(2, 6), self.global_manager) #2-5
+                market_tools.set_price(current_commodity, random.randrange(self.global_manager.get('commodity_min_starting_price'), self.global_manager.get('commodity_max_starting_price') + 1), self.global_manager) #2-5
             else:
-                market_tools.set_price(current_commodity, 2, self.global_manager)
+                market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
         self.global_manager.get('money_tracker').set(100)
         self.global_manager.get('turn_tracker').set(0)
@@ -126,6 +127,12 @@ class save_load_manager_template():
         self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
 
         self.global_manager.set('available_minister_left_index', 0)
+
+        self.global_manager.set('num_african_workers', 0)
+        self.global_manager.set('num_european_workers', 0)
+        self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
+        self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
+        
         minister_utility.update_available_minister_display(self.global_manager)
 
         turn_management_tools.start_turn(self.global_manager, True)

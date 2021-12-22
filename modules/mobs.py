@@ -416,6 +416,9 @@ class mob(actor):
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
+    def fire(self):
+        self.die()
+
     def die(self):
         '''
         Description:

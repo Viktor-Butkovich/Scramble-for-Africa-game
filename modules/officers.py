@@ -394,6 +394,7 @@ class evangelist(officer):
             input_dict['name'] = 'Church volunteers'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['init_type'] = 'church_volunteers'
+            input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             #new_church_volunteers = workers.church_volunteers(False, input_dict, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:

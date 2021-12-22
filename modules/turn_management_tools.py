@@ -100,9 +100,11 @@ def manage_upkeep(global_manager):
     Output:
         None
     '''
-    num_workers = global_manager.get('num_workers')
-    worker_upkeep = global_manager.get('worker_upkeep')
-    total_upkeep = num_workers * worker_upkeep
-    global_manager.get('money_tracker').change(-1 * total_upkeep)
-    text_tools.print_to_screen("You paid " + str(worker_upkeep) + " money for each of your " + str(num_workers) + " workers, totaling to " + str(total_upkeep) + " money", global_manager)
+    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 1)
+    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 1)
+    num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers')
+    total_upkeep = round(african_worker_upkeep + european_worker_upkeep, 1)
+    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1))
+    
+    text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager)
 

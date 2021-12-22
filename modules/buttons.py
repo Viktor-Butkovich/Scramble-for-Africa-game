@@ -693,7 +693,7 @@ class button():
 
             elif self.button_type == 'fire':
                 fired_unit = self.global_manager.get('displayed_mob')
-                fired_unit.die()
+                fired_unit.fire()
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)

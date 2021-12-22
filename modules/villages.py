@@ -66,6 +66,7 @@ class village():
         input_dict['modes'] = ['strategic']
         input_dict['name'] = 'African worker'
         input_dict['init_type'] = 'worker'
+        input_dict['worker_type'] = 'African'
         self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
         self.change_population(-1)
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)

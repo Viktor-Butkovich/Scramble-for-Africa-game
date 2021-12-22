@@ -416,7 +416,7 @@ class resource_building(building):
         self.num_upgrades += 1
 
     def get_upgrade_cost(self):
-        return(2 * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+        return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
     
     def produce(self):
         for current_work_crew in self.contained_work_crews:

@@ -898,18 +898,21 @@ class trade_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
-                    current_cell = current_mob.images[0].current_cell
-                    if current_cell.has_village():
-                        if current_cell.village.population > 0:
-                            if current_mob.get_inventory('consumer goods') > 0:
-                                if current_mob.check_if_minister_appointed():
-                                    current_mob.start_trade()
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.has_village():
+                            if current_cell.village.population > 0:
+                                if current_mob.get_inventory('consumer goods') > 0:
+                                    if current_mob.check_if_minister_appointed():
+                                        current_mob.start_trade()
+                                else:
+                                    text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
                             else:
-                                text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                                text_tools.print_to_screen("Trading is only possible in a village with population above 0.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("Trading is only possible in a village with population above 0.", self.global_manager)
+                            text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trade']) + " money needed to trade with a village.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
             else:
@@ -966,15 +969,18 @@ class convert_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
-                    current_cell = current_mob.images[0].current_cell
-                    if current_cell.has_village():
-                        if current_cell.village.aggressiveness > 1:
-                            if current_mob.check_if_minister_appointed():
-                                current_mob.start_converting()
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.has_village():
+                            if current_cell.village.aggressiveness > 1:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_converting()
+                            else:
+                                text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
+                            text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['action type']) + " money needed to attempt to convert the natives.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
             else:
@@ -1032,8 +1038,11 @@ class religious_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if current_mob.check_if_minister_appointed():
-                            current_mob.start_religious_campaign()
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_religious_campaign()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a religious campaign.", self.global_manager)
                     else:
                         text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1094,13 +1103,16 @@ class advertising_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if current_mob.check_if_minister_appointed():
-                            if not self.global_manager.get('current_game_mode') == 'europe':
-                                game_transitions.set_game_mode('europe', self.global_manager)
-                                current_mob.select()
-                            text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
-                            self.global_manager.set('choosing_advertised_commodity', True)
-                            #current_mob.start_religious_campaign()
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['advertising_campaign']:
+                            if current_mob.check_if_minister_appointed():
+                                if not self.global_manager.get('current_game_mode') == 'europe':
+                                    game_transitions.set_game_mode('europe', self.global_manager)
+                                    current_mob.select()
+                                text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
+                                self.global_manager.set('choosing_advertised_commodity', True)
+                                #current_mob.start_religious_campaign()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money needed for an advertising campaign.", self.global_manager)
                     else:
                         text_tools.print_to_screen("An advertising campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1225,6 +1237,7 @@ class build_train_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_label.actor.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
@@ -1239,6 +1252,8 @@ class build_train_button(label_button):
                                 text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
                         else:
                             text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)

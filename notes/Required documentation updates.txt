@@ -12,3 +12,9 @@ villages.village.recruit_worker
 groups.caravan.complete_trade
 villages.village.change_available_workers
 actor_display_tools.buttons.hire_village_workers_button
+workers.worker.to_save_dict
+workers.worker.__init__
+workers.worker.fire
+workers imports
+market_tools.attempt_worker_upkeep_change
+mobs.mobs.fire

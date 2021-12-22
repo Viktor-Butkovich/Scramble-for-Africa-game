@@ -369,7 +369,7 @@ class group(mob):
         notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager)
             
         text += "/n"
-        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success:
             text += "The " + self.name + " successfully constructed the " + self.building_name + ". /n"
         else:
             text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the construction of the " + self.building_name + ". /n"
@@ -1077,7 +1077,7 @@ class missionaries(group):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         
-        choice_info_dict = {'evanglist': self,'type': 'start converting'}
+        choice_info_dict = {'evangelist': self,'type': 'start converting'}
         self.current_roll_modifier = 0
         self.global_manager.set('ongoing_conversion', True)
         notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
@@ -1210,7 +1210,7 @@ class expedition(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.exploration_mark_list = []
-        self.exploration_cost = 2
+        self.exploration_cost = self.global_manager.get('action_prices')['exploration']#2
         self.can_explore = True
         self.set_group_type('expedition')
 
