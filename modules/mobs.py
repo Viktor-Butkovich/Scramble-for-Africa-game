@@ -154,6 +154,12 @@ class mob(actor):
             self.controlling_minister = 'none'
         else:
             self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
+            #here
+            for current_minister_type_image in self.global_manager.get('minister_image_list'):
+                if current_minister_type_image.minister_type == self.controlling_minister_type:
+                    current_minister_type_image.calibrate(self.controlling_minister)
+                #else:# current_minister_type_image.minister_type == old_position:
+                #    current_minister_type_image.calibrate('none')
 
     def get_movement_cost(self, x_change, y_change):
         '''

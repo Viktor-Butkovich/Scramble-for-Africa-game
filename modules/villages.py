@@ -39,6 +39,7 @@ class village():
             self.aggressiveness = input_dict['aggressiveness']
             self.available_workers = input_dict['available_workers']
         self.cell = input_dict['cell']
+        self.tiles = [] #added in set_resource for tiles
         self.global_manager = global_manager
         self.global_manager.get('village_list').append(self)
 
@@ -177,9 +178,13 @@ class village():
             self.population = 9
         elif self.population < 0:
             self.population = 0
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            self.cell.tile.update_resource_icon()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+        if self.cell.visible:
+            for current_tile in self.tiles:
+                current_tile.update_resource_icon()
+            if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+                #self.cell.tile.update_resource_icon()
+                #self.cell.tile.get_equivalent_tile().update_resource_icon() #update for village on both minimap and main map
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''

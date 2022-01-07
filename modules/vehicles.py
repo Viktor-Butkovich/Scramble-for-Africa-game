@@ -75,6 +75,13 @@ class vehicle(mob):
         if not self.crew == 'none':
             self.crew.die()
 
+    def fire(self):
+        super().fire()
+        for current_passenger in self.contained_mobs:
+            current_passenger.fire()
+        if not self.crew == 'none':
+            self.crew.fire()
+
     def to_save_dict(self):
         '''
         Description:

@@ -88,6 +88,7 @@ class building(actor):
         tiles = []
         for current_image in self.images:
             if not current_image.current_cell == 'none':
+                current_image.current_cell.contained_buildings[self.building_type] = 'none'
                 tiles.append(current_image.current_cell.tile)
             current_image.current_cell.contained_buildings[self.building_type] = 'none'
             current_image.remove_from_cell()

@@ -15,6 +15,7 @@ from . import notification_tools
 from . import dice
 from . import scaling
 from . import main_loop_tools
+from . import market_tools
 
 class group(mob):
     '''
@@ -75,6 +76,11 @@ class group(mob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.set_group_type('none')
+
+    def fire(self):
+        super().fire()
+        self.officer.fire()
+        self.worker.fire()
 
     def set_group_type(self, new_type):
         '''
@@ -985,6 +991,7 @@ class caravan(group):
     def complete_trade(self, gives_commodity, trade_result):
         if trade_result[3]: #if gets worker
             self.notification.choice_info_dict['village'].change_available_workers(1)
+            market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
         self.change_inventory('consumer goods', -1)
         if gives_commodity:
             commodity_gained = trade_result[2]

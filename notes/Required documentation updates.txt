@@ -2,6 +2,7 @@ buildings.resource_building
 actor_display_tools/labels.building_productivity_label
 actor_display_tools/buttons.cycle_work_crews_label
 groups.construction_gang
+groups imports
 buildings.resource_building.to_save_dict
 buildings.resource_building
 actor_display_tools/upgrade_button
