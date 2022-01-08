@@ -980,7 +980,7 @@ class convert_button(label_button):
                         else:
                             text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['action type']) + " money needed to attempt to convert the natives.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['convert']) + " money needed to attempt to convert the natives.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
             else:

@@ -1045,6 +1045,7 @@ class missionaries(group):
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
         message = "Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n"
+        message += "The conversion will cost " + str(self.global_manager.get('action_prices')['convert']) + " money. /n /n "
                             
         if village.cell.contained_buildings['mission'] == 'none': #penalty for no mission
             self.current_roll_modifier -= 1
@@ -1101,6 +1102,7 @@ class missionaries(group):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1)
         village = self.images[0].current_cell.village
         text = ""
         text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
@@ -1312,6 +1314,7 @@ class expedition(group):
         Output:
             None
         '''
+        self.global_manager.get('money_tracker').change(self.exploration_cost * -1)
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0

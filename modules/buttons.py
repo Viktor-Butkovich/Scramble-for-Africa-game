@@ -551,7 +551,7 @@ class button():
                 
             elif self.button_type == 'exploration':
                 self.expedition.start_exploration(self.x_change, self.y_change)
-                self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
+                #self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):

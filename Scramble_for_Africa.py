@@ -212,23 +212,23 @@ global_manager.set('consumer_goods_starting_price', 2)
 
 global_manager.set('action_prices',
     {
-    'exploration': 2,
-    'convert': 0,
-    'religious_campaign': 0,
-    'advertising_campaign': 0,
+    'exploration': 5,
+    'convert': 5,
+    'religious_campaign': 5,
+    'advertising_campaign': 5,
     'trade': 0
     }
 )
 
 global_manager.set('building_prices',
     {
-    'resource': 2,
-    'infrastructure': 1,
-    'port': 3,
-    'train_station': 2,
-    'trading_post': 1,
-    'mission': 1,
-    'train': 1
+    'resource': 5,
+    'infrastructure': 5,
+    'port': 5,
+    'train_station': 5,
+    'trading_post': 5,
+    'mission': 5,
+    'train': 5
    } 
 )
 

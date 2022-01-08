@@ -284,7 +284,7 @@ class evangelist(officer):
         choice_info_dict = {'evangelist': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
         message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native "
-        message += "villages. /n /n"
+        message += "villages. /n /n The campaign will cost " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money. /n /n"
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
@@ -312,6 +312,7 @@ class evangelist(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1)
         text = ""
         text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
@@ -435,7 +436,7 @@ class merchant(officer):
         input_dict['officer_type'] = 'merchant'
         super().__init__(from_save, input_dict, global_manager)
         self.current_roll_modifier = 0
-        self.default_min_success = 4
+        self.default_min_success = 5
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
 
@@ -461,6 +462,7 @@ class merchant(officer):
         choice_info_dict = {'merchant': self, 'type': 'start advertising campaign', 'commodity': target_commodity}
         self.global_manager.set('ongoing_advertising_campaign', True)
         message = "Are you sure you want to start an advertising campaign for " + target_commodity + "? If successful, the price of " + target_commodity + " will increase, decreasing the price of another random commodity. /n /n"
+        message += "The campaign will cost " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money. /n /n "
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
@@ -492,6 +494,7 @@ class merchant(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1)
         text = ""
         text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    
@@ -547,13 +550,13 @@ class merchant(officer):
             text += str(advertised_original_price + increase) + ". The price of " + self.current_unadvertised_commodity + " decreased from " + str(unadvertised_original_price) + " to " + str(unadvertised_original_price - 1) + ". /n /n"
         else:
             text += "The merchant failed to increase the popularity of " + self.current_advertised_commodity + ". /n /n"
-        #if roll_result <= self.current_max_crit_fail:
-        #    text += "Crit fail message. /n /n" #can't die from advertising campaign
+        if roll_result <= self.current_max_crit_fail:
+            text += "Embarassed by this utter failure, the merchant quits your company. /n /n" 
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "The advertising campaign was so successful that the value of " + self.current_advertised_commodity + " increased by 2 instead of 1. /n /n"
-        if roll_result >= 4:
+            text += "The advertising campaign was so popular that the value of " + self.current_advertised_commodity + " increased by 2 instead of 1. /n /n"
+        if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_advertising_campaign', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
@@ -580,4 +583,6 @@ class merchant(officer):
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()
+        elif roll_result <= self.current_max_crit_fail:
+            self.die()
         self.global_manager.set('ongoing_advertising_campaign', False)
