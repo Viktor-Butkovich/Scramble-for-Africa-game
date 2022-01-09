@@ -49,6 +49,8 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height, self.height, pygame.K_f, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
             self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height, self.height, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height, pygame.K_k, self.modes, self, 'resource', 'scale', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height, pygame.K_l, self.modes, self, 'resource', 'efficiency', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, self, 'train_station', global_manager))
@@ -61,6 +63,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height, self.height, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
+        elif self.actor_label_type == 'building workers':
+            self.message_start = 'Work crews: '
+            self.attached_buttons.append(buttons.cycle_work_crews_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
         elif self.actor_label_type == 'building worker':
             self.message_start = ''
             self.attached_building = 'none'
@@ -91,6 +96,7 @@ class actor_display_label(label):
             self.message_start = 'Total population: '
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
+            self.attached_buttons.append(buttons.hire_village_workers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'mobs/African worker/button.png', self, global_manager))
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
         elif self.actor_label_type == 'minister':
@@ -185,6 +191,21 @@ class actor_display_label(label):
                 else:
                     tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
                                     "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'building workers':
+            tooltip_text = [self.message]
+            tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang.")
+            if (not self.attached_building == 'none'):
+                tooltip_text.append("Work crews: ")
+                for current_work_crew in self.attached_building.contained_work_crews:
+                    tooltip_text.append("    " + current_work_crew.name.capitalize())
+                if len(self.attached_building.contained_work_crews) == 0:
+                    tooltip_text[-1] += 'none'
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'building efficiency':
+            tooltip_text = [self.message]
+            tooltip_text.append("Each work crew attached to this building can produce up to the building efficiency in commodities each turn.")
+            tooltip_text.append("Increase work crew efficiency by upgrading the building's efficiency with a construction gang.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -441,10 +462,11 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
+        self.showing = False
+        self.attached_building = 'none'
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
         self.building_type = building_type
-        self.attached_building = 'none'
-        self.showing = False
+        #self.showing = False
 
     def calibrate(self, new_actor):
         '''
@@ -460,7 +482,65 @@ class building_work_crews_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.contained_buildings[self.building_type]
             if not self.attached_building == 'none':
-                self.set_label("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.work_crew_capacity))
+                self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
+                self.showing = True
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
+        '''
+        if self.showing:
+            return(super().can_show())
+        else:
+            return(False)
+
+class building_efficiency_label(actor_display_label):
+    '''
+    Label that shows a production building's efficiency, which is the number of attempts work crews at the building have to produce commodities
+    '''
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+        '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            string building_type: Type of building this label shows the workers of, like 'resource building'
+            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.remove_work_crew_button = 'none'
+        self.showing = False
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building efficiency', actor_type, global_manager)
+        self.building_type = building_type
+        self.attached_building = 'none'
+        #self.showing = False
+
+    def calibrate(self, new_actor):
+        '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
+        self.actor = new_actor
+        self.showing = False
+        if not new_actor == 'none':
+            self.attached_building = new_actor.cell.contained_buildings[self.building_type]
+            if not self.attached_building == 'none':
+                self.set_label("Efficiency: " + str(self.attached_building.efficiency))
                 self.showing = True
 
     def can_show(self):

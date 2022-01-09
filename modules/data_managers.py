@@ -219,7 +219,8 @@ class value_tracker():
         Output:
             None
         '''
-        self.global_manager.set(self.value_key, self.get() + value_change)
+        #self.global_manager.set(self.value_key, self.get() + value_change)
+        self.set(self.get() + value_change)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
     
@@ -275,7 +276,7 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
-        super().set(new_value)
+        super().set(round(new_value, 1))
         if self.get() < 0:
             game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)

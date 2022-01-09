@@ -11,7 +11,6 @@ class village():
     Object that represents a native village in a cell on the strategic map grid
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        #def __init__(self, cell, global_manager):
         '''
         Description:
             Initializes this object
@@ -39,6 +38,7 @@ class village():
             self.aggressiveness = input_dict['aggressiveness']
             self.available_workers = input_dict['available_workers']
         self.cell = input_dict['cell']
+        self.tiles = [] #added in set_resource for tiles
         self.global_manager = global_manager
         self.global_manager.get('village_list').append(self)
 
@@ -52,6 +52,40 @@ class village():
             None
         '''
         self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
+
+    def can_recruit_worker(self):
+        '''
+        Description:
+            Returns whether a worker can be recruited from this village
+        Input:
+            None
+        Output:
+            boolean: Returns True if this village has any available workers, otherwise returns False
+        '''
+        if self.available_workers > 0:
+            return(True)
+        return(False)
+
+    def recruit_worker(self):
+        '''
+        Description:
+            Hires one of this village's available workers by creating a worker object, reducing the village's population and number of available workers
+        Input:
+            None
+        Output:
+            None
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.cell.x, self.cell.y)
+        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
+        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['modes'] = ['strategic']
+        input_dict['name'] = 'African worker'
+        input_dict['init_type'] = 'worker'
+        input_dict['worker_type'] = 'African'
+        self.available_workers -= 1 #doesn't need to update tile display twice, so just directly change # available workers instead of change_available_workers(-1)
+        self.change_population(-1)
+        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
 
     def set_initial_population(self):
         '''
@@ -140,6 +174,19 @@ class village():
         else: #7 - 9
             return(-1)
 
+    def change_available_workers(self, change):
+        '''
+        Description:
+            Changes this village's number of available workers by the inputted amount, updating the tile info display as applicable
+        Input:
+            int change: amount this village's population is changed by
+        Output:
+            None
+        '''
+        self.available_workers += change
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)    
+
     def change_population(self, change):
         '''
         Description:
@@ -152,10 +199,13 @@ class village():
         self.population += change
         if self.population > 9:
             self.population = 9
-        elif self.population < 1:
-            self.population = 1
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+        elif self.population < 0:
+            self.population = 0
+        if self.cell.visible:
+            for current_tile in self.tiles:
+                current_tile.update_resource_icon()
+            if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''

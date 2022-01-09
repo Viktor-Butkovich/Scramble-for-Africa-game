@@ -36,7 +36,7 @@ SFA folder
     modules folder
 
 	workers.py
-	    imports mobs, actor_utility, utility
+	    imports mobs, actor_utility, utility, market_tools
 	    class worker(mobs.mob)
 		class church_volunteers
 
@@ -68,9 +68,10 @@ SFA folder
             def add_to_message
 
 	turn_management_tools.py
-	    imports random, text_tools, actor_utility, market_tools
+	    imports random, text_tools, actor_utility, market_tools, notification_tools
 	    def end_turn
 	    def start_turn
+	    def manage_production
 	    def manage_upkeep
 
         tiles.py
@@ -139,6 +140,7 @@ SFA folder
 	    def adjust_prices
 	    def change_price
 	    def sell
+	    def attempt_worker_upkeep_change
 
         main_loop_tools.py
             imports pygame, time, scaling, text_tools, actor_utility, minister_utility
@@ -185,7 +187,7 @@ SFA folder
                     class veteran_icon_image
 
         groups.py
-            imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools
+	    imports time, random, math, mobs, tiles, buttons, actor_utility, text_tools, dice_utility, utility, notification_tools, dice, scaling, main_loop_tools, market_tools
             class group(mobs.mob)
 		class porters
 		class work_crew
@@ -305,6 +307,7 @@ SFA folder
 		class actor_display_label(modules.labels.label)
 		    class list_item_label
 		    class building_work_crews_label
+		    class building_efficiency_label
 		    class native_info_label
 		    class commodity_display_label
 
@@ -328,6 +331,7 @@ SFA folder
 		    class disembark_vehicle_button
 		    class embark_vehicle_button
 		    class cycle_passengers_button
+		    class cycle_work_crews_button
 		    class work_crew_to_building_button
 		    class trade_button
 		    class convert_button
@@ -336,3 +340,7 @@ SFA folder
 		    class switch_theatre_button
 		    class build_train_button
 		    class construction_button
+		    class upgrade_button
+	   	    class appoint_minister_button
+		    class remove_minister_button
+		    class hire_village_workers_button

@@ -174,10 +174,23 @@ class money_label(value_label):
             None
         '''
         tooltip_text = [self.message]
-        num_workers = self.global_manager.get('num_workers')
-        worker_upkeep = self.global_manager.get('worker_upkeep')
-        total_upkeep = num_workers * worker_upkeep
-        tooltip_text.append("Each of your " + str(num_workers) + " workers will cost " + str(worker_upkeep) + " money per turn, totaling to " + str(total_upkeep) + " money. Church volunteers cost no upkeep.")
+
+        num_african_workers = self.global_manager.get('num_african_workers')
+        african_worker_upkeep = self.global_manager.get('african_worker_upkeep')
+        total_african_worker_upkeep = round(num_african_workers * african_worker_upkeep, 1)
+
+        num_european_workers = self.global_manager.get('num_european_workers')
+        european_worker_upkeep = self.global_manager.get('european_worker_upkeep')
+        total_european_worker_upkeep = round(num_european_workers * european_worker_upkeep, 1)
+        
+        num_workers = num_african_workers + num_european_workers
+        total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep, 1)
+        
+        tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
+        tooltip_text.append("Each of your " + str(num_african_workers) + " African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
+        tooltip_text.append("Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+        tooltip_text.append("Religious volunteers cost no upkeep.")
+        
         self.set_tooltip(tooltip_text)
 
 class commodity_prices_label(label):

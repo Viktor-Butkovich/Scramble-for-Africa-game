@@ -1,8 +1,10 @@
 #Contains functionality for worker units
+import random
 
 from .mobs import mob
 from . import actor_utility
 from . import utility
+from . import market_tools
 
 class worker(mob):
     '''
@@ -23,6 +25,7 @@ class worker(mob):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker_type': string value - Type of worker this is, like 'European'. Each type of worker has a separate upkeep, labor pool, and abilities
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -31,10 +34,59 @@ class worker(mob):
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
-        self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1)
+        self.worker_type = input_dict['worker_type']
+        
+        if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
+            self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') + 1)
+            if not from_save:
+                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+            
+        elif self.worker_type == 'African':
+            self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') + 1)
+            if not from_save:
+                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'modes': string list value - Game modes during which this actor's images can appear
+                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
+                'name': string value - This actor's name
+                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
+                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - How many movement points this actor currently has
+                'image': string value - File path to the image used by this object
+                'worker_type': string value - Type of worker this is, like 'European'. Each type of worker has a separate upkeep, labor pool, and abilities
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['worker_type'] = self.worker_type
+        return(save_dict)
+
+    def fire(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Additionally has a chance to decrease the upkeep of other workers of this worker's type by increasing the size of
+                the labor pool
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().fire()
+        if self.worker_type in ['African', 'European']: #not religious volunteers
+            market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
 
     def can_show_tooltip(self):
         '''
@@ -132,7 +184,10 @@ class worker(mob):
         '''
         super().remove()
         self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
-        self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
+        if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
+            self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
+        elif self.worker_type == 'African':
+            self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
 
 class church_volunteers(worker):
     '''
@@ -159,17 +214,4 @@ class church_volunteers(worker):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
-        self.global_manager.set('num_workers', self.global_manager.get('num_workers') - 1)
         self.is_church_volunteers = True
-        
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('num_workers', self.global_manager.get('num_workers') + 1) #cancels out decrease of superclass

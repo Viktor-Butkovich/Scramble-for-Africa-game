@@ -78,6 +78,9 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if not self.resource_icon == 'none':
             self.resource_icon.update_resource_icon()
+            equivalent_tile = self.get_equivalent_tile()
+            if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
+                equivalent_tile.resource_icon.update_resource_icon()
 
     def draw_destination_outline(self): #called directly by mobs
         '''
@@ -223,6 +226,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                     if not equivalent_tile.cell.village == 'none': #if equivalent tile present and equivalent tile has village, copy village to equivalent instead of creating new one
                         village_exists = True
                         self.cell.village = equivalent_tile.cell.village
+                        self.cell.village.tiles.append(self)
                 if not village_exists: #make new village if village not present
                     input_dict = {'cell': self.cell}
                     if self.cell.grid.from_save:
@@ -231,8 +235,10 @@ class tile(actor): #to do: make terrain tiles a subclass
                         input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
                         input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
                         self.cell.village = villages.village(True, input_dict, self.global_manager)
+                        self.cell.village.tiles.append(self)
                     else:
                         self.cell.village = villages.village(False, input_dict, self.global_manager)
+                        self.cell.village.tiles.append(self)
                     
             input_dict = {}
             input_dict['coordinates'] = (self.x, self.y)

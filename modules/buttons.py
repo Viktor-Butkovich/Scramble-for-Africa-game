@@ -197,7 +197,7 @@ class button():
                 self.set_tooltip(['none'])
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
-                self.set_tooltip(["Detaches 1 worker from this " + self.attached_label.attached_building.name])
+                self.set_tooltip(["Detaches this work crew from the " + self.attached_label.attached_building.name])
             else:
                 self.set_tooltip(['none'])
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
@@ -224,6 +224,13 @@ class button():
                 for current_passenger in self.attached_label.actor.contained_mobs:
                     tooltip_text.append("    " + current_passenger.name)
             self.set_tooltip(tooltip_text)
+        elif self.button_type == 'cycle work crews':
+            tooltip_text = ["Cycles through this  building's work crews"]
+            tooltip_text.append("Work crews: " )
+            if self.can_show():
+                for current_work_crew in self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews:
+                    tooltip_text.append("    " + current_work_crew.name)
+            self.set_tooltip(tooltip_text)
         elif self.button_type == 'cycle tile mobs':
             tooltip_text = ["Cycles through this tile's units"]
             tooltip_text.append("Units: " )
@@ -242,6 +249,9 @@ class button():
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
+        elif self.button_type == 'advertising campaign':
+            self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
+                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
@@ -259,6 +269,9 @@ class button():
             self.set_tooltip(["Removes this minister from their current office"])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
+        elif self.button_type == 'hire village worker':
+            self.set_tooltip(["Hires villagers as workers, reducing the village's population. ", "If fired, the workers will return to their village."])
+
         else:
             self.set_tooltip(['placeholder'])
             
@@ -538,7 +551,7 @@ class button():
                 
             elif self.button_type == 'exploration':
                 self.expedition.start_exploration(self.x_change, self.y_change)
-                self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
+                #self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -611,8 +624,16 @@ class button():
 
             elif self.button_type == 'start end turn':
                 if main_loop_tools.action_possible(self.global_manager):
-                    choice_info_dict = {'type': 'end turn'}
-                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    stopping = False
+                    for current_position in self.global_manager.get('minister_types'):
+                        if self.global_manager.get("current_ministers")[current_position] == 'none':
+                            stopping = True
+                    if stopping:
+                        text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
+                    else:
+                        choice_info_dict = {'type': 'end turn'}
+                        notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen("You are busy and can not end your turn.", self.global_manager)
     
@@ -672,7 +693,7 @@ class button():
 
             elif self.button_type == 'fire':
                 fired_unit = self.global_manager.get('displayed_mob')
-                fired_unit.die()
+                fired_unit.fire()
 
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
@@ -697,6 +718,10 @@ class button():
                 constructor = self.notification.choice_info_dict['constructor']
                 constructor.construct()
 
+            elif self.button_type == 'start upgrade':
+                constructor = self.notification.choice_info_dict['constructor']
+                constructor.upgrade()
+
             elif self.button_type == 'trade':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
@@ -713,7 +738,7 @@ class button():
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
 
-            elif self.button_type == 'stop construction':
+            elif self.button_type in ['stop construction', 'stop upgrade']:
                 self.global_manager.set('ongoing_construction', False)
                 
     def on_rmb_release(self):
@@ -1290,8 +1315,16 @@ class commodity_button(button):
             if self.commodity == 'consumer goods':
                 text_tools.print_to_screen("You can not advertise consumer goods.", self.global_manager)
             else:
-                self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
-                self.global_manager.set('choosing_advertised_commodity', False)
+                can_advertise = False
+                for current_commodity in self.global_manager.get('collectable_resources'):
+                    if (not current_commodity == self.commodity) and self.global_manager.get('commodity_prices')[current_commodity] > 1:
+                        can_advertise = True
+                        break
+                if can_advertise:
+                    self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
+                    self.global_manager.set('choosing_advertised_commodity', False)
+                else:
+                    text_tools.print_to_screen("You can not advertise " + self.commodity + " because all other commodities are already at the minimum price.", self.global_manager)
 
     def can_show_tooltip(self):
         '''

@@ -701,6 +701,70 @@ class cycle_passengers_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
 
+class cycle_work_crews_button(label_button):
+    '''
+    Button that cycles the order of work crews in a building
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.previous_showing_result = False
+        super().__init__(coordinates, width, height, 'cycle work crews', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the displayed tile's cell has a resource building containing more than 3 work crews, otherwise returns False
+        '''
+        result = super().can_show()
+        if result:
+            if self.attached_label.actor.cell.contained_buildings['resource'] == 'none':
+                self.previous_showing_result = False
+                return(False)
+            elif not len(self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews) > 3: #only show if building with 3+ work crews
+                self.previous_showing_result = False
+                return(False)
+        if self.previous_showing_result == False and result == True:
+            self.previous_showing_result = result
+            self.attached_label.set_label(self.attached_label.message) #update label to update this button's location
+        self.previous_showing_result = result
+        return(result)
+    
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the order of work crews displayed in a building
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                moved_mob = self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.pop(0)
+                self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_label.actor) #updates tile info display list to show changed work crew order
+            else:
+                text_tools.print_to_screen("You are busy and can not cycle work crews.", self.global_manager)
+
 class work_crew_to_building_button(label_button):
     '''
     Button that commands a work crew to work in a certain type of building in its tile
@@ -737,9 +801,7 @@ class work_crew_to_building_button(label_button):
         Output:
             None
         '''
-        #self.attached_worker = self.attached_label.actor #selected_list[0]
         self.attached_work_crew = self.attached_label.actor
-        #if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
         if (not self.attached_work_crew == 'none') and self.attached_work_crew.is_work_crew:
             possible_attached_building = self.attached_work_crew.images[0].current_cell.contained_buildings[self.building_type]
             if (not possible_attached_building == 'none'): #and building has capacity
@@ -797,12 +859,12 @@ class work_crew_to_building_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 if not self.attached_building == 'none':
-                    if self.attached_building.work_crew_capacity > len(self.attached_building.contained_work_crews): #if has extra space
+                    if self.attached_building.scale > len(self.attached_building.contained_work_crews): #if has extra space
                         self.showing_outline = True
                         self.attached_work_crew.work_building(self.attached_building)
                     else:
                         text_tools.print_to_screen("This building is at its work crew capacity.", self.global_manager)
-                        text_tools.print_to_screen("Upgrade the building to add more work crew capacity.", self.global_manager)
+                        text_tools.print_to_screen("Upgrade the building's scale to increase work crew capacity.", self.global_manager)
                 else:
                     text_tools.print_to_screen("This work crew must be in the same tile as a resource production building to work in it", self.global_manager)
             else:
@@ -860,15 +922,21 @@ class trade_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
-                    current_cell = current_mob.images[0].current_cell
-                    if current_cell.has_village():
-                        if current_mob.get_inventory('consumer goods') > 0:
-                            if current_mob.check_if_minister_appointed():
-                                current_mob.start_trade()
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.has_village():
+                            if current_cell.village.population > 0:
+                                if current_mob.get_inventory('consumer goods') > 0:
+                                    if current_mob.check_if_minister_appointed():
+                                        current_mob.start_trade()
+                                else:
+                                    text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                            else:
+                                text_tools.print_to_screen("Trading is only possible in a village with population above 0.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                            text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trade']) + " money needed to trade with a village.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
             else:
@@ -925,15 +993,18 @@ class convert_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
-                    current_cell = current_mob.images[0].current_cell
-                    if current_cell.has_village():
-                        if current_cell.village.aggressiveness > 1:
-                            if current_mob.check_if_minister_appointed():
-                                current_mob.start_converting()
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.has_village():
+                            if current_cell.village.aggressiveness > 1:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_converting()
+                            else:
+                                text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
+                            text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['convert']) + " money needed to attempt to convert the natives.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
             else:
@@ -991,8 +1062,11 @@ class religious_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if current_mob.check_if_minister_appointed():
-                            current_mob.start_religious_campaign()
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_religious_campaign()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a religious campaign.", self.global_manager)
                     else:
                         text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1053,13 +1127,16 @@ class advertising_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if current_mob.check_if_minister_appointed():
-                            if not self.global_manager.get('current_game_mode') == 'europe':
-                                game_transitions.set_game_mode('europe', self.global_manager)
-                                current_mob.select()
-                            text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
-                            self.global_manager.set('choosing_advertised_commodity', True)
-                            #current_mob.start_religious_campaign()
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['advertising_campaign']:
+                            if current_mob.check_if_minister_appointed():
+                                if not self.global_manager.get('current_game_mode') == 'europe':
+                                    game_transitions.set_game_mode('europe', self.global_manager)
+                                    current_mob.select()
+                                text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
+                                self.global_manager.set('choosing_advertised_commodity', True)
+                                #current_mob.start_religious_campaign()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money needed for an advertising campaign.", self.global_manager)
                     else:
                         text_tools.print_to_screen("An advertising campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1184,6 +1261,7 @@ class build_train_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_label.actor.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
@@ -1198,6 +1276,8 @@ class build_train_button(label_button):
                                 text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
                         else:
                             text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
@@ -1220,7 +1300,7 @@ class build_train_button(label_button):
 
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
-    Button that commands a mob to construct a certain type of building
+    Button that commands a group to construct a certain type of building
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
         '''
@@ -1233,7 +1313,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
             string list modes: Game modes during which this button can appear
             label attached_label: Label that this button is attached to
-            string building_type: Type of building that this button builds, like 'resource building'
+            string building_type: Type of building that this button builds, like 'resource'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1322,8 +1402,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 can_create = self.attached_label.actor.can_trade
             elif self.requirement == 'can_convert':
                 can_create = self.attached_label.actor.can_convert
-            if (not can_create): #show if unit selected can create this building
+            if not can_create: #show if unit selected can create this building
                 return(False)
+            if not self.attached_tile == 'none':
+                if (not self.attached_tile.cell.contained_buildings[self.building_type] == 'none') and not self.building_type == 'infrastructure': #if building already present, do not show
+                    return(False)
         return(result) 
 
     def update_tooltip(self):
@@ -1454,6 +1537,117 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
 
+class upgrade_button(label_button):
+    '''
+    Button that commands a construction gang to upgrade a certain aspect of a building
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, base_building_type, upgrade_type, global_manager): #base_building_type = 'resource', upgrade_type = 'efficiency'
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            label attached_label: Label that this button is attached to
+            string base_building_type: Type of building that this button upgrades, like 'resource'
+            string upgrade_type: Aspect of building upgraded by this button, like 'scale' or 'efficiency'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.base_building_type = base_building_type
+        self.upgrade_type = upgrade_type
+        self.attached_mob = 'none'
+        self.attached_tile = 'none'
+        self.attached_building = 'none'
+        image_id = 'buttons/upgrade_' + self.upgrade_type + '_button.png'
+        super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+
+    def update_info(self):
+        '''
+        Description:
+            Updates which building object is attached to this button based on the selected construction gang's location relative to buildings of this button's base building type
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.attached_mob = self.attached_label.actor #new_attached_mob
+        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+            self.attached_tile = self.attached_mob.images[0].current_cell.tile
+            if self.attached_mob.can_construct:
+                if not self.attached_tile.cell.contained_buildings[self.base_building_type] == 'none':
+                    self.attached_building = self.attached_tile.cell.contained_buildings[self.base_building_type]
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of upgrading buildings or if there is no valid building in its tile to upgrade, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            self.update_info()
+            if (not self.attached_label.actor.can_construct): #show if unit selected can create this building
+                return(False)
+            if self.attached_building == 'none' or not self.attached_building.can_upgrade(self.upgrade_type):
+                return(False)
+        return(result) 
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on its attached building and the aspect it upgrades
+        Input:
+            None
+        Output:
+            None
+        '''
+        message = []
+        if not self.attached_building == 'none':
+            if self.upgrade_type == 'scale':
+                message.append("Increases the maximum number of work crews that can be attached to this " + self.attached_building.name + " from " + str(self.attached_building.scale) + " to " + str(self.attached_building.scale + 1) + ".")
+            elif self.upgrade_type == 'efficiency':
+                message.append("Increases the number of " + self.attached_building.resource_type + " production attempts made by work crews attached to this " + self.attached_building.name + " from " + str(self.attached_building.efficiency) + " to " + str(self.attached_building.efficiency + 1) + " per turn.")
+            else:
+                message.append('placeholder')
+            message.append('Attempting to upgrade costs ' + str(self.attached_building.get_upgrade_cost()) + ' money and increases with each future upgrade to this building.')
+        self.set_tooltip(message)
+        
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to upgrade part of a certain building in its tile
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.attached_building.get_upgrade_cost():
+                        building_info_dict = {}
+                        building_info_dict['upgrade_type'] = self.upgrade_type
+                        building_info_dict['building_name'] = self.attached_building.name
+                        building_info_dict['upgraded_building'] = self.attached_building
+                        self.attached_mob.start_upgrade(building_info_dict)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.attached_building.get_upgrade_cost()) + " money needed to upgrade this building.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough movement points to upgrade a building.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start upgrading.", self.global_manager)
+
 class appoint_minister_button(label_button):
     '''
     Button that appoints the selected minister to the office corresponding to this button
@@ -1534,7 +1728,7 @@ class remove_minister_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns same as superclass if the selected minister is currently in an office, otherise returns False
+            boolean: Returns same as superclass if the selected minister is currently in an office, otherwise returns False
         '''
         if super().can_show():
             displayed_minister = self.global_manager.get('displayed_minister')
@@ -1559,3 +1753,43 @@ class remove_minister_button(label_button):
                 appointed_minister.appoint('none')
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
+
+class hire_village_workers_button(label_button):
+    '''
+    Button that hires available workers from the displayed village
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'hire village worker', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if a village with available workers is displayed, otherwise returns False
+        '''
+        if super().can_show():
+            attached_village = self.global_manager.get('displayed_tile').cell.village
+            if not attached_village == 'none':
+                if attached_village.can_recruit_worker():
+                    return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                attached_village = self.global_manager.get('displayed_tile').cell.village
+                attached_village.recruit_worker()
+            else:
+                text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)

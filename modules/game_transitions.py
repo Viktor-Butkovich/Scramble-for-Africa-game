@@ -25,7 +25,7 @@ def set_game_mode(new_game_mode, global_manager):
         start_loading(global_manager)
         if new_game_mode == 'strategic':
             global_manager.set('current_game_mode', 'strategic')
-            global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             text_tools.print_to_screen("Entering strategic map", global_manager)
             centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
@@ -41,7 +41,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('current_game_mode', 'ministers')
             text_tools.print_to_screen("Entering minister conference room", global_manager)
         else:
-            global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):
