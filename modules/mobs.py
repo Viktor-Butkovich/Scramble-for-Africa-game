@@ -423,6 +423,15 @@ class mob(actor):
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
 
     def fire(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of die to improve consistency with workers/groups/vehicles, whose die and fire have different
+                functionalities
+        Input:
+            None
+        Output:
+            None
+        '''
         self.die()
 
     def die(self):

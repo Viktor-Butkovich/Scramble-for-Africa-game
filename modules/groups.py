@@ -78,6 +78,14 @@ class group(mob):
         self.set_group_type('none')
 
     def fire(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also fires this group's worker and officer
+        Input:
+            None
+        Output:
+            None
+        '''
         super().fire()
         self.officer.fire()
         self.worker.fire()
@@ -254,7 +262,7 @@ class group(mob):
         '''
         Description
             Used when the player clicks on a construct building or train button, displays a choice notification that allows the player to construct it or not. Choosing to construct starts the construction process, costs an amount based
-                on the building built, and consumes the caravan's movement points
+                on the building built, and consumes the group's movement points
         Input:
             dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
                 string building_type: type of building, like 'resource'
@@ -393,7 +401,7 @@ class group(mob):
     def complete_construction(self):
         '''
         Description:
-            Used when the player finishes rolling for construction, shows the construction's results and making any changes caused by the result. If successful, the building is constructed, promotes engineer to a veteran on critical
+            Used when the player finishes rolling for construction, shows the construction's results and makes any changes caused by the result. If successful, the building is constructed, promotes engineer to a veteran on critical
                 success
         Input:
             None
@@ -562,16 +570,25 @@ class work_crew(group):
         self.select()
 
     def attempt_production(self, building):
+        '''
+        Description:
+            Attempts to produce commodities at a production building at the end of a turn. A work crew makes a number of rolls equal to the building's efficiency level, and each successful roll produces a unit of the building's
+                commodity. Each roll has a success chance based on the work crew's experience and its minister's skill/corruption levels. Promotes foreman to veteran on critical success
+        Input:
+            building building: building in which this work crew is working
+        Output:
+            None
+        '''
         if not building.resource_type in self.global_manager.get('attempted_commodities'):
             self.global_manager.get('attempted_commodities').append(building.resource_type)
         for current_attempt in range(building.efficiency):
             if self.veteran:
-                results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice
+                results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
                 roll_result = max(results[0], results[1])
             else:
                 roll_result = self.controlling_minister.roll(6, 4, 0)
                 
-            if roll_result >= 4: #4+ required on D6 for exploration
+            if roll_result >= 4: #4+ required on D6 for production
                 building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
                 self.global_manager.get('commodities_produced')[building.resource_type] += 1
 
@@ -580,7 +597,7 @@ class work_crew(group):
 
 class construction_gang(group):
     '''
-    A group with an engineer officer that is able to construct buildings and trains
+    A group with an engineer officer that is able to construct/upgrade buildings and trains
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -610,6 +627,18 @@ class construction_gang(group):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
 
     def start_upgrade(self, building_info_dict):
+        '''
+        Description
+            Used when the player clicks on an upgrade building button, displays a choice notification that allows the player to upgrade it or not. Choosing to construct starts the upgrade process, costs an amount based on the number of
+                previous upgrades to that building, and consumes the constructiong gang's movement points
+        Input:
+            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
+                string upgrade_type: type of upgrade, like 'scale' or 'efficiency'
+                string building_name: name of building, like 'ivory camp'
+                building upgraded_building: building object being upgraded
+        Output:
+            None
+        '''
         self.upgrade_type = building_info_dict['upgrade_type']
         self.building_name = building_info_dict['building_name']
         self.upgraded_building = building_info_dict['upgraded_building']
@@ -638,6 +667,14 @@ class construction_gang(group):
         notification_tools.display_choice_notification(message, ['start upgrade', 'stop upgrade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def upgrade(self):
+        '''
+        Description:
+            Controls the upgrade process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         self.current_construction_type = 'upgrade'
         roll_result = 0
         self.just_promoted = False
@@ -657,11 +694,9 @@ class construction_gang(group):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
@@ -690,7 +725,7 @@ class construction_gang(group):
         notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager)
             
         text += "/n"
-        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+        if roll_result >= self.current_min_success: #4+ required on D6 for upgrade
             text += "The " + self.name + " successfully upgraded the " + self.building_name + "'s " + self.upgrade_type + ". /n"
         else:
             text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the upgrade. /n"
@@ -706,6 +741,15 @@ class construction_gang(group):
 
         
     def complete_upgrade(self):
+        '''
+        Description:
+            Used when the player finishes rolling for an upgrade, shows the upgrade's results and makes any changes caused by the result. If successful, the building is upgraded in a certain field, promotes engineer to a veteran on
+                critical success
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('construction_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             if roll_result >= self.current_min_crit_success and not self.veteran:
@@ -989,6 +1033,15 @@ class caravan(group):
         self.global_manager.set('trade_result', [self, roll_result, commodity, gets_worker]) #allows notification to give random commodity when clicked
 
     def complete_trade(self, gives_commodity, trade_result):
+        '''
+        Description:
+            Used when the player finishes rolling for a transaction with a village, shows the transaction's results and makes any changes caused by the result. Consumes one of the caravan's consumer goods and has a chance to convert a
+                villager into an available worker. If successful, gives a commodity in return for the consumer goods 
+        Input:
+            None
+        Output:
+            None
+        '''
         if trade_result[3]: #if gets worker
             self.notification.choice_info_dict['village'].change_available_workers(1)
             market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
@@ -1173,7 +1226,7 @@ class missionaries(group):
     def complete_conversion(self):
         '''
         Description:
-            Used when the player finishes rolling for religious conversion, shows the conversion's results and making any changes caused by the result. If successful, reduces village aggressiveness, promotes evangelist to a veteran on
+            Used when the player finishes rolling for religious conversion, shows the conversion's results and makes any changes caused by the result. If successful, reduces village aggressiveness, promotes evangelist to a veteran on
                 critical success. Missionaries die on critical failure
         Input:
             None
@@ -1402,7 +1455,7 @@ class expedition(group):
     def complete_exploration(self): #roll_result, x_change, y_change
         '''
         Description:
-            Used when the player finishes rolling for an exploration, shows the exploration's results and making any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
+            Used when the player finishes rolling for an exploration, shows the exploration's results and makes any changes caused by the result. If successful, the expedition moves into the explored area, consumes its movement
                 points, promotes its explorer to a veteran on critical success. If not successful, the expedition consumes its movement points and dies on critical failure
         Input:
             None

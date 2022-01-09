@@ -69,7 +69,14 @@ def start_turn(global_manager, first_turn):
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
 
 def manage_production(global_manager):
-    #global_manager.set('commodities_produced', {})
+    '''
+    Description:
+        Orders each work crew in a production building to attempt commodity production and displays a production report of commodities for which production was attempted and how much of each was produced
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     global_manager.set('attempted_commodities', [])
     for current_commodity in global_manager.get('collectable_resources'):
         global_manager.get('commodities_produced')[current_commodity] = 0
@@ -94,7 +101,7 @@ def manage_production(global_manager):
 def manage_upkeep(global_manager):
     '''
     Description:
-        Pays upkeep for all units at the beginning of the turn
+        Pays upkeep for all units at the end of a turn. Currently, only workers cost upkeep
     Input:
         global_manager_template global_manager: Object that accesses shared variables
     Output:

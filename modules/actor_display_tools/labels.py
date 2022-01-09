@@ -500,7 +500,25 @@ class building_work_crews_label(actor_display_label):
             return(False)
 
 class building_efficiency_label(actor_display_label):
+    '''
+    Label that shows a production building's efficiency, which is the number of attempts work crews at the building have to produce commodities
+    '''
     def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+        '''
+        Description:
+            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
+            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
+            int height: Pixel height of this label
+            string list modes: Game modes during which this label can appear
+            string image_id: File path to the image used by this object
+            string building_type: Type of building this label shows the workers of, like 'resource building'
+            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.remove_work_crew_button = 'none'
         self.showing = False
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'building efficiency', actor_type, global_manager)
@@ -509,6 +527,14 @@ class building_efficiency_label(actor_display_label):
         #self.showing = False
 
     def calibrate(self, new_actor):
+        '''
+        Description:
+            Attaches this label to the inputted actor and updates this label's information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor that whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
         self.actor = new_actor
         self.showing = False
         if not new_actor == 'none':
@@ -518,6 +544,14 @@ class building_efficiency_label(actor_display_label):
                 self.showing = True
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this label should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
+        '''
         if self.showing:
             return(super().can_show())
         else:

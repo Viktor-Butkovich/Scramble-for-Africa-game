@@ -702,11 +702,37 @@ class cycle_passengers_button(label_button):
                 text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
 
 class cycle_work_crews_button(label_button):
+    '''
+    Button that cycles the order of work crews in a building
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.previous_showing_result = False
         super().__init__(coordinates, width, height, 'cycle work crews', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the displayed tile's cell has a resource building containing more than 3 work crews, otherwise returns False
+        '''
         result = super().can_show()
         if result:
             if self.attached_label.actor.cell.contained_buildings['resource'] == 'none':
@@ -724,7 +750,7 @@ class cycle_work_crews_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the order of passengers displayed in a vehicle
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the order of work crews displayed in a building
         Input:
             None
         Output:
@@ -775,9 +801,7 @@ class work_crew_to_building_button(label_button):
         Output:
             None
         '''
-        #self.attached_worker = self.attached_label.actor #selected_list[0]
         self.attached_work_crew = self.attached_label.actor
-        #if (not self.attached_worker == 'none') and self.attached_worker.is_worker:
         if (not self.attached_work_crew == 'none') and self.attached_work_crew.is_work_crew:
             possible_attached_building = self.attached_work_crew.images[0].current_cell.contained_buildings[self.building_type]
             if (not possible_attached_building == 'none'): #and building has capacity
@@ -1276,7 +1300,7 @@ class build_train_button(label_button):
 
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
-    Button that commands a mob to construct a certain type of building
+    Button that commands a group to construct a certain type of building
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
         '''
@@ -1289,7 +1313,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
             string list modes: Game modes during which this button can appear
             label attached_label: Label that this button is attached to
-            string building_type: Type of building that this button builds, like 'resource building'
+            string building_type: Type of building that this button builds, like 'resource'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1514,7 +1538,26 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_mob.start_construction(building_info_dict)
 
 class upgrade_button(label_button):
+    '''
+    Button that commands a construction gang to upgrade a certain aspect of a building
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, base_building_type, upgrade_type, global_manager): #base_building_type = 'resource', upgrade_type = 'efficiency'
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            label attached_label: Label that this button is attached to
+            string base_building_type: Type of building that this button upgrades, like 'resource'
+            string upgrade_type: Aspect of building upgraded by this button, like 'scale' or 'efficiency'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.base_building_type = base_building_type
         self.upgrade_type = upgrade_type
         self.attached_mob = 'none'
@@ -1526,7 +1569,7 @@ class upgrade_button(label_button):
     def update_info(self):
         '''
         Description:
-            Updates the exact kind of building constructed by this button depending on what is in the selected mob's tile, like building a road or upgrading a previously constructed road to a railroad
+            Updates which building object is attached to this button based on the selected construction gang's location relative to buildings of this button's base building type
         Input:
             None
         Output:
@@ -1546,7 +1589,7 @@ class upgrade_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not capable of upgrading buildings or if there is no valid building in its tile to upgrade, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
@@ -1560,7 +1603,7 @@ class upgrade_button(label_button):
     def update_tooltip(self):
         '''
         Description:
-            Sets this button's tooltip depending on the type of building it constructs
+            Sets this button's tooltip depending on its attached building and the aspect it upgrades
         Input:
             None
         Output:
@@ -1579,6 +1622,14 @@ class upgrade_button(label_button):
         
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to upgrade part of a certain building in its tile
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
@@ -1677,7 +1728,7 @@ class remove_minister_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns same as superclass if the selected minister is currently in an office, otherise returns False
+            boolean: Returns same as superclass if the selected minister is currently in an office, otherwise returns False
         '''
         if super().can_show():
             displayed_minister = self.global_manager.get('displayed_minister')
@@ -1704,10 +1755,21 @@ class remove_minister_button(label_button):
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 
 class hire_village_workers_button(label_button):
+    '''
+    Button that hires available workers from the displayed village
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         super().__init__(coordinates, width, height, 'hire village worker', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if a village with available workers is displayed, otherwise returns False
+        '''
         if super().can_show():
             attached_village = self.global_manager.get('displayed_tile').cell.village
             if not attached_village == 'none':
@@ -1716,6 +1778,14 @@ class hire_village_workers_button(label_button):
         return(False)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True

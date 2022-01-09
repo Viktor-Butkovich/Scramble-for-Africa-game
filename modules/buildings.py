@@ -344,6 +344,8 @@ class resource_building(building):
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
+                'scale': int value - Required if from save, maximum number of work crews that can be attached to this building
+                'efficiency': int value - Required if from save, number of rolls made by work crews each turn to produce commodities at this building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -381,6 +383,8 @@ class resource_building(building):
                 'image': string value - File path to the image used by this object
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
+                'scale': int value - Maximum number of work crews that can be attached to this building
+                'efficiency': int value - Number of rolls made by work crews each turn to produce commodities at this building
         '''
         save_dict = super().to_save_dict()
         save_dict['resource_type'] = self.resource_type
@@ -401,6 +405,14 @@ class resource_building(building):
         super().remove()
 
     def can_upgrade(self, upgrade_type):
+        '''
+        Description:
+            Returns whether this building can be upgraded in the inputted field. A building can be upgraded not be ugpraded above 6 in a field
+        Input:
+            string upgrade_type: Represents type of upgrade, like 'scale' or 'efficiency'
+        Output:
+            boolean: Returns True if this building can be upgraded in the inputted field, otherwise returns False
+        '''
         if upgrade_type == 'scale': #quantitative
             if self.scale < 6:
                 return(True)
@@ -410,6 +422,14 @@ class resource_building(building):
         return(False)
 
     def upgrade(self, upgrade_type):
+        '''
+        Description:
+            Upgrades this building in the inputted field, such as by increasing the building's efficiency by 1 when 'efficiency' is inputted
+        Input:
+            string upgrade_type: Represents type of upgrade, like 'scale' or 'effiency'
+        Output:
+            None
+        '''
         if upgrade_type == 'scale':
             self.scale += 1
         elif upgrade_type == 'efficiency':
@@ -417,8 +437,25 @@ class resource_building(building):
         self.num_upgrades += 1
 
     def get_upgrade_cost(self):
+        '''
+        Description:
+            Returns the cost of the next upgrade for this building. The first successful upgrade costs 2 money and each subsequent upgrade costs 2 more
+        Input:
+            None
+        Output:
+            None
+        '''
         return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
     
     def produce(self):
+        '''
+        Description:
+            Orders each work crew attached to this building to attempt producing commodities at the end of a turn. Based on work crew experience and minister skill/corruption, each work crew can produce a number of commodities up to the
+                building's efficiency
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_work_crew in self.contained_work_crews:
             current_work_crew.attempt_production(self)

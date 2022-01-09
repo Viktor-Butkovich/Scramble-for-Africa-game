@@ -86,6 +86,14 @@ def sell(seller, sold_commodity, num_sold, global_manager):
         text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
 
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
+    '''
+    Description:
+        Controls the chance to increase worker price when a worker leaves the labor pool or decrease worker price when a worker joins the labor pool
+    Input:
+        string change_type: 'increase' or 'decrease' depending on whether a worker is being added to or removed from the labor pool, decides whether worker price increases or decreases
+        string worker_type: 'European' or 'African', decides which type of worker has a price change
+        global_manager_template global_manager: Object that accesses shared variables
+    '''
     if random.randrange(1, 7) >= 4: #half chance of change
         current_price = global_manager.get(worker_type.lower() + '_worker_upkeep')
         if change_type == 'increase':

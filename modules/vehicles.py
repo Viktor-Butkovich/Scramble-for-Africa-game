@@ -76,6 +76,14 @@ class vehicle(mob):
             self.crew.die()
 
     def fire(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also fires this vehicle's crew and passengers
+        Input:
+            None
+        Output:
+            None
+        '''
         super().fire()
         for current_passenger in self.contained_mobs:
             current_passenger.fire()
