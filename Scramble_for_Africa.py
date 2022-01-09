@@ -706,14 +706,14 @@ available_minister_display_y -= 60
 cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
 
-
-minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
-minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."
-minister_description_message += "A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll."
-minister_description_message += "If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels."
-minister_description_width = 800
-minister_description_label = labels.multi_line_label(scaling.scale_coordinates(global_manager.get('default_display_width') / 2 - (minister_description_width / 2), table_height + 10, global_manager),
-    minister_description_width, 0, ['ministers'], 'misc/default_notification.png', minister_description_message, global_manager) #coordinates, ideal_width, minimum_height, modes, image, message, global_manager
+#explained in tutorial
+#minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
+#minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."
+#minister_description_message += "A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll."
+#minister_description_message += "If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels."
+#minister_description_width = 800
+#minister_description_label = labels.multi_line_label(scaling.scale_coordinates(global_manager.get('default_display_width') / 2 - (minister_description_width / 2), table_height + 10, global_manager),
+#    minister_description_width, 0, ['ministers'], 'misc/default_notification.png', minister_description_message, global_manager) #coordinates, ideal_width, minimum_height, modes, image, message, global_manager
 main_loop.main_loop(global_manager)
 
 #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), tile) to calibrate actor display to a tile

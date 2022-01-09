@@ -1106,12 +1106,16 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.to_mode == 'main menu':
-                    game_transitions.to_main_menu(self.global_manager)
-                if not self.to_mode == 'previous':
-                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                if self.global_manager.get("minister_appointment_tutorial_completed"):
+                    if self.to_mode == 'main menu':
+                        game_transitions.to_main_menu(self.global_manager)
+                    if not self.to_mode == 'previous':
+                        self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+                        game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                    else:
+                        game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
                 else:
-                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+                    text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
 

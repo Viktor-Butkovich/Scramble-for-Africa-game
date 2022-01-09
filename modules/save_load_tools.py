@@ -44,6 +44,9 @@ class save_load_manager_template():
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
+        self.copied_elements.append('minister_appointment_tutorial_completed')
+        self.copied_elements.append('exit_minister_screen_tutorial_completed')
+        self.copied_elements.append('current_game_mode')
         
     def new_game(self):
         '''
@@ -90,7 +93,7 @@ class save_load_manager_template():
         self.global_manager.set('minimap_grid', minimap_grid)
 
         self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
-        notification_tools.show_tutorial_notifications(self.global_manager)
+    
 
         europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
         europe_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
@@ -110,8 +113,9 @@ class save_load_manager_template():
 
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
-
         self.global_manager.get('minimap_grid').calibrate(2, 2)
+
+        game_transitions.set_game_mode('ministers', self.global_manager)
 
         for current_commodity in self.global_manager.get('commodity_types'):
             if not current_commodity == 'consumer goods':
@@ -136,6 +140,10 @@ class save_load_manager_template():
         minister_utility.update_available_minister_display(self.global_manager)
 
         turn_management_tools.start_turn(self.global_manager, True)
+
+        self.global_manager.set('minister_appointment_tutorial_completed', False)
+        self.global_manager.set('exit_minister_screen_tutorial_completed', False)
+        notification_tools.show_tutorial_notifications(self.global_manager)
         
     def save_game(self, file_path):
         '''
@@ -149,6 +157,8 @@ class save_load_manager_template():
         file_path = 'save_games/' + file_path
         saved_global_manager = data_managers.global_manager_template()
         for current_element in self.copied_elements: #save necessary data into new global manager
+            if current_element == 'current_game_mode':
+                print(self.global_manager.get(current_element))
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
 
         saved_grid_dicts = []
@@ -201,7 +211,6 @@ class save_load_manager_template():
             self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
-        #self.global_manager.set('available_minister_left_index', 0)
 
         #load grids
         strategic_grid_height = 300
@@ -273,3 +282,7 @@ class save_load_manager_template():
         self.global_manager.get('commodity_prices_label').update_label()
         
         self.global_manager.get('minimap_grid').calibrate(2, 2)
+        if not new_global_manager.get('current_game_mode') == 'strategic':
+            game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
+
+        notification_tools.show_tutorial_notifications(self.global_manager)
