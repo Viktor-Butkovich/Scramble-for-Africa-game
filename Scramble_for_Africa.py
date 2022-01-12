@@ -720,3 +720,4 @@ main_loop.main_loop(global_manager)
 #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), mob) to calibrate actor display to a tile
 #minister_utility.calibrate_minister_info_display(global_manager, minister) to calibrate minister display to a minister
 pygame.quit()
+#test
