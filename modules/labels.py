@@ -129,6 +129,7 @@ class value_label(label):
         '''
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
         self.value_name = value_name
+        self.display_name = text_tools.remove_underscores(self.value_name) #public_opinion to public opinion
         self.tracker = self.global_manager.get(value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
@@ -142,7 +143,7 @@ class value_label(label):
         Output:
             None
         '''
-        self.set_label(self.value_name + ': ' + str(new_value))
+        self.set_label(self.display_name + ': ' + str(new_value))
 
 class money_label(value_label):
     '''

@@ -354,12 +354,16 @@ game_transitions.set_game_mode('main_menu', global_manager)
 global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
 
 global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-labels.money_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+labels.money_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', global_manager)
 
 global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
-labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'turn', global_manager)
+
+global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, global_manager))
+labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 110, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    'misc/default_label.png', 'public_opinion', global_manager)
 
 strategic_to_europe_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
     pygame.K_e, 'europe', ['strategic'], 'buttons/european_hq_button.png', global_manager)
@@ -706,6 +710,7 @@ available_minister_display_y -= 60
 cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
     scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
 
+
 #explained in tutorial
 #minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
 #minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."
@@ -720,4 +725,3 @@ main_loop.main_loop(global_manager)
 #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), mob) to calibrate actor display to a tile
 #minister_utility.calibrate_minister_info_display(global_manager, minister) to calibrate minister display to a minister
 pygame.quit()
-#test

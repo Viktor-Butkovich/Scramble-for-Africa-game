@@ -96,3 +96,12 @@ def clear_message(global_manager):
         None
     '''
     global_manager.set('message', '')
+
+def remove_underscores(message):
+    return_message = ''
+    for current_character in message:
+        if current_character == '_':
+            return_message += ' '
+        else:
+            return_message += current_character
+    return(return_message)

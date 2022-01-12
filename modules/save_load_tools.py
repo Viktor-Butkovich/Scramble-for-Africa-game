@@ -41,6 +41,7 @@ class save_load_manager_template():
         self.copied_elements = []
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
+        self.copied_elements.append('public_opinion')
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
@@ -125,6 +126,7 @@ class save_load_manager_template():
 
         self.global_manager.get('money_tracker').set(100)
         self.global_manager.get('turn_tracker').set(0)
+        self.global_manager.get('public_opinion_tracker').set(70)
 
         self.global_manager.set('player_turn', True)
 
@@ -194,6 +196,7 @@ class save_load_manager_template():
         Output:
             None
         '''
+        game_transitions.start_loading(self.global_manager)
         #load file
         try:
             file_path = 'save_games/' + file_path
@@ -211,6 +214,7 @@ class save_load_manager_template():
             self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
+        self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
 
         #load grids
         strategic_grid_height = 300
@@ -263,12 +267,13 @@ class save_load_manager_template():
         input_dict['attached_grid'] = strategic_map_grid
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
-        self.global_manager.get('minimap_grid').calibrate(2, 2)
-
+        
         self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
+
+        self.global_manager.get('minimap_grid').calibrate(2, 2)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

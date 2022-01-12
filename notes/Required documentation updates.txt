@@ -1,1 +1,5 @@
 ministers imports
+text_tools.remove_underscores
+turn_management_tools.manage_public_opinion
+turn_management_tools.manage_subsidies
+to do: add financial report at beginning of turn
