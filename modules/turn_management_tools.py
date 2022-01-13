@@ -30,6 +30,7 @@ def end_turn(global_manager):
     manage_public_opinion(global_manager)
     manage_subsidies(global_manager)
     manage_upkeep(global_manager)
+    manage_financial_report(global_manager)
     start_turn(global_manager, False)
 
 def start_turn(global_manager, first_turn):
@@ -113,7 +114,7 @@ def manage_upkeep(global_manager):
     european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 1)
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers')
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep, 1)
-    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1))
+    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
     
     text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager)
 
@@ -129,4 +130,10 @@ def manage_public_opinion(global_manager):
 def manage_subsidies(global_manager):
     subsidies_received = round(global_manager.get('public_opinion') / 10) #5 for 50 public opinion
     text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government for your colonial efforts", global_manager)
-    global_manager.get('money_tracker').change(subsidies_received)
+    global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
+
+
+def manage_financial_report(global_manager):
+    financial_report_text = global_manager.get('money_tracker').prepare_financial_report()
+    notification_tools.display_notification(financial_report_text, 'default', global_manager)
+    global_manager.get('money_tracker').reset_transaction_history()

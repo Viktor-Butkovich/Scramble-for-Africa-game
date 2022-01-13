@@ -251,9 +251,18 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
+        self.transaction_history = {}
+        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment']
+        self.transaction_types += ['construction']
+        self.reset_transaction_history()
         super().__init__('money', initial_value, global_manager)
 
-    def change(self, value_change):
+    def reset_transaction_history(self):
+        self.transaction_history = {}
+        for current_transaction_type in self.transaction_types:
+            self.transaction_history[current_transaction_type] = 0
+
+    def change(self, value_change, change_type = 'misc.'):
         '''
         Description:
             Changes the money variable by the inputted amount
@@ -262,6 +271,12 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
+        if change_type == 'misc.':
+            if value_change > 0:
+                change_type = 'misc. revenue'
+            else:
+                change_type = 'misc. expenses'
+        self.transaction_history[change_type] += value_change
         super().change(value_change)
         if self.get() < 0:
             game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
@@ -281,6 +296,37 @@ class money_tracker(value_tracker):
             game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
+    def prepare_financial_report(self):
+        notification_text = "Financial report: /n /n"
+        notification_text += "Revenue: /n "
+        total_revenue = 0
+        for transaction_type in self.transaction_types:
+            if self.transaction_history[transaction_type] > 0:
+                if transaction_type == 'misc. revenue':
+                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                else:
+                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                total_revenue += self.transaction_history[transaction_type]
+        if total_revenue == 0:
+            notification_text += '  None /n'
+        
+        notification_text += "/nExpenses: /n"
+        total_expenses = 0
+        for transaction_type in self.transaction_types:
+            if self.transaction_history[transaction_type] < 0:
+                if transaction_type == 'misc. expenses':
+                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                else:
+                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                total_expenses += self.transaction_history[transaction_type]
+        if total_expenses == 0:
+            notification_text += '  None /n'
+        notification_text += ' /n'
+        notification_text += 'Total revenue: ' + str(round(total_revenue, 1)) + ' /n'
+        notification_text += 'Total expenses: ' + str(round(total_expenses, 1)) + ' /n'
+        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 1)) + ' /n'
+        return(notification_text)
+                    
 class notification_manager_template():
     '''
     Object that controls the displaying of notifications

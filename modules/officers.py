@@ -312,7 +312,7 @@ class evangelist(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
         text = ""
         text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
@@ -494,7 +494,7 @@ class merchant(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
         text = ""
         text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    

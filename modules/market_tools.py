@@ -76,7 +76,7 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     '''
     sell_price = global_manager.get('commodity_prices')[sold_commodity]
     for i in range(num_sold):
-        global_manager.get('money_tracker').change(sell_price)
+        global_manager.get('money_tracker').change(sell_price, 'commodities sold')
         seller.change_inventory(sold_commodity, -1)
         if random.randrange(1, 7) == 1: #1/6 chance
             change_price(sold_commodity, -1, global_manager)

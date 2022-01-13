@@ -48,6 +48,7 @@ class save_load_manager_template():
         self.copied_elements.append('minister_appointment_tutorial_completed')
         self.copied_elements.append('exit_minister_screen_tutorial_completed')
         self.copied_elements.append('current_game_mode')
+        self.copied_elements.append('transaction_history')
         
     def new_game(self):
         '''
@@ -126,7 +127,7 @@ class save_load_manager_template():
 
         self.global_manager.get('money_tracker').set(100)
         self.global_manager.get('turn_tracker').set(0)
-        self.global_manager.get('public_opinion_tracker').set(70)
+        self.global_manager.get('public_opinion_tracker').set(50)
 
         self.global_manager.set('player_turn', True)
 
@@ -158,9 +159,8 @@ class save_load_manager_template():
         '''
         file_path = 'save_games/' + file_path
         saved_global_manager = data_managers.global_manager_template()
+        self.global_manager.set('transaction_history', self.global_manager.get('money_tracker').transaction_history)
         for current_element in self.copied_elements: #save necessary data into new global manager
-            if current_element == 'current_game_mode':
-                print(self.global_manager.get(current_element))
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
 
         saved_grid_dicts = []
@@ -213,6 +213,7 @@ class save_load_manager_template():
         for current_element in self.copied_elements:
             self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
+        self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
 
