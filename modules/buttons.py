@@ -270,8 +270,9 @@ class button():
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
-            self.set_tooltip(["Hires villagers as workers, reducing the village's population. ", "If fired, the workers will return to their village."])
-
+            self.set_tooltip(["Hires villagers as workers, reducing the village's population", "If fired, the workers will return to their village"])
+        elif self.button_type == 'show previous financial report':
+            self.set_tooltip(["Displays the previous turn's financial report"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -1340,4 +1341,34 @@ class commodity_button(button):
             None
         '''
         return(False)
-        
+
+class show_previous_financial_report_button(button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'blue', 'show previous financial report', keybind_id, modes, image_id, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            if not self.global_manager.get('previous_financial_report') == 'none':
+                return(True)
+        return(False)
+    
+    def on_click(self):
+        self.showing_outline = True
+        if main_loop_tools.action_possible(self.global_manager):
+            notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
+        else:
+            text_tools.print_to_screen("You are busy and can not view the last turn's financial report", self.global_manager)

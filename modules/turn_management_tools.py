@@ -136,4 +136,5 @@ def manage_subsidies(global_manager):
 def manage_financial_report(global_manager):
     financial_report_text = global_manager.get('money_tracker').prepare_financial_report()
     notification_tools.display_notification(financial_report_text, 'default', global_manager)
+    global_manager.set('previous_financial_report', financial_report_text)
     global_manager.get('money_tracker').reset_transaction_history()

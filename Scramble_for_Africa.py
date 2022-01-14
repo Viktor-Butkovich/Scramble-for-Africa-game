@@ -354,15 +354,18 @@ game_transitions.set_game_mode('main_menu', global_manager)
 global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
 
 global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-labels.money_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', global_manager)
+global_manager.set('previous_financial_report', 'none')
+show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
+    scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers'], 'buttons/instructions.png', global_manager)
 
 global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
-labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'turn', global_manager)
 
 global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, global_manager))
-labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 110, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'public_opinion', global_manager)
 
 strategic_to_europe_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',

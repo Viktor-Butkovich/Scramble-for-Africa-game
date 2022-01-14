@@ -254,7 +254,7 @@ class recruitment_choice_button(choice_button):
             input_dict['image'] = self.mob_image_id
             input_dict['modes'] = ['strategic', 'europe']
             self.showing_outline = True
-            self.global_manager.get('money_tracker').change(-1 * self.cost)
+            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
             if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
                 name = ''
                 for character in self.recruitment_type:

@@ -717,6 +717,8 @@ class abstract_grid(grid):
         save_dict = super().to_save_dict()
         if self.global_manager.get('europe_grid') == self:
             save_dict['grid_type'] = 'europe_grid'
+        elif self.global_manager.get('slave_traders_grid') == self:
+            save_dict['grid_type'] = 'slave_traders_grid'
         else:
             save_dict['grid_type'] = 'default'
         return(save_dict)

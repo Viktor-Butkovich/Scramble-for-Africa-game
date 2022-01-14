@@ -225,7 +225,7 @@ class actor_display_label(label):
                 self.set_label(self.message_start + new_actor.name.capitalize())
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
-                    self.set_label('Europe')
+                    self.set_label(new_actor.grid.name.capitalize())
                 elif self.actor.cell.visible:
                     self.set_label(self.message_start + str(new_actor.cell.terrain))
                 else:
