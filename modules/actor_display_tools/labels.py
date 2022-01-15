@@ -99,6 +99,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.hire_village_workers_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'mobs/African worker/button.png', self, global_manager))
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+        elif self.actor_label_type == 'terrain':
+            self.message_start = 'Terrain: '
+            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y), self.height, self.height, 'none', self.modes, 'mobs/slave worker/button.png', self, global_manager))
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))

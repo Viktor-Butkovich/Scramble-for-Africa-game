@@ -45,6 +45,8 @@ class save_load_manager_template():
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
+        self.copied_elements.append('slave_worker_upkeep')
+        self.copied_elements.append('recruitment_costs')
         self.copied_elements.append('minister_appointment_tutorial_completed')
         self.copied_elements.append('exit_minister_screen_tutorial_completed')
         self.copied_elements.append('current_game_mode')
@@ -144,7 +146,7 @@ class save_load_manager_template():
             else:
                 market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
-        self.global_manager.get('money_tracker').set(100)
+        self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
 
@@ -157,8 +159,10 @@ class save_load_manager_template():
 
         self.global_manager.set('num_african_workers', 0)
         self.global_manager.set('num_european_workers', 0)
+        self.global_manager.set('num_slave_workers', 0)
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
+        self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
         
         minister_utility.update_available_minister_display(self.global_manager)
 

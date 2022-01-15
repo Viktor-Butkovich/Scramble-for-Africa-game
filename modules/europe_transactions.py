@@ -60,9 +60,10 @@ class recruitment_button(button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                    notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_name) + ' ' + self.recruitment_name + '? ' +
-                                                                   utility.generate_capitalized_article(self.recruitment_name) + ' ' + self.recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
-                                                                   ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
+                    #notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_name) + ' ' + self.recruitment_name + '? ' +
+                    #                                               utility.generate_capitalized_article(self.recruitment_name) + ' ' + self.recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
+                    #                                               ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:

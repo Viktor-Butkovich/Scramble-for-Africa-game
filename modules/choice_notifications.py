@@ -249,31 +249,52 @@ class recruitment_choice_button(choice_button):
         '''
         if self.can_show():
             input_dict = {}
-            input_dict['coordinates'] = (0, 0)
-            input_dict['grids'] = [self.global_manager.get('europe_grid')]
-            input_dict['image'] = self.mob_image_id
-            input_dict['modes'] = ['strategic', 'europe']
-            self.showing_outline = True
-            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
-            if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
-                name = ''
-                for character in self.recruitment_type:
-                    if not character == '_':
-                        name += character
-                    else:
-                        name += ' '
-                input_dict['name'] = name
-                input_dict['init_type'] = self.recruitment_type
-                input_dict['officer_type'] = self.recruitment_type
-            elif self.recruitment_type == 'European worker':
-                input_dict['name'] = 'European worker'
-                input_dict['init_type'] = 'worker'
-                input_dict['worker_type'] = 'European'
-            elif self.recruitment_type == 'ship':
-                image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
-                input_dict['image_dict'] = image_dict
-                input_dict['name'] = 'ship'
-                input_dict['crew'] = 'none'
-                input_dict['init_type'] = 'ship'
+            if self.recruitment_type == 'slave worker':
+                input_dict = {}
+                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
+                input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
+                attached_cell = input_dict['grids'][0].cell_list[0]
+                input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
+                input_dict['image'] = 'mobs/slave worker/default.png'
+                input_dict['modes'] = ['strategic']
+                input_dict['name'] = 'Slave worker'
+                input_dict['init_type'] = 'slave'
+                input_dict['purchased'] = True
+            elif self.recruitment_type == 'African worker':
+                self.global_manager.get('displayed_tile').cell.village.recruit_worker()
+            else:
+                input_dict['coordinates'] = (0, 0)
+                input_dict['grids'] = [self.global_manager.get('europe_grid')]
+                input_dict['image'] = self.mob_image_id
+                input_dict['modes'] = ['strategic', 'europe']
+                self.showing_outline = True
+                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
+                if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
+                    name = ''
+                    for character in self.recruitment_type:
+                        if not character == '_':
+                            name += character
+                        else:
+                            name += ' '
+                    input_dict['name'] = name
+                    input_dict['init_type'] = self.recruitment_type
+                    input_dict['officer_type'] = self.recruitment_type
+                elif self.recruitment_type == 'European worker':
+                    input_dict['name'] = 'European worker'
+                    input_dict['init_type'] = 'worker'
+                    input_dict['worker_type'] = 'European'
+                elif self.recruitment_type == 'African worker':
+                    input_dict['name'] = 'African worker'
+                    input_dict['init_type'] = 'worker'
+                    input_dict['worker_type'] = 'African'
+                elif self.recruitment_type == 'slave worker':
+                    input_dict['name'] = 'slave worker'
+                    input_dict['init_type'] = 'slave'
+                elif self.recruitment_type == 'ship':
+                    image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
+                    input_dict['image_dict'] = image_dict
+                    input_dict['name'] = 'ship'
+                    input_dict['crew'] = 'none'
+                    input_dict['init_type'] = 'ship'
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         super().on_click()

@@ -112,8 +112,9 @@ def manage_upkeep(global_manager):
     '''
     african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 1)
     european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 1)
-    num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers')
-    total_upkeep = round(african_worker_upkeep + european_worker_upkeep, 1)
+    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 1)
+    num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
+    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
     global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
     
     text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager)
@@ -128,7 +129,7 @@ def manage_public_opinion(global_manager):
         text_tools.print_to_screen("Trending toward a neutral attitude, public opinion toward your company decreased from " + str(current_public_opinion) + " to " + str(current_public_opinion - 1), global_manager)
     
 def manage_subsidies(global_manager):
-    subsidies_received = round(global_manager.get('public_opinion') / 10) #5 for 50 public opinion
+    subsidies_received = round(global_manager.get('public_opinion') / 10, 1) #4.9 for 49 public opinion
     text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government for your colonial efforts", global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 

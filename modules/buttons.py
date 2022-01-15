@@ -270,7 +270,11 @@ class button():
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
-            self.set_tooltip(["Hires villagers as workers, reducing the village's population", "If fired, the workers will return to their village"])
+            self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
+                                str(self.global_manager.get('african_worker_upkeep')) + "money. If fired, the workers will return to their village"])
+        elif self.button_type == 'buy slaves':
+            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to recruit and have an upkeep each turn of " +
+                                str(self.global_manager.get('slave_worker_upkeep')) + " money. This is a morally reprehensible action and will be faced with a public opinion penalty"])
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
         else:

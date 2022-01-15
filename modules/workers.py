@@ -5,6 +5,7 @@ from .mobs import mob
 from . import actor_utility
 from . import utility
 from . import market_tools
+from . import text_tools
 
 class worker(mob):
     '''
@@ -188,6 +189,66 @@ class worker(mob):
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
         elif self.worker_type == 'African':
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
+
+class slave_worker(worker):
+    def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'purchased': 
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        input_dict['worker_type'] = 'slave'
+        super().__init__(from_save, input_dict, global_manager)
+        if not from_save:
+            if input_dict['purchased']: #as opposed to captured
+                market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+                public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+                current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+                resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                if not resulting_public_opinion == current_public_opinion:
+                    text_tools.print_to_screen("Participating in the slave trade has decreased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
+        self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
+        self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+
+    def fire(self):
+        super().fire()
+        market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+        public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
+        current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+        self.global_manager.get('public_opinion_tracker').change(public_opinion_bonus)
+        resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+        if not resulting_public_opinion == current_public_opinion:
+            text_tools.print_to_screen("Freeing slaves has increased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') - 1)
+        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
 
 class church_volunteers(worker):
     '''

@@ -183,7 +183,7 @@ class value_tracker():
     '''
     Object that controls the value of a certain variable
     '''
-    def __init__(self, value_key, initial_value, global_manager):
+    def __init__(self, value_key, initial_value, min_value, max_value, global_manager):
         '''
         Description:
             Initializes this object
@@ -198,6 +198,8 @@ class value_tracker():
         self.global_manager.set(value_key, initial_value)
         self.value_label = 'none'
         self.value_key = value_key
+        self.min_value = min_value
+        self.max_value = max_value
 
     def get(self):
         '''
@@ -234,6 +236,12 @@ class value_tracker():
             None
         '''
         self.global_manager.set(self.value_key, new_value)
+        if not self.min_value == 'none':
+            if self.get() < self.min_value:
+                self.global_manager.set(self.value_key, self.min_value)
+        if not self.max_value == 'none':
+            if self.get() > self.max_value:
+                self.global_manager.set(self.value_key, self.max_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
@@ -255,7 +263,7 @@ class money_tracker(value_tracker):
         self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment']
         self.transaction_types += ['construction']
         self.reset_transaction_history()
-        super().__init__('money', initial_value, global_manager)
+        super().__init__('money', initial_value, 'none', 'none', global_manager)
 
     def reset_transaction_history(self):
         self.transaction_history = {}

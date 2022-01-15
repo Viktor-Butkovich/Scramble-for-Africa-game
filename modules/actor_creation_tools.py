@@ -8,6 +8,8 @@ from . import groups
 from . import vehicles
 from . import buildings
 from . import ministers
+from . import notification_tools
+from . import utility 
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -43,6 +45,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = mobs.mob(from_save, input_dict, global_manager)
         elif init_type == 'worker':
             new_actor = workers.worker(from_save, input_dict, global_manager)
+        elif init_type == 'slave':
+            new_actor = workers.slave_worker(from_save, input_dict, global_manager)
         elif init_type == 'church_volunteers':
             new_actor = workers.church_volunteers(from_save, input_dict, global_manager)
         elif init_type == 'train':
@@ -83,6 +87,21 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type == 'resource':
             new_actor = buildings.resource_building(from_save, input_dict, global_manager)
         return(new_actor)
+
+    def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):
+        message = 'Are you sure you want to recruit ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + '? '
+        message += utility.generate_capitalized_article(recruitment_name) + ' ' + recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit. '
+        if recruitment_name == 'European worker':
+            message += 'European workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('european_worker_upkeep')) + ' money. '
+            message += 'Expanding the labor pool, such as by firing European workers, may decrease the upkeep cost. '
+        elif recruitment_name == 'African worker':
+            message += 'African workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money. '
+            message += 'Expanding the labor pool, such as by convincing villagers to become workers, firing African workers, or freeing slaves may decrease the upkeep cost. '
+        elif recruitment_name == 'slave worker':
+            message += 'Slaves have a set upkeep cost each turn of ' + str(global_manager.get('slave_worker_upkeep')) + ' money. '
+            message += 'Buying slaves is a morally reprehensible action and will be faced with a public opinion penalty. '
+        
+        notification_tools.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
 
     def create_group(self, worker, officer, global_manager): #use when merging groups. At beginning of game, instead of using this, create a group which creates its worker and officer and merges them
         '''

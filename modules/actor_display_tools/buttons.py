@@ -1789,7 +1789,42 @@ class hire_village_workers_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
-                attached_village = self.global_manager.get('displayed_tile').cell.village
-                attached_village.recruit_worker()
+                choice_info_dict = {'recruitment_type': 'African worker', 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment'}
+                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African worker', self.global_manager)
+                #attached_village = self.global_manager.get('displayed_tile').cell.village
+                #attached_village.recruit_worker()
             else:
                 text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)
+
+class buy_slaves_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'buy slaves', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
+                return(True)
+        return(False)
+
+    def on_click(self):
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                self.cost = self.global_manager.get('recruitment_costs')['slave worker']
+                if self.global_manager.get('money_tracker').get() >= self.cost:
+                    choice_info_dict = {'recruitment_type': 'slave worker', 'cost': self.cost, 'mob_image_id': 'mobs/slave worker/default.png', 'type': 'recruitment'}
+                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'slave worker', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You do not have enough money to buy slaves', self.global_manager)
+                #input_dict = {}
+                #input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
+                #attached_cell = input_dict['grids'][0].cell_list[0]
+                #input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
+                #input_dict['image'] = 'mobs/slave worker/default.png'
+                #input_dict['modes'] = ['strategic']
+                #input_dict['name'] = 'Slave worker'
+                #input_dict['init_type'] = 'slave'
+                #input_dict['purchased'] = True
+                #self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not buy a slave.", self.global_manager)

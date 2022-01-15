@@ -200,15 +200,16 @@ global_manager.set('group_minister_dict',
     }
 )
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
-global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
+global_manager.set('recruitment_costs', {'European worker': 0, 'slave worker': 5, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
     global_manager.get('recruitment_costs')[current_officer] = 5
 
-global_manager.set('worker_upkeep_fluctuation_amount', 0.1)
-global_manager.set('base_upgrade_price', 2) #times # upgrades + 1: 2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
+global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
+global_manager.set('base_upgrade_price', 5) #times # upgrades + 1: 5 for 1st upgrade, 10 for 2nd, 15 for 3rd, etc.
 global_manager.set('commodity_min_starting_price', 2)
 global_manager.set('commodity_max_starting_price', 5)
-global_manager.set('consumer_goods_starting_price', 2)
+global_manager.set('consumer_goods_starting_price', 3)
 
 global_manager.set('action_prices',
     {
@@ -263,10 +264,13 @@ global_manager.set('worker_list', [])
 #global_manager.set('num_workers', 0)
 global_manager.set('num_european_workers', 0)
 global_manager.set('num_african_workers', 0)
-global_manager.set('initial_african_worker_upkeep', 1)
-global_manager.set('initial_european_worker_upkeep', 1)
+global_manager.set('num_slave_workers', 0)
+global_manager.set('initial_african_worker_upkeep', 4)
+global_manager.set('initial_european_worker_upkeep', 6)
+global_manager.set('initial_slave_worker_upkeep', 2)
 global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
 global_manager.set('european_worker_upkeep', 0)
+global_manager.set('slave_worker_upkeep', 0)
 #global_manager.set('worker_upkeep', 1)
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
@@ -360,11 +364,11 @@ global_manager.set('previous_financial_report', 'none')
 show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
     scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers'], 'buttons/instructions.png', global_manager)
 
-global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
+global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
 labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'turn', global_manager)
 
-global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, global_manager))
+global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
 labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'public_opinion', global_manager)
 

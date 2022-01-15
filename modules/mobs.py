@@ -107,6 +107,8 @@ class mob(actor):
                 save_dict['end_turn_destination_grid_type'] = 'strategic_map_grid'
             elif self.end_turn_destination.grid == self.global_manager.get('europe_grid'):
                 save_dict['end_turn_destination_grid_type'] = 'europe_grid'
+            elif self.end_turn_destination.grid == self.global_manager.get('slave_traders_grid'):
+                save_dict['end_turn_destination_grid_type'] = 'slave_traders_grid'
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['image'] = self.image_dict['default']
         return(save_dict)
