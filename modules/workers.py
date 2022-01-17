@@ -191,6 +191,9 @@ class worker(mob):
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
 
 class slave_worker(worker):
+    '''
+    Worker that is captured or bought from slave traders, reduces public opinion, and has a low, unvarying upkeep and a varying recruitment cost
+    '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
@@ -206,7 +209,7 @@ class slave_worker(worker):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
-                'purchased': 
+                'purchased': boolean value - Value set to true if the slaves were bought or false if they were captured, determining effects on public opinion and slave recruitment costs
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -228,6 +231,14 @@ class slave_worker(worker):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def fire(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Firing a slave worker unit also frees them, increasing public opinion and adding them to the labor pool
+        Input:
+            None
+        Output:
+            None
+        '''
         super().fire()
         market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
         public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average

@@ -260,6 +260,7 @@ class recruitment_choice_button(choice_button):
                 input_dict['name'] = 'Slave worker'
                 input_dict['init_type'] = 'slave'
                 input_dict['purchased'] = True
+                self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'African worker':
                 self.global_manager.get('displayed_tile').cell.village.recruit_worker()
             else:
@@ -296,5 +297,5 @@ class recruitment_choice_button(choice_button):
                     input_dict['name'] = 'ship'
                     input_dict['crew'] = 'none'
                     input_dict['init_type'] = 'ship'
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         super().on_click()

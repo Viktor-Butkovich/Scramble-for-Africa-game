@@ -27,8 +27,8 @@ def end_turn(global_manager):
             discarded_commodity = random.choice(current_tile.get_held_commodities())
             current_tile.change_inventory(discarded_commodity, -1)
     manage_production(global_manager)
+    manage_subsidies(global_manager) #subsidies given before public opinion changes
     manage_public_opinion(global_manager)
-    manage_subsidies(global_manager)
     manage_upkeep(global_manager)
     manage_financial_report(global_manager)
     start_turn(global_manager, False)
@@ -120,6 +120,14 @@ def manage_upkeep(global_manager):
     text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager)
 
 def manage_public_opinion(global_manager):
+    '''
+    Description:
+        Changes public opinion at the end of the turn to move back toward 50
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     current_public_opinion = round(global_manager.get('public_opinion'))
     if current_public_opinion < 50:
         global_manager.get('public_opinion_tracker').change(1)
@@ -129,12 +137,28 @@ def manage_public_opinion(global_manager):
         text_tools.print_to_screen("Trending toward a neutral attitude, public opinion toward your company decreased from " + str(current_public_opinion) + " to " + str(current_public_opinion - 1), global_manager)
     
 def manage_subsidies(global_manager):
+    '''
+    Description:
+        Receives subsidies at the end of the turn based on public opinion
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     subsidies_received = round(global_manager.get('public_opinion') / 10, 1) #4.9 for 49 public opinion
     text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government for your colonial efforts", global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 
 
 def manage_financial_report(global_manager):
+    '''
+    Description:
+        Displays a financial report at the end of the turn, showing revenue in each area, costs in each area, and total profit from the last turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     financial_report_text = global_manager.get('money_tracker').prepare_financial_report()
     notification_tools.display_notification(financial_report_text, 'default', global_manager)
     global_manager.set('previous_financial_report', financial_report_text)

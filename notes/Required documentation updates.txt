@@ -1,16 +1,1 @@
-ministers imports
-text_tools.remove_underscores
-turn_management_tools.manage_public_opinion
-turn_management_tools.manage_subsidies
-turn_management_tools.manage_financial_report
-data_managers.money_tracker
-buttons.show_previous_financial_report_button
-europe_transactions imports
-workers imports
-workers.slave_worker
-market_tools.attempt_slave_recruitment_cost_change
-actor_display_tools/buttons/hire_village_workers_button
-actor_creation_managers/actor_creation_manager_template
-actor_creation_managers imports
-in to_save_dict for actors and mobs, fix hardcoding of grid types
-test free African worker recruitment
+Add slave/european worker price decreasing over time w/ limits

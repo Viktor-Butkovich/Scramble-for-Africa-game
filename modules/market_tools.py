@@ -88,11 +88,13 @@ def sell(seller, sold_commodity, num_sold, global_manager):
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
     '''
     Description:
-        Controls the chance to increase worker price when a worker leaves the labor pool or decrease worker price when a worker joins the labor pool
+        Controls the chance to increase worker upkeep when a worker leaves the labor pool or decrease worker upkeep when a worker joins the labor pool
     Input:
         string change_type: 'increase' or 'decrease' depending on whether a worker is being added to or removed from the labor pool, decides whether worker price increases or decreases
         string worker_type: 'European' or 'African', decides which type of worker has a price change
         global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
     '''
     if random.randrange(1, 7) >= 4: #half chance of change
         current_price = global_manager.get(worker_type.lower() + '_worker_upkeep')
@@ -107,6 +109,16 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
                 text_tools.print_to_screen("Adding " + utility.generate_article(worker_type) + " " + worker_type + " worker to the labor pool decreased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
 def attempt_slave_recruitment_cost_change(change_type, global_manager):
+    '''
+    Description:
+        Controls the chance to increase slave recruitment cost when a slave worker is bought or decrease the recruitment cost over time
+    Input:
+        string change_type: 'increase' or 'decrease' depending on whether a worker is being added to or removed from the labor pool, decides whether worker price increases or decreases
+        string worker_type: 'European' or 'African', decides which type of worker has a price change
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     if random.randrange(1, 7) >= 4:
         current_price = global_manager.get('recruitment_costs')['slave worker']
         if change_type == 'increase':

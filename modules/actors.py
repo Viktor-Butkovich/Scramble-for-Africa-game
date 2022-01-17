@@ -86,12 +86,15 @@ class actor():
         
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
-        if self.grid == self.global_manager.get('strategic_map_grid'):
-            save_dict['grid_type'] = 'strategic_map_grid'
-        elif self.grid == self.global_manager.get('europe_grid'):
-            save_dict['grid_type'] = 'europe_grid'
-        elif self.grid == self.global_manager.get('slave_traders_grid'):
-            save_dict['grid_type'] = 'slave_traders_grid'
+        for grid_type in self.global_manager.get('grid_types_list'):
+            if self.global_manager.get(grid_type) == self.grid:
+                save_dict['grid_type'] = grid_type
+        #if self.grid == self.global_manager.get('strategic_map_grid'):
+        #    save_dict['grid_type'] = 'strategic_map_grid'
+        #elif self.grid == self.global_manager.get('europe_grid'):
+        #    save_dict['grid_type'] = 'europe_grid'
+        #elif self.grid == self.global_manager.get('slave_traders_grid'):
+        #    save_dict['grid_type'] = 'slave_traders_grid'
         save_dict['name'] = self.name
         saved_inventory = {}
         if self.can_hold_commodities: #only save inventory if not empty

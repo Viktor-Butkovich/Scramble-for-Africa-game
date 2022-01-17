@@ -1347,6 +1347,9 @@ class commodity_button(button):
         return(False)
 
 class show_previous_financial_report_button(button):
+    '''
+    Button appearing near money label that can be clicked to display the previous turn's financial report again
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, global_manager):
         '''
         Description:
@@ -1365,12 +1368,28 @@ class show_previous_financial_report_button(button):
         super().__init__(coordinates, width, height, 'blue', 'show previous financial report', keybind_id, modes, image_id, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False during the first turn when there is no previous financial report to show, otherwise returns same as superclass
+        '''
         if super().can_show():
             if not self.global_manager.get('previous_financial_report') == 'none':
                 return(True)
         return(False)
     
     def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button displays the previous turn's financial report again
+        Input:
+            None
+        Output:
+            None
+        '''
         self.showing_outline = True
         if main_loop_tools.action_possible(self.global_manager):
             notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)

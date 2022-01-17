@@ -266,6 +266,14 @@ class money_tracker(value_tracker):
         super().__init__('money', initial_value, 'none', 'none', global_manager)
 
     def reset_transaction_history(self):
+        '''
+        Description:
+            Resets the stored transactions from the last turn, allowing new transactions to be recorded for the current turn's financial report
+        Input:
+            None
+        Output:
+            None
+        '''
         self.transaction_history = {}
         for current_transaction_type in self.transaction_types:
             self.transaction_history[current_transaction_type] = 0
@@ -305,6 +313,14 @@ class money_tracker(value_tracker):
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def prepare_financial_report(self):
+        '''
+        Description:
+            Creates and formats the text for a financial report based on the last turn's transactions
+        Input:
+            None
+        Output:
+            string: Formatted financial report text with /n being a new line
+        '''
         notification_text = "Financial report: /n /n"
         notification_text += "Revenue: /n "
         total_revenue = 0

@@ -89,6 +89,21 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         return(new_actor)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):
+        '''
+        Description:
+            Displays a choice notification to verify the recruitment of a unit
+        Input:
+            dictionary choice_info_dict: dictionary containing various information needed for the choice notification
+                'recruitment_type': string value - Type of unit to recruit, like 'European worker'
+                'cost': double value - Recruitment cost of the unit
+                'mob_image_id': string value - File path to the image used by the recruited unit
+                'type': string value - Type of choice notification to display, always 'recruitment' for recruitment notificatoins
+                'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'
+            string recruitment_name: Name used in the notification to signify the unit, like 'explorer'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         message = 'Are you sure you want to recruit ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + '? '
         message += utility.generate_capitalized_article(recruitment_name) + ' ' + recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit. '
         if recruitment_name == 'European worker':

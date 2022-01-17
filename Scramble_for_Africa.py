@@ -246,6 +246,7 @@ global_manager.get('instructions_list').append(instructions_message)
 global_manager.set('minister_list', [])
 global_manager.set('available_minister_list', [])
 global_manager.set('grid_list', [])
+global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
 global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
@@ -488,7 +489,7 @@ mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coo
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
 fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
-    scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
+    scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
 
 #mob name label
 mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
