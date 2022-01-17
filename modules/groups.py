@@ -335,7 +335,7 @@ class group(mob):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type])
+        self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type], 'construction')
         text = ""
         text += "The " + self.name + " attempts to construct a " + self.building_name + ". /n /n"
         if not self.veteran:    
@@ -679,7 +679,7 @@ class construction_gang(group):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        self.global_manager.get('money_tracker').change(self.upgraded_building.get_upgrade_cost() * -1)
+        self.global_manager.get('money_tracker').change(self.upgraded_building.get_upgrade_cost() * -1, 'construction')
         text = ""
         text += "The " + self.name + " attempts to upgrade the " + self.building_name + "'s " + self.upgrade_type + ". /n /n"
         if not self.veteran:    
@@ -1155,7 +1155,7 @@ class missionaries(group):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1, 'religious conversion')
         village = self.images[0].current_cell.village
         text = ""
         text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
@@ -1367,7 +1367,7 @@ class expedition(group):
         Output:
             None
         '''
-        self.global_manager.get('money_tracker').change(self.exploration_cost * -1)
+        self.global_manager.get('money_tracker').change(self.exploration_cost * -1, 'exploration')
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0

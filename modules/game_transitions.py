@@ -62,12 +62,12 @@ def create_strategic_map(global_manager):
     main_loop_tools.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
-        if current_grid in global_manager.get('abstract_grid_list'): #if europe grid
+        if current_grid in global_manager.get('abstract_grid_list'): #if europe/slave traders grid
             input_dict = {}
             input_dict['grid'] = current_grid
             input_dict['image'] = current_grid.tile_image_id
             input_dict['name'] = current_grid.name
-            input_dict['modes'] = ['strategic', 'europe']
+            input_dict['modes'] = current_grid.modes
             new_terrain = tiles.abstract_tile(False, input_dict, global_manager)
         else:
             input_dict = {}

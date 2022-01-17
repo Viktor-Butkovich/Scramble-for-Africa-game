@@ -129,6 +129,7 @@ class value_label(label):
         '''
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
         self.value_name = value_name
+        self.display_name = text_tools.remove_underscores(self.value_name) #public_opinion to public opinion
         self.tracker = self.global_manager.get(value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
@@ -142,7 +143,7 @@ class value_label(label):
         Output:
             None
         '''
-        self.set_label(self.value_name + ': ' + str(new_value))
+        self.set_label(self.display_name + ': ' + str(new_value))
 
 class money_label(value_label):
     '''
@@ -182,13 +183,21 @@ class money_label(value_label):
         num_european_workers = self.global_manager.get('num_european_workers')
         european_worker_upkeep = self.global_manager.get('european_worker_upkeep')
         total_european_worker_upkeep = round(num_european_workers * european_worker_upkeep, 1)
+
+        num_slave_workers = self.global_manager.get('num_slave_workers')
+        slave_worker_upkeep = self.global_manager.get('slave_worker_upkeep')
+        total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 1)
         
-        num_workers = num_african_workers + num_european_workers
-        total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep, 1)
+        num_workers = num_african_workers + num_european_workers + num_slave_workers
+        total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 1)
         
         tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
-        tooltip_text.append("Each of your " + str(num_african_workers) + " African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
-        tooltip_text.append("Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+        if num_african_workers > 0:
+            tooltip_text.append("Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
+        if num_european_workers > 0:
+            tooltip_text.append("Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+        if num_slave_workers > 0:
+            tooltip_text.append("Each of your " + str(num_slave_workers) + " slave workers will be paid " + str(slave_worker_upkeep) + " money, totaling to " + str(total_slave_worker_upkeep) + " money.")
         tooltip_text.append("Religious volunteers cost no upkeep.")
         
         self.set_tooltip(tooltip_text)

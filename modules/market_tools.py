@@ -15,19 +15,19 @@ def adjust_prices(global_manager):
     '''
     num_increased = 2
     num_decreased = 1
-    for i in range(2):
+    for i in range(4):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
         change_price(changed_commodity, 1, global_manager)
-    for i in range(1):
+    for i in range(2):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
         while changed_commodity == 'consumer goods':
             changed_commodity = random.choice(global_manager.get('commodity_types'))
         change_price(changed_commodity, -1, global_manager)
     consumer_goods_roll = random.randrange(1, 7)
     if consumer_goods_roll == 1:
-        change_price('consumer goods', 1, global_manager)
+        change_price('consumer goods', 2, global_manager)
     elif consumer_goods_roll >= 5:
-        change_price('consumer goods', -1, global_manager)
+        change_price('consumer goods', -2, global_manager)
 
 def change_price(changed_commodity, num_change, global_manager):
     '''
@@ -76,9 +76,9 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     '''
     sell_price = global_manager.get('commodity_prices')[sold_commodity]
     for i in range(num_sold):
-        global_manager.get('money_tracker').change(sell_price)
+        global_manager.get('money_tracker').change(sell_price, 'commodities sold')
         seller.change_inventory(sold_commodity, -1)
-        if random.randrange(1, 7) == 1: #1/6 chance
+        if random.randrange(1, 7) <= 2: #1/3 chance
             change_price(sold_commodity, -1, global_manager)
     text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
     new_price = global_manager.get('commodity_prices')[sold_commodity]
@@ -88,11 +88,13 @@ def sell(seller, sold_commodity, num_sold, global_manager):
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
     '''
     Description:
-        Controls the chance to increase worker price when a worker leaves the labor pool or decrease worker price when a worker joins the labor pool
+        Controls the chance to increase worker upkeep when a worker leaves the labor pool or decrease worker upkeep when a worker joins the labor pool
     Input:
         string change_type: 'increase' or 'decrease' depending on whether a worker is being added to or removed from the labor pool, decides whether worker price increases or decreases
         string worker_type: 'European' or 'African', decides which type of worker has a price change
         global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
     '''
     if random.randrange(1, 7) >= 4: #half chance of change
         current_price = global_manager.get(worker_type.lower() + '_worker_upkeep')
@@ -105,5 +107,26 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
             if changed_price > 0:
                 global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
                 text_tools.print_to_screen("Adding " + utility.generate_article(worker_type) + " " + worker_type + " worker to the labor pool decreased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
-            
+
+def attempt_slave_recruitment_cost_change(change_type, global_manager):
+    '''
+    Description:
+        Controls the chance to increase slave recruitment cost when a slave worker is bought or decrease the recruitment cost over time
+    Input:
+        string change_type: 'increase' or 'decrease' depending on whether a worker is being added to or removed from the labor pool, decides whether worker price increases or decreases
+        string worker_type: 'European' or 'African', decides which type of worker has a price change
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if random.randrange(1, 7) >= 4:
+        current_price = global_manager.get('recruitment_costs')['slave worker']
+        if change_type == 'increase':
+            changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+            global_manager.get('recruitment_costs')['slave worker'] = changed_price
+            text_tools.print_to_screen("Buying a slave worker increased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        elif change_type == 'decrease':
+            changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+            global_manager.get('recruitment_costs')['slave worker'] = changed_price
+            text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
             

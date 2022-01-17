@@ -36,9 +36,10 @@ SFA folder
     modules folder
 
 	workers.py
-	    imports mobs, actor_utility, utility, market_tools
+	    imports mobs, actor_utility, utility, market_tools, text_tools
 	    class worker(mobs.mob)
 		class church_volunteers
+		class slave_worker
 
 	villages.py
 	    imports random, village_name_generator, actor_utility, utility
@@ -73,6 +74,9 @@ SFA folder
 	    def start_turn
 	    def manage_production
 	    def manage_upkeep
+	    def manage_public_opinion
+	    def manage_subsidies
+	    def manage_financial_report
 
         tiles.py
             imports pygame, images, utility, actor_utility, villages, actors
@@ -90,6 +94,7 @@ SFA folder
             def print_to_screen
             def print_to_previous_message
             def clear_message
+	    def remove_underscores
 
         scaling.py
             def scale_coordinates
@@ -126,7 +131,7 @@ SFA folder
             class mob(actors.actor)
 
 	ministers.py
-	    imports random, utility, actor_utility, minister_utility
+	    imports random, utility, actor_utility, minister_utility, notification_tools
 	    class minister
 
 	minister_utility.py
@@ -211,7 +216,7 @@ SFA folder
 	    def to_main_menu
 
         europe_transactions.py
-            imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, utility
+            imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility
             class recruitment_button(buttons.button)
 	    class buy_commodity_button(buttons.button)
 
@@ -261,6 +266,8 @@ SFA folder
 		class switch_game_mode_button
 		class minister_portrait_image
 		class cycle_available_ministers_button
+		class commodity_button
+		class show_previous_financial_report_button
 
 	buildings.py
 	    imports pygame, actors, buttons, utility, images, actor_utility, text_tools
@@ -288,7 +295,7 @@ SFA folder
 	    def order_actor_info_display
 
 	actor_creation_tools.py
-	    imports actors, mobs, workers, officers, groups, vehicles, buildings, ministers
+	    imports actors, mobs, workers, officers, groups, vehicles, buildings, ministers, notification_tools, utility
 	    class actor_creation_manager_template
 
 	action_notifications.py
@@ -344,3 +351,4 @@ SFA folder
 	   	    class appoint_minister_button
 		    class remove_minister_button
 		    class hire_village_workers_button
+		    class buy_slaves_button

@@ -45,6 +45,20 @@ class label_button(button):
                 return(super().can_show())
         return(False)
 
+    def set_y(self, attached_label): 
+        '''
+        Description:
+            Sets this button's y position to line up the center of this button and its label
+        Input:
+            actor_display_label attached_label: Label to match this button's y position with
+        Output:
+            None
+        '''
+        height_difference = self.height - attached_label.height
+        y_displacement = height_difference / 2
+        self.y = attached_label.y - y_displacement
+        self.Rect.y = self.global_manager.get('display_height') - (attached_label.y + self.height - y_displacement)
+        self.outline.y = self.Rect.y - self.outline_width# - y_displacement
 
 class worker_crew_vehicle_button(label_button):
     '''
@@ -1759,6 +1773,21 @@ class hire_village_workers_button(label_button):
     Button that hires available workers from the displayed village
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by the recruited worker
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'hire village worker', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
@@ -1789,7 +1818,64 @@ class hire_village_workers_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
-                attached_village = self.global_manager.get('displayed_tile').cell.village
-                attached_village.recruit_worker()
+                choice_info_dict = {'recruitment_type': 'African worker', 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment'}
+                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African worker', self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)
+
+class buy_slaves_button(label_button):
+    '''
+    Button that buys slaves from slave traders
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by the recruited worker
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'buy slaves', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
+        '''
+        if super().can_show():
+            if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
+                return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button buys slaves from slave traders
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                self.cost = self.global_manager.get('recruitment_costs')['slave worker']
+                if self.global_manager.get('money_tracker').get() >= self.cost:
+                    choice_info_dict = {'recruitment_type': 'slave worker', 'cost': self.cost, 'mob_image_id': 'mobs/slave worker/default.png', 'type': 'recruitment'}
+                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'slave worker', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not buy slaves.", self.global_manager)

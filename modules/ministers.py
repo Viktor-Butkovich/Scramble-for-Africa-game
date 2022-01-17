@@ -5,6 +5,7 @@ import random
 from . import utility
 from . import actor_utility
 from . import minister_utility
+from . import notification_tools
 
 class minister():
     '''
@@ -108,18 +109,11 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        #print('rolling')
-        #print('default result: ' + str(result))
         if random.randrange(1, 3) == 1: #1/2
             result += self.get_skill_modifier()
-        #print('skill modified result: ' + str(result))
 
         if predetermined_corruption or self.check_corruption(): #true if stealing
-            #print('stealing')
             result = random.randrange(max_crit_fail + 1, min_success) #if crit fail on 1 and success on 4+, do random.randrange(2, 4), pick between 2 and 3
-            #print('reported result: ' + str(result))
-        #else:
-            #print('not stealing')
 
         if result < min_result:
             result = min_result
@@ -187,6 +181,15 @@ class minister():
         if self.global_manager.get('displayed_minister') == self:
             minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
         minister_utility.update_available_minister_display(self.global_manager)
+        
+        if not self.global_manager.get('minister_appointment_tutorial_completed'):
+            completed = True
+            for current_position in self.global_manager.get('minister_types'):
+                if self.global_manager.get('current_ministers')[current_position] == 'none':
+                    completed = False
+            if completed:
+                self.global_manager.set('minister_appointment_tutorial_completed', True)
+                notification_tools.show_tutorial_notifications(self.global_manager)
 
     def skill_setup(self):
         '''

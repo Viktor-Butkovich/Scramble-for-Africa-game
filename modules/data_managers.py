@@ -183,7 +183,7 @@ class value_tracker():
     '''
     Object that controls the value of a certain variable
     '''
-    def __init__(self, value_key, initial_value, global_manager):
+    def __init__(self, value_key, initial_value, min_value, max_value, global_manager):
         '''
         Description:
             Initializes this object
@@ -198,6 +198,8 @@ class value_tracker():
         self.global_manager.set(value_key, initial_value)
         self.value_label = 'none'
         self.value_key = value_key
+        self.min_value = min_value
+        self.max_value = max_value
 
     def get(self):
         '''
@@ -234,6 +236,12 @@ class value_tracker():
             None
         '''
         self.global_manager.set(self.value_key, new_value)
+        if not self.min_value == 'none':
+            if self.get() < self.min_value:
+                self.global_manager.set(self.value_key, self.min_value)
+        if not self.max_value == 'none':
+            if self.get() > self.max_value:
+                self.global_manager.set(self.value_key, self.max_value)
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
@@ -251,9 +259,26 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
-        super().__init__('money', initial_value, global_manager)
+        self.transaction_history = {}
+        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment']
+        self.transaction_types += ['construction']
+        self.reset_transaction_history()
+        super().__init__('money', initial_value, 'none', 'none', global_manager)
 
-    def change(self, value_change):
+    def reset_transaction_history(self):
+        '''
+        Description:
+            Resets the stored transactions from the last turn, allowing new transactions to be recorded for the current turn's financial report
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.transaction_history = {}
+        for current_transaction_type in self.transaction_types:
+            self.transaction_history[current_transaction_type] = 0
+
+    def change(self, value_change, change_type = 'misc.'):
         '''
         Description:
             Changes the money variable by the inputted amount
@@ -262,6 +287,12 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
+        if change_type == 'misc.':
+            if value_change > 0:
+                change_type = 'misc. revenue'
+            else:
+                change_type = 'misc. expenses'
+        self.transaction_history[change_type] += value_change
         super().change(value_change)
         if self.get() < 0:
             game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
@@ -281,6 +312,45 @@ class money_tracker(value_tracker):
             game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
             text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
+    def prepare_financial_report(self):
+        '''
+        Description:
+            Creates and formats the text for a financial report based on the last turn's transactions
+        Input:
+            None
+        Output:
+            string: Formatted financial report text with /n being a new line
+        '''
+        notification_text = "Financial report: /n /n"
+        notification_text += "Revenue: /n "
+        total_revenue = 0
+        for transaction_type in self.transaction_types:
+            if self.transaction_history[transaction_type] > 0:
+                if transaction_type == 'misc. revenue':
+                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                else:
+                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                total_revenue += self.transaction_history[transaction_type]
+        if total_revenue == 0:
+            notification_text += '  None /n'
+        
+        notification_text += "/nExpenses: /n"
+        total_expenses = 0
+        for transaction_type in self.transaction_types:
+            if self.transaction_history[transaction_type] < 0:
+                if transaction_type == 'misc. expenses':
+                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                else:
+                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                total_expenses += self.transaction_history[transaction_type]
+        if total_expenses == 0:
+            notification_text += '  None /n'
+        notification_text += ' /n'
+        notification_text += 'Total revenue: ' + str(round(total_revenue, 1)) + ' /n'
+        notification_text += 'Total expenses: ' + str(round(total_expenses, 1)) + ' /n'
+        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 1)) + ' /n'
+        return(notification_text)
+                    
 class notification_manager_template():
     '''
     Object that controls the displaying of notifications
@@ -300,6 +370,7 @@ class notification_manager_template():
         self.choice_notification_info_dict_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
+        self.notification_modes = ['strategic', 'europe', 'ministers']
 
     def update_notification_layout(self, notification_height = 0):
         '''
@@ -374,7 +445,7 @@ class notification_manager_template():
         notification_type = self.notification_type_queue.pop(0)
         if notification_type == 'roll':
             new_notification = action_notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
             
             for current_die in self.global_manager.get('dice_list'):
                 current_die.start_rolling()
@@ -398,43 +469,43 @@ class notification_manager_template():
                 self.global_manager.get('trade_result')[0].promote() #promotes caravan
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade, 'dies': dies}
             new_notification = action_notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, trade_info_dict, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, trade_info_dict, self.global_manager)
                 
         elif notification_type == 'exploration':
             new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_exploration':
             new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, self.global_manager)
 
         elif notification_type == 'religious_campaign':
             new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_religious_campaign':
             new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, self.global_manager)
 
         elif notification_type == 'advertising_campaign':
             new_notification = action_notifications.advertising_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_advertising_campaign':
             new_notification = action_notifications.advertising_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, self.global_manager)
 
         elif notification_type == 'conversion':
             new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_conversion':
             new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, self.global_manager)
 
         elif notification_type == 'construction':
             new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, False, self.global_manager)
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
             
         elif notification_type == 'final_construction':
             new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
@@ -444,10 +515,10 @@ class notification_manager_template():
             choice_notification_choices = self.choice_notification_choices_queue.pop(0)
             choice_notification_info_dict = self.choice_notification_info_dict_queue.pop(0)
             new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, self.global_manager)
 
         else:
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
                 #coordinates, ideal_width, minimum_height, showing, modes, image, message
     

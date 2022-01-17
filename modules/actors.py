@@ -66,10 +66,12 @@ class actor():
         init_type = ''
         if self.actor_type == 'mob':
             if self.is_worker:
-                if not self.is_church_volunteers:
-                    init_type = 'worker'
-                else:
+                if self.is_church_volunteers:
                     init_type = 'church_volunteers'
+                elif self.worker_type == 'slave':
+                    init_type = 'slave'
+                else:
+                    init_type = 'worker'
             elif self.is_vehicle:
                 init_type = self.vehicle_type
             elif self.is_officer:
@@ -84,10 +86,15 @@ class actor():
         
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['modes'] = self.modes
-        if self.grid == self.global_manager.get('strategic_map_grid'):
-            save_dict['grid_type'] = 'strategic_map_grid'
-        elif self.grid == self.global_manager.get('europe_grid'):
-            save_dict['grid_type'] = 'europe_grid'
+        for grid_type in self.global_manager.get('grid_types_list'):
+            if self.global_manager.get(grid_type) == self.grid:
+                save_dict['grid_type'] = grid_type
+        #if self.grid == self.global_manager.get('strategic_map_grid'):
+        #    save_dict['grid_type'] = 'strategic_map_grid'
+        #elif self.grid == self.global_manager.get('europe_grid'):
+        #    save_dict['grid_type'] = 'europe_grid'
+        #elif self.grid == self.global_manager.get('slave_traders_grid'):
+        #    save_dict['grid_type'] = 'slave_traders_grid'
         save_dict['name'] = self.name
         saved_inventory = {}
         if self.can_hold_commodities: #only save inventory if not empty

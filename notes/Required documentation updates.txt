@@ -1,0 +1,1 @@
+Add slave/european worker price decreasing over time w/ limits

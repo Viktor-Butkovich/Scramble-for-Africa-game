@@ -1,10 +1,13 @@
 #Contains functionality for buttons relating to the European headquarters screen
+import random
+
 
 from .buttons import button
 from . import game_transitions
 from . import main_loop_tools
 from . import notification_tools
 from . import text_tools
+from . import market_tools
 from . import utility
 
 class recruitment_button(button):
@@ -57,9 +60,10 @@ class recruitment_button(button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                    notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_name) + ' ' + self.recruitment_name + '? ' +
-                                                                   utility.generate_capitalized_article(self.recruitment_name) + ' ' + self.recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
-                                                                   ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
+                    #notification_tools.display_choice_notification('Are you sure you want to recruit ' + utility.generate_article(self.recruitment_name) + ' ' + self.recruitment_name + '? ' +
+                    #                                               utility.generate_capitalized_article(self.recruitment_name) + ' ' + self.recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit.',
+                    #                                               ['recruitment', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:
@@ -117,10 +121,15 @@ class buy_commodity_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
+                self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
                         self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                        self.global_manager.get('money_tracker').change(-1 * self.cost)
+                        self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer goods')
+                        text_tools.print_to_screen("You have lost " + str(self.cost) + " money from buying 1 unit of consumer goods.", self.global_manager)
+                        if random.randrange(1, 7) == 1: #1/6 chance
+                            market_tools.change_price('consumer goods', 1, self.global_manager)
+                            text_tools.print_to_screen("The price of consumer goods has increased from " + str(self.cost) + " to " + str(self.cost + 1) + ".", self.global_manager)
                 else:
                     text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
             else:

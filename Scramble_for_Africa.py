@@ -200,15 +200,16 @@ global_manager.set('group_minister_dict',
     }
 )
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
-global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
+global_manager.set('recruitment_costs', {'European worker': 0, 'slave worker': 5, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
     global_manager.get('recruitment_costs')[current_officer] = 5
 
-global_manager.set('worker_upkeep_fluctuation_amount', 0.1)
-global_manager.set('base_upgrade_price', 2) #times # upgrades + 1: 2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
+global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
+global_manager.set('base_upgrade_price', 5) #times # upgrades + 1: 5 for 1st upgrade, 10 for 2nd, 15 for 3rd, etc.
 global_manager.set('commodity_min_starting_price', 2)
 global_manager.set('commodity_max_starting_price', 5)
-global_manager.set('consumer_goods_starting_price', 2)
+global_manager.set('consumer_goods_starting_price', 3)
 
 global_manager.set('action_prices',
     {
@@ -245,6 +246,7 @@ global_manager.get('instructions_list').append(instructions_message)
 global_manager.set('minister_list', [])
 global_manager.set('available_minister_list', [])
 global_manager.set('grid_list', [])
+global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
 global_manager.set('abstract_grid_list', [])
 global_manager.set('text_list', [])
 global_manager.set('image_list', [])
@@ -263,10 +265,13 @@ global_manager.set('worker_list', [])
 #global_manager.set('num_workers', 0)
 global_manager.set('num_european_workers', 0)
 global_manager.set('num_african_workers', 0)
-global_manager.set('initial_african_worker_upkeep', 1)
-global_manager.set('initial_european_worker_upkeep', 1)
+global_manager.set('num_slave_workers', 0)
+global_manager.set('initial_african_worker_upkeep', 4)
+global_manager.set('initial_european_worker_upkeep', 6)
+global_manager.set('initial_slave_worker_upkeep', 2)
 global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
 global_manager.set('european_worker_upkeep', 0)
+global_manager.set('slave_worker_upkeep', 0)
 #global_manager.set('worker_upkeep', 1)
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
@@ -354,12 +359,19 @@ game_transitions.set_game_mode('main_menu', global_manager)
 global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
 
 global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-labels.money_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', global_manager)
+global_manager.set('previous_financial_report', 'none')
+show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
+    scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers'], 'buttons/instructions.png', global_manager)
 
-global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, global_manager))
-labels.value_label(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'],
+global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
+labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
     'misc/default_label.png', 'turn', global_manager)
+
+global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
+labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    'misc/default_label.png', 'public_opinion', global_manager)
 
 strategic_to_europe_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
     pygame.K_e, 'europe', ['strategic'], 'buttons/european_hq_button.png', global_manager)
@@ -477,7 +489,7 @@ mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coo
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
 fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
-    scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
+    scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
 
 #mob name label
 mob_name_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
@@ -707,13 +719,14 @@ cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coor
     scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
 
 
-minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
-minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."
-minister_description_message += "A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll."
-minister_description_message += "If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels."
-minister_description_width = 800
-minister_description_label = labels.multi_line_label(scaling.scale_coordinates(global_manager.get('default_display_width') / 2 - (minister_description_width / 2), table_height + 10, global_manager),
-    minister_description_width, 0, ['ministers'], 'misc/default_notification.png', minister_description_message, global_manager) #coordinates, ideal_width, minimum_height, modes, image, message, global_manager
+#explained in tutorial
+#minister_description_message = "Each minister controls a certain part of your company operations and has hidden skill and corruption levels."
+#minister_description_message += "A particularly skilled or unskilled minister will achieve higher or lower results than average on dice rolls."
+#minister_description_message += "A corrupt minister may choose not to execute your orders, instead keeping the money and reporting a failing dice roll."
+#minister_description_message += "If a minister reports many unusual dice rolls, you may be able to predict their skill or corruption levels."
+#minister_description_width = 800
+#minister_description_label = labels.multi_line_label(scaling.scale_coordinates(global_manager.get('default_display_width') / 2 - (minister_description_width / 2), table_height + 10, global_manager),
+#    minister_description_width, 0, ['ministers'], 'misc/default_notification.png', minister_description_message, global_manager) #coordinates, ideal_width, minimum_height, modes, image, message, global_manager
 main_loop.main_loop(global_manager)
 
 #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), tile) to calibrate actor display to a tile

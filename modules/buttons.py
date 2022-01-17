@@ -270,8 +270,13 @@ class button():
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
-            self.set_tooltip(["Hires villagers as workers, reducing the village's population. ", "If fired, the workers will return to their village."])
-
+            self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
+                                str(self.global_manager.get('african_worker_upkeep')) + "money. If fired, the workers will return to their village"])
+        elif self.button_type == 'buy slaves':
+            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to recruit and have an upkeep each turn of " +
+                                str(self.global_manager.get('slave_worker_upkeep')) + " money. This is a morally reprehensible action and will be faced with a public opinion penalty"])
+        elif self.button_type == 'show previous financial report':
+            self.set_tooltip(["Displays the previous turn's financial report"])
         else:
             self.set_tooltip(['placeholder'])
             
@@ -1106,12 +1111,16 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.to_mode == 'main menu':
-                    game_transitions.to_main_menu(self.global_manager)
-                if not self.to_mode == 'previous':
-                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                if self.global_manager.get("minister_appointment_tutorial_completed"):
+                    if self.to_mode == 'main menu':
+                        game_transitions.to_main_menu(self.global_manager)
+                    if not self.to_mode == 'previous':
+                        game_transitions.set_game_mode(self.to_mode, self.global_manager)
+                    else:
+                        self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+                        game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
                 else:
-                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+                    text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
 
@@ -1336,4 +1345,53 @@ class commodity_button(button):
             None
         '''
         return(False)
-        
+
+class show_previous_financial_report_button(button):
+    '''
+    Button appearing near money label that can be clicked to display the previous turn's financial report again
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'blue', 'show previous financial report', keybind_id, modes, image_id, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False during the first turn when there is no previous financial report to show, otherwise returns same as superclass
+        '''
+        if super().can_show():
+            if not self.global_manager.get('previous_financial_report') == 'none':
+                return(True)
+        return(False)
+    
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button displays the previous turn's financial report again
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.showing_outline = True
+        if main_loop_tools.action_possible(self.global_manager):
+            notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
+        else:
+            text_tools.print_to_screen("You are busy and can not view the last turn's financial report", self.global_manager)
