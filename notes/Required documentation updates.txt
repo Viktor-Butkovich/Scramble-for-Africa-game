@@ -1,1 +1,1 @@
-Add slave/european worker price decreasing over time w/ limits
+turn_management_tools.manage_worker_price_changes

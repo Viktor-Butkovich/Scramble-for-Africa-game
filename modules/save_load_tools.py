@@ -220,6 +220,10 @@ class save_load_manager_template():
         Output:
             None
         '''
+        text_tools.print_to_screen("", self.global_manager)
+        text_tools.print_to_screen("Loading " + file_path, self.global_manager)
+        text_tools.print_to_screen("", self.global_manager)
+        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn') + 1), self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:

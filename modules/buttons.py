@@ -273,8 +273,8 @@ class button():
             self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
                                 str(self.global_manager.get('african_worker_upkeep')) + "money. If fired, the workers will return to their village"])
         elif self.button_type == 'buy slaves':
-            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to recruit and have an upkeep each turn of " +
-                                str(self.global_manager.get('slave_worker_upkeep')) + " money. This is a morally reprehensible action and will be faced with a public opinion penalty"])
+            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to purchase and have an upkeep each turn of " +
+                                str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
         else:
@@ -790,6 +790,9 @@ class button():
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
+            if self.button_type in ['move left', 'move right', 'move down', 'move up']:
+                if self.global_manager.get('displayed_mob') == 'none':
+                    return(False)
             return(True)
         return(False)
 
