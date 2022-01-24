@@ -117,9 +117,13 @@ class button():
                 if not adjacent_cell == 'none':
                     if current_mob.can_walk:
                         tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
+                        if current_mob.can_explore:
+                            tooltip_text.append("Costs 0.5 movements points if moving to a water tile")
                         adjacent_infrastructure = adjacent_cell.contained_buildings['infrastructure']
                         message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
-                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                        if current_mob.can_explore and adjacent_cell.terrain == 'water':
+                            message += "the tile moved to is a water tile"
+                        elif (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
                             message += "this tile has a " + local_infrastructure.infrastructure_type + " and the tile moved to has a " + adjacent_infrastructure.infrastructure_type
                         elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
                             message += "this tile has no road or railroad to connect to the " + adjacent_infrastructure.infrastructure_type + " of the tile moved to"
@@ -138,7 +142,10 @@ class button():
                 else:
                     tooltip_text.append("Can not move on land")
                 if current_mob.can_swim:
-                    tooltip_text.append("Can move in water")
+                    if current_mob.can_explore:
+                        tooltip_text.append("Can move twice as quickly in water")
+                    else:
+                        tooltip_text.append("Can move in water")
                 else:
                     tooltip_text.append("Can not move in water, but can embark on a ship in the water by moving to it")
                 if current_mob.can_explore:
@@ -658,31 +665,34 @@ class button():
                     market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
 
             elif self.button_type == 'cycle units':
-                mob_list = self.global_manager.get('mob_list')
-                cycled_mob = 'none'
-                cycled_index = 0
-                for current_mob_index in range(len(mob_list)):
-                    current_mob = mob_list[current_mob_index]
-                    if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
-                        if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
-                            if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
-                                if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
-                                    cycled_mob = current_mob
-                                    cycled_index = current_mob_index
-                                    break
-                if cycled_mob == 'none':
-                    text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
+                if main_loop_tools.action_possible(self.global_manager):
+                    mob_list = self.global_manager.get('mob_list')
+                    cycled_mob = 'none'
+                    cycled_index = 0
+                    for current_mob_index in range(len(mob_list)):
+                        current_mob = mob_list[current_mob_index]
+                        if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
+                            if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
+                                if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
+                                    if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
+                                        cycled_mob = current_mob
+                                        cycled_index = current_mob_index
+                                        break
+                    if cycled_mob == 'none':
+                        text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
+                    else:
+                        mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
+                        cycled_mob.select()
+                        for current_image in cycled_mob.images:
+                            current_cell = cycled_mob.images[0].current_cell
+                            while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
+                                current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+                        if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
+                            cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
+                        else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
+                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
                 else:
-                    mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
-                    cycled_mob.select()
-                    for current_image in cycled_mob.images:
-                        current_cell = cycled_mob.images[0].current_cell
-                        while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
-                            current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
-                    if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
-                        cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
-                    else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
-                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
+                    text_tools.print_to_screen("You are busy and can not cycle through units.", self.global_manager)
 
             elif self.button_type == 'new game':
                 self.global_manager.get('save_load_manager').new_game()

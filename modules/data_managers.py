@@ -474,10 +474,15 @@ class notification_manager_template():
         elif notification_type == 'exploration':
             new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, self.global_manager)
-            
+
         elif notification_type == 'final_exploration':
             new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, self.global_manager)
+
+        elif notification_type == 'off_tile_exploration':
+            new_notification = action_notifications.off_tile_exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
+                scaling.scale_width(self.notification_width, self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message,
+                self.global_manager)
 
         elif notification_type == 'religious_campaign':
             new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,

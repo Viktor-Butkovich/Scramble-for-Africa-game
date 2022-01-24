@@ -202,7 +202,7 @@ class mob(actor):
             boolean: Returns True if any of the cells directly adjacent to this mob's cell has the water terrain. Otherwise, returns False
         '''
         for current_cell in self.images[0].current_cell.adjacent_list:
-            if current_cell.terrain == 'water':
+            if current_cell.terrain == 'water' and current_cell.visible:
                 return(True)
         return(False)
 
@@ -527,7 +527,7 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
-        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle('ship')
             if self.is_worker and not vehicle.has_crew:

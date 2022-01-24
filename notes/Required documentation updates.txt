@@ -1,1 +1,5 @@
 turn_management_tools.manage_worker_price_changes
+action_notifications.off_tile_exploration_notification
+groups.expedition.resolve_off_tile_exploration
+groups.expedition.disembark_vehicle
+groups.expedition.get_movement_cost

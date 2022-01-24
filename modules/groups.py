@@ -1274,7 +1274,10 @@ class expedition(group):
         self.exploration_mark_list = []
         self.exploration_cost = self.global_manager.get('action_prices')['exploration']#2
         self.can_explore = True
+        self.can_swim = True
         self.set_group_type('expedition')
+        self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+        self.resolve_off_tile_exploration()
 
     def move(self, x_change, y_change):
         '''
@@ -1356,6 +1359,14 @@ class expedition(group):
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
+            #self.move(x_change, y_change)
+            self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+            self.resolve_off_tile_exploration()
+
+    def disembark_vehicle(self, vehicle):
+        super().disembark_vehicle(vehicle)
+        self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+        self.resolve_off_tile_exploration()
 
     def start_exploration(self, x_change, y_change):
         '''
@@ -1382,6 +1393,7 @@ class expedition(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
+        #self.destination_cell = future_cell
         
         self.just_promoted = False
         text = ""
@@ -1433,9 +1445,9 @@ class expedition(group):
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default
             if not future_cell.resource == 'none':
-                text += "You discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
+                text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
             else:
-                text += "You discovered a " + future_cell.terrain.upper() + " tile. /n"
+                text += "The expedition has  discovered a " + future_cell.terrain.upper() + " tile. /n"
         else:
             text += "You were not able to explore the tile. /n"
         if roll_result <= self.current_max_crit_fail:
@@ -1447,6 +1459,7 @@ class expedition(group):
             text += "This explorer is now a veteran. /n"
         if roll_result >= self.current_min_success:
             self.destination_cell = future_cell
+            self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
@@ -1470,11 +1483,14 @@ class expedition(group):
         died = False
         if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
-            if not future_cell.terrain == 'water':
-                super().move(x_change, y_change)
-            else: #if discovered a water tile, update minimap but don't move there
-                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
+            #super().move(x_change, y_change)
+            self.move(x_change, y_change)
+            #if not future_cell.terrain == 'water':
+            #    super().move(x_change, y_change)
+            #else: #if discovered a water tile, update minimap but don't move there
+            #    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+            #    self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
+            #self.resolve_off_tile_exploration() #removing this stops bug
         else:
             self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
@@ -1486,3 +1502,49 @@ class expedition(group):
         for current_die in copy_dice_list:
             current_die.remove()
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
+
+    def resolve_off_tile_exploration(self):
+        cardinal_directions = {'up': 'North', 'down': 'South', 'right': 'East', 'left': 'West'}
+        current_cell = self.images[0].current_cell
+        for current_direction in ['up', 'down', 'left', 'right']:
+            target_cell = current_cell.adjacent_cells[current_direction]
+            if (not target_cell == 'none') and (not target_cell.visible):
+                if current_cell.terrain == 'water' or target_cell.terrain == 'water': #if on water, discover all adjacent undiscovered tiles. Also, discover all adjacent water tiles, regardless of if currently on water
+                    if current_cell.terrain == 'water':
+                        text = "From the water, the expedition has discovered a "
+                    elif target_cell.terrain == 'water':
+                        text = "The expedition has discovered a "
+                    if not target_cell.resource == 'none':
+                        text += target_cell.terrain.upper() + " tile with a " + target_cell.resource.upper() + " resource to the " + cardinal_directions[current_direction] + ". /n"
+                    else:
+                        text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + ". /n"
+
+                    #self.global_manager.set('off_tile_exploration_coordinates', (current_cell.x, current_cell.y))
+                    self.destination_cells.append(target_cell)
+                    notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
+    def get_movement_cost(self, x_change, y_change):
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Only works when one inputted amount is 0 and the other is 1 or -1, with 0 and -1 representing moving 1 cell downward
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
+        local_cell = self.images[0].current_cell
+        direction = 'non'
+        if x_change < 0:
+            direction = 'left'
+        elif x_change > 0:
+            direction = 'right'
+        elif y_change > 0:
+            direction = 'up'
+        elif y_change < 0:
+            direction = 'down'
+        adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
+        if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
+            return(self.movement_cost / 2.0)
+        elif adjacent_cell.terrain == 'water':
+            return(self.movement_cost / 2.0)
+        return(self.movement_cost)
