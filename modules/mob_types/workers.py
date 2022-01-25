@@ -1,11 +1,11 @@
 #Contains functionality for worker units
 import random
 
-from .mobs import mob
-from . import actor_utility
-from . import utility
-from . import market_tools
-from . import text_tools
+from ..mobs import mob
+from .. import actor_utility
+from .. import utility
+from .. import market_tools
+from .. import text_tools
 
 class worker(mob):
     '''

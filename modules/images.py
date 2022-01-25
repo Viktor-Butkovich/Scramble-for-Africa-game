@@ -976,6 +976,8 @@ class tile_image(actor_image):
         Output:
             None
         '''
+        if self.actor.name == 'resource icon' and not self.actor.cell.visible:
+            return() #do not show if resource icon in undiscovered tile
         self.go_to_cell((self.actor.x, self.actor.y))
         drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 

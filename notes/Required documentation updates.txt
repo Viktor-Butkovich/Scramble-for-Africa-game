@@ -3,3 +3,7 @@ action_notifications.off_tile_exploration_notification
 groups.expedition.resolve_off_tile_exploration
 groups.expedition.disembark_vehicle
 groups.expedition.get_movement_cost
+mob_types reorganization
+actor_creation_tools imports
+action_notifications imports
+groups imports

@@ -1,11 +1,11 @@
 #Contains functionality for vehicle units
 
-from . import text_tools
-from . import utility
-from . import actor_utility
-from . import main_loop_tools
-from .mobs import mob
-from .buttons import button
+from .. import text_tools
+from .. import utility
+from .. import actor_utility
+from .. import main_loop_tools
+from ..mobs import mob
+from ..buttons import button
 
 class vehicle(mob):
     '''

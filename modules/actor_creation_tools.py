@@ -1,11 +1,15 @@
 #Contains functionality for creating new instances of mobs, buildings, and ministers
 
-from . import actors
 from . import mobs
-from . import workers
-from . import officers
-from . import groups
-from . import vehicles
+from .mob_types import workers
+from .mob_types import officers
+from .mob_types import caravans
+from .mob_types import construction_gangs
+from .mob_types import expeditions
+from .mob_types import missionaries
+from .mob_types import porters
+from .mob_types import work_crews
+from .mob_types import vehicles
 from . import buildings
 from . import ministers
 from . import notification_tools
@@ -60,18 +64,20 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 new_actor = officers.merchant(from_save, input_dict, global_manager)
             else:
                 new_actor = officers.officer(from_save, input_dict, global_manager)
+                
+        #groups
         elif init_type == 'porters':
-            new_actor = groups.porters(from_save, input_dict, global_manager)
+            new_actor = porters.porters(from_save, input_dict, global_manager)
         elif init_type == 'work_crew':
-            new_actor = groups.work_crew(from_save, input_dict, global_manager)
+            new_actor = work_crews.work_crew(from_save, input_dict, global_manager)
         elif init_type == 'construction_gang':
-            new_actor = groups.construction_gang(from_save, input_dict, global_manager)
+            new_actor = construction_gangs.construction_gang(from_save, input_dict, global_manager)
         elif init_type == 'caravan':
-            new_actor = groups.caravan(from_save, input_dict, global_manager)
+            new_actor = caravans.caravan(from_save, input_dict, global_manager)
         elif init_type == 'missionaries':
-            new_actor = groups.missionaries(from_save, input_dict, global_manager)
+            new_actor = missionaries.missionaries(from_save, input_dict, global_manager)
         elif init_type == 'expedition':
-            new_actor = groups.expedition(from_save, input_dict, global_manager)
+            new_actor = expeditions.expedition(from_save, input_dict, global_manager)
 
         #buildings
         elif init_type == 'infrastructure':

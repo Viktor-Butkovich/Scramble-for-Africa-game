@@ -357,8 +357,6 @@ class tile(actor): #to do: make terrain tiles a subclass
             return(False)
 
 class abstract_tile(tile):
-
-    
     '''
     tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image
     '''

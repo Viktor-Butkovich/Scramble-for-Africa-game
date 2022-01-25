@@ -7,7 +7,6 @@ from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility
-from . import workers
 
 class dice_rolling_notification(notification):
     '''
