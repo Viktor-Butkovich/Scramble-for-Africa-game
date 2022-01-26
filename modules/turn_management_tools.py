@@ -18,7 +18,7 @@ def end_turn(global_manager):
     '''
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
-    text_tools.print_to_screen("Ending turn", global_manager)
+    #text_tools.print_to_screen("Ending turn", global_manager)
     for current_mob in global_manager.get('mob_list'):
         current_mob.end_turn_move()
     for current_cell in global_manager.get('strategic_map_grid').cell_list:
@@ -26,11 +26,6 @@ def end_turn(global_manager):
         while current_tile.get_inventory_used() > current_tile.inventory_capacity:
             discarded_commodity = random.choice(current_tile.get_held_commodities())
             current_tile.change_inventory(discarded_commodity, -1)
-    manage_production(global_manager)
-    manage_subsidies(global_manager) #subsidies given before public opinion changes
-    manage_public_opinion(global_manager)
-    manage_upkeep(global_manager)
-    manage_financial_report(global_manager)
     start_turn(global_manager, False)
 
 def start_turn(global_manager, first_turn):
@@ -42,9 +37,17 @@ def start_turn(global_manager, first_turn):
     Output:
         None
     '''
-    global_manager.set('player_turn', True)
     text_tools.print_to_screen("", global_manager)
-    text_tools.print_to_screen("Starting turn", global_manager)
+    text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
+    if not first_turn:
+        manage_production(global_manager)
+        manage_subsidies(global_manager) #subsidies given before public opinion changes
+        manage_public_opinion(global_manager)
+        manage_upkeep(global_manager)
+        manage_financial_report(global_manager)
+        manage_worker_price_changes(global_manager)
+    
+    global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
     for current_mob in global_manager.get('mob_list'):
         current_mob.reset_movement_points()
@@ -117,7 +120,7 @@ def manage_upkeep(global_manager):
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
     global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
     
-    text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager)
+    #text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager) #described in financial report
 
 def manage_public_opinion(global_manager):
     '''
@@ -146,7 +149,7 @@ def manage_subsidies(global_manager):
         None
     '''
     subsidies_received = round(global_manager.get('public_opinion') / 10, 1) #4.9 for 49 public opinion
-    text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government for your colonial efforts", global_manager)
+    text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government based on your public opinion and colonial efforts", global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 
 
@@ -163,3 +166,40 @@ def manage_financial_report(global_manager):
     notification_tools.display_notification(financial_report_text, 'default', global_manager)
     global_manager.set('previous_financial_report', financial_report_text)
     global_manager.get('money_tracker').reset_transaction_history()
+
+def manage_worker_price_changes(global_manager):
+    '''
+    Description:
+        Randomly changes the prices of slave purchase and European worker upkeep at the end of the turn, generally trending down to compensate for increases when recruited
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    european_worker_roll = random.randrange(1, 7)
+    if european_worker_roll >= 5:
+        current_price = global_manager.get('european_worker_upkeep')
+        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        if changed_price >= global_manager.get('min_european_worker_upkeep'):
+            global_manager.set('european_worker_upkeep', changed_price)
+            text_tools.print_to_screen("An influx of workers from Europe has decreased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+    elif european_worker_roll == 1:
+        current_price = global_manager.get('european_worker_upkeep')
+        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        global_manager.set('european_worker_upkeep', changed_price)
+        text_tools.print_to_screen("An shortage of workers from Europe has increased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+
+    slave_worker_roll = random.randrange(1, 7)
+    if slave_worker_roll >= 5:
+        current_price = global_manager.get('recruitment_costs')['slave worker']
+        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
+            global_manager.get('recruitment_costs')['slave worker'] = changed_price
+            text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+    elif slave_worker_roll == 1:
+        current_price = global_manager.get('recruitment_costs')['slave worker']
+        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        global_manager.get('recruitment_costs')['slave worker'] = changed_price
+        text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        
+

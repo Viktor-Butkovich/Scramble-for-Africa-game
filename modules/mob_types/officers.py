@@ -1,16 +1,16 @@
 #Contains functionality for officer units
 import random
 
-from .mobs import mob
-from .tiles import veteran_icon
-from . import actor_utility
-from . import utility
-from . import notification_tools
-from . import text_tools
-from . import market_tools
-from . import dice_utility
-from . import dice
-from . import scaling
+from ..mobs import mob
+from ..tiles import veteran_icon
+from .. import actor_utility
+from .. import utility
+from .. import notification_tools
+from .. import text_tools
+from .. import market_tools
+from .. import dice_utility
+from .. import dice
+from .. import scaling
 
 class officer(mob):
     '''

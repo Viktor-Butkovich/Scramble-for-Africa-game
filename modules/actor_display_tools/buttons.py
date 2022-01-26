@@ -1443,7 +1443,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
 
         elif self.building_type == 'port':
             message.append('Builds a port, allowing ships to land in this tile')
-            message.append('Can only be built in a tile adjacent to water')
+            message.append('Can only be built in a tile adjacent to discovered water')
 
         elif self.building_type == 'train_station':
             message.append('Builds a train station, allowing trains to pick up and drop off passengers and cargo')
@@ -1502,7 +1502,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 if self.attached_label.actor.check_if_minister_appointed():
                                                     self.construct()
                                         else:
-                                            text_tools.print_to_screen("This building can only be built in tiles adjacent to water.", self.global_manager)
+                                            text_tools.print_to_screen("This building can only be built in tiles adjacent to discovered water.", self.global_manager)
                                     elif self.building_type == 'train_station':
                                         if self.attached_tile.cell.has_railroad():
                                             if self.attached_label.actor.check_if_minister_appointed():

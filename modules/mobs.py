@@ -106,12 +106,6 @@ class mob(actor):
             for grid_type in self.global_manager.get('grid_types_list'):
                 if self.end_turn_destination.grid == self.global_manager.get(grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
-            #if self.end_turn_destination.grid == self.global_manager.get('strategic_map_grid'):
-            #    save_dict['end_turn_destination_grid_type'] = 'strategic_map_grid'
-            #elif self.end_turn_destination.grid == self.global_manager.get('europe_grid'):
-            #    save_dict['end_turn_destination_grid_type'] = 'europe_grid'
-            #elif self.end_turn_destination.grid == self.global_manager.get('slave_traders_grid'):
-            #    save_dict['end_turn_destination_grid_type'] = 'slave_traders_grid'
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['image'] = self.image_dict['default']
         return(save_dict)
@@ -159,12 +153,9 @@ class mob(actor):
             self.controlling_minister = 'none'
         else:
             self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
-            #here
             for current_minister_type_image in self.global_manager.get('minister_image_list'):
                 if current_minister_type_image.minister_type == self.controlling_minister_type:
                     current_minister_type_image.calibrate(self.controlling_minister)
-                #else:# current_minister_type_image.minister_type == old_position:
-                #    current_minister_type_image.calibrate('none')
 
     def get_movement_cost(self, x_change, y_change):
         '''
@@ -202,7 +193,7 @@ class mob(actor):
             boolean: Returns True if any of the cells directly adjacent to this mob's cell has the water terrain. Otherwise, returns False
         '''
         for current_cell in self.images[0].current_cell.adjacent_list:
-            if current_cell.terrain == 'water':
+            if current_cell.terrain == 'water' and current_cell.visible:
                 return(True)
         return(False)
 
@@ -527,7 +518,7 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
-        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle('ship')
             if self.is_worker and not vehicle.has_crew:

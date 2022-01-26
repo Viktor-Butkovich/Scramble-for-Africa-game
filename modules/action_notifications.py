@@ -7,7 +7,6 @@ from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility
-from . import workers
 
 class dice_rolling_notification(notification):
     '''
@@ -155,13 +154,92 @@ class exploration_notification(notification):
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
-            self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
+            if self.global_manager.get('exploration_result')[0].movement_points >= 1: #fix to exploration completing multiple times bug
+                self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
+                #self.global_manager.get('exploration_result')[0].resolve_off_tile_exploration()
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last:
             for current_image in self.notification_images:
                 current_image.remove()
 
+class off_tile_exploration_notification(notification):
+    '''
+    Notification that shows a tile explored by an expedition in an adjacent tile, focusing on the new tile and returning minimap to original position upon removal
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        current_expedition = actor_utility.get_selected_list(global_manager)[0]
+        self.notification_images = []
+        explored_cell = current_expedition.destination_cells.pop(0)
+        explored_tile = explored_cell.tile
+        explored_terrain_image_id = explored_cell.tile.image_dict['default']
+        self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        if not explored_tile.resource_icon == 'none':
+            explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
+            self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        global_manager.set('ongoing_exploration', True)
+        explored_cell.set_visibility(True)
+        global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
+        Input:
+            none
+        Output:
+            None
+        '''
+        super().format_message()
+        self.message.pop(-1)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. When a notification is removed, the next notification is shown, if there is one
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        else:
+            current_expedition = self.global_manager.get('displayed_mob')
+            self.global_manager.get('minimap_grid').calibrate(current_expedition.x, current_expedition.y)
+        for current_image in self.notification_images:
+            current_image.remove()
+        
+        self.global_manager.set('ongoing_exploration', False)
+        
 class trade_notification(notification):
     '''
     Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
@@ -245,15 +323,6 @@ class trade_notification(notification):
         if self.is_commodity_trade:
             caravan = self.trade_result[0]
             caravan.complete_trade(self.gives_commodity, self.trade_result)
-        #if self.dies:
-            
-        #if self.is_commodity_trade:
-            #caravan = self.trade_result[0]
-            #caravan.change_inventory('consumer goods', -1)
-            #if self.gives_commodity:
-            #    commodity_gained = self.trade_result[2]
-            #    if not commodity_gained == 'none':
-            #        caravan.change_inventory(commodity_gained, 1) #caravan gains unit of random commodity 
         super().remove()
         for current_image in self.notification_images:
             current_image.remove()

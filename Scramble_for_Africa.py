@@ -200,7 +200,7 @@ global_manager.set('group_minister_dict',
     }
 )
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
-global_manager.set('recruitment_costs', {'European worker': 0, 'slave worker': 5, 'ship': 5})
+global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
 for current_officer in global_manager.get('officer_types'):
     global_manager.get('recruitment_costs')[current_officer] = 5
 
@@ -262,17 +262,23 @@ global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
-#global_manager.set('num_workers', 0)
-global_manager.set('num_european_workers', 0)
+
 global_manager.set('num_african_workers', 0)
-global_manager.set('num_slave_workers', 0)
-global_manager.set('initial_african_worker_upkeep', 4)
-global_manager.set('initial_european_worker_upkeep', 6)
-global_manager.set('initial_slave_worker_upkeep', 2)
 global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
+global_manager.set('initial_african_worker_upkeep', 4)
+global_manager.set('min_african_worker_upkeep', 0.5)
+
+global_manager.set('num_european_workers', 0)
 global_manager.set('european_worker_upkeep', 0)
+global_manager.set('initial_european_worker_upkeep', 6)
+global_manager.set('min_european_worker_upkeep', 0.5)
+
+global_manager.set('num_slave_workers', 0)
+global_manager.set('initial_slave_worker_upkeep', 2)
 global_manager.set('slave_worker_upkeep', 0)
-#global_manager.set('worker_upkeep', 1)
+global_manager.get('recruitment_costs')['slave worker'] = 5
+global_manager.set('min_slave_worker_recruitment_cost', 2)
+
 global_manager.set('group_list', [])
 global_manager.set('tile_list', [])
 global_manager.set('exploration_mark_list', [])
@@ -400,7 +406,7 @@ load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager
 
 
 
-button_start_x = 650#x position of leftmost button
+button_start_x = 750#x position of leftmost button
 button_separation = 60#x separation between each button
 current_button_number = 0#tracks current button to move each one farther right
 
