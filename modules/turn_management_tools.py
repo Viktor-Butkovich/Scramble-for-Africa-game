@@ -168,6 +168,14 @@ def manage_financial_report(global_manager):
     global_manager.get('money_tracker').reset_transaction_history()
 
 def manage_worker_price_changes(global_manager):
+    '''
+    Description:
+        Randomly changes the prices of slave purchase and European worker upkeep at the end of the turn, generally trending down to compensate for increases when recruited
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     european_worker_roll = random.randrange(1, 7)
     if european_worker_roll >= 5:
         current_price = global_manager.get('european_worker_upkeep')

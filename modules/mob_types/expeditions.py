@@ -10,7 +10,7 @@ from .. import notification_tools
 
 class expedition(group):
     '''
-    A group with an explorer officer that is able to explore
+    A group with an explorer officer that is able to explore and move on water
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -47,7 +47,7 @@ class expedition(group):
         Description:
             Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. Also allows exploration when moving into unexplored areas. Attempting an exploration starts the
                 exploration process, which requires various dice rolls to succeed and can also result in the death of the expedition or the promotion of its explorer. A successful exploration uncovers the area and units to move into it
-                normally in the future
+                normally in the future. As expeditions move, they automatically discover adjacent water tiles, and they also automatically discover all adjacent tiles when looking from a water tile
         Input:
             int x_change: How many cells are moved to the right in the movement
             int y_change: How many cells are moved upward in the movement
@@ -122,11 +122,18 @@ class expedition(group):
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-            #self.move(x_change, y_change)
             self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
             self.resolve_off_tile_exploration()
 
     def disembark_vehicle(self, vehicle):
+        '''
+        Description:
+            Shows this mob and disembarks it from the inputted vehicle after being a passenger. Also automatically explores nearby tiles when applicable, as if this expedition had moved
+        Input:
+            vehicle vehicle: vehicle that this mob disembarks from
+        Output:
+            None
+        '''
         super().disembark_vehicle(vehicle)
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
         self.resolve_off_tile_exploration()
@@ -156,7 +163,6 @@ class expedition(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
-        #self.destination_cell = future_cell
         
         self.just_promoted = False
         text = ""
@@ -246,14 +252,7 @@ class expedition(group):
         died = False
         if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
-            #super().move(x_change, y_change)
             self.move(x_change, y_change)
-            #if not future_cell.terrain == 'water':
-            #    super().move(x_change, y_change)
-            #else: #if discovered a water tile, update minimap but don't move there
-            #    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-            #    self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
-            #self.resolve_off_tile_exploration() #removing this stops bug
         else:
             self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
         if self.just_promoted:
@@ -267,6 +266,14 @@ class expedition(group):
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
     def resolve_off_tile_exploration(self):
+        '''
+        Description:
+            Whenever an expedition arrives in a tile for any reason, they automatically discover any adjacent water tiles. Additionally, when standing on water, they automatically discover all adjacent tiles
+        Input:
+            None
+        Output:
+            None
+        '''
         cardinal_directions = {'up': 'North', 'down': 'South', 'right': 'East', 'left': 'West'}
         current_cell = self.images[0].current_cell
         for current_direction in ['up', 'down', 'left', 'right']:
@@ -282,13 +289,13 @@ class expedition(group):
                     else:
                         text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + ". /n"
 
-                    #self.global_manager.set('off_tile_exploration_coordinates', (current_cell.x, current_cell.y))
                     self.destination_cells.append(target_cell)
                     notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
+                    
     def get_movement_cost(self, x_change, y_change):
         '''
         Description:
-            Returns the cost in movement points of moving by the inputted amounts. Only works when one inputted amount is 0 and the other is 1 or -1, with 0 and -1 representing moving 1 cell downward
+            Returns the cost in movement points of moving by the inputted amounts. Expeditions can move for half cost to water tiles
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement

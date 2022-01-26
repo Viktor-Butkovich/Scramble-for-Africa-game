@@ -1,7 +1,6 @@
 #Contains functionality for missionaries
 
 from .groups import group
-from ..tiles import tile
 from .. import actor_utility
 from .. import dice_utility
 from .. import utility
