@@ -131,5 +131,29 @@ def order_actor_info_display(global_manager, info_display_list, default_y): #dis
             scaled_y = scaling.scale_height(current_y, global_manager)
             if not current_label.y == scaled_y: #if y is not the same as last time, move it
                 current_label.set_y(scaled_y)
-            
-    
+
+def get_migration_destinations(global_manager): #returns cells that could have slumss and receive migration
+    return_list = []
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type in ['port', 'train_station', 'resource']:
+            if not current_building.images[0].current_cell in return_list:
+                return_list.append(current_building.images[0].current_cell)
+    return(return_list)
+
+def get_migration_sources(global_manager): #returns villages from which migration could occur
+    return_list = []
+    for current_village in global_manager.get('village_list'):
+        if current_village.available_workers > 0:
+            return_list.append(current_village)
+    return(return_list)
+
+def get_num_available_workers(location_types, global_manager): #gets how many available workers there are in either all villages, all slums, or both
+    num_available_workers = 0
+    if not location_types == 'village': #slums or all
+        for current_building in global_manager.get('building_list'):
+            if current_building.building_type == 'slums':
+                num_available_workers += current_building.available_workers
+    if not location_types == 'slums': #village or all
+        for current_village in global_manager.get('village_list'):
+            num_available_workers += current_village.available_workers
+    return(num_available_workers)

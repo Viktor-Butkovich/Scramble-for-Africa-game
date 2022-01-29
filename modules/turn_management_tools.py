@@ -6,6 +6,7 @@ from . import text_tools
 from . import actor_utility
 from . import market_tools
 from . import notification_tools
+from . import utility
 
 def end_turn(global_manager):
     '''
@@ -46,6 +47,7 @@ def start_turn(global_manager, first_turn):
         manage_upkeep(global_manager)
         manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
+        manage_worker_migration(global_manager)
     
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
@@ -202,4 +204,48 @@ def manage_worker_price_changes(global_manager):
         global_manager.get('recruitment_costs')['slave worker'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
+def manage_worker_migration(global_manager): #checks if migration occurs, resolves it
+    num_village_workers = actor_utility.get_num_available_workers('village', global_manager)
+    num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
+    if num_village_workers > num_slums_workers:
+        resolve_worker_migration(global_manager)
 
+def resolve_worker_migration(global_manager): #resolves migration if it occurs
+    possible_source_village_list = actor_utility.get_migration_sources(global_manager) #list of villages that could have migration
+    destination_cell_list = actor_utility.get_migration_destinations(global_manager)
+    village_destination_dict = {}
+    village_destination_coordinates_dict = {}
+    village_num_migrated_dict = {}
+    source_village_list = [] #list of villages that actually had migration occur
+    any_migrated = False
+    for source_village in possible_source_village_list:
+        num_migrated = 0
+        for available_worker in range(source_village.available_workers):
+            if random.randrange(1, 7) >= 4:
+                num_migrated += 1
+        if num_migrated > 0:
+            any_migrated = True
+            source_village_list.append(source_village)
+            destination = random.choice(destination_cell_list)
+            if not destination.has_slums():
+                destination.create_slums()
+            source_village.change_available_workers(-1 * num_migrated)
+            source_village.change_population(-1 * num_migrated)
+            destination.contained_buildings['slums'].change_population(num_migrated)
+            if not destination.contained_buildings['port'] == 'none':
+                destination_type = 'port'
+            elif not destination.contained_buildings['resource'] == 'none':
+                destination_type = destination.contained_buildings['resource'].name
+            elif not destination.contained_buildings['train_station'] ==  'none':
+                destination_type = 'train station'
+            village_destination_dict[source_village] = destination_type
+            village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
+            village_num_migrated_dict[source_village] = num_migrated
+    if any_migrated:        
+        migration_report_text = 'A wave of migration from villages to your colony has occured as African workers search for employment. /n'
+        for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
+            current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
+            current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
+            current_line += " at (" + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
+            migration_report_text += current_line + ' /n'
+        notification_tools.display_notification(migration_report_text, 'default', global_manager)

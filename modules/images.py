@@ -636,10 +636,11 @@ class building_image(actor_image):
                 if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
                     self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
             else:
-                old_cell = self.current_cell #specific cell that building image is attached to on minimap doesn't seem to affect anything, it appears in the correct place as long as it is connected to any cell
-                self.current_cell = self.grid.find_cell(2, 2)
-                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
-                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
+                self.current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.actor.x, self.actor.y)
+                #old_cell = self.current_cell #specific cell that building image is attached to on minimap doesn't seem to affect anything, it appears in the correct place as long as it is connected to any cell
+                #self.current_cell = self.grid.find_cell(1, 1)
+                #if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
+                #    self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
                 #self.remove_from_cell()
             self.go_to_cell((mini_x, mini_y))
         else:

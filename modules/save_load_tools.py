@@ -314,10 +314,16 @@ class save_load_manager_template():
 
         self.global_manager.get('minimap_grid').calibrate(2, 2)
 
+        #print('testing here')
+        #print(self.global_manager.get('strategic_map_grid').find_cell(2, 2).contained_buildings)
+        stored = self.global_manager.get('strategic_map_grid').find_cell(2, 2).contained_buildings
         #load actors
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
-
+            #print(current_actor_dict)
+            #print(self.global_manager.get('strategic_map_grid').find_cell(2, 2).contained_buildings)
+        #print('testing again here')
+        #print(self.global_manager.get('strategic_map_grid').find_cell(2, 2).contained_buildings)
         #print(saved_minister_dicts)
         for current_minister_dict in saved_minister_dicts:
             self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)

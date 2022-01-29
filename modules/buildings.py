@@ -41,11 +41,13 @@ class building(actor):
         self.global_manager.get('building_list').append(self)
         self.set_name(input_dict['name'])
         self.work_crew_capacity = 0 #default
-        self.contained_work_crews = []
+        self.contained_work_crews = []        
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
         for current_image in self.images:
+            #print(str(current_image.current_cell.x) + ', ' + str(current_image.current_cell.y))
+            #print(current_image.current_cell.grid)
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
@@ -130,6 +132,8 @@ class building(actor):
         elif self.building_type == 'train_station':
             tooltip_text.append("Allows construction gangs to build trains on this tile")
             tooltip_text.append("Allows trains to drop off or pick up cargo or passengers in this tile")
+        elif self.building_type == 'slums':
+            tooltip_text.append("Contains " + str(self.available_workers) + " African workers in search of employment")
         self.set_tooltip(tooltip_text)
 
     def touching_mouse(self):
@@ -459,3 +463,45 @@ class resource_building(building):
         '''
         for current_work_crew in self.contained_work_crews:
             current_work_crew.attempt_production(self)
+
+class slums(building):
+    def __init__(self, from_save, input_dict, global_manager):
+        input_dict['building_type'] = 'slums'
+        self.available_workers = 0
+        if from_save:
+            self.available_workers = input_dict['available_workers']
+        super().__init__(from_save, input_dict, global_manager)
+
+    def change_population(self, change):
+        self.available_workers += change
+        if self.available_workers < 0:
+            self.available_workers = 0
+        if self.available_workers == 0:
+            self.remove()
+        if self.images[0].current_cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            
+    def recruit_worker(self):
+        '''
+        Description:
+            Hires one of this village's available workers by creating a worker object, reducing the village's population and number of available workers
+        Input:
+            None
+        Output:
+            None
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.cell.x, self.cell.y)
+        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
+        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['modes'] = ['strategic']
+        input_dict['name'] = 'African worker'
+        input_dict['init_type'] = 'worker'
+        input_dict['worker_type'] = 'African'
+        self.change_population(-1)
+        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['available_workers'] = self.available_workers
+        return(save_dict)

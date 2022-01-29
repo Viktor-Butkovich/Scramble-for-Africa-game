@@ -92,6 +92,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.port(from_save, input_dict, global_manager)
         elif init_type == 'resource':
             new_actor = buildings.resource_building(from_save, input_dict, global_manager)
+        elif init_type == 'slums':
+            new_actor = buildings.slums(from_save, input_dict, global_manager)
         return(new_actor)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):
