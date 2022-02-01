@@ -205,32 +205,56 @@ def manage_worker_price_changes(global_manager):
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
 def manage_worker_migration(global_manager): #checks if migration occurs, resolves it
-    num_village_workers = actor_utility.get_num_available_workers('village', global_manager)
+    num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + global_manager.get('num_wandering_workers')
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
-    if num_village_workers > num_slums_workers:
+    if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         resolve_worker_migration(global_manager)
 
 def resolve_worker_migration(global_manager): #resolves migration if it occurs
     possible_source_village_list = actor_utility.get_migration_sources(global_manager) #list of villages that could have migration
     destination_cell_list = actor_utility.get_migration_destinations(global_manager)
-    village_destination_dict = {}
-    village_destination_coordinates_dict = {}
-    village_num_migrated_dict = {}
-    source_village_list = [] #list of villages that actually had migration occur
-    any_migrated = False
-    for source_village in possible_source_village_list:
-        num_migrated = 0
-        for available_worker in range(source_village.available_workers):
-            if random.randrange(1, 7) >= 4:
-                num_migrated += 1
+    if not len(destination_cell_list) == 0:
+        weighted_destination_cell_list = create_weighted_migration_destinations(destination_cell_list)
+        village_destination_dict = {}
+        village_destination_coordinates_dict = {}
+        village_num_migrated_dict = {}
+        source_village_list = [] #list of villages that actually had migration occur
+        any_migrated = False
+        #resolve village worker migration
+        for source_village in possible_source_village_list:
+            num_migrated = 0
+            for available_worker in range(source_village.available_workers):
+                if random.randrange(1, 7) >= 4:
+                    num_migrated += 1
+                    
+            if num_migrated > 0:
+                any_migrated = True
+                
+                source_village_list.append(source_village)
+                destination = random.choice(destination_cell_list) #random.choice(destination_cell_list)
+                if not destination.has_slums():
+                    destination.create_slums()
+                source_village.change_available_workers(-1 * num_migrated)
+                source_village.change_population(-1 * num_migrated)
+                destination.contained_buildings['slums'].change_population(num_migrated)
+                if not destination.contained_buildings['port'] == 'none':
+                    destination_type = 'port'
+                elif not destination.contained_buildings['resource'] == 'none':
+                    destination_type = destination.contained_buildings['resource'].name
+                elif not destination.contained_buildings['train_station'] ==  'none':
+                    destination_type = 'train station'
+                village_destination_dict[source_village] = destination_type
+                village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
+                village_num_migrated_dict[source_village] = num_migrated
+
+
+        #resolve wandering worker migration
+        num_migrated = global_manager.get('num_wandering_workers')
         if num_migrated > 0:
             any_migrated = True
-            source_village_list.append(source_village)
-            destination = random.choice(destination_cell_list)
+            destination = random.choice(destination_cell_list) #random.choice(destination_cell_list)
             if not destination.has_slums():
                 destination.create_slums()
-            source_village.change_available_workers(-1 * num_migrated)
-            source_village.change_population(-1 * num_migrated)
             destination.contained_buildings['slums'].change_population(num_migrated)
             if not destination.contained_buildings['port'] == 'none':
                 destination_type = 'port'
@@ -238,14 +262,45 @@ def resolve_worker_migration(global_manager): #resolves migration if it occurs
                 destination_type = destination.contained_buildings['resource'].name
             elif not destination.contained_buildings['train_station'] ==  'none':
                 destination_type = 'train station'
-            village_destination_dict[source_village] = destination_type
-            village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
-            village_num_migrated_dict[source_village] = num_migrated
-    if any_migrated:        
-        migration_report_text = 'A wave of migration from villages to your colony has occured as African workers search for employment. /n'
-        for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
-            current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
-            current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
-            current_line += " at (" + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
-            migration_report_text += current_line + ' /n'
-        notification_tools.display_notification(migration_report_text, 'default', global_manager)
+            village_destination_dict['wandering'] = destination_type
+            village_destination_coordinates_dict['wandering'] = (destination.x, destination.y)
+            village_num_migrated_dict['wandering'] = num_migrated
+
+
+                
+        if any_migrated:        
+            migration_report_text = 'A wave of migration from villages to your colony has occured as African workers search for employment. /n'
+            for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
+                current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
+                current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
+                current_line += " at (" + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
+                migration_report_text += current_line + ' /n'
+            if global_manager.get('num_wandering_workers') > 0:
+                current_line = str(village_num_migrated_dict['wandering']) + ' wandering worker' + utility.generate_plural(village_num_migrated_dict['wandering']) + ' settled in the slums surrounding your '
+                current_line += village_destination_dict['wandering'] + " at (" + str(village_destination_coordinates_dict['wandering'][0]) + ', ' + str(village_destination_coordinates_dict['wandering'][1]) + ').'
+                migration_report_text += current_line + ' /n'
+                global_manager.set('num_wandering_workers', 0)
+            notification_tools.display_notification(migration_report_text, 'default', global_manager)
+    
+
+def create_weighted_migration_destinations(destination_cell_list):
+    weighted_cell_list = []
+    for current_cell in destination_cell_list:
+        num_poi = 0 #points of interest
+        if not current_cell.contained_buildings['port'] == 'none':
+            num_poi += 1
+        if not current_cell.contained_buildings['train_station'] == 'none':
+            num_poi += 1
+        if not current_cell.contained_buildings['resource'] == 'none':
+            num_poi += 1
+        max_population_weight = 5
+        if current_cell.contained_buildings['slums'] == 'none': #0
+            population_weight = max_population_weight
+        elif current_cell.contained_buildings['slums'].available_workers < max_population_weight: #1-4
+            population_weight = max_population_weight - current_cell.contained_buildings['slums'].available_workers
+        else: #5+
+            population_weight = 1
+        total_weight = population_weight * num_poi
+        for i in range(total_weight):
+            weighted_cell_list.append(current_cell)
+    return(weighted_cell_list)

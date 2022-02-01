@@ -88,6 +88,9 @@ class worker(mob):
         super().fire()
         if self.worker_type in ['African', 'European']: #not religious volunteers
             market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
+        if self.worker_type == 'African':
+            text_tools.print_to_screen("These fired workers will wander and eventually settle down in one of your slums", self.global_manager)
+            self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
 
     def can_show_tooltip(self):
         '''
@@ -247,6 +250,8 @@ class slave_worker(worker):
         resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
         if not resulting_public_opinion == current_public_opinion:
             text_tools.print_to_screen("Freeing slaves has increased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
+        text_tools.print_to_screen("These freed slaves will wander and eventually settle down in one of your slums", self.global_manager)
+        self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
 
     def remove(self):
         '''

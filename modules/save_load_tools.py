@@ -52,6 +52,7 @@ class save_load_manager_template():
         self.copied_elements.append('current_game_mode')
         self.copied_elements.append('transaction_history')
         self.copied_elements.append('previous_financial_report')
+        self.copied_elements.append('num_wandering_workers')
         
     def new_game(self):
         '''
@@ -146,6 +147,7 @@ class save_load_manager_template():
             else:
                 market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
+        self.global_manager.get('money_tracker').reset_transaction_history()
         self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
@@ -160,6 +162,7 @@ class save_load_manager_template():
         self.global_manager.set('num_african_workers', 0)
         self.global_manager.set('num_european_workers', 0)
         self.global_manager.set('num_slave_workers', 0)
+        self.global_manager.set('num_wandering_workers', 0)
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))

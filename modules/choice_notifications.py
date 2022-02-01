@@ -200,7 +200,6 @@ class choice_button(button):
         elif self.button_type == 'trade':
             self.set_tooltip(['Attempt to trade by giving consumer goods'])
 
-            
         elif self.button_type == 'start trading':
             self.set_tooltip(['Start trading, allowing consumer goods to be sold for commodities if the villagers are willing'])
 
@@ -261,8 +260,10 @@ class recruitment_choice_button(choice_button):
                 input_dict['init_type'] = 'slave'
                 input_dict['purchased'] = True
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
-            elif self.recruitment_type == 'African worker':
+            elif self.recruitment_type == 'African worker village':
                 self.global_manager.get('displayed_tile').cell.village.recruit_worker()
+            elif self.recruitment_type == 'African worker slums':
+                self.global_manager.get('displayed_tile').cell.contained_buildings['slums'].recruit_worker()
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]

@@ -97,7 +97,7 @@ class actor_display_label(label):
             self.message_start = 'Total population: '
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
-            self.attached_buttons.append(buttons.hire_village_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, global_manager))
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'village', global_manager))
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
         elif self.actor_label_type == 'terrain':
@@ -114,6 +114,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, global_manager))
             for current_position in global_manager.get('minister_types'):
                 self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, current_position, global_manager))
+        elif self.actor_label_type == 'slums':
+            self.message_start = 'Slums population: '
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'slums', global_manager))
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -211,6 +214,11 @@ class actor_display_label(label):
             tooltip_text.append("Each work crew attached to this building can produce up to the building efficiency in commodities each turn.")
             tooltip_text.append("Increase work crew efficiency by upgrading the building's efficiency with a construction gang.")
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'slums':
+            tooltip_text = [self.message]
+            tooltip_text.append("Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work.")
+            tooltip_text.append("Slums can form around ports, train stations, and resource production facilities.")
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -227,6 +235,10 @@ class actor_display_label(label):
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
                 self.set_label(self.message_start + new_actor.name.capitalize())
+                
+            elif self.actor_label_type == 'coordinates':
+                self.set_label(self.message_start + '(' + str(new_actor.x) + ', ' + str(new_actor.y) + ')')
+                
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(new_actor.grid.name.capitalize())
@@ -318,14 +330,22 @@ class actor_display_label(label):
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
+                    
             elif self.actor_label_type == 'minister':
                 if not self.actor.controlling_minister == 'none':
                     self.set_label(self.message_start + self.actor.controlling_minister.name)
                 self.attached_images[0].calibrate(self.actor.controlling_minister)
+                
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)
+                
             elif self.actor_label_type == 'minister_office':
                 self.set_label(self.message_start + new_actor.current_position)
+                
+            elif self.actor_label_type == 'slums':
+                if not self.actor.cell.contained_buildings['slums'] == 'none':
+                    self.set_label(self.message_start + str(self.actor.cell.contained_buildings['slums'].available_workers))
+            
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
         else:
@@ -673,4 +693,14 @@ class commodity_display_label(actor_display_label):
         else:
             return(super().can_show())
 
+class slums_label(actor_display_label):
+    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+        self.current_commodity = 'none'
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'slums', 'tile', global_manager)
 
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.actor.cell.contained_buildings['slums'] == 'none':
+                return(True)
+        return(False)

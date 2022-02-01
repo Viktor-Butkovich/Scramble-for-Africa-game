@@ -72,8 +72,10 @@ class vehicle(mob):
         super().die()
         for current_passenger in self.contained_mobs:
             current_passenger.die()
+        self.contained_mobs = []
         if not self.crew == 'none':
             self.crew.die()
+            self.crew = 'none'
 
     def fire(self):
         '''
@@ -84,11 +86,13 @@ class vehicle(mob):
         Output:
             None
         '''
-        super().fire()
         for current_passenger in self.contained_mobs:
             current_passenger.fire()
+        self.contained_mobs = []
         if not self.crew == 'none':
             self.crew.fire()
+            self.crew = 'none'
+        super().fire()
 
     def to_save_dict(self):
         '''

@@ -471,15 +471,17 @@ class slums(building):
         if from_save:
             self.available_workers = input_dict['available_workers']
         super().__init__(from_save, input_dict, global_manager)
+        if self.images[0].current_cell.tile == self.global_manager.get('displayed_tile'):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #show self after creation
 
     def change_population(self, change):
         self.available_workers += change
         if self.available_workers < 0:
             self.available_workers = 0
-        if self.available_workers == 0:
-            self.remove()
         if self.images[0].current_cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        if self.available_workers == 0:
+            self.remove()
             
     def recruit_worker(self):
         '''
@@ -491,15 +493,15 @@ class slums(building):
             None
         '''
         input_dict = {}
-        input_dict['coordinates'] = (self.cell.x, self.cell.y)
-        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
+        input_dict['coordinates'] = (self.images[0].current_cell.x, self.images[0].current_cell.y)
+        input_dict['grids'] = [self.images[0].current_cell.grid, self.images[0].current_cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African worker/default.png'
         input_dict['modes'] = ['strategic']
         input_dict['name'] = 'African worker'
         input_dict['init_type'] = 'worker'
         input_dict['worker_type'] = 'African'
-        self.change_population(-1)
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        self.change_population(-1)
 
     def to_save_dict(self):
         save_dict = super().to_save_dict()
