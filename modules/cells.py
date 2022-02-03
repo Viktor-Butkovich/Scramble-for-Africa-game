@@ -1,6 +1,7 @@
 #Contains functionality for grid cells
 
 import pygame
+from . import actor_utility
 
 class cell():
     '''
@@ -196,6 +197,39 @@ class cell():
         if self.contained_buildings['port'] == 'none':
             return(False)
         return(True)
+
+    def has_slums(self):
+        '''
+        Description:
+            Returns whether this cell contains slums
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain slums, otherwise returns True
+        '''
+        if self.contained_buildings['slums'] == 'none':
+            return(False)
+        return(True)
+
+    def create_slums(self):
+        '''
+        Description:
+            Creates an empty slums building when a worker migrates to this cell, if there is not already one present
+        Input:
+            None
+        Outptu:
+            None
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.x, self.y)
+        input_dict['grids'] = [self.grid, self.grid.mini_grid]
+        input_dict['name'] = 'slums'
+        input_dict['modes'] = ['strategic']
+        input_dict['init_type'] = 'slums'
+        #input_dict['image'] = 'buildings/slums.png'
+        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        if self.tile == self.global_manager.get('displayed_tile'):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
 
     def has_vehicle(self, vehicle_type):
         '''

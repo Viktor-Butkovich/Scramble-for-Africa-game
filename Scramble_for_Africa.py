@@ -124,7 +124,7 @@ for current_commodity in global_manager.get('commodity_types'):
 
 global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission'])
+global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'slums'])
 
 global_manager.set('minister_types', ['General', 'Bishop', 'Minister of Trade', 'Minister of Geography', 'Minister of Engineering', 'Minister of Production', 'Minister of Transportation', 'Prosecutor'])
 global_manager.set('type_minister_dict',
@@ -258,6 +258,7 @@ global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('village_list', [])
 global_manager.set('building_list', [])
+global_manager.set('slums_list', [])
 global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
@@ -586,6 +587,11 @@ tile_free_infrastructure_left_image = actor_display_images.actor_display_infrast
     scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', 'left', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_infrastructure_left_image)
 
+#tile slums image
+tile_free_slums_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic'], 'slums', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('tile_info_display_list').append(tile_free_slums_image)
+
 #tile resource image
 tile_free_resource_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'resource', global_manager) #coordinates, width, height, modes, global_manager
@@ -611,19 +617,24 @@ tile_free_trading_post_image = actor_display_images.actor_display_free_image(sca
     scaling.scale_height(115, global_manager), ['strategic'], 'trading_post', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_trading_post_image)
 
-#tile trading post image
+#tile mission image
 tile_free_mission_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
     scaling.scale_height(115, global_manager), ['strategic'], 'mission', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('tile_info_display_list').append(tile_free_mission_image)
 
+#tile coordinates label
+tile_coordinates_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
+    scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'coordinates', 'tile', global_manager) 
+global_manager.get('tile_info_display_list').append(tile_coordinates_label) #coordinates, ideal_width, minimum_height, modes, image_id, actor_label_type, actor_type, global_manager
+
 #tile terrain label
 tile_terrain_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
-    scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'terrain', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+    scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'terrain', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, actor_label_type, actor_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_terrain_label)
 
 #tile resource label
 tile_resource_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
-    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, actor_label_type, actor_type, global_manager
 global_manager.get('tile_info_display_list').append(tile_resource_label)
 
 #tile resource building efficiency label
@@ -635,6 +646,12 @@ global_manager.get('tile_info_display_list').append(building_efficiency_label)
 building_work_crews_label = actor_display_labels.building_work_crews_label(scaling.scale_coordinates(25, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
     ['strategic'], 'misc/default_label.png', 'resource', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(building_work_crews_label)
+
+#tile slums label
+tile_slums_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
+    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'slums', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, global_manager
+global_manager.get('tile_info_display_list').append(tile_slums_label)
+
 
 for i in range(0, 3): #3 labels
     building_work_crew_label = actor_display_labels.list_item_label(scaling.scale_coordinates(50, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),

@@ -131,5 +131,54 @@ def order_actor_info_display(global_manager, info_display_list, default_y): #dis
             scaled_y = scaling.scale_height(current_y, global_manager)
             if not current_label.y == scaled_y: #if y is not the same as last time, move it
                 current_label.set_y(scaled_y)
-            
-    
+
+def get_migration_destinations(global_manager):
+    '''
+    Description:
+        Gathers and returns a list of all cells to which migration could occur. Migration can occur to tiles with places of employment, like ports, train stations, and resource production facilities
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        cell list: Returns list of all cells to which migration could occur
+    '''
+    return_list = []
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type in ['port', 'train_station', 'resource']:
+            if not current_building.images[0].current_cell in return_list:
+                return_list.append(current_building.images[0].current_cell)
+    return(return_list)
+
+def get_migration_sources(global_manager):
+    '''
+    Description:
+        Gathers and returns a list of all villages from which migration could occur. Migration can occur from villages with at least 1 available worker
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        village list: Returns list of all villages from which migration could occur
+    '''
+    return_list = []
+    for current_village in global_manager.get('village_list'):
+        if current_village.available_workers > 0:
+            return_list.append(current_village)
+    return(return_list)
+
+def get_num_available_workers(location_types, global_manager):
+    '''
+    Description:
+        Calculates and returns the number of workers currently available in the inputted location type, like how many workers are in slums
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string location_types: Types of locations to count workers from, can be 'village', 'slums', or 'all'
+    Output:
+        int: Returns number of workers currently available in the inputted location type
+    '''
+    num_available_workers = 0
+    if not location_types == 'village': #slums or all
+        for current_building in global_manager.get('building_list'):
+            if current_building.building_type == 'slums':
+                num_available_workers += current_building.available_workers
+    if not location_types == 'slums': #village or all
+        for current_village in global_manager.get('village_list'):
+            num_available_workers += current_village.available_workers
+    return(num_available_workers)

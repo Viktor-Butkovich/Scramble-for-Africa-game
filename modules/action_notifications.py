@@ -220,6 +220,7 @@ class off_tile_exploration_notification(notification):
         Output:
             None
         '''
+        self.global_manager.set('ongoing_exploration', False)
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
@@ -237,8 +238,6 @@ class off_tile_exploration_notification(notification):
             self.global_manager.get('minimap_grid').calibrate(current_expedition.x, current_expedition.y)
         for current_image in self.notification_images:
             current_image.remove()
-        
-        self.global_manager.set('ongoing_exploration', False)
         
 class trade_notification(notification):
     '''

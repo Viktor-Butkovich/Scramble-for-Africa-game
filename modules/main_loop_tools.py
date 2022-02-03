@@ -46,6 +46,11 @@ def update_display(global_manager):
             current_infrastructure_connection.draw()
             current_infrastructure_connection.has_drawn = True
 
+        for current_slums in global_manager.get('slums_list'): #slums appear under other buildings
+            for current_image in current_slums.images:
+                current_image.draw()
+                current_image.has_drawn = True
+
         mob_image_list = []
         for current_image in global_manager.get('image_list'):
             if not current_image.has_drawn:

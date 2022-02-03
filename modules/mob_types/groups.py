@@ -78,9 +78,12 @@ class group(mob):
         Output:
             None
         '''
-        super().fire()
+        #super().fire()
+        #self.officer.fire()
+        #self.worker.fire()
         self.officer.fire()
         self.worker.fire()
+        self.remove()
 
     def set_group_type(self, new_type):
         '''

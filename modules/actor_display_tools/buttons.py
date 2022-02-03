@@ -1768,11 +1768,11 @@ class remove_minister_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 
-class hire_village_workers_button(label_button):
+class hire_african_workers_button(label_button):
     '''
-    Button that hires available workers from the displayed village
+    Button that hires available workers from the displayed village/slum
     '''
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, hire_source_type, global_manager):
         '''
         Description:
             Initializes this object
@@ -1784,11 +1784,17 @@ class hire_village_workers_button(label_button):
             string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by the recruited worker
             label attached_label: Label that this button is attached to
+            string hire_source_type: Type of location this button hires workers from, can be 'village' or 'slums'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, 'hire village worker', keybind_id, modes, image_id, attached_label, global_manager)
+        self.hire_source_type = hire_source_type
+        if hire_source_type == 'village':
+            button_type = 'hire village worker'
+        elif hire_source_type == 'slums':
+            button_type = 'hire slums worker'
+        super().__init__(coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
         '''
@@ -1797,19 +1803,24 @@ class hire_village_workers_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns same as superclass if a village with available workers is displayed, otherwise returns False
+            boolean: Returns same as superclass if a village/slum with available workers is displayed, otherwise returns False
         '''
         if super().can_show():
-            attached_village = self.global_manager.get('displayed_tile').cell.village
-            if not attached_village == 'none':
-                if attached_village.can_recruit_worker():
+            if self.hire_source_type == 'village':
+                attached_village = self.global_manager.get('displayed_tile').cell.village
+                if not attached_village == 'none':
+                    if attached_village.can_recruit_worker():
+                        return(True)
+            elif self.hire_source_type == 'slums':
+                attached_slums = self.global_manager.get('displayed_tile').cell.contained_buildings['slums']
+                if not attached_slums == 'none':
                     return(True)
         return(False)
 
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village/slum
         Input:
             None
         Output:
@@ -1818,7 +1829,7 @@ class hire_village_workers_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
-                choice_info_dict = {'recruitment_type': 'African worker', 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment'}
+                choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment'}
                 self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African worker', self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)

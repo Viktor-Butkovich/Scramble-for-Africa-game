@@ -278,7 +278,10 @@ class button():
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
             self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
-                                str(self.global_manager.get('african_worker_upkeep')) + "money. If fired, the workers will return to their village"])
+                                str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
+        elif self.button_type == 'hire slums worker':
+            self.set_tooltip(["Hires unemployed workers, reducing the slum's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
+                                str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
         elif self.button_type == 'buy slaves':
             self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to purchase and have an upkeep each turn of " +
                                 str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
@@ -1041,7 +1044,14 @@ class fire_unit_button(button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.showing_outline = True
-                message = "Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game."
+                message = "Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n "
+                if self.attached_mob.is_worker:
+                    if self.attached_mob.worker_type in ['European', 'religious']:
+                        message += "Unlike African workers, fired European workers will never settle in slums and are truly removed from the game."
+                    elif self.attached_mob.worker_type == 'African':
+                        message += "Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again."
+                    elif self.attached_mob.worker_type == 'slave':
+                        message += "Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers."
                 notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
                 #self.attached_mob.die()
             else:

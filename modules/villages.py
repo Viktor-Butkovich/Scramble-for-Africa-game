@@ -69,7 +69,7 @@ class village():
     def recruit_worker(self):
         '''
         Description:
-            Hires one of this village's available workers by creating a worker object, reducing the village's population and number of available workers
+            Hires one of this village's available workers by creating a worker, reducing the village's population and number of available workers
         Input:
             None
         Output:
