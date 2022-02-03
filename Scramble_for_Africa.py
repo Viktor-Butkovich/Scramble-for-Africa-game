@@ -258,6 +258,7 @@ global_manager.set('actor_list', [])
 global_manager.set('mob_list', [])
 global_manager.set('village_list', [])
 global_manager.set('building_list', [])
+global_manager.set('slums_list', [])
 global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
@@ -647,8 +648,8 @@ building_work_crews_label = actor_display_labels.building_work_crews_label(scali
 global_manager.get('tile_info_display_list').append(building_work_crews_label)
 
 #tile slums label
-tile_slums_label = actor_display_labels.slums_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
-    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, global_manager
+tile_slums_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
+    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'slums', 'tile', global_manager) #coordinates, ideal_width, minimum_height, modes, image_id, global_manager
 global_manager.get('tile_info_display_list').append(tile_slums_label)
 
 

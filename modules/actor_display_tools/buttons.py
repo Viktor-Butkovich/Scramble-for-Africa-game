@@ -1770,7 +1770,7 @@ class remove_minister_button(label_button):
 
 class hire_african_workers_button(label_button):
     '''
-    Button that hires available workers from the displayed village
+    Button that hires available workers from the displayed village/slum
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, hire_source_type, global_manager):
         '''
@@ -1784,6 +1784,7 @@ class hire_african_workers_button(label_button):
             string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by the recruited worker
             label attached_label: Label that this button is attached to
+            string hire_source_type: Type of location this button hires workers from, can be 'village' or 'slums'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1802,7 +1803,7 @@ class hire_african_workers_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns same as superclass if a village with available workers is displayed, otherwise returns False
+            boolean: Returns same as superclass if a village/slum with available workers is displayed, otherwise returns False
         '''
         if super().can_show():
             if self.hire_source_type == 'village':
@@ -1819,7 +1820,7 @@ class hire_african_workers_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button hires an available worker from the displayed village/slum
         Input:
             None
         Output:

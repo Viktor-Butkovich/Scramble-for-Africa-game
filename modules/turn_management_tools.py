@@ -204,13 +204,30 @@ def manage_worker_price_changes(global_manager):
         global_manager.get('recruitment_costs')['slave worker'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
-def manage_worker_migration(global_manager): #checks if migration occurs, resolves it
+def manage_worker_migration(global_manager): 
+    '''
+    Description:
+        Checks if a workerm migration event occurs and resolves it if it does occur
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + global_manager.get('num_wandering_workers')
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         resolve_worker_migration(global_manager)
 
 def resolve_worker_migration(global_manager): #resolves migration if it occurs
+    '''
+    Description:
+        When a migration event occurs, about half of available workers in villages and all wandering workers move to a slum around a colonial port, train station, or resource production facility. The chance to move to a slum on a tile
+            is weighted by the number of people already in that tile's slum and the number of employment buildings on that tile. Also displays a report of the movements that occurred
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     possible_source_village_list = actor_utility.get_migration_sources(global_manager) #list of villages that could have migration
     destination_cell_list = actor_utility.get_migration_destinations(global_manager)
     if not len(destination_cell_list) == 0:
@@ -231,7 +248,7 @@ def resolve_worker_migration(global_manager): #resolves migration if it occurs
                 any_migrated = True
                 
                 source_village_list.append(source_village)
-                destination = random.choice(destination_cell_list) #random.choice(destination_cell_list)
+                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
                 if not destination.has_slums():
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
@@ -247,26 +264,34 @@ def resolve_worker_migration(global_manager): #resolves migration if it occurs
                 village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
                 village_num_migrated_dict[source_village] = num_migrated
 
-
+        
         #resolve wandering worker migration
+        wandering_destinations = []
+        wandering_destination_dict = {}
+        wandering_destination_coordinates_dict = {}
+        wandering_num_migrated_dict = {}
         num_migrated = global_manager.get('num_wandering_workers')
         if num_migrated > 0:
             any_migrated = True
-            destination = random.choice(destination_cell_list) #random.choice(destination_cell_list)
-            if not destination.has_slums():
-                destination.create_slums()
-            destination.contained_buildings['slums'].change_population(num_migrated)
-            if not destination.contained_buildings['port'] == 'none':
-                destination_type = 'port'
-            elif not destination.contained_buildings['resource'] == 'none':
-                destination_type = destination.contained_buildings['resource'].name
-            elif not destination.contained_buildings['train_station'] ==  'none':
-                destination_type = 'train station'
-            village_destination_dict['wandering'] = destination_type
-            village_destination_coordinates_dict['wandering'] = (destination.x, destination.y)
-            village_num_migrated_dict['wandering'] = num_migrated
-
-
+            for i in range(num_migrated):
+                destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
+                if not destination.has_slums():
+                    destination.create_slums()
+                destination.contained_buildings['slums'].change_population(1) #num_migrated
+                global_manager.set('num_wandering_workers', global_manager.get('num_wandering_workers') - 1)
+                if not destination.contained_buildings['port'] == 'none':
+                    destination_type = 'port'
+                elif not destination.contained_buildings['resource'] == 'none':
+                    destination_type = destination.contained_buildings['resource'].name
+                elif not destination.contained_buildings['train_station'] ==  'none':
+                    destination_type = 'train station'
+                wandering_destination_dict[destination] = destination_type #destination 0: port
+                wandering_destination_coordinates_dict[destination] = (destination.x, destination.y) #destination 0: (2, 2)
+                if destination in wandering_destinations:
+                    wandering_num_migrated_dict[destination] += 1
+                else:
+                    wandering_num_migrated_dict[destination] = 1
+                    wandering_destinations.append(destination)
                 
         if any_migrated:        
             migration_report_text = 'A wave of migration from villages to your colony has occured as African workers search for employment. /n'
@@ -275,15 +300,21 @@ def resolve_worker_migration(global_manager): #resolves migration if it occurs
                 current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
                 current_line += " at (" + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
                 migration_report_text += current_line + ' /n'
-            if global_manager.get('num_wandering_workers') > 0:
-                current_line = str(village_num_migrated_dict['wandering']) + ' wandering worker' + utility.generate_plural(village_num_migrated_dict['wandering']) + ' settled in the slums surrounding your '
-                current_line += village_destination_dict['wandering'] + " at (" + str(village_destination_coordinates_dict['wandering'][0]) + ', ' + str(village_destination_coordinates_dict['wandering'][1]) + ').'
+            for wandering_destination in wandering_destinations:
+                current_line = str(wandering_num_migrated_dict[wandering_destination]) + ' wandering worker' + utility.generate_plural(wandering_num_migrated_dict[wandering_destination]) + ' settled in the slums surrounding your '
+                current_line += wandering_destination_dict[wandering_destination] + " at (" + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
                 migration_report_text += current_line + ' /n'
-                global_manager.set('num_wandering_workers', 0)
             notification_tools.display_notification(migration_report_text, 'default', global_manager)
     
-
 def create_weighted_migration_destinations(destination_cell_list):
+    '''
+    Description:
+        Analyzes a list of destinations for a migration event and creates a weighted list from which cells with more employment buildings and lower slum populations are more likely to be chosen
+    Input:
+        cell list destination_cell_list: list of cells that have employment buildings to migrate to
+    Output:
+        cell list: Returns a weighted list of cells in which cells with more employment buildings and lower slum populations appear a greater number of times
+    '''
     weighted_cell_list = []
     for current_cell in destination_cell_list:
         num_poi = 0 #points of interest

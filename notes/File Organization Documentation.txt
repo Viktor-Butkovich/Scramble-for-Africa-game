@@ -54,7 +54,7 @@ SFA folder
 		    class upgrade_button
 	   	    class appoint_minister_button
 		    class remove_minister_button
-		    class hire_village_workers_button
+		    class hire_african_workers_button
 		    class buy_slaves_button
 
 	mob_types folder
@@ -130,6 +130,9 @@ SFA folder
 	    def get_random_ocean_coordinates
             def calibrate_actor_info_display
 	    def order_actor_info_display
+	    def get_migration_destinations
+	    def get_migration_sources
+	    def get_num_available_workers
 
         actors.py
             imports pygame, text_tools, utility, actor_utility, scaling
@@ -144,6 +147,7 @@ SFA folder
 		class train_station
 		class port
 		class resource_building
+		class slums
 
         buttons.py
             imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility
@@ -157,7 +161,7 @@ SFA folder
 		class show_previous_financial_report_button
 
         cells.py
-            imports pygame
+            imports pygame, actor_utility
             class cell
 
 	choice_notifications.py
@@ -320,7 +324,7 @@ SFA folder
                 class veteran_icon
 
 	turn_management_tools.py
-	    imports random, text_tools, actor_utility, market_tools, notification_tools
+	    imports random, text_tools, actor_utility, market_tools, notification_tools, utility
 	    def end_turn
 	    def start_turn
 	    def manage_production
@@ -329,6 +333,9 @@ SFA folder
 	    def manage_subsidies
 	    def manage_financial_report
 	    def manage_worker_price_changes
+	    def manage_worker_migration
+	    def resolve_worker_migration
+	    def create_weighted_migration_destinations
 
         utility.py
             def find_object_distance

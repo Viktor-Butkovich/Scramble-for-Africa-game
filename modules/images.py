@@ -104,6 +104,7 @@ class free_image():
             self.image = pygame.image.load('graphics/' + self.image_id)
         except:
             print('graphics/' + self.image_id)
+            self.image = pygame.image.load('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
     def can_show_tooltip(self):
@@ -894,6 +895,7 @@ class button_image(actor_image):
             self.image = pygame.image.load('graphics/' + self.image_id)#.convert()
         except:
             print('graphics/' + self.image_id)
+            self.image = pygame.image.load('graphics/' + self.image_id)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         
     def draw(self):

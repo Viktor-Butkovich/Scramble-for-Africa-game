@@ -410,6 +410,8 @@ class actor_display_label(label):
             return(False)
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
+        elif self.actor_label_type == 'slums' and self.actor.cell.contained_buildings['slums'] == 'none':
+            return(False)
         else:
             return(result)
 
@@ -692,15 +694,3 @@ class commodity_display_label(actor_display_label):
             return(False)
         else:
             return(super().can_show())
-
-class slums_label(actor_display_label):
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
-        self.current_commodity = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'slums', 'tile', global_manager)
-
-    def can_show(self):
-        result = super().can_show()
-        if result:
-            if not self.actor.cell.contained_buildings['slums'] == 'none':
-                return(True)
-        return(False)

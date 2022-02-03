@@ -52,7 +52,8 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/empty.png')
             elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission', 'slums']:
                 if not new_actor.cell.contained_buildings[self.actor_image_type] == 'none':
-                    self.set_image('buildings/' + self.actor_image_type + '.png')
+                    self.set_image(new_actor.cell.contained_buildings[self.actor_image_type].images[0].image_id)
+                    #self.set_image('buildings/' + self.actor_image_type + '.png')
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_middle':
