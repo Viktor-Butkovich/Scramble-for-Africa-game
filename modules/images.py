@@ -235,6 +235,28 @@ class tooltip_free_image(free_image):
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
+class dice_roll_minister_image(tooltip_free_image): #image that appears during dice rolls showing minister position or portrait
+    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager):
+        self.attached_minister = attached_minister #minister object
+        self.minister_image_type = minister_image_type #position or portrait
+        if minister_image_type == 'portrait':
+            image_id = attached_minister.image_id
+        elif minister_image_type == 'position':
+            image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        global_manager.get('dice_roll_minister_images').append(self)
+
+    def update_tooltip(self):
+        if self.minister_image_type == 'portrait':
+            self.set_tooltip(self.attached_minister.tooltip_text)
+        else:
+            self.set_tooltip([])
+
+    def remove(self):
+        super().remove()
+        self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
+        
+
 class minister_type_image(tooltip_free_image): #image of minister type icon
     '''
     Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister

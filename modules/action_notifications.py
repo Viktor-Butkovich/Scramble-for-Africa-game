@@ -156,6 +156,10 @@ class exploration_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             if self.global_manager.get('exploration_result')[0].movement_points >= 1: #fix to exploration completing multiple times bug
                 self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
+                for current_die in self.global_manager.get('dice_list'):
+                    current_die.remove()
+                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                    current_minister_image.remove()
                 #self.global_manager.get('exploration_result')[0].resolve_off_tile_exploration()
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -329,10 +333,12 @@ class trade_notification(notification):
             caravan = self.trade_result[0]
             if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
                 caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
-            caravan.die() 
+            caravan.die()
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
         if self.stops_trade:
             self.global_manager.set('ongoing_trade', False)
 
@@ -398,6 +404,8 @@ class religious_campaign_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
             self.global_manager.get('religious_campaign_result')[0].complete_religious_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -474,6 +482,8 @@ class advertising_campaign_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
             self.global_manager.get('advertising_campaign_result')[0].complete_advertising_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -542,6 +552,8 @@ class conversion_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
             self.global_manager.get('conversion_result')[0].complete_conversion()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -595,6 +607,8 @@ class construction_notification(notification):
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
             if self.global_manager.get('construction_result')[0].current_construction_type == 'default':
                 self.global_manager.get('construction_result')[0].complete_construction()
             elif self.global_manager.get('construction_result')[0].current_construction_type == 'upgrade':

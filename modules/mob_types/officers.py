@@ -11,6 +11,7 @@ from .. import market_tools
 from .. import dice_utility
 from .. import dice
 from .. import scaling
+from .. import images
 
 class officer(mob):
     '''
@@ -229,7 +230,12 @@ class officer(mob):
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)            
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
+        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'position', self.global_manager)
+        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'portrait', self.global_manager)
 
 class evangelist(officer):
     '''

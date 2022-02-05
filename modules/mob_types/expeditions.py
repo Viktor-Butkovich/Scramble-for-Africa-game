@@ -260,9 +260,9 @@ class expedition(group):
         elif roll_result <= self.current_max_crit_fail:
             self.die()
             died = True
-        copy_dice_list = self.global_manager.get('dice_list')
-        for current_die in copy_dice_list:
-            current_die.remove()
+        #copy_dice_list = self.global_manager.get('dice_list')
+        #for current_die in copy_dice_list:
+        #    current_die.remove()
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
     def resolve_off_tile_exploration(self):
