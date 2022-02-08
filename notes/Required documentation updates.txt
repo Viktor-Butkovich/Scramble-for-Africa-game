@@ -3,3 +3,4 @@ groups.group.display_die
 images.dice_roll_minister_image
 officers imports
 officers.office.display_die
+actor_display_tools/buttons.take_loan_button

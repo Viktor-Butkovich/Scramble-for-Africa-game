@@ -217,7 +217,8 @@ global_manager.set('action_prices',
     'convert': 5,
     'religious_campaign': 5,
     'advertising_campaign': 5,
-    'trade': 0
+    'trade': 0,
+    'loan': 5
     }
 )
 

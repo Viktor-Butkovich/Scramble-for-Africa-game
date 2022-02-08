@@ -446,6 +446,9 @@ class merchant(officer):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
 
+    def start_loan(self):
+        self.global_manager.get('money_tracker').change(100)
+
     def start_advertising_campaign(self, target_commodity):
         '''
         Description:

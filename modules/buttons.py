@@ -259,6 +259,9 @@ class button():
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
                 "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points."])
+        elif self.button_type == 'take loan':
+            self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
+                "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
