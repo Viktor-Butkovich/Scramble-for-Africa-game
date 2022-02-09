@@ -19,6 +19,7 @@ import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
 
 pygame.init()
+pygame.mixer.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
 global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
