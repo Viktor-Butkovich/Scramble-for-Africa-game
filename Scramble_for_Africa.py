@@ -218,6 +218,7 @@ global_manager.set('action_prices',
     'convert': 5,
     'religious_campaign': 5,
     'advertising_campaign': 5,
+    'loan_search': 5,
     'trade': 0,
     'loan': 5
     }
@@ -322,6 +323,7 @@ global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
 global_manager.set('ongoing_advertising_campaign', False)
+global_manager.set('ongoing_loan_search', False)
 global_manager.set('ongoing_conversion', False)
 global_manager.set('ongoing_construction', False)
 

@@ -5,3 +5,4 @@ officers imports
 officers.office.display_die
 actor_display_tools/buttons.take_loan_button
 notifications imports
+officers.merchant.loan_search

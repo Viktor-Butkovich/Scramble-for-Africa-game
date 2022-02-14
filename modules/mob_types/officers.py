@@ -446,8 +446,42 @@ class merchant(officer):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
 
-    def start_loan(self):
-        self.global_manager.get('money_tracker').change(100)
+    def start_loan_search(self):
+        #self.global_manager.get('money_tracker').change(100)
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'merchant': self, 'type': 'start loan'}
+        self.global_manager.set('ongoing_loan_search', True)
+        message = "Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant's success will determine the interest rate found. /n /n"
+        message += "The search will cost " + str(self.global_manager.get('action_prices')['loan_search']) + " money. /n /n "
+        notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+    def loan_search(self):
+        principal = 100
+        initial_interest = 11
+        interest = initial_interest
+        roll_modifier = self.controlling_minister.get_skill_modifier() 
+        found_loan = False
+        while not found_loan: #doesn't account for corruption yet, fix this
+            if self.veteran: 
+                roll = max(random.randrange(1, 7) + roll_modifier, random.randrange(1, 7) + roll_modifier)
+            else:
+                roll = random.randrange(1, 7) + roll_modifier
+            if roll >= 5: #increase interest on 1-4, stop on 5-6
+                found_loan = True
+            else:
+                interest += 1
+        text_tools.print_to_screen("Loan result: ", self.global_manager)
+        text_tools.print_to_screen("Interest: " + str(interest), self.global_manager)
+        self.global_manager.get('money_tracker').change(principal)
+        self.global_manager.set('ongoing_loan_search', False)
 
     def start_advertising_campaign(self, target_commodity):
         '''

@@ -731,6 +731,10 @@ class button():
                 merchant = self.notification.choice_info_dict['merchant']
                 merchant.advertising_campaign()
 
+            elif self.button_type == 'start loan search':
+                merchant = self.notification.choice_info_dict['merchant']
+                merchant.loan_search()
+
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.convert()
@@ -755,6 +759,9 @@ class button():
 
             elif self.button_type == 'stop advertising campaign':
                 self.global_manager.set('ongoing_advertising_campaign', False)
+
+            elif self.button_type == 'stop loan search':
+                self.global_manager.set('ongoing_loan_search', False)
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)

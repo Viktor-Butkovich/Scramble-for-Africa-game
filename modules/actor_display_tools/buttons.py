@@ -1116,9 +1116,9 @@ class take_loan_button(label_button):
                     if current_mob.movement_points == current_mob.max_movement_points:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
                             if current_mob.check_if_minister_appointed():
-                                current_mob.start_loan()
+                                current_mob.start_loan_search()
                         else:
-                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trade']) + " money needed to search for a loan offer.", self.global_manager)
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['loan_search']) + " money needed to search for a loan offer.", self.global_manager)
                     else:
                         text_tools.print_to_screen("Searching for a loan offer requires an entire turn of movement points.", self.global_manager)
                 else:
