@@ -45,6 +45,7 @@ def start_turn(global_manager, first_turn):
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
+        manage_loans(global_manager)
         manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
@@ -123,6 +124,10 @@ def manage_upkeep(global_manager):
     global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
     
     #text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager) #described in financial report
+
+def manage_loans(global_manager):
+    for current_loan in global_manager.get('loan_list'):
+        current_loan.make_payment()
 
 def manage_public_opinion(global_manager):
     '''

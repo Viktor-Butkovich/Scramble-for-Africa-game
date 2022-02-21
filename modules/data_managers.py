@@ -260,7 +260,8 @@ class money_tracker(value_tracker):
             None
         '''
         self.transaction_history = {}
-        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment']
+        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment',
+            'loan interest', 'loans', 'loan searches']
         self.transaction_types += ['construction']
         self.reset_transaction_history()
         super().__init__('money', initial_value, 'none', 'none', global_manager)
@@ -526,4 +527,3 @@ class notification_manager_template():
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
                 #coordinates, ideal_width, minimum_height, showing, modes, image, message
-    

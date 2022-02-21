@@ -6,3 +6,7 @@ officers.office.display_die
 actor_display_tools/buttons.take_loan_button
 notifications imports
 officers.merchant.loan_search
+market_tools.loan
+ministers.minister.get_roll_modifier
+turn_management_tools.manage_loans
+actor_creation_tools imports

@@ -118,6 +118,7 @@ def to_main_menu(global_manager, override = False):
             current_notification.remove()
         for current_die in global_manager.get('dice_list'):
             current_die.remove()
+        global_manager.set('loan_list', [])
         global_manager.set('displayed_mob', 'none')
         global_manager.set('displayed_tile', 'none')
         global_manager.set('end_turn_selected_mob', 'none')

@@ -130,4 +130,40 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
             if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
                 global_manager.get('recruitment_costs')['slave worker'] = changed_price
                 text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
-            
+
+class loan():
+    def __init__(self, from_save, input_dict, global_manager):
+        self.global_manager = global_manager
+        self.principal = input_dict['principal']
+        if not from_save:
+            self.global_manager.get('money_tracker').change(self.principal, 'loans')
+        self.interest = input_dict['interest']
+        self.remaining_duration = input_dict['remaining_duration']
+        self.total_to_pay = self.interest * self.remaining_duration
+        self.global_manager.get('loan_list').append(self)
+        text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
+
+    def to_save_dict(self):
+        save_dict = {}
+        save_dict['init_type'] = 'loan'
+        save_dict['principal'] = self.principal
+        save_dict['interest'] = self.interest
+        save_dict['remaining_duration'] = self.remaining_duration
+        return(save_dict)
+
+    def make_payment(self):
+        self.global_manager.get('money_tracker').change(-1 * self.interest, 'loan interest')
+        self.remaining_duration -= 1
+        self.total_to_pay -= self.interest
+        if self.total_to_pay <= 0:
+            self.remove()
+
+    def remove(self):
+        total_paid = self.interest * 10
+        text_tools.print_to_screen("You have finished paying off the " + str(total_paid) + " money required for your " + str(self.principal) + " money loan", self.global_manager)
+        self.global_manager.set('loan_list', utility.remove_from_list(self.global_manager.get('loan_list'), self))
+
+    def get_description(self):
+        message = ""
+        message += str(self.principal) + " money loan with interest payments of " + str(self.interest) + " each turn. " + str(self.remaining_duration) + " turns/" + str(self.total_to_pay) + "money remaining"
+        return(message)

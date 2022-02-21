@@ -459,29 +459,56 @@ class merchant(officer):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'merchant': self, 'type': 'start loan'}
         self.global_manager.set('ongoing_loan_search', True)
+
+        minister_icon_coordinates = (440, self.global_manager.get('notification_manager').notification_x - 140) #show minister in start loan search notification, remove on start/stop loan search
+        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'position', self.global_manager)
+        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'portrait', self.global_manager)
+        
         message = "Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant's success will determine the interest rate found. /n /n"
         message += "The search will cost " + str(self.global_manager.get('action_prices')['loan_search']) + " money. /n /n "
         notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def loan_search(self):
+        just_promoted = False
+        self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
         principal = 100
         initial_interest = 11
         interest = initial_interest
-        roll_modifier = self.controlling_minister.get_skill_modifier() 
         found_loan = False
         while not found_loan: #doesn't account for corruption yet, fix this
             if self.veteran: 
-                roll = max(random.randrange(1, 7) + roll_modifier, random.randrange(1, 7) + roll_modifier)
+                roll = max(random.randrange(1, 7) + self.controlling_minister.get_roll_modifier(), random.randrange(1, 7) + self.controlling_minister.get_roll_modifier())
             else:
-                roll = random.randrange(1, 7) + roll_modifier
+                roll = random.randrange(1, 7) + self.controlling_minister.get_roll_modifier()
             if roll >= 5: #increase interest on 1-4, stop on 5-6
                 found_loan = True
             else:
                 interest += 1
-        text_tools.print_to_screen("Loan result: ", self.global_manager)
-        text_tools.print_to_screen("Interest: " + str(interest), self.global_manager)
-        self.global_manager.get('money_tracker').change(principal)
-        self.global_manager.set('ongoing_loan_search', False)
+        if self.controlling_minister.check_corruption():
+            interest += 2 #increase interest by 20% if corrupt
+            
+        if roll == 6 and interest == initial_interest and not self.veteran: #if rolled 6 on first try, promote
+            just_promoted = True
+                    
+        if just_promoted:
+            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager)
+            self.promote()
+            
+        choice_info_dict = {}
+        choice_info_dict['principal'] = principal
+        choice_info_dict['interest'] = interest
+
+        total_paid = interest * 10 #12 interest -> 120 paid
+        interest_percent = (interest - 10) * 10 #12 interest -> 20%
+        message = ""
+        message += 'Loan offer: /n /n'
+        message += 'The company will be provided an immediate sum of ' + str(principal) + ' money, which it may spend as it sees fit. /n'
+        message += 'In return, the company will be obligated to pay back ' + str(interest) + ' money per turn for 10 turns, for a total of ' + str(total_paid) + ' money. /n /n'
+        message += "Do you accept this exchange? /n"
+        notification_tools.display_choice_notification(message, ['accept loan offer', 'decline loan offer'], choice_info_dict, self.global_manager)
 
     def start_advertising_campaign(self, target_commodity):
         '''

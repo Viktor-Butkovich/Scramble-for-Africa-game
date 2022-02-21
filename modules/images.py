@@ -245,6 +245,7 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
             image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
         super().__init__(image_id, coordinates, width, height, modes, global_manager)
         global_manager.get('dice_roll_minister_images').append(self)
+        self.to_front = True
 
     def update_tooltip(self):
         if self.minister_image_type == 'portrait':
@@ -284,6 +285,7 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
         if not self.minister_type == 'none':
             self.calibrate(global_manager.get('current_ministers')[self.minister_type]) #calibrate to current minister or none if no current minister
         self.global_manager.get('minister_image_list').append(self)
+        self.to_front = True
 
     def calibrate(self, new_minister):
         '''

@@ -734,6 +734,8 @@ class button():
             elif self.button_type == 'start loan search':
                 merchant = self.notification.choice_info_dict['merchant']
                 merchant.loan_search()
+                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                    current_minister_image.remove()
 
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
@@ -760,14 +762,24 @@ class button():
             elif self.button_type == 'stop advertising campaign':
                 self.global_manager.set('ongoing_advertising_campaign', False)
 
-            elif self.button_type == 'stop loan search':
+            elif self.button_type in ['stop loan search', 'decline loan offer']:
                 self.global_manager.set('ongoing_loan_search', False)
+                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                    current_minister_image.remove()
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
 
             elif self.button_type in ['stop construction', 'stop upgrade']:
                 self.global_manager.set('ongoing_construction', False)
+
+            elif self.button_type == 'accept loan offer':
+                input_dict = {}
+                input_dict['principal'] = self.notification.choice_info_dict['principal']
+                input_dict['interest'] = self.notification.choice_info_dict['interest']
+                input_dict['remaining_duration'] = 10
+                new_loan = market_tools.loan(False, input_dict, self.global_manager)
+                self.global_manager.set('ongoing_loan_search', False)
                 
     def on_rmb_release(self):
         '''

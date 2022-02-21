@@ -199,6 +199,12 @@ class money_label(value_label):
         if num_slave_workers > 0:
             tooltip_text.append("Each of your " + str(num_slave_workers) + " slave workers will be paid " + str(slave_worker_upkeep) + " money, totaling to " + str(total_slave_worker_upkeep) + " money.")
         tooltip_text.append("Religious volunteers cost no upkeep.")
+
+        if len(self.global_manager.get('loan_list')) > 0:
+            tooltip_text.append("")
+            tooltip_text.append("Loans: ")
+            for current_loan in self.global_manager.get('loan_list'):
+                tooltip_text.append('    ' + current_loan.get_description())
         
         self.set_tooltip(tooltip_text)
 

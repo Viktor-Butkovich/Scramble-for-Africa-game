@@ -251,6 +251,12 @@ class minister():
         else: #5-6
             return(1)
 
+    def get_roll_modifier(self):
+        if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
+            return(self.get_skill_modifier())
+        else:
+            return(0)
+
     def remove(self):
         '''
         Description:
