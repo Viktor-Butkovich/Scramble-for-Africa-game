@@ -225,6 +225,8 @@ class save_load_manager_template():
         Output:
             None
         '''
+        self.global_manager.set('loading_save', True)
+        
         text_tools.print_to_screen("", self.global_manager)
         text_tools.print_to_screen("Loading " + file_path, self.global_manager)
         text_tools.print_to_screen("", self.global_manager)
@@ -334,3 +336,5 @@ class save_load_manager_template():
             game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
 
         notification_tools.show_tutorial_notifications(self.global_manager)
+
+        self.global_manager.set('loading_save', False)

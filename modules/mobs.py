@@ -528,6 +528,10 @@ class mob(actor):
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water':
+            self.global_manager.get('sound_manager').play_sound('water')
+        else:
+            self.global_manager.get('sound_manager').play_sound('footsteps')
         
     def touching_mouse(self):
         '''
@@ -620,6 +624,8 @@ class mob(actor):
         vehicle.show_images() #moves vehicle images to front
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
             vehicle.select()
+        if not self.global_manager.get('loading_save'):
+            self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def disembark_vehicle(self, vehicle):
         '''
@@ -641,4 +647,5 @@ class mob(actor):
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        self.global_manager.get('sound_manager').play_sound('footsteps')
 

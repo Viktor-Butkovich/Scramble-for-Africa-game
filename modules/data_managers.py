@@ -527,3 +527,15 @@ class notification_manager_template():
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
                 #coordinates, ideal_width, minimum_height, showing, modes, image, message
+
+class sound_manager_template():
+    def __init__(self, global_manager):
+        self.global_manager = global_manager
+
+    def play_sound(self, file_name):
+        current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        current_sound.play()
+
+    def play_music(self, file_name):
+        pygame.mixer.music.load('sounds/' + file_name + '.wav')
+        pygame.mixer.music.play(999)

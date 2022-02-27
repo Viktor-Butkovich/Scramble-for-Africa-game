@@ -135,13 +135,13 @@ class loan():
     def __init__(self, from_save, input_dict, global_manager):
         self.global_manager = global_manager
         self.principal = input_dict['principal']
-        if not from_save:
-            self.global_manager.get('money_tracker').change(self.principal, 'loans')
         self.interest = input_dict['interest']
         self.remaining_duration = input_dict['remaining_duration']
         self.total_to_pay = self.interest * self.remaining_duration
         self.global_manager.get('loan_list').append(self)
-        text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
+        if not from_save:
+            self.global_manager.get('money_tracker').change(self.principal, 'loans')
+            text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
 
     def to_save_dict(self):
         save_dict = {}

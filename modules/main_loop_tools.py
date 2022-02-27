@@ -115,12 +115,6 @@ def update_display(global_manager):
             if not (current_label in global_manager.get('button_list') and current_label.in_notification):
                 current_label.draw()
 
-        for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
-            if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
-                current_button.draw()
-                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                    possible_tooltip_drawers = [current_button]#notifications have priority over buttons and will be shown first
-
         for current_free_image in global_manager.get('free_image_list'):
             if current_free_image.to_front: #draw on top if free image should be in front
                 current_free_image.has_drawn = False
@@ -128,6 +122,12 @@ def update_display(global_manager):
                 current_free_image.has_drawn = True
             if current_free_image.can_show_tooltip():
                 possible_tooltip_drawers = [current_free_image]
+
+        for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
+            if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
+                current_button.draw()
+                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                    possible_tooltip_drawers = [current_button]#notifications have priority over buttons and will be shown first
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)

@@ -1,6 +1,5 @@
 #Contains functionality for notifications
 
-import pygame
 from .labels import multi_line_label
 from . import text_tools
 from . import utility
@@ -30,9 +29,7 @@ class notification(multi_line_label):
         self.global_manager.get('notification_list').append(self)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.in_notification = True
-
-        pygame.mixer.music.load('sounds/opening_letter.wav')
-        pygame.mixer.music.play(1)
+        self.global_manager.get('sound_manager').play_sound('opening_letter')
 
     def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
         super().format_message()
