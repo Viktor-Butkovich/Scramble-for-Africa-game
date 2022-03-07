@@ -47,6 +47,7 @@ SFA folder
 		    class trade_button
 		    class convert_button
 		    class religious_campaign_button
+		    class take_loan_button
 		    class advertising_campaign_button
 		    class switch_theatre_button
 		    class build_train_button
@@ -71,7 +72,7 @@ SFA folder
 		class expedition(groups.group)
 	    
             groups.py
-	        imports modules.mobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.dice, modules.scaling
+	        imports modules.mobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.dice, modules.images, modules.scaling
                 class group(modules.mobs.mob)
 
 	    missionaries.py
@@ -79,7 +80,8 @@ SFA folder
 		class missionaries(groups.group)
 
 	    officers.py
-	        imports random, modules.mobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.dice, modules.scaling
+	        imports random, modules.mobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.dice, modules.scaling, 
+		    modules.images
 	        class officer(modules.mobs.mob)
 		    class evangelist
 		    class merchant
@@ -117,7 +119,7 @@ SFA folder
 
 	actor_creation_tools.py
 	    imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, buildings, 
-		ministers, notification_tools, utility
+		ministers, notification_tools, utility, market_tools
 	    class actor_creation_manager_template
 
         actor_utility.py
@@ -182,6 +184,7 @@ SFA folder
 	    class value_tracker
 		class money_tracker
 	    class notification_manager_template
+	    class sound_manager_template
 
         dice.py
             imports pygame, time, random, buttons, utility
@@ -220,6 +223,7 @@ SFA folder
             imports pygame, time, utility, drawing_tools, text_tools, scaling
             class free_image
 		class tooltip_free_image
+		    class dice_roll_minister_image
 		    class minister_type_image
 		class warning_image
                 class loading_image_template
@@ -262,6 +266,7 @@ SFA folder
 
 	market_tools.py
 	    imports random, text_tools, utility
+	    class loan
 	    def adjust_prices
 	    def change_price
 	    def sell

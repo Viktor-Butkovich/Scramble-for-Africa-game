@@ -1089,7 +1089,25 @@ class religious_campaign_button(label_button):
                 text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
 
 class take_loan_button(label_button):
+    '''
+    Button that commands a merchant to start a loan search in Europe
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'take loan', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
@@ -1108,6 +1126,14 @@ class take_loan_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):

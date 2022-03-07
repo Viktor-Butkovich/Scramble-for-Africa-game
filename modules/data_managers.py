@@ -529,13 +529,40 @@ class notification_manager_template():
                 #coordinates, ideal_width, minimum_height, showing, modes, image, message
 
 class sound_manager_template():
+    '''
+    Object that controls sounds
+    '''
     def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.global_manager = global_manager
 
     def play_sound(self, file_name):
+        '''
+        Description:
+            Plays the sound effect from the inputted file
+        Input:
+            string file_name: Name of .wav file to play sound of
+        Output:
+            None
+        '''
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
         current_sound.play()
 
     def play_music(self, file_name):
+        '''
+        Description:
+            Starts repeating the music from the inputted file, replacing any current music
+        Input:
+            string file_name: Name of .wav file to play music of
+        Output:
+            None
+        '''
         pygame.mixer.music.load('sounds/' + file_name + '.wav')
         pygame.mixer.music.play(999)

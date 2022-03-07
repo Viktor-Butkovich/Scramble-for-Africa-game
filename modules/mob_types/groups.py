@@ -79,9 +79,6 @@ class group(mob):
         Output:
             None
         '''
-        #super().fire()
-        #self.officer.fire()
-        #self.worker.fire()
         self.officer.fire()
         self.worker.fire()
         self.remove()
@@ -452,7 +449,8 @@ class group(mob):
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
         '''
         Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
+                the result
         Input:
             int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
             int result: Predetermined result that the die will end on after rolling

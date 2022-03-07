@@ -126,6 +126,14 @@ def manage_upkeep(global_manager):
     #text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager) #described in financial report
 
 def manage_loans(global_manager):
+    '''
+    Description:
+        Pays interest on all current loans at the end of a turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_loan in global_manager.get('loan_list'):
         current_loan.make_payment()
 

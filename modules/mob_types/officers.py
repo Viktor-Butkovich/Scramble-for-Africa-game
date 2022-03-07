@@ -217,7 +217,8 @@ class officer(mob):
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
         '''
         Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
+                the result
         Input:
             int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
             int result: Predetermined result that the die will end on after rolling
@@ -447,6 +448,15 @@ class merchant(officer):
         self.default_min_crit_success = 6
 
     def start_loan_search(self):
+        '''
+        Description:
+            Used when the player clicks on the start loan search button, displays a choice notification that asks that allows the player to search or not. Starts the loan search process and consumes the merchant's movement points.
+                Also shows a picture of the minister controlling the roll.
+        Input:
+            None
+        Output:
+            None
+        '''
         #self.global_manager.get('money_tracker').change(100)
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
@@ -471,6 +481,15 @@ class merchant(officer):
         notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def loan_search(self):
+        '''
+        Description:
+            Controls the process of searching for a loan. Unlike most actions, this action uses hidden dice rolls - starting the search immediately shows the resulting interest cost of the loan found and the controlling minister's
+                position and portrait. Allows the player to choose whether to accept the loan after seeing the interest cost.
+        Input:
+            None
+        Output:
+            None
+        '''
         just_promoted = False
         self.set_movement_points(0)
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
@@ -516,7 +535,7 @@ class merchant(officer):
             Used when the player clicks on the start advertising campaign button and then clicks a commodity button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign
                 process and consumes the merchant's movement points
         Input:
-            None
+            string target_commodity: Name of commodity that advertising campaign is targeting
         Output:
             None
         '''

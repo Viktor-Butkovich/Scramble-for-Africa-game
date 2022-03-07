@@ -518,6 +518,12 @@ class mob(actor):
         self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_image in self.images:
             current_image.add_to_cell()
+
+        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
+            self.global_manager.get('sound_manager').play_sound('water')
+        else:
+            self.global_manager.get('sound_manager').play_sound('footsteps')
+            
         if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle('ship')
@@ -528,10 +534,6 @@ class mob(actor):
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water':
-            self.global_manager.get('sound_manager').play_sound('water')
-        else:
-            self.global_manager.get('sound_manager').play_sound('footsteps')
         
     def touching_mouse(self):
         '''
