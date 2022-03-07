@@ -1088,6 +1088,70 @@ class religious_campaign_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
 
+class take_loan_button(label_button):
+    '''
+    Button that commands a merchant to start a loan search in Europe
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'take loan', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('europe_grid') in current_mob.grids:
+                    if current_mob.movement_points == current_mob.max_movement_points:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.start_loan_search()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['loan_search']) + " money needed to search for a loan offer.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("Searching for a loan offer requires an entire turn of movement points.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("A merchant can only search for a loan while in Europe", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not search for a loan offer.", self.global_manager)
+
 class advertising_campaign_button(label_button):
     '''
     Button that starts advertising campaign commodity selection
@@ -1117,7 +1181,7 @@ class advertising_campaign_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not an merchant, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:

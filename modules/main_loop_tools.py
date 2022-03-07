@@ -114,15 +114,10 @@ def update_display(global_manager):
         for current_label in global_manager.get('label_list'):
             if not (current_label in global_manager.get('button_list') and current_label.in_notification):
                 current_label.draw()
-                
-        #for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
-        #    if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
-        #        current_button.draw()
-        #        if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-        #            possible_tooltip_drawers = [current_button]#notifications have priority over buttons and will be shown first
 
         for current_free_image in global_manager.get('free_image_list'):
             if current_free_image.to_front: #draw on top if free image should be in front
+                current_free_image.has_drawn = False
                 current_free_image.draw()
                 current_free_image.has_drawn = True
             if current_free_image.can_show_tooltip():
@@ -187,6 +182,8 @@ def action_possible(global_manager):
     elif global_manager.get('ongoing_religious_campaign'):
         return(False)
     elif global_manager.get('ongoing_advertising_campaign'):
+        return(False)
+    elif global_manager.get('ongoing_loan_search'):
         return(False)
     elif global_manager.get('ongoing_conversion'):
         return(False)

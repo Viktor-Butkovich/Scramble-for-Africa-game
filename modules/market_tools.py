@@ -130,4 +130,92 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
             if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
                 global_manager.get('recruitment_costs')['slave worker'] = changed_price
                 text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
-            
+
+class loan():
+    '''
+    Object corresponding to a loan with principal, interest, and duration
+    '''
+    def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'principal': int value - Amount of money borrowed by the loan
+                'interest': int value - Cost of interest payments for this loan each turn
+                'remaining_duration': int value - Number of remaining turns/interest payments
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''    
+        self.global_manager = global_manager
+        self.principal = input_dict['principal']
+        self.interest = input_dict['interest']
+        self.remaining_duration = input_dict['remaining_duration']
+        self.total_to_pay = self.interest * self.remaining_duration
+        self.global_manager.get('loan_list').append(self)
+        if not from_save:
+            self.global_manager.get('money_tracker').change(self.principal, 'loans')
+            text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                'init_type': string value - Represents the type of object this is, used to initialize the correct type of object on loading
+                'principal': int tuple value - Amount of money borrowed by the loan
+                'interest': int value - Cost of interest payments for this loan each turn
+                'remaining_duration': int value - Number of remaining turns/interest payments
+        '''
+        save_dict = {}
+        save_dict['init_type'] = 'loan'
+        save_dict['principal'] = self.principal
+        save_dict['interest'] = self.interest
+        save_dict['remaining_duration'] = self.remaining_duration
+        return(save_dict)
+
+    def make_payment(self):
+        '''
+        Description:
+            Makes a payment on this loan, paying its interest cost and reducing its remaining duration
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.get('money_tracker').change(-1 * self.interest, 'loan interest')
+        self.remaining_duration -= 1
+        self.total_to_pay -= self.interest
+        if self.total_to_pay <= 0:
+            self.remove()
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        total_paid = self.interest * 10
+        text_tools.print_to_screen("You have finished paying off the " + str(total_paid) + " money required for your " + str(self.principal) + " money loan", self.global_manager)
+        self.global_manager.set('loan_list', utility.remove_from_list(self.global_manager.get('loan_list'), self))
+
+    def get_description(self):
+        '''
+        Description:
+             Returns a description of this loan, includings its principal, interest, remaining duration, and remaining payment 
+        Input:
+            None
+        Output:
+            string: Returns a description of this loan, includings its principal, interest, remaining duration, and remaining payment
+        '''
+        message = ""
+        message += str(self.principal) + " money loan with interest payments of " + str(self.interest) + " each turn. " + str(self.remaining_duration) + " turns/" + str(self.total_to_pay) + "money remaining"
+        return(message)

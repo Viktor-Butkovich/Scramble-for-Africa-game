@@ -235,6 +235,63 @@ class tooltip_free_image(free_image):
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
+class dice_roll_minister_image(tooltip_free_image): #image that appears during dice rolls showing minister position or portrait
+    '''
+    Part of a pair of imgaes that shows the controlling minister's position and portrait next to notifications during dice rolls
+    '''
+    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this button can appear
+            minister attached_minister: Minister attached to this image
+            string minister_image_type: Type of minister information shown by this image, like 'portrait' or 'position'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.attached_minister = attached_minister #minister object
+        self.minister_image_type = minister_image_type #position or portrait
+        if minister_image_type == 'portrait':
+            image_id = attached_minister.image_id
+        elif minister_image_type == 'position':
+            image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        global_manager.get('dice_roll_minister_images').append(self)
+        self.to_front = True
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its subclass. A dice roll minister image's tooltip copies the tooltip of the minister, which describes their name and position. Only the portrait image has a
+                tooltip, preventing a double tooltip from the position image
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.minister_image_type == 'portrait':
+            self.set_tooltip(self.attached_minister.tooltip_text)
+        else:
+            self.set_tooltip([])
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
+        
+
 class minister_type_image(tooltip_free_image): #image of minister type icon
     '''
     Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister
@@ -262,6 +319,7 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
         if not self.minister_type == 'none':
             self.calibrate(global_manager.get('current_ministers')[self.minister_type]) #calibrate to current minister or none if no current minister
         self.global_manager.get('minister_image_list').append(self)
+        self.to_front = True
 
     def calibrate(self, new_minister):
         '''
@@ -638,11 +696,6 @@ class building_image(actor_image):
                     self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
             else:
                 self.current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.actor.x, self.actor.y)
-                #old_cell = self.current_cell #specific cell that building image is attached to on minimap doesn't seem to affect anything, it appears in the correct place as long as it is connected to any cell
-                #self.current_cell = self.grid.find_cell(1, 1)
-                #if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
-                #    self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
-                #self.remove_from_cell()
             self.go_to_cell((mini_x, mini_y))
         else:
             self.remove_from_cell()

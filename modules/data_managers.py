@@ -260,7 +260,8 @@ class money_tracker(value_tracker):
             None
         '''
         self.transaction_history = {}
-        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment']
+        self.transaction_types = ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment',
+            'loan interest', 'loans', 'loan searches']
         self.transaction_types += ['construction']
         self.reset_transaction_history()
         super().__init__('money', initial_value, 'none', 'none', global_manager)
@@ -526,4 +527,42 @@ class notification_manager_template():
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
                 #coordinates, ideal_width, minimum_height, showing, modes, image, message
-    
+
+class sound_manager_template():
+    '''
+    Object that controls sounds
+    '''
+    def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.global_manager = global_manager
+
+    def play_sound(self, file_name):
+        '''
+        Description:
+            Plays the sound effect from the inputted file
+        Input:
+            string file_name: Name of .wav file to play sound of
+        Output:
+            None
+        '''
+        current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        current_sound.play()
+
+    def play_music(self, file_name):
+        '''
+        Description:
+            Starts repeating the music from the inputted file, replacing any current music
+        Input:
+            string file_name: Name of .wav file to play music of
+        Output:
+            None
+        '''
+        pygame.mixer.music.load('sounds/' + file_name + '.wav')
+        pygame.mixer.music.play(999)

@@ -251,6 +251,20 @@ class minister():
         else: #5-6
             return(1)
 
+    def get_roll_modifier(self):
+        '''
+        Description:
+            Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
+        Input:
+            None
+        Output:
+            int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
+        '''
+        if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
+            return(self.get_skill_modifier())
+        else:
+            return(0)
+
     def remove(self):
         '''
         Description:

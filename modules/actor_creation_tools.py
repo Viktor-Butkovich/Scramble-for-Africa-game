@@ -13,7 +13,8 @@ from .mob_types import vehicles
 from . import buildings
 from . import ministers
 from . import notification_tools
-from . import utility 
+from . import utility
+from . import market_tools
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -33,7 +34,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
     def create(self, from_save, input_dict, global_manager):
         '''
         Description:
-            Initializes a mob or building based on inputted values
+            Initializes a mob, building, or loan based on inputted values
         Input:
             boolean from_save: True if the object is being recreated from a save file, False if it is being newly created
             dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
@@ -94,6 +95,11 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.resource_building(from_save, input_dict, global_manager)
         elif init_type == 'slums':
             new_actor = buildings.slums(from_save, input_dict, global_manager)
+
+        #loans
+        elif init_type == 'loan':
+            new_actor = market_tools.loan(from_save, input_dict, global_manager)
+            
         return(new_actor)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):

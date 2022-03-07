@@ -37,6 +37,7 @@ def set_game_mode(new_game_mode, global_manager):
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main menu':
             global_manager.set('current_game_mode', 'main_menu')
+            global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
             #text_tools.print_to_screen("Entering minister conference room", global_manager)
@@ -118,6 +119,7 @@ def to_main_menu(global_manager, override = False):
             current_notification.remove()
         for current_die in global_manager.get('dice_list'):
             current_die.remove()
+        global_manager.set('loan_list', [])
         global_manager.set('displayed_mob', 'none')
         global_manager.set('displayed_tile', 'none')
         global_manager.set('end_turn_selected_mob', 'none')

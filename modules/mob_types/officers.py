@@ -11,6 +11,7 @@ from .. import market_tools
 from .. import dice_utility
 from .. import dice
 from .. import scaling
+from .. import images
 
 class officer(mob):
     '''
@@ -216,7 +217,8 @@ class officer(mob):
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
         '''
         Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. The color of the die's outline depends on the result
+            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
+                the result
         Input:
             int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
             int result: Predetermined result that the die will end on after rolling
@@ -229,7 +231,12 @@ class officer(mob):
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)            
+            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
+        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'position', self.global_manager)
+        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'portrait', self.global_manager)
 
 class evangelist(officer):
     '''
@@ -440,13 +447,95 @@ class merchant(officer):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
 
+    def start_loan_search(self):
+        '''
+        Description:
+            Used when the player clicks on the start loan search button, displays a choice notification that asks that allows the player to search or not. Starts the loan search process and consumes the merchant's movement points.
+                Also shows a picture of the minister controlling the roll.
+        Input:
+            None
+        Output:
+            None
+        '''
+        #self.global_manager.get('money_tracker').change(100)
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'merchant': self, 'type': 'start loan'}
+        self.global_manager.set('ongoing_loan_search', True)
+
+        minister_icon_coordinates = (440, self.global_manager.get('notification_manager').notification_x - 140) #show minister in start loan search notification, remove on start/stop loan search
+        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'position', self.global_manager)
+        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            'portrait', self.global_manager)
+        
+        message = "Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant's success will determine the interest rate found. /n /n"
+        message += "The search will cost " + str(self.global_manager.get('action_prices')['loan_search']) + " money. /n /n "
+        notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+    def loan_search(self):
+        '''
+        Description:
+            Controls the process of searching for a loan. Unlike most actions, this action uses hidden dice rolls - starting the search immediately shows the resulting interest cost of the loan found and the controlling minister's
+                position and portrait. Allows the player to choose whether to accept the loan after seeing the interest cost.
+        Input:
+            None
+        Output:
+            None
+        '''
+        just_promoted = False
+        self.set_movement_points(0)
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
+        principal = 100
+        initial_interest = 11
+        interest = initial_interest
+        found_loan = False
+        while not found_loan: #doesn't account for corruption yet, fix this
+            if self.veteran: 
+                roll = max(random.randrange(1, 7) + self.controlling_minister.get_roll_modifier(), random.randrange(1, 7) + self.controlling_minister.get_roll_modifier())
+            else:
+                roll = random.randrange(1, 7) + self.controlling_minister.get_roll_modifier()
+            if roll >= 5: #increase interest on 1-4, stop on 5-6
+                found_loan = True
+            else:
+                interest += 1
+        if self.controlling_minister.check_corruption():
+            interest += 2 #increase interest by 20% if corrupt
+            
+        if roll == 6 and interest == initial_interest and not self.veteran: #if rolled 6 on first try, promote
+            just_promoted = True
+                    
+        if just_promoted:
+            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager)
+            self.promote()
+            
+        choice_info_dict = {}
+        choice_info_dict['principal'] = principal
+        choice_info_dict['interest'] = interest
+
+        total_paid = interest * 10 #12 interest -> 120 paid
+        interest_percent = (interest - 10) * 10 #12 interest -> 20%
+        message = ""
+        message += 'Loan offer: /n /n'
+        message += 'The company will be provided an immediate sum of ' + str(principal) + ' money, which it may spend as it sees fit. /n'
+        message += 'In return, the company will be obligated to pay back ' + str(interest) + ' money per turn for 10 turns, for a total of ' + str(total_paid) + ' money. /n /n'
+        message += "Do you accept this exchange? /n"
+        notification_tools.display_choice_notification(message, ['accept loan offer', 'decline loan offer'], choice_info_dict, self.global_manager)
+
     def start_advertising_campaign(self, target_commodity):
         '''
         Description:
             Used when the player clicks on the start advertising campaign button and then clicks a commodity button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign
                 process and consumes the merchant's movement points
         Input:
-            None
+            string target_commodity: Name of commodity that advertising campaign is targeting
         Output:
             None
         '''

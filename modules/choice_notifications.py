@@ -134,11 +134,23 @@ class choice_button(button):
             if button_type == 'start advertising campaign':
                 self.commodity = self.notification.choice_info_dict['commodity']
 
+        elif button_type == 'start loan search':
+            self.message = 'Find loan'
+
         elif button_type == 'start converting':
             self.message = 'Convert'
             
         elif button_type == 'stop religious campaign' or button_type == 'stop advertising campaign':
             self.message = 'Stop campaign'
+
+        elif button_type == 'stop loan search':
+            self.message = 'Stop search'
+
+        elif button_type == 'accept loan offer':
+            self.message = 'Accept'
+
+        elif button_type == 'decline loan offer':
+            self.message = 'Decline'
             
         elif button_type == 'none':
             self.message = 'Do nothing'
@@ -209,8 +221,17 @@ class choice_button(button):
         elif self.button_type == 'start advertising campaign':
             self.set_tooltip(['Starts an advertising campaign for ' + self.commodity])
 
+        elif self.button_type == 'start loan search':
+            self.set_tooltip(['Starts a search for a low-interest loan offer'])
+
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
+
+        elif self.button_type == 'accept loan offer':
+            self.set_tooltip(['Accepts the loan offer'])
+
+        elif self.button_type == 'reject loan offer':
+            self.set_tooltip(['Rejects the loan offer'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']

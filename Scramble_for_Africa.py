@@ -19,8 +19,11 @@ import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
 
 pygame.init()
+pygame.mixer.init()
 
 global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
+global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
+global_manager.get('sound_manager').play_music('waltz_2')
 global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
 global_manager.set('europe_grid', 'none')
 resolution_finder = pygame.display.Info()
@@ -217,7 +220,9 @@ global_manager.set('action_prices',
     'convert': 5,
     'religious_campaign': 5,
     'advertising_campaign': 5,
-    'trade': 0
+    'loan_search': 5,
+    'trade': 0,
+    'loan': 5
     }
 )
 
@@ -263,6 +268,7 @@ global_manager.set('resource_building_list', [])
 global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
+global_manager.set('loan_list', [])
 
 global_manager.set('num_african_workers', 0)
 global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
@@ -296,6 +302,7 @@ global_manager.set('tile_info_display_list', [])
 global_manager.set('tile_ordered_label_list', [])
 global_manager.set('displayed_tile', 'none')
 global_manager.set('dice_list', [])
+global_manager.set('dice_roll_minister_images', [])
 global_manager.set('end_turn_selected_mob', 'none')
 pygame.key.set_repeat(300, 200)
 global_manager.set('crashed', False)
@@ -309,6 +316,7 @@ global_manager.set('show_text_box', True)
 global_manager.set('show_selection_outlines', True)
 global_manager.set('show_minimap_outlines', True)
 global_manager.set('making_choice', False)
+global_manager.set('loading_save', False)
 global_manager.set('player_turn', True)
 global_manager.set('choosing_destination', False)
 global_manager.set('choosing_destination_info_dict', {})
@@ -319,6 +327,7 @@ global_manager.set('ongoing_exploration', False)
 global_manager.set('ongoing_trade', False)
 global_manager.set('ongoing_religious_campaign', False)
 global_manager.set('ongoing_advertising_campaign', False)
+global_manager.set('ongoing_loan_search', False)
 global_manager.set('ongoing_conversion', False)
 global_manager.set('ongoing_construction', False)
 

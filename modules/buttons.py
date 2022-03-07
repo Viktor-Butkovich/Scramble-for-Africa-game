@@ -259,6 +259,9 @@ class button():
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
                 "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points."])
+        elif self.button_type == 'take loan':
+            self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
+                "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
@@ -728,6 +731,12 @@ class button():
                 merchant = self.notification.choice_info_dict['merchant']
                 merchant.advertising_campaign()
 
+            elif self.button_type == 'start loan search':
+                merchant = self.notification.choice_info_dict['merchant']
+                merchant.loan_search()
+                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                    current_minister_image.remove()
+
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.convert()
@@ -753,11 +762,24 @@ class button():
             elif self.button_type == 'stop advertising campaign':
                 self.global_manager.set('ongoing_advertising_campaign', False)
 
+            elif self.button_type in ['stop loan search', 'decline loan offer']:
+                self.global_manager.set('ongoing_loan_search', False)
+                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                    current_minister_image.remove()
+
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
 
             elif self.button_type in ['stop construction', 'stop upgrade']:
                 self.global_manager.set('ongoing_construction', False)
+
+            elif self.button_type == 'accept loan offer':
+                input_dict = {}
+                input_dict['principal'] = self.notification.choice_info_dict['principal']
+                input_dict['interest'] = self.notification.choice_info_dict['interest']
+                input_dict['remaining_duration'] = 10
+                new_loan = market_tools.loan(False, input_dict, self.global_manager)
+                self.global_manager.set('ongoing_loan_search', False)
                 
     def on_rmb_release(self):
         '''
