@@ -20,7 +20,7 @@ def end_turn(global_manager):
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     #text_tools.print_to_screen("Ending turn", global_manager)
-    for current_mob in global_manager.get('mob_list'):
+    for current_mob in global_manager.get('pmob_list'):
         current_mob.end_turn_move()
     for current_cell in global_manager.get('strategic_map_grid').cell_list:
         current_tile = current_cell.tile

@@ -1,7 +1,7 @@
 #Contains functionality for officer units
 import random
 
-from ..mobs import mob
+from .pmobs import pmob
 from ..tiles import veteran_icon
 from .. import actor_utility
 from .. import utility
@@ -13,9 +13,9 @@ from .. import dice
 from .. import scaling
 from .. import images
 
-class officer(mob):
+class officer(pmob):
     '''
-    Mob that is considered an officer and can join groups and become a veteran
+    pmob that is considered an officer and can join groups and become a veteran
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''

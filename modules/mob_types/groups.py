@@ -1,6 +1,6 @@
 #Contains functionality for group units
 
-from ..mobs import mob
+from .pmobs import pmob
 from ..tiles import veteran_icon
 from .. import actor_utility
 from .. import dice_utility
@@ -10,9 +10,9 @@ from .. import dice
 from .. import images
 from .. import scaling
 
-class group(mob):
+class group(pmob):
     '''
-    Mob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
+    pmob that is created by a combination of a worker and officer, has special capabilities depending on its officer, and separates its worker and officer upon being disbanded
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''

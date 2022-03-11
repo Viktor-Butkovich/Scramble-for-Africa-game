@@ -1285,7 +1285,7 @@ class switch_theatre_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.travel_possible): 
+            if (not self.attached_label.actor.can_travel()): 
                 return(False)
         return(result) 
 

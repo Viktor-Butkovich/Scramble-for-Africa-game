@@ -4,12 +4,12 @@ from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import main_loop_tools
-from ..mobs import mob
+from .pmobs import pmob
 from ..buttons import button
 
-class vehicle(mob):
+class vehicle(pmob):
     '''
-    Mob that requires an attached worker to function and can carry other mobs as passengers
+    pmob that requires an attached worker to function and can carry other mobs as passengers
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -33,7 +33,7 @@ class vehicle(mob):
         Output:
             None
         '''
-        self.initializing = True #when mobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
+        self.initializing = True #when pmobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
         self.vehicle_type = 'vehicle'
         self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']

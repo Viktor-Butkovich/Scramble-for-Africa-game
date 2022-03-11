@@ -672,7 +672,7 @@ class button():
 
             elif self.button_type == 'cycle units':
                 if main_loop_tools.action_possible(self.global_manager):
-                    mob_list = self.global_manager.get('mob_list')
+                    mob_list = self.global_manager.get('pmob_list')
                     cycled_mob = 'none'
                     cycled_index = 0
                     for current_mob_index in range(len(mob_list)):
@@ -826,7 +826,7 @@ class button():
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
-                if self.global_manager.get('displayed_mob') == 'none':
+                if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
             return(True)
         return(False)

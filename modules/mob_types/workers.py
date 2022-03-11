@@ -1,15 +1,15 @@
 #Contains functionality for worker units
 import random
 
-from ..mobs import mob
+from .pmobs import pmob
 from .. import actor_utility
 from .. import utility
 from .. import market_tools
 from .. import text_tools
 
-class worker(mob):
+class worker(pmob):
     '''
-    Mob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
+    pmob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
