@@ -168,7 +168,7 @@ for file_name in os.listdir('graphics/ministers/portraits'):
 global_manager.set('minister_portraits', minister_portraits)
 
 
-global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist']) #change to driver
+global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
 global_manager.set('officer_group_type_dict',
     {
     'explorer': 'expedition',
@@ -176,7 +176,8 @@ global_manager.set('officer_group_type_dict',
     'driver': 'porters',
     'foreman': 'work_crew',
     'merchant': 'caravan',
-    'evangelist': 'missionaries'
+    'evangelist': 'missionaries',
+    'major': 'battalion'
     }
 )
 
@@ -188,7 +189,8 @@ global_manager.set('officer_minister_dict',
     'driver': type_minister_dict['transportation'],
     'foreman': type_minister_dict['production'],
     'merchant': type_minister_dict['trade'],
-    'evangelist': type_minister_dict['religion']
+    'evangelist': type_minister_dict['religion'],
+    'major': type_minister_dict['military']
     }
 )
 
@@ -199,7 +201,8 @@ global_manager.set('group_minister_dict',
     'porters': type_minister_dict['transportation'],
     'work_crew': type_minister_dict['production'],
     'caravan': type_minister_dict['trade'],
-    'missionaries': type_minister_dict['religion']
+    'missionaries': type_minister_dict['religion'],
+    'battalion': type_minister_dict['military']
     }
 )
 global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
@@ -705,6 +708,7 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
 tile_inventory_capacity_label = actor_display_labels.actor_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 455, global_manager), scaling.scale_width(10, global_manager),
     scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', 'tile inventory capacity', 'tile', global_manager)
 global_manager.get('tile_info_display_list').append(tile_inventory_capacity_label)
+
 for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected tile
     new_commodity_display_label = actor_display_labels.commodity_display_label(scaling.scale_coordinates(300, global_manager.get('default_display_height') - (490 + (35 * (current_index))), global_manager),
         scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe'], 'misc/default_label.png', current_index, 'tile', global_manager)
@@ -712,12 +716,13 @@ for current_index in range(len(global_manager.get('commodity_types'))): #commodi
     
     global_manager.get('tile_info_display_list').append(new_commodity_display_label)
 
+#max of 8 in column
 buy_button_y = 0#140
 for recruitment_index in range(len(global_manager.get('recruitment_types'))):
-    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500, buy_button_y + (120 * (recruitment_index)), global_manager), scaling.scale_width(100, global_manager),
+    new_recruitment_button = europe_transactions.recruitment_button(scaling.scale_coordinates(1500 - (recruitment_index // 8) * 125, buy_button_y + (120 * (recruitment_index % 8)), global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), 'blue', global_manager.get('recruitment_types')[recruitment_index], 'none', ['europe'], global_manager)
 
-new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1375, buy_button_y, global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
+new_consumer_goods_buy_button = europe_transactions.buy_commodity_button(scaling.scale_coordinates(1500 - ((recruitment_index + 1) // 8) * 125, buy_button_y + (120 * ((recruitment_index + 1) % 8)), global_manager), scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), 'blue',
     'consumer goods', ['europe'], global_manager)#coordinates, width, height, color, commodity_type, modes, global_manager
 
 table_width = 400

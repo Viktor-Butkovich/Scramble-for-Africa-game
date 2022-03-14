@@ -10,6 +10,7 @@ from .mob_types import missionaries
 from .mob_types import porters
 from .mob_types import work_crews
 from .mob_types import vehicles
+from .mob_types import battalions
 from . import buildings
 from . import ministers
 from . import notification_tools
@@ -79,6 +80,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = missionaries.missionaries(from_save, input_dict, global_manager)
         elif init_type == 'expedition':
             new_actor = expeditions.expedition(from_save, input_dict, global_manager)
+        elif init_type == 'battalion':
+            new_actor = battalions.battalion(from_save, input_dict, global_manager)
 
         #buildings
         elif init_type == 'infrastructure':
