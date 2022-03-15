@@ -617,7 +617,9 @@ class embark_vehicle_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
+            if not self.attached_label.actor.controllable:
+                result = False
+            elif self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
                 result = False
             elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
@@ -1285,6 +1287,8 @@ class switch_theatre_button(label_button):
         '''
         result = super().can_show()
         if result:
+            if not self.attached_label.actor.controllable:
+                return(False)
             if (not self.attached_label.actor.can_travel()): 
                 return(False)
         return(result) 

@@ -162,6 +162,10 @@ class mob_background_image(free_image):
         '''
         if self.actor == 'none':
             return(False)
+        if self.image_id == 'misc/pmob_background.png' and not self.actor.is_pmob:
+            return(False)
+        if self.image_id == 'misc/npmob_background.png' and not self.actor.is_npmob:
+            return(False)
         else:
             return(super().can_show())
 

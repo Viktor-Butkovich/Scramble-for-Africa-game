@@ -49,6 +49,7 @@ def start_turn(global_manager, first_turn):
         manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
+        manage_villages(global_manager)
     
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
@@ -56,21 +57,9 @@ def start_turn(global_manager, first_turn):
         current_mob.reset_movement_points()
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
-    for current_village in global_manager.get('village_list'):
-        roll = random.randrange(1, 7)
-        if roll <= 2: #1-2
-            current_village.change_aggressiveness(-1)
-        #3-4 does nothing
-        elif roll >= 5: #5-6
-            current_village.change_aggressiveness(1)
-
-        roll = random.randrange(1, 7)
-        second_roll = random.randrange(1, 7)
-        if roll == 6 and second_roll == 6:
-            current_village.change_population(1)
             
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if not end_turn_selected_mob == 'none':
+    if (not end_turn_selected_mob == 'none') and end_turn_selected_mob in global_manager.get('mob_list'): #do not attempt to select if none selected or has been removed since end of turn
         end_turn_selected_mob.select()
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
@@ -348,3 +337,20 @@ def create_weighted_migration_destinations(destination_cell_list):
         for i in range(total_weight):
             weighted_cell_list.append(current_cell)
     return(weighted_cell_list)
+
+
+def manage_villages(global_manager):
+    for current_village in global_manager.get('village_list'):
+        roll = random.randrange(1, 7)
+        if roll <= 2: #1-2
+            current_village.change_aggressiveness(-1)
+        #3-4 does nothing
+        elif roll >= 5: #5-6
+            current_village.change_aggressiveness(1)
+
+        roll = random.randrange(1, 7)
+        second_roll = random.randrange(1, 7)
+        if roll == 6 and second_roll == 6:
+            current_village.change_population(1)
+
+        current_village.manage_warriors()

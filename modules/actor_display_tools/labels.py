@@ -262,19 +262,20 @@ class actor_display_label(label):
                     self.set_label(self.message_start + 'unknown')
                     
             elif self.actor_label_type == 'movement':
-                if not new_actor.has_infinite_movement:
-                    self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
-                else:
-                    if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
-                        if new_actor.movement_points == 0 or not new_actor.has_crew:
-                            self.set_label("No movement")
-                        else:
-                            self.set_label("Infinite movement until cargo/passenger dropped")
+                if self.actor.controllable:
+                    if not new_actor.has_infinite_movement:
+                        self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
                     else:
-                        if new_actor.movement_points == 0 or not new_actor.has_crew:
-                            self.set_label("No movement")
+                        if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                                self.set_label("No movement")
+                            else:
+                                self.set_label("Infinite movement until cargo/passenger dropped")
                         else:
-                            self.set_label("Infinite movement")
+                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                                self.set_label("No movement")
+                            else:
+                                self.set_label("Infinite movement")
                             
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
@@ -333,9 +334,10 @@ class actor_display_label(label):
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
                     
             elif self.actor_label_type == 'minister':
-                if not self.actor.controlling_minister == 'none':
-                    self.set_label(self.message_start + self.actor.controlling_minister.name)
-                self.attached_images[0].calibrate(self.actor.controlling_minister)
+                if self.actor.controllable:
+                    if not self.actor.controlling_minister == 'none':
+                        self.set_label(self.message_start + self.actor.controlling_minister.name)
+                    self.attached_images[0].calibrate(self.actor.controlling_minister)
                 
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)
@@ -412,6 +414,8 @@ class actor_display_label(label):
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
         elif self.actor_label_type == 'slums' and self.actor.cell.contained_buildings['slums'] == 'none':
+            return(False)
+        elif self.actor_label_type in ['minister', 'movement'] and not self.actor.controllable:
             return(False)
         else:
             return(result)

@@ -203,7 +203,8 @@ class save_load_manager_template():
                 saved_actor_dicts.append(current_pmob.to_save_dict())
                 
         for current_npmob in self.global_manager.get('npmob_list'):
-            saved_actor_dicts.append(current_npmob.to_save_dict())
+            if current_npmob.saves_normally: #for units like native warriors that are saved as part a village and not as their own unit, do not attempt to save from here
+                saved_actor_dicts.append(current_npmob.to_save_dict())
             
         for current_building in self.global_manager.get('building_list'):
             saved_actor_dicts.append(current_building.to_save_dict())

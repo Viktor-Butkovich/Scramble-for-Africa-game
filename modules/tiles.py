@@ -227,6 +227,10 @@ class tile(actor): #to do: make terrain tiles a subclass
                         village_exists = True
                         self.cell.village = equivalent_tile.cell.village
                         self.cell.village.tiles.append(self)
+                        if self.cell.grid.is_mini_grid: #set main cell of village to one on strategic map grid, as opposed to the mini map
+                            self.cell.village.cell = equivalent_tile.cell
+                        else:
+                            self.cell.village.cell = self.cell
                 if not village_exists: #make new village if village not present
                     input_dict = {'cell': self.cell}
                     if self.cell.grid.from_save:
@@ -234,6 +238,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                         input_dict['population'] = self.cell.save_dict['village_population']
                         input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
                         input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
+                        input_dict['attached_warriors'] = self.cell.save_dict['village_attached_warriors']
                         self.cell.village = villages.village(True, input_dict, self.global_manager)
                         self.cell.village.tiles.append(self)
                     else:

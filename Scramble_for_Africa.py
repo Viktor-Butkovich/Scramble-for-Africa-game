@@ -489,10 +489,15 @@ actor_display_top_y = global_manager.get('default_display_height') - 205
 actor_display_current_y = actor_display_top_y
 global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
-#mob background image
-mob_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+#pmob background image
+pmob_free_image_background = actor_display_images.mob_background_image('misc/pmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
-global_manager.get('mob_info_display_list').append(mob_free_image_background)
+global_manager.get('mob_info_display_list').append(pmob_free_image_background)
+
+#npmob background image
+npmob_free_image_background = actor_display_images.mob_background_image('misc/npmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
+global_manager.get('mob_info_display_list').append(npmob_free_image_background)
 
 #mob background image's tooltip
 mob_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),

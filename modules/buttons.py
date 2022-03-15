@@ -1092,7 +1092,8 @@ class fire_unit_button(button):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
-                return(True)
+                if self.attached_mob.controllable:
+                    return(True)
         return(False)
 
     def update_tooltip(self):

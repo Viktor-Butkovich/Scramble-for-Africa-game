@@ -28,6 +28,23 @@ class mob(actor):
         Output:
             None
         '''
+        self.in_group = False
+        self.in_vehicle = False
+        self.in_building = False
+        self.veteran = False
+        self.is_vehicle = False
+        self.is_worker = False
+        self.is_officer = False
+        self.is_work_crew = False
+        self.is_group = False
+        self.is_npmob = False
+        self.is_pmob = False
+        self.can_explore = False #if can attempt to explore unexplored areas
+        self.can_construct = False #if can construct buildings
+        self.can_trade = False #if can trade or create trading posts
+        self.can_convert = False #if can convert natives or build missions
+        self.controllable = True
+        
         self.selected = False
         self.actor_type = 'mob'
         super().__init__(from_save, input_dict, global_manager)
@@ -237,11 +254,6 @@ class mob(actor):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
-            if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
-                self.end_turn_destination.draw_destination_outline()
-                equivalent_tile = self.end_turn_destination.get_equivalent_tile()
-                if not equivalent_tile == 'none':
-                    equivalent_tile.draw_destination_outline()
         
     def update_tooltip(self):
         '''

@@ -1,6 +1,8 @@
 #Contains functionality for non-player mobs
 
+import random
 from ..mobs import mob
+from .. import utility
 
 class npmob(mob):
     '''
@@ -8,7 +10,12 @@ class npmob(mob):
     '''
     def __init__(self, from_save, input_dict, global_manager):
         super().__init__(from_save, input_dict, global_manager)
-
+        self.hostile = False
+        self.controllable = False
+        self.is_npmob = True
+        
+        self.selection_outline_color = 'bright red'
+        
     def remove(self):
         '''
         Description:

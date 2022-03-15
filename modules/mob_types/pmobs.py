@@ -1,3 +1,4 @@
+import pygame
 from ..mobs import mob
 from .. import text_tools
 from .. import utility
@@ -26,27 +27,26 @@ class pmob(mob):
         Output:
             None
         '''
-        self.in_group = False
-        self.in_vehicle = False
-        self.in_building = False
-        self.veteran = False
+        #self.in_group = False
+        #self.in_vehicle = False
+        #self.in_building = False
+        #self.veteran = False
         
         super().__init__(from_save, input_dict, global_manager)
         self.selection_outline_color = 'bright green'
         global_manager.get('pmob_list').append(self)
-        self.is_npmob = False
         self.is_pmob = True
         
-        self.can_explore = False #if can attempt to explore unexplored areas
-        self.can_construct = False #if can construct buildings
-        self.can_trade = False #if can trade or create trading posts
-        self.can_convert = False #if can convert natives or build missions
+        #self.can_explore = False #if can attempt to explore unexplored areas
+        #self.can_construct = False #if can construct buildings
+        #self.can_trade = False #if can trade or create trading posts
+        #self.can_convert = False #if can convert natives or build missions
         #self.travel_possible = False #if can switch theatres
-        self.is_vehicle = False
-        self.is_worker = False
-        self.is_officer = False
-        self.is_work_crew = False
-        self.is_group = False
+        #self.is_vehicle = False
+        #self.is_worker = False
+        #self.is_officer = False
+        #self.is_work_crew = False
+        #self.is_group = False
 
         self.set_controlling_minister_type('none')
         if from_save:
@@ -112,6 +112,25 @@ class pmob(mob):
                 current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         super().remove()
         self.global_manager.set('pmob_list', utility.remove_from_list(self.global_manager.get('pmob_list'), self)) #make a version of pmob_list without self and set pmob_list to it
+
+    def draw_outline(self):
+        '''
+        Description:
+            Draws a flashing outline around this mob if it is selected, also shows its end turn destination, if any
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.global_manager.get('show_selection_outlines'):
+            for current_image in self.images:
+                if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+            if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
+                self.end_turn_destination.draw_destination_outline()
+                equivalent_tile = self.end_turn_destination.get_equivalent_tile()
+                if not equivalent_tile == 'none':
+                    equivalent_tile.draw_destination_outline()
 
     def check_if_minister_appointed(self):
         '''
