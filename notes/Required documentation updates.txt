@@ -7,3 +7,5 @@ actor_creation_tools imports
 mob_types/native_warriors
 villages.village
 turn_management_tools.manage_villages
+mobs.can_show
+mobs.can_show_tooltip

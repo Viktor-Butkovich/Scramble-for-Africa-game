@@ -276,6 +276,20 @@ class actor_display_label(label):
                                 self.set_label("No movement")
                             else:
                                 self.set_label("Infinite movement")
+                else:
+                    self.set_label(self.message_start + "???")
+
+
+            elif self.actor_label_type == 'attitude':
+                if not self.actor.controllable:
+                    if self.actor.hostile:
+                        self.set_label(self.message_start + "hostile")
+                    else:
+                        self.set_label(self.message_start + "neutral")
+
+            elif self.actor_label_type == 'controllable':
+                if not self.actor.controllable:
+                    self.set_label("You do not control this unit")
                             
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
@@ -415,7 +429,9 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'slums' and self.actor.cell.contained_buildings['slums'] == 'none':
             return(False)
-        elif self.actor_label_type in ['minister', 'movement'] and not self.actor.controllable:
+        elif self.actor_label_type == 'minister' and not self.actor.controllable:
+            return(False)
+        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
             return(False)
         else:
             return(result)

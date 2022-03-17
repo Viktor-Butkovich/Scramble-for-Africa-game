@@ -87,15 +87,21 @@ class mob(actor):
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
-        #if self.end_turn_destination == 'none':
-        #    save_dict['end_turn_destination'] = 'none'
-        #else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-        #    for grid_type in self.global_manager.get('grid_types_list'):
-        #        if self.end_turn_destination.grid == self.global_manager.get(grid_type):
-        #            save_dict['end_turn_destination_grid_type'] = grid_type
-        #    save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['image'] = self.image_dict['default']
         return(save_dict)        
+
+    def can_show(self):
+        if not (self.in_vehicle or self.in_group or self.in_building):
+            if (not self.images[0].current_cell == 'none') and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
+                if self.images[0].current_cell.visible:
+                    return(True)
+        return(False)
+
+    def can_show_tooltip(self):
+        if super().can_show_tooltip():
+            if self.images[0].current_cell.visible:
+                return(True)
+        return(False)
 
     def get_movement_cost(self, x_change, y_change):
         '''
@@ -266,10 +272,21 @@ class mob(actor):
         '''
         tooltip_list = []
         tooltip_list.append("Name: " + self.name.capitalize())
-        if not self.has_infinite_movement:
-            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+        
+        if self.controllable:
+            if not self.has_infinite_movement:
+                tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+            else:
+                tooltip_list.append("Movement points: infinite")
+
         else:
-            tooltip_list.append("Movement points: infinite")
+            tooltip_list.append("Movement points: ???")
+            if self.hostile:
+                tooltip_list.append("Attitude: hostile")
+            else:
+                tooltip_list.append("Attitude: neutral")
+            tooltip_list.append("You do not control this unit")
+                
         self.set_tooltip(tooltip_list)
         
     def remove(self):
@@ -281,10 +298,6 @@ class mob(actor):
         Output:
             None
         '''
-        #if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
-        #    current_tile = self.images[0].current_cell.tile
-        #    for current_commodity in self.global_manager.get('commodity_types'):
-        #        current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         if self.selected:
             self.selected = False
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')

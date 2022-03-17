@@ -873,12 +873,7 @@ class mob_image(actor_image):
         Output:
             boolean: Returns True if this image can appear during the current game mode and if its mob is not attached to another actor or behind another mob, otherwise returns False
         '''
-        if self.actor.in_vehicle or self.actor.in_group or self.actor.in_building:
-            return(False)
-        if (not self.current_cell == 'none') and self.current_cell.contained_mobs[0] == self.actor and self.global_manager.get('current_game_mode') in self.modes:
-            return(True)
-        else:
-            return(False)
+        return(self.actor.can_show())
 
 class button_image(actor_image):
     '''

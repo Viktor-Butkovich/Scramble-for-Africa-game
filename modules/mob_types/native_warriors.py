@@ -6,10 +6,11 @@ from .. import utility
 
 class native_warriors(npmob):
     def __init__(self, from_save, input_dict, global_manager):
+        super().__init__(from_save, input_dict, global_manager)
         self.hostile = True
         self.origin_village = input_dict['origin_village']
         self.origin_village.attached_warriors.append(self)
-        super().__init__(from_save, input_dict, global_manager)
+        self.npmob_type = 'native_warriors'
 
     def remove(self):
         super().remove()

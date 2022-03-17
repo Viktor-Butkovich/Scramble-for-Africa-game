@@ -40,28 +40,12 @@ class village():
             self.available_workers = input_dict['available_workers']
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
-                self.global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
+                global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
         self.cell = input_dict['cell']
-        #if self.cell.grid.is_mini_grid: #make sure main cell is in main map grid, not mini map
-        #    print('x: ' + str(self.cell.x) + ', y: ' + str(self.cell.y))
-            #main_grid_coordinates = self.cell.grid.get_main_grid_coordinates(self.cell.x, self.cell.y)
-            #self.cell = self.cell.grid.attached_grid.find_cell(main_grid_coordinates[0], main_grid_coordinates[1])
-            #print(self.cell)
-            #print(main_grid_coordinates)
-        #    main_grid = self.cell.grid.attached_grid
-        #    main_coordinates = (self.cell.x, self.cell.y)
-            #main_coordinates = self.cell.grid.get_main_grid_coordinates(self.cell.x, self.cell.y)
-        #    self.cell = main_grid.find_cell(main_coordinates[0], main_coordinates[1])
-            #self.cell = self.cell.grid.attached_grid.find_cell(self.cell.x, self.cell.y)
-            #self.cell.tile.get_equivalent_tile().cell 
         self.tiles = [] #added in set_resource for tiles
         self.global_manager = global_manager
-        if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, have more permanent fix later
-            self.global_manager.get('village_list').append(self)
-        #print(str(self.cell.x) + ', ' + str(self.cell.y))
-        #print(self.cell)
-        #print(self.cell.grid)
-        #print(self.cell.grid.mini_grid)
+        if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
+            self.global_manager.get('village_list').append(self) #have more permanent fix later
 
     def remove(self):
         '''
@@ -107,7 +91,7 @@ class village():
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African worker/default.png'
         input_dict['modes'] = ['strategic']
-        input_dict['name'] = ' native warriors'
+        input_dict['name'] = 'Native warriors'
         input_dict['init_type'] = 'native_warriors'
         input_dict['origin_village'] = self
         self.change_population(-1)

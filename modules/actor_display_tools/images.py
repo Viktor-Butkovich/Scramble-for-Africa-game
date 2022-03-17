@@ -45,7 +45,7 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
                 self.set_image(new_actor.image_dict['hidden'])
-            elif self.actor_image_type == 'resource building':
+            elif self.actor_image_type == 'resource_building':
                 if not new_actor.cell.contained_buildings['resource'] == 'none':
                     self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
                 else:

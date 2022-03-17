@@ -13,6 +13,7 @@ class npmob(mob):
         self.hostile = False
         self.controllable = False
         self.is_npmob = True
+        self.npmob_type = 'npmob'
         
         self.selection_outline_color = 'bright red'
         

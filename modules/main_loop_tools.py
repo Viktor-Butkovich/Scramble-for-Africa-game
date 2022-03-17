@@ -408,18 +408,19 @@ def manage_lmb_down(clicked_button, global_manager):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
-                            if len(current_cell.contained_mobs) > 0:
-                                selected_new_mob = True
-                                current_cell.contained_mobs[0].select()
-                                if current_grid == global_manager.get('minimap_grid'):
-                                    main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                    main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
-                                    if not main_cell == 'none':
-                                        main_tile = main_cell.tile
-                                        if not main_tile == 'none':
-                                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
-                                else: #elif current_grid == global_manager.get('strategic_map_grid'):
-                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+                            if current_cell.visible:
+                                if len(current_cell.contained_mobs) > 0:
+                                    selected_new_mob = True
+                                    current_cell.contained_mobs[0].select()
+                                    if current_grid == global_manager.get('minimap_grid'):
+                                        main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                        main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                        if not main_cell == 'none':
+                                            main_tile = main_cell.tile
+                                            if not main_tile == 'none':
+                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
+                                    else: #elif current_grid == global_manager.get('strategic_map_grid'):
+                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
             if selected_new_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)
                 if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid

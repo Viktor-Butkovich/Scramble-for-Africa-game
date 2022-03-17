@@ -619,11 +619,12 @@ class button():
                                         text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
                                     if can_pick_up:
                                         if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                            displayed_mob.change_inventory(commodity, num_commodity)
-                                            displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                            amount_transferred = num_commodity
                                         else:
-                                            text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                                str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                            amount_transferred = displayed_mob.get_inventory_remaining()
+                                            text_tools.print_to_screen("This unit can currently only pick up " + str(amount_transferred) + " units of " + commodity + ".", self.global_manager)
+                                        displayed_mob.change_inventory(commodity, amount_transferred)
+                                        displayed_tile.change_inventory(commodity, -1 * amount_transferred)
                                 else:
                                     text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                             else:

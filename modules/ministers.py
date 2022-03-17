@@ -164,8 +164,8 @@ class minister():
             self.global_manager.get('current_ministers')[self.current_position] = 'none'
         self.current_position = new_position
         self.global_manager.get('current_ministers')[new_position] = self
-        for current_mob in self.global_manager.get('mob_list'):
-            current_mob.update_controlling_minister()
+        for current_pmob in self.global_manager.get('pmob_list'):
+            current_pmob.update_controlling_minister()
         if not new_position == 'none': #if appointing
             self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
             if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 2:

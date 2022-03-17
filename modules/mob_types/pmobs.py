@@ -86,7 +86,6 @@ class pmob(mob):
                 'image': string value - File path to the image used by this object
         '''
         save_dict = super().to_save_dict()
-        #save_dict['movement_points'] = self.movement_points
         if self.end_turn_destination == 'none':
             save_dict['end_turn_destination'] = 'none'
         else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
@@ -94,7 +93,6 @@ class pmob(mob):
                 if self.end_turn_destination.grid == self.global_manager.get(grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
-        #save_dict['image'] = self.image_dict['default']
         return(save_dict)
 
     def remove(self):

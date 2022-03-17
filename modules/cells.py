@@ -87,7 +87,7 @@ class cell():
             save_dict['village_available_workers'] = self.village.available_workers
             save_dict['village_attached_warriors'] = []
             for attached_warrior in self.village.attached_warriors:
-                save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict)
+                save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
 
     def has_village(self):
