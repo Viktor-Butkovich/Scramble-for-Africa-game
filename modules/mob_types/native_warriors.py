@@ -8,6 +8,7 @@ class native_warriors(npmob):
     def __init__(self, from_save, input_dict, global_manager):
         super().__init__(from_save, input_dict, global_manager)
         self.hostile = True
+        self.saves_normally = False #saves as part of village
         self.origin_village = input_dict['origin_village']
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'

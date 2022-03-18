@@ -8,7 +8,7 @@ def find_object_distance(first, second):
         object first: Object with x and y coordinate attributes
         object second: Object with x and y coordinate attributes
     Output:
-        double: Distance between the positions of the inputted objects
+        double: Returns the distance between the positions of the inputted objects
     '''
     return((((first.x - second.x) ** 2) + ((first.y - second.y) ** 2)) ** 0.5)
 
@@ -26,6 +26,21 @@ def find_coordinate_distance(first, second):
     second_x, second_y = second
     return((((first_x - second_x) ** 2) + ((first_y - second_y) ** 2)) ** 0.5)
 
+def find_grid_distance(first, second):
+    '''
+    Description:
+        Returns the sum of the horizontal and vertical distances between the positions of the inputted objects. Works for calculating movement distance on a grid. Returns -1 for objects on different grids
+    Input:
+        object first: Object with x and y coordinate attributes
+        object second: Object with x and y coordinate attributes
+    Output:
+        int: Returns the sum of the horizontal and vertical distance between the positions of the inputted objects
+    '''
+    horizontal_distance = abs(first.x - second.x)
+    vertical_distance = abs(first.x - second.x)
+    if not first.grids[0] in second.grids:
+        return(-1)
+    return(horizontal_distance + vertical_distance)
     
 def remove_from_list(received_list, item_to_remove):
     '''

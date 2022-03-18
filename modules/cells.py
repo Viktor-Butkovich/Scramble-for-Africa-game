@@ -159,6 +159,19 @@ class cell():
             return(True)
         return(False)
 
+    def has_resource_building(self):
+        '''
+        Description:
+            Returns whether this cell contains a resource production building
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a resource production building, otherwise returns True
+        '''
+        if self.contained_buildings['resource'] == 'none':
+            return(False)
+        return(True)
+
     def reset_buildings(self):
         '''
         Description:
@@ -186,7 +199,6 @@ class cell():
             if not self.contained_buildings[current_building_type] == 'none':
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
-        
 
     def has_port(self):
         '''
@@ -332,6 +344,22 @@ class cell():
                 return(current_mob)
         return('none')
 
+    def has_pmob(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_pmob:
+                return(True)
+        if self.has_resource_building():
+            if len(self.contained_buildings['resource'].contained_work_crews) > 0:
+                return(True)
+        #maybe have slums count?
+        return(False)
+
+    def has_npmob(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_npmob:
+                return(True)
+        return(False)
+    
     def set_visibility(self, new_visibility):
         '''
         Description:

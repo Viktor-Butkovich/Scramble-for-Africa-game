@@ -26,27 +26,11 @@ class pmob(mob):
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
-        '''
-        #self.in_group = False
-        #self.in_vehicle = False
-        #self.in_building = False
-        #self.veteran = False
-        
+        '''   
         super().__init__(from_save, input_dict, global_manager)
         self.selection_outline_color = 'bright green'
         global_manager.get('pmob_list').append(self)
         self.is_pmob = True
-        
-        #self.can_explore = False #if can attempt to explore unexplored areas
-        #self.can_construct = False #if can construct buildings
-        #self.can_trade = False #if can trade or create trading posts
-        #self.can_convert = False #if can convert natives or build missions
-        #self.travel_possible = False #if can switch theatres
-        #self.is_vehicle = False
-        #self.is_worker = False
-        #self.is_officer = False
-        #self.is_work_crew = False
-        #self.is_group = False
 
         self.set_controlling_minister_type('none')
         if from_save:
@@ -56,12 +40,8 @@ class pmob(mob):
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             else:
                 self.end_turn_destination = 'none'
-            #self.set_movement_points(input_dict['movement_points'])
-            #self.update_tooltip()
         else:
             self.end_turn_destination = 'none'
-            #self.reset_movement_points()
-            #self.update_tooltip()
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)

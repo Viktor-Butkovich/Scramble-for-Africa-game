@@ -167,7 +167,7 @@ class pick_up_all_passengers_button(label_button):
                 vehicle = self.attached_label.actor
                 for contained_mob in vehicle.images[0].current_cell.contained_mobs:
                     passenger = contained_mob
-                    if not passenger.is_vehicle: #vehicles won't be picked up as passengers
+                    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                         passenger.embark_vehicle(vehicle)
             else:
                 text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)

@@ -7,5 +7,8 @@ actor_creation_tools imports
 mob_types/native_warriors
 villages.village
 turn_management_tools.manage_villages
-mobs.can_show
-mobs.can_show_tooltip
+mobs.mob.can_show
+mobs.mob.can_show_tooltip
+cells.cell.has_pmob
+cells.cell.has_npmob
+cells.cell.get_best_combatant
