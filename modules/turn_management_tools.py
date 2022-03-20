@@ -22,8 +22,8 @@ def end_turn(global_manager):
     #text_tools.print_to_screen("Ending turn", global_manager)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
-    for current_npmob in global_manager.get('npmob_list'):
-        current_npmob.end_turn_move()
+    #for current_npmob in global_manager.get('npmob_list'):
+    #    current_npmob.end_turn_move()
     for current_cell in global_manager.get('strategic_map_grid').cell_list:
         current_tile = current_cell.tile
         while current_tile.get_inventory_used() > current_tile.inventory_capacity:
@@ -52,6 +52,7 @@ def start_turn(global_manager, first_turn):
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
         manage_villages(global_manager)
+        manage_enemy_movement(global_manager)
         manage_combat(global_manager)
     
     global_manager.set('player_turn', True)
@@ -358,8 +359,10 @@ def manage_villages(global_manager):
 
         current_village.manage_warriors()
 
+def manage_enemy_movement(global_manager):
+    for current_npmob in global_manager.get('npmob_list'):
+        current_npmob.end_turn_move()
+
 def manage_combat(global_manager):
-    #maybe check for hostility
-    for current_cell in global_manager.get('strategic_map_grid').cell_list:
-        if current_cell.has_pmob() and current_cell.has_npmob():
-            print('combat at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ')')
+    if len(global_manager.get('attacker_queue')) > 0:
+        global_manager.get('attacker_queue').pop(0).attempt_local_combat()

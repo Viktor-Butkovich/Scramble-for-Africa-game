@@ -214,29 +214,29 @@ class officer(pmob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
-    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
-        '''
-        Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
-                the result
-        Input:
-            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-            int result: Predetermined result that the die will end on after rolling
-            int min_success: Minimum roll required for a success
-            int min_crit_success: Minimum roll required for a critical success
-            int max_crit_fail: Maximum roll required for a critical failure
-        Output:
-            None
-        '''
-        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)
-        minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'position', self.global_manager)
-        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'portrait', self.global_manager)
+    #def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
+    #    '''
+    #    Description:
+    #        Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
+    #            the result
+    #    Input:
+    #        int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
+    #        int result: Predetermined result that the die will end on after rolling
+    #        int min_success: Minimum roll required for a success
+    #        int min_crit_success: Minimum roll required for a critical success
+    #        int max_crit_fail: Maximum roll required for a critical failure
+    #    Output:
+    #        None
+    #    '''
+    #    result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
+    #    outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
+    #    new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
+    #        result_outcome_dict, outcome_color_dict, result, self.global_manager)
+    #    minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
+    #    minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+    #        'position', self.global_manager)
+    #    minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+    #        'portrait', self.global_manager)
 
 class evangelist(officer):
     '''

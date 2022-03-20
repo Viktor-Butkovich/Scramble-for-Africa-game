@@ -294,6 +294,7 @@ global_manager.set('infrastructure_connection_list', [])
 global_manager.set('officer_list', [])
 global_manager.set('worker_list', [])
 global_manager.set('loan_list', [])
+global_manager.set('attacker_queue', [])
 
 global_manager.set('num_african_workers', 0)
 global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
@@ -355,6 +356,7 @@ global_manager.set('ongoing_advertising_campaign', False)
 global_manager.set('ongoing_loan_search', False)
 global_manager.set('ongoing_conversion', False)
 global_manager.set('ongoing_construction', False)
+global_manager.set('ongoing_combat', False)
 
 global_manager.set('r_shift', 'up')
 global_manager.set('l_shift', 'up')

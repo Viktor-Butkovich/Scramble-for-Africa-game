@@ -17,6 +17,7 @@ class npmob(mob):
         self.npmob_type = 'npmob'
         
         self.selection_outline_color = 'bright red'
+        self.last_move_direction = (0, 0)
         global_manager.get('npmob_list').append(self)
         
     def remove(self):
@@ -49,6 +50,14 @@ class npmob(mob):
                         elif distance == min_distance: #if as close as previous, add as alternative to previous
                             closest_targets.append(possible_target)
         return(random.choice(closest_targets)) #return one of the closest ones, or 'none' if none were found
+
+    def attempt_local_combat(self):
+        defender = self.images[0].current_cell.get_best_combatant('pmob')
+        if not defender == 'none':
+            defender.start_combat('defending', self)
+        else:
+            if len(self.global_manager.get('attacker_queue')) > 0:
+                   self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
         
     def end_turn_move(self):
         closest_target = self.find_closest_target()
@@ -84,7 +93,9 @@ class npmob(mob):
                         self.move(1 * horizontal_multiplier, 0)
                 else:
                     while self.movement_points > 0:
-                        self.move(0, 1 * vertical_multiplier)             
+                        self.move(0, 1 * vertical_multiplier)
+            if self.combat_possible():
+                self.global_manager.get('attacker_queue').append(self)
 
     def move(self, x_change, y_change):
         '''
@@ -108,3 +119,8 @@ class npmob(mob):
             self.global_manager.get('sound_manager').play_sound('water')
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
+        self.last_move_direction = (x_change, y_change)
+
+    def retreat(self):
+        self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+        

@@ -17,9 +17,6 @@ class native_warriors(npmob):
         super().remove()
         self.origin_village.attached_warriors = utility.remove_from_list(self.origin_village.attached_warriors, self)
 
-    def to_save_dict(self): #should be called directly by village in cells.to_save_dict, not from mob list
-        return(super().to_save_dict())
-
     def check_despawn(self):
         if random.randrange(1, 7) == 1:
             self.remove()

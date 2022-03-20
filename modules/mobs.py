@@ -90,6 +90,15 @@ class mob(actor):
         save_dict['image'] = self.image_dict['default']
         return(save_dict)        
 
+    def combat_possible(self):
+        if self.is_npmob:
+            if self.hostile and self.images[0].current_cell.has_pmob():
+                return(True)
+        elif self.is_pmob:
+            if self.images[0].current_cell.has_npmob():
+                return(True)
+        return(False)
+
     def can_show(self):
         if not (self.in_vehicle or self.in_group or self.in_building):
             if (not self.images[0].current_cell == 'none') and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
@@ -306,6 +315,18 @@ class mob(actor):
             current_image.remove_from_cell()
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+
+    def die(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups/vehicles, whose die and remove have different
+                functionalities
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
 
     def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''

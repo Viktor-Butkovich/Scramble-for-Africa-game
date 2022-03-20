@@ -348,9 +348,9 @@ class cell():
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
                 return(True)
-        if self.has_resource_building():
-            if len(self.contained_buildings['resource'].contained_work_crews) > 0:
-                return(True)
+        #if self.has_resource_building():
+        #    if len(self.contained_buildings['resource'].contained_work_crews) > 0:
+        #        return(True)
         #maybe have slums count?
         return(False)
 
@@ -359,6 +359,17 @@ class cell():
             if current_mob.is_npmob:
                 return(True)
         return(False)
+
+    def get_best_combatant(self, mob_type):
+        if mob_type == 'npmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_npmob:
+                    return(current_mob)
+        elif mob_type == 'pmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_pmob:
+                    return(current_mob)
+        return('none')
     
     def set_visibility(self, new_visibility):
         '''
