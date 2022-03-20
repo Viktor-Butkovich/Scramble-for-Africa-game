@@ -6,6 +6,9 @@ from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import notification_tools
+from .. import dice
+from .. import scaling
+from .. import images
 
 class pmob(mob):
     '''

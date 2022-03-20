@@ -16,3 +16,5 @@ cells.cell.has_pmob
 cells.cell.has_npmob
 cells.cell.get_best_combatant
 mob_types/pmobs.pmob.display_die, change inputs
+groups imports
+officers imports

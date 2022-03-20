@@ -9,7 +9,6 @@ from .. import notification_tools
 from .. import text_tools
 from .. import market_tools
 from .. import dice_utility
-from .. import dice
 from .. import scaling
 from .. import images
 

@@ -6,7 +6,6 @@ from .. import actor_utility
 from .. import dice_utility
 from .. import utility
 from .. import notification_tools
-from .. import dice
 from .. import images
 from .. import scaling
 
