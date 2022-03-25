@@ -36,7 +36,12 @@ class die(button):
         self.rolling = False
         self.last_roll = 0
         self.highlighted = False
-        if self.result_outcome_dict['min_success'] <= 6:
+        self.normal_die = True
+        if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0 and result_outcome_dict['min_crit_success'] >= 7:
+            #if roll without normal success/failure results, like combat
+            image_id = 'misc/dice/4.png'
+            self.normal_die = False
+        elif self.result_outcome_dict['min_success'] <= 6:
             image_id = 'misc/dice/' + str(self.result_outcome_dict['min_success']) + '.png'
         else:
             image_id = 'misc/dice/impossible.png'
@@ -46,7 +51,15 @@ class die(button):
         self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
         self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + height + 3), width + 6, height + 6)
         self.color = 'white'
-        self.outline_color = self.outcome_color_dict['default']
+        if self.normal_die:
+            self.outline_color = self.outcome_color_dict['default']
+        else:
+            if self.result_outcome_dict['min_success'] <= 0: #if green combat die
+                self.outline_color = self.outcome_color_dict['success']
+                self.special_die_type = 'green'
+            else: #if red combat die
+                self.outline_color = self.outcome_color_dict['fail']
+                self.special_die_type = 'red'
         self.in_notification = True #dice are attached to notifications and should be drawn over other buttons
 
     def on_click(self):
@@ -73,20 +86,21 @@ class die(button):
         '''
         tooltip_list = []
         if self.rolls_completed == 0:
-            if self.result_outcome_dict['min_success'] <= 6:
-                tooltip_list.append(str(self.result_outcome_dict['min_success']) + '+ required for success')
-            else:
-                tooltip_list.append(str('Success is impossible'))
-            if not self.result_outcome_dict['min_crit_success'] > self.num_sides: #do not mention critical success if impossible 
-                if self.result_outcome_dict['min_crit_success'] == self.num_sides:
-                    tooltip_list.append(str(self.result_outcome_dict['min_crit_success']) + ' required for critical success')
+            if self.normal_die: #if has normal success/failure results
+                if self.result_outcome_dict['min_success'] <= 6:
+                    tooltip_list.append(str(self.result_outcome_dict['min_success']) + '+ required for success')
                 else:
-                    tooltip_list.append(str(self.result_outcome_dict['min_crit_success']) + '+ required for critical success')
-            if not self.result_outcome_dict['max_crit_fail'] <= 0: #do not mention critical failure if impossible 
-                if self.result_outcome_dict['max_crit_fail'] == self.num_sides:
-                    tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' required for critical failure')
-                else:
-                    tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' or lower required for critical failure')
+                    tooltip_list.append(str('Success is impossible'))
+                if not self.result_outcome_dict['min_crit_success'] > self.num_sides: #do not mention critical success if impossible 
+                    if self.result_outcome_dict['min_crit_success'] == self.num_sides:
+                        tooltip_list.append(str(self.result_outcome_dict['min_crit_success']) + ' required for critical success')
+                    else:
+                        tooltip_list.append(str(self.result_outcome_dict['min_crit_success']) + '+ required for critical success')
+                if not self.result_outcome_dict['max_crit_fail'] <= 0: #do not mention critical failure if impossible 
+                    if self.result_outcome_dict['max_crit_fail'] == self.num_sides:
+                        tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' required for critical failure')
+                    else:
+                        tooltip_list.append(str(self.result_outcome_dict['max_crit_fail']) + ' or lower required for critical failure')
             tooltip_list.append('Click to roll')
         else:
             tooltip_list.append(str(self.roll_result))
@@ -132,16 +146,17 @@ class die(button):
                 self.roll_result = self.final_result
             else:
                 self.roll_result = random.randrange(1, self.num_sides + 1) #1 - num_sides, inclusive
-            if self.roll_result >= self.result_outcome_dict['min_success']: #if success
-                if self.roll_result >= self.result_outcome_dict['min_crit_success']: #if crit success
-                    self.outline_color = self.outcome_color_dict['crit_success']
-                else: #if normal success
-                    self.outline_color = self.outcome_color_dict['success']
-            else: #if failure
-                if self.roll_result <= self.result_outcome_dict['max_crit_fail']: #if crit fail
-                    self.outline_color = self.outcome_color_dict['crit_fail']
-                else: #if normal fail
-                    self.outline_color = self.outcome_color_dict['fail']
+            if self.normal_die:
+                if self.roll_result >= self.result_outcome_dict['min_success']: #if success
+                    if self.roll_result >= self.result_outcome_dict['min_crit_success']: #if crit success
+                        self.outline_color = self.outcome_color_dict['crit_success']
+                    else: #if normal success
+                        self.outline_color = self.outcome_color_dict['success']
+                else: #if failure
+                    if self.roll_result <= self.result_outcome_dict['max_crit_fail']: #if crit fail
+                        self.outline_color = self.outcome_color_dict['crit_fail']
+                    else: #if normal fail
+                        self.outline_color = self.outcome_color_dict['fail']
             self.image.set_image('misc/dice/' + str(self.roll_result) + '.png')#self.set_label(str(self.roll_result))
             self.rolls_completed += 1
 
@@ -155,11 +170,11 @@ class die(button):
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if self.can_show(): #if self.global_manager.get('current_game_mode') in self.modes:
             if self.rolling and time.time() >= self.last_roll + self.roll_interval: #if roll_interval time has passed since last_roll
                 self.roll()
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.color], self.Rect)
-            if self.highlighted:
+            if self.highlighted or not self.normal_die:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.outline_color], self.Rect, 6)
             else:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)
@@ -179,4 +194,8 @@ class die(button):
         self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
-
+    def can_show(self):
+        if super().can_show():
+            if self.global_manager.get('notification_list')[0].is_action_notification: #dice may appear before their notifications are shown, so hide on non-applicable notifications
+                return(True)
+        return(False)

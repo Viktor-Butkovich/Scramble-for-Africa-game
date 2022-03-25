@@ -62,9 +62,11 @@ class mob(actor):
         if from_save:
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
+            self.creation_turn = input_dict['creation_turn']
         else:
             self.reset_movement_points()
             self.update_tooltip()
+            self.creation_turn = self.global_manager.get('turn')
 
     def to_save_dict(self):
         '''
@@ -84,10 +86,12 @@ class mob(actor):
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - How many movement points this actor currently has
                 'image': string value - File path to the image used by this object
+                'creation_turn': int value - turn number on which this unit was created
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
         save_dict['image'] = self.image_dict['default']
+        save_dict['creation_turn'] = self.creation_turn
         return(save_dict)        
 
     def combat_possible(self):

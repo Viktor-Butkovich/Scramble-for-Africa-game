@@ -361,7 +361,8 @@ def manage_villages(global_manager):
 
 def manage_enemy_movement(global_manager):
     for current_npmob in global_manager.get('npmob_list'):
-        current_npmob.end_turn_move()
+        if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+            current_npmob.end_turn_move()
 
 def manage_combat(global_manager):
     if len(global_manager.get('attacker_queue')) > 0:

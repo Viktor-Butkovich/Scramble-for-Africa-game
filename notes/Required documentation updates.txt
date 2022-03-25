@@ -18,3 +18,8 @@ cells.cell.get_best_combatant
 mob_types/pmobs.pmob.display_die, change inputs
 groups imports
 officers imports
+action_notifications/combat_notification
+action_notifications/action_notification
+action_notification inheritance
+dice.die.can_show
+combat images not appearing correctly in some situations, maybe when multiple combats are going to occur

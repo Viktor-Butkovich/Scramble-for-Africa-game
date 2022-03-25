@@ -9,6 +9,7 @@ from .. import notification_tools
 from .. import dice
 from .. import scaling
 from .. import images
+from .. import dice_utility
 
 class pmob(mob):
     '''
@@ -360,66 +361,121 @@ class pmob(mob):
         self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
+        self.select()
         if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                
-        self.current_roll_modifier = 0
-        self.current_min_success = self.default_min_success
-        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
-        self.current_min_crit_success = self.default_min_crit_success
-        
-        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
-        self.current_max_crit_fail -= self.current_roll_modifier
-        if self.current_min_success > self.current_min_crit_success:
-            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
-            message = "Your " + self.name + " is being attacked by " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = enemy.name + " are attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
         elif combat_type == 'attacking':
-            message = "Your " + self.name + " is attacking " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = "Your " + self.name + " is attacking the " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
         self.current_combat_type = combat_type
         self.current_enemy = enemy
-        notification_tools.display_notification(message, 'default', self.global_manager)
+        notification_tools.display_notification(message, 'combat', self.global_manager)
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):
-        #show combat rolls and such
         combat_type = self.current_combat_type
         enemy = self.current_enemy
-        own_roll = random.randrange(1, 7)
+
+        text = ""
+        text += "The " + self.name + " attempts to defeat the " + enemy.name + ". /n /n"
+
+        if not self.veteran: #should civilian veteran officers have higher combat rolls?
+            notification_tools.display_notification(text + "The outcome will be based on the difference between your roll and the enemy's roll. /n /nClick to roll. ", 'combat', self.global_manager)
+        else:
+            text += ("The veteran major can roll twice and pick the higher result. /n /n")
+            notification_tools.display_notification(text + "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /nClick to roll. ", 'combat', self.global_manager)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
+            first_roll_list = dice_utility.roll_to_list(6, "Combat roll", 0, 0, 0, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+           
+            second_roll_list = dice_utility.roll_to_list(6, "second_combat", 0, 7, 0, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            text += ("The higher result, " + str(roll_result) + ", was used. /n")
+        else:
+            result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Combat roll", 0, 7, 0, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        own_roll = roll_result
         enemy_roll = random.randrange(1, 7)
-        result = own_roll - enemy_roll
-        if result <= -2:
+        self.display_die((die_x, 620), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
+
+        overall_result = own_roll - enemy_roll
+        if overall_result <= -2:
             conclusion = 'lose'
-        elif result <= 1:
+            description = 'DEFEAT'
+        elif overall_result <= 1:
             conclusion = 'draw'
+            description = 'STALEMATE'
         else:
             conclusion = 'win'
-        message = self.name + ' roll: ' + str(own_roll)
-        message += enemy.name + ' roll: ' + str(enemy_roll)
-        message = 'Result: ' + str(result) + ' - ' + conclusion
-        notification_tools.display_notification(message, 'default', self.global_manager)
-        self.complete_combat(conclusion)
+            description = 'VICTORY'
 
-    def complete_combat(self, conclusion):
+        text += "/n Overall result: /n"
+        text += str(own_roll) + " - " + str(enemy_roll) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
+        
+        notification_tools.display_notification(text + "Click to continue.", 'combat', self.global_manager)
+
+        text += "/n"
+        if conclusion == 'win':
+            text += "Your " + self.name + " successfully defeated and destroyed the " + enemy.name + ". /n /n"
+            
+        elif conclusion == 'draw':
+            #if combat_type == 'attacking':
+            if combat_type == 'defending':
+                if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
+                    retreat_direction = 'west'
+                elif enemy.last_move_direction[0] < 0: #if enemy attacked by going west
+                    retreat_direction = 'east'
+                elif enemy.last_move_direction[1] > 0: #if enemy attacked by going north
+                    retreat_direction = 'south'
+                elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
+                    retreat_direction = 'north'
+                text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who were seen retreating to the " + retreat_direction + ". /n /n"
+
+        elif conclusion == 'lose':
+            text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
+        #if (not self.veteran) and own_roll >= 6: #should be in battalion-specific version of function
+        #    self.just_promoted = True
+        #    text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
+        #    text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
+        notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_combat', self.global_manager)
+        self.global_manager.set('combat_result', [self, conclusion])
+
+
+    def complete_combat(self):
         combat_type = self.current_combat_type
         enemy = self.current_enemy
+        conclusion = self.global_manager.get('combat_result')[1]
         if conclusion == 'win':
             enemy.die()
-            message = enemy.name  + ' has died.'
         elif conclusion == 'draw':
             if combat_type == 'defending':
                 enemy.retreat() #have as function of npmobs
-                message = enemy.name + ' has been forced to retreat.'
             elif combat_type == 'attacking':
                 self.retreat() #have as function of military units only
-                message = 'Your ' + self.name + ' has been forced to retreat.'
         elif conclusion == 'lose':
             self.die()
-            message = 'Your ' + self.name + ' has died.'
-        notification_tools.display_notification(message, 'default', self.global_manager)
+
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()

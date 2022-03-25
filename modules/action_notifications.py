@@ -8,7 +8,12 @@ from . import utility
 from . import scaling
 from . import actor_utility
 
-class dice_rolling_notification(notification):
+class action_notification(notification):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        self.is_action_notification = True
+
+class dice_rolling_notification(action_notification):
     '''
     Notification that is removed when a dice roll is completed rather than when clicked
     '''
@@ -84,11 +89,16 @@ class dice_rolling_notification(notification):
                 if current_die.roll_result > max_roll:
                     max_roll = current_die.roll_result
                     max_die = current_die
+                if not current_die.normal_die: #change highlight color of special dice to show that roll is complete
+                    if current_die.special_die_type == 'green':
+                        current_die.outline_color = current_die.outcome_color_dict['crit_success']
+                    elif current_die.special_die_type == 'red':
+                        current_die.outline_color = current_die.outcome_color_dict['crit_fail']
             max_die.highlighted = True
         else:
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
 
-class exploration_notification(notification):
+class exploration_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
     '''
@@ -167,7 +177,7 @@ class exploration_notification(notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
-class off_tile_exploration_notification(notification):
+class off_tile_exploration_notification(action_notification):
     '''
     Notification that shows a tile explored by an expedition in an adjacent tile, focusing on the new tile and returning minimap to original position upon removal
     '''
@@ -243,7 +253,7 @@ class off_tile_exploration_notification(notification):
         for current_image in self.notification_images:
             current_image.remove()
         
-class trade_notification(notification):
+class trade_notification(action_notification):
     '''
     Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
     '''
@@ -342,7 +352,7 @@ class trade_notification(notification):
         if self.stops_trade:
             self.global_manager.set('ongoing_trade', False)
 
-class religious_campaign_notification(notification):
+class religious_campaign_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a religious campaign when the last notification is removed
     '''
@@ -414,7 +424,7 @@ class religious_campaign_notification(notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
-class advertising_campaign_notification(notification):
+class advertising_campaign_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of an advertising campaign when the last notification is removed
     '''
@@ -492,7 +502,7 @@ class advertising_campaign_notification(notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
-class conversion_notification(notification):
+class conversion_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a religious conversion attempt when the last notification is removed
     '''
@@ -562,7 +572,7 @@ class conversion_notification(notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
-class construction_notification(notification):
+class construction_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
     '''
@@ -616,3 +626,65 @@ class construction_notification(notification):
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
+
+class combat_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a combat when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+        self.is_last = is_last
+        #if self.is_last: #if last, show result
+        #self.notification_images = []
+        if len(global_manager.get('combatant_images')) == 0: #if none already exist
+            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').images[0].image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, 280, global_manager),
+                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
+            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').current_enemy.images[0].image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, 720, global_manager),
+                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
+                not add a prompt to close the notification
+        Input:
+            none
+        Output:
+            None
+        '''
+        super().format_message()
+        self.message.pop(-1)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+            self.global_manager.get('combat_result')[0].complete_combat()
+    
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+
+        if self.is_last:
+            for current_image in self.global_manager.get('combatant_images'):
+                current_image.remove()
+        #for current_image in self.notification_images:
+        #    current_image.remove()
