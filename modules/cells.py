@@ -1,6 +1,7 @@
 #Contains functionality for grid cells
 
 import pygame
+import random
 from . import actor_utility
 
 class cell():
@@ -361,15 +362,32 @@ class cell():
         return(False)
 
     def get_best_combatant(self, mob_type):
+        best_combatants = ['none']
+        best_combat_modifier = 0
         if mob_type == 'npmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_npmob:
-                    return(current_mob)
+                    current_combat_modifier = current_mob.get_combat_modifier()
+                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
+                        best_combatants = [current_mob]
+                        best_combat_modifier = current_combat_modifier
+                    elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
+                        best_combatants.append(current_mob)
         elif mob_type == 'pmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_pmob:
-                    return(current_mob)
-        return('none')
+                    current_combat_modifier = current_mob.get_combat_modifier()
+                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
+                        best_combatants = [current_mob]
+                        best_combat_modifier = current_combat_modifier
+                    elif current_combat_modifier == best_combat_modifier:
+                        if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
+                            best_combatants = [current_mob]
+                            best_combatant_modifier = current_combat_modifier
+                        else:
+                            best_combatants.append(current_mob)
+                        
+        return(random.choice(best_combatants))
     
     def set_visibility(self, new_visibility):
         '''

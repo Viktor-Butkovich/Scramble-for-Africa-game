@@ -149,6 +149,12 @@ class expedition(group):
             None
         '''
         self.global_manager.get('money_tracker').change(self.exploration_cost * -1, 'exploration')
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         future_x = self.x + x_change
         future_y = self.y + y_change
         roll_result = 0
@@ -170,12 +176,12 @@ class expedition(group):
         text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
         
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager, num_dice)
         else:
             text += ("The veteran explorer can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -209,7 +215,7 @@ class expedition(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default

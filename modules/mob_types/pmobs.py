@@ -57,6 +57,7 @@ class pmob(mob):
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
+        self.attached_dice_list = []
 
     def to_save_dict(self):
         '''
@@ -361,10 +362,11 @@ class pmob(mob):
         self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
-        self.select()
+        #self.select()
         if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+                self.select()
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
@@ -373,42 +375,66 @@ class pmob(mob):
             message = "Your " + self.name + " is attacking the " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
         self.current_combat_type = combat_type
         self.current_enemy = enemy
-        notification_tools.display_notification(message, 'combat', self.global_manager)
+        
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling. Has 1 more die than usual because enemy also rolls
+            num_dice = 3
+        else:
+            num_dice = 2
+            
+        notification_tools.display_notification(message, 'combat', self.global_manager, num_dice)
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):
         combat_type = self.current_combat_type
         enemy = self.current_enemy
+        own_combat_modifier = self.get_combat_modifier()
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling. Has 1 more die than usual because enemy also rolls
+            num_dice = 3
+        else:
+            num_dice = 2
 
         text = ""
         text += "The " + self.name + " attempts to defeat the " + enemy.name + ". /n /n"
 
         if not self.veteran: #should civilian veteran officers have higher combat rolls?
-            notification_tools.display_notification(text + "The outcome will be based on the difference between your roll and the enemy's roll. /n /nClick to roll. ", 'combat', self.global_manager)
+            if self.is_officer:
+                text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
+            else:
+                text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
+            text += "The outcome will be based on the difference between your roll and the enemy's roll. /n /n"
+            notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
         else:
-            text += ("The veteran major can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /nClick to roll. ", 'combat', self.global_manager)
+            if self.is_officer:
+                text += "The " + self.name + " can roll twice and pick the higher result. /n"
+            elif self.is_group:
+                text += "The " + self.officer.name + " can roll twice and pick the higher result. /n"
+            if self.is_officer:
+                text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
+            else:
+                text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
+            text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
+            notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
             results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
-            first_roll_list = dice_utility.roll_to_list(6, "Combat roll", 0, 0, 0, self.global_manager, results[0])
-            self.display_die((die_x, 500), first_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 0, 0, self.global_manager, results[0], own_combat_modifier)
+            self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
            
-            second_roll_list = dice_utility.roll_to_list(6, "second_combat", 0, 7, 0, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            second_roll_list = dice_utility.combat_roll_to_list(6, "second_combat", 0, 7, 0, self.global_manager, results[1], own_combat_modifier)
+            self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
             result_outcome_dict = {}
-            text += ("The higher result, " + str(roll_result) + ", was used. /n")
+            text += ("The higher result, " + str(roll_result + own_combat_modifier) + ", was used. /n")
         else:
             result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            roll_list = dice_utility.roll_to_list(6, "Combat roll", 0, 7, 0, self.global_manager, result)
+            roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 7, 0, self.global_manager, result, own_combat_modifier)
             self.display_die((die_x, 440), roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
@@ -417,9 +443,13 @@ class pmob(mob):
 
         own_roll = roll_result
         enemy_roll = random.randrange(1, 7)
-        self.display_die((die_x, 620), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
+        if num_dice == 2:
+            self.display_die((die_x, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
+        elif num_dice == 3:
+            self.display_die((die_x - 60, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
 
-        overall_result = own_roll - enemy_roll
+        overall_result = own_roll + own_combat_modifier - enemy_roll
+        
         if overall_result <= -2:
             conclusion = 'lose'
             description = 'DEFEAT'
@@ -431,9 +461,9 @@ class pmob(mob):
             description = 'VICTORY'
 
         text += "/n Overall result: /n"
-        text += str(own_roll) + " - " + str(enemy_roll) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
+        text += str(own_roll + own_combat_modifier) + " - " + str(enemy_roll) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
         
-        notification_tools.display_notification(text + "Click to continue.", 'combat', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'combat', self.global_manager, num_dice)
 
         text += "/n"
         if conclusion == 'win':
@@ -467,6 +497,9 @@ class pmob(mob):
         enemy = self.current_enemy
         conclusion = self.global_manager.get('combat_result')[1]
         if conclusion == 'win':
+            if combat_type == 'attacking':
+                if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
+                    self.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
             enemy.die()
         elif conclusion == 'draw':
             if combat_type == 'defending':
@@ -474,14 +507,80 @@ class pmob(mob):
             elif combat_type == 'attacking':
                 self.retreat() #have as function of military units only
         elif conclusion == 'lose':
+            if combat_type == 'defending':
+                if len(self.images[0].current_cell.contained_mobs) > 2:
+                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
             self.die()
+            
 
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-        
-        
 
+    def start_construction(self, building_info_dict):
+        '''
+        Description
+            Used when the player clicks on a construct building or train button, displays a choice notification that allows the player to construct it or not. Choosing to construct starts the construction process, costs an amount based
+                on the building built, and consumes the group's movement points
+        Input:
+            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
+                string building_type: type of building, like 'resource'
+                string building_name: name of building, like 'ivory camp'
+                string attached_resource: optional, type of resource building produces, like 'ivory'
+        Output:
+            None
+        '''
+        self.building_type = building_info_dict['building_type']
+        self.building_name = building_info_dict['building_name']
+        if self.building_type == 'resource':
+            self.attached_resource = building_info_dict['attached_resource']
+        else:
+            self.attached_resource = ''
+        
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'constructor': self, 'type': 'start construction'}
+        self.global_manager.set('ongoing_construction', True)
+        message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
+        message += "The planning and materials will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
+        message += "If successful, a " + self.building_name + " will be built. " #change to match each building
+        if self.building_type == 'resource':
+            message += "Each work crew attached to a " + self.building_name + " produces 1 unit of " + self.attached_resource + " each turn. "
+            message += "It also expands the tile's warehouse capacity."
+        elif self.building_type == 'infrastructure':
+            if self.building_name == 'road':
+                message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad."
+            elif self.building_name == 'railroad':
+                message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
+                message += "It is also required for trains to move and for a train station to be built."
+        elif self.building_type == 'port':
+            message += "A port allows ships to enter the tile. It also expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for ships traveling between theatres."
+            if self.y == 1:
+                message += "A port built here would be adjacent to the ocean."
+            else:
+                message += "A port built here would not be adjacent to the ocean."
+        elif self.building_type == 'train_station':
+            message += "A train station is required for a train to pick up or drop off cargo and passengers. It also expands the tile's warehouse capacity. A train can only be built at a train station."
+        elif self.building_type == 'trading_post':
+            message += "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
+        elif self.building_type == 'mission':
+            message += "A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting."
+        elif self.building_type == 'train':
+            message += "A train is a unit that can carry commodities and passengers at high speed along railroads. It can only exchange cargo at a train station and must stop moving for the rest of the turn after dropping off cargo. "
+            message += "It also requires an attached worker as crew to function."
+        else:
+            message += "Placeholder building description"
+        message += " /n /n"
+            
+        notification_tools.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        
     def construct(self):
         '''
         Description:
@@ -495,16 +594,20 @@ class pmob(mob):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
         self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type], 'construction')
         text = ""
         text += "The " + self.name + " attempts to construct a " + self.building_name + ". /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
         else:
             text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -540,7 +643,7 @@ class pmob(mob):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success:
@@ -555,8 +658,7 @@ class pmob(mob):
             notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])  
-
+        self.global_manager.set('construction_result', [self, roll_result])
         
     def complete_construction(self):
         '''
@@ -631,6 +733,8 @@ class pmob(mob):
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        self.attached_dice_list.append(new_die)
+        #self.current_attached_dice.append(new_die) start here next, have dice attached to unit and show unit's dice when notification is shown
         if uses_minister:
             minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
             minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,

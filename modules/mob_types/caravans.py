@@ -111,14 +111,20 @@ class caravan(group):
         '''
         self.notification = notification
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         village = self.notification.choice_info_dict['village']
         text = ("The merchant attempts to convince the villagers to trade. /n /n")
         if self.veteran:
             text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager, num_dice)
         else:
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager, num_dice)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -157,7 +163,7 @@ class caravan(group):
             roll_result = roll_list[0]
 
         self.global_manager.set('trade_result', [self, roll_result])
-        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager, num_dice)
 
         if roll_result >= self.current_min_success:
             self.trades_remaining = math.ceil(village.population / 3)
@@ -194,6 +200,12 @@ class caravan(group):
         Output:
             None
         '''
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.current_roll_modifier = 0 #trading - getting good deals - is different from the willingness to trade roll and uses different modifiers
         self.current_min_success = 4
         self.current_max_crit_fail = 0 #0 requirement for critical fail means critical fails will not occur
@@ -209,10 +221,10 @@ class caravan(group):
         text = ("The merchant attempts to find valuable commodities in return for consumer goods. /n /n")
         if self.veteran:
             text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'trade', self.global_manager, num_dice)
         else:
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager)
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'trade', self.global_manager, num_dice)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -247,7 +259,7 @@ class caravan(group):
             text += roll_list[1]
             roll_result = roll_list[0]
                 
-        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'final_trade', self.global_manager, num_dice)
         self.trades_remaining -= 1
         num_consumer_goods = self.get_inventory('consumer goods') - 1 #consumer goods are actually lost when clicking out of notification, so subtract 1 here to show accurate number
         commodity = 'none'

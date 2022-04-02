@@ -213,30 +213,6 @@ class officer(pmob):
         for current_veteran_icon in self.veteran_icons:
             current_veteran_icon.remove()
 
-    #def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
-    #    '''
-    #    Description:
-    #        Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
-    #            the result
-    #    Input:
-    #        int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-    #        int result: Predetermined result that the die will end on after rolling
-    #        int min_success: Minimum roll required for a success
-    #        int min_crit_success: Minimum roll required for a critical success
-    #        int max_crit_fail: Maximum roll required for a critical failure
-    #    Output:
-    #        None
-    #    '''
-    #    result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-    #    outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-    #    new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-    #        result_outcome_dict, outcome_color_dict, result, self.global_manager)
-    #    minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-    #    minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-    #        'position', self.global_manager)
-    #    minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-    #        'portrait', self.global_manager)
-
 class evangelist(officer):
     '''
     Officer that can start religious campaigns and merge with church volunteers to form missionaries
@@ -318,16 +294,22 @@ class evangelist(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
         text = ""
         text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager, num_dice)
         else:
             text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -363,7 +345,7 @@ class evangelist(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -491,6 +473,9 @@ class merchant(officer):
         '''
         just_promoted = False
         self.set_movement_points(0)
+
+        num_dice = 0 #don't show dice roll for loan
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
         principal = 100
         initial_interest = 11
@@ -512,7 +497,7 @@ class merchant(officer):
             just_promoted = True
                     
         if just_promoted:
-            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager)
+            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager, num_dice)
             self.promote()
             
         choice_info_dict = {}
@@ -582,16 +567,22 @@ class merchant(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
         text = ""
         text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager, num_dice)
         else:
             text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -625,7 +616,7 @@ class merchant(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration

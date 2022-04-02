@@ -9,15 +9,29 @@ from . import scaling
 from . import actor_utility
 
 class action_notification(notification):
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.is_action_notification = True
+        self.notification_dice = notification_dice #how many dice are allowed to be shown by selected mob when this notification shown
+
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Unlike s
+                uperclass, this version removes the automatic prompt to close the notification, as action notifications often require more specific messages not add a prompt to close the notification.
+        Input:
+            none
+        Output:
+            None
+        '''
+        super().format_message()
+        self.message.pop(-1)
 
 class dice_rolling_notification(action_notification):
     '''
     Notification that is removed when a dice roll is completed rather than when clicked
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -32,21 +46,8 @@ class dice_rolling_notification(action_notification):
         Output:
             None
         '''
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1) #remove "Click to remove this notification"
 
     def update_tooltip(self):
         '''
@@ -86,14 +87,21 @@ class dice_rolling_notification(action_notification):
             max_roll = 0
             max_die = 0
             for current_die in self.global_manager.get('dice_list'):
-                if current_die.roll_result > max_roll:
-                    max_roll = current_die.roll_result
-                    max_die = current_die
+                if not (not current_die.normal_die and current_die.special_die_type == 'red'): #do not include enemy dice in this calculation
+                    if current_die.roll_result > max_roll:
+                        max_roll = current_die.roll_result
+                        max_die = current_die
+                    #elif not current_die.normal_die: #if highlighted and not max die, remove highlight after rolling
+                    #    current_die.normal_die = True
                 if not current_die.normal_die: #change highlight color of special dice to show that roll is complete
                     if current_die.special_die_type == 'green':
                         current_die.outline_color = current_die.outcome_color_dict['crit_success']
                     elif current_die.special_die_type == 'red':
                         current_die.outline_color = current_die.outcome_color_dict['crit_fail']
+            for current_die in self.global_manager.get('dice_list'):
+                if not (not current_die.normal_die and current_die.special_die_type == 'red'):
+                    if not current_die == max_die:
+                        current_die.normal_die = True
             max_die.highlighted = True
         else:
             self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
@@ -102,7 +110,7 @@ class exploration_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of exploration when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -131,20 +139,7 @@ class exploration_notification(action_notification):
                 explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
                 self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                     scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -181,7 +176,7 @@ class off_tile_exploration_notification(action_notification):
     '''
     Notification that shows a tile explored by an expedition in an adjacent tile, focusing on the new tile and returning minimap to original position upon removal
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -210,20 +205,7 @@ class off_tile_exploration_notification(action_notification):
         global_manager.set('ongoing_exploration', True)
         explored_cell.set_visibility(True)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -257,7 +239,7 @@ class trade_notification(action_notification):
     '''
     Notification used during trading that has various behaviors relevant to trading based on the values in its inputted trade_info_dict
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, trade_info_dict, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, trade_info_dict, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -308,20 +290,7 @@ class trade_notification(action_notification):
                     scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
         elif self.dies:
             self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-        
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         
     def remove(self):
         '''
@@ -356,7 +325,7 @@ class religious_campaign_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a religious campaign when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -378,20 +347,7 @@ class religious_campaign_notification(action_notification):
             self.notification_images = []
             self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -428,7 +384,7 @@ class advertising_campaign_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of an advertising campaign when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -456,20 +412,7 @@ class advertising_campaign_notification(action_notification):
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             self.notification_images.append(free_image('scenery/resources/minus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 400, global_manager),
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -506,7 +449,7 @@ class conversion_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a religious conversion attempt when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -526,20 +469,7 @@ class conversion_notification(action_notification):
         if self.is_last: #if last, show result
             current_head_missionary = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -576,25 +506,12 @@ class construction_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         self.is_last = is_last
         if self.is_last: #if last, show result
             current_constructor = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -631,29 +548,27 @@ class combat_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a combat when the last notification is removed
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
         self.is_last = is_last
         #if self.is_last: #if last, show result
         #self.notification_images = []
         if len(global_manager.get('combatant_images')) == 0: #if none already exist
-            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').images[0].image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, 280, global_manager),
+            image_x = global_manager.get('notification_manager').notification_x - 165#175
+            if notification_dice > 2:
+                image_x -= 60
+            global_manager.get('combatant_images').append(free_image('misc/pmob_background.png', scaling.scale_coordinates(image_x, 280, global_manager),
                 scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
-            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').current_enemy.images[0].image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, 720, global_manager),
+            if global_manager.get('displayed_mob').veteran:
+                global_manager.get('combatant_images').append(free_image('misc/veteran_icon.png', scaling.scale_coordinates(image_x, 280, global_manager),
+                    scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))             
+            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').images[0].image_id, scaling.scale_coordinates(image_x, 280, global_manager),
                 scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
 
-    def format_message(self):
-        '''
-        Description:
-            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text. Does
-                not add a prompt to close the notification
-        Input:
-            none
-        Output:
-            None
-        '''
-        super().format_message()
-        self.message.pop(-1)
+            global_manager.get('combatant_images').append(free_image('misc/npmob_background.png', scaling.scale_coordinates(image_x, 670, global_manager),
+                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))            
+            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').current_enemy.images[0].image_id, scaling.scale_coordinates(image_x, 670, global_manager),
+                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
         '''
@@ -686,5 +601,4 @@ class combat_notification(action_notification):
         if self.is_last:
             for current_image in self.global_manager.get('combatant_images'):
                 current_image.remove()
-        #for current_image in self.notification_images:
-        #    current_image.remove()
+            self.global_manager.set('combatant_images', [])

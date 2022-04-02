@@ -94,6 +94,14 @@ class mob(actor):
         save_dict['creation_turn'] = self.creation_turn
         return(save_dict)        
 
+    def get_combat_modifier(self):
+        modifier = 0
+        if self.is_pmob:
+            modifier -= 1
+            if self.is_officer:
+                modifier -= 1
+        return(modifier)
+
     def combat_possible(self):
         if self.is_npmob:
             if self.hostile and self.images[0].current_cell.has_pmob():
@@ -256,6 +264,7 @@ class mob(actor):
         '''
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
+        self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
@@ -405,6 +414,13 @@ class mob(actor):
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+        self.last_move_direction = (x_change, y_change)
+
+    def retreat(self):
+        original_movement_points = self.movement_points
+        self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+        self.set_movement_points(original_movement_points) #retreating is free
         
     def touching_mouse(self):
         '''

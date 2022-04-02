@@ -37,7 +37,7 @@ class npmob(mob):
         min_distance = -1
         closest_targets = ['none']
         for possible_target in target_list:
-            if not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
+            if possible_target.actor_type == 'building' or not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
                 distance = utility.find_grid_distance(self, possible_target)
                 if min_distance == -1 and (not distance == -1): #automatically choose first one to replace initial value
                     min_distance = distance
@@ -54,6 +54,7 @@ class npmob(mob):
     def attempt_local_combat(self):
         defender = self.images[0].current_cell.get_best_combatant('pmob')
         if not defender == 'none':
+            #defender.select()
             defender.start_combat('defending', self)
         else:
             if len(self.global_manager.get('attacker_queue')) > 0:
@@ -121,6 +122,8 @@ class npmob(mob):
             self.global_manager.get('sound_manager').play_sound('footsteps')
         self.last_move_direction = (x_change, y_change)
 
-    def retreat(self):
-        self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+    #def retreat(self):
+    #    original_movement_points = self.movement_points
+    #    self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+    #    self.set_movement_points(original_movement_points) #retreating is free
         

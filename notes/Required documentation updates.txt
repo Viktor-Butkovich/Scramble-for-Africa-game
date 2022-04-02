@@ -15,11 +15,18 @@ mobs.mob.combat_possible
 cells.cell.has_pmob
 cells.cell.has_npmob
 cells.cell.get_best_combatant
+cells imports
 mob_types/pmobs.pmob.display_die, change inputs
 groups imports
 officers imports
 action_notifications/combat_notification
 action_notifications/action_notification
+all action_notification subclass constructors
 action_notification inheritance
 dice.die.can_show
-combat images not appearing correctly in some situations, maybe when multiple combats are going to occur
+issue with multiple combats in a row, dice showing up at incorrect times due to is_action_notification fix
+notification_tools.display_notification
+choice_notifications.choice_notification
+mobs.mob.retreat
+mobs.mob.get_combat_modifier
+dice_utility
