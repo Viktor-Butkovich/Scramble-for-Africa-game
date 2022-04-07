@@ -35,7 +35,7 @@ class worker(pmob):
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
-        self.worker_type = input_dict['worker_type']
+        self.worker_type = input_dict['worker_type'] #European, African, religious, slave
         
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') + 1)
@@ -289,6 +289,7 @@ class church_volunteers(worker):
         Output:
             None
         '''
+        input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
         self.is_church_volunteers = True

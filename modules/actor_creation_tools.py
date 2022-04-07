@@ -157,7 +157,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #input_dict['modes'] = ['strategic', 'europe']
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
-        input_dict['image'] = 'mobs/' + officer.officer_type + '/' + input_dict['init_type'] + '.png' #mobs/merchant/caravan.png
+        input_dict['image'] = 'mobs/' + officer.officer_type + '/' + input_dict['init_type'] + '_' + worker.worker_type + '.png' #mobs/merchant/caravan.png
         name = ''
         for character in input_dict['init_type']:
             if not character == '_':
