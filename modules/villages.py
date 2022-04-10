@@ -68,7 +68,7 @@ class village():
                 self.spawn_warrior()
             
     def can_spawn_warrior(self):
-        if self.population > 0:
+        if self.global_manager.get('spawning_allowed') and self.population > 0:
             return(True)
         return(False)
     
@@ -89,7 +89,7 @@ class village():
         input_dict = {}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['image'] = 'mobs/native_warriors/default.png'
         input_dict['modes'] = ['strategic']
         input_dict['name'] = 'Native warriors'
         input_dict['init_type'] = 'native_warriors'

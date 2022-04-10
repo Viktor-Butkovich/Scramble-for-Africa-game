@@ -709,7 +709,7 @@ for current_index in range(0, 8): #creates an office icon and a portrait at a se
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
         buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
-5
+
 available_minister_display_x = global_manager.get('default_display_width')
 available_minister_display_y = 500
 cycle_left_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
@@ -726,6 +726,10 @@ cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coor
 #minister table setup
 
 
+
+#activating/disabling debugging tools
+global_manager.set('spawning_allowed', True) #True by default
+#activating/disabling debugging tools
 
 main_loop.main_loop(global_manager)
 pygame.quit()

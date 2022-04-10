@@ -362,7 +362,6 @@ class pmob(mob):
         self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
-        #self.select()
         if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
@@ -396,24 +395,28 @@ class pmob(mob):
         text = ""
         text += "The " + self.name + " attempts to defeat the " + enemy.name + ". /n /n"
 
-        if not self.veteran: #should civilian veteran officers have higher combat rolls?
-            if self.is_officer:
-                text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
-            else:
-                text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
-            text += "The outcome will be based on the difference between your roll and the enemy's roll. /n /n"
-            notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
-        else:
+        if self.veteran:
             if self.is_officer:
                 text += "The " + self.name + " can roll twice and pick the higher result. /n"
             elif self.is_group:
                 text += "The " + self.officer.name + " can roll twice and pick the higher result. /n"
-            if self.is_officer:
-                text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
+
+        if self.is_battalion:
+            if self.battalion_type == 'imperial':
+                text += "Your professional imperial soldiers will receive a +2 bonus after the roll. /n"
             else:
-                text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
+                text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after the roll. /n"
+        elif self.is_officer:
+            text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
+        else:
+            text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
+
+        if self.veteran:
             text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
-            notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
+        else:
+            text += "The outcome will be based on the difference between your roll and the enemy's roll. /n /n"
+
+        notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
 
         notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
@@ -470,7 +473,8 @@ class pmob(mob):
             text += "Your " + self.name + " successfully defeated and destroyed the " + enemy.name + ". /n /n"
             
         elif conclusion == 'draw':
-            #if combat_type == 'attacking':
+            if combat_type == 'attacking':
+                text += "Your " + self.name + " failed to push back the defending " + enemy.name + " and were forced to withdraw. /n /n"
             if combat_type == 'defending':
                 if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
                     retreat_direction = 'west'
@@ -484,10 +488,9 @@ class pmob(mob):
 
         elif conclusion == 'lose':
             text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
-        #if (not self.veteran) and own_roll >= 6: #should be in battalion-specific version of function
-        #    self.just_promoted = True
-        #    text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
-        #    text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
+        if (not self.veteran) and own_roll >= 6 and self.is_battalion: #civilian units can not become veterans through combat
+            self.just_promoted = True
+            text += " /nThis major is now a veteran. /n"
         notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
 
@@ -499,20 +502,19 @@ class pmob(mob):
         if conclusion == 'win':
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
-                    self.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
+                    self.retreat() #attacker retreats in draw or if more defenders remaining
             enemy.die()
-        elif conclusion == 'draw':
+        elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
             if combat_type == 'defending':
-                enemy.retreat() #have as function of npmobs
+                enemy.retreat()
             elif combat_type == 'attacking':
-                self.retreat() #have as function of military units only
+                self.retreat()
         elif conclusion == 'lose':
             if combat_type == 'defending':
                 if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
             self.die()
             
-
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()

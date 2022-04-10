@@ -303,45 +303,31 @@ class cell():
                 return(current_mob)
         return('none')
 
-    def has_worker(self):
+    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
         '''
         Description:
-            Returns whether this cell contains a worker
+            Returns whether this cell contains a worker of one of the inputted types
         Input:
-            None
+            string list possible_types: type of worker that can be detected, includes all workers by default
         Output:
-            Returns True if this cell contains a worker, otherwise returns False
+            Returns True if this cell contains a worker of one of the inputted types, otherwise returns False
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types: 
                 return(True)
         return(False)
 
-    def get_worker(self):
+    def get_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
         '''
         Description:
-            Returns the first worker in this cell, or 'none' if none are present. Does not inclue church volunteers
+            Returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
-            None
+            string list possible_types: type of worker that can be returned, includes all workers by default
         Output:
-            string/worker: Returns the first worker in this cell, or 'none' if none are present
+            string/worker: Returns the first worker in this cell of the inputted types, or 'none' if none are present
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
-                return(current_mob)
-        return('none')
-
-    def get_church_volunteers(self):
-        '''
-        Description:
-            Returns the first church volunteer in this cell, or 'none' if none are present
-        Input:
-            None
-        Output:
-            string/church_volunteers: Returns the first church volunteer in this cell, or 'none' if none are present
-        '''
-        for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and current_mob.is_church_volunteers:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types:
                 return(current_mob)
         return('none')
 

@@ -36,6 +36,7 @@ class mob(actor):
         self.is_worker = False
         self.is_officer = False
         self.is_work_crew = False
+        self.is_battalion = False
         self.is_group = False
         self.is_npmob = False
         self.is_pmob = False
@@ -97,9 +98,14 @@ class mob(actor):
     def get_combat_modifier(self):
         modifier = 0
         if self.is_pmob:
-            modifier -= 1
-            if self.is_officer:
+            if self.is_group and self.group_type == 'battalion':
+                modifier += 1
+                if self.battalion_type == 'imperial':
+                    modifier += 1
+            else:
                 modifier -= 1
+                if self.is_officer:
+                    modifier -= 1
         return(modifier)
 
     def combat_possible(self):

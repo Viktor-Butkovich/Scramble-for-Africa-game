@@ -141,7 +141,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
     def create_group(self, worker, officer, global_manager): #use when merging groups. At beginning of game, instead of using this, create a group which creates its worker and officer and merges them
         '''
         Description:
-            Creates a group out of the inputted worker and officer. The type of group formed depends on the officer's type. Upon joining a group, the component officer and worker will not be able to be seen or interacted with
+            Creates a group out of the inputted worker and officer. Once the group is created, it's component officer and worker will not be able to be directly seen or interacted with until the group is disbanded
                 independently until the group is disbanded
         Input:
             worker worker: worker to create a group out of
@@ -154,16 +154,21 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['grids'] = officer.grids
         input_dict['worker'] = worker
         input_dict['officer'] = officer
-        #input_dict['modes'] = ['strategic', 'europe']
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
         input_dict['image'] = 'mobs/' + officer.officer_type + '/' + input_dict['init_type'] + '_' + worker.worker_type + '.png' #mobs/merchant/caravan.png
-        name = ''
-        for character in input_dict['init_type']:
-            if not character == '_':
-                name += character
+        if not officer.officer_type == 'major':
+            name = ''
+            for character in input_dict['init_type']:
+                if not character == '_':
+                    name += character
+                else:
+                    name += ' '
+        else: #battalions have special naming convention based on worker type
+            if worker.worker_type == 'European':
+                name = 'imperial battalion'
             else:
-                name += ' '
+                name = 'colonial battalion'
         input_dict['name'] = name
         return(self.create(False, input_dict, global_manager))
 

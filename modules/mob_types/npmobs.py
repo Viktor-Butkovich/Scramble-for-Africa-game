@@ -19,7 +19,7 @@ class npmob(mob):
         self.selection_outline_color = 'bright red'
         self.last_move_direction = (0, 0)
         global_manager.get('npmob_list').append(self)
-        
+    
     def remove(self):
         '''
         Description:
@@ -54,7 +54,6 @@ class npmob(mob):
     def attempt_local_combat(self):
         defender = self.images[0].current_cell.get_best_combatant('pmob')
         if not defender == 'none':
-            #defender.select()
             defender.start_combat('defending', self)
         else:
             if len(self.global_manager.get('attacker_queue')) > 0:
@@ -121,9 +120,3 @@ class npmob(mob):
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
         self.last_move_direction = (x_change, y_change)
-
-    #def retreat(self):
-    #    original_movement_points = self.movement_points
-    #    self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
-    #    self.set_movement_points(original_movement_points) #retreating is free
-        
