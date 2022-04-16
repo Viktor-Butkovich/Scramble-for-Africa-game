@@ -1,7 +1,9 @@
 #Contains functionality for porters
-
+import time
 from .groups import group
+from ..tiles import tile
 from .. import actor_utility
+from .. import notification_tools
 
 class battalion(group): #most battalion_unique behaviors found in pmob combat functions and get_combat_modifier
     '''
@@ -15,13 +17,81 @@ class battalion(group): #most battalion_unique behaviors found in pmob combat fu
             self.battalion_type = 'imperial'
         else: #colonial
             self.battalion_type = 'colonial'
+        self.attack_cost = self.global_manager.get('action_prices')['attack']
+        self.attack_mark_list = []
 
-    def move(self, x_change, y_change):
-        super().move(x_change, y_change)
-        if not self.in_vehicle:
-            self.attempt_local_combat()
+    def move(self, x_change, y_change, attack_confirmed = False):
+        self.global_manager.set('show_selection_outlines', True)
+        self.global_manager.set('show_minimap_outlines', True)
+        self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
+        self.global_manager.set('last_minimap_outline_switch', time.time())
+        future_x = self.x + x_change
+        future_y = self.y + y_change
+        roll_result = 0
+        if x_change > 0:
+            direction = 'east'
+        elif x_change < 0:
+            direction = 'west'
+        elif y_change > 0:
+            direction = 'north'
+        elif y_change < 0:
+            direction = 'south'
+        else:
+            direction = 'none'
+        future_cell = self.grid.find_cell(future_x, future_y)
+        defender = future_cell.get_best_combatant('npmob')
+        
+        if (not attack_confirmed) and (not defender == 'none'): #if enemy in destination tile and attack not confirmed yet
+            if self.global_manager.get('money_tracker').get() >= self.attack_cost:
+                if self.check_if_minister_appointed():
+                    choice_info_dict = {'battalion': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.attack_cost, 'type': 'combat'}
+                    
+                    message = ""
+
+                    risk_value = -1 * self.get_combat_modifier() #should be low risk with +2/veteran, moderate with +2 or +1/veteran, high with +1
+                    if self.veteran: #reduce risk if veteran
+                        risk_value -= 1
+
+                    if risk_value < -2:
+                        message = "RISK: LOW /n /n" + message  
+                    elif risk_value == -2:
+                        message = "RISK: MODERATE /n /n" + message
+                    elif risk_value == -1: #2/6 = high risk
+                        message = "RISK: HIGH /n /n" + message
+                    elif risk_value > 0:
+                        message = "RISK: DEADLY /n /n" + message
+                    
+                    notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "?",
+                        ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    self.global_manager.set('ongoing_combat', True)
+                    for current_grid in self.grids:
+                        coordinates = (0, 0)
+                        if current_grid.is_mini_grid:
+                            coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
+                        else:
+                            coordinates = (self.x + x_change, self.y + y_change)
+                        input_dict = {}
+                        input_dict['coordinates'] = coordinates
+                        input_dict['grid'] = current_grid
+                        input_dict['image'] = 'misc/attack_mark/' + direction + '.png'
+                        input_dict['name'] = 'exploration mark'
+                        input_dict['modes'] = ['strategic']
+                        input_dict['show_terrain'] = False
+                        self.attack_mark_list.append(tile(False, input_dict, self.global_manager))
+            else:
+                text_tools.print_to_screen("You do not have enough money to supply an attack.", self.global_manager)
+        else: #if destination empty and 
+            super().move(x_change, y_change)
+            if not self.in_vehicle:
+                self.attempt_local_combat()
 
     def attempt_local_combat(self):
         defender = self.images[0].current_cell.get_best_combatant('npmob')
         if not defender == 'none':
+            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attacker supplies')
             self.start_combat('attacking', defender)
+
+    def remove_attack_marks(self):
+        for attack_mark in self.attack_mark_list:
+            attack_mark.remove()
+        self.attack_mark_list = []

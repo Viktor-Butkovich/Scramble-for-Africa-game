@@ -21,7 +21,6 @@ class native_warriors(npmob):
                     if not cell.has_pmob() and not cell.terrain == 'water':
                         possible_directions.append(direction)
             if len(possible_directions) > 0:
-                print(self.last_move_direction)
                 self.last_move_direction = random.choice(possible_directions)
                 self.global_manager.get('attacker_queue').append(self)
             else:

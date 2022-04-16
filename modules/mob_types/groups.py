@@ -133,6 +133,7 @@ class group(pmob):
         Output:
             None
         '''
+        self.just_promoted = False
         self.veteran = True
         self.set_name("veteran " + self.name)
         self.officer.set_name("veteran " + self.officer.name)

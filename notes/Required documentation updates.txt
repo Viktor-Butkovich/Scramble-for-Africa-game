@@ -30,5 +30,5 @@ choice_notifications.choice_notification
 mobs.mob.retreat
 mobs.mob.get_combat_modifier
 dice_utility
+ministers.minister.attack_roll_to_list
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-remember to add minister as a factor for battalion combat

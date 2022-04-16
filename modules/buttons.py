@@ -569,7 +569,10 @@ class button():
                 
             elif self.button_type == 'exploration':
                 self.expedition.start_exploration(self.x_change, self.y_change)
-                #self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
+
+            elif self.button_type == 'attack':
+                self.battalion.remove_attack_marks()
+                self.battalion.move(self.x_change, self.y_change, True)
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -753,6 +756,10 @@ class button():
             elif self.button_type == 'trade':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
+
+            elif self.button_type == 'stop attack':
+                self.global_manager.set('ongoing_combat', False)
+                self.notification.choice_info_dict['battalion'].remove_attack_marks()
 
             elif self.button_type == 'stop trading':
                 self.global_manager.set('ongoing_trade', False)

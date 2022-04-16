@@ -45,7 +45,7 @@ class mob(actor):
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
         self.controllable = True
-        
+        self.just_promoted = False
         self.selected = False
         self.actor_type = 'mob'
         super().__init__(from_save, input_dict, global_manager)

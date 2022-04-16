@@ -124,6 +124,29 @@ class minister():
             
         return(result)
 
+    def no_corruption_roll(self, num_sides):
+        '''
+        Description:
+            Rolls and returns the result of a die with the inputted number of sides, modifying the result based on skill with the assumption that corruption has already failed to occur
+        Input:
+            int num_sides: Number of sides on the die rolled
+
+        Output:
+            int: Returns the roll's modified result
+        '''
+        min_result = 1
+        max_result = num_sides
+        result = random.randrange(1, num_sides + 1)
+        if random.randrange(1, 3) == 1: #1/2
+            result += self.get_skill_modifier()
+
+        if result < min_result:
+            result = min_result
+        elif result > max_result:
+            result = max_result
+            
+        return(result)
+
     def roll_to_list(self, num_sides, min_success, max_crit_fail, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
         '''
         Description:
@@ -144,11 +167,45 @@ class minister():
                     results.append(self.roll(num_sides, min_success, max_crit_fail, True))
                 else: #for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
                     results.append(self.roll(num_sides, min_success, 0, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
-        else: #if not corrupt, just roll twice
+        else: #if not corrupt, just roll with minister modifier
             for i in range(num_dice):
-                results.append(self.roll(num_sides, min_success, max_crit_fail))
+                results.append(self.no_corruption_roll(num_sides))
         return(results)
             
+    def attack_roll_to_list(self, modifier, num_dice):
+        '''
+        Description:
+            Rolls and returns the result of the inputted number of 6-sided dice along with the enemy unit's roll in combat, modifying the results based on skill and possibly lying about the result based on corruption
+        Input:
+            int modifier: Modifier added to the friendly unit's roll, used to create realistic inconclusive results when corrupt
+            int num_dice: number of dice rolled by the friendly unit, not including the one die rolled by the enemy unit
+        Output:
+            int list: Returns a list of the rolls' modified results, with the first item being the enemy roll
+        '''
+        results = []
+        if self.check_corruption():
+            print('corrupt')
+            for i in range(num_dice):
+                results.append(0)
+            difference = 10
+            while difference >= 2: #keep rolling until a combination of attacker and defender rolls with an inconclusive result is found
+                own_roll = random.randrange(1, 7) + modifier
+                enemy_roll = random.randrange(1, 7)
+                difference = abs(own_roll - enemy_roll)
+            corrupt_index = random.randrange(0, num_dice)
+            for i in range(num_dice):
+                if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly to be the chosen result, with the others being lower
+                    results[i] = own_roll
+                else:
+                    results[i] = random.randrange(1, own_roll + 1) # if own_roll is 1, range is 1-2 non-inclusive, always chooses 1
+            results = [enemy_roll] + results #inserts enemy roll at beginning
+
+        else: #if not corrupt, just roll with minister modifier
+            for i in range(num_dice):
+                results.append(self.no_corruption_roll(6))
+            enemy_roll = random.randrange(1, 7)
+            results = [enemy_roll] + results
+        return(results)
 
     def appoint(self, new_position):
         '''

@@ -126,8 +126,15 @@ class choice_button(button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
             
-        elif button_type == 'stop exploration':
-            self.message = 'Do nothing'
+        #elif button_type == 'stop exploration':
+        #    self.message = 'Do nothing'
+
+        elif button_type == 'attack':
+            self.message = 'Attack'
+            self.cost = self.notification.choice_info_dict['cost']
+            self.battalion = self.notification.choice_info_dict['battalion']
+            self.x_change = self.notification.choice_info_dict['x_change']
+            self.y_change = self.notification.choice_info_dict['y_change']
             
         elif button_type == 'start religious campaign' or button_type == 'start advertising campaign':
             self.message = 'Start campaign'
@@ -152,7 +159,7 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type == 'none':
+        elif button_type in ['none', 'stop exploration', 'stop attack']:
             self.message = 'Do nothing'
     
         else:
@@ -208,6 +215,9 @@ class choice_button(button):
             
         elif self.button_type == 'exploration':
             self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
+
+        elif self.button_type == 'attack':
+            self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])
             
         elif self.button_type == 'trade':
             self.set_tooltip(['Attempt to trade by giving consumer goods'])

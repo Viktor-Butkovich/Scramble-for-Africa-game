@@ -387,6 +387,10 @@ class pmob(mob):
         combat_type = self.current_combat_type
         enemy = self.current_enemy
         own_combat_modifier = self.get_combat_modifier()
+        if combat_type == 'attacking':
+            uses_minister = True
+        else:
+            uses_minister = False
         if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling. Has 1 more die than usual because enemy also rolls
             num_dice = 3
         else:
@@ -423,30 +427,41 @@ class pmob(mob):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
+            if combat_type == 'attacking': #minister only involved in attacks
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, num_dice - 1)
+                enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
+                results = minister_rolls
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
-            results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
+            else:
+                results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
             first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 0, 0, self.global_manager, results[0], own_combat_modifier)
-            self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
            
             second_roll_list = dice_utility.combat_roll_to_list(6, "second_combat", 0, 7, 0, self.global_manager, results[1], own_combat_modifier)
-            self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
             result_outcome_dict = {}
             text += ("The higher result, " + str(roll_result + own_combat_modifier) + ", was used. /n")
         else:
-            result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            if combat_type == 'attacking': #minister only involved in attacks
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, num_dice - 1)
+                enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
+                result = minister_rolls[0]
+            else:
+                result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 7, 0, self.global_manager, result, own_combat_modifier)
-            self.display_die((die_x, 440), roll_list[0], 0, 7, 0, False) #die won't show result, so give inputs that make it green
+            self.display_die((die_x, 440), roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
         own_roll = roll_result
-        enemy_roll = random.randrange(1, 7)
-        if num_dice == 2:
+        if not combat_type == 'attacking':
+            enemy_roll = random.randrange(1, 7)
+        if num_dice == 2: #displays enemy dice
             self.display_die((die_x, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
         elif num_dice == 3:
             self.display_die((die_x - 60, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
@@ -514,6 +529,9 @@ class pmob(mob):
                 if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
             self.die()
+
+        if self.just_promoted:
+            self.promote()
             
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
@@ -738,7 +756,10 @@ class pmob(mob):
         self.attached_dice_list.append(new_die)
         #self.current_attached_dice.append(new_die) start here next, have dice attached to unit and show unit's dice when notification is shown
         if uses_minister:
-            minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
+            if self.is_battalion: #combat has a different dice layout
+                minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
+            else:
+                minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
             minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
                 'position', self.global_manager)
             minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,

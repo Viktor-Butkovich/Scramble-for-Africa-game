@@ -241,7 +241,8 @@ global_manager.set('action_prices',
     'advertising_campaign': 5,
     'loan_search': 5,
     'trade': 0,
-    'loan': 5
+    'loan': 5,
+    'attack': 5
     }
 )
 
@@ -256,6 +257,9 @@ global_manager.set('building_prices',
     'train': 5
    } 
 )
+
+global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion',
+    'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction'])
 #price setup
 
 

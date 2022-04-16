@@ -86,6 +86,7 @@ class officer(pmob):
         Output:
             None
         '''
+        self.just_promoted = False
         self.veteran = True
         self.set_name("veteran " + self.name)
         for current_grid in self.grids:
