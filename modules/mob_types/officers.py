@@ -2,7 +2,7 @@
 import random
 
 from .pmobs import pmob
-from ..tiles import veteran_icon
+from ..tiles import status_icon
 from .. import actor_utility
 from .. import utility
 from .. import notification_tools
@@ -39,7 +39,7 @@ class officer(pmob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('officer_list').append(self)
-        self.veteran_icons = []
+        #self.status_icons = []
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
@@ -59,16 +59,7 @@ class officer(pmob):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple - 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': File path to the image used by this object
+                Same pairs as superclass, along with:
                 'officer_type': Type of officer that this is, like 'explorer' or 'engineer'
                 'veteran': Whether this officer is a veteran
         '''
@@ -103,8 +94,9 @@ class officer(pmob):
             input_dict['name'] = 'veteran icon'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['show_terrain'] = False
-            input_dict['actor'] = self 
-            self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
+            input_dict['actor'] = self
+            input_dict['status_icon_type'] = 'veteran'
+            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
@@ -123,39 +115,39 @@ class officer(pmob):
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
-    def go_to_grid(self, new_grid, new_coordinates):
-        '''
-        Description:
-            Links this officer to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when an officer that was previously attached to another actor becomes independent and
-                visible, like when an explorer leaves an expedition. Also moves veteran icons to follow this officer
-        Input:
-            grid new_grid: grid that this officer is linked to
-            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
-        Output:
-            None
-        '''
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                current_veteran_icon.remove()
-        self.veteran_icons = []
-        super().go_to_grid(new_grid, new_coordinates)
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                elif current_grid == self.global_manager.get('europe_grid'):
-                    veteran_icon_x, veteran_icon_y = (0, 0)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                input_dict = {}
-                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-                input_dict['grid'] = current_grid
-                input_dict['image'] = 'misc/veteran_icon.png'
-                input_dict['name'] = 'veteran icon'
-                input_dict['modes'] = ['strategic', 'europe']
-                input_dict['show_terrain'] = False
-                input_dict['actor'] = self 
-                self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
+    #def go_to_grid(self, new_grid, new_coordinates):
+    #    '''
+    #    Description:
+    #        Links this officer to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when an officer that was previously attached to another actor becomes independent and
+    #            visible, like when an explorer leaves an expedition. Also moves veteran icons to follow this officer
+    #    Input:
+    #        grid new_grid: grid that this officer is linked to
+    #        int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
+    #    Output:
+    #        None
+    #    '''
+    #    if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
+    #        for current_status_icon in self.status_icons:
+    #            current_status_icon.remove()
+    #    self.status_icons = []
+    #    super().go_to_grid(new_grid, new_coordinates)
+    #    if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
+    #        for current_grid in self.grids:
+    #            if current_grid == self.global_manager.get('minimap_grid'):
+    #                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+    #            elif current_grid == self.global_manager.get('europe_grid'):
+    #                veteran_icon_x, veteran_icon_y = (0, 0)
+    #            else:
+    #                veteran_icon_x, veteran_icon_y = (self.x, self.y)
+    #            input_dict = {}
+    #            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+    #            input_dict['grid'] = current_grid
+    #            input_dict['image'] = 'misc/veteran_icon.png'
+    #            input_dict['name'] = 'veteran icon'
+    #            input_dict['modes'] = ['strategic', 'europe']
+    #            input_dict['show_terrain'] = False
+    #            input_dict['actor'] = self 
+    #            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
 
     def can_show_tooltip(self):
         '''
@@ -211,8 +203,9 @@ class officer(pmob):
         '''
         super().remove()
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.remove()
+        #for current_status_icon in self.status_icons:
+        #    current_status_icon.remove()
+        #self.status_icons = []
 
 class evangelist(officer):
     '''

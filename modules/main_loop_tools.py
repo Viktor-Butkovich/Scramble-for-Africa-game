@@ -82,11 +82,11 @@ def update_display(global_manager):
             for current_image in current_mob.images:
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
-            if current_mob.veteran:
-                for current_veteran_icon in current_mob.veteran_icons:
-                    current_veteran_icon.image.has_drawn = False #may have been drawn already but draw on top of other images
-                    current_veteran_icon.image.draw()
-                    current_veteran_icon.image.has_drawn = True
+            #if current_mob.veteran:
+            for current_status_icon in current_mob.status_icons:
+                current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other images
+                current_status_icon.image.draw()
+                current_status_icon.image.has_drawn = True
             if current_mob.can_show_tooltip():
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order

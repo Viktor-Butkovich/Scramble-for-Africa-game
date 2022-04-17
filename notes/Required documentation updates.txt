@@ -9,9 +9,14 @@ villages.village
 turn_management_tools.manage_villages
 turn_management_tools.manage_enemy_movement
 turn_management_tools.manage_combat
+turn_management_tools.reset
 mobs.mob.can_show
 mobs.mob.can_show_tooltip
 mobs.mob.combat_possible
+mobs.mobs.set_disorganized
+mobs.mob.retreat
+mobs.mob.get_combat_modifier
+mobs.mob.get_combat_strength
 cells.cell.has_pmob
 cells.cell.has_npmob
 cells.cell.get_best_combatant
@@ -27,8 +32,8 @@ dice.die.can_show
 issue with multiple combats in a row, dice showing up at incorrect times due to is_action_notification fix
 notification_tools.display_notification
 choice_notifications.choice_notification
-mobs.mob.retreat
-mobs.mob.get_combat_modifier
 dice_utility
 ministers.minister.attack_roll_to_list
+change tiles.veteran_icon to status_icon
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
+errors: tile unit selection icons and number of mobs in tile appearing in undiscovered tiles

@@ -143,34 +143,34 @@ class vehicle(pmob):
             text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
     
-    def update_tooltip(self):
-        '''
-        Description:
-            Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
-        Input:
-            None
-        Output:
-            None
-        '''
-        tooltip_list = ["Name: " + self.name.capitalize()]
-        if self.has_crew:
-            tooltip_list.append("Crew: " + self.crew.name.capitalize())
-        else:
-            tooltip_list.append("Crew: None")
-            tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
-            
-        if len(self.contained_mobs) > 0:
-            tooltip_list.append("Passengers: ")
-            for current_mob in self.contained_mobs:
-                tooltip_list.append('    ' + current_mob.name.capitalize())
-        else:
-            tooltip_list.append("No passengers")
-
-        if not self.has_infinite_movement:
-            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
-        else:
-            tooltip_list.append("Movement points: infinite")
-        self.set_tooltip(tooltip_list)
+    #def update_tooltip(self):
+    #    '''
+    #    Description:
+    #        Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
+    #    Input:
+    #        None
+    #    Output:
+    #        None
+    #    '''
+    #    tooltip_list = ["Name: " + self.name.capitalize()]
+    #    if self.has_crew:
+    #        tooltip_list.append("Crew: " + self.crew.name.capitalize())
+    #    else:
+    #        tooltip_list.append("Crew: None")
+    #        tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+    #        
+    #    if len(self.contained_mobs) > 0:
+    #        tooltip_list.append("Passengers: ")
+    #        for current_mob in self.contained_mobs:
+    #            tooltip_list.append('    ' + current_mob.name.capitalize())
+    #    else:
+    #        tooltip_list.append("No passengers")
+    #
+    #    if not self.has_infinite_movement:
+    #        tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+    #    else:
+    #        tooltip_list.append("Movement points: infinite")
+    #    self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

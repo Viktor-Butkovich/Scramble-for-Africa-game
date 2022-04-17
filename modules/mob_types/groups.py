@@ -1,7 +1,7 @@
 #Contains functionality for group units
 
 from .pmobs import pmob
-from ..tiles import veteran_icon
+from ..tiles import status_icon
 from .. import actor_utility
 from .. import dice_utility
 from .. import utility
@@ -40,6 +40,7 @@ class group(pmob):
         else:
             self.worker = global_manager.get('actor_creation_manager').create(True, input_dict['worker'], global_manager)
             self.officer = global_manager.get('actor_creation_manager').create(True, input_dict['officer'], global_manager)
+        self.group_type = 'none'
         super().__init__(from_save, input_dict, global_manager)
         self.worker.join_group()
         self.officer.join_group()
@@ -54,9 +55,9 @@ class group(pmob):
             self.select()
             if self.veteran:
                 self.set_name("Veteran " + self.name.lower())
-        self.veteran_icons = self.officer.veteran_icons
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.actor = self
+        self.status_icons = self.officer.status_icons
+        for current_status_icon in self.status_icons:
+            current_status_icon.actor = self
         self.global_manager.get('group_list').append(self)
         if not from_save:
             if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
@@ -105,15 +106,7 @@ class group(pmob):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
+                Same pairs as superclass, along with:
                 'image': string value - File path to the image used by this object
                 'worker': dictionary value - dictionary of the saved information necessary to recreate the worker
                 'officer': dictionary value - dictionary of the saved information necessary to recreate the officer
@@ -150,8 +143,9 @@ class group(pmob):
             input_dict['name'] = 'veteran icon'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['show_terrain'] = False
-            input_dict['actor'] = self 
-            self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
+            input_dict['actor'] = self
+            input_dict['status_icon_type'] = 'veteran'
+            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
@@ -166,42 +160,30 @@ class group(pmob):
         Output:
             None
         '''
-        if self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                current_veteran_icon.remove()
-            self.veteran_icons = []
+        #if self.veteran:
+        #    for current_status_icon in self.status_icons:
+        #        current_status_icon.remove()
+        #    self.status_icons = []
         super().go_to_grid(new_grid, new_coordinates)
-        if self.veteran:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                input_dict = {}
-                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-                input_dict['grid'] = current_grid
-                input_dict['image'] = 'misc/veteran_icon.png'
-                input_dict['name'] = 'veteran icon'
-                input_dict['modes'] = ['strategic', 'europe']
-                input_dict['show_terrain'] = False
-                input_dict['actor'] = self 
-                self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
+        #if self.veteran:
+        #    for current_grid in self.grids:
+        #        if current_grid == self.global_manager.get('minimap_grid'):
+        #            veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+        #        else:
+        #            veteran_icon_x, veteran_icon_y = (self.x, self.y)
+        #        input_dict = {}
+        #        input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+        #        input_dict['grid'] = current_grid
+        #        input_dict['image'] = 'misc/veteran_icon.png'
+        #        input_dict['name'] = 'veteran icon'
+        #        input_dict['modes'] = ['strategic', 'europe']
+        #        input_dict['show_terrain'] = False
+        #        input_dict['actor'] = self 
+        #        self.status_icons.append(status_icon(False, input_dict, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
         self.officer.join_group() #hides images self.worker.hide_images()#
         self.worker.go_to_grid(new_grid, new_coordinates)
         self.worker.join_group() #self.worker.hide_images()#
-
-    def update_tooltip(self): #to do: show carried commodities in tooltip
-        '''
-        Description:
-            Sets this group's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this group's name, the names of its officer and worker, and its movement points
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.set_tooltip(["Name: " + self.name.capitalize(), '    Officer: ' + self.officer.name.capitalize(), '    Worker: ' + self.worker.name.capitalize(),
-            "Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points)])
 
     def disband(self):
         '''
@@ -217,9 +199,9 @@ class group(pmob):
         self.remove()
         self.worker.leave_group(self)
         self.worker.set_movement_points(self.movement_points)
-        self.officer.veteran_icons = self.veteran_icons
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.actor = self.officer
+        self.officer.status_icons = self.status_icons
+        for current_status_icon in self.status_icons:
+            current_status_icon.actor = self.officer
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
         self.officer.set_movement_points(self.movement_points)

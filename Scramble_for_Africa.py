@@ -553,6 +553,12 @@ mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coo
     scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
 global_manager.get('mob_info_display_list').append(mob_free_image)
 
+
+#disorganized icon image
+mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
+global_manager.get('mob_info_display_list').append(mob_free_image)
+
 fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
     scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
 #mob info images setup
@@ -560,7 +566,7 @@ fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor
 
 
 #mob info labels setup
-mob_info_display_labels = ['name', 'minister', 'officer', 'worker', 'movement', 'attitude', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+mob_info_display_labels = ['name', 'minister', 'officer', 'worker', 'movement', 'attitude', 'combat_strength', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
 for current_actor_label_type in mob_info_display_labels:
     if current_actor_label_type == 'minister': #how far from edge of screen
         x_displacement = 40
@@ -585,7 +591,7 @@ for current_actor_label_type in mob_info_display_labels:
 
 #tile info images setup
 #tile background image
-actor_display_current_y = global_manager.get('default_display_height') - (580 + 35)
+actor_display_current_y = global_manager.get('default_display_height') - (580 + 35 + 35)
 global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
 tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
     scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager) 

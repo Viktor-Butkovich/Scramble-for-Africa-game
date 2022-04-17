@@ -118,6 +118,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'slums', global_manager))
+        elif self.actor_label_type == 'combat_strength':
+            self.message_start = 'Combat strength: '
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -220,6 +222,21 @@ class actor_display_label(label):
             tooltip_text.append("Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work.")
             tooltip_text.append("Slums can form around ports, train stations, and resource production facilities.")
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'combat_strength':
+            tooltip_text = [self.message]
+            tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type.")
+            if not self.actor == 'none':
+                modifier = self.actor.get_combat_modifier()
+                if modifier >= 0:
+                    sign = '+'
+                else:
+                    sign = ''
+                    
+                if self.actor.veteran:
+                    tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                else:
+                    tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -286,6 +303,9 @@ class actor_display_label(label):
                         self.set_label(self.message_start + "hostile")
                     else:
                         self.set_label(self.message_start + "neutral")
+
+            elif self.actor_label_type == 'combat_strength':
+                self.set_label(self.message_start + str(self.actor.get_combat_strength()))
 
             elif self.actor_label_type == 'controllable':
                 if not self.actor.controllable:

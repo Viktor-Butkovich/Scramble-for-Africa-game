@@ -6,6 +6,7 @@ from . import images
 from . import utility
 from . import actor_utility
 from .actors import actor
+from .tiles import status_icon
 
 class mob(actor):
     '''
@@ -32,6 +33,7 @@ class mob(actor):
         self.in_vehicle = False
         self.in_building = False
         self.veteran = False
+        self.disorganized = False
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
@@ -48,9 +50,11 @@ class mob(actor):
         self.just_promoted = False
         self.selected = False
         self.actor_type = 'mob'
+        self.end_turn_destination = 'none'
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict = {'default': input_dict['image']}
         self.images = []
+        self.status_icons = []
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
         global_manager.get('mob_list').append(self)
@@ -64,6 +68,8 @@ class mob(actor):
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
             self.creation_turn = input_dict['creation_turn']
+            if input_dict['disorganized']:
+                self.set_disorganized(True)
         else:
             self.reset_movement_points()
             self.update_tooltip()
@@ -87,13 +93,46 @@ class mob(actor):
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - How many movement points this actor currently has
                 'image': string value - File path to the image used by this object
-                'creation_turn': int value - turn number on which this unit was created
+                'creation_turn': int value - Turn number on which this unit was created
+                'disorganized': boolean value - Whether this unit is currently disorganized
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
         save_dict['image'] = self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
+        save_dict['disorganized'] = self.disorganized
         return(save_dict)        
+
+    def set_disorganized(self, new_value):
+        self.disorganized = new_value
+        if new_value == True:
+            for current_grid in self.grids:
+                if current_grid == self.global_manager.get('minimap_grid'):
+                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                elif current_grid == self.global_manager.get('europe_grid'):
+                    veteran_icon_x, veteran_icon_y = (0, 0)
+                else:
+                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                input_dict = {}
+                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                input_dict['grid'] = current_grid
+                input_dict['image'] = 'misc/disorganized_icon.png'
+                input_dict['name'] = 'veteran icon'
+                input_dict['modes'] = ['strategic', 'europe']
+                input_dict['show_terrain'] = False
+                input_dict['actor'] = self
+                input_dict['status_icon_type'] = 'disorganized'
+                self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+        else:
+            remaining_icons = []
+            for current_status_icon in self.status_icons:
+                if current_status_icon.status_icon_type == 'disorganized':
+                    current_status_icon.remove()
+                else:
+                    remaining_icons.append(current_status_icon)
+            self.status_icons = remaining_icons
 
     def get_combat_modifier(self):
         modifier = 0
@@ -106,7 +145,25 @@ class mob(actor):
                 modifier -= 1
                 if self.is_officer:
                     modifier -= 1
+        if self.disorganized:
+            modifier -= 1
         return(modifier)
+
+    def get_combat_strength(self):
+        #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
+        #add 3 to modifier and add veteran bonus to get strength
+        #0: disorganized lone officer
+        #1: lone officer, disorganized workers/civilian group/vehicle
+        #2: veteran lone officer, workers/civilian group/vehicle, disorganized native warriors
+        #3: veteran civilian group, disorganized colonial battalion, native warriors
+        #4: colonial battalion, disorganized imperial battalion
+        #5: imperial battalion, veteran colonial battalion, disorganized veteran imperial battalion
+        #6: veteran imperial battalion
+        base = self.get_combat_modifier()
+        result = base + 3
+        if self.veteran:
+            result += 1
+        return(result)
 
     def combat_possible(self):
         if self.is_npmob:
@@ -232,13 +289,17 @@ class mob(actor):
         '''
         Description:
             Links this mob to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when a mob that was previously attached to another actor becomes independent and visible,
-                like when a building's worker leaves
+                like when a building's worker leaves. Also moves this unit's status icons as necessary
         Input:
             grid new_grid: grid that this mob is linked to
             int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
             None
         '''
+        if not self.in_group:
+            for current_status_icon in self.status_icons:
+                current_status_icon.remove()
+            self.status_icons = []
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
@@ -258,6 +319,26 @@ class mob(actor):
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
             self.images[-1].add_to_cell()
+        if not self.in_group:
+            if self.veteran:
+                for current_grid in self.grids:
+                    if current_grid == self.global_manager.get('minimap_grid'):
+                        veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    elif current_grid == self.global_manager.get('europe_grid'):
+                        veteran_icon_x, veteran_icon_y = (0, 0)
+                    else:
+                        veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                    input_dict = {}
+                    input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/veteran_icon.png'
+                    input_dict['name'] = 'veteran icon'
+                    input_dict['modes'] = ['strategic', 'europe']
+                    input_dict['show_terrain'] = False
+                    input_dict['actor'] = self 
+                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            #if self.disorganized: make another icon
+            
 
     def select(self):
         '''
@@ -292,7 +373,7 @@ class mob(actor):
     def update_tooltip(self):
         '''
         Description:
-            Sets this mob's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this actor's name and its movement points
+            Sets this mob's tooltip to what it should be whenever the player mouses over one of its images
         Input:
             None
         Output:
@@ -302,19 +383,47 @@ class mob(actor):
         tooltip_list.append("Name: " + self.name.capitalize())
         
         if self.controllable:
+            if self.is_group:
+                tooltip_list.append('    Officer: ' + self.officer.name.capitalize())
+                tooltip_list.append('    Worker: ' + self.worker.name.capitalize())
+            elif self.is_vehicle:
+                if self.has_crew:
+                    tooltip_list.append("    Crew: " + self.crew.name.capitalize())
+                else:
+                    tooltip_list.append("    Crew: None")
+                    tooltip_list.append("    A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+                    
+                if len(self.contained_mobs) > 0:
+                    tooltip_list.append("    Passengers: ")
+                    for current_mob in self.contained_mobs:
+                        tooltip_list.append('        ' + current_mob.name.capitalize())
+                else:
+                    tooltip_list.append("    Passengers: None")
+            
             if not self.has_infinite_movement:
                 tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
             else:
-                tooltip_list.append("Movement points: infinite")
+                tooltip_list.append("Movement points: Infinite")
 
         else:
             tooltip_list.append("Movement points: ???")
             if self.hostile:
-                tooltip_list.append("Attitude: hostile")
+                tooltip_list.append("Attitude: Hostile")
             else:
-                tooltip_list.append("Attitude: neutral")
+                tooltip_list.append("Attitude: Neutral")
             tooltip_list.append("You do not control this unit")
-                
+        
+        tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
+        if self.disorganized:
+            tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
+
+        if not self.end_turn_destination == 'none':
+            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn.")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn.")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn.")
         self.set_tooltip(tooltip_list)
         
     def remove(self):
@@ -334,6 +443,10 @@ class mob(actor):
             current_image.remove_from_cell()
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+        for current_status_icon in self.status_icons:
+            current_status_icon.remove()
+        self.status_icons = []
+
 
     def die(self):
         '''

@@ -45,10 +45,10 @@ class pmob(mob):
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
-            else:
-                self.end_turn_destination = 'none'
+            #else:
+            #    self.end_turn_destination = 'none'
         else:
-            self.end_turn_destination = 'none'
+            #self.end_turn_destination = 'none'
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
@@ -387,6 +387,7 @@ class pmob(mob):
         combat_type = self.current_combat_type
         enemy = self.current_enemy
         own_combat_modifier = self.get_combat_modifier()
+        enemy_combat_modifier = enemy.get_combat_modifier()
         if combat_type == 'attacking':
             uses_minister = True
         else:
@@ -407,13 +408,18 @@ class pmob(mob):
 
         if self.is_battalion:
             if self.battalion_type == 'imperial':
-                text += "Your professional imperial soldiers will receive a +2 bonus after the roll. /n"
+                text += "Your professional imperial soldiers will receive a +2 bonus after their roll. /n"
             else:
-                text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after the roll. /n"
+                text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n"
         elif self.is_officer:
-            text += "As a lone officer, your " + self.name + " will receive a -2 penalty after the roll. /n"
+            text += "As a lone officer, your " + self.name + " will receive a -2 penalty after their roll. /n"
         else:
-            text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after the roll. /n"
+            text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after their roll. /n"
+        if self.disorganized:
+            text += "The " + self.name + " is disorganized from a recent defeat and will receive a -1 penalty after their roll. /n"
+        elif enemy.disorganized:
+            text += "The " + enemy.name + " are disorganized from a recent defeat and will receive a -1 after their roll. /n"
+
 
         if self.veteran:
             text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
@@ -461,12 +467,21 @@ class pmob(mob):
         own_roll = roll_result
         if not combat_type == 'attacking':
             enemy_roll = random.randrange(1, 7)
+
+        text += "The enemy rolled a " + str(enemy_roll)
+        if enemy_combat_modifier > 0:
+            text += " + " + str(enemy_combat_modifier) + " = " + str(enemy_roll + enemy_combat_modifier)
+        elif enemy_combat_modifier < 0:
+            text += " - " + str(enemy_combat_modifier * -1) + " = " + str(enemy_roll + enemy_combat_modifier)
+        text += ' /n'
+
+        
         if num_dice == 2: #displays enemy dice
             self.display_die((die_x, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
         elif num_dice == 3:
             self.display_die((die_x - 60, 560), enemy_roll, 7, 7, 0, False) #die won't show result, so give inputs that make it red
 
-        overall_result = own_roll + own_combat_modifier - enemy_roll
+        overall_result = own_roll + own_combat_modifier - (enemy_roll + enemy_combat_modifier)
         
         if overall_result <= -2:
             conclusion = 'lose'
@@ -478,14 +493,25 @@ class pmob(mob):
             conclusion = 'win'
             description = 'VICTORY'
 
-        text += "/n Overall result: /n"
-        text += str(own_roll + own_combat_modifier) + " - " + str(enemy_roll) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
+        text += "Overall result: /n"
+        text += str(own_roll + own_combat_modifier) + " - " + str(enemy_roll + enemy_combat_modifier) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
         
         notification_tools.display_notification(text + "Click to continue.", 'combat', self.global_manager, num_dice)
 
         text += "/n"
         if conclusion == 'win':
-            text += "Your " + self.name + " successfully defeated and destroyed the " + enemy.name + ". /n /n"
+            if combat_type == 'attacking':
+                text += "Your " + self.name + " decisively defeated and destroyed the " + enemy.name + ". /n /n"
+            elif combat_type == 'defending':
+                if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
+                    retreat_direction = 'west'
+                elif enemy.last_move_direction[0] < 0: #if enemy attacked by going west
+                    retreat_direction = 'east'
+                elif enemy.last_move_direction[1] > 0: #if enemy attacked by going north
+                    retreat_direction = 'south'
+                elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
+                    retreat_direction = 'north'
+                text += "Your " + self.name + " decisively routed the attacking " + enemy.name + ", who were seen scattering to the " + retreat_direction + " and will be vulnerable to counterattack. /n /n"
             
         elif conclusion == 'draw':
             if combat_type == 'attacking':
@@ -499,14 +525,17 @@ class pmob(mob):
                     retreat_direction = 'south'
                 elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
                     retreat_direction = 'north'
-                text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who were seen retreating to the " + retreat_direction + ". /n /n"
+                text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who were seen withdrawing to the " + retreat_direction + ". /n /n"
 
         elif conclusion == 'lose':
-            text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
+            if combat_type == 'attacking':
+                text += "The " + enemy.name + " decisively routed your " + self.name + ", who are scattered and will be vulnerable to counterattack. /n /n"
+            elif combat_type == 'defending':
+                text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
         if (not self.veteran) and own_roll >= 6 and self.is_battalion: #civilian units can not become veterans through combat
             self.just_promoted = True
-            text += " /nThis major is now a veteran. /n"
-        notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_combat', self.global_manager)
+            text += " This major is now a veteran. /n /n"
+        notification_tools.display_notification(text + " Click to remove this notification.", 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
 
 
@@ -518,17 +547,23 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
-            enemy.die()
-        elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
-            if combat_type == 'defending':
+                enemy.die()
+            elif combat_type == 'defending':
                 enemy.retreat()
-            elif combat_type == 'attacking':
+                enemy.set_disorganized(True)
+        elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
+            if combat_type == 'attacking':
                 self.retreat()
+            elif combat_type == 'defending':
+                enemy.retreat()
         elif conclusion == 'lose':
+            if combat_type == 'attacking':
+                self.retreat()
+                self.set_disorganized(True)
             if combat_type == 'defending':
                 if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
-            self.die()
+                self.die()
 
         if self.just_promoted:
             self.promote()

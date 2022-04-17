@@ -40,6 +40,15 @@ def start_turn(global_manager, first_turn):
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
+        #enemy turn starts
+        manage_villages(global_manager)
+        reset_mobs('npmobs', global_manager)
+        manage_enemy_movement(global_manager)
+        manage_combat(global_manager)
+        
+        #own turn starts
+        reset_mobs('pmobs', global_manager)
+        
         manage_production(global_manager)
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
@@ -48,14 +57,12 @@ def start_turn(global_manager, first_turn):
         manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
-        manage_villages(global_manager)
-        manage_enemy_movement(global_manager)
-        manage_combat(global_manager)
-    
+
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
-    for current_mob in global_manager.get('mob_list'):
-        current_mob.reset_movement_points()
+    #for current_mob in global_manager.get('mob_list'):
+    #    current_mob.reset_movement_points()
+        
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
@@ -66,6 +73,20 @@ def start_turn(global_manager, first_turn):
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+
+def reset_mobs(mob_type, global_manager):
+    if mob_type == 'pmobs':
+        for current_pmob in global_manager.get('pmob_list'):
+            current_pmob.reset_movement_points()
+            current_pmob.set_disorganized(False) 
+    elif mob_type == 'npmobs':
+        for current_npmob in global_manager.get('npmob_list'):
+            current_npmob.reset_movement_points()
+            current_npmob.set_disorganized(False) 
+    else:
+        for current_mob in global_manager.get('mob_list'):
+            current_mob.reset_movement_points()
+            current_mob.set_disorganized(False)
 
 def manage_production(global_manager):
     '''

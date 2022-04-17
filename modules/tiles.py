@@ -474,9 +474,9 @@ class resource_icon(tile):
             self.image.set_image('large')
             self.image_dict['default'] = self.image_dict['large']
 
-class veteran_icon(tile):
+class status_icon(tile): #class veteran_icon(tile):
     '''
-    A tile that follows one of the images of a veteran officer or a group containing a veteran officer, designating that unit as a veteran
+    A tile that follows one of the images of a unit, showing special statuses like veteran or disorganized
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -492,12 +492,14 @@ class veteran_icon(tile):
                 'modes': string list value - Game modes during which this actor's images can appear
                 'show_terrain': boolean value - True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
                 'actor': actor value - mob to which this icon is attached. Can be a group or an officer
+                'status_icon_type': string value - type of status shown by icon, like veteran or disorganized
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.actor = input_dict['actor']
+        self.status_icon_type = input_dict['status_icon_type']
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), self.grid, 'default', global_manager)
         self.images = [self.image]
