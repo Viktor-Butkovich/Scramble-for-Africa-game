@@ -9,6 +9,7 @@ def display_notification(message, notification_type, global_manager, num_dice_sh
         string message: Text for future notification
         string notification_type: Type of notification created, like 'roll, 'choice', or 'exploration'
         global_manager_template global_manager: Object that accesses shared variables
+        int num_dice_shown = 0: Determines number of dice allowed to be shown during the displayed notification, allowing the correct ones to be shown when multiple notifications are queued
     Output:
         None
     '''

@@ -24,7 +24,6 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        
         self.global_manager = global_manager
         self.global_manager.get('notification_list').append(self)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)

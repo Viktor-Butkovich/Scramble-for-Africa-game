@@ -1,39 +1,6 @@
-Mob class reorganization
-mob_types/pmobs
-mob_types/npmobs
-mobs imports
-mob_types/battalions
-actor_creation_tools imports
-mob_types/native_warriors
-villages.village
-turn_management_tools.manage_villages
-turn_management_tools.manage_enemy_movement
-turn_management_tools.manage_combat
-turn_management_tools.reset
-mobs.mob.can_show
-mobs.mob.can_show_tooltip
-mobs.mob.combat_possible
-mobs.mobs.set_disorganized
-mobs.mob.retreat
-mobs.mob.get_combat_modifier
-mobs.mob.get_combat_strength
-cells.cell.has_pmob
-cells.cell.has_npmob
-cells.cell.get_best_combatant
-cells imports
-mob_types/pmobs.pmob.display_die, change inputs
-groups imports
-officers imports
-action_notifications/combat_notification
-action_notifications/action_notification
-all action_notification subclass constructors
-action_notification inheritance
-dice.die.can_show
-issue with multiple combats in a row, dice showing up at incorrect times due to is_action_notification fix
-notification_tools.display_notification
-choice_notifications.choice_notification
-dice_utility
-ministers.minister.attack_roll_to_list
-change tiles.veteran_icon to status_icon
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-errors: tile unit selection icons and number of mobs in tile appearing in undiscovered tiles
+errors: combats after the first seem to occur after the player's turn starts
+combat strength label not updating correctly on group creation
+able to move through native warriors with non-battalion units
+make sure available workers never exceeds population when native warriors leave
+battalion should get off of vehicle when combat starts, maybe with disorganized penalty

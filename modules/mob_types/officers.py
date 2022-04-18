@@ -115,40 +115,6 @@ class officer(pmob):
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
-    #def go_to_grid(self, new_grid, new_coordinates):
-    #    '''
-    #    Description:
-    #        Links this officer to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when an officer that was previously attached to another actor becomes independent and
-    #            visible, like when an explorer leaves an expedition. Also moves veteran icons to follow this officer
-    #    Input:
-    #        grid new_grid: grid that this officer is linked to
-    #        int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
-    #    Output:
-    #        None
-    #    '''
-    #    if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-    #        for current_status_icon in self.status_icons:
-    #            current_status_icon.remove()
-    #    self.status_icons = []
-    #    super().go_to_grid(new_grid, new_coordinates)
-    #    if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-    #        for current_grid in self.grids:
-    #            if current_grid == self.global_manager.get('minimap_grid'):
-    #                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-    #            elif current_grid == self.global_manager.get('europe_grid'):
-    #                veteran_icon_x, veteran_icon_y = (0, 0)
-    #            else:
-    #                veteran_icon_x, veteran_icon_y = (self.x, self.y)
-    #            input_dict = {}
-    #            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-    #            input_dict['grid'] = current_grid
-    #            input_dict['image'] = 'misc/veteran_icon.png'
-    #            input_dict['name'] = 'veteran icon'
-    #            input_dict['modes'] = ['strategic', 'europe']
-    #            input_dict['show_terrain'] = False
-    #            input_dict['actor'] = self 
-    #            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-
     def can_show_tooltip(self):
         '''
         Description:
@@ -179,7 +145,7 @@ class officer(pmob):
     def leave_group(self, group):
         '''
         Description:
-            Reveals this officer when its group is disbanded, allowing it to be directly interacted with. Also selects this officer, meaning that the officer will be selected rather than the worker when a group is disbanded
+            Reveals this officer when its group is disbanded, allowing it to be directly interacted with. Also selects this officer, rather than the group's worker
         Input:
             group group: group from which this officer is leaving
         Output:
@@ -189,6 +155,8 @@ class officer(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
+        self.disorganized = group.disorganized
+        self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
 

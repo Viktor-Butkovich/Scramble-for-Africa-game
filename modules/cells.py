@@ -242,7 +242,6 @@ class cell():
         input_dict['name'] = 'slums'
         input_dict['modes'] = ['strategic']
         input_dict['init_type'] = 'slums'
-        #input_dict['image'] = 'buildings/slums.png'
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         if self.tile == self.global_manager.get('displayed_tile'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
@@ -332,6 +331,14 @@ class cell():
         return('none')
 
     def has_pmob(self):
+        '''
+        Description:
+            Returns whether this cell contains a pmob
+        Input:
+            None
+        Output:
+            Returns whether this cell contains a pmob
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
                 return(True)
@@ -342,12 +349,26 @@ class cell():
         return(False)
 
     def has_npmob(self):
+        '''
+        Description:
+            Returns whether this cell contains an npmob
+        Input:
+            None
+        Output:
+            Returns whether this cell contains an npmob
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_npmob:
                 return(True)
         return(False)
 
     def get_best_combatant(self, mob_type):
+        '''
+        Description:
+            Finds and returns the best combatant in this cell of the inputted type. Combat ability is based on the unit's combat modifier and veteran status
+        Input:
+            string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for the most powerful npmob and vice versa
+        '''
         best_combatants = ['none']
         best_combat_modifier = 0
         if mob_type == 'npmob':
@@ -439,7 +460,7 @@ class cell():
             None
         '''
         length = len(self.contained_mobs)
-        if length >= 2 and not self.terrain == 'none':
+        if length >= 2 and self.visible and not self.terrain == 'none':
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)

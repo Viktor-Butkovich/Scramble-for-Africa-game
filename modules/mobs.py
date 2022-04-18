@@ -104,6 +104,14 @@ class mob(actor):
         return(save_dict)        
 
     def set_disorganized(self, new_value):
+        '''
+        Description:
+            Sets this unit to be disorganized or not. Setting it to be disorganized gives a temporary combat debuff and an icon that follows the unit, while removing the disorganized status removes the debuff and the icon
+        Input:
+            boolean new_value: Represents new disorganized status
+        Output:
+            None
+        '''
         self.disorganized = new_value
         if new_value == True:
             for current_grid in self.grids:
@@ -135,6 +143,14 @@ class mob(actor):
             self.status_icons = remaining_icons
 
     def get_combat_modifier(self):
+        '''
+        Description:
+            Calculates and returns the modifier added to this unit's combat rolls
+        Input:
+            None
+        Output:
+            int: Returns the modifier added to this unit's combat rolls
+        '''
         modifier = 0
         if self.is_pmob:
             if self.is_group and self.group_type == 'battalion':
@@ -150,6 +166,14 @@ class mob(actor):
         return(modifier)
 
     def get_combat_strength(self):
+        '''
+        Description:
+            Calculates and returns this unit's combat strength. While combat strength has no role in combat calculations, it serves as an estimate for the player of the unit's combat capabilities
+        Input:
+            None
+        Output:
+            int: Returns this unit's combst strength
+        '''
         #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
         #add 3 to modifier and add veteran bonus to get strength
         #0: disorganized lone officer
@@ -166,6 +190,14 @@ class mob(actor):
         return(result)
 
     def combat_possible(self):
+        '''
+        Description:
+            Returns whether this unit can start any combats in its current cell. A pmob can start combats with npmobs in its cell, and a hostile npmob can start combats with pmobs in its cell
+        Input:
+            None
+        Output:
+            boolean: Returns whether this unit can start any combats in its current cell
+        '''
         if self.is_npmob:
             if self.hostile and self.images[0].current_cell.has_pmob():
                 return(True)
@@ -175,6 +207,14 @@ class mob(actor):
         return(False)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this unit can be shown. By default, it can be shown when it is in a discovered cell during the correct game mode and is not attached to any other units or buildings
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
+        '''
         if not (self.in_vehicle or self.in_group or self.in_building):
             if (not self.images[0].current_cell == 'none') and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
                 if self.images[0].current_cell.visible:
@@ -182,6 +222,14 @@ class mob(actor):
         return(False)
 
     def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this unit's tooltip can be shown. Along with superclass conditions, requires that it is in a discovered cell
+        Input:
+            None
+        Output:
+            None
+        '''
         if super().can_show_tooltip():
             if self.images[0].current_cell.visible:
                 return(True)
@@ -323,21 +371,39 @@ class mob(actor):
             if self.veteran:
                 for current_grid in self.grids:
                     if current_grid == self.global_manager.get('minimap_grid'):
-                        veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                     elif current_grid == self.global_manager.get('europe_grid'):
-                        veteran_icon_x, veteran_icon_y = (0, 0)
+                        status_icon_x, status_icon_y = (0, 0)
                     else:
-                        veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                        status_icon_x, status_icon_y = (self.x, self.y)
                     input_dict = {}
-                    input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
                     input_dict['grid'] = current_grid
                     input_dict['image'] = 'misc/veteran_icon.png'
                     input_dict['name'] = 'veteran icon'
                     input_dict['modes'] = ['strategic', 'europe']
                     input_dict['show_terrain'] = False
-                    input_dict['actor'] = self 
+                    input_dict['actor'] = self
+                    input_dict['status_icon_type'] = 'veteran'
                     self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            #if self.disorganized: make another icon
+            if self.disorganized:
+                for current_grid in self.grids:
+                    if current_grid == self.global_manager.get('minimap_grid'):
+                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    elif current_grid == self.global_manager.get('europe_grid'):
+                        status_icon_x, status_icon_y = (0, 0)
+                    else:
+                        status_icon_x, status_icon_y = (self.x, self.y)
+                    input_dict = {}
+                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/disorganized_icon.png'
+                    input_dict['name'] = 'disorganized icon'
+                    input_dict['modes'] = ['strategic', 'europe']
+                    input_dict['show_terrain'] = False
+                    input_dict['actor'] = self
+                    input_dict['status_icon_type'] = 'disorganized'
+                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
             
 
     def select(self):
@@ -537,6 +603,14 @@ class mob(actor):
         self.last_move_direction = (x_change, y_change)
 
     def retreat(self):
+        '''
+        Description:
+            Causes a free movement to the last cell this unit moved from, following a failed attack
+        Input:
+            None
+        Output:
+            None
+        '''
         original_movement_points = self.movement_points
         self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
         self.set_movement_points(original_movement_points) #retreating is free

@@ -1,15 +1,35 @@
-#Contains functionality for porters
+#Contains functionality for battalions
 import time
 from .groups import group
 from ..tiles import tile
 from .. import actor_utility
 from .. import notification_tools
 
-class battalion(group): #most battalion_unique behaviors found in pmob combat functions and get_combat_modifier
+class battalion(group):
     '''
-    A group with a major officer that can fight enemy units
+    A group with a major officer that can attack enemy units
     '''
     def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(from_save, input_dict, global_manager)
         self.set_group_type('battalion')
         self.is_battalion = True
@@ -21,6 +41,17 @@ class battalion(group): #most battalion_unique behaviors found in pmob combat fu
         self.attack_mark_list = []
 
     def move(self, x_change, y_change, attack_confirmed = False):
+        '''
+        Description:
+            Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship. If moving into a cell with an npmob, asks for a confirmation to attack instead of moving. If the attack
+                is confirmed, move is called again to cause a combat to start
+        Input:
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
+            boolean attack_confirmed = False: Whether an attack has already been confirmed. If an attack has been confirmed, a move into the target cell will occur and a combat will start
+        Output:
+            None
+        '''
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('show_minimap_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
@@ -86,12 +117,28 @@ class battalion(group): #most battalion_unique behaviors found in pmob combat fu
                 self.attempt_local_combat()
 
     def attempt_local_combat(self):
+        '''
+        Description:
+            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local npmob and pay to supply the attack
+        Input:
+            None
+        Output:
+            None
+        '''
         defender = self.images[0].current_cell.get_best_combatant('npmob')
         if not defender == 'none':
             self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attacker supplies')
             self.start_combat('attacking', defender)
 
     def remove_attack_marks(self):
+        '''
+        Description:
+            Removes all of the attack marks used to show the direction of a proposed attack during its confirmation
+        Input:
+            None
+        Output:
+            None
+        '''
         for attack_mark in self.attack_mark_list:
             attack_mark.remove()
         self.attack_mark_list = []

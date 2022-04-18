@@ -176,6 +176,8 @@ class worker(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
+        self.disorganized = group.disorganized
+        self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
 
     def remove(self):
         '''

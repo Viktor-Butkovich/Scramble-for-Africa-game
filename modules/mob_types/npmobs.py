@@ -6,9 +6,25 @@ from .. import utility
 
 class npmob(mob):
     '''
-    Short for non-player-mob, mob not controlled by the player
+    Short for non-player-controlled mob, mob not controlled by the player
     '''
     def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this mob's name
+                'modes': string list value - Game modes during which this mob's images can appear
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(from_save, input_dict, global_manager)
         self.hostile = False
         self.controllable = False
@@ -23,7 +39,7 @@ class npmob(mob):
     def remove(self):
         '''
         Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob and drops any commodities it is carrying
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
         Input:
             None
         Output:
@@ -33,6 +49,14 @@ class npmob(mob):
         self.global_manager.set('npmob_list', utility.remove_from_list(self.global_manager.get('npmob_list'), self)) #make a version of npmob_list without self and set npmob_list to it
 
     def find_closest_target(self):
+        '''
+        Description:
+            Find and returns one of the closest reachable pmobs or buildings
+        Input:
+            None
+        Output:
+            string/actor: Returns one of the closest reachable pmobs or buildings, or returns 'none' if none are reachable
+        '''
         target_list = self.global_manager.get('pmob_list') + self.global_manager.get('building_list')
         min_distance = -1
         closest_targets = ['none']
@@ -52,6 +76,15 @@ class npmob(mob):
         return(random.choice(closest_targets)) #return one of the closest ones, or 'none' if none were found
 
     def attempt_local_combat(self):
+        '''
+        Description:
+            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will attempt to start a combat at the end of the turn with any local pmobs. If, for example, another npmob killed
+                the pmob found in this npmob's cell, then this npmob will not start a combat
+        Input:
+            None
+        Output:
+            None
+        '''
         defender = self.images[0].current_cell.get_best_combatant('pmob')
         if not defender == 'none':
             defender.start_combat('defending', self)
@@ -60,6 +93,10 @@ class npmob(mob):
                    self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
         
     def end_turn_move(self):
+        '''
+        Moves this npmob towards pmobs and buildings at the end of the turn and schedules this npmob to start combat if any pmobs are encountered. Movement is weighted based on the distance on each axis, so movement towards a pmob
+            that is far to the north and slightly to the east will be more likely to move north than east
+        '''
         closest_target = self.find_closest_target()
         if not closest_target == 'none':
             if closest_target.x > self.x: #decides moving left or right
@@ -100,7 +137,7 @@ class npmob(mob):
     def move(self, x_change, y_change):
         '''
         Description:
-            Moves this mob x_change to the right and y_change upward. Moving to a ship in the water automatically embarks the ship
+            Moves this mob x_change to the right and y_change upward
         Input:
             int x_change: How many cells are moved to the right in the movement
             int y_change: How many cells are moved upward in the movement

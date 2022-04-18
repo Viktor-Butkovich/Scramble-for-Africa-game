@@ -957,7 +957,7 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected, otherwise returns same as superclass
         '''
-        if (not self.global_manager.get('displayed_tile') == 'none'):
+        if (not self.global_manager.get('displayed_tile') == 'none') and self.global_manager.get('displayed_tile').cell.visible:
             return(super().can_show())
         else:
             return(False)

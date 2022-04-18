@@ -474,7 +474,7 @@ class resource_icon(tile):
             self.image.set_image('large')
             self.image_dict['default'] = self.image_dict['large']
 
-class status_icon(tile): #class veteran_icon(tile):
+class status_icon(tile):
     '''
     A tile that follows one of the images of a unit, showing special statuses like veteran or disorganized
     '''

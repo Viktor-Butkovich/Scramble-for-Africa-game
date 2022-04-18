@@ -13,7 +13,7 @@ from .. import dice_utility
 
 class pmob(mob):
     '''
-    mob that can be controlled
+    Short for player-controlled mob, mob controlled by the player
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -45,10 +45,7 @@ class pmob(mob):
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
-            #else:
-            #    self.end_turn_destination = 'none'
         else:
-            #self.end_turn_destination = 'none'
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
@@ -231,8 +228,7 @@ class pmob(mob):
     def fire(self):
         '''
         Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of die to improve consistency with workers/groups/vehicles, whose die and fire have different
-                functionalities
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Has different effects from die in certain subclasses
         Input:
             None
         Output:
@@ -243,7 +239,7 @@ class pmob(mob):
     def can_leave(self):
         '''
         Description:
-            Returns whether this mob is allowed to move away from its current cell. By default, mobs can always allowed to move away from their current cells, but subclasses like ship are able to return False
+            Returns whether this mob is allowed to move away from its current cell. By default, mobs are always allowed to move away from their current cells, but subclasses like ship are able to return False
         Input:
             None
         Output:
@@ -362,11 +358,20 @@ class pmob(mob):
         self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
+        '''
+        Description
+            Used when any player unit is involved in combat, displays a notification that combat is starting and starts the combat process. Unlike most action start functions, the choice to start combat is in a separate
+                battalion-specific function
+        Input:
+            string combat_type: Type of combat, either defending or attacking
+            npmob enemy: Enemy that the combat is being fought against
+        Output:
+            None
+        '''
         if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
                 self.select()
-        choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
             message = enemy.name + " are attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
@@ -384,6 +389,14 @@ class pmob(mob):
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):
+        '''
+        Description:
+            Controls the combat process, determining and displaying its result through a series of notifications. Unlike most action functions, uses 2 competing rolls instead of a roll against a difficulty class
+        Input:
+            None
+        Output:
+            None
+        '''
         combat_type = self.current_combat_type
         enemy = self.current_enemy
         own_combat_modifier = self.get_combat_modifier()
@@ -440,10 +453,10 @@ class pmob(mob):
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
             else:
                 results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
-            first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 0, 0, self.global_manager, results[0], own_combat_modifier)
+            first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, results[0], own_combat_modifier)
             self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
            
-            second_roll_list = dice_utility.combat_roll_to_list(6, "second_combat", 0, 7, 0, self.global_manager, results[1], own_combat_modifier)
+            second_roll_list = dice_utility.combat_roll_to_list(6, "second_combat", self.global_manager, results[1], own_combat_modifier)
             self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -457,7 +470,7 @@ class pmob(mob):
                 result = minister_rolls[0]
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", 0, 7, 0, self.global_manager, result, own_combat_modifier)
+            roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, result, own_combat_modifier)
             self.display_die((die_x, 440), roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
@@ -540,6 +553,15 @@ class pmob(mob):
 
 
     def complete_combat(self):
+        '''
+        Description:
+            Used when the player finishes rolling for combat, shows the combat's results and makes any changes caused by the result. If attacking, outcomes include destroying the enemy unit, retreating, and retreating with a temporary
+                debuff against counterattacks. If defending, outcomes include forcing enemy to retreat with a temporary debuff against counterattacks, forcing enemy to retreat, and being destroyed.
+        Input:
+            None
+        Output:
+            None
+        '''
         combat_type = self.current_combat_type
         enemy = self.current_enemy
         conclusion = self.global_manager.get('combat_result')[1]
@@ -781,6 +803,7 @@ class pmob(mob):
             int min_success: Minimum roll required for a success
             int min_crit_success: Minimum roll required for a critical success
             int max_crit_fail: Maximum roll required for a critical failure
+            boolean uses_minister = True: Determines if the roll is controlled by a minister and whether a minister portrait should be shown during the roll
         Output:
             None
         '''
@@ -789,7 +812,6 @@ class pmob(mob):
         new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
         self.attached_dice_list.append(new_die)
-        #self.current_attached_dice.append(new_die) start here next, have dice attached to unit and show unit's dice when notification is shown
         if uses_minister:
             if self.is_battalion: #combat has a different dice layout
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)

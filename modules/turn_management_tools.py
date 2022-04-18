@@ -44,7 +44,7 @@ def start_turn(global_manager, first_turn):
         manage_villages(global_manager)
         reset_mobs('npmobs', global_manager)
         manage_enemy_movement(global_manager)
-        manage_combat(global_manager)
+        manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
         
         #own turn starts
         reset_mobs('pmobs', global_manager)
@@ -60,8 +60,6 @@ def start_turn(global_manager, first_turn):
 
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
-    #for current_mob in global_manager.get('mob_list'):
-    #    current_mob.reset_movement_points()
         
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
@@ -75,6 +73,15 @@ def start_turn(global_manager, first_turn):
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
 
 def reset_mobs(mob_type, global_manager):
+    '''
+    Description:
+        Starts the turn for mobs of the inputed type, resetting their movement points and removing the disorganized status
+    Input:
+        string mob_type: Can be pmob or npmob, determines which mobs' turn starts
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     if mob_type == 'pmobs':
         for current_pmob in global_manager.get('pmob_list'):
             current_pmob.reset_movement_points()
@@ -133,8 +140,6 @@ def manage_upkeep(global_manager):
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
     global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
-    
-    #text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager) #described in financial report
 
 def manage_loans(global_manager):
     '''
@@ -362,6 +367,14 @@ def create_weighted_migration_destinations(destination_cell_list):
 
 
 def manage_villages(global_manager):
+    '''
+    Description:
+        Controls the aggressiveness and population changes of villages and native warrior spawning/despawning
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_village in global_manager.get('village_list'):
         roll = random.randrange(1, 7)
         if roll <= 2: #1-2
@@ -378,10 +391,26 @@ def manage_villages(global_manager):
         current_village.manage_warriors()
 
 def manage_enemy_movement(global_manager):
+    '''
+    Description:
+        Moves npmobs at the end of the turn towards player-controlled mobs/buildings
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_npmob in global_manager.get('npmob_list'):
         if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
             current_npmob.end_turn_move()
 
 def manage_combat(global_manager):
+    '''
+    Description:
+        Resolves, in order, each possible combat that was triggered by npmobs moving into cells with pmobs. When a possible combat is resolved, it should call the next possible combat until all are resolved
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     if len(global_manager.get('attacker_queue')) > 0:
         global_manager.get('attacker_queue').pop(0).attempt_local_combat()

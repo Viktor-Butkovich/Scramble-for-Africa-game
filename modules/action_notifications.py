@@ -9,7 +9,25 @@ from . import scaling
 from . import actor_utility
 
 class action_notification(notification):
+    '''
+    Interactive notification attached in a series to other notifications that is used for dice rolls and other real-time player interactions
+    '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.is_action_notification = True
         self.notification_dice = notification_dice #how many dice are allowed to be shown by selected mob when this notification shown
@@ -42,6 +60,7 @@ class dice_rolling_notification(action_notification):
             string list modes: Game modes during which this notification can appear
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -91,8 +110,6 @@ class dice_rolling_notification(action_notification):
                     if current_die.roll_result > max_roll:
                         max_roll = current_die.roll_result
                         max_die = current_die
-                    #elif not current_die.normal_die: #if highlighted and not max die, remove highlight after rolling
-                    #    current_die.normal_die = True
                 if not current_die.normal_die: #change highlight color of special dice to show that roll is complete
                     if current_die.special_die_type == 'green':
                         current_die.outline_color = current_die.outcome_color_dict['crit_success']
@@ -122,6 +139,7 @@ class exploration_notification(action_notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             boolean is_last: Whether this is the last exploration notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -187,6 +205,7 @@ class off_tile_exploration_notification(action_notification):
             string list modes: Game modes during which this notification can appear
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -255,6 +274,7 @@ class trade_notification(action_notification):
                 string key: 'stops_trade', boolean value: If True, trading will stop when this notification is removed
                 string key: 'commodity_trade', boolean value: If True, this notification will show a transaction
                 string key: 'commodity_trade_type', string value: If equals 'successful_commodity_trade', the trade will be successful and a commodity will be given for the transaction
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -337,6 +357,7 @@ class religious_campaign_notification(action_notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -396,6 +417,7 @@ class advertising_campaign_notification(action_notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             boolean is_last: Whether this is the last advertising campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -461,6 +483,7 @@ class conversion_notification(action_notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -507,6 +530,22 @@ class construction_notification(action_notification):
     Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last construction notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.is_last = is_last
         if self.is_last: #if last, show result
             current_constructor = actor_utility.get_selected_list(global_manager)[0]
@@ -549,9 +588,23 @@ class combat_notification(action_notification):
     Notification that does not automatically prompt the user to remove it and shows the results of a combat when the last notification is removed
     '''
     def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last combat notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.is_last = is_last
-        #if self.is_last: #if last, show result
-        #self.notification_images = []
         if len(global_manager.get('combatant_images')) == 0: #if none already exist
             image_x = global_manager.get('notification_manager').notification_x - 165#175
             if notification_dice > 2:

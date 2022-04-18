@@ -57,13 +57,6 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
         result = random.randrange(1, num_sides + 1)
     text = ""
     
-    #if roll_type in ['Combat roll', 'second_combat']:
-    #    if roll_type == 'second_combat':
-    #        text += "Second roll: /n"
-    #    else:
-    #        text += (roll_type + ": /n")
-    #    text += "You rolled a " + str(result) + " /n"
-    #else:
     if not roll_type == 'second': #do not show again for 2nd die rolled by veteran
         text += (roll_type + ": " + str(requirement) + "+ required to succeed /n")
     if result >= requirement:
@@ -78,7 +71,18 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
             text += ("You rolled a " + str(result) + ": FAILURE /n")
     return([result, text])
 
-def combat_roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, global_manager, result, modifier):
+def combat_roll_to_list(num_sides, roll_type, global_manager, result, modifier):
+    '''
+    Description:
+        Conducts a dice roll and returns a list that contains the roll's result and a description of the roll. Unlike normal rolls, a combat roll does not have an inherent success or failure, as it uses competing rolls instead of a
+            difficulty class
+    Input:
+        int num_sides: Number of sides of the simulated die
+        string roll_type: Represents the purpose of the roll, affecting the roll's description
+        global_manager_template global_manager: Object that accesses shared variables
+        string/int result = 'none': If value passed, the die will roll to a predetermined result
+        int modifier: Value added to the dice roll and shown in the description of the calculation
+    '''
     if result == 'none':
         result = random.randrange(1, num_sides + 1)
     text = ""

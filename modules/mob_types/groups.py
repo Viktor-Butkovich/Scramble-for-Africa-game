@@ -160,30 +160,11 @@ class group(pmob):
         Output:
             None
         '''
-        #if self.veteran:
-        #    for current_status_icon in self.status_icons:
-        #        current_status_icon.remove()
-        #    self.status_icons = []
         super().go_to_grid(new_grid, new_coordinates)
-        #if self.veteran:
-        #    for current_grid in self.grids:
-        #        if current_grid == self.global_manager.get('minimap_grid'):
-        #            veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-        #        else:
-        #            veteran_icon_x, veteran_icon_y = (self.x, self.y)
-        #        input_dict = {}
-        #        input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-        #        input_dict['grid'] = current_grid
-        #        input_dict['image'] = 'misc/veteran_icon.png'
-        #        input_dict['name'] = 'veteran icon'
-        #        input_dict['modes'] = ['strategic', 'europe']
-        #        input_dict['show_terrain'] = False
-        #        input_dict['actor'] = self 
-        #        self.status_icons.append(status_icon(False, input_dict, self.global_manager))
         self.officer.go_to_grid(new_grid, new_coordinates)
-        self.officer.join_group() #hides images self.worker.hide_images()#
+        self.officer.join_group()
         self.worker.go_to_grid(new_grid, new_coordinates)
-        self.worker.join_group() #self.worker.hide_images()#
+        self.worker.join_group()
 
     def disband(self):
         '''

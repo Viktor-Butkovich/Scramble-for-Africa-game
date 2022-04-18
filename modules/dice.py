@@ -196,6 +196,14 @@ class die(button):
         self.global_manager.get('displayed_mob').attached_dice_list = utility.remove_from_list(self.global_manager.get('displayed_mob').attached_dice_list, self)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this die should be shown. The currently displayed notification should have a number of dice attached to it, and only that many of existing dice are shown at once, starting from the those first created
+        Input:
+            None
+        Output:
+            boolean: Returns whether this die should be shown
+        '''
         if super().can_show():
             displayed_mob_dice_list = self.global_manager.get('displayed_mob').attached_dice_list
             num_notification_dice = self.global_manager.get('notification_list')[0].notification_dice

@@ -59,6 +59,14 @@ class village():
         self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
     def manage_warriors(self):
+        '''
+        Description:
+            Controls the spawning and despawning of native warriors, with higher-population and highly aggressive villages being more likely to spawn. Spawned warriors temporarily leave the population and return when despawned
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_attached_warrior in self.attached_warriors:
             current_attached_warrior.check_despawn()
 
@@ -68,6 +76,14 @@ class village():
                 self.spawn_warrior()
             
     def can_spawn_warrior(self):
+        '''
+        Description:
+            Returns whether this village can currently spawn a warrior. A village with 0 population can not spawn warriors
+        Input:
+            None
+        Output:
+            Returns whether this village can currently spawn a warrior
+        '''
         if self.global_manager.get('spawning_allowed') and self.population > 0:
             return(True)
         return(False)
@@ -86,6 +102,14 @@ class village():
         return(False)
 
     def spawn_warrior(self):
+        '''
+        Description:
+            Creates a native warrior at this village's location from one of its population units
+        Input:
+            None
+        Output:
+            None
+        '''
         input_dict = {}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
