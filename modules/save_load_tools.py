@@ -190,24 +190,34 @@ class save_load_manager_template():
         for current_element in self.copied_elements: #save necessary data into new global manager
             saved_global_manager.set(current_element, self.global_manager.get(current_element))
 
+
         saved_grid_dicts = []
         for current_grid in self.global_manager.get('grid_list'):
             if not current_grid.is_mini_grid: #minimap grid doesn't need to be saved
                 saved_grid_dicts.append(current_grid.to_save_dict())
+
             
         saved_actor_dicts = []
-        for current_mob in self.global_manager.get('mob_list'):
-            if not (current_mob.in_group or current_mob.in_vehicle or current_mob.in_building): #containers save their contents and load them in, contents don't need to be saved/loaded separately
-                saved_actor_dicts.append(current_mob.to_save_dict())
+        for current_pmob in self.global_manager.get('pmob_list'):
+            if not (current_pmob.in_group or current_pmob.in_vehicle or current_pmob.in_building): #containers save their contents and load them in, contents don't need to be saved/loaded separately
+                saved_actor_dicts.append(current_pmob.to_save_dict())
+                
+        for current_npmob in self.global_manager.get('npmob_list'):
+            if current_npmob.saves_normally: #for units like native warriors that are saved as part a village and not as their own unit, do not attempt to save from here
+                saved_actor_dicts.append(current_npmob.to_save_dict())
+            
         for current_building in self.global_manager.get('building_list'):
             saved_actor_dicts.append(current_building.to_save_dict())
+            
         for current_loan in self.global_manager.get('loan_list'):
             saved_actor_dicts.append(current_loan.to_save_dict())
+
 
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
             print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
+
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file

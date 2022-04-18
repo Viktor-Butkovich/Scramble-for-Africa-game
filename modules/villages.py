@@ -26,6 +26,7 @@ class village():
         Output:
             None
         '''
+        self.attached_warriors = []
         if not from_save:
             self.set_initial_population()
             self.set_initial_aggressiveness()
@@ -37,10 +38,14 @@ class village():
             self.population = input_dict['population']
             self.aggressiveness = input_dict['aggressiveness']
             self.available_workers = input_dict['available_workers']
+            for current_save_dict in input_dict['attached_warriors']:
+                current_save_dict['origin_village'] = self
+                global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
         self.cell = input_dict['cell']
         self.tiles = [] #added in set_resource for tiles
         self.global_manager = global_manager
-        self.global_manager.get('village_list').append(self)
+        if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
+            self.global_manager.get('village_list').append(self) #have more permanent fix later
 
     def remove(self):
         '''
@@ -53,6 +58,36 @@ class village():
         '''
         self.global_manager.set('village_list', utility.remove_from_list(self.global_manager.get('village_list'), self))
 
+    def manage_warriors(self):
+        '''
+        Description:
+            Controls the spawning and despawning of native warriors, with higher-population and highly aggressive villages being more likely to spawn. Spawned warriors temporarily leave the population and return when despawned
+        Input:
+            None
+        Output:
+            None
+        '''
+        for current_attached_warrior in self.attached_warriors:
+            current_attached_warrior.check_despawn()
+
+        if self.can_spawn_warrior():
+            min_spawn_result = 6 + self.get_aggressiveness_modifier() # 6-1 = 5 on high aggressiveness, 6 on average aggressiveness, 6+1 = 7 on low aggressiveness
+            if random.randrange(1, 7) >= min_spawn_result: #1/3 on high, 1/6 on average, 0 on low
+                self.spawn_warrior()
+            
+    def can_spawn_warrior(self):
+        '''
+        Description:
+            Returns whether this village can currently spawn a warrior. A village with 0 population can not spawn warriors
+        Input:
+            None
+        Output:
+            Returns whether this village can currently spawn a warrior
+        '''
+        if self.global_manager.get('spawning_allowed') and self.population > 0:
+            return(True)
+        return(False)
+    
     def can_recruit_worker(self):
         '''
         Description:
@@ -65,6 +100,28 @@ class village():
         if self.available_workers > 0:
             return(True)
         return(False)
+
+    def spawn_warrior(self):
+        '''
+        Description:
+            Creates a native warrior at this village's location from one of its population units
+        Input:
+            None
+        Output:
+            None
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.cell.x, self.cell.y)
+        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
+        input_dict['image'] = 'mobs/native_warriors/default.png'
+        input_dict['modes'] = ['strategic']
+        input_dict['name'] = 'Native warriors'
+        input_dict['init_type'] = 'native_warriors'
+        input_dict['origin_village'] = self
+        self.change_population(-1)
+        if self.available_workers > self.population: #if available worker leaves to be warrior, reduce number of available workers
+            self.set_available_workers(self.population)
+        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
 
     def recruit_worker(self):
         '''
@@ -184,9 +241,22 @@ class village():
             None
         '''
         self.available_workers += change
-        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)    
 
+    def set_available_workers(self, new_value):
+        '''
+        Description:
+            Sets this village's number of avavilable workers to the inputted amount
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.available_workers = new_value
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+    
     def change_population(self, change):
         '''
         Description:

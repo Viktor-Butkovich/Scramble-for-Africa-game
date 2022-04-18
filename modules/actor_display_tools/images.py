@@ -45,7 +45,7 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
                 self.set_image(new_actor.image_dict['hidden'])
-            elif self.actor_image_type == 'resource building':
+            elif self.actor_image_type == 'resource_building':
                 if not new_actor.cell.contained_buildings['resource'] == 'none':
                     self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
                 else:
@@ -74,6 +74,11 @@ class actor_display_free_image(free_image):
             elif self.actor_image_type == 'veteran_icon':
                 if (self.actor.is_officer or self.actor.is_group) and self.actor.veteran:
                     self.set_image('misc/veteran_icon.png')
+                else:
+                    self.set_image('misc/empty.png')
+            elif self.actor_image_type == 'disorganized_icon':
+                if self.actor.disorganized:
+                    self.set_image('misc/disorganized_icon.png')
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'minister_default':
@@ -161,6 +166,10 @@ class mob_background_image(free_image):
             boolean: False if there is no actor in the info display, otherwise returns same value as superclass
         '''
         if self.actor == 'none':
+            return(False)
+        if self.image_id == 'misc/pmob_background.png' and not self.actor.is_pmob:
+            return(False)
+        if self.image_id == 'misc/npmob_background.png' and not self.actor.is_npmob:
             return(False)
         else:
             return(super().can_show())

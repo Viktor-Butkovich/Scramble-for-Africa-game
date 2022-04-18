@@ -20,17 +20,22 @@ def roll(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, glo
     '''
     if result == 'none':
         result = random.randrange(1, num_sides + 1)
-    text_tools.print_to_screen(roll_type + ": " + str(requirement) + "+ required to succeed", global_manager)
-    if result >= requirement:
-        if result >= min_crit_success:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL SUCCESS!", global_manager)
-        else:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": SUCCESS!", global_manager)
+
+    if roll_type in ['Combat roll', 'second_combat']:
+        text_tools.print_to_screen(roll_type + ": ")
+        text_tools.print_to_screen("You rolled a " + str(result))
     else:
-        if result <= max_crit_fail:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL FAILURE", global_manager)
+        text_tools.print_to_screen(roll_type + ": " + str(requirement) + "+ required to succeed", global_manager)
+        if result >= requirement:
+            if result >= min_crit_success:
+                text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL SUCCESS!", global_manager)
+            else:
+                text_tools.print_to_screen("You rolled a " + str(result) + ": SUCCESS!", global_manager)
         else:
-            text_tools.print_to_screen("You rolled a " + str(result) + ": FAILURE", global_manager)
+            if result <= max_crit_fail:
+                text_tools.print_to_screen("You rolled a " + str(result) + ": CRITICAL FAILURE", global_manager)
+            else:
+                text_tools.print_to_screen("You rolled a " + str(result) + ": FAILURE", global_manager)
     return(result)
 
 def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_fail, global_manager, result = 'none'):
@@ -51,6 +56,7 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
     if result == 'none':
         result = random.randrange(1, num_sides + 1)
     text = ""
+    
     if not roll_type == 'second': #do not show again for 2nd die rolled by veteran
         text += (roll_type + ": " + str(requirement) + "+ required to succeed /n")
     if result >= requirement:
@@ -63,4 +69,31 @@ def roll_to_list(num_sides, roll_type, requirement, min_crit_success, max_crit_f
             text += ("You rolled a " + str(result) + ": CRITICAL FAILURE /n")
         else:
             text += ("You rolled a " + str(result) + ": FAILURE /n")
+    return([result, text])
+
+def combat_roll_to_list(num_sides, roll_type, global_manager, result, modifier):
+    '''
+    Description:
+        Conducts a dice roll and returns a list that contains the roll's result and a description of the roll. Unlike normal rolls, a combat roll does not have an inherent success or failure, as it uses competing rolls instead of a
+            difficulty class
+    Input:
+        int num_sides: Number of sides of the simulated die
+        string roll_type: Represents the purpose of the roll, affecting the roll's description
+        global_manager_template global_manager: Object that accesses shared variables
+        string/int result = 'none': If value passed, the die will roll to a predetermined result
+        int modifier: Value added to the dice roll and shown in the description of the calculation
+    '''
+    if result == 'none':
+        result = random.randrange(1, num_sides + 1)
+    text = ""
+    if roll_type == 'second_combat':
+        text += "Second roll: /n"
+    else:
+        text += (roll_type + ": /n")
+    text += "You rolled a " + str(result) + " "
+    if modifier > 0:
+        text += "+ " + str(modifier) + " = " + str(result + modifier)
+    elif modifier < 0:
+        text += "- " + str(modifier * -1) + " = " + str(result + modifier)
+    text += " /n"
     return([result, text])

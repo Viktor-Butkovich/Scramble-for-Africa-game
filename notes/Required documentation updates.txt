@@ -1,0 +1,6 @@
+possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
+errors: combats after the first seem to occur after the player's turn starts
+combat strength label not updating correctly on group creation
+able to move through native warriors with non-battalion units
+make sure available workers never exceeds population when native warriors leave
+battalion should get off of vehicle when combat starts, maybe with disorganized penalty

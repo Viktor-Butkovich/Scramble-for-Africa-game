@@ -1,15 +1,15 @@
 #Contains functionality for worker units
 import random
 
-from ..mobs import mob
+from .pmobs import pmob
 from .. import actor_utility
 from .. import utility
 from .. import market_tools
 from .. import text_tools
 
-class worker(mob):
+class worker(pmob):
     '''
-    Mob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
+    pmob that is required for resource buildings to produce commodities, officers to form group, and vehicles to function
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -35,7 +35,7 @@ class worker(mob):
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
-        self.worker_type = input_dict['worker_type']
+        self.worker_type = input_dict['worker_type'] #European, African, religious, slave
         
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') + 1)
@@ -176,6 +176,8 @@ class worker(mob):
         self.x = group.x
         self.y = group.y
         self.show_images()
+        self.disorganized = group.disorganized
+        self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
 
     def remove(self):
         '''
@@ -289,6 +291,7 @@ class church_volunteers(worker):
         Output:
             None
         '''
+        input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
-        self.is_church_volunteers = True
+        #self.is_church_volunteers = True

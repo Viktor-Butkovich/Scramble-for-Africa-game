@@ -10,7 +10,7 @@ class choice_notification(notification):
     '''
     Notification that presents 2 choices and is removed when one is chosen rather than when the notification itself is clicked, causing a different outcome depending on the chosen option
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, button_types, choice_info_dict, global_manager):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, button_types, choice_info_dict, notification_dice, global_manager):
         '''
         Description:
             Initializes this object
@@ -23,6 +23,7 @@ class choice_notification(notification):
             string message: Text that will appear on the notification with lines separated by /n
             string list button_types: List of strings that correspond to the button types of this notification's choice buttons, like ['end turn', 'none'] for an end turn button and a do nothing button
             dictionary choice_info_dict: string keys corresponding to various values used by this notification's choice buttons when clicked
+            int notification_dice: Number of dice attached to this notification, allowing the correct ones to be shown during the notification when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -125,9 +126,13 @@ class choice_button(button):
             self.expedition = self.notification.choice_info_dict['expedition']
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
-            
-        elif button_type == 'stop exploration':
-            self.message = 'Do nothing'
+
+        elif button_type == 'attack':
+            self.message = 'Attack'
+            self.cost = self.notification.choice_info_dict['cost']
+            self.battalion = self.notification.choice_info_dict['battalion']
+            self.x_change = self.notification.choice_info_dict['x_change']
+            self.y_change = self.notification.choice_info_dict['y_change']
             
         elif button_type == 'start religious campaign' or button_type == 'start advertising campaign':
             self.message = 'Start campaign'
@@ -152,7 +157,7 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type == 'none':
+        elif button_type in ['none', 'stop exploration', 'stop attack']:
             self.message = 'Do nothing'
     
         else:
@@ -208,6 +213,9 @@ class choice_button(button):
             
         elif self.button_type == 'exploration':
             self.set_tooltip(['Attempt an exploration for ' + str(self.cost) + ' money'])
+
+        elif self.button_type == 'attack':
+            self.set_tooltip(['Supply an attack for ' + str(self.cost) + ' money'])
             
         elif self.button_type == 'trade':
             self.set_tooltip(['Attempt to trade by giving consumer goods'])

@@ -65,19 +65,22 @@ class actor():
         save_dict = {}
         init_type = ''
         if self.actor_type == 'mob':
-            if self.is_worker:
-                if self.is_church_volunteers:
-                    init_type = 'church_volunteers'
-                elif self.worker_type == 'slave':
-                    init_type = 'slave'
-                else:
-                    init_type = 'worker'
-            elif self.is_vehicle:
-                init_type = self.vehicle_type
-            elif self.is_officer:
-                init_type = self.officer_type
-            elif self.is_group:
-                init_type = self.group_type
+            if self.controllable: #if pmob
+                if self.is_worker:
+                    if self.is_church_volunteers:
+                        init_type = 'church_volunteers'
+                    elif self.worker_type == 'slave':
+                        init_type = 'slave'
+                    else:
+                        init_type = 'worker'
+                elif self.is_vehicle:
+                    init_type = self.vehicle_type
+                elif self.is_officer:
+                    init_type = self.officer_type
+                elif self.is_group:
+                    init_type = self.group_type
+            else: #if npmob
+                init_type = self.npmob_type
         elif self.actor_type == 'tile':
             init_type = 'tile'
         elif self.actor_type == 'building':

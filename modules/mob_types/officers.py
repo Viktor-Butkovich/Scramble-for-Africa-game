@@ -1,21 +1,20 @@
 #Contains functionality for officer units
 import random
 
-from ..mobs import mob
-from ..tiles import veteran_icon
+from .pmobs import pmob
+from ..tiles import status_icon
 from .. import actor_utility
 from .. import utility
 from .. import notification_tools
 from .. import text_tools
 from .. import market_tools
 from .. import dice_utility
-from .. import dice
 from .. import scaling
 from .. import images
 
-class officer(mob):
+class officer(pmob):
     '''
-    Mob that is considered an officer and can join groups and become a veteran
+    pmob that is considered an officer and can join groups and become a veteran
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -40,7 +39,7 @@ class officer(mob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('officer_list').append(self)
-        self.veteran_icons = []
+        #self.status_icons = []
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
@@ -60,16 +59,7 @@ class officer(mob):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple - 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': File path to the image used by this object
+                Same pairs as superclass, along with:
                 'officer_type': Type of officer that this is, like 'explorer' or 'engineer'
                 'veteran': Whether this officer is a veteran
         '''
@@ -87,6 +77,7 @@ class officer(mob):
         Output:
             None
         '''
+        self.just_promoted = False
         self.veteran = True
         self.set_name("veteran " + self.name)
         for current_grid in self.grids:
@@ -103,8 +94,9 @@ class officer(mob):
             input_dict['name'] = 'veteran icon'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['show_terrain'] = False
-            input_dict['actor'] = self 
-            self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
+            input_dict['actor'] = self
+            input_dict['status_icon_type'] = 'veteran'
+            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
@@ -122,40 +114,6 @@ class officer(mob):
         self.set_name(name)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-
-    def go_to_grid(self, new_grid, new_coordinates):
-        '''
-        Description:
-            Links this officer to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when an officer that was previously attached to another actor becomes independent and
-                visible, like when an explorer leaves an expedition. Also moves veteran icons to follow this officer
-        Input:
-            grid new_grid: grid that this officer is linked to
-            int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
-        Output:
-            None
-        '''
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_veteran_icon in self.veteran_icons:
-                current_veteran_icon.remove()
-        self.veteran_icons = []
-        super().go_to_grid(new_grid, new_coordinates)
-        if self.veteran and not self.in_group: #if (not (self.in_group or self.in_vehicle)) and self.veteran:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                elif current_grid == self.global_manager.get('europe_grid'):
-                    veteran_icon_x, veteran_icon_y = (0, 0)
-                else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
-                input_dict = {}
-                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-                input_dict['grid'] = current_grid
-                input_dict['image'] = 'misc/veteran_icon.png'
-                input_dict['name'] = 'veteran icon'
-                input_dict['modes'] = ['strategic', 'europe']
-                input_dict['show_terrain'] = False
-                input_dict['actor'] = self 
-                self.veteran_icons.append(veteran_icon(False, input_dict, self.global_manager))
 
     def can_show_tooltip(self):
         '''
@@ -187,7 +145,7 @@ class officer(mob):
     def leave_group(self, group):
         '''
         Description:
-            Reveals this officer when its group is disbanded, allowing it to be directly interacted with. Also selects this officer, meaning that the officer will be selected rather than the worker when a group is disbanded
+            Reveals this officer when its group is disbanded, allowing it to be directly interacted with. Also selects this officer, rather than the group's worker
         Input:
             group group: group from which this officer is leaving
         Output:
@@ -197,6 +155,8 @@ class officer(mob):
         self.x = group.x
         self.y = group.y
         self.show_images()
+        self.disorganized = group.disorganized
+        self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
 
@@ -211,32 +171,9 @@ class officer(mob):
         '''
         super().remove()
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
-        for current_veteran_icon in self.veteran_icons:
-            current_veteran_icon.remove()
-
-    def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail):
-        '''
-        Description:
-            Creates a die object at the inputted location and predetermined roll result to use for multi-step notification dice rolls. Also shows a picture of the minister controlling the roll. The color of the die's outline depends on
-                the result
-        Input:
-            int tuple coordinates: Two values representing x and y pixel coordinates for the bottom left corner of the die
-            int result: Predetermined result that the die will end on after rolling
-            int min_success: Minimum roll required for a success
-            int min_crit_success: Minimum roll required for a critical success
-            int max_crit_fail: Maximum roll required for a critical failure
-        Output:
-            None
-        '''
-        result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
-        outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)
-        minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'position', self.global_manager)
-        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
-            'portrait', self.global_manager)
+        #for current_status_icon in self.status_icons:
+        #    current_status_icon.remove()
+        #self.status_icons = []
 
 class evangelist(officer):
     '''
@@ -319,16 +256,22 @@ class evangelist(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
         text = ""
         text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager, num_dice)
         else:
             text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -364,7 +307,7 @@ class evangelist(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -492,6 +435,9 @@ class merchant(officer):
         '''
         just_promoted = False
         self.set_movement_points(0)
+
+        num_dice = 0 #don't show dice roll for loan
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
         principal = 100
         initial_interest = 11
@@ -513,7 +459,7 @@ class merchant(officer):
             just_promoted = True
                     
         if just_promoted:
-            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager)
+            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager, num_dice)
             self.promote()
             
         choice_info_dict = {}
@@ -583,16 +529,22 @@ class merchant(officer):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
         text = ""
         text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager, num_dice)
         else:
             text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -626,7 +578,7 @@ class merchant(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration

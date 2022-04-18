@@ -110,18 +110,24 @@ class missionaries(group):
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1, 'religious conversion')
         village = self.images[0].current_cell.village
         text = ""
         text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
 
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager, num_dice)
         else:
             text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager)
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager)
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -155,7 +161,7 @@ class missionaries(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager)
+        notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager, num_dice)
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration

@@ -3,14 +3,14 @@
 import pygame
 import time
 from . import images
-from . import text_tools
 from . import utility
 from . import actor_utility
 from .actors import actor
+from .tiles import status_icon
 
 class mob(actor):
     '''
-    Actor that can be controlled and selected and can appear on multiple grids at once
+    Actor that can be selected and appear on multiple grids at once, but not necessarily controlled
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -24,60 +24,56 @@ class mob(actor):
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
-                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.selected = False
         self.in_group = False
         self.in_vehicle = False
         self.in_building = False
         self.veteran = False
-        self.actor_type = 'mob'
-        super().__init__(from_save, input_dict, global_manager)
-        self.image_dict = {'default': input_dict['image']}
-        self.selection_outline_color = 'bright green'
-        self.images = []
-        for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
-        global_manager.get('mob_list').append(self)
-        self.set_name(input_dict['name'])
-        self.can_explore = False #if can attempt to explore unexplored areas
-        self.can_construct = False #if can construct buildings
-        self.can_trade = False #if can trade or create trading posts
-        self.can_convert = False #if can convert natives or build missions
-        self.can_swim = False #if can enter water areas without ships in them
-        self.can_walk = True #if can enter land areas
-        self.travel_possible = False #if can switch theatres
+        self.disorganized = False
         self.is_vehicle = False
         self.is_worker = False
         self.is_officer = False
         self.is_work_crew = False
+        self.is_battalion = False
         self.is_group = False
-        
+        self.is_npmob = False
+        self.is_pmob = False
+        self.can_explore = False #if can attempt to explore unexplored areas
+        self.can_construct = False #if can construct buildings
+        self.can_trade = False #if can trade or create trading posts
+        self.can_convert = False #if can convert natives or build missions
+        self.controllable = True
+        self.just_promoted = False
+        self.selected = False
+        self.actor_type = 'mob'
+        self.end_turn_destination = 'none'
+        super().__init__(from_save, input_dict, global_manager)
+        self.image_dict = {'default': input_dict['image']}
+        self.images = []
+        self.status_icons = []
+        for current_grid in self.grids:
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))#self, actor, width, height, grid, image_description, global_manager
+        global_manager.get('mob_list').append(self)
+        self.set_name(input_dict['name'])
+        self.can_swim = False #if can enter water areas without ships in them
+        self.can_walk = True #if can enter land areas
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
-        self.set_controlling_minister_type('none')
         if from_save:
-            if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
-                end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
-                end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
-                self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
-            else:
-                self.end_turn_destination = 'none'
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
+            self.creation_turn = input_dict['creation_turn']
+            if input_dict['disorganized']:
+                self.set_disorganized(True)
         else:
-            self.end_turn_destination = 'none'
             self.reset_movement_points()
             self.update_tooltip()
-            actor_utility.deselect_all(self.global_manager)
-            self.select()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            self.creation_turn = self.global_manager.get('turn')
 
     def to_save_dict(self):
         '''
@@ -97,65 +93,147 @@ class mob(actor):
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - How many movement points this actor currently has
                 'image': string value - File path to the image used by this object
+                'creation_turn': int value - Turn number on which this unit was created
+                'disorganized': boolean value - Whether this unit is currently disorganized
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
-        if self.end_turn_destination == 'none':
-            save_dict['end_turn_destination'] = 'none'
-        else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-            for grid_type in self.global_manager.get('grid_types_list'):
-                if self.end_turn_destination.grid == self.global_manager.get(grid_type):
-                    save_dict['end_turn_destination_grid_type'] = grid_type
-            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['image'] = self.image_dict['default']
-        return(save_dict)
+        save_dict['creation_turn'] = self.creation_turn
+        save_dict['disorganized'] = self.disorganized
+        return(save_dict)        
 
-    def check_if_minister_appointed(self):
+    def set_disorganized(self, new_value):
         '''
         Description:
-            Returns whether there is currently an appointed minister to control this unit
+            Sets this unit to be disorganized or not. Setting it to be disorganized gives a temporary combat debuff and an icon that follows the unit, while removing the disorganized status removes the debuff and the icon
         Input:
-            None
+            boolean new_value: Represents new disorganized status
         Output:
-            boolean: Returns whether there is currently an appointed minister to control this unit
+            None
         '''
-        if not self.controlling_minister == 'none':
-            return(True)
+        self.disorganized = new_value
+        if new_value == True:
+            for current_grid in self.grids:
+                if current_grid == self.global_manager.get('minimap_grid'):
+                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                elif current_grid == self.global_manager.get('europe_grid'):
+                    veteran_icon_x, veteran_icon_y = (0, 0)
+                else:
+                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                input_dict = {}
+                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                input_dict['grid'] = current_grid
+                input_dict['image'] = 'misc/disorganized_icon.png'
+                input_dict['name'] = 'veteran icon'
+                input_dict['modes'] = ['strategic', 'europe']
+                input_dict['show_terrain'] = False
+                input_dict['actor'] = self
+                input_dict['status_icon_type'] = 'disorganized'
+                self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
         else:
-            keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
-            text_tools.print_to_screen("", self.global_manager)
-            text_tools.print_to_screen("You can not do " + keyword + " actions because a " + self.controlling_minister_type + " has not been appointed", self.global_manager)
-            text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", self.global_manager)
-            return(False)
+            remaining_icons = []
+            for current_status_icon in self.status_icons:
+                if current_status_icon.status_icon_type == 'disorganized':
+                    current_status_icon.remove()
+                else:
+                    remaining_icons.append(current_status_icon)
+            self.status_icons = remaining_icons
 
-    def set_controlling_minister_type(self, new_type):
+    def get_combat_modifier(self):
         '''
         Description:
-            Sets the type of minister that controls this unit, like "Minister of Trade"
-        Input:
-            Type of minister to control this unit, like "Minister of Trade"
-        Output:
-            None
-        '''
-        self.controlling_minister_type = new_type
-        self.update_controlling_minister()
-
-    def update_controlling_minister(self):
-        '''
-        Description:
-            Sets the minister that controls this unit to the one occupying the office that has authority over this unit
+            Calculates and returns the modifier added to this unit's combat rolls
         Input:
             None
         Output:
+            int: Returns the modifier added to this unit's combat rolls
+        '''
+        modifier = 0
+        if self.is_pmob:
+            if self.is_group and self.group_type == 'battalion':
+                modifier += 1
+                if self.battalion_type == 'imperial':
+                    modifier += 1
+            else:
+                modifier -= 1
+                if self.is_officer:
+                    modifier -= 1
+        if self.disorganized:
+            modifier -= 1
+        return(modifier)
+
+    def get_combat_strength(self):
+        '''
+        Description:
+            Calculates and returns this unit's combat strength. While combat strength has no role in combat calculations, it serves as an estimate for the player of the unit's combat capabilities
+        Input:
+            None
+        Output:
+            int: Returns this unit's combst strength
+        '''
+        #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
+        #add 3 to modifier and add veteran bonus to get strength
+        #0: disorganized lone officer
+        #1: lone officer, disorganized workers/civilian group/vehicle
+        #2: veteran lone officer, workers/civilian group/vehicle, disorganized native warriors
+        #3: veteran civilian group, disorganized colonial battalion, native warriors
+        #4: colonial battalion, disorganized imperial battalion
+        #5: imperial battalion, veteran colonial battalion, disorganized veteran imperial battalion
+        #6: veteran imperial battalion
+        base = self.get_combat_modifier()
+        result = base + 3
+        if self.veteran:
+            result += 1
+        return(result)
+
+    def combat_possible(self):
+        '''
+        Description:
+            Returns whether this unit can start any combats in its current cell. A pmob can start combats with npmobs in its cell, and a hostile npmob can start combats with pmobs in its cell
+        Input:
+            None
+        Output:
+            boolean: Returns whether this unit can start any combats in its current cell
+        '''
+        if self.is_npmob:
+            if self.hostile and self.images[0].current_cell.has_pmob():
+                return(True)
+        elif self.is_pmob:
+            if self.images[0].current_cell.has_npmob():
+                return(True)
+        return(False)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this unit can be shown. By default, it can be shown when it is in a discovered cell during the correct game mode and is not attached to any other units or buildings
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
+        '''
+        if not (self.in_vehicle or self.in_group or self.in_building):
+            if (not self.images[0].current_cell == 'none') and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
+                if self.images[0].current_cell.visible:
+                    return(True)
+        return(False)
+
+    def can_show_tooltip(self):
+        '''
+        Description:
+            Returns whether this unit's tooltip can be shown. Along with superclass conditions, requires that it is in a discovered cell
+        Input:
+            None
+        Output:
             None
         '''
-        if self.controlling_minister_type == 'none':
-            self.controlling_minister = 'none'
-        else:
-            self.controlling_minister = self.global_manager.get('current_ministers')[self.controlling_minister_type]
-            for current_minister_type_image in self.global_manager.get('minister_image_list'):
-                if current_minister_type_image.minister_type == self.controlling_minister_type:
-                    current_minister_type_image.calibrate(self.controlling_minister)
+        if super().can_show_tooltip():
+            if self.images[0].current_cell.visible:
+                return(True)
+        return(False)
 
     def get_movement_cost(self, x_change, y_change):
         '''
@@ -196,34 +274,6 @@ class mob(actor):
             if current_cell.terrain == 'water' and current_cell.visible:
                 return(True)
         return(False)
-
-    def end_turn_move(self):
-        '''
-        Description:
-            If this mob has any pending movement orders at the end of the turn, this executes the movement. Currently used to move ships between Africa and Europe at the end of the turn
-        Input:
-            None
-        Output:
-            None
-        '''
-        if not self.end_turn_destination == 'none':
-            if self.grids[0] in self.end_turn_destination.grids: #if on same grid
-                nothing = 0 #do later
-            else: #if on different grid
-                if self.can_travel():
-                    self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
-            self.end_turn_destination = 'none'
-    
-    def can_travel(self): #if can move between Europe, Africa, etc.
-        '''
-        Description:
-            Returns whether this mob can cross the ocean, like going between Africa and Europe. By default, mobs cannot cross the ocean, but subclasses like ship are able to return True
-        Input:
-            None
-        Output:
-            boolean: Returns True if this mob can cross the ocean, otherwise returns False
-        '''
-        return(False) #different for subclasses
 
     def change_movement_points(self, change):
         '''
@@ -283,47 +333,21 @@ class mob(actor):
         self.max_movement_points = new_value
         self.set_movement_points(new_value)
 
-    def change_inventory(self, commodity, change):
-        '''
-        Description:
-            Changes the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
-        Input:
-            string commodity: Type of commodity to change the inventory of
-            int change: Amount of commodities of the inputted type to add. Removes commodities of the inputted type if negative
-        Output:
-            None
-        '''
-        if self.can_hold_commodities:
-            self.inventory[commodity] += change
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-
-    def set_inventory(self, commodity, new_value):
-        '''
-        Description:
-            Sets the number of commodities of a certain type held by this mob. Also ensures that the mob info display is updated correctly
-        Input:
-            string commodity: Type of commodity to set the inventory of
-            int new_value: Amount of commodities of the inputted type to set inventory to
-        Output:
-            None
-        '''
-        if self.can_hold_commodities:
-            self.inventory[commodity] = new_value
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-
     def go_to_grid(self, new_grid, new_coordinates):
         '''
         Description:
             Links this mob to a grid, causing it to appear on that grid and its minigrid at certain coordinates. Used when crossing the ocean and when a mob that was previously attached to another actor becomes independent and visible,
-                like when a building's worker leaves
+                like when a building's worker leaves. Also moves this unit's status icons as necessary
         Input:
             grid new_grid: grid that this mob is linked to
             int tuple new_coordinates: Two values representing x and y coordinates to start at on the inputted grid
         Output:
             None
         '''
+        if not self.in_group:
+            for current_status_icon in self.status_icons:
+                current_status_icon.remove()
+            self.status_icons = []
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
@@ -343,6 +367,44 @@ class mob(actor):
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
             self.images[-1].add_to_cell()
+        if not self.in_group:
+            if self.veteran:
+                for current_grid in self.grids:
+                    if current_grid == self.global_manager.get('minimap_grid'):
+                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    elif current_grid == self.global_manager.get('europe_grid'):
+                        status_icon_x, status_icon_y = (0, 0)
+                    else:
+                        status_icon_x, status_icon_y = (self.x, self.y)
+                    input_dict = {}
+                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/veteran_icon.png'
+                    input_dict['name'] = 'veteran icon'
+                    input_dict['modes'] = ['strategic', 'europe']
+                    input_dict['show_terrain'] = False
+                    input_dict['actor'] = self
+                    input_dict['status_icon_type'] = 'veteran'
+                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            if self.disorganized:
+                for current_grid in self.grids:
+                    if current_grid == self.global_manager.get('minimap_grid'):
+                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    elif current_grid == self.global_manager.get('europe_grid'):
+                        status_icon_x, status_icon_y = (0, 0)
+                    else:
+                        status_icon_x, status_icon_y = (self.x, self.y)
+                    input_dict = {}
+                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/disorganized_icon.png'
+                    input_dict['name'] = 'disorganized icon'
+                    input_dict['modes'] = ['strategic', 'europe']
+                    input_dict['show_terrain'] = False
+                    input_dict['actor'] = self
+                    input_dict['status_icon_type'] = 'disorganized'
+                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            
 
     def select(self):
         '''
@@ -355,6 +417,7 @@ class mob(actor):
         '''
         actor_utility.deselect_all(self.global_manager)
         self.selected = True
+        self.global_manager.set('end_turn_selected_mob', self) #tells game to select this unit at the end of the turn because it was selected most recently
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
@@ -372,16 +435,11 @@ class mob(actor):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
-            if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
-                self.end_turn_destination.draw_destination_outline()
-                equivalent_tile = self.end_turn_destination.get_equivalent_tile()
-                if not equivalent_tile == 'none':
-                    equivalent_tile.draw_destination_outline()
         
     def update_tooltip(self):
         '''
         Description:
-            Sets this mob's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this actor's name and its movement points
+            Sets this mob's tooltip to what it should be whenever the player mouses over one of its images
         Input:
             None
         Output:
@@ -389,26 +447,60 @@ class mob(actor):
         '''
         tooltip_list = []
         tooltip_list.append("Name: " + self.name.capitalize())
-        if not self.has_infinite_movement:
-            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+        
+        if self.controllable:
+            if self.is_group:
+                tooltip_list.append('    Officer: ' + self.officer.name.capitalize())
+                tooltip_list.append('    Worker: ' + self.worker.name.capitalize())
+            elif self.is_vehicle:
+                if self.has_crew:
+                    tooltip_list.append("    Crew: " + self.crew.name.capitalize())
+                else:
+                    tooltip_list.append("    Crew: None")
+                    tooltip_list.append("    A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+                    
+                if len(self.contained_mobs) > 0:
+                    tooltip_list.append("    Passengers: ")
+                    for current_mob in self.contained_mobs:
+                        tooltip_list.append('        ' + current_mob.name.capitalize())
+                else:
+                    tooltip_list.append("    Passengers: None")
+            
+            if not self.has_infinite_movement:
+                tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+            else:
+                tooltip_list.append("Movement points: Infinite")
+
         else:
-            tooltip_list.append("Movement points: infinite")
+            tooltip_list.append("Movement points: ???")
+            if self.hostile:
+                tooltip_list.append("Attitude: Hostile")
+            else:
+                tooltip_list.append("Attitude: Neutral")
+            tooltip_list.append("You do not control this unit")
+        
+        tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
+        if self.disorganized:
+            tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
+
+        if not self.end_turn_destination == 'none':
+            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn.")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn.")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn.")
         self.set_tooltip(tooltip_list)
         
-
     def remove(self):
         '''
         Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob and drops any commodities it is carrying
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob
         Input:
             None
         Output:
             None
         '''
-        if (not self.images[0].current_cell == 'none') and (not self.images[0].current_cell.tile == 'none'): #drop inventory on death
-            current_tile = self.images[0].current_cell.tile
-            for current_commodity in self.global_manager.get('commodity_types'):
-                current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
         if self.selected:
             self.selected = False
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
@@ -417,18 +509,10 @@ class mob(actor):
             current_image.remove_from_cell()
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
+        for current_status_icon in self.status_icons:
+            current_status_icon.remove()
+        self.status_icons = []
 
-    def fire(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of die to improve consistency with workers/groups/vehicles, whose die and fire have different
-                functionalities
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.die()
 
     def die(self):
         '''
@@ -442,18 +526,7 @@ class mob(actor):
         '''
         self.remove()
 
-    def can_leave(self):
-        '''
-        Description:
-            Returns whether this mob is allowed to move away from its current cell. By default, mobs can always allowed to move away from their current cells, but subclasses like ship are able to return False
-        Input:
-            None
-        Output:
-            boolean: Returns True
-        '''
-        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
-
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc.
@@ -478,25 +551,17 @@ class mob(actor):
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:
-                                text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
                                 return(False)
                         elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                             #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
                             return(False)
                         else: #if trying to swim in water and can't 
-                            #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
                             return(False)
                     else:
-                        text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
                         return(False)
                 else:
-                    text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
                     return(False)
             else:
-                text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
                 return(False)
 
     def move(self, x_change, y_change):
@@ -534,6 +599,21 @@ class mob(actor):
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+        self.last_move_direction = (x_change, y_change)
+
+    def retreat(self):
+        '''
+        Description:
+            Causes a free movement to the last cell this unit moved from, following a failed attack
+        Input:
+            None
+        Output:
+            None
+        '''
+        original_movement_points = self.movement_points
+        self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+        self.set_movement_points(original_movement_points) #retreating is free
         
     def touching_mouse(self):
         '''
@@ -563,20 +643,6 @@ class mob(actor):
         if self.global_manager.get('displayed_mob') == self: #self.selected:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
-    def can_show_tooltip(self):
-        '''
-        Description:
-            Returns whether this mob's tooltip can be shown. Along with the superclass' requirements, mob tooltips can not be shown when attached to another actor, such as when working in a building
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.in_vehicle or self.in_group or self.in_building:
-            return(False)
-        else:
-            return(super().can_show_tooltip())
-
     def hide_images(self):
         '''
         Description:
@@ -600,54 +666,4 @@ class mob(actor):
         '''
         for current_image in self.images:
             current_image.add_to_cell()        
-
-    def embark_vehicle(self, vehicle):
-        '''
-        Description:
-            Hides this mob and embarks it on the inputted vehicle as a passenger. Any commodities held by this mob are put on the vehicle if there is cargo space, or dropped in its tile if there is no cargo space
-        Input:
-            vehicle vehicle: vehicle that this mob becomes a passenger of
-        Output:
-            None
-        '''
-        self.in_vehicle = True
-        self.selected = False
-        for current_commodity in self.get_held_commodities(): #gives inventory to ship
-            num_held = self.get_inventory(current_commodity)
-            for current_commodity_unit in range(num_held):
-                if vehicle.get_inventory_remaining() > 0:
-                    vehicle.change_inventory(current_commodity, 1)
-                else:
-                    self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
-        self.hide_images()
-        vehicle.contained_mobs.append(self)
-        self.inventory_setup() #empty own inventory
-        vehicle.hide_images()
-        vehicle.show_images() #moves vehicle images to front
-        if not vehicle.initializing: #don't select vehicle if loading in at start of game
-            vehicle.select()
-        if not self.global_manager.get('loading_save'):
-            self.global_manager.get('sound_manager').play_sound('footsteps')
-
-    def disembark_vehicle(self, vehicle):
-        '''
-        Description:
-            Shows this mob and disembarks it from the inputted vehicle after being a passenger
-        Input:
-            vehicle vehicle: vehicle that this mob disembarks from
-        Output:
-            None
-        '''
-        vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
-        self.in_vehicle = False
-        self.x = vehicle.x
-        self.y = vehicle.y
-        for current_image in self.images:
-            current_image.add_to_cell()
-        vehicle.selected = False
-        self.select()
-        if self.global_manager.get('minimap_grid') in self.grids:
-            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
-        self.global_manager.get('sound_manager').play_sound('footsteps')
 

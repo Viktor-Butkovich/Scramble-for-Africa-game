@@ -59,6 +59,10 @@ SFA folder
 		    class buy_slaves_button
 
 	mob_types folder
+	    battalions.py
+		imports time, groups, modules.tiles, modules.actor_utility, modules.notification_tools
+		class battalion(groups.group)
+
 	    caravans.py
 		imports random, math, groups, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
 		class caravan(groups.group)
@@ -72,19 +76,30 @@ SFA folder
 		class expedition(groups.group)
 	    
             groups.py
-	        imports modules.mobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.dice, modules.images, modules.scaling
+	        imports pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
                 class group(modules.mobs.mob)
 
 	    missionaries.py
 		imports groups, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools
 		class missionaries(groups.group)
 
+	    native_warriors.py
+		imports random, npmobs, modules.utility
+		class native_warriors(npmobs.npmob)
+
+	    npmobs.py
+		imports random, modules.mobs, modules.utility
+		class npmob(modules.mob)
+
 	    officers.py
-	        imports random, modules.mobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.dice, modules.scaling, 
-		    modules.images
-	        class officer(modules.mobs.mob)
+	        imports random, pmobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.scaling, modules.images
+	        class officer(pmobs.pmob)
 		    class evangelist
 		    class merchant
+
+	    pmobs.py
+		imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility
+		class pmob(modules.mob)
 
 	    porters.py
 		imports groups, modules.actor_utility
@@ -92,7 +107,7 @@ SFA folder
 
 	    vehicles.py
 	        imports modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.mobs, modules.buttons
-	        class vehicle(modules.mobs.mob)
+	        class vehicle(pmobs.pmob)
 		    class train
 		    class ship
 
@@ -102,24 +117,25 @@ SFA folder
 
 	    workers.py
 	        imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
-	        class worker(modules.mobs.mob)
+	        class worker(pmobs.pmob)
 		    class church_volunteers
 		    class slave_worker
 
 	action_notifications.py
 	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility
-	    class dice_rolling_notification(notifications.notification)
-	    class exploration_notification(notifications.notification)
-	    class off_tile_exploration_notification(notifications.notification)
-	    class trade_notification_notification(notifications.notification)
-	    class religious_campaign_notification(notifications.notification)
-	    class advertising_campaign_notification(notifications.notification)
-    	    class conversion_notification(notifications.notification)
-	    class construction_notification(notifications.notification)
+	    class action_notification(notifications.notification)
+	    class dice_rolling_notification(action_notification)
+	    class exploration_notification(action_notification)
+	    class off_tile_exploration_notification(action_notification)
+	    class trade_notification_notification(action_notification)
+	    class religious_campaign_notification(action_notification)
+	    class advertising_campaign_notification(action_notification)
+    	    class conversion_notification(action_notification)
+	    class construction_notification(action_notification)
 
 	actor_creation_tools.py
-	    imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, buildings, 
-		ministers, notification_tools, utility, market_tools
+	    imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
+		mob_types.battalions, mob_types.native_warriors, buildings, ministers, notification_tools, utility, market_tools
 	    class actor_creation_manager_template
 
         actor_utility.py
@@ -163,7 +179,7 @@ SFA folder
 		class show_previous_financial_report_button
 
         cells.py
-            imports pygame, actor_utility
+            imports pygame, random, actor_utility
             class cell
 
 	choice_notifications.py
@@ -194,6 +210,7 @@ SFA folder
             imports random, text_tools
             def roll
             def roll_to_list
+	    def combat_roll_to_list
 
         drawing_tools.py
             imports pygame
@@ -283,7 +300,7 @@ SFA folder
 	    class minister
 
         mobs.py
-            imports pygame, time, images, text_tools, utility, actor_utility, actors
+            imports pygame, time, images, utility, actor_utility, actors, tiles
             class mob(actors.actor)
 
 	mouse_followers.py
@@ -326,12 +343,13 @@ SFA folder
             class tile(actors.actor)
                 class abstract_tile
 		class resource_icon
-                class veteran_icon
+                class status_icon
 
 	turn_management_tools.py
 	    imports random, text_tools, actor_utility, market_tools, notification_tools, utility
 	    def end_turn
 	    def start_turn
+	    def reset_mobs
 	    def manage_production
 	    def manage_upkeep
 	    def manage_public_opinion
@@ -341,6 +359,9 @@ SFA folder
 	    def manage_worker_migration
 	    def resolve_worker_migration
 	    def create_weighted_migration_destinations
+	    def manage_villages
+	    def manage_enemy_movement
+	    def manage_combat
 
         utility.py
             def find_object_distance

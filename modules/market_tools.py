@@ -17,17 +17,21 @@ def adjust_prices(global_manager):
     num_decreased = 1
     for i in range(4):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
+        while changed_commodity == 'consumer goods':
+            changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
         change_price(changed_commodity, 1, global_manager)
     for i in range(2):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
         while changed_commodity == 'consumer goods':
-            changed_commodity = random.choice(global_manager.get('commodity_types'))
+            changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
         change_price(changed_commodity, -1, global_manager)
+        
     consumer_goods_roll = random.randrange(1, 7)
+    
     if consumer_goods_roll == 1:
-        change_price('consumer goods', 2, global_manager)
+        change_price('consumer goods', 1, global_manager)
     elif consumer_goods_roll >= 5:
-        change_price('consumer goods', -2, global_manager)
+        change_price('consumer goods', -1, global_manager)
 
 def change_price(changed_commodity, num_change, global_manager):
     '''

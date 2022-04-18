@@ -1,6 +1,7 @@
 #Contains functionality for grid cells
 
 import pygame
+import random
 from . import actor_utility
 
 class cell():
@@ -85,6 +86,9 @@ class cell():
             save_dict['village_population'] = self.village.population
             save_dict['village_aggressiveness'] = self.village.aggressiveness
             save_dict['village_available_workers'] = self.village.available_workers
+            save_dict['village_attached_warriors'] = []
+            for attached_warrior in self.village.attached_warriors:
+                save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
 
     def has_village(self):
@@ -156,6 +160,19 @@ class cell():
             return(True)
         return(False)
 
+    def has_resource_building(self):
+        '''
+        Description:
+            Returns whether this cell contains a resource production building
+        Input:
+            None
+        Output:
+            boolean: Returns False if this cell does not contain a resource production building, otherwise returns True
+        '''
+        if self.contained_buildings['resource'] == 'none':
+            return(False)
+        return(True)
+
     def reset_buildings(self):
         '''
         Description:
@@ -183,7 +200,6 @@ class cell():
             if not self.contained_buildings[current_building_type] == 'none':
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
-        
 
     def has_port(self):
         '''
@@ -226,7 +242,6 @@ class cell():
         input_dict['name'] = 'slums'
         input_dict['modes'] = ['strategic']
         input_dict['init_type'] = 'slums'
-        #input_dict['image'] = 'buildings/slums.png'
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         if self.tile == self.global_manager.get('displayed_tile'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
@@ -287,48 +302,100 @@ class cell():
                 return(current_mob)
         return('none')
 
-    def has_worker(self):
+    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
         '''
         Description:
-            Returns whether this cell contains a worker
+            Returns whether this cell contains a worker of one of the inputted types
         Input:
-            None
+            string list possible_types: type of worker that can be detected, includes all workers by default
         Output:
-            Returns True if this cell contains a worker, otherwise returns False
+            Returns True if this cell contains a worker of one of the inputted types, otherwise returns False
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types: 
                 return(True)
         return(False)
 
-    def get_worker(self):
+    def get_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
         '''
         Description:
-            Returns the first worker in this cell, or 'none' if none are present. Does not inclue church volunteers
+            Returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
-            None
+            string list possible_types: type of worker that can be returned, includes all workers by default
         Output:
-            string/worker: Returns the first worker in this cell, or 'none' if none are present
+            string/worker: Returns the first worker in this cell of the inputted types, or 'none' if none are present
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and not current_mob.is_church_volunteers:
+            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types:
                 return(current_mob)
         return('none')
 
-    def get_church_volunteers(self):
+    def has_pmob(self):
         '''
         Description:
-            Returns the first church volunteer in this cell, or 'none' if none are present
+            Returns whether this cell contains a pmob
         Input:
             None
         Output:
-            string/church_volunteers: Returns the first church volunteer in this cell, or 'none' if none are present
+            Returns whether this cell contains a pmob
         '''
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and current_mob.is_church_volunteers:
-                return(current_mob)
-        return('none')
+            if current_mob.is_pmob:
+                return(True)
+        #if self.has_resource_building():
+        #    if len(self.contained_buildings['resource'].contained_work_crews) > 0:
+        #        return(True)
+        #maybe have slums count?
+        return(False)
 
+    def has_npmob(self):
+        '''
+        Description:
+            Returns whether this cell contains an npmob
+        Input:
+            None
+        Output:
+            Returns whether this cell contains an npmob
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob.is_npmob:
+                return(True)
+        return(False)
+
+    def get_best_combatant(self, mob_type):
+        '''
+        Description:
+            Finds and returns the best combatant in this cell of the inputted type. Combat ability is based on the unit's combat modifier and veteran status
+        Input:
+            string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for the most powerful npmob and vice versa
+        '''
+        best_combatants = ['none']
+        best_combat_modifier = 0
+        if mob_type == 'npmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_npmob:
+                    current_combat_modifier = current_mob.get_combat_modifier()
+                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
+                        best_combatants = [current_mob]
+                        best_combat_modifier = current_combat_modifier
+                    elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
+                        best_combatants.append(current_mob)
+        elif mob_type == 'pmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_pmob:
+                    current_combat_modifier = current_mob.get_combat_modifier()
+                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
+                        best_combatants = [current_mob]
+                        best_combat_modifier = current_combat_modifier
+                    elif current_combat_modifier == best_combat_modifier:
+                        if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
+                            best_combatants = [current_mob]
+                            best_combatant_modifier = current_combat_modifier
+                        else:
+                            best_combatants.append(current_mob)
+                        
+        return(random.choice(best_combatants))
+    
     def set_visibility(self, new_visibility):
         '''
         Description:
@@ -393,7 +460,7 @@ class cell():
             None
         '''
         length = len(self.contained_mobs)
-        if length >= 2 and not self.terrain == 'none':
+        if length >= 2 and self.visible and not self.terrain == 'none':
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)

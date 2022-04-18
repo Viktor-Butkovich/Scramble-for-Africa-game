@@ -118,6 +118,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'slums', global_manager))
+        elif self.actor_label_type == 'combat_strength':
+            self.message_start = 'Combat strength: '
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -220,6 +222,21 @@ class actor_display_label(label):
             tooltip_text.append("Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work.")
             tooltip_text.append("Slums can form around ports, train stations, and resource production facilities.")
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'combat_strength':
+            tooltip_text = [self.message]
+            tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type.")
+            if not self.actor == 'none':
+                modifier = self.actor.get_combat_modifier()
+                if modifier >= 0:
+                    sign = '+'
+                else:
+                    sign = ''
+                    
+                if self.actor.veteran:
+                    tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                else:
+                    tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
+            self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
 
@@ -262,19 +279,37 @@ class actor_display_label(label):
                     self.set_label(self.message_start + 'unknown')
                     
             elif self.actor_label_type == 'movement':
-                if not new_actor.has_infinite_movement:
-                    self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
-                else:
-                    if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
-                        if new_actor.movement_points == 0 or not new_actor.has_crew:
-                            self.set_label("No movement")
-                        else:
-                            self.set_label("Infinite movement until cargo/passenger dropped")
+                if self.actor.controllable:
+                    if not new_actor.has_infinite_movement:
+                        self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
                     else:
-                        if new_actor.movement_points == 0 or not new_actor.has_crew:
-                            self.set_label("No movement")
+                        if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                                self.set_label("No movement")
+                            else:
+                                self.set_label("Infinite movement until cargo/passenger dropped")
                         else:
-                            self.set_label("Infinite movement")
+                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                                self.set_label("No movement")
+                            else:
+                                self.set_label("Infinite movement")
+                else:
+                    self.set_label(self.message_start + "???")
+
+
+            elif self.actor_label_type == 'attitude':
+                if not self.actor.controllable:
+                    if self.actor.hostile:
+                        self.set_label(self.message_start + "hostile")
+                    else:
+                        self.set_label(self.message_start + "neutral")
+
+            elif self.actor_label_type == 'combat_strength':
+                self.set_label(self.message_start + str(self.actor.get_combat_strength()))
+
+            elif self.actor_label_type == 'controllable':
+                if not self.actor.controllable:
+                    self.set_label("You do not control this unit")
                             
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
@@ -333,9 +368,10 @@ class actor_display_label(label):
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
                     
             elif self.actor_label_type == 'minister':
-                if not self.actor.controlling_minister == 'none':
-                    self.set_label(self.message_start + self.actor.controlling_minister.name)
-                self.attached_images[0].calibrate(self.actor.controlling_minister)
+                if self.actor.controllable:
+                    if not self.actor.controlling_minister == 'none':
+                        self.set_label(self.message_start + self.actor.controlling_minister.name)
+                    self.attached_images[0].calibrate(self.actor.controlling_minister)
                 
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)
@@ -412,6 +448,10 @@ class actor_display_label(label):
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
         elif self.actor_label_type == 'slums' and self.actor.cell.contained_buildings['slums'] == 'none':
+            return(False)
+        elif self.actor_label_type == 'minister' and not self.actor.controllable:
+            return(False)
+        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
             return(False)
         else:
             return(result)

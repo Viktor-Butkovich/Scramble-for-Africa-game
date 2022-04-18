@@ -19,9 +19,8 @@ def end_turn(global_manager):
     '''
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
-    #text_tools.print_to_screen("Ending turn", global_manager)
-    for current_mob in global_manager.get('mob_list'):
-        current_mob.end_turn_move()
+    for current_pmob in global_manager.get('pmob_list'):
+        current_pmob.end_turn_move()
     for current_cell in global_manager.get('strategic_map_grid').cell_list:
         current_tile = current_cell.tile
         while current_tile.get_inventory_used() > current_tile.inventory_capacity:
@@ -41,6 +40,15 @@ def start_turn(global_manager, first_turn):
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
+        #enemy turn starts
+        manage_villages(global_manager)
+        reset_mobs('npmobs', global_manager)
+        manage_enemy_movement(global_manager)
+        manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+        
+        #own turn starts
+        reset_mobs('pmobs', global_manager)
+        
         manage_production(global_manager)
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
@@ -49,33 +57,43 @@ def start_turn(global_manager, first_turn):
         manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
-    
+
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
-    for current_mob in global_manager.get('mob_list'):
-        current_mob.reset_movement_points()
+        
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
-    for current_village in global_manager.get('village_list'):
-        roll = random.randrange(1, 7)
-        if roll <= 2: #1-2
-            current_village.change_aggressiveness(-1)
-        #3-4 does nothing
-        elif roll >= 5: #5-6
-            current_village.change_aggressiveness(1)
-
-        roll = random.randrange(1, 7)
-        second_roll = random.randrange(1, 7)
-        if roll == 6 and second_roll == 6:
-            current_village.change_population(1)
             
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if not end_turn_selected_mob == 'none':
+    if (not end_turn_selected_mob == 'none') and end_turn_selected_mob in global_manager.get('mob_list'): #do not attempt to select if none selected or has been removed since end of turn
         end_turn_selected_mob.select()
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+
+def reset_mobs(mob_type, global_manager):
+    '''
+    Description:
+        Starts the turn for mobs of the inputed type, resetting their movement points and removing the disorganized status
+    Input:
+        string mob_type: Can be pmob or npmob, determines which mobs' turn starts
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if mob_type == 'pmobs':
+        for current_pmob in global_manager.get('pmob_list'):
+            current_pmob.reset_movement_points()
+            current_pmob.set_disorganized(False) 
+    elif mob_type == 'npmobs':
+        for current_npmob in global_manager.get('npmob_list'):
+            current_npmob.reset_movement_points()
+            current_npmob.set_disorganized(False) 
+    else:
+        for current_mob in global_manager.get('mob_list'):
+            current_mob.reset_movement_points()
+            current_mob.set_disorganized(False)
 
 def manage_production(global_manager):
     '''
@@ -122,8 +140,6 @@ def manage_upkeep(global_manager):
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
     global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
-    
-    #text_tools.print_to_screen("You paid a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.", global_manager) #described in financial report
 
 def manage_loans(global_manager):
     '''
@@ -348,3 +364,53 @@ def create_weighted_migration_destinations(destination_cell_list):
         for i in range(total_weight):
             weighted_cell_list.append(current_cell)
     return(weighted_cell_list)
+
+
+def manage_villages(global_manager):
+    '''
+    Description:
+        Controls the aggressiveness and population changes of villages and native warrior spawning/despawning
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_village in global_manager.get('village_list'):
+        roll = random.randrange(1, 7)
+        if roll <= 2: #1-2
+            current_village.change_aggressiveness(-1)
+        #3-4 does nothing
+        elif roll >= 5: #5-6
+            current_village.change_aggressiveness(1)
+
+        roll = random.randrange(1, 7)
+        second_roll = random.randrange(1, 7)
+        if roll == 6 and second_roll == 6:
+            current_village.change_population(1)
+
+        current_village.manage_warriors()
+
+def manage_enemy_movement(global_manager):
+    '''
+    Description:
+        Moves npmobs at the end of the turn towards player-controlled mobs/buildings
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_npmob in global_manager.get('npmob_list'):
+        if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+            current_npmob.end_turn_move()
+
+def manage_combat(global_manager):
+    '''
+    Description:
+        Resolves, in order, each possible combat that was triggered by npmobs moving into cells with pmobs. When a possible combat is resolved, it should call the next possible combat until all are resolved
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if len(global_manager.get('attacker_queue')) > 0:
+        global_manager.get('attacker_queue').pop(0).attempt_local_combat()

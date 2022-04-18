@@ -569,7 +569,10 @@ class button():
                 
             elif self.button_type == 'exploration':
                 self.expedition.start_exploration(self.x_change, self.y_change)
-                #self.global_manager.get('money_tracker').change(self.expedition.exploration_cost * -1)
+
+            elif self.button_type == 'attack':
+                self.battalion.remove_attack_marks()
+                self.battalion.move(self.x_change, self.y_change, True)
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -619,11 +622,12 @@ class button():
                                         text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
                                     if can_pick_up:
                                         if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                            displayed_mob.change_inventory(commodity, num_commodity)
-                                            displayed_tile.change_inventory(commodity, -1 * num_commodity)
+                                            amount_transferred = num_commodity
                                         else:
-                                            text_tools.print_to_screen("Picking up " + str(num_commodity) + " unit" + utility.generate_plural(num_commodity) + " of " + commodity + " would exceed this unit's inventory capacity of " +
-                                                str(displayed_mob.inventory_capacity) + ".", self.global_manager)
+                                            amount_transferred = displayed_mob.get_inventory_remaining()
+                                            text_tools.print_to_screen("This unit can currently only pick up " + str(amount_transferred) + " units of " + commodity + ".", self.global_manager)
+                                        displayed_mob.change_inventory(commodity, amount_transferred)
+                                        displayed_tile.change_inventory(commodity, -1 * amount_transferred)
                                 else:
                                     text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                             else:
@@ -672,7 +676,7 @@ class button():
 
             elif self.button_type == 'cycle units':
                 if main_loop_tools.action_possible(self.global_manager):
-                    mob_list = self.global_manager.get('mob_list')
+                    mob_list = self.global_manager.get('pmob_list')
                     cycled_mob = 'none'
                     cycled_index = 0
                     for current_mob_index in range(len(mob_list)):
@@ -753,6 +757,10 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
+            elif self.button_type == 'stop attack':
+                self.global_manager.set('ongoing_combat', False)
+                self.notification.choice_info_dict['battalion'].remove_attack_marks()
+
             elif self.button_type == 'stop trading':
                 self.global_manager.set('ongoing_trade', False)
                 
@@ -826,7 +834,7 @@ class button():
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
-                if self.global_manager.get('displayed_mob') == 'none':
+                if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
             return(True)
         return(False)
@@ -949,7 +957,7 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected, otherwise returns same as superclass
         '''
-        if (not self.global_manager.get('displayed_tile') == 'none'):
+        if (not self.global_manager.get('displayed_tile') == 'none') and self.global_manager.get('displayed_tile').cell.visible:
             return(super().can_show())
         else:
             return(False)
@@ -1092,7 +1100,8 @@ class fire_unit_button(button):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
-                return(True)
+                if self.attached_mob.controllable:
+                    return(True)
         return(False)
 
     def update_tooltip(self):

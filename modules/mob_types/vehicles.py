@@ -4,12 +4,12 @@ from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import main_loop_tools
-from ..mobs import mob
+from .pmobs import pmob
 from ..buttons import button
 
-class vehicle(mob):
+class vehicle(pmob):
     '''
-    Mob that requires an attached worker to function and can carry other mobs as passengers
+    pmob that requires an attached worker to function and can carry other mobs as passengers
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -33,7 +33,7 @@ class vehicle(mob):
         Output:
             None
         '''
-        self.initializing = True #when mobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
+        self.initializing = True #when pmobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
         self.vehicle_type = 'vehicle'
         self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']
@@ -143,34 +143,34 @@ class vehicle(mob):
             text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
     
-    def update_tooltip(self):
-        '''
-        Description:
-            Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
-        Input:
-            None
-        Output:
-            None
-        '''
-        tooltip_list = ["Name: " + self.name.capitalize()]
-        if self.has_crew:
-            tooltip_list.append("Crew: " + self.crew.name.capitalize())
-        else:
-            tooltip_list.append("Crew: None")
-            tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
-            
-        if len(self.contained_mobs) > 0:
-            tooltip_list.append("Passengers: ")
-            for current_mob in self.contained_mobs:
-                tooltip_list.append('    ' + current_mob.name.capitalize())
-        else:
-            tooltip_list.append("No passengers")
-
-        if not self.has_infinite_movement:
-            tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
-        else:
-            tooltip_list.append("Movement points: infinite")
-        self.set_tooltip(tooltip_list)
+    #def update_tooltip(self):
+    #    '''
+    #    Description:
+    #        Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
+    #    Input:
+    #        None
+    #    Output:
+    #        None
+    #    '''
+    #    tooltip_list = ["Name: " + self.name.capitalize()]
+    #    if self.has_crew:
+    #        tooltip_list.append("Crew: " + self.crew.name.capitalize())
+    #    else:
+    #        tooltip_list.append("Crew: None")
+    #        tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+    #        
+    #    if len(self.contained_mobs) > 0:
+    #        tooltip_list.append("Passengers: ")
+    #        for current_mob in self.contained_mobs:
+    #            tooltip_list.append('    ' + current_mob.name.capitalize())
+    #    else:
+    #        tooltip_list.append("No passengers")
+    #
+    #    if not self.has_infinite_movement:
+    #        tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+    #    else:
+    #        tooltip_list.append("Movement points: infinite")
+    #    self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -300,7 +300,7 @@ class ship(vehicle):
         '''
         if self.images[0].current_cell.terrain == 'water':
             for current_mob in self.images[0].current_cell.contained_mobs:
-                if not current_mob.can_swim:
+                if current_mob.controllable and not current_mob.can_swim:
                     text_tools.print_to_screen("A " + self.vehicle_type + " can not leave without taking unaccompanied units as passengers.", self.global_manager)
                     return(False)
         return(True)

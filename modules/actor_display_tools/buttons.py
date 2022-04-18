@@ -121,7 +121,7 @@ class worker_crew_vehicle_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.is_church_volunteers)) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
+            if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.worker_type == 'religious')) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
@@ -167,7 +167,7 @@ class pick_up_all_passengers_button(label_button):
                 vehicle = self.attached_label.actor
                 for contained_mob in vehicle.images[0].current_cell.contained_mobs:
                     passenger = contained_mob
-                    if not passenger.is_vehicle: #vehicles won't be picked up as passengers
+                    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                         passenger.embark_vehicle(vehicle)
             else:
                 text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)
@@ -226,7 +226,7 @@ class crew_vehicle_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 vehicle = self.attached_label.actor
-                crew = vehicle.images[0].current_cell.get_worker() #'none'
+                crew = vehicle.images[0].current_cell.get_worker(['African', 'European', 'slave']) #'none'
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         crew.crew_vehicle(vehicle)
@@ -374,21 +374,20 @@ class merge_button(label_button):
                         if current_selected in self.global_manager.get('officer_list'):
                             officer = current_selected
                             if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
-                                worker = officer.images[0].current_cell.get_church_volunteers()
+                                worker = officer.images[0].current_cell.get_worker(['religious'])
                             else:
-                                worker = officer.images[0].current_cell.get_worker()
+                                worker = officer.images[0].current_cell.get_worker(['African', 'European', 'slave'])
                     if not (officer == 'none' or worker == 'none'): #if worker and officer selected
                         if officer.x == worker.x and officer.y == worker.y:
-                            #groups.create_group(worker, officer, self.global_manager) #groups.create_group(officer.images[0].current_cell.get_worker(), officer, self.global_manager)
                             self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
                         else:
                             if (not officer == 'none') and officer.officer_type == 'evangelist':
-                                text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
+                                text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create missionaries.", self.global_manager)
                             else:  
                                 text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                     else:
                         if (not officer == 'none') and officer.officer_type == 'evangelist':
-                            text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create a group.", self.global_manager)
+                            text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create missionaries.", self.global_manager)
                         else:  
                             text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
                 else:
@@ -617,7 +616,9 @@ class embark_vehicle_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
+            if not self.attached_label.actor.controllable:
+                result = False
+            elif self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
                 result = False
             elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
@@ -1285,7 +1286,9 @@ class switch_theatre_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not self.attached_label.actor.travel_possible): 
+            if not self.attached_label.actor.controllable:
+                return(False)
+            if (not self.attached_label.actor.can_travel()): 
                 return(False)
         return(result) 
 
