@@ -10,6 +10,7 @@ from .. import dice
 from .. import scaling
 from .. import images
 from .. import dice_utility
+from .. import turn_management_tools
 
 class pmob(mob):
     '''
@@ -582,8 +583,8 @@ class pmob(mob):
             if combat_type == 'attacking':
                 self.retreat()
                 self.set_disorganized(True)
-            if combat_type == 'defending':
-                if len(self.images[0].current_cell.contained_mobs) > 2:
+            elif combat_type == 'defending':
+                if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
                 self.die()
 
@@ -593,6 +594,8 @@ class pmob(mob):
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+        elif not self.global_manager.get('player_turn'): #if enemy turn and all combats are completed, go to player turn
+            turn_management_tools.start_player_turn(self.global_manager)
 
     def start_construction(self, building_info_dict):
         '''

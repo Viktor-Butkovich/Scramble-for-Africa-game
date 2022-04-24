@@ -26,27 +26,38 @@ def end_turn(global_manager):
         while current_tile.get_inventory_used() > current_tile.inventory_capacity:
             discarded_commodity = random.choice(current_tile.get_held_commodities())
             current_tile.change_inventory(discarded_commodity, -1)
-    start_turn(global_manager, False)
+            
+    start_enemy_turn(global_manager)
 
-def start_turn(global_manager, first_turn):
+def start_enemy_turn(global_manager):
     '''
     Description:
-        Starts the turn, giving all units their maximum movement points and adjusting market prices
+        Starts the ai's turn, resetting their units to maximum movement points, spawning warriors, etc.
     Input:
         global_manager_template global_manager: Object that accesses shared variables
+        first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
+    Output:
+        None
+    '''
+    manage_villages(global_manager)
+    reset_mobs('npmobs', global_manager)
+    manage_enemy_movement(global_manager)
+    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+    #the manage_combat function starts the player turn
+    
+def start_player_turn(global_manager, first_turn = False):
+    '''
+    Description:
+        Starts the player's turn, resetting their units to maximum movement points, adjusting prices, paying upkeep, etc.
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
     Output:
         None
     '''
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
-        #enemy turn starts
-        manage_villages(global_manager)
-        reset_mobs('npmobs', global_manager)
-        manage_enemy_movement(global_manager)
-        manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
-        
-        #own turn starts
         reset_mobs('pmobs', global_manager)
         
         manage_production(global_manager)
@@ -414,3 +425,5 @@ def manage_combat(global_manager):
     '''
     if len(global_manager.get('attacker_queue')) > 0:
         global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+    else:
+        start_player_turn(global_manager)

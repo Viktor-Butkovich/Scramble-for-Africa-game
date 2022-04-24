@@ -3,6 +3,7 @@
 import random
 from ..mobs import mob
 from .. import utility
+from .. import turn_management_tools
 
 class npmob(mob):
     '''
@@ -90,7 +91,9 @@ class npmob(mob):
             defender.start_combat('defending', self)
         else:
             if len(self.global_manager.get('attacker_queue')) > 0:
-                   self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+                self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+            elif not self.global_manager.get('player_turn'): #if enemy turn and all combats are completed, go to player turn
+                turn_management_tools.start_player_turn(self.global_manager)
         
     def end_turn_move(self):
         '''

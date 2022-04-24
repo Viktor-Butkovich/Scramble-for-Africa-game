@@ -88,7 +88,7 @@ SFA folder
 		class native_warriors(npmobs.npmob)
 
 	    npmobs.py
-		imports random, modules.mobs, modules.utility
+		imports random, modules.mobs, modules.utility, modules.turn_management_tools
 		class npmob(modules.mob)
 
 	    officers.py
@@ -98,7 +98,8 @@ SFA folder
 		    class merchant
 
 	    pmobs.py
-		imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility
+		imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
+			modules.turn_management_tools
 		class pmob(modules.mob)
 
 	    porters.py
@@ -348,7 +349,8 @@ SFA folder
 	turn_management_tools.py
 	    imports random, text_tools, actor_utility, market_tools, notification_tools, utility
 	    def end_turn
-	    def start_turn
+	    def start_enemy_turn
+	    def start_player_turn
 	    def reset_mobs
 	    def manage_production
 	    def manage_upkeep
@@ -405,4 +407,5 @@ SFA folder
     README.txt
 
     Scramble_for_Africa.py
-        imports pygame, time, random, os, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tool
+        imports pygame, time, random, os, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tools
+As of last count, this program contains 19,565 lines of code across 54 python files

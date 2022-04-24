@@ -294,4 +294,3 @@ class church_volunteers(worker):
         input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
-        #self.is_church_volunteers = True
