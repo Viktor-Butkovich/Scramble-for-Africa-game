@@ -271,7 +271,11 @@ class pmob(mob):
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
                             (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
-                                return(True)
+                                if (not future_cell.has_npmob()) or self.is_battalion: #non-battalion units can't move into enemies
+                                    return(True)
+                                else:
+                                    text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
+                                    return(False)
                             else:
                                 text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
                                 text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)

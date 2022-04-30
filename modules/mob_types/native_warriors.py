@@ -67,6 +67,6 @@ class native_warriors(npmob):
         Output:
             None
         '''
-        if random.randrange(1, 7) == 1:
+        if random.randrange(1, 7) >= 4 and random.randrange(1, 7) >= 4: #1/4 chance of despawn
             self.remove()
             self.origin_village.change_population(1)

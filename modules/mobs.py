@@ -611,7 +611,6 @@ class mob(actor):
         Output:
             None
         '''
-        print(str(self) + " retreating")
         original_movement_points = self.movement_points
         self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
         self.set_movement_points(original_movement_points) #retreating is free

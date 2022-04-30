@@ -654,6 +654,8 @@ class button():
                         text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
                         text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
                     else:
+                        if not self.global_manager.get('current_game_mode') == 'strategic':
+                            game_transitions.set_game_mode('strategic', self.global_manager)
                         choice_info_dict = {'type': 'end turn'}
                         notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:

@@ -126,7 +126,7 @@ class grid():
         Output:
             None
         '''
-        if self.global_manager.get('show_grid_lines'):
+        if self.global_manager.get('show_grid_lines') and self.global_manager.get('current_game_mode') in self.modes:
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
             for y in range(0, self.coordinate_height+1):

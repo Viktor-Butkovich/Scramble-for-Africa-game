@@ -70,7 +70,7 @@ class village():
         for current_attached_warrior in self.attached_warriors:
             current_attached_warrior.check_despawn()
 
-        if self.can_spawn_warrior():
+        if self.can_spawn_warrior() and random.randrange(1, 7) >= 3: #2/3 chance of even attempting
             min_spawn_result = 6 + self.get_aggressiveness_modifier() # 6-1 = 5 on high aggressiveness, 6 on average aggressiveness, 6+1 = 7 on low aggressiveness
             if random.randrange(1, 7) >= min_spawn_result: #1/3 on high, 1/6 on average, 0 on low
                 self.spawn_warrior()
@@ -78,13 +78,13 @@ class village():
     def can_spawn_warrior(self):
         '''
         Description:
-            Returns whether this village can currently spawn a warrior. A village with 0 population can not spawn warriors
+            Returns whether this village can currently spawn a warrior. A village with 0 population can not spawn warriors, and available workers will not become warriors
         Input:
             None
         Output:
             Returns whether this village can currently spawn a warrior
         '''
-        if self.global_manager.get('spawning_allowed') and self.population > 0:
+        if self.global_manager.get('spawning_allowed') and self.population > self.available_workers:
             return(True)
         return(False)
     

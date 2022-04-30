@@ -7,6 +7,7 @@ from . import actor_utility
 from . import market_tools
 from . import notification_tools
 from . import utility
+from . import game_transitions
 
 def end_turn(global_manager):
     '''
@@ -17,6 +18,7 @@ def end_turn(global_manager):
     Output:
         None
     '''
+    
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
