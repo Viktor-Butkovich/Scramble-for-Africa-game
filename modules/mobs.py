@@ -174,11 +174,12 @@ class mob(actor):
         Output:
             int: Returns this unit's combst strength
         '''
+        #A unit with 0 combat strength can not fight
         #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
         #add 3 to modifier and add veteran bonus to get strength
-        #0: disorganized lone officer
-        #1: lone officer, disorganized workers/civilian group/vehicle
-        #2: veteran lone officer, workers/civilian group/vehicle, disorganized native warriors
+        #0: lone officer, vehicle
+        #1: disorganized workers/civilian group
+        #2: veteran lone officer, workers/civilian group, disorganized native warriors
         #3: veteran civilian group, disorganized colonial battalion, native warriors
         #4: colonial battalion, disorganized imperial battalion
         #5: imperial battalion, veteran colonial battalion, disorganized veteran imperial battalion
@@ -187,6 +188,8 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
+        if self.is_officer or self.is_vehicle:
+            result = 0
         return(result)
 
     def combat_possible(self):
@@ -421,6 +424,12 @@ class mob(actor):
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+
+    def move_to_front(self):
+        for current_image in self.images:
+            current_cell = self.images[0].current_cell
+            while not current_cell.contained_mobs[0] == self: #move to front of tile
+                current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
 
     def draw_outline(self):
         '''

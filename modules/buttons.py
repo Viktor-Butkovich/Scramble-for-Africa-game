@@ -695,10 +695,11 @@ class button():
                     else:
                         mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
                         cycled_mob.select()
-                        for current_image in cycled_mob.images:
-                            current_cell = cycled_mob.images[0].current_cell
-                            while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
-                                current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+                        cycled_mob.move_to_front()
+                        #for current_image in cycled_mob.images:
+                        #    current_cell = cycled_mob.images[0].current_cell
+                        #    while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
+                        #        current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
                         if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
                             cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
                         else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it

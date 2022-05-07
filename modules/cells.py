@@ -337,7 +337,7 @@ class cell():
         Input:
             None
         Output:
-            Returns whether this cell contains a pmob
+            boolean: Returns whether this cell contains a pmob
         '''
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
@@ -355,7 +355,7 @@ class cell():
         Input:
             None
         Output:
-            Returns whether this cell contains an npmob
+            booleaN: Returns whether this cell contains an npmob
         '''
         for current_mob in self.contained_mobs:
             if current_mob.is_npmob:
@@ -365,9 +365,12 @@ class cell():
     def get_best_combatant(self, mob_type):
         '''
         Description:
-            Finds and returns the best combatant in this cell of the inputted type. Combat ability is based on the unit's combat modifier and veteran status
+            Finds and returns the best combatant of the inputted type in this cell. Combat ability is based on the unit's combat modifier and veteran status. Assumes that units in vehicles and buildings have already detached upon being
+                attacked
         Input:
             string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for the most powerful npmob and vice versa
+        Output;
+            mob: Returns the best combatant of the inputted type in this cell
         '''
         best_combatants = ['none']
         best_combat_modifier = 0
@@ -383,19 +386,40 @@ class cell():
         elif mob_type == 'pmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_pmob:
-                    current_combat_modifier = current_mob.get_combat_modifier()
-                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
-                        best_combatants = [current_mob]
-                        best_combat_modifier = current_combat_modifier
-                    elif current_combat_modifier == best_combat_modifier:
-                        if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
+                    if current_mob.get_combat_strength() > 0: #unit with 0 combat strength can not fight
+                        current_combat_modifier = current_mob.get_combat_modifier()
+                        if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
                             best_combatants = [current_mob]
-                            best_combatant_modifier = current_combat_modifier
-                        else:
-                            best_combatants.append(current_mob)
+                            best_combat_modifier = current_combat_modifier
+                        elif current_combat_modifier == best_combat_modifier:
+                            if current_mob.veteran and not best_combatants[0].veteran: #use veteran as tiebreaker
+                                best_combatants = [current_mob]
+                                best_combatant_modifier = current_combat_modifier
+                            else:
+                                best_combatants.append(current_mob)
                         
         return(random.choice(best_combatants))
-    
+
+    def get_noncombatants(self, mob_type):
+        '''
+        Description:
+            Finds and returns all units of the inputted type in this cell that have 0 combat strength. Assumes that units in vehicles and buildings have already detached upon being attacked
+        Input:
+            string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for noncombatant pmobs and vice versa
+        Output:
+            mob list: Returns the noncombatants of the inputted type in this cell
+        '''
+        noncombatants = []
+        if mob_type == 'npmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_npmob and current_mob.get_combat_strength() == 0:
+                    noncombatants.append(current_mob)
+        elif mob_type == 'pmob':
+            for current_mob in self.contained_mobs:
+                if current_mob.is_pmob and current_mob.get_combat_strength() == 0:
+                    noncombatants.append(current_mob)
+        return(noncombatants)
+                    
     def set_visibility(self, new_visibility):
         '''
         Description:

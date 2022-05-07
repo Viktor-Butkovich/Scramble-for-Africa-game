@@ -1,3 +1,14 @@
+turn_management_tools.manage_attrition
+cells.cell.get_noncombatants
+vehicles.vehicle.eject_crew, eject_passengers, reembark
+mob_types/npmobs.npmob.kill_noncombatants
+mobs.mob.move_to_front
+Future plans:
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-errors:
 battalion should get off of vehicle when combat starts, maybe with disorganized penalty
+add attrition
+possibly display a notification when a unit dies and have an optional cause of death parameter
+Enemies should attack buildings and attached work crews
+
+Errors:
+If a vehicle's crew is detached, it should retain its inventory but have its inventory size reduced to 0 and remove its inventory at the end of the next turn

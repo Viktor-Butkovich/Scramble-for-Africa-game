@@ -38,6 +38,8 @@ class vehicle(pmob):
         self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']
         self.contained_mobs = []
+        self.ejected_crew = 'none'
+        self.ejected_passengers = []
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
@@ -60,6 +62,27 @@ class vehicle(pmob):
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
+    def eject_crew(self):
+        if self.has_crew:
+            self.ejected_crew = self.crew
+            self.crew.uncrew_vehicle(self)
+            
+    def eject_passengers(self):
+        while len(self.contained_mobs) > 0:
+            current_mob = self.contained_mobs.pop(0)
+            current_mob.disembark_vehicle(self)
+            self.ejected_passengers.append(current_mob)
+
+    def reembark(self):
+        if not self.ejected_crew == 'none':
+            if self.ejected_crew in self.global_manager.get('pmob_list'): #not self.ejected_crew.dead:
+                self.ejected_crew.crew_vehicle(self)
+                for current_passenger in self.ejected_passengers:
+                    if current_passenger in self.global_manager.get('pmob_list'): #not current_passenger.dead:
+                        current_passenger.embark_vehicle(self)
+            self.ejected_crew = 'none'
+            self.ejected_passengers = []
+        
     def die(self):
         '''
         Description:
@@ -142,35 +165,6 @@ class vehicle(pmob):
         else:
             text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
-    
-    #def update_tooltip(self):
-    #    '''
-    #    Description:
-    #        Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
-    #    Input:
-    #        None
-    #    Output:
-    #        None
-    #    '''
-    #    tooltip_list = ["Name: " + self.name.capitalize()]
-    #    if self.has_crew:
-    #        tooltip_list.append("Crew: " + self.crew.name.capitalize())
-    #    else:
-    #        tooltip_list.append("Crew: None")
-    #        tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
-    #        
-    #    if len(self.contained_mobs) > 0:
-    #        tooltip_list.append("Passengers: ")
-    #        for current_mob in self.contained_mobs:
-    #            tooltip_list.append('    ' + current_mob.name.capitalize())
-    #    else:
-    #        tooltip_list.append("No passengers")
-    #
-    #    if not self.has_infinite_movement:
-    #        tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
-    #    else:
-    #        tooltip_list.append("Movement points: infinite")
-    #    self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

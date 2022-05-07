@@ -39,7 +39,6 @@ class officer(pmob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('officer_list').append(self)
-        #self.status_icons = []
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
@@ -155,7 +154,7 @@ class officer(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
-        self.disorganized = group.disorganized
+        #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding

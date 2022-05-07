@@ -142,6 +142,7 @@ class worker(pmob):
         self.x = vehicle.x
         self.y = vehicle.y
         self.show_images()
+        self.set_disorganized(True)
         vehicle.crew = 'none'
         vehicle.has_crew = False
         vehicle.set_image('uncrewed')

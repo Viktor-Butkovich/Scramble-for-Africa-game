@@ -356,6 +356,7 @@ class pmob(mob):
         for current_image in self.images:
             current_image.add_to_cell()
         vehicle.selected = False
+        self.set_disorganized(True)
         self.select()
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
@@ -377,6 +378,7 @@ class pmob(mob):
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
                 self.select()
+                self.move_to_front()
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
             message = enemy.name + " are attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
@@ -434,9 +436,9 @@ class pmob(mob):
         else:
             text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after their roll. /n"
         if self.disorganized:
-            text += "The " + self.name + " is disorganized from a recent defeat and will receive a -1 penalty after their roll. /n"
+            text += "The " + self.name + " is disorganized from and will receive a -1 penalty after their roll. /n"
         elif enemy.disorganized:
-            text += "The " + enemy.name + " are disorganized from a recent defeat and will receive a -1 after their roll. /n"
+            text += "The " + enemy.name + " are disorganized and will receive a -1 after their roll. /n"
 
 
         if self.veteran:
@@ -588,9 +590,12 @@ class pmob(mob):
                 self.retreat()
                 self.set_disorganized(True)
             elif combat_type == 'defending':
-                if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
-                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
+                current_cell = self.images[0].current_cell
                 self.die()
+                if current_cell.get_best_combatant('pmob') == 'none':
+                    enemy.kill_noncombatants()
+                if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
+                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
 
         if self.just_promoted:
             self.promote()

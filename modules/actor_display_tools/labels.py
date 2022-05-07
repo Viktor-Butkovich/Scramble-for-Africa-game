@@ -225,17 +225,20 @@ class actor_display_label(label):
         elif self.actor_label_type == 'combat_strength':
             tooltip_text = [self.message]
             tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type.")
+            tooltip_text.append("When attacked, the defending side will automatically choose its strongest unit to fight.")
             if not self.actor == 'none':
                 modifier = self.actor.get_combat_modifier()
                 if modifier >= 0:
                     sign = '+'
                 else:
                     sign = ''
-                    
-                if self.actor.veteran:
-                    tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                if self.actor.get_combat_strength() == 0:
+                    tooltip_text.append("A unit with 0 combat strength will die automatically if forced to fight or if all other defenders are defeated.")
                 else:
-                    tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
+                    if self.actor.veteran:
+                        tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                    else:
+                        tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()

@@ -60,8 +60,12 @@ def start_player_turn(global_manager, first_turn = False):
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
+        for current_pmob in global_manager.get('pmob_list'):
+            if current_pmob.is_vehicle:
+                current_pmob.reembark()
         reset_mobs('pmobs', global_manager)
-        
+
+        manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
         manage_production(global_manager)
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
@@ -108,6 +112,24 @@ def reset_mobs(mob_type, global_manager):
             current_mob.reset_movement_points()
             current_mob.set_disorganized(False)
 
+def manage_attrition(global_manager):
+    none = 0
+    '''
+    for current_mob in global_manager.get('mob_list'):
+        if current_mob.get_inventory_used > 0:
+            if not current_mob.in_vehicle or current_mob.in_group or current_mob.in_building: #vehicles, groups, and buildings handle attrition for their attached units
+                current_mob.manage_commodity_attrition()
+                in manage_commodity_attrition: for current_commodity_type in current_mob.get_held_commodities():
+                                                    remove certain number from each based on random rolls, make function that takes # of commodity as input and removes a random number of those
+                                                    drop commodities on ground, can be picked up by anything close enough
+                current_mob.manage_health_attrition()
+                in manage_health_attrition: have each one have a chance of dying - vehicles and groups check for each of their attached units
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type == 'resource': #not sure about building type variable name
+            current_building.manage_health_attrition()
+            in manage_health_attrition: for current_worker in self.attached_workers: worker has chance of dying
+    remember to modify attrition chances based on worker type            
+    '''
 def manage_production(global_manager):
     '''
     Description:
