@@ -408,6 +408,15 @@ class resource_building(building):
         self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
         super().remove()
 
+    def manage_health_attrition(self):
+        attrition_losses = []
+        for current_work_crew in self.contained_work_crews:
+            if current_work_crew.manage_health_attrition(self.images[0].current_cell):
+                attrition_losses.append(current_work_crew)
+        for current_work_crew in attrition_losses:
+            current_work_crew.leave_building(self)
+            current_work_crew.attrition_death()
+
     def can_upgrade(self, upgrade_type):
         '''
         Description:

@@ -738,7 +738,7 @@ cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coor
 
 
 #activating/disabling debugging tools
-global_manager.set('spawning_allowed', True) #True by default
+global_manager.set('spawning_allowed', False) #True by default
 #activating/disabling debugging tools
 
 main_loop.main_loop(global_manager)

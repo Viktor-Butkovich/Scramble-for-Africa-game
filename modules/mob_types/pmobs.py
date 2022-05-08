@@ -57,6 +57,17 @@ class pmob(mob):
         self.default_min_crit_success = 6
         self.attached_dice_list = []
 
+    def manage_health_attrition(self, current_cell = 'default'):
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        if current_cell.local_attrition():
+            if random.randrange(1, 7) == 1:
+                self.attrition_death()
+
+    def attrition_death(self):
+        text_tools.print_to_screen(self.name + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.global_manager)
+        self.die()
+
     def to_save_dict(self):
         '''
         Description:

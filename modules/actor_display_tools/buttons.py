@@ -1345,7 +1345,7 @@ class build_train_button(label_button):
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                                if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                if self.attached_label.actor.images[0].current_cell.has_train_station(): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                                         if self.attached_label.actor.check_if_minister_appointed():
                                             self.construct()
