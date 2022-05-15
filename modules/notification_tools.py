@@ -41,7 +41,14 @@ def display_choice_notification(message, choices, choice_info_dict, global_manag
     if len(global_manager.get('notification_manager').notification_queue) == 1: #_type_queue
         global_manager.get('notification_manager').notification_to_front(message)#notifications.notification_to_front(message, global_manager)
 
-
+def display_zoom_notification(message, target, global_manager):
+    global_manager.get('notification_manager').notification_queue.append(message)
+    global_manager.get('notification_manager').notification_type_queue.append('zoom')
+    global_manager.get('notification_manager').notification_dice_queue.append(0)
+    global_manager.get('notification_manager').choice_notification_choices_queue.append(target)
+    global_manager.get('notification_manager').choice_notification_info_dict_queue.append('n/a')
+    if len(global_manager.get('notification_manager').notification_queue) == 1:
+        global_manager.get('notification_manager').notification_to_front(message)   
 
 def show_tutorial_notifications(global_manager):
     '''

@@ -65,7 +65,7 @@ class pmob(mob):
                 self.attrition_death()
 
     def attrition_death(self):
-        text_tools.print_to_screen(self.name + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.global_manager)
+        notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
         self.die()
 
     def to_save_dict(self):

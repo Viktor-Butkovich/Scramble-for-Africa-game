@@ -285,7 +285,7 @@ class recruitment_choice_button(choice_button):
                 input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
                 input_dict['image'] = 'mobs/slave worker/default.png'
                 input_dict['modes'] = ['strategic']
-                input_dict['name'] = 'Slave worker'
+                input_dict['name'] = 'slave workers'
                 input_dict['init_type'] = 'slave'
                 input_dict['purchased'] = True
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
@@ -311,15 +311,15 @@ class recruitment_choice_button(choice_button):
                     input_dict['init_type'] = self.recruitment_type
                     input_dict['officer_type'] = self.recruitment_type
                 elif self.recruitment_type == 'European worker':
-                    input_dict['name'] = 'European worker'
+                    input_dict['name'] = 'European workers'
                     input_dict['init_type'] = 'worker'
                     input_dict['worker_type'] = 'European'
                 elif self.recruitment_type == 'African worker':
-                    input_dict['name'] = 'African worker'
+                    input_dict['name'] = 'African workers'
                     input_dict['init_type'] = 'worker'
                     input_dict['worker_type'] = 'African'
                 elif self.recruitment_type == 'slave worker':
-                    input_dict['name'] = 'slave worker'
+                    input_dict['name'] = 'slave workers'
                     input_dict['init_type'] = 'slave'
                 elif self.recruitment_type == 'ship':
                     image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}

@@ -102,7 +102,7 @@ def reset_mobs(mob_type, global_manager):
     if mob_type == 'pmobs':
         for current_pmob in global_manager.get('pmob_list'):
             current_pmob.reset_movement_points()
-            current_pmob.set_disorganized(False) 
+            current_pmob.set_disorganized(False)
     elif mob_type == 'npmobs':
         for current_npmob in global_manager.get('npmob_list'):
             current_npmob.reset_movement_points()

@@ -1,5 +1,5 @@
 #Contains functionality for group units
-
+import random
 from .pmobs import pmob
 from ..tiles import status_icon
 from .. import actor_utility
@@ -55,11 +55,12 @@ class group(pmob):
             self.select()
             if self.veteran:
                 self.set_name("Veteran " + self.name.lower())
-        self.status_icons = self.officer.status_icons
-        for current_status_icon in self.status_icons:
-            current_status_icon.actor = self
         self.global_manager.get('group_list').append(self)
         if not from_save:
+            self.status_icons = self.officer.status_icons
+            for current_status_icon in self.status_icons:
+                current_status_icon.actor = self
+                
             if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
                 self.set_movement_points(self.officer.movement_points)
             else:
@@ -69,6 +70,32 @@ class group(pmob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.set_group_type('none')
+
+    def manage_health_attrition(self, current_cell = 'default'):
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        if current_cell.local_attrition():
+            if random.randrange(1, 7) == 1:
+                if random.randrange(1, 3) == 1:
+                    self.attrition_death('officer')
+                else:
+                    self.attrition_death('worker')
+
+    def attrition_death(self, target):
+        if target == 'officer':
+            text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
+            text += "The " + self.name + " will remain inactive for the next turn as a replacement is found."
+            self.disband()
+            self.officer.die()
+            
+            notification_tools.display_zoom_notification(text, self.worker, self.global_manager)
+        elif target == 'worker':
+            text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+            text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+            self.disband()
+            self.worker.die()
+            notification_tools.display_zoom_notification(text, self.officer, self.global_manager)
+        
 
     def fire(self):
         '''
