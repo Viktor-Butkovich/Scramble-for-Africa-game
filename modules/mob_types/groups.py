@@ -51,12 +51,14 @@ class group(pmob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        if not from_save:
-            self.select()
-            if self.veteran:
-                self.set_name("Veteran " + self.name.lower())
+        #if not from_save:
+        #    self.select()
+            #if self.veteran:
+                #self.set_name("Veteran " + self.name.lower())
+            #    self.load_veteran()
         self.global_manager.get('group_list').append(self)
         if not from_save:
+            self.select()
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self
@@ -65,6 +67,12 @@ class group(pmob):
                 self.set_movement_points(self.officer.movement_points)
             else:
                 self.set_movement_points(self.worker.movement_points)
+        else:
+            if self.veteran:
+                #self.set_name("Veteran " + self.name.lower())
+                self.name = self.default_name
+                self.officer.name = self.officer.default_name
+                self.promote() #creates veteran status icons
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -75,20 +83,23 @@ class group(pmob):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1:
+            if random.randrange(1, 7) == 1 or self.global_manager.get('boost_attrition'):
                 if random.randrange(1, 3) == 1:
                     self.attrition_death('officer')
                 else:
                     self.attrition_death('worker')
 
     def attrition_death(self, target):
+        self.temp_disable_movement()
+
         if target == 'officer':
             text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
-            text += "The " + self.name + " will remain inactive for the next turn as a replacement is found."
-            self.disband()
-            self.officer.die()
+            text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
+            text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
+            #self.disband()
+            self.officer.replace(self) #self.officer.die()
             
-            notification_tools.display_zoom_notification(text, self.worker, self.global_manager)
+            notification_tools.display_zoom_notification(text, self, self.global_manager)
         elif target == 'worker':
             text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as replacements are found."

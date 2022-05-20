@@ -63,9 +63,8 @@ def start_player_turn(global_manager, first_turn = False):
         for current_pmob in global_manager.get('pmob_list'):
             if current_pmob.is_vehicle:
                 current_pmob.reembark()
-        reset_mobs('pmobs', global_manager)
-
         manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
+        reset_mobs('pmobs', global_manager)
         manage_production(global_manager)
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)

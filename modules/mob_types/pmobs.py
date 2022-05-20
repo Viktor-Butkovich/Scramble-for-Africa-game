@@ -46,7 +46,9 @@ class pmob(mob):
                 end_turn_destination_x, end_turn_destination_y = input_dict['end_turn_destination']
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
+            self.default_name = input_dict['default_name']
         else:
+            self.default_name = self.name
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
@@ -57,11 +59,23 @@ class pmob(mob):
         self.default_min_crit_success = 6
         self.attached_dice_list = []
 
+    def replace(self):
+        self.set_name(self.default_name)
+        if (self.is_group or self.is_officer) and self.veteran:
+            self.veteran = False
+            new_status_icons = []
+            for current_status_icon in self.status_icons:
+                if current_status_icon.status_icon_type == 'veteran':
+                    current_status_icon.remove()
+                else:
+                    new_status_icons.append(current_status_icon)
+            self.status_icons = new_status_icons
+
     def manage_health_attrition(self, current_cell = 'default'):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1:
+            if random.randrange(1, 7) == 1 or self.global_manager.get('boost_attrition'):
                 self.attrition_death()
 
     def attrition_death(self):
@@ -81,6 +95,7 @@ class pmob(mob):
                 'modes': string list value - Game modes during which this actor's images can appear
                 'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
                 'name': string value - This actor's name
+                'default_name': string value - This actor's name without modifications like veteran
                 'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
                 'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
@@ -95,6 +110,7 @@ class pmob(mob):
                 if self.end_turn_destination.grid == self.global_manager.get(grid_type):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
+        save_dict['default_name'] = self.default_name
         return(save_dict)
 
     def remove(self):

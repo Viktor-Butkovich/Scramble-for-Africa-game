@@ -50,6 +50,20 @@ class officer(pmob):
             if self.veteran:
                 self.load_veteran()
 
+    def replace(self, attached_group = 'none'):
+        super().replace()
+        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition replacements')
+        if not attached_group == 'none':
+            attached_group.set_name(attached_group.default_name)
+            attached_group.veteran = False
+            new_status_icons = []
+            for current_status_icon in attached_group.status_icons:
+                if current_status_icon.status_icon_type == 'veteran':
+                    current_status_icon.remove()
+                else:
+                    new_status_icons.append(current_status_icon)
+            attached_group.status_icons = new_status_icons
+
     def to_save_dict(self):
         '''
         Description:
@@ -108,9 +122,9 @@ class officer(pmob):
         Output:
             None
         '''
-        name = self.name
+        name = self.default_name
         self.promote()
-        self.set_name(name)
+        #self.set_name(name)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 

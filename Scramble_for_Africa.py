@@ -259,7 +259,7 @@ global_manager.set('building_prices',
 )
 
 global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion',
-    'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction'])
+    'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements'])
 #price setup
 
 
@@ -738,7 +738,8 @@ cycle_right_button = buttons.cycle_available_ministers_button(scaling.scale_coor
 
 
 #activating/disabling debugging tools
-global_manager.set('spawning_allowed', True) #True by default
+global_manager.set('spawning_allowed', False) #True by default
+global_manager.set('boost_attrition', True) #False by default
 #activating/disabling debugging tools
 
 main_loop.main_loop(global_manager)

@@ -64,6 +64,7 @@ class mob(actor):
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
+        self.temp_movement_disabled = False
         if from_save:
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
@@ -103,6 +104,9 @@ class mob(actor):
         save_dict['disorganized'] = self.disorganized
         return(save_dict)        
 
+    def temp_disable_movement(self):
+        self.temp_movement_disabled = True
+    
     def set_disorganized(self, new_value):
         '''
         Description:
@@ -318,11 +322,15 @@ class mob(actor):
         Output:
             None
         '''
-        self.movement_points = self.max_movement_points
-        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
-            self.movement_points = round(self.movement_points)
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        if self.temp_movement_disabled:
+            self.temp_movement_disabled = False
+            self.movement_points = 0
+        else:
+            self.movement_points = self.max_movement_points
+            if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+                self.movement_points = round(self.movement_points)
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_max_movement_points(self, new_value):
         '''

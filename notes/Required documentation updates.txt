@@ -11,9 +11,13 @@ groups imports
 notification_tools.display_zoom_notification
 notifications.zoom_notification
 notifications imports
+pmobs.pmob.replace
+officers.officer.replace
+workers.worker.replace
+mobs.mob.temp_disable_movement
 
 Future plans:
-Make officer/worker replacement and "stunned" status work correctly
+Make group worker, attached work crew, and passenger replacement work
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
 battalion should get off of vehicle when combat starts, maybe with disorganized penalty
 improve health attrition, add commodity attrition w/ corruption
