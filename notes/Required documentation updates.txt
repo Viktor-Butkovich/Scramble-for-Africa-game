@@ -15,6 +15,7 @@ pmobs.pmob.replace
 officers.officer.replace
 workers.worker.replace
 mobs.mob.temp_disable_movement
+main imports
 
 Future plans:
 Make group worker, attached work crew, and passenger replacement work
