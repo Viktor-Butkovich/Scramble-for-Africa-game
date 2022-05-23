@@ -1,5 +1,27 @@
-ERROR:root:division by zero
+ERROR:root:module 'modules.actor_utility' has no attribute 'find_closest_available_worker'
 Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 744, in <module>
-    print(0/0)
-ZeroDivisionError: division by zero
+  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
+    main_loop.main_loop(global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 156, in main_loop
+    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 181, in on_click
+    super().on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 665, in on_click
+    turn_management_tools.end_turn(self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 32, in end_turn
+    start_enemy_turn(global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 47, in start_enemy_turn
+    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 453, in manage_combat
+    start_player_turn(global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 66, in start_player_turn
+    manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 125, in manage_attrition
+    current_pmob.manage_health_attrition()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 79, in manage_health_attrition
+    self.attrition_death()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 98, in attrition_death
+    self.replace()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\workers.py", line 59, in replace
+    new_worker_source = actor_utility.find_closest_available_worker()
+AttributeError: module 'modules.actor_utility' has no attribute 'find_closest_available_worker'

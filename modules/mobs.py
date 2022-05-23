@@ -468,7 +468,7 @@ class mob(actor):
         if self.controllable:
             if self.is_group:
                 tooltip_list.append('    Officer: ' + self.officer.name.capitalize())
-                tooltip_list.append('    Worker: ' + self.worker.name.capitalize())
+                tooltip_list.append('    Workers: ' + self.worker.name.capitalize())
             elif self.is_vehicle:
                 if self.has_crew:
                     tooltip_list.append("    Crew: " + self.crew.name.capitalize())

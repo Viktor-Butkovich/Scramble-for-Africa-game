@@ -83,7 +83,7 @@ class group(pmob):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1 or self.global_manager.get('boost_attrition'):
+            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                 if random.randrange(1, 3) == 1:
                     self.attrition_death('officer')
                 else:

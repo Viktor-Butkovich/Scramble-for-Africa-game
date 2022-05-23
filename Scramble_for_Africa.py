@@ -19,8 +19,8 @@ import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
 
-#fundamental setup
 try:
+    #fundamental setup
     pygame.init()
     pygame.mixer.init()
 
@@ -223,8 +223,8 @@ try:
 
 
     #price setup
-    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European worker', 'ship'])
-    global_manager.set('recruitment_costs', {'European worker': 0, 'ship': 5})
+    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'ship'])
+    global_manager.set('recruitment_costs', {'European workers': 0, 'ship': 5})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
 
@@ -315,7 +315,7 @@ try:
     global_manager.set('num_slave_workers', 0)
     global_manager.set('initial_slave_worker_upkeep', 2)
     global_manager.set('slave_worker_upkeep', 0)
-    global_manager.get('recruitment_costs')['slave worker'] = 5
+    global_manager.get('recruitment_costs')['slave workers'] = 5
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
     global_manager.set('group_list', [])
@@ -568,7 +568,7 @@ try:
 
 
     #mob info labels setup
-    mob_info_display_labels = ['name', 'minister', 'officer', 'worker', 'movement', 'attitude', 'combat_strength', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'attitude', 'combat_strength', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
     for current_actor_label_type in mob_info_display_labels:
         if current_actor_label_type == 'minister': #how far from edge of screen
             x_displacement = 40
@@ -649,7 +649,7 @@ try:
         elif current_actor_label_type == 'current building work crew':
             for i in range(0, 3):
                 global_manager.get('tile_info_display_list').append(actor_display_labels.list_item_label(scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
-                    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'building worker', i, 'resource building', 'tile', global_manager))
+                    scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', 'building work crew', i, 'resource building', 'tile', global_manager))
         elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             global_manager.get('tile_info_display_list').append(actor_display_labels.native_info_label(scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager), scaling.scale_width(10, global_manager),
                 scaling.scale_height(30, global_manager), ['strategic'], 'misc/default_label.png', current_actor_label_type, 'tile', global_manager))
@@ -738,8 +738,9 @@ try:
     #minister table setup
 
     #activating/disabling debugging tools
-    global_manager.set('spawning_allowed', True) #True by default
-    global_manager.set('boost_attrition', False) #False by default
+    global_manager.set('DEBUG_spawning_allowed', False) #True by default
+    global_manager.set('DEBUG_boost_attrition', True) #False by default
+    global_manager.set('DEBUG_infinite_village_workers', True) #False by default
     #activating/disabling debugging tools
     main_loop.main_loop(global_manager)
     pygame.quit()

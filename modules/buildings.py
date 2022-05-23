@@ -568,10 +568,10 @@ class slums(building):
         input_dict = {}
         input_dict['coordinates'] = (self.images[0].current_cell.x, self.images[0].current_cell.y)
         input_dict['grids'] = [self.images[0].current_cell.grid, self.images[0].current_cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['image'] = 'mobs/African workers/default.png'
         input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'African worker'
-        input_dict['init_type'] = 'worker'
+        input_dict['name'] = 'African workers'
+        input_dict['init_type'] = 'workers'
         input_dict['worker_type'] = 'African'
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         self.change_population(-1)

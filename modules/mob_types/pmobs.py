@@ -75,12 +75,32 @@ class pmob(mob):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1 or self.global_manager.get('boost_attrition'):
+            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                 self.attrition_death()
 
     def attrition_death(self):
-        notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
-        self.die()
+        if self.is_officer or self.is_worker:
+            self.temp_disable_movement()
+
+            #if target == 'officer':
+            #    text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
+            #    text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
+            #    text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
+            #    #self.disband()
+            #    self.officer.replace(self) #self.officer.die()
+            #    
+            #    notification_tools.display_zoom_notification(text, self, self.global_manager)
+            #elif target == 'worker':
+            #    text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+            #    text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+                #self.disband()
+                #self.worker.die()
+            self.replace()
+            notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+                self.images[0].current_cell.tile, self.global_manager)
+        else:
+            notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
+            self.die()
 
     def to_save_dict(self):
         '''

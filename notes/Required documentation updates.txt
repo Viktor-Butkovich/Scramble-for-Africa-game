@@ -16,8 +16,11 @@ officers.officer.replace
 workers.worker.replace
 mobs.mob.temp_disable_movement
 main imports
+utility.generate_article
+utility.generate_capitalized_article
 
 Future plans:
+add actor_utility.find_closest_available_worker and fix worker.replace
 Make group worker, attached work crew, and passenger replacement work
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
 battalion should get off of vehicle when combat starts, maybe with disorganized penalty
@@ -29,3 +32,4 @@ Errors:
 If a vehicle's crew is detached, it should retain its inventory but have its inventory size reduced to 0 and remove its inventory at the end of the next turn
 Check maximum inventory capacity on resource production building - should be 9, 18 on current save
 Change worker -> workers in text descriptions throughout the program
+incorrect spacing on generate article when blank output is returned

@@ -51,6 +51,35 @@ class worker(pmob):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
+    def replace(self, attached_group = 'none'):
+        super().replace()
+        if self.worker_type in ['European', 'African']: #increase relevant costs as if recruiting new worker
+            
+            if self.worker_type == 'African': #get worker from nearest slum or village
+                new_worker_source = 'none' #actor_utility.find_closest_available_worker()
+                if not new_worker_source == 'none':
+                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    if new_worker_source in self.global_manager.get('village_list'): #both village and slum have change_population, but slum change population automatically changes number of workers while village does not
+                        new_worker_source.available_workers -= 1
+                    new_worker_source.change_population(-1)
+                else: #if no villages or slums with available workers, recruit abstract African workers and give bigger upkeep penalty to compensate
+                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    
+            elif self.worker_type == 'European':
+                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                
+        elif self.worker_type == 'slave':
+            market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+            public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+            current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+            self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+            resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+            if not resulting_public_opinion == current_public_opinion:
+                text_tools.print_to_screen("Participating in the slave trade has decreased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
+
+        #elif self.worker_type == 'religious':
+
     def to_save_dict(self):
         '''
         Description:
