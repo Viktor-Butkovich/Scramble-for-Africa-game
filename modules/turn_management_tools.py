@@ -257,15 +257,15 @@ def manage_worker_price_changes(global_manager):
 
     slave_worker_roll = random.randrange(1, 7)
     if slave_worker_roll >= 5:
-        current_price = global_manager.get('recruitment_costs')['slave worker']
+        current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
-            global_manager.get('recruitment_costs')['slave worker'] = changed_price
+            global_manager.get('recruitment_costs')['slave workers'] = changed_price
             text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif slave_worker_roll == 1:
-        current_price = global_manager.get('recruitment_costs')['slave worker']
+        current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
-        global_manager.get('recruitment_costs')['slave worker'] = changed_price
+        global_manager.get('recruitment_costs')['slave workers'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
 def manage_worker_migration(global_manager): 

@@ -103,9 +103,10 @@ class group(pmob):
         elif target == 'worker':
             text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
-            self.disband()
-            self.worker.die()
-            notification_tools.display_zoom_notification(text, self.officer, self.global_manager)
+            #self.disband()
+            #self.worker.die()
+            self.worker.replace(self)
+            notification_tools.display_zoom_notification(text, self, self.global_manager)
         
 
     def fire(self):

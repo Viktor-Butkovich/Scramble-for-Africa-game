@@ -67,12 +67,12 @@ class actor():
         if self.actor_type == 'mob':
             if self.controllable: #if pmob
                 if self.is_worker:
-                    if self.is_church_volunteers:
+                    if self.worker_type == 'religious':
                         init_type = 'church_volunteers'
                     elif self.worker_type == 'slave':
-                        init_type = 'slave'
+                        init_type = 'slaves'
                     else:
-                        init_type = 'worker'
+                        init_type = 'workers'
                 elif self.is_vehicle:
                     init_type = self.vehicle_type
                 elif self.is_officer:

@@ -45,6 +45,8 @@ class village():
         if self.global_manager.get('DEBUG_infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
+        self.x = self.cell.x
+        self.y = self.cell.y
         self.tiles = [] #added in set_resource for tiles
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
             self.global_manager.get('village_list').append(self) #have more permanent fix later

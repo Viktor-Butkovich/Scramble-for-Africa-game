@@ -3,6 +3,36 @@
 import random
 
 from . import scaling
+from . import utility
+
+def find_closest_available_worker(destination, global_manager):
+    possible_sources = []
+    for current_village in global_manager.get('village_list'):
+        if current_village.available_workers > 0:
+            possible_sources.append(current_village)
+    possible_sources += global_manager.get('slums_list')
+    
+    min_distance = -1 #makes a list of closest sources
+    min_distance_sources = []
+    for possible_source in possible_sources:
+        current_distance = utility.find_object_distance(destination, possible_source)
+        if min_distance == -1 or current_distance < min_distance:
+            min_distance_sources = [possible_source]
+            min_distance = current_distance
+        elif min_distance == current_distance:
+            min_distance_sources.append(possible_source)
+
+    max_workers = -1 #makes list of closest sources that have the most workers
+    max_workers_sources = ['none']
+    for possible_source in min_distance_sources:
+        current_workers = possible_source.available_workers
+        if max_workers == -1 or current_workers > max_workers:
+            max_workers_sources = [possible_source]
+            max_workers = current_workers
+        elif max_workers == current_workers:
+            max_workers_sources.append(possible_source)
+            
+    return(random.choice(max_workers_sources)) #randomly choose from ['none'] or the list of tied closest sources w/ most workers
 
 def stop_exploration(global_manager):
     '''
@@ -175,9 +205,9 @@ def get_num_available_workers(location_types, global_manager):
     '''
     num_available_workers = 0
     if not location_types == 'village': #slums or all
-        for current_building in global_manager.get('building_list'):
-            if current_building.building_type == 'slums':
-                num_available_workers += current_building.available_workers
+        for current_slums in global_manager.get('slums_list'):
+            #if current_building.building_type == 'slums':
+            num_available_workers += current_slums.available_workers
     if not location_types == 'slums': #village or all
         for current_village in global_manager.get('village_list'):
             num_available_workers += current_village.available_workers

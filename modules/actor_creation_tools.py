@@ -46,7 +46,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             actor: Returns the mob or building that was created
         '''
         init_type = input_dict['init_type']
-
         #mobs
         if init_type == 'mob':
             new_actor = mobs.mob(from_save, input_dict, global_manager)
