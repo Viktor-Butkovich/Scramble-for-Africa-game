@@ -79,6 +79,16 @@ class group(pmob):
         self.default_min_crit_success = 6
         self.set_group_type('none')
 
+    def move(self, x_change, y_change):
+        super().move(x_change, y_change)
+        self.calibrate_sub_mob_positions()
+
+    def calibrate_sub_mob_positions(self):
+        self.officer.x = self.x
+        self.officer.y = self.y
+        self.worker.x = self.x
+        self.worker.y = self.y
+
     def manage_health_attrition(self, current_cell = 'default'):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
@@ -92,21 +102,26 @@ class group(pmob):
     def attrition_death(self, target):
         self.temp_disable_movement()
 
+        if self.in_vehicle:
+            zoom_destination = self.vehicle
+        else:
+            zoom_destination = self
+
         if target == 'officer':
             text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
             text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
             #self.disband()
             self.officer.replace(self) #self.officer.die()
-            
-            notification_tools.display_zoom_notification(text, self, self.global_manager)
+
+            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         elif target == 'worker':
             text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
             #self.disband()
             #self.worker.die()
             self.worker.replace(self)
-            notification_tools.display_zoom_notification(text, self, self.global_manager)
+            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         
 
     def fire(self):

@@ -1,4 +1,4 @@
-ERROR:root:print_to_screen() missing 1 required positional argument: 'global_manager'
+ERROR:root:name 'notification_tools' is not defined
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
     main_loop.main_loop(global_manager)
@@ -18,10 +18,8 @@ Traceback (most recent call last):
     manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
   File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 125, in manage_attrition
     current_pmob.manage_health_attrition()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\groups.py", line 90, in manage_health_attrition
-    self.attrition_death('worker')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\groups.py", line 108, in attrition_death
-    self.worker.replace(self)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\workers.py", line 89, in replace
-    text_tools.print_to_screen("Replacement slave workers were automatically purchased" + destination_message + ", costing " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money.")
-TypeError: print_to_screen() missing 1 required positional argument: 'global_manager'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 80, in manage_health_attrition
+    self.crew_attrition_death()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 90, in crew_attrition_death
+    notification_tools.display_zoom_notification(text, self, self.global_manager)
+NameError: name 'notification_tools' is not defined

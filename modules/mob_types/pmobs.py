@@ -369,6 +369,7 @@ class pmob(mob):
             None
         '''
         self.in_vehicle = True
+        self.vehicle = vehicle
         self.selected = False
         for current_commodity in self.get_held_commodities(): #gives inventory to ship
             num_held = self.get_inventory(current_commodity)
@@ -397,6 +398,7 @@ class pmob(mob):
             None
         '''
         vehicle.contained_mobs = utility.remove_from_list(vehicle.contained_mobs, self)
+        self.vehicle = 'none'
         self.in_vehicle = False
         self.x = vehicle.x
         self.y = vehicle.y

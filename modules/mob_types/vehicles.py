@@ -1,9 +1,12 @@
 #Contains functionality for vehicle units
 
+import random
+
 from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import main_loop_tools
+from .. import notification_tools
 from .pmobs import pmob
 from ..buttons import button
 
@@ -61,6 +64,51 @@ class vehicle(pmob):
                 self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
+
+    def manage_health_attrition(self, current_cell = 'default'):
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        if self.crew == 'none':
+            sub_mobs = []
+        else:
+            sub_mobs = [self.crew]
+        sub_mobs += self.contained_mobs
+        for current_sub_mob in sub_mobs:
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+
+                    if current_sub_mob == self.crew:
+                        self.crew_attrition_death()
+                    elif current_sub_mob.is_group:
+                        current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
+                    else:
+                        text = "The " + current_sub_mob.name + " aboard the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+                        text += "The " + current_sub_mob.name + " will remain inactive for the next turn as replacements are found."
+                        current_sub_mob.replace()
+                        current_sub_mob.temp_disable_movement()
+                        notification_tools.display_zoom_notification(text, self, self.global_manager)
+                        
+    def crew_attrition_death(self):
+        text = "The " + self.crew.name + " crewing the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+        text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+        self.crew.replace(self)
+        notification_tools.display_zoom_notification(text, self, self.global_manager)
+        self.temp_disable_movement()
+
+
+    def move(self, x_change, y_change):
+        super().move(x_change, y_change)
+        self.calibrate_sub_mob_positions()
+
+    def calibrate_sub_mob_positions(self):
+        for current_passenger in self.contained_mobs:
+            current_passenger.x = self.x
+            current_passenger.y = self.y
+            if current_passenger.is_group:
+                current_passenger.calibrate_sub_mob_positions()
+        if not self.crew == 'none':
+            self.crew.x = self.x
+            self.crew.y = self.y
 
     def eject_crew(self):
         if self.has_crew:
@@ -161,7 +209,10 @@ class vehicle(pmob):
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
         if self.has_crew:
-            return(super().can_move(x_change, y_change))
+            if not self.temp_movement_disabled:
+                return(super().can_move(x_change, y_change))
+            else:
+                text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
         else:
             text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
@@ -309,6 +360,6 @@ class ship(vehicle):
             boolean: Returs True if this ship has any crew, otherwise returns False
         '''
         if self.has_crew:
-            return(True)
-        else:
-            return(False)
+            if not self.temp_movement_disabled:
+                return(True)
+        return(False)
