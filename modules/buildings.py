@@ -1,6 +1,8 @@
 #Contains functionality for buildings
 
 import pygame
+import random
+
 from .actors import actor
 from .buttons import button
 from . import utility
@@ -408,14 +410,13 @@ class resource_building(building):
         self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
         super().remove()
 
-    def manage_health_attrition(self):
-        attrition_losses = []
+    def manage_health_attrition(self, current_cell = 'default'):
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
         for current_work_crew in self.contained_work_crews:
-            if current_work_crew.manage_health_attrition(self.images[0].current_cell):
-                attrition_losses.append(current_work_crew)
-        for current_work_crew in attrition_losses:
-            current_work_crew.leave_building(self)
-            current_work_crew.attrition_death()
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                    current_work_crew.attrition_death(random.choice(['officer', 'worker']))
 
     def can_upgrade(self, upgrade_type):
         '''

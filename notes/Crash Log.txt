@@ -1,4 +1,4 @@
-ERROR:root:name 'notification_tools' is not defined
+ERROR:root:name 'random' is not defined
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
     main_loop.main_loop(global_manager)
@@ -16,10 +16,8 @@ Traceback (most recent call last):
     start_player_turn(global_manager)
   File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 66, in start_player_turn
     manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 125, in manage_attrition
-    current_pmob.manage_health_attrition()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 80, in manage_health_attrition
-    self.crew_attrition_death()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 90, in crew_attrition_death
-    notification_tools.display_zoom_notification(text, self, self.global_manager)
-NameError: name 'notification_tools' is not defined
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 129, in manage_attrition
+    current_building.manage_health_attrition()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 417, in manage_health_attrition
+    if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+NameError: name 'random' is not defined

@@ -101,14 +101,22 @@ class group(pmob):
 
     def attrition_death(self, target):
         self.temp_disable_movement()
-
         if self.in_vehicle:
             zoom_destination = self.vehicle
+            destination_type = 'vehicle'
+            destination_message = " from the " + self.name + " aboard the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+        elif self.in_building:
+            zoom_destination = self.building.images[0].current_cell.tile
+            destination_type = 'building'
+            destination_message = " from the " + self.name + " working in the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
         else:
             zoom_destination = self
+            destination_type = 'self'
+            destination_message = " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+            
 
         if target == 'officer':
-            text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
+            text = "The " + self.officer.name + destination_message + "has died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
             text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
             #self.disband()
@@ -116,7 +124,7 @@ class group(pmob):
 
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         elif target == 'worker':
-            text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+            text = "The " + self.worker.name + destination_message + "have died from attrition. /n /n "
             text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
             #self.disband()
             #self.worker.die()

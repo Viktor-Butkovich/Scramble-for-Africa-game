@@ -25,6 +25,7 @@ vehicles.vehicle.move
 vehicles.vehicle.calibrate_sub_mob_positions
 groups.group.move
 groups.group.calibrate_sub_mob_positions
+buildings imports
 
 Future plans:
 add actor_utility.find_closest_available_worker and fix worker.replace
