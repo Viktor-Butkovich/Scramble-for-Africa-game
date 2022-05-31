@@ -98,7 +98,8 @@ class zoom_notification(notification):
             None
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
-        self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
+        if self.global_manager.get('strategic_map_grid') in target.grids:
+            self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
         if target.actor_type == 'tile':
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target)
         elif target.actor_type == 'mob':

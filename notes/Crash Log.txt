@@ -1,4 +1,4 @@
-ERROR:root:name 'random' is not defined
+ERROR:root:local variable 'was_word' referenced before assignment
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
     main_loop.main_loop(global_manager)
@@ -8,16 +8,18 @@ Traceback (most recent call last):
     super().on_click()
   File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 665, in on_click
     turn_management_tools.end_turn(self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 32, in end_turn
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 27, in end_turn
     start_enemy_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 47, in start_enemy_turn
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 42, in start_enemy_turn
     manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 453, in manage_combat
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 457, in manage_combat
     start_player_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 66, in start_player_turn
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 61, in start_player_turn
     manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 129, in manage_attrition
-    current_building.manage_health_attrition()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 417, in manage_health_attrition
-    if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
-NameError: name 'random' is not defined
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 135, in manage_attrition
+    current_tile.manage_inventory_attrition()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 269, in manage_inventory_attrition
+    self.trigger_inventory_attrition(transportation_minister)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 309, in trigger_inventory_attrition
+    notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + was_word +  " at (" +
+UnboundLocalError: local variable 'was_word' referenced before assignment

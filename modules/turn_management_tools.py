@@ -23,11 +23,6 @@ def end_turn(global_manager):
     global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
-    for current_cell in global_manager.get('strategic_map_grid').cell_list:
-        current_tile = current_cell.tile
-        while current_tile.get_inventory_used() > current_tile.inventory_capacity:
-            discarded_commodity = random.choice(current_tile.get_held_commodities())
-            current_tile.change_inventory(discarded_commodity, -1)
             
     start_enemy_turn(global_manager)
 
@@ -128,7 +123,16 @@ def manage_attrition(global_manager):
         if current_building.building_type == 'resource': #not sure about building type variable name
             current_building.manage_health_attrition()
             #in manage_health_attrition: for current_worker in self.attached_workers: worker has chance of dying
-    #remember to modify attrition chances based on worker type            
+    #remember to modify attrition chances based on worker type
+
+    for current_pmob in global_manager.get('pmob_list'):
+        current_pmob.manage_inventory_attrition()
+
+    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    for current_cell in terrain_cells:
+        current_tile = current_cell.tile
+        if len(current_tile.get_held_commodities()) > 0:
+            current_tile.manage_inventory_attrition()
     
 def manage_production(global_manager):
     '''

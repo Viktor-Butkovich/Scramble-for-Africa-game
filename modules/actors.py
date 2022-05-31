@@ -1,7 +1,10 @@
 #Contains functionality for actors
 
 import pygame
+import random
+
 from . import text_tools
+from . import notification_tools
 from . import utility
 from . import actor_utility
 from . import scaling
@@ -250,6 +253,74 @@ class actor():
             return(held_commodities)
         else:
             return([])
+
+    def manage_inventory_attrition(self):
+        if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+            if self.actor_type == 'tile':
+                current_cell = self.cell#self.trigger_inventory_attrition()
+            elif self.actor_type == 'mob':
+                if not (self.in_building or self.in_group or self.in_vehicle):
+                    current_cell = self.images[0].current_cell
+                else:
+                    return() #only surface-level mobs can have inventories and need to roll for attrition
+                
+            if transportation_minister.check_corruption() or current_cell.local_attrition('inventory'): #attrition more common in bad terrain and away from civilization, also happens if minister corrupt
+                    self.trigger_inventory_attrition(transportation_minister)
+
+    def trigger_inventory_attrition(self, transportation_minister):
+        lost_commodities_message = ''
+        types_lost_list = []
+        amounts_lost_list = []
+        for current_commodity in self.get_held_commodities():
+            amount_lost = random.randrange(0, self.get_inventory(current_commodity))
+            if amount_lost > 0:
+                types_lost_list.append(current_commodity)
+                amounts_lost_list.append(amount_lost)
+                self.change_inventory(current_commodity, -1 * amount_lost)
+        for current_index in range(0, len(types_lost_list)):
+            lost_commodity = types_lost_list[current_index]
+            amount_lost = amounts_lost_list[current_index]
+            if current_index == 0:
+                is_first = True
+            else:
+                is_first = False
+            if current_index == len(types_lost_list) - 1:
+                is_last = True
+            else:
+                is_last = False
+
+            if amount_lost == 1:
+                unit_word = 'unit'
+            else:
+                unit_word = 'units'
+            if is_first and is_last:
+                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity
+            elif len(types_lost_list) == 2 and is_first:
+                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity + " "
+            elif (not is_last):
+                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity + ", "
+            else:
+                lost_commodities_message += "and " + str(amount_lost) + " " + unit_word + " of " + lost_commodity
+        if not lost_commodities_message == '':
+            if len(types_lost_list) == 1 and amounts_lost_list[0] == 1:
+                was_word = 'was'
+            else:
+                was_word = 'were'
+            if self.global_manager.get('strategic_map_grid') in self.grids:
+                location_message = "at (" + str(self.x) + ", " + str(self.y) + ")"
+            elif self.global_manager.get('europe_grid') in self.grids:
+                location_message = 'in Europe'
+            elif self.global_manager.get('slave_traders_grid') in self.grids:
+                location_message = 'in the Arab slave markets'
+            
+            if self.actor_type == 'tile':
+                notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
+                    was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+            elif self.actor_type == 'mob':
+                notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
+                    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+            
     
     def set_name(self, new_name):
         '''

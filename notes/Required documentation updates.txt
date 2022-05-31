@@ -26,6 +26,8 @@ vehicles.vehicle.calibrate_sub_mob_positions
 groups.group.move
 groups.group.calibrate_sub_mob_positions
 buildings imports
+actors imports
+actors.actors
 
 Future plans:
 add actor_utility.find_closest_available_worker and fix worker.replace
@@ -37,7 +39,6 @@ possibly display a notification when a unit dies and have an optional cause of d
 Enemies should attack buildings and attached work crews
 
 Errors:
-Church volunteers name attribute always capitalized instead of just the label display name being capitalized, causing incorrect notification description on replacement
 If a vehicle's crew is detached, it should retain its inventory but have its inventory size reduced to 0 and remove its inventory at the end of the next turn
 Check maximum inventory capacity on resource production building - should be 9, 18 on current save
 Change worker -> workers in text descriptions throughout the program

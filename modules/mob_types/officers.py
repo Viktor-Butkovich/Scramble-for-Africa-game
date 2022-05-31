@@ -355,7 +355,7 @@ class evangelist(officer):
             input_dict['coordinates'] = (0, 0)
             input_dict['grids'] = [self.global_manager.get('europe_grid')]
             input_dict['image'] = 'mobs/church_volunteers/default.png'
-            input_dict['name'] = 'Church volunteers'
+            input_dict['name'] = 'church volunteers'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['init_type'] = 'church_volunteers'
             input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep

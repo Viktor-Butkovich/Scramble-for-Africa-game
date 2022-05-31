@@ -91,27 +91,31 @@ class cell():
                 save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
 
-    def local_attrition(self):
+    def local_attrition(self, attrition_type = 'health'): #attrition_type can be 'inventory' when checking for inventory attrition instead
         #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
         if self.grid in [self.global_manager.get('europe_grid'), self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
-            return(False)
-        
-        if self.terrain in ['clear', 'hills']:
-            if random.randrange(1, 7) >= 2: #only attrition on 1's
+            if attrition_type == 'health':
                 return(False)
-        elif self.terrain in ['mountain', 'desert', 'water']:
-            if random.randrange(1, 7) >= 3: #attrition on 1's and 2's
-                return(False)
-        elif self.terrain in ['jungle', 'swamp']:
-            if random.randrange(1, 7) >= 4: #attrition on 1-3
-                return(False)
+            elif attrition_type == 'inventory': #losing inventory in warehouses and such is uncommon but not impossible in Europe, but no health attrition in Europe
+                if random.randrange(1, 7) >= 2 or random.randrange(1, 7) >= 3: #same effect as clear area with port
+                    return(False)
+        else:
+            if self.terrain in ['clear', 'hills']:
+                if random.randrange(1, 7) >= 2: #only attrition on 1's
+                    return(False)
+            elif self.terrain in ['mountain', 'desert', 'water']:
+                if random.randrange(1, 7) >= 3: #attrition on 1's and 2's
+                    return(False)
+            elif self.terrain in ['jungle', 'swamp']:
+                if random.randrange(1, 7) >= 4: #attrition on 1-3
+                    return(False)
 
-        if self.has_village() or self.has_train_station() or self.has_port() or self.has_resource_building():
-            if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
-                return(False)
-        elif self.has_road() or self.has_railroad():
-            if random.randrange(1, 7) >= 5: #removes 1/3 of attrition
-                return(False)
+            if self.has_village() or self.has_train_station() or self.has_port() or self.has_resource_building():
+                if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
+                    return(False)
+            elif self.has_road() or self.has_railroad():
+                if random.randrange(1, 7) >= 5: #removes 1/3 of attrition
+                    return(False)
 
         return(True)
 
