@@ -30,6 +30,8 @@ actors imports
 actors.actors
 
 Future plans:
+Add chance of commodity loss on movement
+Chance of commodity attrition for a unit carrying commodities, higher chance if more being held, lose a certain amount at a time
 add actor_utility.find_closest_available_worker and fix worker.replace
 Make group worker, attached work crew, and passenger replacement work
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
@@ -39,6 +41,7 @@ possibly display a notification when a unit dies and have an optional cause of d
 Enemies should attack buildings and attached work crews
 
 Errors:
+Make production corruption happen after corruption occurs
 If a vehicle's crew is detached, it should retain its inventory but have its inventory size reduced to 0 and remove its inventory at the end of the next turn
 Check maximum inventory capacity on resource production building - should be 9, 18 on current save
 Change worker -> workers in text descriptions throughout the program

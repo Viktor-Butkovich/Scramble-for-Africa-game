@@ -94,9 +94,13 @@ class group(pmob):
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
             if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
-                if random.randrange(1, 3) == 1:
-                    self.attrition_death('officer')
-                else:
+                #if random.randrange(1, 3) == 1:
+                self.attrition_death('officer')
+                #else:
+        if current_cell.local_attrition():
+            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                worker_type = self.worker.worker_type
+                if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')
 
     def attrition_death(self, target):

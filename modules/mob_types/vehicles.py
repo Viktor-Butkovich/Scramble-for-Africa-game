@@ -74,19 +74,24 @@ class vehicle(pmob):
             sub_mobs = [self.crew]
         sub_mobs += self.contained_mobs
         for current_sub_mob in sub_mobs:
+            worker_type = 'none'
+            if current_sub_mob.is_worker:
+                worker_type = current_sub_mob.worker_type
+            elif current_sub_mob.is_group:
+                worker_type = current_sub_mob.worker.worker_type
             if current_cell.local_attrition():
                 if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
-
-                    if current_sub_mob == self.crew:
-                        self.crew_attrition_death()
-                    elif current_sub_mob.is_group:
-                        current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
-                    else:
-                        text = "The " + current_sub_mob.name + " aboard the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
-                        text += "The " + current_sub_mob.name + " will remain inactive for the next turn as replacements are found."
-                        current_sub_mob.replace()
-                        current_sub_mob.temp_disable_movement()
-                        notification_tools.display_zoom_notification(text, self, self.global_manager)
+                    if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
+                        if current_sub_mob == self.crew:
+                            self.crew_attrition_death()
+                        elif current_sub_mob.is_group:
+                            current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
+                        else:
+                            text = "The " + current_sub_mob.name + " aboard the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+                            text += "The " + current_sub_mob.name + " will remain inactive for the next turn as replacements are found."
+                            current_sub_mob.replace()
+                            current_sub_mob.temp_disable_movement()
+                            notification_tools.display_zoom_notification(text, self, self.global_manager)
                         
     def crew_attrition_death(self):
         text = "The " + self.crew.name + " crewing the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "

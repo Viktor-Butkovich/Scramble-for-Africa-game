@@ -84,14 +84,15 @@ class work_crew(group):
                 self.global_manager.get('attempted_commodities').append(building.resource_type)
             for current_attempt in range(building.efficiency):
                 if self.veteran:
-                    results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
+                    results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]#self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
                     roll_result = max(results[0], results[1])
                 else:
-                    roll_result = self.controlling_minister.roll(6, 4, 0)
+                    roll_result = self.controlling_minister.no_corruption_roll(6)#self.controlling_minister.roll(6, 4, 0) #CHANGE TO NO CORRUPTION ROLLS HERE AND 3 LINES UP, TEST HEALTH ATTRITION FOR WORKERS AND INVENTORY ATTRITION
                     
                 if roll_result >= 4: #4+ required on D6 for production
-                    building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
-                    self.global_manager.get('commodities_produced')[building.resource_type] += 1
+                    if not self.controlling_minister.check_corruption():
+                        building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
+                        self.global_manager.get('commodities_produced')[building.resource_type] += 1
 
-                if (not self.veteran) and roll_result >= 6:
-                    self.promote()
+                        if (not self.veteran) and roll_result >= 6:
+                            self.promote()

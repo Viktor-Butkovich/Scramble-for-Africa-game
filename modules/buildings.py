@@ -416,7 +416,12 @@ class resource_building(building):
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
                 if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
-                    current_work_crew.attrition_death(random.choice(['officer', 'worker']))
+                    current_work_crew.attrition_death('officer')
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                    worker_type = current_work_crew.worker.worker_type
+                    if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
+                        current_work_crew.attrition_death('worker')
 
     def can_upgrade(self, upgrade_type):
         '''

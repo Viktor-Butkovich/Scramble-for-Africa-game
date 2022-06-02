@@ -71,12 +71,16 @@ class pmob(mob):
                     new_status_icons.append(current_status_icon)
             self.status_icons = new_status_icons
 
-    def manage_health_attrition(self, current_cell = 'default'):
+    def manage_health_attrition(self, current_cell = 'default'): #other versions of manage_health_attrition in group, vehicle, and resource_building
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
             if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
-                self.attrition_death()
+                worker_type = 'none'
+                if self.is_worker:
+                    worker_type = self.worker_type
+                if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
+                    self.attrition_death()
 
     def attrition_death(self):
         if self.is_officer or self.is_worker:
