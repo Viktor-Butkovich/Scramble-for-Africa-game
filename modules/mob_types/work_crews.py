@@ -46,6 +46,7 @@ class work_crew(group):
             None
         '''
         self.in_building = True
+        self.building = building
         self.selected = False
         self.hide_images()
         building.contained_work_crews.append(self)
@@ -62,6 +63,7 @@ class work_crew(group):
             None
         '''
         self.in_building = False
+        self.building = 'none'
         self.show_images()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
@@ -77,18 +79,20 @@ class work_crew(group):
         Output:
             None
         '''
-        if not building.resource_type in self.global_manager.get('attempted_commodities'):
-            self.global_manager.get('attempted_commodities').append(building.resource_type)
-        for current_attempt in range(building.efficiency):
-            if self.veteran:
-                results = self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
-                roll_result = max(results[0], results[1])
-            else:
-                roll_result = self.controlling_minister.roll(6, 4, 0)
-                
-            if roll_result >= 4: #4+ required on D6 for production
-                building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
-                self.global_manager.get('commodities_produced')[building.resource_type] += 1
+        if self.movement_points >= 1: #do not attempt production if unit already did something this turn or suffered from attrition #not self.temp_movement_disabled:
+            if not building.resource_type in self.global_manager.get('attempted_commodities'):
+                self.global_manager.get('attempted_commodities').append(building.resource_type)
+            for current_attempt in range(building.efficiency):
+                if self.veteran:
+                    results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]#self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
+                    roll_result = max(results[0], results[1])
+                else:
+                    roll_result = self.controlling_minister.no_corruption_roll(6)#self.controlling_minister.roll(6, 4, 0) #CHANGE TO NO CORRUPTION ROLLS HERE AND 3 LINES UP, TEST HEALTH ATTRITION FOR WORKERS AND INVENTORY ATTRITION
+                    
+                if roll_result >= 4: #4+ required on D6 for production
+                    if not self.controlling_minister.check_corruption():
+                        building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
+                        self.global_manager.get('commodities_produced')[building.resource_type] += 1
 
-            if (not self.veteran) and roll_result >= 6:
-                self.promote()
+                        if (not self.veteran) and roll_result >= 6:
+                            self.promote()

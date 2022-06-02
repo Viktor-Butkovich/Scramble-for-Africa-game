@@ -286,7 +286,7 @@ class button():
             self.set_tooltip(["Hires unemployed workers, reducing the slum's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
                                 str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
         elif self.button_type == 'buy slaves':
-            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave worker']) + " money to purchase and have an upkeep each turn of " +
+            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money to purchase and have an upkeep each turn of " +
                                 str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
@@ -654,6 +654,8 @@ class button():
                         text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
                         text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
                     else:
+                        if not self.global_manager.get('current_game_mode') == 'strategic':
+                            game_transitions.set_game_mode('strategic', self.global_manager)
                         choice_info_dict = {'type': 'end turn'}
                         notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
@@ -693,10 +695,11 @@ class button():
                     else:
                         mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
                         cycled_mob.select()
-                        for current_image in cycled_mob.images:
-                            current_cell = cycled_mob.images[0].current_cell
-                            while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
-                                current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+                        cycled_mob.move_to_front()
+                        #for current_image in cycled_mob.images:
+                        #    current_cell = cycled_mob.images[0].current_cell
+                        #    while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
+                        #        current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
                         if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
                             cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
                         else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it

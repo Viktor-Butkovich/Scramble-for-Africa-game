@@ -1,5 +1,5 @@
 #Contains functionality for group units
-
+import random
 from .pmobs import pmob
 from ..tiles import status_icon
 from .. import actor_utility
@@ -51,24 +51,113 @@ class group(pmob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        if not from_save:
-            self.select()
-            if self.veteran:
-                self.set_name("Veteran " + self.name.lower())
-        self.status_icons = self.officer.status_icons
-        for current_status_icon in self.status_icons:
-            current_status_icon.actor = self
         self.global_manager.get('group_list').append(self)
         if not from_save:
+            self.select()
+            self.status_icons = self.officer.status_icons
+            for current_status_icon in self.status_icons:
+                current_status_icon.actor = self
+                
             if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
                 self.set_movement_points(self.officer.movement_points)
             else:
                 self.set_movement_points(self.worker.movement_points)
+        else:
+            if self.veteran:
+                #self.set_name("Veteran " + self.name.lower())
+                self.name = self.default_name
+                self.officer.name = self.officer.default_name
+                self.promote() #creates veteran status icons
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.set_group_type('none')
+
+    def move(self, x_change, y_change):
+        '''
+        Description:
+            Moves this mob x_change to the right and y_change upward, also making sure to update the positions of the group's worker and officer
+        Input:
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
+        Output:
+            None
+        '''
+        super().move(x_change, y_change)
+        self.calibrate_sub_mob_positions()
+
+    def calibrate_sub_mob_positions(self):
+        '''
+        Description:
+            Updates the positions of this mob's submobs (mobs inside of a building or other mob that are not able to be independently viewed or selected) to match this mob
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.officer.x = self.x
+        self.officer.y = self.y
+        self.worker.x = self.x
+        self.worker.y = self.y
+
+    def manage_health_attrition(self, current_cell = 'default'):
+        '''
+        Description:
+            Checks this mob for health attrition each turn. A group's worker and officer each roll for attrition independently, but the group itself can not suffer attrition
+        Input:
+            string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
+        Output:
+            None
+        '''
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        if current_cell.local_attrition():
+            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                self.attrition_death('officer')
+        if current_cell.local_attrition():
+            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                worker_type = self.worker.worker_type
+                if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
+                    self.attrition_death('worker')
+
+    def attrition_death(self, target):
+        '''
+        Description:
+            Resolves either the group's worker or officer dying from attrition, preventing the group from moving in the next turn and automatically recruiting a new one
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.temp_disable_movement()
+        if self.in_vehicle:
+            zoom_destination = self.vehicle
+            destination_type = 'vehicle'
+            destination_message = " from the " + self.name + " aboard the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+        elif self.in_building:
+            zoom_destination = self.building.images[0].current_cell.tile
+            destination_type = 'building'
+            destination_message = " from the " + self.name + " working in the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+        else:
+            zoom_destination = self
+            destination_type = 'self'
+            destination_message = " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+            
+
+        if target == 'officer':
+            text = "The " + self.officer.name + destination_message + "has died from attrition. /n /n "
+            text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
+            text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
+            self.officer.replace(self) #self.officer.die()
+
+            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
+        elif target == 'worker':
+            text = "The " + self.worker.name + destination_message + "have died from attrition. /n /n "
+            text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+            self.worker.replace(self)
+            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
+        
 
     def fire(self):
         '''

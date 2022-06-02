@@ -39,6 +39,8 @@ class battalion(group):
             self.battalion_type = 'colonial'
         self.attack_cost = self.global_manager.get('action_prices')['attack']
         self.attack_mark_list = []
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
     def move(self, x_change, y_change, attack_confirmed = False):
         '''

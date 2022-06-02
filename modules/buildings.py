@@ -1,6 +1,8 @@
 #Contains functionality for buildings
 
 import pygame
+import random
+
 from .actors import actor
 from .buttons import button
 from . import utility
@@ -408,6 +410,19 @@ class resource_building(building):
         self.global_manager.set('resource_building_list', utility.remove_from_list(self.global_manager.get('resource_building_list'), self))
         super().remove()
 
+    def manage_health_attrition(self, current_cell = 'default'):
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        for current_work_crew in self.contained_work_crews:
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                    current_work_crew.attrition_death('officer')
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                    worker_type = current_work_crew.worker.worker_type
+                    if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
+                        current_work_crew.attrition_death('worker')
+
     def can_upgrade(self, upgrade_type):
         '''
         Description:
@@ -559,10 +574,10 @@ class slums(building):
         input_dict = {}
         input_dict['coordinates'] = (self.images[0].current_cell.x, self.images[0].current_cell.y)
         input_dict['grids'] = [self.images[0].current_cell.grid, self.images[0].current_cell.grid.mini_grid]
-        input_dict['image'] = 'mobs/African worker/default.png'
+        input_dict['image'] = 'mobs/African workers/default.png'
         input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'African worker'
-        input_dict['init_type'] = 'worker'
+        input_dict['name'] = 'African workers'
+        input_dict['init_type'] = 'workers'
         input_dict['worker_type'] = 'African'
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         self.change_population(-1)

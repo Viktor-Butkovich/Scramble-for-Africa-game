@@ -124,15 +124,15 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
         None
     '''
     if random.randrange(1, 7) >= 4:
-        current_price = global_manager.get('recruitment_costs')['slave worker']
+        current_price = global_manager.get('recruitment_costs')['slave workers']
         if change_type == 'increase':
             changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
-            global_manager.get('recruitment_costs')['slave worker'] = changed_price
-            text_tools.print_to_screen("Buying a slave worker increased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            global_manager.get('recruitment_costs')['slave workers'] = changed_price
+            text_tools.print_to_screen("Buying slave workers increased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         elif change_type == 'decrease':
             changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
             if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
-                global_manager.get('recruitment_costs')['slave worker'] = changed_price
+                global_manager.get('recruitment_costs')['slave workers'] = changed_price
                 text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
 class loan():

@@ -97,8 +97,11 @@ def generate_article(word):
         string: Returns 'an' if the inputed word starts with a vowel, otherwise returns 'a'
     '''
     vowels = ['a', 'e', 'i', 'o', 'u']
-    exceptions = ['European', 'unit']
-    if word[0] in vowels and (not word in exceptions):
+    plural_exceptions = []
+    a_an_exceptions = ['European', 'unit']
+    if word[-1] == 's' and (not word in plural_exceptions):
+        return('')
+    elif word[0] in vowels and (not word in a_an_exceptions):
         return('an')
     else:
         return('a')
@@ -128,8 +131,11 @@ def generate_capitalized_article(word):
         string: Returns 'An' if the inputed word starts with a vowel, otherwise returns 'A'
     '''
     vowels = ['a', 'e', 'i', 'o', 'u']
-    exceptions = ['European', 'unit']
-    if word[0] in vowels and (not word in exceptions):
+    plural_exceptions = []
+    a_an_exceptions = ['European', 'unit']
+    if word[-1] == 's' and (not word in plural_exceptions):
+        return('')
+    elif word[0] in vowels and (not word in a_an_exceptions):
         return('An')
     else:
         return('A')

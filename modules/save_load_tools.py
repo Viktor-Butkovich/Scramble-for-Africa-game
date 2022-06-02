@@ -169,7 +169,7 @@ class save_load_manager_template():
         
         minister_utility.update_available_minister_display(self.global_manager)
 
-        turn_management_tools.start_turn(self.global_manager, True)
+        turn_management_tools.start_player_turn(self.global_manager, True)
 
         self.global_manager.set('minister_appointment_tutorial_completed', False)
         self.global_manager.set('exit_minister_screen_tutorial_completed', False)

@@ -65,10 +65,10 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
-        elif self.actor_label_type == 'building workers':
+        elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
             self.attached_buttons.append(buttons.cycle_work_crews_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
-        elif self.actor_label_type == 'building worker':
+        elif self.actor_label_type == 'building work crew':
             self.message_start = ''
             self.attached_building = 'none'
             self.attached_buttons.append(buttons.remove_work_crew_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/remove_work_crew_button.png', self, 'resource', global_manager))
@@ -98,12 +98,12 @@ class actor_display_label(label):
             self.message_start = 'Total population: '
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'village', global_manager))
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'village', global_manager))
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
-            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/slave worker/button.png', self, global_manager))
+            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/slave workers/button.png', self, global_manager))
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
@@ -117,7 +117,7 @@ class actor_display_label(label):
                 self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, current_position, global_manager))
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African worker/button.png', self, 'slums', global_manager))
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
         else:
@@ -133,7 +133,7 @@ class actor_display_label(label):
         Output:
             None
         '''
-        if self.actor_label_type in ['building worker', 'current passenger']:
+        if self.actor_label_type in ['building work crew', 'current passenger']:
             if len(self.attached_list) > self.list_index:
                 self.attached_list[self.list_index].update_tooltip()
                 tooltip_text = self.attached_list[self.list_index].tooltip_text
@@ -225,17 +225,20 @@ class actor_display_label(label):
         elif self.actor_label_type == 'combat_strength':
             tooltip_text = [self.message]
             tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type.")
+            tooltip_text.append("When attacked, the defending side will automatically choose its strongest unit to fight.")
             if not self.actor == 'none':
                 modifier = self.actor.get_combat_modifier()
                 if modifier >= 0:
                     sign = '+'
                 else:
                     sign = ''
-                    
-                if self.actor.veteran:
-                    tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                if self.actor.get_combat_strength() == 0:
+                    tooltip_text.append("A unit with 0 combat strength will die automatically if forced to fight or if all other defenders are defeated.")
                 else:
-                    tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
+                    if self.actor.veteran:
+                        tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results.")
+                    else:
+                        tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer.")
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
@@ -284,12 +287,12 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
                     else:
                         if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
-                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")
                             else:
                                 self.set_label("Infinite movement until cargo/passenger dropped")
                         else:
-                            if new_actor.movement_points == 0 or not new_actor.has_crew:
+                            if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")
                             else:
                                 self.set_label("Infinite movement")
@@ -346,9 +349,9 @@ class actor_display_label(label):
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
 
-            elif self.actor_label_type in ['worker', 'officer']:
+            elif self.actor_label_type in ['workers', 'officer']:
                 if self.actor.is_group:
-                    if self.actor_label_type == 'worker':
+                    if self.actor_label_type == 'workers':
                         self.set_label(self.message_start + str(self.actor.worker.name.capitalize()))
                     else:
                         self.set_label(self.message_start + str(self.actor.officer.name.capitalize()))
@@ -443,7 +446,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle: #do not show passenger or crew labels for non-vehicle mobs
             return(False)
-        elif self.actor_label_type in ['worker', 'officer'] and not self.actor.is_group:
+        elif self.actor_label_type in ['workers', 'officer'] and not self.actor.is_group:
             return(False)
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)

@@ -7,6 +7,7 @@ from . import actor_utility
 from . import market_tools
 from . import notification_tools
 from . import utility
+from . import game_transitions
 
 def end_turn(global_manager):
     '''
@@ -17,38 +18,48 @@ def end_turn(global_manager):
     Output:
         None
     '''
+    
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
-    for current_cell in global_manager.get('strategic_map_grid').cell_list:
-        current_tile = current_cell.tile
-        while current_tile.get_inventory_used() > current_tile.inventory_capacity:
-            discarded_commodity = random.choice(current_tile.get_held_commodities())
-            current_tile.change_inventory(discarded_commodity, -1)
-    start_turn(global_manager, False)
+            
+    start_enemy_turn(global_manager)
 
-def start_turn(global_manager, first_turn):
+def start_enemy_turn(global_manager):
     '''
     Description:
-        Starts the turn, giving all units their maximum movement points and adjusting market prices
+        Starts the ai's turn, resetting their units to maximum movement points, spawning warriors, etc.
     Input:
         global_manager_template global_manager: Object that accesses shared variables
+        first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
+    Output:
+        None
+    '''
+    manage_villages(global_manager)
+    reset_mobs('npmobs', global_manager)
+    manage_enemy_movement(global_manager)
+    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+    #the manage_combat function starts the player turn
+    
+def start_player_turn(global_manager, first_turn = False):
+    '''
+    Description:
+        Starts the player's turn, resetting their units to maximum movement points, adjusting prices, paying upkeep, etc.
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        first_turn = False: Whether this is the first turn - do not pay upkeep, etc. when the game first starts
     Output:
         None
     '''
     text_tools.print_to_screen("", global_manager)
     text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
-        #enemy turn starts
-        manage_villages(global_manager)
-        reset_mobs('npmobs', global_manager)
-        manage_enemy_movement(global_manager)
-        manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
-        
-        #own turn starts
+        for current_pmob in global_manager.get('pmob_list'):
+            if current_pmob.is_vehicle:
+                current_pmob.reembark()
+        manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
         reset_mobs('pmobs', global_manager)
-        
         manage_production(global_manager)
         manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
@@ -85,7 +96,7 @@ def reset_mobs(mob_type, global_manager):
     if mob_type == 'pmobs':
         for current_pmob in global_manager.get('pmob_list'):
             current_pmob.reset_movement_points()
-            current_pmob.set_disorganized(False) 
+            current_pmob.set_disorganized(False)
     elif mob_type == 'npmobs':
         for current_npmob in global_manager.get('npmob_list'):
             current_npmob.reset_movement_points()
@@ -95,6 +106,32 @@ def reset_mobs(mob_type, global_manager):
             current_mob.reset_movement_points()
             current_mob.set_disorganized(False)
 
+def manage_attrition(global_manager):
+    '''
+    Description:
+        Checks each unit and commodity storage location to see if attrition occurs. Health attrition forces parts of units to die and need to be replaced, costing money, removing experience, and preventing them from acting in the next
+            turn. Commodity attrition causes up to half of the commodities stored in a warehouse or carried by a unit to be lost. Both types of attrition are more common in bad terrain and less common in areas with more infrastructure
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_pmob in global_manager.get('pmob_list'):
+        if not (current_pmob.in_vehicle or current_pmob.in_group or current_pmob.in_building): #vehicles, groups, and buildings handle attrition for their submobs
+            current_pmob.manage_health_attrition()
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type == 'resource':
+            current_building.manage_health_attrition()
+
+    for current_pmob in global_manager.get('pmob_list'):
+        current_pmob.manage_inventory_attrition()
+
+    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    for current_cell in terrain_cells:
+        current_tile = current_cell.tile
+        if len(current_tile.get_held_commodities()) > 0:
+            current_tile.manage_inventory_attrition()
+    
 def manage_production(global_manager):
     '''
     Description:
@@ -222,15 +259,15 @@ def manage_worker_price_changes(global_manager):
 
     slave_worker_roll = random.randrange(1, 7)
     if slave_worker_roll >= 5:
-        current_price = global_manager.get('recruitment_costs')['slave worker']
+        current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
-            global_manager.get('recruitment_costs')['slave worker'] = changed_price
+            global_manager.get('recruitment_costs')['slave workers'] = changed_price
             text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif slave_worker_roll == 1:
-        current_price = global_manager.get('recruitment_costs')['slave worker']
+        current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
-        global_manager.get('recruitment_costs')['slave worker'] = changed_price
+        global_manager.get('recruitment_costs')['slave workers'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
 def manage_worker_migration(global_manager): 
@@ -245,9 +282,9 @@ def manage_worker_migration(global_manager):
     num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + global_manager.get('num_wandering_workers')
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
-        resolve_worker_migration(global_manager)
+        trigger_worker_migration(global_manager)
 
-def resolve_worker_migration(global_manager): #resolves migration if it occurs
+def trigger_worker_migration(global_manager): #resolves migration if it occurs
     '''
     Description:
         When a migration event occurs, about half of available workers in villages and all wandering workers move to a slum around a colonial port, train station, or resource production facility. The chance to move to a slum on a tile
@@ -414,3 +451,5 @@ def manage_combat(global_manager):
     '''
     if len(global_manager.get('attacker_queue')) > 0:
         global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+    else:
+        start_player_turn(global_manager)

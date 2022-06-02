@@ -4,6 +4,7 @@ from .labels import multi_line_label
 from . import text_tools
 from . import utility
 from . import scaling
+from . import actor_utility
 
 class notification(multi_line_label):
     '''
@@ -32,7 +33,15 @@ class notification(multi_line_label):
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
 
-    def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text
+        Input:
+            None
+        Output:
+            None
+        '''
         super().format_message()
         self.message.append("Click to remove this notification.")
                     
@@ -76,3 +85,31 @@ class notification(multi_line_label):
         if len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
+class zoom_notification(notification):
+    '''
+    Notification that selects a certain tile or mob and moves the minimap to it when first displayed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, target, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            actor target: Tile or mob to select and move the minimap to when this notification is first displayed
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        if self.global_manager.get('strategic_map_grid') in target.grids:
+            self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
+        if target.actor_type == 'tile':
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target)
+        elif target.actor_type == 'mob':
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), target)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)

@@ -1,10 +1,13 @@
 #Contains functionality for vehicle units
 
+import random
+
+from .pmobs import pmob
 from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import main_loop_tools
-from .pmobs import pmob
+from .. import notification_tools
 from ..buttons import button
 
 class vehicle(pmob):
@@ -38,6 +41,8 @@ class vehicle(pmob):
         self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']
         self.contained_mobs = []
+        self.ejected_crew = 'none'
+        self.ejected_passengers = []
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
@@ -60,6 +65,134 @@ class vehicle(pmob):
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
+    def manage_health_attrition(self, current_cell = 'default'):
+        '''
+        Description:
+            Checks this mob, its, crew, and its passengers for health attrition each turn
+        Input:
+            string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
+        Output:
+            None
+        '''
+        if current_cell == 'default':
+            current_cell = self.images[0].current_cell
+        if self.crew == 'none':
+            sub_mobs = []
+        else:
+            sub_mobs = [self.crew]
+        sub_mobs += self.contained_mobs
+        for current_sub_mob in sub_mobs:
+            worker_type = 'none'
+            if current_sub_mob.is_worker:
+                worker_type = current_sub_mob.worker_type
+            elif current_sub_mob.is_group:
+                worker_type = current_sub_mob.worker.worker_type
+            if current_cell.local_attrition():
+                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                    if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
+                        if current_sub_mob == self.crew:
+                            self.crew_attrition_death()
+                        elif current_sub_mob.is_group:
+                            current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
+                        else:
+                            text = "The " + current_sub_mob.name + " aboard the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+                            text += "The " + current_sub_mob.name + " will remain inactive for the next turn as replacements are found."
+                            current_sub_mob.replace()
+                            current_sub_mob.temp_disable_movement()
+                            notification_tools.display_zoom_notification(text, self, self.global_manager)
+                        
+    def crew_attrition_death(self):
+        '''
+        Description:
+            Resolves the vehicle's crew dying from attrition, preventing the ship from moving in the next turn and automatically recruiting a new worker
+        Input:
+            None
+        Output:
+            None
+        '''
+        text = "The " + self.crew.name + " crewing the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
+        text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+        self.crew.replace(self)
+        notification_tools.display_zoom_notification(text, self, self.global_manager)
+        self.temp_disable_movement()
+
+
+    def move(self, x_change, y_change):
+        '''
+        Description:
+            Moves this mob x_change to the right and y_change upward, also making sure to update the positions of the vehicle's crew and passengers
+        Input:
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
+        Output:
+            None
+        '''
+        super().move(x_change, y_change)
+        self.calibrate_sub_mob_positions()
+
+    def calibrate_sub_mob_positions(self):
+        '''
+        Description:
+            Updates the positions of this mob's submobs (mobs inside of a building or other mob that are not able to be independently viewed or selected) to match this mob
+        Input:
+            None
+        Output:
+            None
+        '''
+        for current_passenger in self.contained_mobs:
+            current_passenger.x = self.x
+            current_passenger.y = self.y
+            if current_passenger.is_group:
+                current_passenger.calibrate_sub_mob_positions()
+        if not self.crew == 'none':
+            self.crew.x = self.x
+            self.crew.y = self.y
+
+    def eject_crew(self):
+        '''
+        Description:
+            Removes this vehicle's crew
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.has_crew:
+            self.ejected_crew = self.crew
+            self.crew.uncrew_vehicle(self)
+            
+    def eject_passengers(self):
+        '''
+        Description:
+            Removes this vehicle's passengers
+        Input:
+            None
+        Output:
+            None
+        '''
+        while len(self.contained_mobs) > 0:
+            current_mob = self.contained_mobs.pop(0)
+            current_mob.disembark_vehicle(self)
+            self.ejected_passengers.append(current_mob)
+
+    def reembark(self):
+        '''
+        Description:
+            After combat is finished, reembarks any surviving crew or passengers onto this vehicle, if possible
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.ejected_crew == 'none':
+            if self.ejected_crew in self.global_manager.get('pmob_list'): #not self.ejected_crew.dead:
+                self.ejected_crew.crew_vehicle(self)
+                for current_passenger in self.ejected_passengers:
+                    if current_passenger in self.global_manager.get('pmob_list'): #not current_passenger.dead:
+                        current_passenger.embark_vehicle(self)
+            self.ejected_crew = 'none'
+            self.ejected_passengers = []
+        
     def die(self):
         '''
         Description:
@@ -138,39 +271,13 @@ class vehicle(pmob):
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
         if self.has_crew:
-            return(super().can_move(x_change, y_change))
+            if not self.temp_movement_disabled:
+                return(super().can_move(x_change, y_change))
+            else:
+                text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
         else:
             text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
-    
-    #def update_tooltip(self):
-    #    '''
-    #    Description:
-    #        Sets this vehicle's tooltip to what it should be whenever the player looks at the tooltip. By default, sets tooltip to this vehicle's name, a description of its crew and each of its passengers, and its movement points
-    #    Input:
-    #        None
-    #    Output:
-    #        None
-    #    '''
-    #    tooltip_list = ["Name: " + self.name.capitalize()]
-    #    if self.has_crew:
-    #        tooltip_list.append("Crew: " + self.crew.name.capitalize())
-    #    else:
-    #        tooltip_list.append("Crew: None")
-    #        tooltip_list.append("A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
-    #        
-    #    if len(self.contained_mobs) > 0:
-    #        tooltip_list.append("Passengers: ")
-    #        for current_mob in self.contained_mobs:
-    #            tooltip_list.append('    ' + current_mob.name.capitalize())
-    #    else:
-    #        tooltip_list.append("No passengers")
-    #
-    #    if not self.has_infinite_movement:
-    #        tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
-    #    else:
-    #        tooltip_list.append("Movement points: infinite")
-    #    self.set_tooltip(tooltip_list)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -315,6 +422,6 @@ class ship(vehicle):
             boolean: Returs True if this ship has any crew, otherwise returns False
         '''
         if self.has_crew:
-            return(True)
-        else:
-            return(False)
+            if not self.temp_movement_disabled:
+                return(True)
+        return(False)

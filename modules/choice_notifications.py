@@ -277,16 +277,16 @@ class recruitment_choice_button(choice_button):
         '''
         if self.can_show():
             input_dict = {}
-            if self.recruitment_type == 'slave worker':
+            if self.recruitment_type == 'slave workers':
                 input_dict = {}
                 self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
                 input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
                 attached_cell = input_dict['grids'][0].cell_list[0]
                 input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
-                input_dict['image'] = 'mobs/slave worker/default.png'
+                input_dict['image'] = 'mobs/slave workers/default.png'
                 input_dict['modes'] = ['strategic']
-                input_dict['name'] = 'Slave worker'
-                input_dict['init_type'] = 'slave'
+                input_dict['name'] = 'slave workers'
+                input_dict['init_type'] = 'slaves'
                 input_dict['purchased'] = True
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'African worker village':
@@ -310,17 +310,17 @@ class recruitment_choice_button(choice_button):
                     input_dict['name'] = name
                     input_dict['init_type'] = self.recruitment_type
                     input_dict['officer_type'] = self.recruitment_type
-                elif self.recruitment_type == 'European worker':
-                    input_dict['name'] = 'European worker'
-                    input_dict['init_type'] = 'worker'
+                elif self.recruitment_type == 'European workers':
+                    input_dict['name'] = 'European workers'
+                    input_dict['init_type'] = 'workers'
                     input_dict['worker_type'] = 'European'
-                elif self.recruitment_type == 'African worker':
-                    input_dict['name'] = 'African worker'
-                    input_dict['init_type'] = 'worker'
+                elif self.recruitment_type == 'African workers':
+                    input_dict['name'] = 'African workers'
+                    input_dict['init_type'] = 'workers'
                     input_dict['worker_type'] = 'African'
-                elif self.recruitment_type == 'slave worker':
-                    input_dict['name'] = 'slave worker'
-                    input_dict['init_type'] = 'slave'
+                #elif self.recruitment_type == 'slave workers':
+                #    input_dict['name'] = 'slave workers'
+                #    input_dict['init_type'] = 'slaves'
                 elif self.recruitment_type == 'ship':
                     image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
                     input_dict['image_dict'] = image_dict

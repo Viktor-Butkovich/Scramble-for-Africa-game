@@ -646,12 +646,12 @@ class combat_notification(action_notification):
                 current_die.remove()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                 current_minister_image.remove()
-            self.global_manager.get('combat_result')[0].complete_combat()
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
         if self.is_last:
+            self.global_manager.get('combat_result')[0].complete_combat()
             for current_image in self.global_manager.get('combatant_images'):
                 current_image.remove()
             self.global_manager.set('combatant_images', [])

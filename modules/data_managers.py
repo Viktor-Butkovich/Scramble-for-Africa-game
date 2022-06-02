@@ -262,7 +262,7 @@ class money_tracker(value_tracker):
         self.transaction_history = {}
         self.transaction_types = global_manager.get('transaction_types')
         #['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction']
-        #self.transaction_types += ['construction']
+        #self.transaction_types += ['construction', 'attrition_replacements']
         self.reset_transaction_history()
         super().__init__('money', initial_value, 'none', 'none', global_manager)
 
@@ -533,6 +533,12 @@ class notification_manager_template():
             new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, notification_dice,
                 self.global_manager)
+
+        elif notification_type == 'zoom':
+            target = self.choice_notification_choices_queue.pop(0) #repurposing communication method used for choice notifications to tell notification which target
+            self.choice_notification_info_dict_queue.pop(0)
+            new_notification = notifications.zoom_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, target, self.global_manager)     
 
         else:
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

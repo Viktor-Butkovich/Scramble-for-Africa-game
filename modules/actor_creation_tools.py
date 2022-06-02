@@ -46,13 +46,12 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             actor: Returns the mob or building that was created
         '''
         init_type = input_dict['init_type']
-
         #mobs
         if init_type == 'mob':
             new_actor = mobs.mob(from_save, input_dict, global_manager)
-        elif init_type == 'worker':
+        elif init_type == 'workers':
             new_actor = workers.worker(from_save, input_dict, global_manager)
-        elif init_type == 'slave':
+        elif init_type == 'slaves':
             new_actor = workers.slave_worker(from_save, input_dict, global_manager)
         elif init_type == 'church_volunteers':
             new_actor = workers.church_volunteers(from_save, input_dict, global_manager)
@@ -126,10 +125,10 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         '''
         message = 'Are you sure you want to recruit ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + '? '
         message += utility.generate_capitalized_article(recruitment_name) + ' ' + recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit. '
-        if recruitment_name == 'European worker':
+        if recruitment_name == 'European workers':
             message += 'European workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('european_worker_upkeep')) + ' money. '
             message += 'Expanding the labor pool, such as by firing European workers, may decrease the upkeep cost. '
-        elif recruitment_name == 'African worker':
+        elif recruitment_name == 'African workers':
             message += 'African workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money. '
             message += 'Expanding the labor pool, such as by convincing villagers to become workers, firing African workers, or freeing slaves may decrease the upkeep cost. '
         elif recruitment_name == 'slave worker':

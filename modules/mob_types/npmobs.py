@@ -3,6 +3,8 @@
 import random
 from ..mobs import mob
 from .. import utility
+from .. import turn_management_tools
+from .. import notification_tools
 
 class npmob(mob):
     '''
@@ -85,12 +87,34 @@ class npmob(mob):
         Output:
             None
         '''
+        for current_mob in self.images[0].current_cell.contained_mobs:
+            if current_mob.is_vehicle:
+                current_mob.eject_passengers()
+                current_mob.eject_crew()
         defender = self.images[0].current_cell.get_best_combatant('pmob')
         if not defender == 'none':
             defender.start_combat('defending', self)
         else:
+            self.kill_noncombatants()
+            
             if len(self.global_manager.get('attacker_queue')) > 0:
-                   self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+                self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
+            elif not self.global_manager.get('player_turn'): #if enemy turn and all combats are completed, go to player turn
+                turn_management_tools.start_player_turn(self.global_manager)
+
+    def kill_noncombatants(self):
+        '''
+        Description:
+            Kills all defenseless units, such as lone officers and vehicles, in this cell after combat if no possible combatants, like workers or soldiers, remain
+        Input:
+            None
+        Output:
+            None
+        '''
+        noncombatants = self.images[0].current_cell.get_noncombatants('pmob')
+        for current_noncombatant in noncombatants:
+            notification_tools.display_notification("The defenseless " + current_noncombatant.name + " has been killed by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
+            current_noncombatant.die()
         
     def end_turn_move(self):
         '''

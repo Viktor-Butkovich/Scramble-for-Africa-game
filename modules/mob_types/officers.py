@@ -39,7 +39,6 @@ class officer(pmob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('officer_list').append(self)
-        #self.status_icons = []
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
@@ -50,6 +49,28 @@ class officer(pmob):
             self.veteran = input_dict['veteran']
             if self.veteran:
                 self.load_veteran()
+
+    def replace(self, attached_group = 'none'):
+        '''
+        Description:
+            Replaces this unit for a new version of itself when it dies from attrition, removing all experience and name modifications. Also charges the usual officer recruitment cost
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().replace()
+        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition replacements')
+        if not attached_group == 'none':
+            attached_group.set_name(attached_group.default_name)
+            attached_group.veteran = False
+            new_status_icons = []
+            for current_status_icon in attached_group.status_icons:
+                if current_status_icon.status_icon_type == 'veteran':
+                    current_status_icon.remove()
+                else:
+                    new_status_icons.append(current_status_icon)
+            attached_group.status_icons = new_status_icons
 
     def to_save_dict(self):
         '''
@@ -109,9 +130,9 @@ class officer(pmob):
         Output:
             None
         '''
-        name = self.name
+        name = self.default_name
         self.promote()
-        self.set_name(name)
+        #self.set_name(name)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -155,7 +176,7 @@ class officer(pmob):
         self.x = group.x
         self.y = group.y
         self.show_images()
-        self.disorganized = group.disorganized
+        #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
         self.select()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
@@ -342,7 +363,7 @@ class evangelist(officer):
             input_dict['coordinates'] = (0, 0)
             input_dict['grids'] = [self.global_manager.get('europe_grid')]
             input_dict['image'] = 'mobs/church_volunteers/default.png'
-            input_dict['name'] = 'Church volunteers'
+            input_dict['name'] = 'church volunteers'
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['init_type'] = 'church_volunteers'
             input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep

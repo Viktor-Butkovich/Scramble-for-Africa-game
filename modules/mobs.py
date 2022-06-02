@@ -64,6 +64,7 @@ class mob(actor):
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
+        self.temp_movement_disabled = False
         if from_save:
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
@@ -103,6 +104,17 @@ class mob(actor):
         save_dict['disorganized'] = self.disorganized
         return(save_dict)        
 
+    def temp_disable_movement(self):
+        '''
+        Description:
+            Sets this unit's movement to 0 for the next turn, preventing it from taking its usual actions
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.temp_movement_disabled = True
+    
     def set_disorganized(self, new_value):
         '''
         Description:
@@ -174,11 +186,12 @@ class mob(actor):
         Output:
             int: Returns this unit's combst strength
         '''
+        #A unit with 0 combat strength can not fight
         #combat modifiers range from -3 (disorganized lone officer) to +2 (imperial battalion), and veteran status should increase strength by 1: range from 0 to 6
         #add 3 to modifier and add veteran bonus to get strength
-        #0: disorganized lone officer
-        #1: lone officer, disorganized workers/civilian group/vehicle
-        #2: veteran lone officer, workers/civilian group/vehicle, disorganized native warriors
+        #0: lone officer, vehicle
+        #1: disorganized workers/civilian group
+        #2: veteran lone officer, workers/civilian group, disorganized native warriors
         #3: veteran civilian group, disorganized colonial battalion, native warriors
         #4: colonial battalion, disorganized imperial battalion
         #5: imperial battalion, veteran colonial battalion, disorganized veteran imperial battalion
@@ -187,6 +200,8 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
+        if self.is_officer or self.is_vehicle:
+            result = 0
         return(result)
 
     def combat_possible(self):
@@ -315,11 +330,15 @@ class mob(actor):
         Output:
             None
         '''
-        self.movement_points = self.max_movement_points
-        if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
-            self.movement_points = round(self.movement_points)
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        if self.temp_movement_disabled:
+            self.temp_movement_disabled = False
+            self.movement_points = 0
+        else:
+            self.movement_points = self.max_movement_points
+            if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
+                self.movement_points = round(self.movement_points)
+            if self.global_manager.get('displayed_mob') == self:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def set_max_movement_points(self, new_value):
         '''
@@ -422,6 +441,20 @@ class mob(actor):
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
+    def move_to_front(self):
+        '''
+        Description:
+            Moves the image of this unit to the front of the cell, making it visible and selected first when the cell is clicked
+        Input:
+            None
+        Output:
+            None
+        '''
+        for current_image in self.images:
+            current_cell = self.images[0].current_cell
+            while not current_cell.contained_mobs[0] == self: #move to front of tile
+                current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
+
     def draw_outline(self):
         '''
         Description:
@@ -451,7 +484,7 @@ class mob(actor):
         if self.controllable:
             if self.is_group:
                 tooltip_list.append('    Officer: ' + self.officer.name.capitalize())
-                tooltip_list.append('    Worker: ' + self.worker.name.capitalize())
+                tooltip_list.append('    Workers: ' + self.worker.name.capitalize())
             elif self.is_vehicle:
                 if self.has_crew:
                     tooltip_list.append("    Crew: " + self.crew.name.capitalize())
@@ -600,6 +633,8 @@ class mob(actor):
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
+        if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
+            self.manage_inventory_attrition()
         self.last_move_direction = (x_change, y_change)
 
     def retreat(self):

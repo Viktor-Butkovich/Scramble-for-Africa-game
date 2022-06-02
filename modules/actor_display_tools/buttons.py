@@ -1345,7 +1345,7 @@ class build_train_button(label_button):
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                                if not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                if self.attached_label.actor.images[0].current_cell.has_train_station(): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                                         if self.attached_label.actor.check_if_minister_appointed():
                                             self.construct()
@@ -1949,10 +1949,10 @@ class buy_slaves_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
-                self.cost = self.global_manager.get('recruitment_costs')['slave worker']
+                self.cost = self.global_manager.get('recruitment_costs')['slave workers']
                 if self.global_manager.get('money_tracker').get() >= self.cost:
-                    choice_info_dict = {'recruitment_type': 'slave worker', 'cost': self.cost, 'mob_image_id': 'mobs/slave worker/default.png', 'type': 'recruitment'}
-                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'slave worker', self.global_manager)
+                    choice_info_dict = {'recruitment_type': 'slave workers', 'cost': self.cost, 'mob_image_id': 'mobs/slave workers/default.png', 'type': 'recruitment'}
+                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'slave workers', self.global_manager)
                 else:
                     text_tools.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
             else:
