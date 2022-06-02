@@ -105,6 +105,14 @@ class mob(actor):
         return(save_dict)        
 
     def temp_disable_movement(self):
+        '''
+        Description:
+            Sets this unit's movement to 0 for the next turn, preventing it from taking its usual actions
+        Input:
+            None
+        Output:
+            None
+        '''
         self.temp_movement_disabled = True
     
     def set_disorganized(self, new_value):
@@ -434,6 +442,14 @@ class mob(actor):
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def move_to_front(self):
+        '''
+        Description:
+            Moves the image of this unit to the front of the cell, making it visible and selected first when the cell is clicked
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_image in self.images:
             current_cell = self.images[0].current_cell
             while not current_cell.contained_mobs[0] == self: #move to front of tile
@@ -617,6 +633,8 @@ class mob(actor):
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
+        if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
+            self.manage_inventory_attrition()
         self.last_move_direction = (x_change, y_change)
 
     def retreat(self):

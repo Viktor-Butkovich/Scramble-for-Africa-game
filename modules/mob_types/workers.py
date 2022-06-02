@@ -52,6 +52,15 @@ class worker(pmob):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
 
     def replace(self, attached_group = 'none'):
+        '''
+        Description:
+            Replaces this unit for a new version of itself when it dies from attrition, removing all experience and name modifications. Also finds a nearby worker to replace with if possible, such as recruiting an available African
+                worker from a nearby village if any exist, incurring the usual recruitment costs/upkeep increases
+        Input:
+            None
+        Output:
+            None
+        '''
         super().replace()
         if attached_group == 'none':
             destination = self

@@ -1,35 +1,10 @@
-turn_management_tools.manage_attrition
-cells.cell.get_noncombatants
-vehicles.vehicle.eject_crew, eject_passengers, reembark
-mob_types/npmobs.npmob.kill_noncombatants
-mobs.mob.move_to_front
-cells.cell.local_attrition
-pmobs.pmob.manage_health_attrition
-groups.manage_health_attrition
-groups.attrition_death
-groups imports
-notification_tools.display_zoom_notification
-notifications.zoom_notification
-notifications imports
-pmobs.pmob.replace
-officers.officer.replace
-workers.worker.replace
-mobs.mob.temp_disable_movement
-main imports
-utility.generate_article
-utility.generate_capitalized_article
-actor_utility.find_closest_available_worker
-actor_utility imports
-vehicles imports
-vehicles.vehicle.move
-vehicles.vehicle.calibrate_sub_mob_positions
-groups.group.move
-groups.group.calibrate_sub_mob_positions
-buildings imports
-actors imports
-actors.actors
 
 Future plans:
+Maybe cause health attrition when moving
+Cause inventory attrition when moving, not just when standing still
+Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
+Possibly ministers should still be involved but without corruption when there is no profit to be gained, such as in defensive combat or when avoiding health attrition
+Maybe allow ship's crew to leave while cargo is on board but cargo is lost at end of turn if not replaced
 Add chance of commodity loss on movement
 Chance of commodity attrition for a unit carrying commodities, higher chance if more being held, lose a certain amount at a time
 add actor_utility.find_closest_available_worker and fix worker.replace
@@ -40,10 +15,8 @@ improve health attrition, add commodity attrition w/ corruption
 possibly display a notification when a unit dies and have an optional cause of death parameter
 Enemies should attack buildings and attached work crews
 
-Errors:
-Make production corruption happen after corruption occurs
-If a vehicle's crew is detached, it should retain its inventory but have its inventory size reduced to 0 and remove its inventory at the end of the next turn
-Check maximum inventory capacity on resource production building - should be 9, 18 on current save
-Change worker -> workers in text descriptions throughout the program
+Known Errors:
+When attrition on movement is added, ensure that movement is not possible while transportation minister is not appointed
+Check maximum inventory capacity on resource production building - should be 9 but is 18 under certain circumstances
+Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned
-Fix have/has died on attrition messages for officers

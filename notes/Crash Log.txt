@@ -1,25 +1,13 @@
-ERROR:root:local variable 'was_word' referenced before assignment
+ERROR:root:print_to_screen() missing 1 required positional argument: 'global_manager'
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 156, in main_loop
-    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 181, in on_click
-    super().on_click()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 665, in on_click
-    turn_management_tools.end_turn(self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 27, in end_turn
-    start_enemy_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 42, in start_enemy_turn
-    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 457, in manage_combat
-    start_player_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 61, in start_player_turn
-    manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 135, in manage_attrition
-    current_tile.manage_inventory_attrition()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 269, in manage_inventory_attrition
-    self.trigger_inventory_attrition(transportation_minister)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 309, in trigger_inventory_attrition
-    notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + was_word +  " at (" +
-UnboundLocalError: local variable 'was_word' referenced before assignment
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 41, in main_loop
+    current_button.on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 537, in on_click
+    if mob.can_move(x_change, y_change):
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 275, in can_move
+    return(super().can_move(x_change, y_change))
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 367, in can_move
+    text_tools.print_to_screen("You can not move units before a Minister of Transportation has been appointed.")
+TypeError: print_to_screen() missing 1 required positional argument: 'global_manager'

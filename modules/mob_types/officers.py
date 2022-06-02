@@ -51,6 +51,14 @@ class officer(pmob):
                 self.load_veteran()
 
     def replace(self, attached_group = 'none'):
+        '''
+        Description:
+            Replaces this unit for a new version of itself when it dies from attrition, removing all experience and name modifications. Also charges the usual officer recruitment cost
+        Input:
+            None
+        Output:
+            None
+        '''
         super().replace()
         self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition replacements')
         if not attached_group == 'none':

@@ -76,7 +76,7 @@ SFA folder
 		class expedition(groups.group)
 	    
             groups.py
-	        imports pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
+	        imports random, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
                 class group(modules.mobs.mob)
 
 	    missionaries.py
@@ -107,7 +107,7 @@ SFA folder
 		class porters(groups.group)
 
 	    vehicles.py
-	        imports modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.mobs, modules.buttons
+	        imports random, pmobs, modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.buttons
 	        class vehicle(pmobs.pmob)
 		    class train
 		    class ship
@@ -140,7 +140,8 @@ SFA folder
 	    class actor_creation_manager_template
 
         actor_utility.py
-            imports random, scaling
+            imports random, scaling, utility
+	    def find_closest_available_worker
 	    def stop_exploration
             def create_image_dict
 	    def update_roads
@@ -154,11 +155,11 @@ SFA folder
 	    def get_num_available_workers
 
         actors.py
-            imports pygame, text_tools, utility, actor_utility, scaling
+            imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling
             class actor
 
 	buildings.py
-	    imports pygame, actors, buttons, utility, images, actor_utility, text_tools
+	    imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
 	    class building(actors.actor)
 		class infrastructure_building
 		class trading_post
@@ -314,8 +315,9 @@ SFA folder
             def show_tutorial_notifications
 
         notifications.py
-            imports labels, text_tools, utility, scaling
+            imports labels, text_tools, utility, scaling, actor_utility
             class notification(labels.multi_line_label)
+	    	class zoom_notification
 
 	save_load_tools.py
 	    imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools, minister_utility
@@ -352,14 +354,16 @@ SFA folder
 	    def start_enemy_turn
 	    def start_player_turn
 	    def reset_mobs
+	    def manage_attrition
 	    def manage_production
 	    def manage_upkeep
+	    def manage_loans
 	    def manage_public_opinion
 	    def manage_subsidies
 	    def manage_financial_report
 	    def manage_worker_price_changes
 	    def manage_worker_migration
-	    def resolve_worker_migration
+	    def trigger_worker_migration
 	    def create_weighted_migration_destinations
 	    def manage_villages
 	    def manage_enemy_movement
@@ -368,7 +372,9 @@ SFA folder
         utility.py
             def find_object_distance
             def find_coordinate_distance
+	    def find_grid_distance
             def remove_from_list
+	    def copy_list
             def toggle
             def generate_article
 	    def generate_plural
@@ -407,5 +413,6 @@ SFA folder
     README.txt
 
     Scramble_for_Africa.py
-        imports pygame, time, random, os, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, actor_creation_tools
+        imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools, instructions, mouse_followers, save_load_tools, 
+		actor_creation_tools
 As of last count, this program contains 19,565 lines of code across 54 python files

@@ -60,6 +60,14 @@ class pmob(mob):
         self.attached_dice_list = []
 
     def replace(self):
+        '''
+        Description:
+            Replaces this unit for a new version of itself when it dies from attrition, removing all experience and name modifications
+        Input:
+            None
+        Output:
+            None
+        '''
         self.set_name(self.default_name)
         if (self.is_group or self.is_officer) and self.veteran:
             self.veteran = False
@@ -72,6 +80,14 @@ class pmob(mob):
             self.status_icons = new_status_icons
 
     def manage_health_attrition(self, current_cell = 'default'): #other versions of manage_health_attrition in group, vehicle, and resource_building
+        '''
+        Description:
+            Checks this mob for health attrition each turn
+        Input:
+            string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
+        Output:
+            None
+        '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
@@ -83,22 +99,17 @@ class pmob(mob):
                     self.attrition_death()
 
     def attrition_death(self):
+        '''
+        Description:
+            Kills this unit, takes away its next turn, and automatically buys a replacement when it fails its rolls for health attrition. If an officer dies, the replacement costs the officer's usual recruitment cost and does not have
+                the previous officer's experience. If a worker dies, the replacement is found and recruited from somewhere else on the map, increasing worker upkeep colony-wide as usual
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.is_officer or self.is_worker:
             self.temp_disable_movement()
-
-            #if target == 'officer':
-            #    text = "The " + self.officer.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") has died from attrition. /n /n "
-            #    text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
-            #    text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
-            #    #self.disband()
-            #    self.officer.replace(self) #self.officer.die()
-            #    
-            #    notification_tools.display_zoom_notification(text, self, self.global_manager)
-            #elif target == 'worker':
-            #    text = "The " + self.worker.name + " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
-            #    text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
-                #self.disband()
-                #self.worker.die()
             self.replace()
             notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
                 self.images[0].current_cell.tile, self.global_manager)
@@ -230,10 +241,11 @@ class pmob(mob):
         '''
         if not self.end_turn_destination == 'none':
             if self.grids[0] in self.end_turn_destination.grids: #if on same grid
-                nothing = 0 #do later
+                nothing = 0 #do once queued movement is added
             else: #if on different grid
                 if self.can_travel():
                     self.go_to_grid(self.end_turn_destination.grids[0], (self.end_turn_destination.x, self.end_turn_destination.y))
+                    self.manage_inventory_attrition() #do an inventory check when crossing ocean, using the destination's terrain
             self.end_turn_destination = 'none'
     
     def can_travel(self): #if can move between Europe, Africa, etc.
@@ -311,43 +323,48 @@ class pmob(mob):
         '''
         future_x = self.x + x_change
         future_y = self.y + y_change
-        if self.can_leave():
-            if not self.grid in self.global_manager.get('abstract_grid_list'):
-                if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
-                    future_cell = self.grid.find_cell(future_x, future_y)
-                    if future_cell.visible or self.can_explore:
-                        destination_type = 'land'
-                        if future_cell.terrain == 'water':
-                            destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                        if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
-                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
-                            if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
-                                if (not future_cell.has_npmob()) or self.is_battalion: #non-battalion units can't move into enemies
-                                    return(True)
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        if not transportation_minister == 'none':
+            if self.can_leave():
+                if not self.grid in self.global_manager.get('abstract_grid_list'):
+                    if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
+                        future_cell = self.grid.find_cell(future_x, future_y)
+                        if future_cell.visible or self.can_explore:
+                            destination_type = 'land'
+                            if future_cell.terrain == 'water':
+                                destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
+                            if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
+                                (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
+                                if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
+                                    if (not future_cell.has_npmob()) or self.is_battalion: #non-battalion units can't move into enemies
+                                        return(True)
+                                    else:
+                                        text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
+                                        return(False)
                                 else:
-                                    text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
+                                    text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
+                                    text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
                                     return(False)
-                            else:
-                                text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                                text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
+                            elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
+                                #if future_cell.visible or self.can_explore: #already checked earlier
+                                text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
                                 return(False)
-                        elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
-                            #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
-                            return(False)
-                        else: #if trying to swim in water and can't 
-                            #if future_cell.visible or self.can_explore: #already checked earlier
-                            text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                            else: #if trying to swim in water and can't 
+                                #if future_cell.visible or self.can_explore: #already checked earlier
+                                text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                                return(False)
+                        else:
+                            text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
                             return(False)
                     else:
-                        text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
+                        text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
                         return(False)
                 else:
-                    text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
+                    text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
                     return(False)
-            else:
-                text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
-                return(False)
+        else:
+            text_tools.print_to_screen("You can not move units before a Minister of Transportation has been appointed.", self.global_manager)
+            return(False)
 
     def can_show_tooltip(self):
         '''
@@ -489,7 +506,7 @@ class pmob(mob):
         else:
             text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after their roll. /n"
         if self.disorganized:
-            text += "The " + self.name + " is disorganized from and will receive a -1 penalty after their roll. /n"
+            text += "The " + self.name + " are disorganized and will receive a -1 penalty after their roll. /n"
         elif enemy.disorganized:
             text += "The " + enemy.name + " are disorganized and will receive a -1 after their roll. /n"
 
@@ -607,7 +624,7 @@ class pmob(mob):
                 text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
         if (not self.veteran) and own_roll >= 6 and self.is_battalion: #civilian units can not become veterans through combat
             self.just_promoted = True
-            text += " This major is now a veteran. /n /n"
+            text += " This battalion's major is now a veteran. /n /n"
         notification_tools.display_notification(text + " Click to remove this notification.", 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
 

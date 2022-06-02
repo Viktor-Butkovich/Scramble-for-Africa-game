@@ -6,6 +6,14 @@ from . import scaling
 from . import utility
 
 def find_closest_available_worker(destination, global_manager):
+    '''
+    Description:
+        Finds one of the closest African workers and returns its slums or village. Weighted based on the amount available such that a village with more available workers at the same distance is more likely to be chosen
+    Input:
+        pmob destination: Unit that the worker will be sent to, used as a reference point for distance
+    Output:
+        slums/village: Returns the slums or village at which the chosen closest worker is located
+    '''
     possible_sources = []
     for current_village in global_manager.get('village_list'):
         if current_village.available_workers > 0:

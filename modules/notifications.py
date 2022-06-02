@@ -33,7 +33,15 @@ class notification(multi_line_label):
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
 
-    def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
+    def format_message(self):
+        '''
+        Description:
+            Converts this notification's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text
+        Input:
+            None
+        Output:
+            None
+        '''
         super().format_message()
         self.message.append("Click to remove this notification.")
                     

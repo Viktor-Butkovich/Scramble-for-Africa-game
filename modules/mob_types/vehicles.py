@@ -2,12 +2,12 @@
 
 import random
 
+from .pmobs import pmob
 from .. import text_tools
 from .. import utility
 from .. import actor_utility
 from .. import main_loop_tools
 from .. import notification_tools
-from .pmobs import pmob
 from ..buttons import button
 
 class vehicle(pmob):
@@ -66,6 +66,14 @@ class vehicle(pmob):
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
 
     def manage_health_attrition(self, current_cell = 'default'):
+        '''
+        Description:
+            Checks this mob, its, crew, and its passengers for health attrition each turn
+        Input:
+            string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
+        Output:
+            None
+        '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if self.crew == 'none':
@@ -94,6 +102,14 @@ class vehicle(pmob):
                             notification_tools.display_zoom_notification(text, self, self.global_manager)
                         
     def crew_attrition_death(self):
+        '''
+        Description:
+            Resolves the vehicle's crew dying from attrition, preventing the ship from moving in the next turn and automatically recruiting a new worker
+        Input:
+            None
+        Output:
+            None
+        '''
         text = "The " + self.crew.name + " crewing the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
         text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
         self.crew.replace(self)
@@ -102,10 +118,27 @@ class vehicle(pmob):
 
 
     def move(self, x_change, y_change):
+        '''
+        Description:
+            Moves this mob x_change to the right and y_change upward, also making sure to update the positions of the vehicle's crew and passengers
+        Input:
+            int x_change: How many cells are moved to the right in the movement
+            int y_change: How many cells are moved upward in the movement
+        Output:
+            None
+        '''
         super().move(x_change, y_change)
         self.calibrate_sub_mob_positions()
 
     def calibrate_sub_mob_positions(self):
+        '''
+        Description:
+            Updates the positions of this mob's submobs (mobs inside of a building or other mob that are not able to be independently viewed or selected) to match this mob
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_passenger in self.contained_mobs:
             current_passenger.x = self.x
             current_passenger.y = self.y
@@ -116,17 +149,41 @@ class vehicle(pmob):
             self.crew.y = self.y
 
     def eject_crew(self):
+        '''
+        Description:
+            Removes this vehicle's crew
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.has_crew:
             self.ejected_crew = self.crew
             self.crew.uncrew_vehicle(self)
             
     def eject_passengers(self):
+        '''
+        Description:
+            Removes this vehicle's passengers
+        Input:
+            None
+        Output:
+            None
+        '''
         while len(self.contained_mobs) > 0:
             current_mob = self.contained_mobs.pop(0)
             current_mob.disembark_vehicle(self)
             self.ejected_passengers.append(current_mob)
 
     def reembark(self):
+        '''
+        Description:
+            After combat is finished, reembarks any surviving crew or passengers onto this vehicle, if possible
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.ejected_crew == 'none':
             if self.ejected_crew in self.global_manager.get('pmob_list'): #not self.ejected_crew.dead:
                 self.ejected_crew.crew_vehicle(self)

@@ -107,23 +107,21 @@ def reset_mobs(mob_type, global_manager):
             current_mob.set_disorganized(False)
 
 def manage_attrition(global_manager):
-    none = 0
-    
-    
+    '''
+    Description:
+        Checks each unit and commodity storage location to see if attrition occurs. Health attrition forces parts of units to die and need to be replaced, costing money, removing experience, and preventing them from acting in the next
+            turn. Commodity attrition causes up to half of the commodities stored in a warehouse or carried by a unit to be lost. Both types of attrition are more common in bad terrain and less common in areas with more infrastructure
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_pmob in global_manager.get('pmob_list'):
-        if not (current_pmob.in_vehicle or current_pmob.in_group or current_pmob.in_building): #vehicles, groups, and buildings handle attrition for their attached units
-            #if current_mob.get_inventory_used > 0:
-                #current_mob.manage_commodity_attrition()
-                #in manage_commodity_attrition: for current_commodity_type in current_mob.get_held_commodities():
-                #                                    remove certain number from each based on random rolls, make function that takes # of commodity as input and removes a random number of those
-                #                                    drop commodities on ground, can be picked up by anything close enough
+        if not (current_pmob.in_vehicle or current_pmob.in_group or current_pmob.in_building): #vehicles, groups, and buildings handle attrition for their submobs
             current_pmob.manage_health_attrition()
-            #in manage_health_attrition: have each one have a chance of dying - vehicles and groups check for each of their attached units
     for current_building in global_manager.get('building_list'):
-        if current_building.building_type == 'resource': #not sure about building type variable name
+        if current_building.building_type == 'resource':
             current_building.manage_health_attrition()
-            #in manage_health_attrition: for current_worker in self.attached_workers: worker has chance of dying
-    #remember to modify attrition chances based on worker type
 
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.manage_inventory_attrition()
@@ -284,9 +282,9 @@ def manage_worker_migration(global_manager):
     num_village_workers = actor_utility.get_num_available_workers('village', global_manager) + global_manager.get('num_wandering_workers')
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
-        resolve_worker_migration(global_manager)
+        trigger_worker_migration(global_manager)
 
-def resolve_worker_migration(global_manager): #resolves migration if it occurs
+def trigger_worker_migration(global_manager): #resolves migration if it occurs
     '''
     Description:
         When a migration event occurs, about half of available workers in villages and all wandering workers move to a slum around a colonial port, train station, or resource production facility. The chance to move to a slum on a tile

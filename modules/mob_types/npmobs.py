@@ -103,6 +103,14 @@ class npmob(mob):
                 turn_management_tools.start_player_turn(self.global_manager)
 
     def kill_noncombatants(self):
+        '''
+        Description:
+            Kills all defenseless units, such as lone officers and vehicles, in this cell after combat if no possible combatants, like workers or soldiers, remain
+        Input:
+            None
+        Output:
+            None
+        '''
         noncombatants = self.images[0].current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
             notification_tools.display_notification("The defenseless " + current_noncombatant.name + " has been killed by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)

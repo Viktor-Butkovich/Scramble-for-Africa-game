@@ -42,6 +42,17 @@ def display_choice_notification(message, choices, choice_info_dict, global_manag
         global_manager.get('notification_manager').notification_to_front(message)#notifications.notification_to_front(message, global_manager)
 
 def display_zoom_notification(message, target, global_manager):
+    '''
+    Description:
+        Adds a future notification to the notification queue with the inputted text and type. If other notifications are already in the notification queue, adds this notification to the back, causing it to appear last. When a
+            notification is closed, the next notification in the queue is shown. A zoom notification selects the target and moves the minimap to it when revealed
+    Input:
+        string message: Text for future notification
+        actor target: Can be a tile or mob, object to select when the zoom notification is revealed
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     global_manager.get('notification_manager').notification_queue.append(message)
     global_manager.get('notification_manager').notification_type_queue.append('zoom')
     global_manager.get('notification_manager').notification_dice_queue.append(0)

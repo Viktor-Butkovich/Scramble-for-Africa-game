@@ -91,7 +91,16 @@ class cell():
                 save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
 
-    def local_attrition(self, attrition_type = 'health'): #attrition_type can be 'inventory' when checking for inventory attrition instead
+    def local_attrition(self, attrition_type = 'health'):
+        '''
+        Description:
+            Returns the result of a roll that determines if a given unit or set of stored commodities should suffer attrition based on this cell's terrain and buildings. Bad terrain increases attrition frequency while infrastructure
+                decreases it
+        Input:
+            string attrition_type = 'health': 'health' or 'inventory', refers to type of attrition being tested for. Used because inventory attrition can occur in Europe but not health attrition
+        Output:
+            boolean: Returns whether attrition should happen here based on this cell's terrain and buildings
+        '''
         #terrain_list = ['clear', 'mountain', 'hills', 'jungle', 'swamp', 'desert']
         if self.grid in [self.global_manager.get('europe_grid'), self.global_manager.get('slave_traders_grid')]: #no attrition in Europe or with slave traders
             if attrition_type == 'health':
