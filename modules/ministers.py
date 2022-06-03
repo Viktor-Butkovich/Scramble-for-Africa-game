@@ -184,7 +184,6 @@ class minister():
         '''
         results = []
         if self.check_corruption():
-            print('corrupt')
             for i in range(num_dice):
                 results.append(0)
             difference = 10

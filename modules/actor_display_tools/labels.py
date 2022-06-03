@@ -272,12 +272,12 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    if (not new_actor.cell.village == 'none') and new_actor.cell.visible:
-                        self.set_label('Village name: ' + new_actor.cell.village.name)
-                    elif new_actor.cell.contained_buildings[self.actor_label_type] == 'none': #if no building built, show resource: name
+                    if new_actor.cell.has_building('village') and new_actor.cell.visible:
+                        self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
+                    elif not new_actor.cell.has_building(self.actor_label_type): #if no building built, show resource: name
                         self.set_label(self.message_start + new_actor.cell.resource)
                     else:
-                        self.set_label('Resource building: ' + new_actor.cell.contained_buildings[self.actor_label_type].name) #if resource building built, show it
+                        self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
                 else:
                     self.set_label(self.message_start + 'unknown')
                     
@@ -316,8 +316,8 @@ class actor_display_label(label):
                             
             elif self.actor_label_type == 'building worker':
                 if self.list_type == 'resource building':
-                    if not new_actor.cell.contained_buildings['resource'] == 'none':
-                        self.attached_building = new_actor.cell.contained_buildings['resource']
+                    if new_actor.cell.has_building('resource'):
+                        self.attached_building = new_actor.cell.get_building('resource')
                         self.attached_list = self.attached_building.contained_work_crews
                         if len(self.attached_list) > self.list_index:
                             self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
@@ -357,13 +357,13 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(self.actor.officer.name.capitalize()))
             
             elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
-                if (not self.actor.cell.village == 'none') and self.actor.cell.visible: #if village present
+                if self.actor.cell.has_building('village') and self.actor.cell.visible: #if village present
                     if self.actor_label_type == 'native aggressiveness':
-                        self.set_label(self.message_start + str(self.actor.cell.village.aggressiveness))
+                        self.set_label(self.message_start + str(self.actor.cell.get_building('village').aggressiveness))
                     elif self.actor_label_type == 'native population':
-                        self.set_label(self.message_start + str(self.actor.cell.village.population))
+                        self.set_label(self.message_start + str(self.actor.cell.get_building('village').population))
                     elif self.actor_label_type == 'native available workers':
-                        self.set_label(self.message_start + str(self.actor.cell.village.available_workers))
+                        self.set_label(self.message_start + str(self.actor.cell.get_building('village').available_workers))
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
                 if self.actor.can_hold_infinite_commodities:
                     self.set_label(self.message_start + 'unlimited')
@@ -383,8 +383,8 @@ class actor_display_label(label):
                 self.set_label(self.message_start + new_actor.current_position)
                 
             elif self.actor_label_type == 'slums':
-                if not self.actor.cell.contained_buildings['slums'] == 'none':
-                    self.set_label(self.message_start + str(self.actor.cell.contained_buildings['slums'].available_workers))
+                if self.actor.cell.has_building('slums'):
+                    self.set_label(self.message_start + str(self.actor.cell.get_building('slums').available_workers))
             
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
@@ -450,7 +450,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor.actor_type == 'mob' and (self.actor.in_vehicle or self.actor.in_group or self.actor.in_building): #do not show mobs that are attached to another unit/building
             return(False)
-        elif self.actor_label_type == 'slums' and self.actor.cell.contained_buildings['slums'] == 'none':
+        elif self.actor_label_type == 'slums' and not self.actor.cell.has_building('slums'):
             return(False)
         elif self.actor_label_type == 'minister' and not self.actor.controllable:
             return(False)
@@ -550,7 +550,7 @@ class building_work_crews_label(actor_display_label):
         self.actor = new_actor
         self.showing = False
         if not new_actor == 'none':
-            self.attached_building = new_actor.cell.contained_buildings[self.building_type]
+            self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 self.showing = True
@@ -608,7 +608,7 @@ class building_efficiency_label(actor_display_label):
         self.actor = new_actor
         self.showing = False
         if not new_actor == 'none':
-            self.attached_building = new_actor.cell.contained_buildings[self.building_type]
+            self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label("Efficiency: " + str(self.attached_building.efficiency))
                 self.showing = True
@@ -642,7 +642,7 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
         '''
         result = super().can_show()
         if result:
-            if (not self.actor.cell.village == 'none') and self.actor.cell.visible:
+            if self.actor.cell.has_building('village') and self.actor.cell.visible:
                 return(True)
         return(False)
         

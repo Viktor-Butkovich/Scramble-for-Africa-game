@@ -145,7 +145,8 @@ def manage_production(global_manager):
     for current_commodity in global_manager.get('collectable_resources'):
         global_manager.get('commodities_produced')[current_commodity] = 0
     for current_resource_building in global_manager.get('resource_building_list'):
-        current_resource_building.produce()
+        if not current_resource_building.damaged:
+            current_resource_building.produce()
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
@@ -319,12 +320,12 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
                 source_village.change_population(-1 * num_migrated)
-                destination.contained_buildings['slums'].change_population(num_migrated)
-                if not destination.contained_buildings['port'] == 'none':
+                destination.get_building('slums').change_population(num_migrated)
+                if destination.has_intact_building('port'):
                     destination_type = 'port'
-                elif not destination.contained_buildings['resource'] == 'none':
-                    destination_type = destination.contained_buildings['resource'].name
-                elif not destination.contained_buildings['train_station'] ==  'none':
+                elif destination.has_intact_building('resource'):
+                    destination_type = destination.get_building('resource').name
+                elif destination.has_intact_building('train_station'):
                     destination_type = 'train station'
                 village_destination_dict[source_village] = destination_type
                 village_destination_coordinates_dict[source_village] = (destination.x, destination.y)
@@ -341,15 +342,15 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
             any_migrated = True
             for i in range(num_migrated):
                 destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
-                if not destination.has_slums():
+                if not destination.has_building('slums'):
                     destination.create_slums()
-                destination.contained_buildings['slums'].change_population(1) #num_migrated
+                destination.get_building('slums').change_population(1) #num_migrated
                 global_manager.set('num_wandering_workers', global_manager.get('num_wandering_workers') - 1)
-                if not destination.contained_buildings['port'] == 'none':
+                if destination.has_intact_building('port'):
                     destination_type = 'port'
-                elif not destination.contained_buildings['resource'] == 'none':
-                    destination_type = destination.contained_buildings['resource'].name
-                elif not destination.contained_buildings['train_station'] ==  'none':
+                elif destination.has_intact_building('resource'):
+                    destination_type = destination.get_building('resource').name
+                elif destination.has_intact_building('train_station'):
                     destination_type = 'train station'
                 wandering_destination_dict[destination] = destination_type #destination 0: port
                 wandering_destination_coordinates_dict[destination] = (destination.x, destination.y) #destination 0: (2, 2)
@@ -384,17 +385,17 @@ def create_weighted_migration_destinations(destination_cell_list):
     weighted_cell_list = []
     for current_cell in destination_cell_list:
         num_poi = 0 #points of interest
-        if not current_cell.contained_buildings['port'] == 'none':
+        if current_cell.has_intact_building('port'):
             num_poi += 1
-        if not current_cell.contained_buildings['train_station'] == 'none':
+        if current_cell.has_intact_building('train_station'):
             num_poi += 1
-        if not current_cell.contained_buildings['resource'] == 'none':
+        if current_cell.has_intact_building('resource'):
             num_poi += 1
         max_population_weight = 5
-        if current_cell.contained_buildings['slums'] == 'none': #0
+        if not current_cell.has_building('slums'): #0
             population_weight = max_population_weight
-        elif current_cell.contained_buildings['slums'].available_workers < max_population_weight: #1-4
-            population_weight = max_population_weight - current_cell.contained_buildings['slums'].available_workers
+        elif current_cell.get_building('slums').available_workers < max_population_weight: #1-4
+            population_weight = max_population_weight - current_cell.get_building('slums').available_workers
         else: #5+
             population_weight = 1
         total_weight = population_weight * num_poi

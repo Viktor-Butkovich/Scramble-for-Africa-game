@@ -939,8 +939,8 @@ class trade_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
                         current_cell = current_mob.images[0].current_cell
-                        if current_cell.has_village():
-                            if current_cell.village.population > 0:
+                        if current_cell.has_building('village'):
+                            if current_cell.get_building('village').population > 0:
                                 if current_mob.get_inventory('consumer goods') > 0:
                                     if current_mob.check_if_minister_appointed():
                                         current_mob.start_trade()
@@ -1010,8 +1010,8 @@ class convert_button(label_button):
                 if current_mob.movement_points == current_mob.max_movement_points:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
                         current_cell = current_mob.images[0].current_cell
-                        if current_cell.has_village():
-                            if current_cell.village.aggressiveness > 1:
+                        if current_cell.has_building('village'):
+                            if current_cell.get_building('village').aggressiveness > 1:
                                 if current_mob.check_if_minister_appointed():
                                     current_mob.start_converting()
                             else:
@@ -1260,7 +1260,7 @@ class switch_theatre_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points == current_mob.max_movement_points:
-                    if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_port()))): #can leave if in ocean or if in coastal port
+                    if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                         if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
                             if self.global_manager.get('current_game_mode') == 'strategic':
                                 current_mob.end_turn_destination = 'none'
@@ -1345,7 +1345,7 @@ class build_train_button(label_button):
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                                if self.attached_label.actor.images[0].current_cell.has_train_station(): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                if self.attached_label.actor.images[0].current_cell.has_intact_building('train_station'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
                                         if self.attached_label.actor.check_if_minister_appointed():
                                             self.construct()
@@ -1571,7 +1571,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                         else:
                                             text_tools.print_to_screen("This building can only be built in tiles adjacent to discovered water.", self.global_manager)
                                     elif self.building_type == 'train_station':
-                                        if self.attached_tile.cell.has_railroad():
+                                        if self.attached_tile.cell.has_intact_building('railroad'):
                                             if self.attached_label.actor.check_if_minister_appointed():
                                                 self.construct()
                                         else:
@@ -1580,7 +1580,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                         if self.attached_label.actor.check_if_minister_appointed():
                                             self.construct()
                                     elif self.building_type == 'trading_post' or self.building_type == 'mission':
-                                        if self.attached_tile.cell.has_village():
+                                        if self.attached_tile.cell.has_building('village'):
                                             if self.attached_label.actor.check_if_minister_appointed():
                                                 self.construct()
                                         else:
@@ -1874,7 +1874,7 @@ class hire_african_workers_button(label_button):
         '''
         if super().can_show():
             if self.hire_source_type == 'village':
-                attached_village = self.global_manager.get('displayed_tile').cell.village
+                attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
                 if not attached_village == 'none':
                     if attached_village.can_recruit_worker():
                         return(True)

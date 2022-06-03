@@ -261,7 +261,7 @@ class mob(actor):
             double: How many movement points would be spent by moving by the inputted amount
         '''
         local_cell = self.images[0].current_cell
-        if local_cell.has_road() or local_cell.has_railroad(): #if not local_infrastructure == 'none':
+        if local_cell.has_intact_building('road') or local_cell.has_intact_building('railroad'): #if not local_infrastructure == 'none':
             direction = 'non'
             if x_change < 0:
                 direction = 'left'
@@ -272,7 +272,7 @@ class mob(actor):
             elif y_change < 0:
                 direction = 'down'
             adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
-            if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
+            if adjacent_cell.has_intact_building('road') or adjacent_cell.has_intact_building('railroad'): #if not adjacent_infrastructure == 'none':
                 return(self.movement_cost / 2.0)
         return(self.movement_cost)
 
@@ -579,7 +579,7 @@ class mob(actor):
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                        if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
+                        if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
                             (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)

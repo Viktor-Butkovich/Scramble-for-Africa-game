@@ -47,9 +47,10 @@ class building(actor):
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
+            self.damaged = input_dict['damaged']
+        else:
+            self.damaged = False
         for current_image in self.images:
-            #print(str(current_image.current_cell.x) + ', ' + str(current_image.current_cell.y))
-            #print(current_image.current_cell.grid)
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
@@ -71,11 +72,13 @@ class building(actor):
                 'building_type': string value - Type of building, like 'port'
                 'image': string value - File path to the image used by this object
                 'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
+                'damaged': boolean value - whether this building is currently damaged
         '''
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
         save_dict['contained_work_crews'] = [] #list of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
         save_dict['image'] = self.image_dict['default']
+        save_dict['damaged'] = self.damaged
         for current_work_crew in self.contained_work_crews:
             save_dict['contained_work_crews'].append(current_work_crew.to_save_dict())
         return(save_dict)

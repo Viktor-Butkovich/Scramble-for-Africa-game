@@ -290,9 +290,9 @@ class recruitment_choice_button(choice_button):
                 input_dict['purchased'] = True
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             elif self.recruitment_type == 'African worker village':
-                self.global_manager.get('displayed_tile').cell.village.recruit_worker()
+                self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
             elif self.recruitment_type == 'African worker slums':
-                self.global_manager.get('displayed_tile').cell.contained_buildings['slums'].recruit_worker()
+                self.global_manager.get('displayed_tile').cell.get_building('slums').recruit_worker()
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]

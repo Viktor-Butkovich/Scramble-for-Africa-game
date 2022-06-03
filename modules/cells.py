@@ -119,109 +119,93 @@ class cell():
                 if random.randrange(1, 7) >= 4: #attrition on 1-3
                     return(False)
 
-            if self.has_village() or self.has_train_station() or self.has_port() or self.has_resource_building():
+            if self.has_building('village') or self.has_intact_building('train_station') or self.has_intact_building('port') or self.has_intact_building('resource'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
-            elif self.has_road() or self.has_railroad():
+            elif self.has_intact_building('road') or self.has_intact_building('railroad'):
                 if random.randrange(1, 7) >= 5: #removes 1/3 of attrition
                     return(False)
 
         return(True)
 
-    def has_village(self):
-        '''
-        Description:
-            Returns whether this cell contains a village
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a village, otherwise returns True
-        '''
-        if self.village == 'none':
-            return(False)
-        return(True)
+    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, road, railroad, resource, slums. No forts in game yet
+        if building_type == 'village':
+            if self.village == 'none':
+                return(False)
+            else:
+                return(True)
+            
+        elif building_type in ['road', 'railroad']:
+            if self.contained_buildings['infrastructure'] == 'none':
+                return(False)
+            elif building_type == 'road' and self.contained_buildings['infrastructure'].is_road:
+                return(True)
+            elif building_type == 'railroad' and self.contained_buildings['infrastructure'].is_railroad:
+                return(True)
+            else:
+                return(False)
+            
+        else:
+            if self.contained_buildings[building_type] == 'none':
+                return(False)
+            else:
+                return(True)
 
-    def has_train_station(self):
-        '''
-        Description:
-            Returns whether this cell contains a train station
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a train station, otherwise returns True
-        '''
-        if self.contained_buildings['train_station'] == 'none':
-            return(False)
-        return(True) 
+    def has_intact_building(self, building_type):
+        if building_type == 'village':
+            if self.village == 'none':
+                return(False)
+            else:
+                returned_building = self.village
+                
+        elif building_type in ['road', 'railroad']:
+            if self.contained_buildings['infrastructure'] == 'none':
+                return(False)
+            elif building_type == 'road' and self.contained_buildings['infrastructure'].is_road:
+                returned_building = self.contained_buildings['infrastructure']
+            elif building_type == 'railroad' and self.contained_buildings['infrastructure'].is_railroad:
+                returned_building = self.contained_buildings['infrastructure']
+            else:
+                return(False)
+            
+        else:
+            if self.contained_buildings[building_type] == 'none':
+                return(False)
+            else:
+                returned_building = self.contained_buildings[building_type]
 
-    def has_trading_post(self):
-        '''
-        Description:
-            Returns whether this cell contains a trading post
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a trading post, otherwise returns True
-        '''
-        if self.contained_buildings['trading_post'] == 'none':
-            return(False)
-        return(True)
-
-    def has_mission(self):
-        '''
-        Description:
-            Returns whether this cell contains a mission
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a mission, otherwise returns True
-        '''
-        if self.contained_buildings['mission'] == 'none':
-            return(False)
-        return(True)
-
-    def has_road(self):
-        '''
-        Description:
-            Returns whether this cell contains a road
-        Input:
-            None
-        Output:
-            boolean: Returns True if this cell contains a road, otherwise returns False
-        '''
-        if self.contained_buildings['infrastructure'] == 'none':
-            return(False)
-        if self.contained_buildings['infrastructure'].is_road:
+        if not returned_building.damaged:
             return(True)
-        return(False)
-
-    def has_railroad(self):
-        '''
-        Description:
-            Returns whether this cell contains a railroad
-        Input:
-            None
-        Output:
-            boolean: Returns True if this cell contains a railroad, otherwise returns False
-        '''
-        if self.contained_buildings['infrastructure'] == 'none':
+        else:
             return(False)
-        if self.contained_buildings['infrastructure'].is_railroad:
-            return(True)
-        return(False)
+        
+    def get_building(self, building_type):
+        if self.has_building(building_type):
+            if building_type == 'village':
+                return(self.village)
+                
+            elif building_type in ['road', 'railroad']:
+                return(self.contained_buildings['infrastructure'])
+                
+            else:
+                return(self.contained_buildings[building_type])
+            
+        else:
+            return('none')
 
-    def has_resource_building(self):
-        '''
-        Description:
-            Returns whether this cell contains a resource production building
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a resource production building, otherwise returns True
-        '''
-        if self.contained_buildings['resource'] == 'none':
-            return(False)
-        return(True)
+    def get_intact_building(self, building_type):
+        if self.has_intact_building(building_type):
+            if building_type == 'village':
+                return(self.village)
+                
+            elif building_type in ['road', 'railroad']:
+                return(self.contained_buildings['infrastructure'])
+                
+            else:
+                return(self.contained_buildings[building_type])
+            
+        else:
+            return('none')
 
     def reset_buildings(self):
         '''
@@ -247,35 +231,9 @@ class cell():
         '''
         contained_buildings_list = []
         for current_building_type in self.global_manager.get('building_types'):
-            if not self.contained_buildings[current_building_type] == 'none':
+            if self.has_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
-
-    def has_port(self):
-        '''
-        Description:
-            Returns whether this cell contains a port
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a port, otherwise returns True
-        '''
-        if self.contained_buildings['port'] == 'none':
-            return(False)
-        return(True)
-
-    def has_slums(self):
-        '''
-        Description:
-            Returns whether this cell contains slums
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain slums, otherwise returns True
-        '''
-        if self.contained_buildings['slums'] == 'none':
-            return(False)
-        return(True)
 
     def create_slums(self):
         '''

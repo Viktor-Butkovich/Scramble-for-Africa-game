@@ -59,7 +59,11 @@ class npmob(mob):
         Output:
             string/actor: Returns one of the closest reachable pmobs or buildings, or returns 'none' if none are reachable
         '''
-        target_list = self.global_manager.get('pmob_list') + self.global_manager.get('building_list')
+        target_list = []
+        for current_building in self.global_manager.get('building_list'):
+            if not current_building.damaged:
+                target_list.append(current_building)
+        target_list += self.global_manager.get('pmob_list')
         min_distance = -1
         closest_targets = ['none']
         for possible_target in target_list:

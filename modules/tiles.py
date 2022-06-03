@@ -450,7 +450,7 @@ class resource_icon(tile):
             None
         '''
         if self.resource == 'natives':
-            attached_village = self.attached_tile.cell.village
+            attached_village = self.attached_tile.cell.get_building('village')
             if attached_village.population == 0: #0
                 self.image_dict['small'] = 'scenery/resources/small/natives0.png'
                 self.image_dict['large'] = 'scenery/resources/natives0.png'
@@ -465,7 +465,7 @@ class resource_icon(tile):
                 self.image_dict['large'] = 'scenery/resources/natives3.png'
         building_present = False
         for building_type in self.global_manager.get('building_types'):
-            if not self.attached_tile.cell.contained_buildings[building_type] == 'none': #if any building present
+            if self.attached_tile.cell.has_building(building_type): #if any building present
                 self.image.set_image('small')
                 self.image_dict['default'] = self.image_dict['small']
                 building_present = True

@@ -112,14 +112,14 @@ class button():
                 current_mob = selected_list[0]
                 message = ""
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
-                local_infrastructure = current_mob.images[0].current_cell.contained_buildings['infrastructure']
+                local_infrastructure = current_mob.images[0].current_cell.get_intact_building('infrastructure')
                 adjacent_cell = current_mob.images[0].current_cell.adjacent_cells[non_cardinal_direction]
                 if not adjacent_cell == 'none':
                     if current_mob.can_walk:
                         tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
                         if current_mob.can_explore:
                             tooltip_text.append("Costs 0.5 movements points if moving to a water tile")
-                        adjacent_infrastructure = adjacent_cell.contained_buildings['infrastructure']
+                        adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
                         message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
                         if current_mob.can_explore and adjacent_cell.terrain == 'water':
                             message += "the tile moved to is a water tile"
@@ -235,7 +235,7 @@ class button():
             tooltip_text = ["Cycles through this  building's work crews"]
             tooltip_text.append("Work crews: " )
             if self.can_show():
-                for current_work_crew in self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews:
+                for current_work_crew in self.attached_label.actor.cell.get_building('resource').contained_work_crews:
                     tooltip_text.append("    " + current_work_crew.name)
             self.set_tooltip(tooltip_text)
         elif self.button_type == 'cycle tile mobs':
@@ -586,7 +586,7 @@ class button():
                         if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
                             if displayed_mob in displayed_tile.cell.contained_mobs:
                                 can_drop_off = True
-                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
                                     can_drop_off = False
                                     text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
                                 if can_drop_off:
@@ -617,7 +617,7 @@ class button():
                             if displayed_mob in displayed_tile.cell.contained_mobs:
                                 if displayed_mob.can_hold_commodities:
                                     can_pick_up = True
-                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and displayed_mob.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
                                         can_pick_up = False
                                         text_tools.print_to_screen("A train can only pick up cargo at a train station.", self.global_manager)
                                     if can_pick_up:

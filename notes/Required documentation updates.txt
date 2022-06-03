@@ -1,3 +1,7 @@
+cells.cell.has_building
+cells.cell.has_intact_building
+cells.cell.get_building
+cells.cell.get_intact_building
 
 Future plans:
 Maybe cause health attrition when moving
@@ -16,7 +20,12 @@ possibly display a notification when a unit dies and have an optional cause of d
 Enemies should attack buildings and attached work crews
 
 Known Errors:
+building worker labels not displaying in current save game, maybe issue with detecting resource building or with work crew/worker distinction
+images.update_roads interaction may not work with new building damage system
 When attrition on movement is added, ensure that movement is not possible while transportation minister is not appointed
-Check maximum inventory capacity on resource production building - should be 9 but is 18 under certain circumstances
+
+Check maximum inventory capacity on resource production building - should be 9 but is 18 under certain circumstances. 
+Seems to occur after loading a game, perhaps inventory capacity is saved incorrectly
+
 Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned

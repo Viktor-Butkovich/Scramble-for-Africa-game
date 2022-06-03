@@ -331,7 +331,6 @@ class save_load_manager_template():
 
         self.global_manager.get('minimap_grid').calibrate(2, 2)
 
-        stored = self.global_manager.get('strategic_map_grid').find_cell(2, 2).contained_buildings
         #load actors
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)

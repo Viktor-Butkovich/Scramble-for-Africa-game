@@ -330,8 +330,8 @@ class trade_notification(action_notification):
             current_image.remove()
         if self.dies:
             caravan = self.trade_result[0]
-            if not caravan.images[0].current_cell.contained_buildings['trading_post'] == 'none':
-                caravan.images[0].current_cell.contained_buildings['trading_post'].remove()
+            if caravan.images[0].current_cell.has_building('trading_post'): #maybe change to damage instead of removing
+                caravan.images[0].current_cell.get_building('trading_post').remove()
             caravan.die()
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
