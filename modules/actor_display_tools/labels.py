@@ -314,7 +314,7 @@ class actor_display_label(label):
                 if not self.actor.controllable:
                     self.set_label("You do not control this unit")
                             
-            elif self.actor_label_type == 'building worker':
+            elif self.actor_label_type == 'building work crew':
                 if self.list_type == 'resource building':
                     if new_actor.cell.has_building('resource'):
                         self.attached_building = new_actor.cell.get_building('resource')

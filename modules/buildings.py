@@ -35,7 +35,8 @@ class building(actor):
         self.actor_type = 'building'
         self.building_type = input_dict['building_type']
         super().__init__(from_save, input_dict, global_manager)
-        self.image_dict = {'default': input_dict['image']}
+        no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
+        self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
         self.images = []
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
@@ -54,6 +55,12 @@ class building(actor):
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
+        self.default_inventory_capacity = 0
+        self.inventory_capacity = 0
+        self.set_inventory_capacity(self.default_inventory_capacity)
+        if global_manager.get('DEBUG_damaged_buildings'):
+            if not self.building_type in ['slums', 'infrastructure']:
+                self.set_damaged(True)
 
     def to_save_dict(self):
         '''
@@ -139,8 +146,47 @@ class building(actor):
             tooltip_text.append("Allows trains to drop off or pick up cargo or passengers in this tile")
         elif self.building_type == 'slums':
             tooltip_text.append("Contains " + str(self.available_workers) + " African workers in search of employment")
+
+        if self.damaged:
+            tooltip_text.append("This building is damaged and is currently not functional.")
+            
         self.set_tooltip(tooltip_text)
 
+    def set_damaged(self, new_value):
+        self.damaged = new_value
+        if self.building_type == 'infrastructure':
+            actor_utility.update_roads(self.global_manager)
+        if self.damaged:
+            self.set_inventory_capacity(0)
+            self.image_dict['default'] = self.image_dict['damaged']
+            self.set_image('default')
+        else:
+            self.set_inventory_capacity(self.default_inventory_capacity)
+            self.image_dict['default'] = self.image_dict['intact']
+            self.set_image('default')
+
+    def set_default_inventory_capacity(self, new_value): #use if upgrading warehouses
+        self.default_inventory_capacity = new_value
+        self.set_inventory_capacity(new_value)
+    
+    def set_inventory_capacity(self, new_value):
+        old_value = self.inventory_capacity
+        if new_value == 'default':
+            self.inventory_capacity = self.default_inventory_capacity
+        else:
+            self.inventory_capacity = new_value
+        self.contribute_local_inventory_capacity(old_value, new_value)
+
+    def contribute_local_inventory_capacity(self, previous_value, new_value):
+        current_index = 0
+        for current_image in self.images:
+            if current_index == 0:
+                current_image.current_cell.tile.inventory_capacity -= previous_value
+                current_image.current_cell.tile.inventory_capacity += new_value
+            else:
+                current_image.current_cell.tile.inventory_capacity = self.images[0].current_cell.tile.inventory_capacity
+            current_index += 1
+            
     def touching_mouse(self):
         '''
         Description:
@@ -197,6 +243,10 @@ class infrastructure_building(building):
         self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
         self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
         self.image_dict['empty'] = 'misc/empty.png'
+        if self.is_railroad:
+            self.image_dict['damaged'] = 'buildings/infrastructure/railroad_damaged.png'
+        elif self.is_road:
+            self.image_dict['damaged'] = 'buildings/infrastructure/road_damaged.png'
         self.infrastructure_connection_images = {}
         for current_grid in self.grids:
             up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
@@ -213,6 +263,8 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['right'] = right_image
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
+        if global_manager.get('DEBUG_damaged_buildings'):
+            self.set_damaged(True)
 
     def to_save_dict(self):
         '''
@@ -305,8 +357,9 @@ class train_station(building):
         '''
         input_dict['building_type'] = 'train_station'
         super().__init__(from_save, input_dict, global_manager)
-        for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 9
+        self.set_default_inventory_capacity(9)
+        #for current_image in self.images:
+        #    current_image.current_cell.tile.inventory_capacity += 9
 
 class port(building):
     '''
@@ -332,8 +385,9 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
-        for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 9
+        self.set_default_inventory_capacity(9)
+        #for current_image in self.images:
+        #    current_image.current_cell.tile.inventory_capacity += 9
 
 class resource_building(building):
     '''
@@ -366,8 +420,9 @@ class resource_building(building):
         self.num_upgrades = 0
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        for current_image in self.images:
-            current_image.current_cell.tile.inventory_capacity += 9
+        self.set_default_inventory_capacity(9)
+        #for current_image in self.images:
+        #    current_image.current_cell.tile.inventory_capacity += 9
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')

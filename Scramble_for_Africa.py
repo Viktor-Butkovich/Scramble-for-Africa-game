@@ -741,6 +741,7 @@ try:
     global_manager.set('DEBUG_spawning_allowed', True) #True by default
     global_manager.set('DEBUG_boost_attrition', False) #False by default
     global_manager.set('DEBUG_infinite_village_workers', False) #False by default
+    global_manager.set('DEBUG_damaged_buildings', False) #False by default
     #activating/disabling debugging tools
     main_loop.main_loop(global_manager)
     pygame.quit()

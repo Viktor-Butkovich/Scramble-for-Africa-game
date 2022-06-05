@@ -818,11 +818,12 @@ class work_crew_to_building_button(label_button):
         '''
         self.attached_work_crew = self.attached_label.actor
         if (not self.attached_work_crew == 'none') and self.attached_work_crew.is_work_crew:
-            possible_attached_building = self.attached_work_crew.images[0].current_cell.contained_buildings[self.building_type]
-            if (not possible_attached_building == 'none'): #and building has capacity
-                self.attached_building = possible_attached_building
-            else:
-                self.attached_building = 'none'
+            self.attached_building = self.attached_work_crew.images[0].current_cell.get_intact_building(self.building_type)
+            #possible_attached_building = self.attached_work_crew.images[0].current_cell.contained_buildings[self.building_type]
+            #if (not possible_attached_building == 'none'): #and building has capacity
+            #    self.attached_building = possible_attached_building
+            #else:
+            #    self.attached_building = 'none'
         else:
             self.attached_building = 'none'
     

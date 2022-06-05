@@ -1,17 +1,28 @@
-ERROR:root:'ship' object has no attribute 'current_enemy'
+ERROR:root:No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
 Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 745, in <module>
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 543, in set_image
+    self.image = pygame.image.load('graphics/' + self.image_id)
+FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 746, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 156, in main_loop
-    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 183, in on_click
-    self.notification.remove()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 92, in remove
-    super().remove()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 86, in remove
-    notification_manager.notification_to_front(notification_manager.notification_queue[0])
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 523, in notification_to_front
-    new_notification = action_notifications.combat_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 622, in __init__
-    global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').current_enemy.images[0].image_id, scaling.scale_coordinates(image_x, 670, global_manager),
-AttributeError: 'ship' object has no attribute 'current_enemy'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 41, in main_loop
+    current_button.on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 720, in on_click
+    self.global_manager.get('save_load_manager').load_game('save1.pickle')
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 336, in load_game
+    self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 90, in create
+    new_actor = buildings.infrastructure_building(from_save, input_dict, global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 263, in __init__
+    self.set_damaged(True)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 162, in set_damaged
+    self.set_image('default')
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 118, in set_image
+    current_image.set_image(new_image)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 546, in set_image
+    self.image = pygame.image.load('graphics/' + self.image_id)
+FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.

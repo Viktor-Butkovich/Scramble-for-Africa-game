@@ -47,6 +47,7 @@ class pmob(mob):
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             self.default_name = input_dict['default_name']
+            self.set_name(self.default_name)
         else:
             self.default_name = self.name
             actor_utility.deselect_all(self.global_manager)
