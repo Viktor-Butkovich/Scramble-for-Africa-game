@@ -58,6 +58,9 @@ def start_player_turn(global_manager, first_turn = False):
         for current_pmob in global_manager.get('pmob_list'):
             if current_pmob.is_vehicle:
                 current_pmob.reembark()
+        for current_building in global_manager.get('building_list'):
+            if current_building.building_type == 'resource':
+                current_building.reattach_work_crews()
         manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
         reset_mobs('pmobs', global_manager)
         manage_production(global_manager)
@@ -76,7 +79,8 @@ def start_player_turn(global_manager, first_turn = False):
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if (not end_turn_selected_mob == 'none') and end_turn_selected_mob in global_manager.get('mob_list'): #do not attempt to select if none selected or has been removed since end of turn
+    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.in_building or end_turn_selected_mob.in_group or end_turn_selected_mob.in_vehicle)) and end_turn_selected_mob in global_manager.get('mob_list'):
+        #do not attempt to select if none selected or has been removed since end of turn
         end_turn_selected_mob.select()
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
     else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
@@ -131,6 +135,7 @@ def manage_attrition(global_manager):
         current_tile = current_cell.tile
         if len(current_tile.get_held_commodities()) > 0:
             current_tile.manage_inventory_attrition()
+            current_tile.remove_excess_inventory()
     
 def manage_production(global_manager):
     '''

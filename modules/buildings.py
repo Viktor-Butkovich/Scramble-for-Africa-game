@@ -43,7 +43,6 @@ class building(actor):
                 self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
         self.global_manager.get('building_list').append(self)
         self.set_name(input_dict['name'])
-        self.work_crew_capacity = 0 #default
         self.contained_work_crews = []        
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
@@ -125,14 +124,14 @@ class building(actor):
         '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
-            tooltip_text.append("Work crew capacity: " + str(len(self.contained_work_crews)) + '/' + str(self.work_crew_capacity))
+            tooltip_text.append("Work crew capacity: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             if len(self.contained_work_crews) == 0:
                 tooltip_text.append("Work crews: none")
             else:
                 tooltip_text.append("Work crews: ")
             for current_work_crew in self.contained_work_crews:
                 tooltip_text.append("    " + current_work_crew.name)
-            tooltip_text.append("Produces 1 unit of " + self.resource_type + " per attached work crew per turn")
+            tooltip_text.append("Lets " + str(self.scale) + " attached work crews each attempt to produce " + str(self.efficiency) + " units of " + self.resource_type + " each turn")
         elif self.building_type == 'port':
             tooltip_text.append("Allows ships to enter this tile")
         elif self.building_type == 'infrastructure':
@@ -423,6 +422,7 @@ class resource_building(building):
         self.set_default_inventory_capacity(9)
         #for current_image in self.images:
         #    current_image.current_cell.tile.inventory_capacity += 9
+        self.ejected_work_crews = []
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')
@@ -455,6 +455,19 @@ class resource_building(building):
         save_dict['scale'] = self.scale
         save_dict['efficiency'] = self.efficiency
         return(save_dict)
+
+    def eject_work_crews(self):
+        self.ejected_work_crews = []
+        for current_work_crew in self.contained_work_crews:
+            self.ejected_work_crews.append(current_work_crew)
+        for current_work_crew in self.ejected_work_crews:
+            current_work_crew.leave_building(self)
+
+    def reattach_work_crews(self):
+        for current_work_crew in self.ejected_work_crews:
+            if current_work_crew in self.global_manager.get('pmob_list'): #if not dead
+                current_work_crew.work_building(self)
+        self.ejected_work_crews = []
 
     def remove(self):
         '''

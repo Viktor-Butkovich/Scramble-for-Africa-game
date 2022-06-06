@@ -61,7 +61,7 @@ class npmob(mob):
         '''
         target_list = []
         for current_building in self.global_manager.get('building_list'):
-            if not current_building.damaged:
+            if (not current_building.damaged) and (not current_building.building_type == 'slums'):
                 target_list.append(current_building)
         target_list += self.global_manager.get('pmob_list')
         min_distance = -1
@@ -95,11 +95,14 @@ class npmob(mob):
             if current_mob.is_vehicle:
                 current_mob.eject_passengers()
                 current_mob.eject_crew()
+        if self.images[0].current_cell.has_intact_building('resource'):
+            self.images[0].current_cell.get_intact_building('resource').eject_work_crews()
         defender = self.images[0].current_cell.get_best_combatant('pmob')
         if not defender == 'none':
             defender.start_combat('defending', self)
         else:
             self.kill_noncombatants()
+            self.damage_buildings()
             
             if len(self.global_manager.get('attacker_queue')) > 0:
                 self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
@@ -117,9 +120,15 @@ class npmob(mob):
         '''
         noncombatants = self.images[0].current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
-            notification_tools.display_notification("The defenseless " + current_noncombatant.name + " has been killed by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
+            notification_tools.display_notification("The undefended " + current_noncombatant.name + " has been killed by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
             current_noncombatant.die()
-        
+
+    def damage_buildings(self):
+        for current_building in self.images[0].current_cell.get_intact_buildings():
+            if not current_building.building_type == 'slums': #slums are not damaged
+                notification_tools.display_notification("The undefended " + current_building.name + " has been damaged by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
+                current_building.set_damaged(True)
+            
     def end_turn_move(self):
         '''
         Moves this npmob towards pmobs and buildings at the end of the turn and schedules this npmob to start combat if any pmobs are encountered. Movement is weighted based on the distance on each axis, so movement towards a pmob
@@ -161,6 +170,9 @@ class npmob(mob):
                         self.move(0, 1 * vertical_multiplier)
             if self.combat_possible():
                 self.global_manager.get('attacker_queue').append(self)
+            else:
+                self.kill_noncombatants()
+                self.damage_buildings()
 
     def move(self, x_change, y_change):
         '''

@@ -1,6 +1,8 @@
 #Contains functionality for tiles and other cell icons
 
 import pygame
+import random
+
 from . import images
 from . import utility
 from . import actor_utility
@@ -112,6 +114,19 @@ class tile(actor): #to do: make terrain tiles a subclass
                 equivalent_tile = self.get_equivalent_tile()
                 if (not equivalent_tile == 'none') and (not called_by_equivalent):
                     equivalent_tile.draw_actor_match_outline(True)
+
+    def remove_excess_inventory(self):
+        inventory_used = self.get_inventory_used()
+        amount_to_remove = inventory_used - self.inventory_capacity
+        if amount_to_remove > 0:
+            commodity_types = self.get_held_commodities()
+            amount_removed = 0
+            while amount_removed < amount_to_remove:
+                commodity_removed = random.choice(commodity_types)
+                if self.get_inventory(commodity_removed) > 0:
+                    self.change_inventory(commodity_removed, -1)
+                    amount_removed += 1
+        
 
     def change_inventory(self, commodity, change):
 

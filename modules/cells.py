@@ -235,6 +235,21 @@ class cell():
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
 
+    def get_intact_buildings(self):
+        '''
+        Description:
+            Returns a list of the nondamaged buildings contained in this cell
+        Input:
+            None
+        Output:
+            building list contained_buildings_list: nondamaged buildings contained in this cell
+        '''
+        contained_buildings_list = []
+        for current_building_type in self.global_manager.get('building_types'):
+            if self.has_intact_building(current_building_type):
+                contained_buildings_list.append(self.contained_buildings[current_building_type])
+        return(contained_buildings_list)
+
     def create_slums(self):
         '''
         Description:
@@ -350,10 +365,9 @@ class cell():
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
                 return(True)
-        #if self.has_resource_building():
-        #    if len(self.contained_buildings['resource'].contained_work_crews) > 0:
-        #        return(True)
-        #maybe have slums count?
+        if self.has_intact_building('resource'):
+            if len(self.get_intact_building('resource').contained_work_crews) > 0:
+                return(True)
         return(False)
 
     def has_npmob(self):

@@ -3,6 +3,10 @@ cells.cell.has_intact_building
 cells.cell.get_building
 cells.cell.get_intact_building
 buildings.building functions
+buildings.resource_building.eject/reattach_work_crews
+npmobs.npmob.damage_buildings
+tiles.tiles.remove_excess_inventory
+tiles imports
 
 Future plans:
 Maybe cause health attrition when moving
@@ -21,6 +25,8 @@ possibly display a notification when a unit dies and have an optional cause of d
 Enemies should attack buildings and attached work crews
 
 Known Errors:
+make sure that construction gang can not construct copy of damaged building
+native warriors name attribute unnecessarily capitalized
 work crews should be removed from building when it is damaged
 make sure upgrading roads/railroads works correctly with damage - road that has been upgraded to railroad should use the damaged_railroad image
 Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water

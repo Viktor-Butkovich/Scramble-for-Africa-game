@@ -1,28 +1,23 @@
-ERROR:root:No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
-Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 543, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
-
-During handling of the above exception, another exception occurred:
-
+ERROR:root:name 'random' is not defined
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 746, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 41, in main_loop
-    current_button.on_click()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 720, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 336, in load_game
-    self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 90, in create
-    new_actor = buildings.infrastructure_building(from_save, input_dict, global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 263, in __init__
-    self.set_damaged(True)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 162, in set_damaged
-    self.set_image('default')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 118, in set_image
-    current_image.set_image(new_image)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 546, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 156, in main_loop
+    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 181, in on_click
+    super().on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 665, in on_click
+    turn_management_tools.end_turn(self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 27, in end_turn
+    start_enemy_turn(global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 42, in start_enemy_turn
+    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 461, in manage_combat
+    start_player_turn(global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 64, in start_player_turn
+    manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 138, in manage_attrition
+    current_tile.remove_excess_inventory()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\tiles.py", line 125, in remove_excess_inventory
+    commodity_removed = random.choice(commodity_types)
+NameError: name 'random' is not defined

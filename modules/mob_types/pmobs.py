@@ -666,6 +666,7 @@ class pmob(mob):
                 self.die()
                 if current_cell.get_best_combatant('pmob') == 'none':
                     enemy.kill_noncombatants()
+                    enemy.damage_buildings()
                 if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
 
