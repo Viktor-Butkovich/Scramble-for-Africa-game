@@ -262,8 +262,8 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['right'] = right_image
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
-        if global_manager.get('DEBUG_damaged_buildings'):
-            self.set_damaged(True)
+        #if global_manager.get('DEBUG_damaged_buildings'):
+        #    self.set_damaged(True)
 
     def to_save_dict(self):
         '''

@@ -1413,18 +1413,18 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = 'buildings/buttons/port.png'
             self.building_name = 'port'
         elif self.building_type == 'infrastructure':
-            self.road_image_id = 'buttons/road_button.png'
-            self.railroad_image_id = 'buttons/railroad_button.png'
+            self.road_image_id = 'buildings/buttons/road.png'
+            self.railroad_image_id = 'buildings/buttons/railroad.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
-            image_id = 'buttons/train_station_button.png'
+            image_id = 'buildings/buttons/train_station.png'
             self.building_name = 'train station'
         elif self.building_type == 'trading_post':
-            image_id = 'buttons/trading_post_button.png'
+            image_id = 'buildings/buttons/trading_post.png'
             self.building_name = 'trading post'
             self.requirement = 'can_trade'
         elif self.building_type == 'mission':
-            image_id = 'buttons/mission_button.png'
+            image_id = 'buildings/buttons/mission.png'
             self.building_name = 'mission'
             self.requirement = 'can_convert'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
@@ -1460,10 +1460,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
                     if current_infrastructure == 'none':
                         self.building_name = 'road'
-                        self.image.set_image('buttons/road_button.png')
+                        self.image.set_image('buildings/buttons/road.png')
                     else: #if has road or railroad, show railroad icon
                         self.building_name = 'railroad'
-                        self.image.set_image('buttons/railroad_button.png')
+                        self.image.set_image('buildings/buttons/railroad.png')
 
     def can_show(self):
         '''
@@ -1554,9 +1554,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type]:
-                        current_building = self.attached_tile.cell.contained_buildings[self.building_type]
+                        current_building = self.attached_tile.cell.get_building('self.building_type')
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
-                            if not self.global_manager.get('europe_grid') in self.attached_mob.grids:
+                            if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
                                 if not self.attached_tile.cell.terrain == 'water':
                                     if self.building_type == 'resource':
                                         if not self.attached_resource == 'none':
@@ -1589,7 +1589,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                 else:
                                     text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                             else:
-                                text_tools.print_to_screen("This building can not be built in Europe.", self.global_manager)
+                                text_tools.print_to_screen("This building can only be built in Africa.", self.global_manager)
                         else:
                             if self.building_type == 'infrastructure': #if railroad
                                 text_tools.print_to_screen("This tile already contains a railroad.", self.global_manager)
@@ -1618,6 +1618,135 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         if self.building_type == 'resource':
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
+
+class repair_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            label attached_label: Label that this button is attached to
+            string building_type: Type of building that this button builds, like 'resource'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.building_type = building_type
+        self.attached_mob = 'none'
+        self.attached_tile = 'none'
+        self.building_name = 'none'
+        self.requirement = 'can_construct'
+        image_id = 'buildings/buttons/repair_' + building_type + '.png'
+        if self.building_type == 'resource':
+            self.attached_resource = 'none'
+        else:
+            self.building_name = text_tools.remove_underscores(self.building_type)
+            if self.building_type == 'trading_post':
+                self.requirement = 'can_trade'
+            elif self.building_type == 'mission':
+                self.requirement = 'can_convert'
+            else:
+                self.requirement = 'none'
+        super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+
+    def update_info(self):
+        '''
+        Description:
+            Updates the exact kind of building constructed by this button depending on what is in the selected mob's tile, like building a road or upgrading a previously constructed road to a railroad
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.attached_mob = self.attached_label.actor #new_attached_mob
+        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+            self.attached_tile = self.attached_mob.images[0].current_cell.tile
+            if self.attached_mob.can_construct:
+                if self.building_type == 'resource':
+                    if self.attached_tile.cell.resource in self.global_manager.get('collectable_resources'):
+                        self.attached_resource = self.attached_tile.cell.resource
+                        self.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
+                        if self.attached_resource in ['gold', 'iron', 'copper', 'diamond']: #'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'
+                            self.building_name = self.attached_resource + ' mine'
+                        elif self.attached_resource in ['exotic wood', 'fruit', 'rubber', 'coffee']:
+                            self.building_name = self.attached_resource + ' plantation'
+                        elif self.attached_resource == 'ivory':
+                            self.building_name = 'ivory camp'
+                    else:
+                        self.attached_resource = 'none'
+                        self.building_name = 'none'
+                        self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if self.attached_label.actor.can_construct or (self.attached_label.actor.can_trade and self.requirement == 'can_trade') or (self.attached_label.actor.can_convert and self.requirement == 'can_convert'):
+                #construction gangs can repair all buildings, caravans can only repair trading posts, missionaries can only repair missions
+                attached_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
+                if (not attached_building == 'none') and attached_building.damaged:
+                    self.update_info()
+                    return(result)
+        return(False) 
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip depending on the type of building it constructs
+        Input:
+            None
+        Output:
+            None
+        '''
+        message = []
+        if self.can_show():
+            message.append("Attempts to repair the " + self.building_name + " in this tile, restoring it to full functionality")
+            message.append("Attempting to repair costs " + str(self.global_manager.get('building_prices')[self.building_type] / 2) + " money and an entire turn of movement points.")
+        self.set_tooltip(message)  
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a mob to construct a certain type of building
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type] / 2:
+                        current_building = self.attached_tile.cell.get_building(self.building_type)
+                        self.repair()
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')[self.building_type]) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)
+            
+    def repair(self):
+        building_info_dict = {}
+        building_info_dict['building_type'] = self.building_type
+        building_info_dict['building_name'] = self.building_name
+        if self.building_type == 'resource':
+            building_info_dict['attached_resource'] = self.attached_resource
+        self.attached_mob.start_repair(building_info_dict)
 
 class upgrade_button(label_button):
     '''

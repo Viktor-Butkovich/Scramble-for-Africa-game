@@ -174,3 +174,9 @@ class construction_gang(group):
             self.upgraded_building.upgrade(self.upgrade_type)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show building upgrade
         self.global_manager.set('ongoing_construction', False)
+
+    def start_repair(self, building_info_dict):
+        #called by actor_display_tools/buttons.repair_button.repair
+        print('repairing')
+        current_building = self.images[0].current_cell.get_building(building_info_dict['building_type'])
+        current_building.set_damaged(False)

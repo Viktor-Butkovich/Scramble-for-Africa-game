@@ -216,7 +216,8 @@ class save_load_manager_template():
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
-            print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
+            if self.global_manager.get('DEBUG_show_corruption_on_save'):
+                print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
 
 
         with open(file_path, 'wb') as handle: #write wb, read rb

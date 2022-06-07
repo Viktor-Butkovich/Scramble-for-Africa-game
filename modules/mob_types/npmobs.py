@@ -61,7 +61,7 @@ class npmob(mob):
         '''
         target_list = []
         for current_building in self.global_manager.get('building_list'):
-            if (not current_building.damaged) and (not current_building.building_type == 'slums'):
+            if (not current_building.damaged) and (not current_building.building_type in ['slums', 'infrastructure']):
                 target_list.append(current_building)
         target_list += self.global_manager.get('pmob_list')
         min_distance = -1
@@ -125,7 +125,7 @@ class npmob(mob):
 
     def damage_buildings(self):
         for current_building in self.images[0].current_cell.get_intact_buildings():
-            if not current_building.building_type == 'slums': #slums are not damaged
+            if not current_building.building_type in ['slums', 'infrastructure']: #natives only attack circular icon buildings
                 notification_tools.display_notification("The undefended " + current_building.name + " has been damaged by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
                 current_building.set_damaged(True)
             

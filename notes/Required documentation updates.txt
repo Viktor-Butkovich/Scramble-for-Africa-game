@@ -7,31 +7,27 @@ buildings.resource_building.eject/reattach_work_crews
 npmobs.npmob.damage_buildings
 tiles.tiles.remove_excess_inventory
 tiles imports
+actor_display_tools/buttons.repair_button
 
 Future plans:
+prevent ignored commodity prices from skyrocketing
+add multiple save slots
+allow attrition resistance even when buildings are damaged
 Maybe cause health attrition when moving
-Cause inventory attrition when moving, not just when standing still
 Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
 Possibly ministers should still be involved but without corruption when there is no profit to be gained, such as in defensive combat or when avoiding health attrition
 Maybe allow ship's crew to leave while cargo is on board but cargo is lost at end of turn if not replaced
-Add chance of commodity loss on movement
-Chance of commodity attrition for a unit carrying commodities, higher chance if more being held, lose a certain amount at a time
-add actor_utility.find_closest_available_worker and fix worker.replace
-Make group worker, attached work crew, and passenger replacement work
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-battalion should get off of vehicle when combat starts, maybe with disorganized penalty
-improve health attrition, add commodity attrition w/ corruption
 possibly display a notification when a unit dies and have an optional cause of death parameter
-Enemies should attack buildings and attached work crews
 
 Known Errors:
+building icon issue most likely from building's default image_id being based on the one it had when saving rather than what it had on creation
+incorrect building inventory capacity when buildings are damaged on load
+building icon not updating correctly on repair
 make sure that construction gang can not construct copy of damaged building
 native warriors name attribute unnecessarily capitalized
 work crews should be removed from building when it is damaged
 make sure upgrading roads/railroads works correctly with damage - road that has been upgraded to railroad should use the damaged_railroad image
 Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water
-
-images.update_roads interaction might not work with new building damage system
-
 Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned

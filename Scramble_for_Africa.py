@@ -739,9 +739,20 @@ try:
 
     #activating/disabling debugging tools
     global_manager.set('DEBUG_spawning_allowed', True) #True by default
+    #allows villages to spawn native warriors
+    
     global_manager.set('DEBUG_boost_attrition', False) #False by default
+    #increases chance of any attrition occuring by a factor of 6
+    
     global_manager.set('DEBUG_infinite_village_workers', False) #False by default
+    #converts all villagers to available workers on startup
+    
     global_manager.set('DEBUG_damaged_buildings', False) #False by default
+    #causes all buildings to be damaged on startup
+    
+    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
+    #prints the corruption and skill levels of each minister to the console when saving the game
+    
     #activating/disabling debugging tools
     main_loop.main_loop(global_manager)
     pygame.quit()
