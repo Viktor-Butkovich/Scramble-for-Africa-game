@@ -167,7 +167,7 @@ class construction_gang(group):
             None
         '''
         roll_result = self.global_manager.get('construction_result')[1]
-        if roll_result >= self.current_min_success: #if campaign succeeded
+        if roll_result >= self.current_min_success: #if upgrade succeeded
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.set_movement_points(0)
@@ -177,6 +177,109 @@ class construction_gang(group):
 
     def start_repair(self, building_info_dict):
         #called by actor_display_tools/buttons.repair_button.repair
-        print('repairing')
-        current_building = self.images[0].current_cell.get_building(building_info_dict['building_type'])
-        current_building.set_damaged(False)
+
+
+        self.building_type = building_info_dict['building_type']
+        self.building_name = building_info_dict['building_name']
+        self.repaired_building = self.images[0].current_cell.get_building(self.building_type)
+        
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success - 1 #easier than building new building
+        self.current_max_crit_fail = 0 #construction shouldn't have critical failures
+        self.current_min_crit_success = self.default_min_crit_success
+        
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'constructor': self, 'type': 'start repair'}
+        self.global_manager.set('ongoing_construction', True)
+        message = "Are you sure you want to start repairing the " + self.building_name + "? /n /n"
+        message += "The planning and materials will cost " + str(self.repaired_building.get_repair_cost()) + " money, half the initial cost of the building's construction. /n /n"
+        message += "If successful, the " + self.building_name + " will be restored to full functionality. /n /n"
+            
+        notification_tools.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+
+
+    def repair(self):
+        self.current_construction_type = 'repair'
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
+        self.global_manager.get('money_tracker').change(self.repaired_building.get_repair_cost() * -1, 'construction')
+        text = ""
+        text += "The " + self.name + " attempts to repair the " + self.building_name + ". /n /n"
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
+        else:
+            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager, num_dice)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i >= self.current_min_crit_success:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+            roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager, num_dice)
+            
+        text += "/n"
+        if roll_result >= self.current_min_success: #3+ required on D6 for repair
+            text += "The " + self.name + " successfully repaired the " + self.building_name + ". /n"
+        else:
+            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the repair. /n"
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
+        if roll_result >= 4:
+            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('construction_result', [self, roll_result])  
+
+    def complete_repair(self):
+        roll_result = self.global_manager.get('construction_result')[1]
+        if roll_result >= self.current_min_success: #if repair succeeded
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+            self.set_movement_points(0)
+            self.repaired_building.set_damaged(False)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show repaired building
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob info display to hide repair button
+        self.global_manager.set('ongoing_construction', False)

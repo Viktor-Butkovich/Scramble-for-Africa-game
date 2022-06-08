@@ -8,8 +8,15 @@ npmobs.npmob.damage_buildings
 tiles.tiles.remove_excess_inventory
 tiles imports
 actor_display_tools/buttons.repair_button
+mobs_types/construction_gangs repair
+buildings.building.get_build_cost
+buildings.building.get_repair_cost
+buildings.building.can_damage
+buildings.infrastructure_building.can_damage
+buildings.slums.can_damage
 
 Future plans:
+change action failed messages to reference minister asking for more time/money rather than the unit officer
 prevent ignored commodity prices from skyrocketing
 add multiple save slots
 allow attrition resistance even when buildings are damaged
@@ -21,9 +28,6 @@ possible ui improvement: have green/red letters appear by cursor after user does
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
 Known Errors:
-building icon issue most likely from building's default image_id being based on the one it had when saving rather than what it had on creation
-incorrect building inventory capacity when buildings are damaged on load
-building icon not updating correctly on repair
 make sure that construction gang can not construct copy of damaged building
 native warriors name attribute unnecessarily capitalized
 work crews should be removed from building when it is damaged

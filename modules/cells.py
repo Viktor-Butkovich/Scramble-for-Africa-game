@@ -122,7 +122,7 @@ class cell():
             if self.has_building('village') or self.has_intact_building('train_station') or self.has_intact_building('port') or self.has_intact_building('resource'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
-            elif self.has_intact_building('road') or self.has_intact_building('railroad'):
+            elif self.has_building('road') or self.has_building('railroad'):
                 if random.randrange(1, 7) >= 5: #removes 1/3 of attrition
                     return(False)
 

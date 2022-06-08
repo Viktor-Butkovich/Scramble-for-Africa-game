@@ -1487,7 +1487,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if not can_create: #show if unit selected can create this building
                 return(False)
             if not self.attached_tile == 'none':
-                if (not self.attached_tile.cell.contained_buildings[self.building_type] == 'none') and not self.building_type == 'infrastructure': #if building already present, do not show
+                if self.attached_tile.cell.has_building(self.building_type) and not self.building_type == 'infrastructure': #if building already present, do not show
                     return(False)
         return(result) 
 
@@ -1554,7 +1554,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type]:
-                        current_building = self.attached_tile.cell.get_building('self.building_type')
+                        current_building = self.attached_tile.cell.get_building(self.building_type)
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
                                 if not self.attached_tile.cell.terrain == 'water':
@@ -1670,7 +1670,7 @@ class repair_button(label_button):
                 if self.building_type == 'resource':
                     if self.attached_tile.cell.resource in self.global_manager.get('collectable_resources'):
                         self.attached_resource = self.attached_tile.cell.resource
-                        self.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
+                        #self.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
                         if self.attached_resource in ['gold', 'iron', 'copper', 'diamond']: #'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'
                             self.building_name = self.attached_resource + ' mine'
                         elif self.attached_resource in ['exotic wood', 'fruit', 'rubber', 'coffee']:
@@ -1680,7 +1680,7 @@ class repair_button(label_button):
                     else:
                         self.attached_resource = 'none'
                         self.building_name = 'none'
-                        self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
+                        #self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
 
     def can_show(self):
         '''
@@ -1713,7 +1713,7 @@ class repair_button(label_button):
         message = []
         if self.can_show():
             message.append("Attempts to repair the " + self.building_name + " in this tile, restoring it to full functionality")
-            message.append("Attempting to repair costs " + str(self.global_manager.get('building_prices')[self.building_type] / 2) + " money and an entire turn of movement points.")
+            message.append("Attempting to repair costs " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money and an entire turn of movement points.")
         self.set_tooltip(message)  
 
     def on_click(self):
@@ -1733,9 +1733,9 @@ class repair_button(label_button):
                         current_building = self.attached_tile.cell.get_building(self.building_type)
                         self.repair()
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')[self.building_type]) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money needed to attempt to repair the " + self.building_name + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
+                    text_tools.print_to_screen("You do not have enough movement points to repair a building.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)

@@ -756,6 +756,10 @@ class button():
                 constructor = self.notification.choice_info_dict['constructor']
                 constructor.upgrade()
 
+            elif self.button_type == 'start repair':
+                constructor = self.notification.choice_info_dict['constructor']
+                constructor.repair()
+
             elif self.button_type == 'trade':
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
@@ -781,7 +785,7 @@ class button():
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
 
-            elif self.button_type in ['stop construction', 'stop upgrade']:
+            elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
                 self.global_manager.set('ongoing_construction', False)
 
             elif self.button_type == 'accept loan offer':

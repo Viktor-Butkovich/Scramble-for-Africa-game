@@ -575,10 +575,13 @@ class construction_notification(action_notification):
                 current_die.remove()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                 current_minister_image.remove()
-            if self.global_manager.get('construction_result')[0].current_construction_type == 'default':
-                self.global_manager.get('construction_result')[0].complete_construction()
-            elif self.global_manager.get('construction_result')[0].current_construction_type == 'upgrade':
-                self.global_manager.get('construction_result')[0].complete_upgrade()
+            constructor = self.global_manager.get('construction_result')[0]
+            if constructor.current_construction_type == 'default':
+                constructor.complete_construction()
+            elif constructor.current_construction_type == 'upgrade':
+                constructor.complete_upgrade()
+            elif constructor.current_construction_type == 'repair':
+                constructor.complete_repair()
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])

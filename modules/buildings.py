@@ -34,7 +34,10 @@ class building(actor):
         '''
         self.actor_type = 'building'
         self.building_type = input_dict['building_type']
+        self.damaged = False
         super().__init__(from_save, input_dict, global_manager)
+        self.default_inventory_capacity = 0
+        self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
         self.images = []
@@ -47,18 +50,18 @@ class building(actor):
         if from_save:
             for current_work_crew in input_dict['contained_work_crews']:
                 self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
-            self.damaged = input_dict['damaged']
-        else:
-            self.damaged = False
+            if self.can_damage():
+                self.set_damaged(input_dict['damaged'])
+        elif self.can_damage():
+            self.set_damaged(False)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
         self.is_port = False #used to determine if port is in a tile to move there
-        self.default_inventory_capacity = 0
-        self.inventory_capacity = 0
+
         self.set_inventory_capacity(self.default_inventory_capacity)
         if global_manager.get('DEBUG_damaged_buildings'):
-            if not self.building_type in ['slums', 'infrastructure']:
+            if self.can_damage():
                 self.set_damaged(True)
 
     def to_save_dict(self):
@@ -83,11 +86,14 @@ class building(actor):
         save_dict = super().to_save_dict()
         save_dict['building_type'] = self.building_type
         save_dict['contained_work_crews'] = [] #list of dictionaries for each work crew, on load a building creates all of its work crews and attaches them
-        save_dict['image'] = self.image_dict['default']
+        save_dict['image'] = self.image_dict['intact']
         save_dict['damaged'] = self.damaged
         for current_work_crew in self.contained_work_crews:
             save_dict['contained_work_crews'].append(current_work_crew.to_save_dict())
         return(save_dict)
+
+    def can_damage(self):
+        return(True)
 
     def remove(self):
         '''
@@ -202,6 +208,12 @@ class building(actor):
                         return(True)
         return(False)
 
+    def get_build_cost(self):
+        return(self.global_manager.get('building_prices')[self.building_type])
+
+    def get_repair_cost(self):
+        return(self.get_build_cost() / 2)
+
 class infrastructure_building(building):
     '''
     Building that eases movement between tiles and is a road or railroad. Has images that show connections with other tiles that have roads or railroads
@@ -287,6 +299,9 @@ class infrastructure_building(building):
         save_dict = super().to_save_dict()
         save_dict['infrastructure_type'] = self.infrastructure_type
         return(save_dict)
+
+    def can_damage(self):
+        return(False)
 
 class trading_post(building):
     '''
@@ -536,6 +551,12 @@ class resource_building(building):
             None
         '''
         return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+
+    def get_build_cost(self):
+        cost = super().get_build_cost()
+        for i in range(0, self.num_upgrades): #adds cost of each upgrade, each of which is more expensive than the last
+            cost += (self.global_manager.get('base_upgrade_price') * (i + 1))
+        return(cost)
     
     def produce(self):
         '''
@@ -602,6 +623,9 @@ class slums(building):
             self.set_image('medium')
         else:
             self.set_image('large')
+
+    def can_damage(self):
+        return(False)
 
     def remove(self):
         '''
