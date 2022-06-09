@@ -52,6 +52,7 @@ SFA folder
 		    class switch_theatre_button
 		    class build_train_button
 		    class construction_button
+		    class repair_button
 		    class upgrade_button
 	   	    class appoint_minister_button
 		    class remove_minister_button
@@ -342,7 +343,7 @@ SFA folder
 	    def remove_underscores
 
         tiles.py
-            imports pygame, images, utility, actor_utility, villages, actors
+            imports pygame, random, images, utility, actor_utility, villages, actors
             class tile(actors.actor)
                 class abstract_tile
 		class resource_icon

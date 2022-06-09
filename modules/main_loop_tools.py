@@ -446,7 +446,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             stopping = False
                             if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
                                 destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
-                                if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_port()))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
+                                if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
                                     text_tools.print_to_screen("You can only send ships to coastal waters and coastal ports.", global_manager)
                                     stopping = True
                             chose_destination = True

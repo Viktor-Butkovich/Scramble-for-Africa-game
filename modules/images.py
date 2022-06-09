@@ -758,7 +758,7 @@ class infrastructure_connection_image(building_image):
         adjacent_cell = 'none'
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
-            adjacent_tile_infrastructure = adjacent_cell.contained_buildings['infrastructure']
+            adjacent_tile_infrastructure = adjacent_cell.get_intact_building('infrastructure')
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
                 adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
                 if own_tile_infrastructure_type == 'railroad' and own_tile_infrastructure_type == adjacent_tile_infrastructure_type: #if both railroads, draw railroad
@@ -768,13 +768,15 @@ class infrastructure_connection_image(building_image):
                     self.set_image(self.direction + '_road')
                     if own_tile_infrastructure_type == 'road': #hide center cross if adjacent tiles have same type
                         self.actor.set_image('empty')
+                        #self.actor.set_image('default')
                     else:
                         self.actor.set_image('default') #if not same, show cross
                 self.showing_connection = True
             else:
                 self.showing_connection = False
         else:
-            self.showing_connection = False #do not show if adjacent cell does not exist 
+            self.showing_connection = False #do not show if adjacent cell does not exist
+            
             
     def remove(self):
         '''

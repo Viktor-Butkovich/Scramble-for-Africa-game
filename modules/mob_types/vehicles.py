@@ -349,7 +349,7 @@ class train(vehicle):
         '''
         result = super().can_move(x_change, y_change)
         if result:
-            if not (self.images[0].current_cell.has_railroad() and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_railroad()):
+            if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
                 text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
                 return(False)
         return(result)

@@ -1,6 +1,8 @@
 #Contains functionality for tiles and other cell icons
 
 import pygame
+import random
+
 from . import images
 from . import utility
 from . import actor_utility
@@ -113,8 +115,27 @@ class tile(actor): #to do: make terrain tiles a subclass
                 if (not equivalent_tile == 'none') and (not called_by_equivalent):
                     equivalent_tile.draw_actor_match_outline(True)
 
+    def remove_excess_inventory(self):
+        '''
+        Description:
+            Removes random excess commodities from this tile until the number of commodities fits in this tile's inventory capacity
+        Input:
+            None
+        Output:
+            None
+        '''
+        inventory_used = self.get_inventory_used()
+        amount_to_remove = inventory_used - self.inventory_capacity
+        if amount_to_remove > 0:
+            commodity_types = self.get_held_commodities()
+            amount_removed = 0
+            while amount_removed < amount_to_remove:
+                commodity_removed = random.choice(commodity_types)
+                if self.get_inventory(commodity_removed) > 0:
+                    self.change_inventory(commodity_removed, -1)
+                    amount_removed += 1
+        
     def change_inventory(self, commodity, change):
-
         '''
         Description:
             Changes the number of commodities of a certain type held by this tile. Also ensures that the tile info display is updated correctly
@@ -450,7 +471,7 @@ class resource_icon(tile):
             None
         '''
         if self.resource == 'natives':
-            attached_village = self.attached_tile.cell.village
+            attached_village = self.attached_tile.cell.get_building('village')
             if attached_village.population == 0: #0
                 self.image_dict['small'] = 'scenery/resources/small/natives0.png'
                 self.image_dict['large'] = 'scenery/resources/natives0.png'
@@ -465,7 +486,7 @@ class resource_icon(tile):
                 self.image_dict['large'] = 'scenery/resources/natives3.png'
         building_present = False
         for building_type in self.global_manager.get('building_types'):
-            if not self.attached_tile.cell.contained_buildings[building_type] == 'none': #if any building present
+            if self.attached_tile.cell.has_building(building_type): #if any building present
                 self.image.set_image('small')
                 self.image_dict['default'] = self.image_dict['small']
                 building_present = True

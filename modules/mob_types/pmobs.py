@@ -47,6 +47,7 @@ class pmob(mob):
                 end_turn_destination_grid = self.global_manager.get(input_dict['end_turn_destination_grid_type'])
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             self.default_name = input_dict['default_name']
+            self.set_name(self.default_name)
         else:
             self.default_name = self.name
             actor_utility.deselect_all(self.global_manager)
@@ -333,7 +334,7 @@ class pmob(mob):
                             destination_type = 'land'
                             if future_cell.terrain == 'water':
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                            if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_port() and self.images[0].current_cell.terrain == 'water'))) or
+                            if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
                                 (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                     if (not future_cell.has_npmob()) or self.is_battalion: #non-battalion units can't move into enemies
@@ -449,6 +450,7 @@ class pmob(mob):
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
                 self.select()
                 self.move_to_front()
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
             message = enemy.name + " are attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
@@ -664,6 +666,7 @@ class pmob(mob):
                 self.die()
                 if current_cell.get_best_combatant('pmob') == 'none':
                     enemy.kill_noncombatants()
+                    enemy.damage_buildings()
                 if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
 
@@ -842,8 +845,8 @@ class pmob(mob):
             input_dict['modes'] = ['strategic']
             input_dict['init_type'] = self.building_type
             if not self.building_type == 'train':
-                if not self.images[0].current_cell.contained_buildings[self.building_type] == 'none': #if building of same type exists, remove it and replace with new one
-                    self.images[0].current_cell.contained_buildings[self.building_type].remove()
+                if self.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
+                    self.images[0].current_cell.get_building(self.building_type).remove()
             if self.building_type == 'resource':
                 input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
                 input_dict['resource_type'] = self.attached_resource

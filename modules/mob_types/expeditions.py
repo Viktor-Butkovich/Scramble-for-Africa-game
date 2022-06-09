@@ -319,7 +319,7 @@ class expedition(group):
         elif y_change < 0:
             direction = 'down'
         adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
-        if adjacent_cell.has_road() or adjacent_cell.has_railroad(): #if not adjacent_infrastructure == 'none':
+        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
             return(self.movement_cost / 2.0)
         elif adjacent_cell.terrain == 'water':
             return(self.movement_cost / 2.0)

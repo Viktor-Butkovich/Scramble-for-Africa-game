@@ -55,7 +55,7 @@ class caravan(group):
         Output:
             None
         '''
-        village = self.images[0].current_cell.village
+        village = self.images[0].current_cell.get_building('village')
         choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
         self.global_manager.set('ongoing_trade', True)
         message = "Are you sure you want to attempt to trade with the village of " + village.name + "? /n /n"
@@ -65,7 +65,7 @@ class caravan(group):
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
 
-        if village.cell.contained_buildings['trading_post'] == 'none': #penalty for no trading post
+        if not village.cell.has_intact_building('trading_post'): #penalty for no trading post
             self.current_roll_modifier -= 1
             message += "Without an established trading post, the merchant will have difficulty convincing villagers to trade. /n /n"
         
@@ -183,7 +183,7 @@ class caravan(group):
             if roll_result <= self.current_max_crit_fail:
                 text += " /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n"
                 text += " /nEveryone in the caravan has died "
-                if not village.cell.contained_buildings['trading_post'] == 'none':
+                if village.cell.has_building('trading_post'):
                     text += "and the trading post has been destroyed"
                 text += ". /n"
                 notification_tools.display_notification(text + " /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)

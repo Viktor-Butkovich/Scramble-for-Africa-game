@@ -46,24 +46,24 @@ class actor_display_free_image(free_image):
             elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
                 self.set_image(new_actor.image_dict['hidden'])
             elif self.actor_image_type == 'resource_building':
-                if not new_actor.cell.contained_buildings['resource'] == 'none':
-                    self.set_image(new_actor.cell.contained_buildings['resource'].image_dict['default']) #matches resource building
+                if new_actor.cell.has_building('resource'):
+                    self.set_image(new_actor.cell.get_building('resource').image_dict['default']) #matches resource building
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission', 'slums']:
-                if not new_actor.cell.contained_buildings[self.actor_image_type] == 'none':
-                    self.set_image(new_actor.cell.contained_buildings[self.actor_image_type].images[0].image_id)
+                if new_actor.cell.has_building(self.actor_image_type):
+                    self.set_image(new_actor.cell.get_building(self.actor_image_type).images[0].image_id)
                     #self.set_image('buildings/' + self.actor_image_type + '.png')
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_middle':
-                contained_infrastructure = new_actor.cell.contained_buildings['infrastructure']
+                contained_infrastructure = new_actor.cell.get_building('infrastructure')
                 if not contained_infrastructure == 'none':
                     self.set_image(contained_infrastructure.image_dict['default'])
                 else:
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_connection':
-                contained_infrastructure = new_actor.cell.contained_buildings['infrastructure']
+                contained_infrastructure = new_actor.cell.get_building('infrastructure')
                 if not contained_infrastructure == 'none':
                     if contained_infrastructure.infrastructure_connection_images[self.direction].can_show():
                         self.set_image(contained_infrastructure.infrastructure_connection_images[self.direction].image_id)

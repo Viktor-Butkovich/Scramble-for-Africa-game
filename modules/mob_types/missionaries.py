@@ -47,7 +47,7 @@ class missionaries(group):
         Output:
             None
         '''
-        village = self.images[0].current_cell.village
+        village = self.images[0].current_cell.get_building('village')
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
@@ -55,7 +55,7 @@ class missionaries(group):
         message = "Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n"
         message += "The conversion will cost " + str(self.global_manager.get('action_prices')['convert']) + " money. /n /n "
                             
-        if village.cell.contained_buildings['mission'] == 'none': #penalty for no mission
+        if not village.cell.has_intact_building('mission'): #penalty for no mission
             self.current_roll_modifier -= 1
             message += "Without an established mission, the missionaries will have difficulty converting the villagers. /n /n"
             
@@ -117,7 +117,7 @@ class missionaries(group):
             num_dice = 1
         
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1, 'religious conversion')
-        village = self.images[0].current_cell.village
+        village = self.images[0].current_cell.get_building('village')
         text = ""
         text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
 
@@ -170,7 +170,7 @@ class missionaries(group):
             text += "The missionaries made little progress in converting the natives. /n /n"
         if roll_result <= self.current_max_crit_fail:
             text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died "
-            if not village.cell.contained_buildings['mission'] == 'none':
+            if village.cell.has_building('mission'):
                 text += "and the mission building has been destroyed."
             text += ". /n"
 
@@ -202,6 +202,6 @@ class missionaries(group):
                 self.promote()
         if roll_result <= self.current_max_crit_fail:
             self.die()
-            if not village.cell.contained_buildings['mission'] == 'none':
-                village.cell.contained_buildings['mission'].remove()
+            if village.cell.has_building('mission'):
+                village.cell.get_building('mission').remove()
         self.global_manager.set('ongoing_conversion', False)

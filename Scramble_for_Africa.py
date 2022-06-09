@@ -26,7 +26,7 @@ try:
 
     global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    global_manager.get('sound_manager').play_music('waltz_2')
+    #global_manager.get('sound_manager').play_music('waltz_2')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('europe_grid', 'none')
     resolution_finder = pygame.display.Info()
@@ -739,8 +739,20 @@ try:
 
     #activating/disabling debugging tools
     global_manager.set('DEBUG_spawning_allowed', True) #True by default
+    #allows villages to spawn native warriors
+    
     global_manager.set('DEBUG_boost_attrition', False) #False by default
+    #increases chance of any attrition occuring by a factor of 6
+    
     global_manager.set('DEBUG_infinite_village_workers', False) #False by default
+    #converts all villagers to available workers on startup
+    
+    global_manager.set('DEBUG_damaged_buildings', False) #False by default
+    #causes all buildings to be damaged on startup
+    
+    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
+    #prints the corruption and skill levels of each minister to the console when saving the game
+    
     #activating/disabling debugging tools
     main_loop.main_loop(global_manager)
     pygame.quit()

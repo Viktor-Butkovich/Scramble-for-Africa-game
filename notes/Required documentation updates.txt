@@ -1,22 +1,19 @@
 
 Future plans:
+change action failed messages to reference minister asking for more time/money rather than the unit officer
+prevent ignored commodity prices from skyrocketing
+add multiple save slots
+allow attrition resistance even when buildings are damaged
 Maybe cause health attrition when moving
-Cause inventory attrition when moving, not just when standing still
 Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
 Possibly ministers should still be involved but without corruption when there is no profit to be gained, such as in defensive combat or when avoiding health attrition
 Maybe allow ship's crew to leave while cargo is on board but cargo is lost at end of turn if not replaced
-Add chance of commodity loss on movement
-Chance of commodity attrition for a unit carrying commodities, higher chance if more being held, lose a certain amount at a time
-add actor_utility.find_closest_available_worker and fix worker.replace
-Make group worker, attached work crew, and passenger replacement work
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-battalion should get off of vehicle when combat starts, maybe with disorganized penalty
-improve health attrition, add commodity attrition w/ corruption
 possibly display a notification when a unit dies and have an optional cause of death parameter
-Enemies should attack buildings and attached work crews
 
-Known Errors:
-When attrition on movement is added, ensure that movement is not possible while transportation minister is not appointed
-Check maximum inventory capacity on resource production building - should be 9 but is 18 under certain circumstances
+Possible/known Errors:
+native warriors name attribute unnecessarily capitalized
+damaging a building should remove its work crews, even if no enemies are present
+Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water
 Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned

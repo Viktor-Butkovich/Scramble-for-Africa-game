@@ -119,109 +119,125 @@ class cell():
                 if random.randrange(1, 7) >= 4: #attrition on 1-3
                     return(False)
 
-            if self.has_village() or self.has_train_station() or self.has_port() or self.has_resource_building():
+            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
-            elif self.has_road() or self.has_railroad():
+            elif self.has_building('road') or self.has_building('railroad'):
                 if random.randrange(1, 7) >= 5: #removes 1/3 of attrition
                     return(False)
 
         return(True)
 
-    def has_village(self):
+    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, road, railroad, resource, slums. No forts in game yet
         '''
         Description:
-            Returns whether this cell contains a village
+            Returns whether this cell has a building of the inputted type, even if the building is damaged
         Input:
-            None
+            string building_type: type of building to search for
         Output:
-            boolean: Returns False if this cell does not contain a village, otherwise returns True
+            boolean: Returns whether this cell has a building of the inputted type
         '''
-        if self.village == 'none':
-            return(False)
-        return(True)
+        if building_type == 'village':
+            if self.village == 'none':
+                return(False)
+            else:
+                return(True)
+            
+        elif building_type in ['road', 'railroad']:
+            if self.contained_buildings['infrastructure'] == 'none':
+                return(False)
+            elif building_type == 'road' and self.contained_buildings['infrastructure'].is_road:
+                return(True)
+            elif building_type == 'railroad' and self.contained_buildings['infrastructure'].is_railroad:
+                return(True)
+            else:
+                return(False)
+            
+        else:
+            if self.contained_buildings[building_type] == 'none':
+                return(False)
+            else:
+                return(True)
 
-    def has_train_station(self):
+    def has_intact_building(self, building_type):
         '''
         Description:
-            Returns whether this cell contains a train station
+            Returns whether this cell has an undamaged building of the inputted type
         Input:
-            None
+            string building_type: Type of building to search for
         Output:
-            boolean: Returns False if this cell does not contain a train station, otherwise returns True
+            boolean: Returns whether this cell has an undamaged building of the inputted type
         '''
-        if self.contained_buildings['train_station'] == 'none':
-            return(False)
-        return(True) 
+        if building_type == 'village':
+            if self.village == 'none':
+                return(False)
+            else:
+                returned_building = self.village
+                
+        elif building_type in ['road', 'railroad']:
+            if self.contained_buildings['infrastructure'] == 'none':
+                return(False)
+            elif building_type == 'road' and self.contained_buildings['infrastructure'].is_road:
+                returned_building = self.contained_buildings['infrastructure']
+            elif building_type == 'railroad' and self.contained_buildings['infrastructure'].is_railroad:
+                returned_building = self.contained_buildings['infrastructure']
+            else:
+                return(False)
+            
+        else:
+            if self.contained_buildings[building_type] == 'none':
+                return(False)
+            else:
+                returned_building = self.contained_buildings[building_type]
 
-    def has_trading_post(self):
-        '''
-        Description:
-            Returns whether this cell contains a trading post
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a trading post, otherwise returns True
-        '''
-        if self.contained_buildings['trading_post'] == 'none':
-            return(False)
-        return(True)
-
-    def has_mission(self):
-        '''
-        Description:
-            Returns whether this cell contains a mission
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain a mission, otherwise returns True
-        '''
-        if self.contained_buildings['mission'] == 'none':
-            return(False)
-        return(True)
-
-    def has_road(self):
-        '''
-        Description:
-            Returns whether this cell contains a road
-        Input:
-            None
-        Output:
-            boolean: Returns True if this cell contains a road, otherwise returns False
-        '''
-        if self.contained_buildings['infrastructure'] == 'none':
-            return(False)
-        if self.contained_buildings['infrastructure'].is_road:
+        if not returned_building.damaged:
             return(True)
-        return(False)
-
-    def has_railroad(self):
+        else:
+            return(False)
+        
+    def get_building(self, building_type):
         '''
         Description:
-            Returns whether this cell contains a railroad
+            Returns this cell's building of the inputted type, or 'none' if that building is not present
         Input:
-            None
+            string building_type: Type of building to search for
         Output:
-            boolean: Returns True if this cell contains a railroad, otherwise returns False
+            building/string: Returns whether this cell's building of the inputted type, or 'none' if that building is not present
         '''
-        if self.contained_buildings['infrastructure'] == 'none':
-            return(False)
-        if self.contained_buildings['infrastructure'].is_railroad:
-            return(True)
-        return(False)
+        if self.has_building(building_type):
+            if building_type == 'village':
+                return(self.village)
+                
+            elif building_type in ['road', 'railroad']:
+                return(self.contained_buildings['infrastructure'])
+                
+            else:
+                return(self.contained_buildings[building_type])
+            
+        else:
+            return('none')
 
-    def has_resource_building(self):
+    def get_intact_building(self, building_type):
         '''
         Description:
-            Returns whether this cell contains a resource production building
+            Returns this cell's undamaged building of the inputted type, or 'none' if that building is damaged or not present
         Input:
-            None
+            string building_type: Type of building to search for
         Output:
-            boolean: Returns False if this cell does not contain a resource production building, otherwise returns True
+            building/string: Returns this cell's undamaged building of the inputted type, or 'none' if that building is damaged or not present
         '''
-        if self.contained_buildings['resource'] == 'none':
-            return(False)
-        return(True)
+        if self.has_intact_building(building_type):
+            if building_type == 'village':
+                return(self.village)
+                
+            elif building_type in ['road', 'railroad']:
+                return(self.contained_buildings['infrastructure'])
+                
+            else:
+                return(self.contained_buildings[building_type])
+            
+        else:
+            return('none')
 
     def reset_buildings(self):
         '''
@@ -247,35 +263,24 @@ class cell():
         '''
         contained_buildings_list = []
         for current_building_type in self.global_manager.get('building_types'):
-            if not self.contained_buildings[current_building_type] == 'none':
+            if self.has_building(current_building_type):
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
 
-    def has_port(self):
+    def get_intact_buildings(self):
         '''
         Description:
-            Returns whether this cell contains a port
+            Returns a list of the nondamaged buildings contained in this cell
         Input:
             None
         Output:
-            boolean: Returns False if this cell does not contain a port, otherwise returns True
+            building list contained_buildings_list: nondamaged buildings contained in this cell
         '''
-        if self.contained_buildings['port'] == 'none':
-            return(False)
-        return(True)
-
-    def has_slums(self):
-        '''
-        Description:
-            Returns whether this cell contains slums
-        Input:
-            None
-        Output:
-            boolean: Returns False if this cell does not contain slums, otherwise returns True
-        '''
-        if self.contained_buildings['slums'] == 'none':
-            return(False)
-        return(True)
+        contained_buildings_list = []
+        for current_building_type in self.global_manager.get('building_types'):
+            if self.has_intact_building(current_building_type):
+                contained_buildings_list.append(self.contained_buildings[current_building_type])
+        return(contained_buildings_list)
 
     def create_slums(self):
         '''
@@ -357,7 +362,7 @@ class cell():
         Description:
             Returns whether this cell contains a worker of one of the inputted types
         Input:
-            string list possible_types: type of worker that can be detected, includes all workers by default
+            string list possible_types: Type of worker that can be detected, includes all workers by default
         Output:
             Returns True if this cell contains a worker of one of the inputted types, otherwise returns False
         '''
@@ -371,7 +376,7 @@ class cell():
         Description:
             Returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
-            string list possible_types: type of worker that can be returned, includes all workers by default
+            string list possible_types: Type of worker that can be returned, includes all workers by default
         Output:
             string/worker: Returns the first worker in this cell of the inputted types, or 'none' if none are present
         '''
@@ -392,10 +397,9 @@ class cell():
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
                 return(True)
-        #if self.has_resource_building():
-        #    if len(self.contained_buildings['resource'].contained_work_crews) > 0:
-        #        return(True)
-        #maybe have slums count?
+        if self.has_intact_building('resource'):
+            if len(self.get_intact_building('resource').contained_work_crews) > 0:
+                return(True)
         return(False)
 
     def has_npmob(self):
@@ -405,7 +409,7 @@ class cell():
         Input:
             None
         Output:
-            booleaN: Returns whether this cell contains an npmob
+            boolean: Returns whether this cell contains an npmob
         '''
         for current_mob in self.contained_mobs:
             if current_mob.is_npmob:
