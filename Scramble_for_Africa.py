@@ -26,7 +26,7 @@ try:
 
     global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    global_manager.get('sound_manager').play_music('waltz_2')
+    #global_manager.get('sound_manager').play_music('waltz_2')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('europe_grid', 'none')
     resolution_finder = pygame.display.Info()

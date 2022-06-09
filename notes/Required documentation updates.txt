@@ -1,19 +1,3 @@
-cells.cell.has_building
-cells.cell.has_intact_building
-cells.cell.get_building
-cells.cell.get_intact_building
-buildings.building functions
-buildings.resource_building.eject/reattach_work_crews
-npmobs.npmob.damage_buildings
-tiles.tiles.remove_excess_inventory
-tiles imports
-actor_display_tools/buttons.repair_button
-mobs_types/construction_gangs repair
-buildings.building.get_build_cost
-buildings.building.get_repair_cost
-buildings.building.can_damage
-buildings.infrastructure_building.can_damage
-buildings.slums.can_damage
 
 Future plans:
 change action failed messages to reference minister asking for more time/money rather than the unit officer
@@ -27,11 +11,9 @@ Maybe allow ship's crew to leave while cargo is on board but cargo is lost at en
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
-Known Errors:
-make sure that construction gang can not construct copy of damaged building
+Possible/known Errors:
 native warriors name attribute unnecessarily capitalized
-work crews should be removed from building when it is damaged
-make sure upgrading roads/railroads works correctly with damage - road that has been upgraded to railroad should use the damaged_railroad image
+damaging a building should remove its work crews, even if no enemies are present
 Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water
 Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned

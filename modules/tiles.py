@@ -116,6 +116,14 @@ class tile(actor): #to do: make terrain tiles a subclass
                     equivalent_tile.draw_actor_match_outline(True)
 
     def remove_excess_inventory(self):
+        '''
+        Description:
+            Removes random excess commodities from this tile until the number of commodities fits in this tile's inventory capacity
+        Input:
+            None
+        Output:
+            None
+        '''
         inventory_used = self.get_inventory_used()
         amount_to_remove = inventory_used - self.inventory_capacity
         if amount_to_remove > 0:
@@ -127,9 +135,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                     self.change_inventory(commodity_removed, -1)
                     amount_removed += 1
         
-
     def change_inventory(self, commodity, change):
-
         '''
         Description:
             Changes the number of commodities of a certain type held by this tile. Also ensures that the tile info display is updated correctly

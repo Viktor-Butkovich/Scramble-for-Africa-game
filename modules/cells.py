@@ -119,7 +119,7 @@ class cell():
                 if random.randrange(1, 7) >= 4: #attrition on 1-3
                     return(False)
 
-            if self.has_building('village') or self.has_intact_building('train_station') or self.has_intact_building('port') or self.has_intact_building('resource'):
+            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
             elif self.has_building('road') or self.has_building('railroad'):
@@ -129,6 +129,14 @@ class cell():
         return(True)
 
     def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, road, railroad, resource, slums. No forts in game yet
+        '''
+        Description:
+            Returns whether this cell has a building of the inputted type, even if the building is damaged
+        Input:
+            string building_type: type of building to search for
+        Output:
+            boolean: Returns whether this cell has a building of the inputted type
+        '''
         if building_type == 'village':
             if self.village == 'none':
                 return(False)
@@ -152,6 +160,14 @@ class cell():
                 return(True)
 
     def has_intact_building(self, building_type):
+        '''
+        Description:
+            Returns whether this cell has an undamaged building of the inputted type
+        Input:
+            string building_type: Type of building to search for
+        Output:
+            boolean: Returns whether this cell has an undamaged building of the inputted type
+        '''
         if building_type == 'village':
             if self.village == 'none':
                 return(False)
@@ -180,6 +196,14 @@ class cell():
             return(False)
         
     def get_building(self, building_type):
+        '''
+        Description:
+            Returns this cell's building of the inputted type, or 'none' if that building is not present
+        Input:
+            string building_type: Type of building to search for
+        Output:
+            building/string: Returns whether this cell's building of the inputted type, or 'none' if that building is not present
+        '''
         if self.has_building(building_type):
             if building_type == 'village':
                 return(self.village)
@@ -194,6 +218,14 @@ class cell():
             return('none')
 
     def get_intact_building(self, building_type):
+        '''
+        Description:
+            Returns this cell's undamaged building of the inputted type, or 'none' if that building is damaged or not present
+        Input:
+            string building_type: Type of building to search for
+        Output:
+            building/string: Returns this cell's undamaged building of the inputted type, or 'none' if that building is damaged or not present
+        '''
         if self.has_intact_building(building_type):
             if building_type == 'village':
                 return(self.village)
@@ -330,7 +362,7 @@ class cell():
         Description:
             Returns whether this cell contains a worker of one of the inputted types
         Input:
-            string list possible_types: type of worker that can be detected, includes all workers by default
+            string list possible_types: Type of worker that can be detected, includes all workers by default
         Output:
             Returns True if this cell contains a worker of one of the inputted types, otherwise returns False
         '''
@@ -344,7 +376,7 @@ class cell():
         Description:
             Returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
-            string list possible_types: type of worker that can be returned, includes all workers by default
+            string list possible_types: Type of worker that can be returned, includes all workers by default
         Output:
             string/worker: Returns the first worker in this cell of the inputted types, or 'none' if none are present
         '''
@@ -377,7 +409,7 @@ class cell():
         Input:
             None
         Output:
-            booleaN: Returns whether this cell contains an npmob
+            boolean: Returns whether this cell contains an npmob
         '''
         for current_mob in self.contained_mobs:
             if current_mob.is_npmob:

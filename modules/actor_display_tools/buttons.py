@@ -1620,6 +1620,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         self.attached_mob.start_construction(building_info_dict)
 
 class repair_button(label_button):
+    '''
+    Button that commands a group to repair a certain type of building
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, attached_label, building_type, global_manager):
         '''
         Description:
@@ -1657,17 +1660,17 @@ class repair_button(label_button):
     def update_info(self):
         '''
         Description:
-            Updates the exact kind of building constructed by this button depending on what is in the selected mob's tile, like building a road or upgrading a previously constructed road to a railroad
+            If this is a resource production building repair button, updates the button's description based on the type of resource production building in the current tile
         Input:
             None
         Output:
             None
         '''
         self.attached_mob = self.attached_label.actor #new_attached_mob
-        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
-            self.attached_tile = self.attached_mob.images[0].current_cell.tile
-            if self.attached_mob.can_construct:
-                if self.building_type == 'resource':
+        if self.building_type == 'resource':
+            if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+                self.attached_tile = self.attached_mob.images[0].current_cell.tile
+                if self.attached_mob.can_construct:
                     if self.attached_tile.cell.resource in self.global_manager.get('collectable_resources'):
                         self.attached_resource = self.attached_tile.cell.resource
                         #self.image.set_image(self.global_manager.get('resource_building_button_dict')[self.attached_resource])
@@ -1689,7 +1692,8 @@ class repair_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not capable of repairing this button's building, otherwise returns same as superclass. A group can repair a building if it is able to build it, and construction gang's can
+                repair any type of building
         '''
         result = super().can_show()
         if result:
@@ -1704,7 +1708,7 @@ class repair_button(label_button):
     def update_tooltip(self):
         '''
         Description:
-            Sets this button's tooltip depending on the type of building it constructs
+            Sets this button's tooltip depending on the type of building it repairs
         Input:
             None
         Output:
@@ -1719,7 +1723,7 @@ class repair_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a mob to construct a certain type of building
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a mob to repair a certain type of building
         Input:
             None
         Output:
@@ -1741,6 +1745,14 @@ class repair_button(label_button):
                 text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)
             
     def repair(self):
+        '''
+        Description:
+            Commands the selected mob to repair a certain type of building, depending on this button's building_type
+        Input:
+            None
+        Output:
+            None
+        '''
         building_info_dict = {}
         building_info_dict['building_type'] = self.building_type
         building_info_dict['building_name'] = self.building_name

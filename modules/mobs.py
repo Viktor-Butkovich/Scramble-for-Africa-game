@@ -261,7 +261,7 @@ class mob(actor):
             double: How many movement points would be spent by moving by the inputted amount
         '''
         local_cell = self.images[0].current_cell
-        if local_cell.has_intact_building('road') or local_cell.has_intact_building('railroad'): #if not local_infrastructure == 'none':
+        if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
             direction = 'non'
             if x_change < 0:
                 direction = 'left'
@@ -272,7 +272,7 @@ class mob(actor):
             elif y_change < 0:
                 direction = 'down'
             adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
-            if adjacent_cell.has_intact_building('road') or adjacent_cell.has_intact_building('railroad'): #if not adjacent_infrastructure == 'none':
+            if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
                 return(self.movement_cost / 2.0)
         return(self.movement_cost)
 

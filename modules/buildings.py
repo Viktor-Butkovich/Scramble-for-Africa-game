@@ -93,6 +93,14 @@ class building(actor):
         return(save_dict)
 
     def can_damage(self):
+        '''
+        Description:
+            Returns whether this building is able to be damaged. Roads, railroads, and slums cannot be damaged
+        Input:
+            None
+        Output:
+            boolean: Returns whether this building is able to be damaged
+        '''
         return(True)
 
     def remove(self):
@@ -158,6 +166,14 @@ class building(actor):
         self.set_tooltip(tooltip_text)
 
     def set_damaged(self, new_value):
+        '''
+        Description:
+            Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities
+        Input:
+            boolean new_value: New damaged/undamaged state of the building
+        Output:
+            None
+        '''
         self.damaged = new_value
         if self.building_type == 'infrastructure':
             actor_utility.update_roads(self.global_manager)
@@ -170,11 +186,27 @@ class building(actor):
             self.image_dict['default'] = self.image_dict['intact']
             self.set_image('default')
 
-    def set_default_inventory_capacity(self, new_value): #use if upgrading warehouses
+    def set_default_inventory_capacity(self, new_value):
+        '''
+        Description:
+            Sets a new default inventory capacity for a building. A building's inventory capacity may differ from its default inventory capacity if it becomes damaged
+        Input:
+            int new_value: New default inventory capacity for the building
+        Output:
+            None
+        '''
         self.default_inventory_capacity = new_value
         self.set_inventory_capacity(new_value)
     
     def set_inventory_capacity(self, new_value):
+        '''
+        Description:
+            Sets a new current inventory capacity for a building. A building's inventory capacity may change when it is upgraded, damaged, or repaired
+        Input:
+            int/string new_value: New current inventory capacity for the building. 'default' sets the inventory capacity to its default amount
+        Output:
+            None
+        '''
         old_value = self.inventory_capacity
         if new_value == 'default':
             self.inventory_capacity = self.default_inventory_capacity
@@ -183,6 +215,15 @@ class building(actor):
         self.contribute_local_inventory_capacity(old_value, new_value)
 
     def contribute_local_inventory_capacity(self, previous_value, new_value):
+        '''
+        Description:
+            Updates this building's tile's total inventory capacity based on changes to this buiding's current inventory capacity
+        Input:
+            int previous_value: Previous inventory capacity that had been used in the tile's total inventory capacity
+            int new_value: New inventory capacity to be used in the tile's total inventory capacity
+        Output:
+            None
+        '''
         current_index = 0
         for current_image in self.images:
             if current_index == 0:
@@ -209,9 +250,25 @@ class building(actor):
         return(False)
 
     def get_build_cost(self):
+        '''
+        Description:
+            Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+        Input:
+            None
+        Output:
+            double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+        '''
         return(self.global_manager.get('building_prices')[self.building_type])
 
     def get_repair_cost(self):
+        '''
+        Description:
+            Returns the cost of repairing this building, not accounting for failed attempts. Repair cost if half of total build cost
+        Input:
+            None
+        Output:
+            double: Returns the cost of repairing this building, not accounting for failed attempts
+        '''
         return(self.get_build_cost() / 2)
 
 class infrastructure_building(building):
@@ -254,10 +311,6 @@ class infrastructure_building(building):
         self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
         self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
         self.image_dict['empty'] = 'misc/empty.png'
-        if self.is_railroad:
-            self.image_dict['damaged'] = 'buildings/infrastructure/railroad_damaged.png'
-        elif self.is_road:
-            self.image_dict['damaged'] = 'buildings/infrastructure/road_damaged.png'
         self.infrastructure_connection_images = {}
         for current_grid in self.grids:
             up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
@@ -274,8 +327,6 @@ class infrastructure_building(building):
             self.infrastructure_connection_images['right'] = right_image
             self.infrastructure_connection_images['left'] = left_image
         actor_utility.update_roads(self.global_manager)
-        #if global_manager.get('DEBUG_damaged_buildings'):
-        #    self.set_damaged(True)
 
     def to_save_dict(self):
         '''
@@ -301,6 +352,14 @@ class infrastructure_building(building):
         return(save_dict)
 
     def can_damage(self):
+        '''
+        Description:
+            Returns whether this building is able to be damaged. Roads, railroads, and slums cannot be damaged
+        Input:
+            None
+        Output:
+            boolean: Returns whether this building is able to be damaged
+        '''
         return(False)
 
 class trading_post(building):
@@ -372,8 +431,6 @@ class train_station(building):
         input_dict['building_type'] = 'train_station'
         super().__init__(from_save, input_dict, global_manager)
         self.set_default_inventory_capacity(9)
-        #for current_image in self.images:
-        #    current_image.current_cell.tile.inventory_capacity += 9
 
 class port(building):
     '''
@@ -400,8 +457,6 @@ class port(building):
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
         self.set_default_inventory_capacity(9)
-        #for current_image in self.images:
-        #    current_image.current_cell.tile.inventory_capacity += 9
 
 class resource_building(building):
     '''
@@ -435,8 +490,6 @@ class resource_building(building):
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.set_default_inventory_capacity(9)
-        #for current_image in self.images:
-        #    current_image.current_cell.tile.inventory_capacity += 9
         self.ejected_work_crews = []
         if from_save:
             while self.scale < input_dict['scale']:
@@ -472,6 +525,14 @@ class resource_building(building):
         return(save_dict)
 
     def eject_work_crews(self):
+        '''
+        Description:
+            Removes this building's work crews
+        Input:
+            None
+        Output:
+            None
+        '''
         self.ejected_work_crews = []
         for current_work_crew in self.contained_work_crews:
             self.ejected_work_crews.append(current_work_crew)
@@ -479,6 +540,14 @@ class resource_building(building):
             current_work_crew.leave_building(self)
 
     def reattach_work_crews(self):
+        '''
+        Description:
+            After combat is finished, returns any surviving work crews to this building, if possible
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_work_crew in self.ejected_work_crews:
             if current_work_crew in self.global_manager.get('pmob_list'): #if not dead
                 current_work_crew.work_building(self)
@@ -497,6 +566,14 @@ class resource_building(building):
         super().remove()
 
     def manage_health_attrition(self, current_cell = 'default'):
+        '''
+        Description:
+            Checks this building's work crews for health attrition each turn
+        Input:
+            string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
+        Output:
+            None
+        '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         for current_work_crew in self.contained_work_crews:
@@ -553,6 +630,14 @@ class resource_building(building):
         return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
 
     def get_build_cost(self):
+        '''
+        Description:
+            Returns the total cost of building this building, including all of its upgrades but not failed attempts
+        Input:
+            None
+        Output:
+            double: Returns the total cost of building this building
+        '''
         cost = super().get_build_cost()
         for i in range(0, self.num_upgrades): #adds cost of each upgrade, each of which is more expensive than the last
             cost += (self.global_manager.get('base_upgrade_price') * (i + 1))
@@ -625,6 +710,14 @@ class slums(building):
             self.set_image('large')
 
     def can_damage(self):
+        '''
+        Description:
+            Returns whether this building is able to be damaged. Roads, railroads, and slums cannot be damaged
+        Input:
+            None
+        Output:
+            boolean: Returns whether this building is able to be damaged
+        '''
         return(False)
 
     def remove(self):

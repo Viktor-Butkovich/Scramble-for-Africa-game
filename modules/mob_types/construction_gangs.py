@@ -40,7 +40,7 @@ class construction_gang(group):
         '''
         Description
             Used when the player clicks on an upgrade building button, displays a choice notification that allows the player to upgrade it or not. Choosing to construct starts the upgrade process, costs an amount based on the number of
-                previous upgrades to that building, and consumes the constructiong gang's movement points
+                previous upgrades to that building, and consumes the construction gang's movement points
         Input:
             dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
                 string upgrade_type: type of upgrade, like 'scale' or 'efficiency'
@@ -176,9 +176,17 @@ class construction_gang(group):
         self.global_manager.set('ongoing_construction', False)
 
     def start_repair(self, building_info_dict):
-        #called by actor_display_tools/buttons.repair_button.repair
-
-
+        '''
+        Description
+            Used when the player clicks on a repair building button, displays a choice notification that allows the player to repair it or not. Choosing to repair starts the repair process, costs an amount based on the building's total
+                cost with upgrades, and consumes the construction gang's movement points
+        Input:
+            dictionary building_info_dict: string keys corresponding to various values used to determine the building constructed
+                string building_type: type of building to repair, like 'resource'
+                string building_name: name of building, like 'ivory camp'
+        Output:
+            None
+        '''
         self.building_type = building_info_dict['building_type']
         self.building_name = building_info_dict['building_name']
         self.repaired_building = self.images[0].current_cell.get_building(self.building_type)
@@ -200,9 +208,15 @@ class construction_gang(group):
             
         notification_tools.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
-
-
     def repair(self):
+        '''
+        Description:
+            Controls the repair process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         self.current_construction_type = 'repair'
         roll_result = 0
         self.just_promoted = False
@@ -274,6 +288,15 @@ class construction_gang(group):
         self.global_manager.set('construction_result', [self, roll_result])  
 
     def complete_repair(self):
+        '''
+        Description:
+            Used when the player finishes rolling for a repair, shows the repair's results and makes any changes caused by the result. If successful, the building is repaired and returned to full functionality, promotes engineer to a
+                veteran on critical success
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('construction_result')[1]
         if roll_result >= self.current_min_success: #if repair succeeded
             if roll_result >= self.current_min_crit_success and not self.veteran:

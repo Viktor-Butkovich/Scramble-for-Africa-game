@@ -124,6 +124,14 @@ class npmob(mob):
             current_noncombatant.die()
 
     def damage_buildings(self):
+        '''
+        Description:
+            Damages all undefended buildings in this cell after combat if no possible combatants, like workers or soldiers, remain
+        Input:
+            None
+        Output:
+            None
+        '''
         for current_building in self.images[0].current_cell.get_intact_buildings():
             if current_building.can_damage():
                 notification_tools.display_notification("The undefended " + current_building.name + " has been damaged by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
