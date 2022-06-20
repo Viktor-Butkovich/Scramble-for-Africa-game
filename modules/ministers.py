@@ -40,6 +40,8 @@ class minister():
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
             self.image_id = input_dict['image_id']
+            self.stolen_money = input_dict['stolen_money']
+            self.corruption_evidence = input_dict['corruption_evidence']
             if not self.current_position == 'none':
                 self.appoint(self.current_position)
             else:
@@ -52,6 +54,8 @@ class minister():
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
             self.image_id = random.choice(self.global_manager.get('minister_portraits'))
+            self.stolen_money = 0
+            self.corruption_evidence = 0
             minister_utility.update_available_minister_display(self.global_manager)
         self.update_tooltip()
 
@@ -70,6 +74,33 @@ class minister():
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
         else:
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
+
+    def steal_money(self, value, theft_type = 'none'):
+        prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
+        if not prosecutor == 'none':
+            if self.global_manager.get('DEBUG_show_minister_stealing'):
+                print(self.current_position + " " + self.name + " stole " + str(value) + " money from " + theft_type + ".") 
+            difficulty = self.no_corruption_roll(6)
+            result = prosecutor.no_corruption_roll(6)
+            if result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
+                if prosecutor.check_corruption(): #if prosecutor takes bribe, split money
+                    prosecutor.stolen_money += (value / 2)
+                    self.stolen_money += (value / 2)
+                    if self.global_manager.get('DEBUG_show_minister_stealing'):
+                        print("The theft was caught by the prosecutor, who accepted a bribe to not create evidence.") 
+                else: #if prosecutor refuses bribe, still keep money but create evidence
+                    self.stolen_money += value
+                    self.corruption_evidence += 1
+                    if self.global_manager.get('DEBUG_show_minister_stealing'):
+                        print("The theft was caught by the prosecutor, who chose to create evidence.") 
+            else: #if not caught, keep money
+                self.stolen_money += value
+                if self.global_manager.get('DEBUG_show_minister_stealing'):
+                    print("The theft was not caught by the prosecutor.")
+        if self.global_manager.get('DEBUG_show_minister_stealing'):
+            print(self.name + " has now stolen a total of " + str(self.stolen_money) + " money.")
+            print('')
+                
 
     def to_save_dict(self):
         '''
@@ -93,9 +124,11 @@ class minister():
         save_dict['specific_skills'] = self.specific_skills
         save_dict['corruption'] = self.corruption
         save_dict['image_id'] = self.image_id
+        save_dict['stolen_money'] = self.stolen_money
+        save_dict['corruption_evidence'] = self.corruption_evidence
         return(save_dict)
 
-    def roll(self, num_sides, min_success, max_crit_fail, predetermined_corruption = False):
+    def roll(self, num_sides, min_success, max_crit_fail, value, roll_type, predetermined_corruption = False):
         '''
         Description:
             Rolls and returns the result of a die with the inputted number of sides, modifying the result based on skill and possibly lying about the result based on corruption
@@ -113,6 +146,7 @@ class minister():
             result += self.get_skill_modifier()
 
         if predetermined_corruption or self.check_corruption(): #true if stealing
+            self.steal_money(value, roll_type)
             result = random.randrange(max_crit_fail + 1, min_success) #if crit fail on 1 and success on 4+, do random.randrange(2, 4), pick between 2 and 3
 
         if result < min_result:
@@ -147,7 +181,7 @@ class minister():
             
         return(result)
 
-    def roll_to_list(self, num_sides, min_success, max_crit_fail, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
+    def roll_to_list(self, num_sides, min_success, max_crit_fail, value, roll_type, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
         '''
         Description:
             Rolls and returns the result of the inputted number of dice each with the inputted number of sides, modifying the results based on skill and possibly lying about the result based on corruption
@@ -161,6 +195,7 @@ class minister():
         '''
         results = []
         if self.check_corruption():
+            self.steal_money(value, roll_type)
             corrupt_index = random.randrange(0, num_dice)
             for i in range(num_dice):
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly and make it the corrupt result, making it a non-critical failure
@@ -172,7 +207,7 @@ class minister():
                 results.append(self.no_corruption_roll(num_sides))
         return(results)
             
-    def attack_roll_to_list(self, modifier, num_dice):
+    def attack_roll_to_list(self, modifier, value, roll_type, num_dice):
         '''
         Description:
             Rolls and returns the result of the inputted number of 6-sided dice along with the enemy unit's roll in combat, modifying the results based on skill and possibly lying about the result based on corruption
@@ -184,6 +219,7 @@ class minister():
         '''
         results = []
         if self.check_corruption():
+            self.steal_money(value, roll_type)
             for i in range(num_dice):
                 results.append(0)
             difference = 10

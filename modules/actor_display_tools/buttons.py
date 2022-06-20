@@ -1734,7 +1734,7 @@ class repair_button(label_button):
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type] / 2:
-                        current_building = self.attached_tile.cell.get_building(self.building_type)
+                        current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                         self.repair()
                     else:
                         text_tools.print_to_screen("You do not have the " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money needed to attempt to repair the " + self.building_name + ".", self.global_manager)

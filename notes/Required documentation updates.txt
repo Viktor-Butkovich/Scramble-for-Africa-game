@@ -1,3 +1,10 @@
+minister.minister.roll
+ministers.minister.roll_to_list
+ministers.minister.attack_roll_to_list
+ministers.minister.steal_money
+ministers.minister.to_save_dict
+ministers.minister.__init__
+
 
 Future plans:
 change action failed messages to reference minister asking for more time/money rather than the unit officer

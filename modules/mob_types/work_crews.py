@@ -79,6 +79,7 @@ class work_crew(group):
         Output:
             None
         '''
+        value_stolen = 0
         if self.movement_points >= 1: #do not attempt production if unit already did something this turn or suffered from attrition #not self.temp_movement_disabled:
             if not building.resource_type in self.global_manager.get('attempted_commodities'):
                 self.global_manager.get('attempted_commodities').append(building.resource_type)
@@ -96,3 +97,7 @@ class work_crew(group):
 
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
+                    else:
+                        value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
+            if value_stolen > 0:
+                self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities

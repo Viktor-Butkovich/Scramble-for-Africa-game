@@ -1,4 +1,4 @@
-#Contains functionality for non-player mobs
+#Contains functionality for non-player-controlled mobs
 
 import random
 from ..mobs import mob
