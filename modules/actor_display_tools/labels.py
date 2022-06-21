@@ -4,6 +4,7 @@ import pygame
 
 from ..labels import label
 from ..images import minister_type_image
+from .. import utility
 from . import buttons
 from . import images
 
@@ -211,6 +212,14 @@ class actor_display_label(label):
                     tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
                                     "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
             self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'evidence':
+            tooltip_text = []
+            if not self.actor == 'none': 
+                tooltip_text.append("Your prosecutor has found " + str(self.actor.corruption_evidence) + " piece" + utility.generate_plural(self.actor.corruption_evidence) + " of evidence of corruption against this minister.")
+                tooltip_text.append("A corrupt minister may let goods go missing, steal the money given for a task and report a failure, or otherwise benefit themselves at the expense of your company.")
+                tooltip_text.append("When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.")
+                tooltip_text.append("If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position.")
+            self.set_tooltip(tooltip_text)
         elif self.actor_label_type == 'building workers':
             tooltip_text = [self.message]
             tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang.")
@@ -384,6 +393,9 @@ class actor_display_label(label):
                     if not self.actor.controlling_minister == 'none':
                         self.set_label(self.message_start + self.actor.controlling_minister.name)
                     self.attached_images[0].calibrate(self.actor.controlling_minister)
+                    
+            elif self.actor_label_type == 'evidence':
+                self.set_label(self.message_start + str(new_actor.corruption_evidence))
                 
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)

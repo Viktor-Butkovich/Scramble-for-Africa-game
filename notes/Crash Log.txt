@@ -1,15 +1,21 @@
-ERROR:root:'stolen_money'
+ERROR:root:bad operand type for unary +: 'str'
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 760, in <module>
     main_loop.main_loop(global_manager)
   File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 41, in main_loop
     current_button.on_click()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 720, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 339, in load_game
-    self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 202, in load_minister
-    new_minister = ministers.minister(True, input_dict, global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 43, in __init__
-    self.stolen_money = input_dict['stolen_money']
-KeyError: 'stolen_money'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 538, in on_click
+    mob.move(x_change, y_change)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\vehicles.py", line 130, in move
+    super().move(x_change, y_change)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 637, in move
+    self.manage_inventory_attrition()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 278, in manage_inventory_attrition
+    self.trigger_inventory_attrition(transportation_minister, True)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 351, in trigger_inventory_attrition
+    transportation_minister.steal_money(value_stolen, 'inventory attrition')
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 110, in steal_money
+    prosecutor.display_message(evidence_message)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 86, in display_message
+    notification_tools.display_notification(text, + "Click to continue.", 'minister', self.global_manager, 0)
+TypeError: bad operand type for unary +: 'str'

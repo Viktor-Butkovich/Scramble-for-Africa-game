@@ -85,6 +85,16 @@ class notification(multi_line_label):
         if len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
+class minister_notification(notification):
+    '''
+    Notification that is a message from a minister and has a minister portrait attached
+    '''
+    def remove(self):
+        super().remove()
+        for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+            current_minister_image.remove()
+        
+        
 class zoom_notification(notification):
     '''
     Notification that selects a certain tile or mob and moves the minimap to it when first displayed

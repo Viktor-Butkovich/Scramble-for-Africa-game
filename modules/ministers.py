@@ -6,6 +6,8 @@ from . import utility
 from . import actor_utility
 from . import minister_utility
 from . import notification_tools
+from . import images
+from . import scaling
 
 class minister():
     '''
@@ -75,6 +77,14 @@ class minister():
         else:
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
 
+    def display_message(self, text):
+        minister_icon_coordinates = (self.global_manager.get('notification_manager').notification_x - 140, 440 + 120)
+        minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
+            self, 'position', self.global_manager)
+        minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
+            self, 'portrait', self.global_manager)
+        notification_tools.display_notification(text, 'minister', self.global_manager, 0)
+
     def steal_money(self, value, theft_type = 'none'):
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
         if not prosecutor == 'none':
@@ -91,6 +101,13 @@ class minister():
                 else: #if prosecutor refuses bribe, still keep money but create evidence
                     self.stolen_money += value
                     self.corruption_evidence += 1
+                    evidence_message = ""
+                    #evidence_message += "To the governor, /n"
+                    #evidence_message += "It has come to my attention that ..."
+                    evidence_message += "Prosecutor " + prosecutor.name + " suspects that " + self.current_position + " " + self.name + " just engaged in corrupt activity and has filed a piece of evidence against him. /n /n"
+                    evidence_message += "There are now " + str(self.corruption_evidence) + " piece" + utility.generate_plural(self.corruption_evidence) + " of evidence against " + self.name + ". /n /n"
+                    evidence_message += "Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n"
+                    prosecutor.display_message(evidence_message)
                     if self.global_manager.get('DEBUG_show_minister_stealing'):
                         print("The theft was caught by the prosecutor, who chose to create evidence.") 
             else: #if not caught, keep money
