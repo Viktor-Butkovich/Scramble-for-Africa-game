@@ -6,9 +6,11 @@ ministers.minister.to_save_dict
 ministers.minister.__init__
 ministers imports
 actor_display_tools/labels imports
+actor_display_tools/buttons.start_trial_button
+actor_display_tools/buttons imports
 
-add minister face notifications, check how it is done in action notifications
 Future plans:
+add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
 change action failed messages to reference minister asking for more time/money rather than the unit officer
 prevent ignored commodity prices from skyrocketing
 add multiple save slots
@@ -21,6 +23,7 @@ possible ui improvement: have green/red letters appear by cursor after user does
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
 Possible/known Errors:
+prevent multiple trials from happening in the same turn
 pmobs.display_die creating minister icons without resolution scaling
 native warriors name attribute unnecessarily capitalized
 damaging a building should remove its work crews, even if no enemies are present

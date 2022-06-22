@@ -3,6 +3,7 @@
 from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
+from .. import minister_utility
 from .. import text_tools
 from .. import game_transitions
 
@@ -1977,6 +1978,53 @@ class remove_minister_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 
+class start_trial_button(label_button):
+    '''
+    Button that starts a trial to remove the selected minister from their current office
+    '''
+    def __init__(self, coordinates, width, height, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'start trial', 'none', ['ministers'], 'buttons/start_trial_button.png', attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
+                return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
+                ministers
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+                    self.showing_outline = True
+                    game_transitions.set_game_mode('trial', self.global_manager)
+                    minister_utility.trial_setup(self.global_manager.get('displayed_minister'), self.global_manager.get('current_ministers')['Prosecutor'], self.global_manager) #sets up defense and prosecution displays
+                else:
+                    text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)  
+    
 class hire_african_workers_button(label_button):
     '''
     Button that hires available workers from the displayed village/slum

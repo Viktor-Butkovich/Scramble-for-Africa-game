@@ -244,7 +244,8 @@ try:
         'loan_search': 5,
         'trade': 0,
         'loan': 5,
-        'attack': 5
+        'attack': 5,
+        'trial': 5
         }
     )
 
@@ -330,8 +331,12 @@ try:
     global_manager.set('minister_ordered_label_list', [])
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_minister', 'none')
+    global_manager.set('displayed_defense', 'none')
+    global_manager.set('displayed_prosecution', 'none')
     global_manager.set('tile_info_display_list', [])
     global_manager.set('tile_ordered_label_list', [])
+    global_manager.set('defense_info_display_list', [])
+    global_manager.set('prosecution_info_display_list', [])
     global_manager.set('displayed_tile', 'none')
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
@@ -386,7 +391,7 @@ try:
     global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 
-    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers'], global_manager)
+    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
     strategic_grid_height = 300#450
     strategic_grid_width = 320#480
@@ -412,11 +417,11 @@ try:
 
     #value tracker setup
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
-        'misc/default_label.png', global_manager)
+    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+        ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager)
     global_manager.set('previous_financial_report', 'none')
     show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
-        scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers'], 'buttons/instructions.png', global_manager)
+        scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
     labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
@@ -488,6 +493,26 @@ try:
     cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
     #button setup
+
+
+
+    #trial screen setup
+    defense_type_image = images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + 200, 500, global_manager),
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), ['trial'], 'none', 'none', global_manager)
+    global_manager.get('defense_info_display_list').append(defense_type_image)
+    
+    defense_portrait_image = buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + 200, 450, global_manager),
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), ['trial'], 'none', global_manager)
+    global_manager.get('defense_info_display_list').append(defense_portrait_image)
+    
+    prosecution_type_image = images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - 250, 500, global_manager),
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), ['trial'], 'none', 'none', global_manager)
+    global_manager.get('prosecution_info_display_list').append(prosecution_type_image)
+    
+    prosecution_portrait_image = buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - 250, 450, global_manager),
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), ['trial'], 'none', global_manager)
+    global_manager.get('prosecution_info_display_list').append(prosecution_portrait_image)
+    #trial screen setup
 
 
 
@@ -737,6 +762,8 @@ try:
         scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
     #minister table setup
 
+
+
     #activating/disabling debugging tools
     global_manager.set('DEBUG_spawning_allowed', True) #True by default
     #allows villages to spawn native warriors
@@ -757,6 +784,9 @@ try:
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
     
     #activating/disabling debugging tools
+
+
+    
     main_loop.main_loop(global_manager)
     pygame.quit()
 

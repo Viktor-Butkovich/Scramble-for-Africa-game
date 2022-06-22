@@ -372,7 +372,7 @@ class notification_manager_template():
         self.choice_notification_info_dict_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
-        self.notification_modes = ['strategic', 'europe', 'ministers']
+        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial']
 
     def update_notification_layout(self, notification_height = 0):
         '''

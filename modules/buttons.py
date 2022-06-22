@@ -277,6 +277,8 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
+        elif self.button_type == 'start a trial':
+            self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
@@ -1221,7 +1223,8 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         super().__init__(coordinates, width, height, 'gray', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
         self.minister_type = minister_type #position, like General
         if self.minister_type == 'none': #if available minister portrait
-            self.global_manager.get('available_minister_portrait_list').append(self)
+            if 'ministers' in self.modes:
+                self.global_manager.get('available_minister_portrait_list').append(self)
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
         self.global_manager.get('minister_image_list').append(self)

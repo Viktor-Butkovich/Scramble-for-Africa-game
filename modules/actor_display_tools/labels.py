@@ -125,6 +125,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, global_manager))
             for current_position in global_manager.get('minister_types'):
                 self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, current_position, global_manager))
+        elif self.actor_label_type == 'evidence':
+            self.message_start = 'Evidence: '
+            self.attached_buttons.append(buttons.start_trial_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))

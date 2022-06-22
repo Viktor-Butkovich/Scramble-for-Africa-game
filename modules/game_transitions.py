@@ -41,6 +41,8 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
             #text_tools.print_to_screen("Entering minister conference room", global_manager)
+        elif new_game_mode == 'trial':
+            global_manager.set('current_game_mode', 'trial')
         else:
             global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
