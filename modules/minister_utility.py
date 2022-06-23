@@ -56,7 +56,6 @@ def calibrate_trial_info_display(global_manager, info_display_list, new_minister
 def trial_setup(defense, prosecution, global_manager):
     calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), defense)
     calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), prosecution)
-    print('setting up trial')
     
 def update_available_minister_display(global_manager):
     '''

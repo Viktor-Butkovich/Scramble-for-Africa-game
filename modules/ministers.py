@@ -59,6 +59,7 @@ class minister():
             self.stolen_money = 0
             self.corruption_evidence = 0
             minister_utility.update_available_minister_display(self.global_manager)
+        self.fabricated_evidence = 0
         self.update_tooltip()
 
     def update_tooltip(self):

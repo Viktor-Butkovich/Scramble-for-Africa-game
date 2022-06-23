@@ -5,9 +5,12 @@ ministers.minister.steal_money
 ministers.minister.to_save_dict
 ministers.minister.__init__
 ministers imports
+minister_utility.trial_setup
 actor_display_tools/labels imports
 actor_display_tools/buttons.start_trial_button
+actor_display_tools/buttons.fabricate_evidence_button
 actor_display_tools/buttons imports
+game_transitions imports
 
 Future plans:
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button

@@ -277,8 +277,14 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
-        elif self.button_type == 'start a trial':
+        elif self.button_type == 'start trial':
             self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
+        elif self.button_type == 'fabricate evidence':
+            if self.global_manager.get('current_game_mode') == 'trial':
+                self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance.",
+                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial."])
+            else:
+                self.set_tooltip(['placeholder'])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
@@ -1255,7 +1261,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         Output:
             None
         '''
-        if not self.current_minister == 'none':
+        if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
             minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
 
     def calibrate(self, new_minister):

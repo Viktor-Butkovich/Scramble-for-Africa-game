@@ -1995,7 +1995,7 @@ class start_trial_button(label_button):
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, 'start trial', 'none', ['ministers'], 'buttons/start_trial_button.png', attached_label, global_manager)
+        super().__init__(coordinates, width, height, 'start trial', 'none', attached_label.modes, 'buttons/start_trial_button.png', attached_label, global_manager)
 
     def can_show(self):
         if super().can_show():
@@ -2018,12 +2018,67 @@ class start_trial_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
                     self.showing_outline = True
+                    defense = self.global_manager.get('displayed_minister')
+                    prosecution = self.global_manager.get('current_ministers')['Prosecutor']
                     game_transitions.set_game_mode('trial', self.global_manager)
-                    minister_utility.trial_setup(self.global_manager.get('displayed_minister'), self.global_manager.get('current_ministers')['Prosecutor'], self.global_manager) #sets up defense and prosecution displays
+                    minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
                 else:
                     text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)  
+
+class fabricate_evidence_button(label_button):
+    def __init__(self, coordinates, width, height, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'fabricate evidence', 'none', attached_label.modes, 'buttons/fabricate_evidence_button.png', attached_label, global_manager)
+
+    #def can_show(self):
+    #    if super().can_show():
+    #        displayed_minister = self.global_manager.get('displayed_minister')
+    #        if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
+    #            return(True)
+    #    return(False)
+
+    def get_cost(self):
+        base_cost = 5
+        current_fabricated_evidence = self.global_manager.get('displayed_defense').fabricated_evidence
+        multiplier = 2 ** current_fabricated_evidence #1 if 0 evidence previously created, 2 if 1 previous, 4 if 2 previous, 8 if 3 previous
+        return(base_cost * multiplier) #5 if 0 evidence previously created, 10 if 1 previous, 20 if 2 previous, 40 if 3 previous
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
+                ministers
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money') >= self.get_cost():
+                    self.showing_outline = True
+                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'evidence fabrication')
+                    defense = self.global_manager.get('displayed_defense')
+                    defense.fabricated_evidence += 1
+                    defense.corruption_evidence += 1
+                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display_list'), defense) #updates trial display with new evidence
+                else:
+                    text_tools.print_to_screen("You do not have the " + str(self.get_cost()) + " money needed to fabricate evidence.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)     
     
 class hire_african_workers_button(label_button):
     '''
