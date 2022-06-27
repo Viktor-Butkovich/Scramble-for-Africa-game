@@ -7,6 +7,7 @@ from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility
+from . import trial_utility
 
 class action_notification(notification):
     '''
@@ -400,6 +401,34 @@ class religious_campaign_notification(action_notification):
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
                 current_image.remove()
+
+class trial_notification(action_notification):
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        print('removing trial notification')
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        for current_die in self.global_manager.get('dice_list'):
+            current_die.remove()
+        previous_roll = self.global_manager.get('trial_rolls').pop(0)
+        print('new roll list: ')
+        print(self.global_manager.get('trial_rolls'))
+        if len(self.global_manager.get('trial_rolls')) > 0:
+            print('continuing')
+            trial_utility.display_evidence_roll(self.global_manager)
+        else:
+            print('stopping')
+            trial_utility.complete_trial(previous_roll, self.global_manager)
+
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
 class advertising_campaign_notification(action_notification):
     '''

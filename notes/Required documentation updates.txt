@@ -7,12 +7,23 @@ ministers.minister.__init__
 ministers imports
 minister_utility.trial_setup
 actor_display_tools/labels imports
-actor_display_tools/buttons.start_trial_button
+actor_display_tools/buttons.to_trial_button
 actor_display_tools/buttons.fabricate_evidence_button
 actor_display_tools/buttons imports
 game_transitions imports
+trial_utility
+buttons imports
+action_notifications.trial_notification
+actor_creation_tools imports
+actor_creation_tools.actor_creation_manager_template.display_die
+notifications imports
+
 
 Future plans:
+add corruption during trials
+confiscate % of money from minister losing trial
+possibly have adjustable police investment per turn
+add flavor text for police informants, investigations, etc instead of prosecutor finding it
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
 change action failed messages to reference minister asking for more time/money rather than the unit officer
 prevent ignored commodity prices from skyrocketing

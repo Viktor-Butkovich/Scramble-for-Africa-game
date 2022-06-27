@@ -13,6 +13,7 @@ from . import market_tools
 from . import notification_tools
 from . import game_transitions
 from . import minister_utility
+from . import trial_utility
 
 class button():
     '''
@@ -277,7 +278,7 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
-        elif self.button_type == 'start trial':
+        elif self.button_type in ['to trial', 'launch trial']:
             self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
@@ -772,6 +773,9 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
+            elif self.button_type == 'start trial':
+                trial_utility.trial(self.global_manager)
+
             elif self.button_type == 'stop attack':
                 self.global_manager.set('ongoing_combat', False)
                 self.notification.choice_info_dict['battalion'].remove_attack_marks()
@@ -796,6 +800,9 @@ class button():
             elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
                 self.global_manager.set('ongoing_construction', False)
 
+            elif self.button_type == 'stop trial':
+                self.global_manager.set('ongoing_trial', False)
+
             elif self.button_type == 'accept loan offer':
                 input_dict = {}
                 input_dict['principal'] = self.notification.choice_info_dict['principal']
@@ -803,6 +810,19 @@ class button():
                 input_dict['remaining_duration'] = 10
                 new_loan = market_tools.loan(False, input_dict, self.global_manager)
                 self.global_manager.set('ongoing_loan_search', False)
+
+            elif self.button_type == 'launch trial':
+                if main_loop_tools.action_possible(self.global_manager):
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+                        if self.global_manager.get('displayed_defense').corruption_evidence > 0:
+                            self.showing_outline = True
+                            trial_utility.start_trial(self.global_manager)
+                        else:
+                            text_tools.print_to_screen("No real or fabricated evidence currently exists, so the trial has no chance of success.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager) 
                 
     def on_rmb_release(self):
         '''

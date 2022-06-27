@@ -1,5 +1,6 @@
 #Contains functionality for notifications
 
+import time
 from .labels import multi_line_label
 from . import text_tools
 from . import utility
@@ -32,6 +33,7 @@ class notification(multi_line_label):
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
+        self.creation_time = time.time()
 
     def format_message(self):
         '''
@@ -65,7 +67,8 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        self.remove()
+        if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
+            self.remove()
             
     def remove(self):
         '''

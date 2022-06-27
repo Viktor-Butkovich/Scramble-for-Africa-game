@@ -1978,9 +1978,9 @@ class remove_minister_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 
-class start_trial_button(label_button):
+class to_trial_button(label_button):
     '''
-    Button that starts a trial to remove the selected minister from their current office
+    Button that goes to the trial screen to remove the selected minister from their current office
     '''
     def __init__(self, coordinates, width, height, attached_label, global_manager):
         '''
@@ -1995,7 +1995,7 @@ class start_trial_button(label_button):
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, 'start trial', 'none', attached_label.modes, 'buttons/start_trial_button.png', attached_label, global_manager)
+        super().__init__(coordinates, width, height, 'to trial', 'none', attached_label.modes, 'buttons/to_trial_button.png', attached_label, global_manager)
 
     def can_show(self):
         if super().can_show():
@@ -2025,7 +2025,7 @@ class start_trial_button(label_button):
                 else:
                     text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)  
+                text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)   
 
 class fabricate_evidence_button(label_button):
     def __init__(self, coordinates, width, height, attached_label, global_manager):
@@ -2042,13 +2042,6 @@ class fabricate_evidence_button(label_button):
             None
         '''
         super().__init__(coordinates, width, height, 'fabricate evidence', 'none', attached_label.modes, 'buttons/fabricate_evidence_button.png', attached_label, global_manager)
-
-    #def can_show(self):
-    #    if super().can_show():
-    #        displayed_minister = self.global_manager.get('displayed_minister')
-    #        if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
-    #            return(True)
-    #    return(False)
 
     def get_cost(self):
         base_cost = 5

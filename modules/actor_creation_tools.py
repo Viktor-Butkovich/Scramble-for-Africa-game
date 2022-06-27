@@ -17,6 +17,7 @@ from . import ministers
 from . import notification_tools
 from . import utility
 from . import market_tools
+from . import dice
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -200,3 +201,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             None
         '''
         new_minister = ministers.minister(True, input_dict, global_manager)
+
+    def display_die(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
+        dice.die(coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager)
+    

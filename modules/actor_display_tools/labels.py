@@ -129,7 +129,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'evidence':
             self.message_start = 'Evidence: '
             if 'ministers' in self.modes:
-                self.attached_buttons.append(buttons.start_trial_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
+                self.attached_buttons.append(buttons.to_trial_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
             if 'trial' in self.modes:
                 self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
         elif self.actor_label_type == 'slums':

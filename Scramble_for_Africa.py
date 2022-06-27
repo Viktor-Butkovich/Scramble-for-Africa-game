@@ -262,7 +262,7 @@ try:
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion',
-        'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication'])
+        'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
     #price setup
 
 
@@ -369,6 +369,7 @@ try:
     global_manager.set('ongoing_conversion', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
+    global_manager.set('ongoing_trial', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -501,7 +502,7 @@ try:
 
 
 
-    #trial screen setup
+    #trial setup
     trial_display_default_y = 500
     button_separation = 100
     distance_to_center = 300
@@ -543,7 +544,11 @@ try:
         prosecution_current_y -= 35
         global_manager.get('prosecution_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager), scaling.scale_width(10, global_manager),
             scaling.scale_height(30, global_manager), ['trial'], 'misc/default_label.png', current_actor_label_type, 'minister', global_manager))    
-    #trial screen setup
+
+    launch_trial_button_width = 150
+    down_arrow_button = buttons.button(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300, global_manager),
+        scaling.scale_width(launch_trial_button_width, global_manager), scaling.scale_height(launch_trial_button_width, global_manager), 'blue', 'launch trial', 'none', ['trial'], 'buttons/to_trial_button.png', global_manager)
+    #trial setup
 
 
 
