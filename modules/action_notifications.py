@@ -415,6 +415,8 @@ class trial_notification(action_notification):
         for current_die in self.global_manager.get('dice_list'):
             current_die.remove()
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
+        if previous_roll == 6:
+            self.global_manager.set('trial_rolls', []) #stop trial after success
         print('new roll list: ')
         print(self.global_manager.get('trial_rolls'))
         if len(self.global_manager.get('trial_rolls')) > 0:

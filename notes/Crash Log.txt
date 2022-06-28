@@ -1,4 +1,4 @@
-ERROR:root:name 'minister_utility' is not defined
+ERROR:root:name 'self' is not defined
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 826, in <module>
     main_loop.main_loop(global_manager)
@@ -6,8 +6,8 @@ Traceback (most recent call last):
     current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
   File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 71, in on_click
     self.remove()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 425, in remove
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 427, in remove
     trial_utility.complete_trial(previous_roll, self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\trial_utility.py", line 52, in complete_trial
-    minister_utility.calibrate_minister_info_display(global_manager, defense)
-NameError: name 'minister_utility' is not defined
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\trial_utility.py", line 93, in complete_trial
+    self.global_manager.get('money_tracker').change(confiscated_money, 'trial compensation')
+NameError: name 'self' is not defined

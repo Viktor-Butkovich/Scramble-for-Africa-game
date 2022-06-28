@@ -261,8 +261,8 @@ try:
        } 
     )
 
-    global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion',
-        'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
+    global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
+        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
     #price setup
 
 
@@ -813,7 +813,7 @@ try:
     global_manager.set('DEBUG_damaged_buildings', False) #False by default
     #causes all buildings to be damaged on startup
     
-    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
+    global_manager.set('DEBUG_show_corruption_on_save', True) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
 
     global_manager.set('DEBUG_show_minister_stealing', False) #False by default

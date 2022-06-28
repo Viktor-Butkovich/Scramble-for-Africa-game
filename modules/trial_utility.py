@@ -14,27 +14,65 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     global_manager.set('ongoing_trial', True)
     notification_tools.display_choice_notification(message, ['start trial', 'stop trial'], choice_info_dict, global_manager) #creates choice notification to verify starting trial
 
-
-
+def manage_defense(corruption_evidence, global_manager):
+    defense = global_manager.get('displayed_defense')
+    max_defense_fund = 0.6 * defense.stolen_money #pay up to 60% of savings
+    building_defense = True
+    num_lawyers = 0
+    defense_cost = 0
+    while building_defense:
+        lawyer_cost = get_lawyer_cost(num_lawyers)
+        if (defense_cost + lawyer_cost <= max_defense_fund) and (num_lawyers + 1 < corruption_evidence): #pay no more than 60% of savings and allow some chance of success for prosecution
+            defense_cost += lawyer_cost
+            num_lawyers += 1
+        else:
+            building_defense = False
+    defense.stolen_money -= defense_cost
+    defense_info_dict = {}
+    defense_info_dict['num_lawyers'] = num_lawyers
+    defense_info_dict['corruption_evidence'] = corruption_evidence
+    defense_info_dict['effective_evidence'] = corruption_evidence - num_lawyers
+    return(defense_info_dict)
+            
+        
+def get_lawyer_cost(num_lawyers):
+    base_cost = 5
+    multiplier = 2 ** num_lawyers #1, 2, 4, 8
+    return(base_cost * multiplier)
 
 def trial(global_manager): #called by choice notification button
     global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial fees')
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
+
+    defense_info_dict = manage_defense(defense.corruption_evidence, global_manager)
+
+    if defense_info_dict['num_lawyers'] == 0:
+        text = 'As the defense decided not to hire any additional lawyers, each piece of evidence will be usable, allowing ' + str(defense_info_dict['effective_evidence']) + ' evidence rolls to attempt to win the trial. /n /n'
+    else:
+        text = 'The defense hired ' + str(defense_info_dict['num_lawyers']) + ' additional lawyers, who will each cancel out a piece of evidence. This will leave ' + str(defense_info_dict['effective_evidence'])
+        text += ' evidence rolls to attempt to win the trial. /n /n'
     
-    effective_evidence = defense.corruption_evidence #can be cancelled out by defense lawyers and such, effective < actual
+    
+    text += str(defense_info_dict['corruption_evidence']) + ' initial evidence - '
+    text += str(defense_info_dict['num_lawyers']) + ' defense lawyers = '
+    text += str(defense_info_dict['effective_evidence']) + ' evidence rolls /n /n'
+    notification_tools.display_notification(text, 'default', global_manager)
+    #effective_evidence = defense.corruption_evidence - defense_info_dict['num_lawyers'] #can be cancelled out by defense lawyers and such, effective < actual
     
     global_manager.set('trial_rolls', [])
-    for i in range(0, effective_evidence):
+    for i in range(0, defense_info_dict['effective_evidence']):
         current_roll = prosecution.no_corruption_roll(6)
         global_manager.get('trial_rolls').append(current_roll)
-        if current_roll == 6:
-            break
+        #if current_roll == 6:
+        #    break
     print(global_manager.get('trial_rolls'))
     display_evidence_roll(global_manager)
 
 def display_evidence_roll(global_manager):
-    text = 'Current evidence roll: /n /n'
+    text = ''
+    text += ''
+    text = 'Evidence rolls remaining: ' + str(len(global_manager.get('trial_rolls'))) + ' /n /n'
     result = global_manager.get('trial_rolls')[0]
     result_outcome_dict = {'min_success': 4, 'min_crit_success': 6, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
@@ -48,7 +86,15 @@ def complete_trial(final_roll, global_manager):
     defense = global_manager.get('displayed_defense')
     game_transitions.set_game_mode('ministers', global_manager)
     if final_roll == 6:
-        notification_tools.display_notification("Success", 'default', global_manager)
+        confiscated_money = defense.stolen_money / 2.0
+        text = "You have won the trial, removing " + defense.name + " as " + defense.current_position + " and putting them in prison."
+        if confiscated_money > 0:
+            text += "While most of " + defense.name + "'s money was spent on the trial or unaccounted for, authorities managed to confiscate " + str(confiscated_money) + " money, which has been given to your company as compensation."
+            global_manager.get('money_tracker').change(confiscated_money, 'trial compensation')
+        else:
+            text += "Authorities searched " + defense.name + "'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. "
+        notification_tools.display_notification(text, 'default', global_manager)
+        
         defense.appoint('none')
         minister_utility.calibrate_minister_info_display(global_manager, defense)
     else:
