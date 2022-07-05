@@ -17,18 +17,17 @@ action_notifications.trial_notification
 actor_creation_tools imports
 actor_creation_tools.actor_creation_manager_template.display_die
 notifications imports
+utility.conjugate
 
 
 Future plans:
 add corruption during trials
-confiscate % of money from minister losing trial
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
 change action failed messages to reference minister asking for more time/money rather than the unit officer
 prevent ignored commodity prices from skyrocketing
 add multiple save slots
-allow attrition resistance even when buildings are damaged
 Maybe cause health attrition when moving
 Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
 Possibly ministers should still be involved but without corruption when there is no profit to be gained, such as in defensive combat or when avoiding health attrition

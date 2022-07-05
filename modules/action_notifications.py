@@ -407,7 +407,6 @@ class trial_notification(action_notification):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
-        print('removing trial notification')
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
@@ -417,13 +416,9 @@ class trial_notification(action_notification):
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
         if previous_roll == 6:
             self.global_manager.set('trial_rolls', []) #stop trial after success
-        print('new roll list: ')
-        print(self.global_manager.get('trial_rolls'))
         if len(self.global_manager.get('trial_rolls')) > 0:
-            print('continuing')
             trial_utility.display_evidence_roll(self.global_manager)
         else:
-            print('stopping')
             trial_utility.complete_trial(previous_roll, self.global_manager)
 
         notification_manager = self.global_manager.get('notification_manager')

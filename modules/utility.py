@@ -151,3 +151,16 @@ def add_to_message(message, new):
         string: Returns a concatenated version of the inputted strings
     '''
     return (message + new)
+
+def conjugate(infinitive, amount):
+    if infinitive == 'be':
+        if amount == 1:
+            return('is')
+        else:
+            return('are')
+    else:
+        if amount == 1:
+            return(infinitive + 's')
+        else:
+            return(infinitive)
+    return('none')
