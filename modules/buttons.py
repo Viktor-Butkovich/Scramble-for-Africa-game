@@ -1200,7 +1200,15 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.global_manager.get("minister_appointment_tutorial_completed"):
+                if self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager):
+
+                    if self.to_mode == 'ministers' and 'trial' in self.modes:
+                        defense = self.global_manager.get('displayed_defense')
+                        if defense.fabricated_evidence > 0:
+                            text = "WARNING: Your " + str(defense.fabricated_evidence) + " piece" + utility.generate_plural(defense.fabricated_evidence) + " of fabricated evidence against " + defense.current_position + " "
+                            text += defense.name + " will disappear at the end of the turn if left unused. /n /n"
+                            notification_tools.display_notification(text, 'default', self.global_manager)
+                    
                     if self.to_mode == 'main menu':
                         game_transitions.to_main_menu(self.global_manager)
                     if not self.to_mode == 'previous':
@@ -1211,7 +1219,7 @@ class switch_game_mode_button(button):
                 else:
                     text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
+                text_tools.print_to_screen("You are busy and can not switch screens.", self.global_manager)
 
     def update_tooltip(self):
         '''

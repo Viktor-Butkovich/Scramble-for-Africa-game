@@ -319,6 +319,8 @@ try:
     global_manager.get('recruitment_costs')['slave workers'] = 5
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
+    global_manager.set('minister_limit', 15)
+
     global_manager.set('group_list', [])
     global_manager.set('tile_list', [])
     global_manager.set('exploration_mark_list', [])

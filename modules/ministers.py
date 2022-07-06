@@ -390,6 +390,9 @@ class minister():
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
+        #if self == self.global_manager.get('displayed_minister') and not self.global_manager.get('available_minister_left_index') == 0: #move display up to account for removed minister from bottom
+        #if self.global_manager.get('current_game_mode') == 'ministers':
+        self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
         self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
         minister_utility.update_available_minister_display(self.global_manager)

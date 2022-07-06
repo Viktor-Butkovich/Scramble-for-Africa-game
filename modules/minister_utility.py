@@ -75,3 +75,10 @@ def update_available_minister_display(global_manager):
             available_minister_portrait_list[current_index].calibrate(available_minister_list[minister_index])
         else:
             available_minister_portrait_list[current_index].calibrate('none')
+
+def positions_filled(global_manager):
+    completed = True
+    for current_position in global_manager.get('minister_types'):
+        if global_manager.get('current_ministers')[current_position] == 'none':
+            completed = False
+    return(completed)

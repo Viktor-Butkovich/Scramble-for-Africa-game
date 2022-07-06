@@ -2017,11 +2017,14 @@ class to_trial_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
-                    self.showing_outline = True
-                    defense = self.global_manager.get('displayed_minister')
-                    prosecution = self.global_manager.get('current_ministers')['Prosecutor']
-                    game_transitions.set_game_mode('trial', self.global_manager)
-                    minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
+                    if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
+                        self.showing_outline = True
+                        defense = self.global_manager.get('displayed_minister')
+                        prosecution = self.global_manager.get('current_ministers')['Prosecutor']
+                        game_transitions.set_game_mode('trial', self.global_manager)
+                        minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
+                    else:
+                        text_tools.print_to_screen("There are currently no available appointees to replace this minister in the event of a successful trial.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
             else:

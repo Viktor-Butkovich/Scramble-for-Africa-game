@@ -97,8 +97,9 @@ def complete_trial(final_roll, global_manager):
             text += " /n /n"
         notification_tools.display_notification(text, 'default', global_manager)
         
-        defense.appoint('none') #should remove minister from game instead
-        minister_utility.calibrate_minister_info_display(global_manager, defense)
+        defense.appoint('none')
+        defense.remove()
+        #minister_utility.calibrate_minister_info_display(global_manager, defense)
     else:
         text = "You have lost the trial and " + defense.name + " goes unpunished, remaining your " + defense.current_position + ". /n /n"
         fabricated_evidence = defense.fabricated_evidence

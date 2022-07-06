@@ -18,9 +18,11 @@ actor_creation_tools imports
 actor_creation_tools.actor_creation_manager_template.display_die
 notifications imports
 utility.conjugate
-
+turn_management_tools.manage_ministers
+actor_creation_tools.create_minister
 
 Future plans:
+add public opinion penalty for removing ministers
 add corruption during trials
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it

@@ -181,8 +181,11 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        for i in range(0, 10):
-            new_minister = ministers.minister(False, {}, global_manager)
+        for i in range(0, global_manager.get('minister_limit') - 2):
+            self.create_minister(global_manager)
+
+    def create_minister(self, global_manager):
+        new_minister = ministers.minister(False, {}, global_manager)
 
     def load_minister(self, input_dict, global_manager):
         '''
