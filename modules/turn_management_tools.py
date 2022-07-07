@@ -4,6 +4,7 @@ import random
 
 from . import text_tools
 from . import actor_utility
+from . import trial_utility
 from . import market_tools
 from . import notification_tools
 from . import utility
@@ -462,12 +463,29 @@ def manage_combat(global_manager):
         start_player_turn(global_manager)
 
 def manage_ministers(global_manager):
+    '''
+    Description:
+        Controls minister retirement, new ministers appearing, and evidence loss over time
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     removed_ministers = []
     for current_minister in global_manager.get('minister_list'):
         if current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
         elif random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/108 chance of retiring
             removed_ministers.append(current_minister)
+
+        if current_minister.fabricated_evidence > 0:
+            prosecutor = global_manager.get('current_ministers')['Prosecutor']
+            if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
+                prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated evidence')
+            text_tools.print_to_screen("The " + str(current_minister.fabricated_evidence) + " fabricated evidence against " + current_minister.name + " is no longer usable.", global_manager)
+            current_minister.corruption_evidence -= current_minister.fabricated_evidence
+            current_minister.fabricated_evidence = 0
+            
     while len(removed_ministers) > 0:
         current_minister = removed_ministers.pop(0)
         if current_minister.current_position == 'none':
@@ -485,4 +503,5 @@ def manage_ministers(global_manager):
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
             global_manager.get('actor_creation_manager').create_minister(global_manager)
         notification_tools.display_notification("Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n", 'default', global_manager)
+
         

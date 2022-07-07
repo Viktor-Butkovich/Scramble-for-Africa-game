@@ -4,6 +4,7 @@ from ..buttons import button
 from .. import main_loop_tools
 from .. import actor_utility
 from .. import minister_utility
+from .. import trial_utility
 from .. import text_tools
 from .. import game_transitions
 
@@ -1998,6 +1999,14 @@ class to_trial_button(label_button):
         super().__init__(coordinates, width, height, 'to trial', 'none', attached_label.modes, 'buttons/to_trial_button.png', attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
+        '''
         if super().can_show():
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
@@ -2007,8 +2016,8 @@ class to_trial_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
-                ministers
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button goes to the trial screen to remove the selected minister from the game and confiscate a portion of their
+                stolen money
         Input:
             None
         Output:
@@ -2017,20 +2026,27 @@ class to_trial_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
-                    if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
-                        self.showing_outline = True
-                        defense = self.global_manager.get('displayed_minister')
-                        prosecution = self.global_manager.get('current_ministers')['Prosecutor']
-                        game_transitions.set_game_mode('trial', self.global_manager)
-                        minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
+                    if minister_utility.positions_filled(self.global_manager):
+                        if len(self.global_manager.get('minister_list')) > 8: #if any available appointees
+                            self.showing_outline = True
+                            defense = self.global_manager.get('displayed_minister')
+                            prosecution = self.global_manager.get('current_ministers')['Prosecutor']
+                            game_transitions.set_game_mode('trial', self.global_manager)
+                            minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
+                        else:
+                            text_tools.print_to_screen("There are currently no available appointees to replace this minister in the event of a successful trial.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("There are currently no available appointees to replace this minister in the event of a successful trial.", self.global_manager)
+                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)   
 
 class fabricate_evidence_button(label_button):
+    '''
+    Button in the trial screen that fabricates evidence to use against the defense in the current trial. Fabricated evidence disappears at the end of the trial or at the end of the turn
+    '''
     def __init__(self, coordinates, width, height, attached_label, global_manager):
         '''
         Description:
@@ -2047,16 +2063,21 @@ class fabricate_evidence_button(label_button):
         super().__init__(coordinates, width, height, 'fabricate evidence', 'none', attached_label.modes, 'buttons/fabricate_evidence_button.png', attached_label, global_manager)
 
     def get_cost(self):
-        base_cost = 5
-        current_fabricated_evidence = self.global_manager.get('displayed_defense').fabricated_evidence
-        multiplier = 2 ** current_fabricated_evidence #1 if 0 evidence previously created, 2 if 1 previous, 4 if 2 previous, 8 if 3 previous
-        return(base_cost * multiplier) #5 if 0 evidence previously created, 10 if 1 previous, 20 if 2 previous, 40 if 3 previous
+        '''
+        Description:
+            Returns the cost of fabricating another piece of evidence. The cost increases for each existing fabricated evidence against the selected minister
+        Input:
+            None
+        Output:
+            Returns the cost of fabricating another piece of evidence
+        '''
+        defense = self.global_manager.get('displayed_defense')
+        return(trial_utility.get_fabricated_evidence_cost(defense.fabricated_evidence))
 
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected minister from their current office, returning them to the pool of available
-                ministers
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button spends money to fabricate a piece of evidence against the selected minister
         Input:
             None
         Output:

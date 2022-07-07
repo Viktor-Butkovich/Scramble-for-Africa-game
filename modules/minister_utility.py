@@ -45,6 +45,8 @@ def calibrate_trial_info_display(global_manager, info_display_list, new_minister
         button/actor list info_display_list: All buttons and actors that are updated when the displayed mob or tile changes. Can be 'prosecution_info_display_list' or 'defense_info_display_list' depending on the minister's side in
             the trial
         string new_minister: The new minister that is displayed
+    Output:
+        None
     '''
     if info_display_list == global_manager.get('defense_info_display_list'):
         global_manager.set('displayed_defense', new_minister)
@@ -54,6 +56,15 @@ def calibrate_trial_info_display(global_manager, info_display_list, new_minister
         current_object.calibrate(new_minister)
 
 def trial_setup(defense, prosecution, global_manager):
+    '''
+    Description:
+        Sets the trial info displays to the defense and prosecution ministers at the start of a trial
+    Input:
+        minister defense: Minister to calibrate defense info display to
+        minister prosecution: Minsiter to calibrate prosecution info display to
+    Output:
+        None
+    '''
     calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), defense)
     calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), prosecution)
     
@@ -77,6 +88,14 @@ def update_available_minister_display(global_manager):
             available_minister_portrait_list[current_index].calibrate('none')
 
 def positions_filled(global_manager):
+    '''
+    Description:
+        Returns whether all minister positions are currently filled. Any action in the game that could require minister rolls should only be allowed when all minister positions are filled
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        boolean: Returns whether all minister positions are currently filled
+    '''
     completed = True
     for current_position in global_manager.get('minister_types'):
         if global_manager.get('current_ministers')[current_position] == 'none':

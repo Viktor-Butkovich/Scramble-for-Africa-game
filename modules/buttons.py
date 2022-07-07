@@ -540,19 +540,23 @@ class button():
                     y_change = -1
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 if main_loop_tools.action_possible(self.global_manager):
-                    if len(selected_list) == 1:
-                        if self.global_manager.get('current_game_mode') == 'strategic':
-                            mob = selected_list[0]
-                            if mob.can_move(x_change, y_change):
-                                mob.move(x_change, y_change)
-                                self.global_manager.set('show_selection_outlines', True)
-                                self.global_manager.set('last_selection_outline_switch', time.time())
+                    if minister_utility.positions_filled(self.global_manager):
+                        if len(selected_list) == 1:
+                            if self.global_manager.get('current_game_mode') == 'strategic':
+                                mob = selected_list[0]
+                                if mob.can_move(x_change, y_change):
+                                    mob.move(x_change, y_change)
+                                    self.global_manager.set('show_selection_outlines', True)
+                                    self.global_manager.set('last_selection_outline_switch', time.time())
+                            else:
+                                text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
+                        elif len(selected_list) < 1:
+                            text_tools.print_to_screen("There are no selected units to move.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
-                    elif len(selected_list) < 1:
-                        text_tools.print_to_screen("There are no selected units to move.", self.global_manager)
+                            text_tools.print_to_screen("You can only move one unit at a time.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You can only move one unit at a time.", self.global_manager)
+                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
             elif self.button_type == 'toggle grid lines':
@@ -660,8 +664,8 @@ class button():
                         if self.global_manager.get("current_ministers")[current_position] == 'none':
                             stopping = True
                     if stopping:
-                        text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
-                        text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
+                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
                     else:
                         if not self.global_manager.get('current_game_mode') == 'strategic':
                             game_transitions.set_game_mode('strategic', self.global_manager)
@@ -1200,7 +1204,7 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager):
+                if (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)) or self.to_mode == 'ministers':
 
                     if self.to_mode == 'ministers' and 'trial' in self.modes:
                         defense = self.global_manager.get('displayed_defense')
@@ -1218,6 +1222,7 @@ class switch_game_mode_button(button):
                         game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
                 else:
                     text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                    text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not switch screens.", self.global_manager)
 

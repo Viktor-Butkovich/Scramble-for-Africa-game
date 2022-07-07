@@ -261,6 +261,24 @@ try:
        } 
     )
 
+    #central place in program to change descriptions of actions to use in prosector reports
+    global_manager.set('theft_type_descriptions',
+        {
+        'trial fees': 'trial fees',
+        'fabricated evidence': 'evidence fabrication',
+        'bribery': 'bribery',
+        'loan interest': 'loan interest',
+        'exploration': 'exploration',
+        'religious campaign': 'religious campaigning',
+        'advertising campaign': 'advertising',
+        'trade': 'trading with natives',
+        'construction': 'construction',
+        'conversion': 'religious conversion',
+        'inventory attrition': 'missing commodities',
+        'none': 'miscellaneous company activities'
+        }
+    )
+
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
         'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
     #price setup
@@ -818,7 +836,7 @@ try:
     global_manager.set('DEBUG_show_corruption_on_save', True) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
 
-    global_manager.set('DEBUG_show_minister_stealing', False) #False by default
+    global_manager.set('DEBUG_show_minister_stealing', True) #False by default
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
     
     #activating/disabling debugging tools
