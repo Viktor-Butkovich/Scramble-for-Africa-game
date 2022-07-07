@@ -244,7 +244,8 @@ try:
         'loan_search': 5,
         'trade': 0,
         'loan': 5,
-        'attack': 5
+        'attack': 5,
+        'trial': 5
         }
     )
 
@@ -260,8 +261,26 @@ try:
        } 
     )
 
-    global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion',
-        'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements'])
+    #central place in program to change descriptions of actions to use in prosector reports
+    global_manager.set('theft_type_descriptions',
+        {
+        'trial fees': 'trial fees',
+        'fabricated evidence': 'evidence fabrication',
+        'bribery': 'bribery',
+        'loan interest': 'loan interest',
+        'exploration': 'exploration',
+        'religious campaign': 'religious campaigning',
+        'advertising campaign': 'advertising',
+        'trade': 'trading with natives',
+        'construction': 'construction',
+        'conversion': 'religious conversion',
+        'inventory attrition': 'missing commodities',
+        'none': 'miscellaneous company activities'
+        }
+    )
+
+    global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
+        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
     #price setup
 
 
@@ -318,6 +337,8 @@ try:
     global_manager.get('recruitment_costs')['slave workers'] = 5
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
+    global_manager.set('minister_limit', 15)
+
     global_manager.set('group_list', [])
     global_manager.set('tile_list', [])
     global_manager.set('exploration_mark_list', [])
@@ -330,8 +351,12 @@ try:
     global_manager.set('minister_ordered_label_list', [])
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_minister', 'none')
+    global_manager.set('displayed_defense', 'none')
+    global_manager.set('displayed_prosecution', 'none')
     global_manager.set('tile_info_display_list', [])
     global_manager.set('tile_ordered_label_list', [])
+    global_manager.set('defense_info_display_list', [])
+    global_manager.set('prosecution_info_display_list', [])
     global_manager.set('displayed_tile', 'none')
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
@@ -364,6 +389,7 @@ try:
     global_manager.set('ongoing_conversion', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
+    global_manager.set('ongoing_trial', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -386,7 +412,7 @@ try:
     global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 
-    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers'], global_manager)
+    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
     strategic_grid_height = 300#450
     strategic_grid_width = 320#480
@@ -412,11 +438,11 @@ try:
 
     #value tracker setup
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
-        'misc/default_label.png', global_manager)
+    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+        ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager)
     global_manager.set('previous_financial_report', 'none')
     show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
-        scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers'], 'buttons/instructions.png', global_manager)
+        scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
     labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
@@ -439,21 +465,26 @@ try:
     to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager),
         scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'none', 'main menu', ['strategic', 'europe', 'ministers'], 'buttons/exit_european_hq_button.png', global_manager)
 
-    to_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_q, 'ministers',
-        ['strategic', 'europe'], 'buttons/european_hq_button.png', global_manager)
+    to_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', pygame.K_q, 'ministers', ['strategic', 'europe'], 'buttons/european_hq_button.png', global_manager)
 
-    from_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_ESCAPE, 'previous',
-        ['ministers'], 'buttons/exit_european_hq_button.png', global_manager)
+    from_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', pygame.K_ESCAPE, 'previous', ['ministers'], 'buttons/exit_european_hq_button.png', global_manager)
+
+    from_trial_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager),
+        'blue', pygame.K_ESCAPE, 'ministers', ['trial'], 'buttons/exit_european_hq_button.png', global_manager)
 
     end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
         global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'],
         'buttons/end_turn_button.png', global_manager)
 
     new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
-        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'buttons/new_game_button.png', global_manager)
+        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'buttons/new_game_button.png',
+        global_manager)
 
     load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 125, global_manager),
-        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'load game', pygame.K_l, ['main_menu'], 'buttons/load_game_button.png', global_manager)
+        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'load game', pygame.K_l, ['main_menu'], 'buttons/load_game_button.png',
+        global_manager)
 
 
     button_start_x = 750#x position of leftmost button
@@ -491,6 +522,56 @@ try:
 
 
 
+    #trial setup
+    trial_display_default_y = 500
+    button_separation = 100
+    distance_to_center = 300
+    distance_to_notification = 100
+    
+    defense_current_y = trial_display_default_y
+    defense_x = (global_manager.get('default_display_width') / 2) + (distance_to_center - button_separation) + distance_to_notification
+    
+    defense_type_image = images.minister_type_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
+    global_manager.get('defense_info_display_list').append(defense_type_image)
+
+    defense_current_y -= button_separation * 2
+    defense_portrait_image = buttons.minister_portrait_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', global_manager)
+    global_manager.get('defense_info_display_list').append(defense_portrait_image)
+
+    defense_info_display_labels = ['minister_name', 'minister_office', 'evidence']
+    for current_actor_label_type in defense_info_display_labels:
+        defense_current_y -= 35
+        global_manager.get('defense_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(defense_x, defense_current_y, global_manager), scaling.scale_width(10, global_manager),
+            scaling.scale_height(30, global_manager), ['trial'], 'misc/default_label.png', current_actor_label_type, 'minister', global_manager))    
+
+
+    prosecution_current_y = trial_display_default_y
+    prosecution_x = (global_manager.get('default_display_width') / 2) - (distance_to_center + button_separation) - distance_to_notification
+    
+    prosecution_type_image = images.minister_type_image(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
+    global_manager.get('prosecution_info_display_list').append(prosecution_type_image)
+
+    prosecution_current_y -= button_separation * 2
+    prosecution_portrait_image = buttons.minister_portrait_image(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', global_manager)
+    global_manager.get('prosecution_info_display_list').append(prosecution_portrait_image)
+
+    prosecution_info_display_labels = ['minister_name', 'minister_office']
+    for current_actor_label_type in prosecution_info_display_labels:
+        prosecution_current_y -= 35
+        global_manager.get('prosecution_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager), scaling.scale_width(10, global_manager),
+            scaling.scale_height(30, global_manager), ['trial'], 'misc/default_label.png', current_actor_label_type, 'minister', global_manager))    
+
+    launch_trial_button_width = 150
+    down_arrow_button = buttons.button(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300, global_manager),
+        scaling.scale_width(launch_trial_button_width, global_manager), scaling.scale_height(launch_trial_button_width, global_manager), 'blue', 'launch trial', 'none', ['trial'], 'buttons/to_trial_button.png', global_manager)
+    #trial setup
+
+
+
     #minister info images setup
     minister_display_top_y = global_manager.get('default_display_height') - 205
     minister_display_current_y = minister_display_top_y
@@ -516,7 +597,7 @@ try:
 
 
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         global_manager.get('minister_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager),
@@ -737,6 +818,8 @@ try:
         scaling.scale_height(50, global_manager), pygame.K_s, ['ministers'], 'buttons/cycle_ministers_down_button.png', 'right', global_manager)
     #minister table setup
 
+
+
     #activating/disabling debugging tools
     global_manager.set('DEBUG_spawning_allowed', True) #True by default
     #allows villages to spawn native warriors
@@ -750,10 +833,16 @@ try:
     global_manager.set('DEBUG_damaged_buildings', False) #False by default
     #causes all buildings to be damaged on startup
     
-    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
+    global_manager.set('DEBUG_show_corruption_on_save', True) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
+
+    global_manager.set('DEBUG_show_minister_stealing', True) #False by default
+    #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
     
     #activating/disabling debugging tools
+
+
+    
     main_loop.main_loop(global_manager)
     pygame.quit()
 

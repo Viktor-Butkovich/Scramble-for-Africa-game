@@ -5,6 +5,7 @@ from . import main_loop_tools
 from . import text_tools
 from . import tiles
 from . import actor_utility
+from . import minister_utility
 
 def set_game_mode(new_game_mode, global_manager):
     '''
@@ -21,7 +22,8 @@ def set_game_mode(new_game_mode, global_manager):
     if new_game_mode == previous_game_mode:
         return()
     else:
-        global_manager.set('previous_game_mode', global_manager.get('current_game_mode'))
+        if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
+            global_manager.set('previous_game_mode', global_manager.get('current_game_mode'))
         start_loading(global_manager)
         if new_game_mode == 'strategic':
             global_manager.set('current_game_mode', 'strategic')
@@ -41,14 +43,23 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
             #text_tools.print_to_screen("Entering minister conference room", global_manager)
+        elif new_game_mode == 'trial':
+            global_manager.set('current_game_mode', 'trial')
         else:
             global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):
         current_mob.selected = False
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #remove any actor info from display when deselecting
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
+        
+    if previous_game_mode in ['strategic', 'europe']:
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
+    elif previous_game_mode == 'ministers':
+        minister_utility.calibrate_minister_info_display(global_manager, 'none')
+    elif previous_game_mode == 'trial':
+        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
+        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')
     
 def create_strategic_map(global_manager):
     '''

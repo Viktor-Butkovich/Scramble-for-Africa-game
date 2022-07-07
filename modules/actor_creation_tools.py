@@ -1,4 +1,4 @@
-#Contains functionality for creating new instances of mobs, buildings, and ministers
+#Contains functionality for creating new instances of mobs, buildings, dice, and ministers
 
 from . import mobs
 from .mob_types import workers
@@ -17,6 +17,7 @@ from . import ministers
 from . import notification_tools
 from . import utility
 from . import market_tools
+from . import dice
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -174,14 +175,25 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
     def create_placeholder_ministers(self, global_manager):
         '''
         Description:
-            Creates 10 non-appointed ministers at the start of the game
+            Creates a set number of unappointed ministers at the start of the game
         Input:
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        for i in range(0, 10):
-            new_minister = ministers.minister(False, {}, global_manager)
+        for i in range(0, global_manager.get('minister_limit') - 2):
+            self.create_minister(global_manager)
+
+    def create_minister(self, global_manager):
+        '''
+        Description:
+            Creates a minister with a randomized face, name, skills, and corruption threshold
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        new_minister = ministers.minister(False, {}, global_manager)
 
     def load_minister(self, input_dict, global_manager):
         '''
@@ -200,3 +212,23 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             None
         '''
         new_minister = ministers.minister(True, input_dict, global_manager)
+
+    def display_die(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
+        '''
+        Description:
+            Initializes a die object through the global manager-accessible actor_creation_manager, removing the need to import the die module and create circular imports 
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this die
+            int width: Pixel width of this die
+            int height: Pixel height of this die
+            string list modes: Game modes during which this button can appear
+            int num_sides: Number of sides for this die
+            string/int dictionary result_outcome_dict: dictionary of string result type keys and int die result values determining which die results are successes/failures or critical successes/failures
+            string/int outcome_color_dict: dictionary of string color name keys and int die result values determining what colors are shown for certain die results
+            int final_result: Predetermined final result of this roll that the die will end on
+            global_manager_template global_manager: Object that accesses shared variables
+        Ouptut:
+            None
+        '''
+        dice.die(coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager)
+    

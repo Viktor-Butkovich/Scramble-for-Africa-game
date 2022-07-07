@@ -4,6 +4,7 @@ import pygame
 
 from ..labels import label
 from ..images import minister_type_image
+from .. import utility
 from . import buttons
 from . import images
 
@@ -37,7 +38,8 @@ class actor_display_label(label):
         self.image_y_displacement = 0
         super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
-        if not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']: #certain types of labels, like inventory capacity, are not ordered on the side of the screen and stay at set positions
+        if (not 'trial' in modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
+            #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
             self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
@@ -124,6 +126,12 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, global_manager))
             for current_position in global_manager.get('minister_types'):
                 self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, current_position, global_manager))
+        elif self.actor_label_type == 'evidence':
+            self.message_start = 'Evidence: '
+            if 'ministers' in self.modes:
+                self.attached_buttons.append(buttons.to_trial_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
+            if 'trial' in self.modes:
+                self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
@@ -210,6 +218,22 @@ class actor_display_label(label):
                 else:
                     tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit.",
                                     "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed."]
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'evidence':
+            tooltip_text = []
+            if not self.actor == 'none':
+                if self.global_manager.get('current_game_mode') == 'trial':
+                    real_evidence = self.actor.corruption_evidence - self.actor.fabricated_evidence
+                    tooltip_text.append("Your prosecutor has found " + str(real_evidence) + " piece" + utility.generate_plural(real_evidence) + " of evidence of corruption against this minister.")
+                    if self.actor.fabricated_evidence > 0:
+                        tooltip_text.append("Additionally, your prosecutor has fabricated " + str(self.actor.fabricated_evidence) + " piece" + utility.generate_plural(self.actor.corruption_evidence) +
+                            " of fake evidence against this minister.")
+                    tooltip_text.append("Each piece of evidence, real or fabricated, increases the chance of a trial's success. After a trial, all fabricated evidence and about half of the real evidence are rendered unusable.")
+                else:
+                    tooltip_text.append("Your prosecutor has found " + str(self.actor.corruption_evidence) + " piece" + utility.generate_plural(self.actor.corruption_evidence) + " of evidence of corruption against this minister.")
+                    tooltip_text.append("A corrupt minister may let goods go missing, steal the money given for a task and report a failure, or otherwise benefit themselves at the expense of your company.")
+                    tooltip_text.append("When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.")
+                    tooltip_text.append("If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position.")
             self.set_tooltip(tooltip_text)
         elif self.actor_label_type == 'building workers':
             tooltip_text = [self.message]
@@ -384,6 +408,12 @@ class actor_display_label(label):
                     if not self.actor.controlling_minister == 'none':
                         self.set_label(self.message_start + self.actor.controlling_minister.name)
                     self.attached_images[0].calibrate(self.actor.controlling_minister)
+                    
+            elif self.actor_label_type == 'evidence':
+                if new_actor.fabricated_evidence == 0:
+                    self.set_label(self.message_start + str(new_actor.corruption_evidence))
+                else:
+                    self.set_label(self.message_start + str(new_actor.corruption_evidence) + " (" + str(new_actor.fabricated_evidence) + ")")               
                 
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)

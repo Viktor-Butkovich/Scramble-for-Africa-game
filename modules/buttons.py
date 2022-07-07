@@ -13,6 +13,7 @@ from . import market_tools
 from . import notification_tools
 from . import game_transitions
 from . import minister_utility
+from . import trial_utility
 
 class button():
     '''
@@ -277,6 +278,14 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
+        elif self.button_type in ['to trial', 'launch trial']:
+            self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
+        elif self.button_type == 'fabricate evidence':
+            if self.global_manager.get('current_game_mode') == 'trial':
+                self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance.",
+                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial."])
+            else:
+                self.set_tooltip(['placeholder'])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
@@ -531,19 +540,23 @@ class button():
                     y_change = -1
                 selected_list = actor_utility.get_selected_list(self.global_manager)
                 if main_loop_tools.action_possible(self.global_manager):
-                    if len(selected_list) == 1:
-                        if self.global_manager.get('current_game_mode') == 'strategic':
-                            mob = selected_list[0]
-                            if mob.can_move(x_change, y_change):
-                                mob.move(x_change, y_change)
-                                self.global_manager.set('show_selection_outlines', True)
-                                self.global_manager.set('last_selection_outline_switch', time.time())
+                    if minister_utility.positions_filled(self.global_manager):
+                        if len(selected_list) == 1:
+                            if self.global_manager.get('current_game_mode') == 'strategic':
+                                mob = selected_list[0]
+                                if mob.can_move(x_change, y_change):
+                                    mob.move(x_change, y_change)
+                                    self.global_manager.set('show_selection_outlines', True)
+                                    self.global_manager.set('last_selection_outline_switch', time.time())
+                            else:
+                                text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
+                        elif len(selected_list) < 1:
+                            text_tools.print_to_screen("There are no selected units to move.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
-                    elif len(selected_list) < 1:
-                        text_tools.print_to_screen("There are no selected units to move.", self.global_manager)
+                            text_tools.print_to_screen("You can only move one unit at a time.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You can only move one unit at a time.", self.global_manager)
+                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
             elif self.button_type == 'toggle grid lines':
@@ -651,8 +664,8 @@ class button():
                         if self.global_manager.get("current_ministers")[current_position] == 'none':
                             stopping = True
                     if stopping:
-                        text_tools.print_to_screen("You can not end turn until a minister is appointed in each office.", self.global_manager)
-                        text_tools.print_to_screen("Press Q to see the minister interface.", self.global_manager)
+                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
                     else:
                         if not self.global_manager.get('current_game_mode') == 'strategic':
                             game_transitions.set_game_mode('strategic', self.global_manager)
@@ -764,6 +777,9 @@ class button():
                 caravan = self.notification.choice_info_dict['caravan']
                 caravan.trade(self.notification)
 
+            elif self.button_type == 'start trial':
+                trial_utility.trial(self.global_manager)
+
             elif self.button_type == 'stop attack':
                 self.global_manager.set('ongoing_combat', False)
                 self.notification.choice_info_dict['battalion'].remove_attack_marks()
@@ -788,6 +804,9 @@ class button():
             elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
                 self.global_manager.set('ongoing_construction', False)
 
+            elif self.button_type == 'stop trial':
+                self.global_manager.set('ongoing_trial', False)
+
             elif self.button_type == 'accept loan offer':
                 input_dict = {}
                 input_dict['principal'] = self.notification.choice_info_dict['principal']
@@ -795,6 +814,19 @@ class button():
                 input_dict['remaining_duration'] = 10
                 new_loan = market_tools.loan(False, input_dict, self.global_manager)
                 self.global_manager.set('ongoing_loan_search', False)
+
+            elif self.button_type == 'launch trial':
+                if main_loop_tools.action_possible(self.global_manager):
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+                        if self.global_manager.get('displayed_defense').corruption_evidence > 0:
+                            self.showing_outline = True
+                            trial_utility.start_trial(self.global_manager)
+                        else:
+                            text_tools.print_to_screen("No real or fabricated evidence currently exists, so the trial has no chance of success.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager) 
                 
     def on_rmb_release(self):
         '''
@@ -1172,7 +1204,15 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if self.global_manager.get("minister_appointment_tutorial_completed"):
+                if (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)) or self.to_mode == 'ministers':
+
+                    if self.to_mode == 'ministers' and 'trial' in self.modes:
+                        defense = self.global_manager.get('displayed_defense')
+                        if defense.fabricated_evidence > 0:
+                            text = "WARNING: Your " + str(defense.fabricated_evidence) + " piece" + utility.generate_plural(defense.fabricated_evidence) + " of fabricated evidence against " + defense.current_position + " "
+                            text += defense.name + " will disappear at the end of the turn if left unused. /n /n"
+                            notification_tools.display_notification(text, 'default', self.global_manager)
+                    
                     if self.to_mode == 'main menu':
                         game_transitions.to_main_menu(self.global_manager)
                     if not self.to_mode == 'previous':
@@ -1182,8 +1222,9 @@ class switch_game_mode_button(button):
                         game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
                 else:
                     text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
+                    text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
+                text_tools.print_to_screen("You are busy and can not switch screens.", self.global_manager)
 
     def update_tooltip(self):
         '''
@@ -1221,7 +1262,8 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         super().__init__(coordinates, width, height, 'gray', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
         self.minister_type = minister_type #position, like General
         if self.minister_type == 'none': #if available minister portrait
-            self.global_manager.get('available_minister_portrait_list').append(self)
+            if 'ministers' in self.modes:
+                self.global_manager.get('available_minister_portrait_list').append(self)
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
         self.global_manager.get('minister_image_list').append(self)
@@ -1252,7 +1294,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         Output:
             None
         '''
-        if not self.current_minister == 'none':
+        if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
             minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
 
     def calibrate(self, new_minister):

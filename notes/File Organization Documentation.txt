@@ -1,10 +1,10 @@
 SFA folder
 
     graphics folder
-	buildings
-	buttons
+	  buildings
+	  buttons
         locations
-	ministers
+	  ministers
         misc
         mobs
         scenery
@@ -12,198 +12,200 @@ SFA folder
 
     modules folder
 
-	actor_display_tools folder
-	    labels.py
-		imports pygame, modules.labels, buttons, images
-		class actor_display_label(modules.labels.label)
-		    class list_item_label
-		    class building_work_crews_label
-		    class building_efficiency_label
-		    class native_info_label
-		    class commodity_display_label
+	  actor_display_tools folder
+	      labels.py
+		    imports pygame, modules.labels, modules.images, modules.utility, buttons, images
+		    class actor_display_label(modules.labels.label)
+		        class list_item_label
+		        class building_work_crews_label
+		        class building_efficiency_label
+		        class native_info_label
+		        class commodity_display_label
 
-	    images.py
-		imports modules.images
-		class actor_display_free_image(modules.images.free_image)
+	      images.py
+		    imports modules.images
+		    class actor_display_free_image(modules.images.free_image)
 		    class actor_display_infrastructure_connection_image
 		    class mob_background_image
-		class label_image(modules.images.free_image)
+		    class label_image(modules.images.free_image)
 
-	    buttons.py
-		imports modules.buttons, modules.main_loop_tools, modules.actor_utility, modules.text_tools, modules.game_transitions
-	        class label_button(modules.buttons.button)
-		    class worker_crew_vehicle_button
-		    class pick_up_all_passengers_button
-		    class crew_vehicle_button
-		    class uncrew_vehicle_button
-		    class merge_button
-		    class split_button
-		    class remove_work_crew_button
-		    class disembark_vehicle_button
-		    class embark_vehicle_button
-		    class cycle_passengers_button
-		    class cycle_work_crews_button
-		    class work_crew_to_building_button
-		    class trade_button
-		    class convert_button
-		    class religious_campaign_button
-		    class take_loan_button
-		    class advertising_campaign_button
-		    class switch_theatre_button
-		    class build_train_button
-		    class construction_button
-		    class repair_button
-		    class upgrade_button
-	   	    class appoint_minister_button
-		    class remove_minister_button
-		    class hire_african_workers_button
-		    class buy_slaves_button
+            buttons.py
+		    imports modules.buttons, modules.main_loop_tools, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, modules.game_transitions
+	          class label_button(modules.buttons.button)
+		        class worker_crew_vehicle_button
+		        class pick_up_all_passengers_button
+		        class crew_vehicle_button
+		        class uncrew_vehicle_button
+		        class merge_button
+		        class split_button
+		        class remove_work_crew_button
+		        class disembark_vehicle_button
+		        class embark_vehicle_button
+		        class cycle_passengers_button
+		        class cycle_work_crews_button
+		        class work_crew_to_building_button
+		        class trade_button
+		        class convert_button
+		        class religious_campaign_button
+		        class take_loan_button
+		        class advertising_campaign_button
+		        class switch_theatre_button
+		        class build_train_button
+		        class construction_button
+		        class repair_button
+		        class upgrade_button
+	   	        class appoint_minister_button
+		        class remove_minister_button
+		        class to_trial_button
+		        class fabricate_evidence_button
+		        class hire_african_workers_button
+		        class buy_slaves_button
 
-	mob_types folder
-	    battalions.py
-		imports time, groups, modules.tiles, modules.actor_utility, modules.notification_tools
-		class battalion(groups.group)
+        mob_types folder
+	      battalions.py
+		    imports time, groups, modules.tiles, modules.actor_utility, modules.notification_tools
+		    class battalion(groups.group)
 
-	    caravans.py
-		imports random, math, groups, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
-		class caravan(groups.group)
+	      caravans.py
+		    imports random, math, groups, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
+		    class caravan(groups.group)
 	    
-	    construction_gangs.py
-		imports groups, modules.actor_utility, modules.dice_utility, modules.notification_tools
-		class construction_gang(groups.group)
+	      construction_gangs.py
+		    imports groups, modules.actor_utility, modules.dice_utility, modules.notification_tools
+		    class construction_gang(groups.group)
 
-    	    expeditions.py
-		imports time, groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
-		class expedition(groups.group)
+    	      expeditions.py
+		    imports time, groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
+		    class expedition(groups.group)
 	    
             groups.py
-	        imports random, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
+	          imports random, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
                 class group(modules.mobs.mob)
 
-	    missionaries.py
-		imports groups, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools
-		class missionaries(groups.group)
+	      missionaries.py
+		    imports groups, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools
+		    class missionaries(groups.group)
 
-	    native_warriors.py
-		imports random, npmobs, modules.utility
-		class native_warriors(npmobs.npmob)
+	      native_warriors.py
+		    imports random, npmobs, modules.utility
+		    class native_warriors(npmobs.npmob)
 
-	    npmobs.py
-		imports random, modules.mobs, modules.utility, modules.turn_management_tools
-		class npmob(modules.mob)
+	      npmobs.py
+		    imports random, modules.mobs, modules.utility, modules.turn_management_tools
+		    class npmob(modules.mob)
 
-	    officers.py
-	        imports random, pmobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.scaling, modules.images
-	        class officer(pmobs.pmob)
-		    class evangelist
-		    class merchant
+	      officers.py
+	          imports random, pmobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.scaling, modules.images
+	          class officer(pmobs.pmob)
+		        class evangelist
+		        class merchant
 
-	    pmobs.py
-		imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
-			modules.turn_management_tools
-		class pmob(modules.mob)
+	      pmobs.py
+		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
+		        modules.turn_management_tools
+		    class pmob(modules.mob)
 
-	    porters.py
-		imports groups, modules.actor_utility
-		class porters(groups.group)
+	      porters.py
+		    imports groups, modules.actor_utility
+		    class porters(groups.group)
 
-	    vehicles.py
-	        imports random, pmobs, modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.buttons
-	        class vehicle(pmobs.pmob)
-		    class train
-		    class ship
+	      vehicles.py
+	          imports random, pmobs, modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.buttons
+	          class vehicle(pmobs.pmob)
+		        class train
+                    class ship
 
-	    work_crews.py
-		imports groups, modules.actor_utility, modules.utility
-		class work_crew(groups.group)	
+	      work_crews.py
+		    imports groups, modules.actor_utility, modules.utility
+		    class work_crew(groups.group)	
 
-	    workers.py
-	        imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
-	        class worker(pmobs.pmob)
-		    class church_volunteers
-		    class slave_worker
+	      workers.py
+	          imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
+	          class worker(pmobs.pmob)
+		        class church_volunteers
+		        class slave_worker
 
-	action_notifications.py
-	    imports labels, images, notifications, text_tools, utility, scaling, actor_utility
-	    class action_notification(notifications.notification)
-	    class dice_rolling_notification(action_notification)
-	    class exploration_notification(action_notification)
-	    class off_tile_exploration_notification(action_notification)
-	    class trade_notification_notification(action_notification)
-	    class religious_campaign_notification(action_notification)
-	    class advertising_campaign_notification(action_notification)
-    	    class conversion_notification(action_notification)
-	    class construction_notification(action_notification)
+        action_notifications.py
+	      imports labels, images, notifications, text_tools, utility, scaling, actor_utility
+	      class action_notification(notifications.notification)
+	      class dice_rolling_notification(action_notification)
+	      class exploration_notification(action_notification)
+	      class off_tile_exploration_notification(action_notification)
+	      class trade_notification_notification(action_notification)
+	      class religious_campaign_notification(action_notification)
+	      class trial_notification(action_notification)
+	      class advertising_campaign_notification(action_notification)
+    	      class conversion_notification(action_notification)
+	      class construction_notification(action_notification)
 
-	actor_creation_tools.py
-	    imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
-		mob_types.battalions, mob_types.native_warriors, buildings, ministers, notification_tools, utility, market_tools
-	    class actor_creation_manager_template
+	  actor_creation_tools.py
+	      imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
+	          mob_types.battalions, mob_types.native_warriors, buildings, ministers, notification_tools, utility, market_tools, dice
+	      class actor_creation_manager_template
 
         actor_utility.py
             imports random, scaling, utility
-	    def find_closest_available_worker
-	    def stop_exploration
+	      def find_closest_available_worker
+	      def stop_exploration
             def create_image_dict
-	    def update_roads
+	      def update_roads
             def get_selected_list
-	    def deselect_all
-	    def get_random_ocean_coordinates
+	      def deselect_all
+	      def get_random_ocean_coordinates
             def calibrate_actor_info_display
-	    def order_actor_info_display
-	    def get_migration_destinations
-	    def get_migration_sources
-	    def get_num_available_workers
+	      def order_actor_info_display
+	      def get_migration_destinations
+	      def get_migration_sources
+	      def get_num_available_workers
 
         actors.py
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling
             class actor
 
-	buildings.py
-	    imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
-	    class building(actors.actor)
-		class infrastructure_building
-		class trading_post
-		class mission
-		class train_station
-		class port
-		class resource_building
-		class slums
-
+	  buildings.py
+	      imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
+	      class building(actors.actor)
+		    class infrastructure_building
+		    class trading_post
+		    class mission
+		    class train_station
+		    class port
+		    class resource_building
+		    class slums
         buttons.py
-            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility
+            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
             class button
-		class cycle_same_tile_button
-		class same_tile_icon
-		class switch_game_mode_button
-		class minister_portrait_image
-		class cycle_available_ministers_button
-		class commodity_button
-		class show_previous_financial_report_button
+	          class cycle_same_tile_button
+	          class same_tile_icon
+	          class switch_game_mode_button
+	          class minister_portrait_image
+	          class cycle_available_ministers_button
+	          class commodity_button
+	         class show_previous_financial_report_button
 
         cells.py
             imports pygame, random, actor_utility
             class cell
 
-	choice_notifications.py
-	    imports pygame, buttons, notifications, text_tools, scaling
-	    class choice_notification(notifications.notification)
-	    class choice_button(buttons.button)
-		class recruitment_choice_button
+	  choice_notifications.py
+	      imports pygame, buttons, notifications, text_tools, scaling
+	      class choice_notification(notifications.notification)
+	      class choice_button(buttons.button)
+	          class recruitment_choice_button
 
         csv_tools.py
             imports csv
-            def read_csv
+           def read_csv
 
         data_managers.py
             imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, game_transitions
             class global_manager_template
             class input_manager_template
             class flavor_text_manager_template
-	    class value_tracker
-		class money_tracker
-	    class notification_manager_template
-	    class sound_manager_template
+	      class value_tracker
+   	          class money_tracker
+	      class notification_manager_template
+	      class sound_manager_template
 
         dice.py
             imports pygame, time, random, buttons, utility
@@ -213,7 +215,7 @@ SFA folder
             imports random, text_tools
             def roll
             def roll_to_list
-	    def combat_roll_to_list
+	      def combat_roll_to_list
 
         drawing_tools.py
             imports pygame
@@ -224,50 +226,50 @@ SFA folder
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility
             class recruitment_button(buttons.button)
-	    class buy_commodity_button(buttons.button)
+	      class buy_commodity_button(buttons.button)
 
         game_transitions.py
-            imports time, main_loop_tools, text_tools, tiles, actor_utility
+            imports time, main_loop_tools, text_tools, tiles, actor_utility, minister_utility
             def set_game_mode
             def create_strategic_map
             def start_loading
-	    def to_main_menu
+	      def to_main_menu
 
         grids.py
             imports random, pygame, cells, actor_utility, utility
             class grid
                 class mini_grid
-                class abstract_grid
+               class abstract_grid
 
         images.py
             imports pygame, time, utility, drawing_tools, text_tools, scaling
             class free_image
-		class tooltip_free_image
-		    class dice_roll_minister_image
-		    class minister_type_image
-		class warning_image
-                class loading_image_template
-            class actor_image
-		class building_image
-		    class infrastructure_connection_image
-                class mob_image
-                class button_image
-                class tile_image
-                    class veteran_icon_image
+	          class tooltip_free_image
+	              class dice_roll_minister_image
+	              class minister_type_image
+	          class warning_image
+	          class loading_image_template
+	      class actor_image
+	          class building_image
+	              class infrastructure_connection_image
+	          class mob_image
+	          class button_image
+	          class tile_image
+	              class veteran_icon_image
 
         instructions.py
             imports labels, buttons, scaling, text_tools
-	    class instructions_button(buttons.button)
-	    class instructions_page(labels.label)
+	      class instructions_button(buttons.button)
+	      class instructions_page(labels.label)
             def display_instructions_page
 
         labels.py
             imports pygame, buttons, scaling, text_tools, utility
             class label(buttons.button)
-		class value_label
-		class money_label
-		class commodity_prices_label
-		class multi_line_label
+	      class value_label
+	      class money_label
+	      class commodity_prices_label
+	      class multi_line_label
 
         main_loop.py
             imports time, pygame, main_loop_tools, utility, text_tools
@@ -282,54 +284,57 @@ SFA folder
             def draw_text_box
             def manage_rmb_down
             def manage_lmb_down
-	    def click_move_minimap
+	      def click_move_minimap
 
-	market_tools.py
-	    imports random, text_tools, utility
-	    class loan
-	    def adjust_prices
-	    def change_price
-	    def sell
-	    def attempt_worker_upkeep_change
+	  market_tools.py
+	      imports random, text_tools, utility
+	      class loan
+	      def adjust_prices
+	      def change_price
+	      def sell
+	      def attempt_worker_upkeep_change
 
-	minister_utility.py
-	    def check_corruption
-	    def get_skill_modifier
-	    def calibrate_minister_info_display
-	    def update_available_minister_display
+	  minister_utility.py
+	      def check_corruption
+	      def get_skill_modifier
+	      def calibrate_minister_info_display
+	      def calibrate_trial_info_display
+	      def trial_setup
+	      def update_available_minister_display
+	      def positions_filled
 
-	ministers.py
-	    imports random, utility, actor_utility, minister_utility, notification_tools
-	    class minister
+	  ministers.py
+	      imports random, utility, actor_utility, minister_utility, notification_tools, images, scaling
+	      class minister
 
         mobs.py
             imports pygame, time, images, utility, actor_utility, actors, tiles
             class mob(actors.actor)
 
-	mouse_followers.py
-	    imports pygame, images
-	    class mouse_follower(images.free_image)
+	  mouse_followers.py
+	      imports pygame, images
+	      class mouse_follower(images.free_image)
 
         notification_tools.py
             def display_notification
-	    def display_choice_notification
+	      def display_choice_notification
             def show_tutorial_notifications
 
         notifications.py
-            imports labels, text_tools, utility, scaling, actor_utility
+            imports time, labels, text_tools, utility, scaling, actor_utility
             class notification(labels.multi_line_label)
-	    	class zoom_notification
+	      class zoom_notification
 
-	save_load_tools.py
-	    imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools, minister_utility
-	    class save_load_manager_template
+        save_load_tools.py
+	      imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools, minister_utility
+	      class save_load_manager_template
 
         scaling.py
             def scale_coordinates
             def scale_width
             def scale_height
-	    def unscale_width
-	    def unscale_height
+	      def unscale_width
+	     def unscale_height
 
         text_tools.py
             imports pygame
@@ -340,70 +345,72 @@ SFA folder
             def print_to_screen
             def print_to_previous_message
             def clear_message
-	    def remove_underscores
+	      def remove_underscores
 
         tiles.py
             imports pygame, random, images, utility, actor_utility, villages, actors
             class tile(actors.actor)
                 class abstract_tile
-		class resource_icon
+	          class resource_icon
                 class status_icon
 
-	turn_management_tools.py
-	    imports random, text_tools, actor_utility, market_tools, notification_tools, utility
-	    def end_turn
-	    def start_enemy_turn
-	    def start_player_turn
-	    def reset_mobs
-	    def manage_attrition
-	    def manage_production
-	    def manage_upkeep
-	    def manage_loans
-	    def manage_public_opinion
-	    def manage_subsidies
-	    def manage_financial_report
-	    def manage_worker_price_changes
-	    def manage_worker_migration
-	    def trigger_worker_migration
-	    def create_weighted_migration_destinations
-	    def manage_villages
-	    def manage_enemy_movement
-	    def manage_combat
+	  turn_management_tools.py
+	      imports random, text_tools, actor_utility, market_tools, notification_tools, utility
+	      def end_turn
+	      def start_enemy_turn
+	      def start_player_turn
+	      def reset_mobs
+	      def manage_attrition
+	      def manage_production
+	      def manage_upkeep
+	      def manage_loans
+	      def manage_public_opinion
+	      def manage_subsidies
+	      def manage_financial_report
+	      def manage_worker_price_changes
+	      def manage_worker_migration
+	      def trigger_worker_migration
+	      def create_weighted_migration_destinations
+	      def manage_villages
+	      def manage_enemy_movement
+	      def manage_combat
+		def manage_ministers
 
         utility.py
             def find_object_distance
             def find_coordinate_distance
-	    def find_grid_distance
+	      def find_grid_distance
             def remove_from_list
-	    def copy_list
+	      def copy_list
             def toggle
             def generate_article
-	    def generate_plural
-	    def generate_capitalized_article
+	      def generate_plural
+	      def generate_capitalized_article
             def add_to_message
+	      def conjugate
 
-	village_name_generator.py
-	    imports random
-	    def create_village_name
-	    def add_space
-	    def add_vowel
-	    def add_consonant
+	  village_name_generator.py
+	      imports random
+	      def create_village_name
+	      def add_space
+	      def add_vowel
+	      def add_consonant
 
-	villages.py
-	    imports random, village_name_generator, actor_utility, utility
-	    class village
+        villages.py
+	      imports random, village_name_generator, actor_utility, utility
+	      class village
 
     notes folder
-	File Organization Documentation.txt
-	Required Documentation Updates.txt
+        Organization Documentation.txt
+	  Required Documentation Updates.txt
 
     save_games folder
-	save1.pickle
+	  save1.pickle
 
     text folder
         flavor_explorer.csv
-	flavor_minister_first_names.csv
-	flavor_minister_last_names.csv
+	  flavor_minister_first_names.csv
+	  flavor_minister_last_names.csv
 
     .gitignore.txt
 

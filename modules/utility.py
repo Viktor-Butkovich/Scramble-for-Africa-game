@@ -151,3 +151,25 @@ def add_to_message(message, new):
         string: Returns a concatenated version of the inputted strings
     '''
     return (message + new)
+
+def conjugate(infinitive, amount):
+    '''
+    Description:
+        Returns a singular or plural conjugated version of the inputted verb
+    Input:
+        string infinitive: base word to conjugate, like "be" or "attack"
+        int amount: quantity of subject, determining if singular or plural verb should be used
+    Output:
+        string: Returns conjugated word with the correct number, like "is" or "attacks"
+    '''
+    if infinitive == 'be':
+        if amount == 1:
+            return('is')
+        else:
+            return('are')
+    else:
+        if amount == 1:
+            return(infinitive + 's')
+        else:
+            return(infinitive)
+    return('none')

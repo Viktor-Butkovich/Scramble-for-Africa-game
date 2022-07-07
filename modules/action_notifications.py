@@ -7,6 +7,7 @@ from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility
+from . import trial_utility
 
 class action_notification(notification):
     '''
@@ -400,6 +401,59 @@ class religious_campaign_notification(action_notification):
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
                 current_image.remove()
+
+class trial_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a trial when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as recruiting a unit, as applicable. Removes dice and other side images as applicable. A trial notification in a series of evidence rolls stops the series and wins the trial if it rolls a 6
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        for current_die in self.global_manager.get('dice_list'):
+            current_die.remove()
+        previous_roll = self.global_manager.get('trial_rolls').pop(0)
+        if previous_roll == 6:
+            self.global_manager.set('trial_rolls', []) #stop trial after success
+        if len(self.global_manager.get('trial_rolls')) > 0:
+            trial_utility.display_evidence_roll(self.global_manager)
+        else:
+            trial_utility.complete_trial(previous_roll, self.global_manager)
+
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
 class advertising_campaign_notification(action_notification):
     '''

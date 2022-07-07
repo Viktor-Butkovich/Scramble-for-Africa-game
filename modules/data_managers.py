@@ -261,8 +261,6 @@ class money_tracker(value_tracker):
         '''
         self.transaction_history = {}
         self.transaction_types = global_manager.get('transaction_types')
-        #['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'consumer goods', 'exploration', 'religious campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction']
-        #self.transaction_types += ['construction', 'attrition_replacements']
         self.reset_transaction_history()
         super().__init__('money', initial_value, 'none', 'none', global_manager)
 
@@ -372,7 +370,7 @@ class notification_manager_template():
         self.choice_notification_info_dict_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
-        self.notification_modes = ['strategic', 'europe', 'ministers']
+        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial']
 
     def update_notification_layout(self, notification_height = 0):
         '''
@@ -526,6 +524,10 @@ class notification_manager_template():
         elif notification_type == 'final_combat':
             new_notification = action_notifications.combat_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
+
+        elif notification_type == 'trial':
+            new_notification = action_notifications.trial_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
             
         elif notification_type == 'choice':
             choice_notification_choices = self.choice_notification_choices_queue.pop(0)
@@ -539,6 +541,10 @@ class notification_manager_template():
             self.choice_notification_info_dict_queue.pop(0)
             new_notification = notifications.zoom_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
                 scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, target, self.global_manager)     
+            
+        elif notification_type == 'minister':
+            new_notification = notifications.minister_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
 
         else:
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

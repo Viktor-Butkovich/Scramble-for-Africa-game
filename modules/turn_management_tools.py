@@ -4,6 +4,7 @@ import random
 
 from . import text_tools
 from . import actor_utility
+from . import trial_utility
 from . import market_tools
 from . import notification_tools
 from . import utility
@@ -68,9 +69,10 @@ def start_player_turn(global_manager, first_turn = False):
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
         manage_loans(global_manager)
-        manage_financial_report(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
+        manage_ministers(global_manager)
+        manage_financial_report(global_manager)
 
     global_manager.set('player_turn', True)
     global_manager.get('turn_tracker').change(1)
@@ -459,3 +461,47 @@ def manage_combat(global_manager):
         global_manager.get('attacker_queue').pop(0).attempt_local_combat()
     else:
         start_player_turn(global_manager)
+
+def manage_ministers(global_manager):
+    '''
+    Description:
+        Controls minister retirement, new ministers appearing, and evidence loss over time
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    removed_ministers = []
+    for current_minister in global_manager.get('minister_list'):
+        if current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
+            removed_ministers.append(current_minister)
+        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/108 chance of retiring
+            removed_ministers.append(current_minister)
+
+        if current_minister.fabricated_evidence > 0:
+            prosecutor = global_manager.get('current_ministers')['Prosecutor']
+            if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
+                prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated evidence')
+            text_tools.print_to_screen("The " + str(current_minister.fabricated_evidence) + " fabricated evidence against " + current_minister.name + " is no longer usable.", global_manager)
+            current_minister.corruption_evidence -= current_minister.fabricated_evidence
+            current_minister.fabricated_evidence = 0
+            
+    while len(removed_ministers) > 0:
+        current_minister = removed_ministers.pop(0)
+        if current_minister.current_position == 'none':
+            text = current_minister.name + " no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n"
+        else:
+            text = current_minister.current_position + " " + current_minister.name + " has chosen to step down and retire. /n /n"
+            text += "Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n"
+        notification_tools.display_notification(text, 'default', global_manager)
+        
+        if not current_minister.current_position == 'none':
+            current_minister.appoint('none')
+        current_minister.remove()
+
+    if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
+        while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
+            global_manager.get('actor_creation_manager').create_minister(global_manager)
+        notification_tools.display_notification("Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n", 'default', global_manager)
+
+        

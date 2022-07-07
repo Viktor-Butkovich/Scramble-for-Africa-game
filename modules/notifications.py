@@ -1,5 +1,6 @@
 #Contains functionality for notifications
 
+import time
 from .labels import multi_line_label
 from . import text_tools
 from . import utility
@@ -32,6 +33,7 @@ class notification(multi_line_label):
         self.is_action_notification = False
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
+        self.creation_time = time.time()
 
     def format_message(self):
         '''
@@ -65,7 +67,8 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        self.remove()
+        if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
+            self.remove()
             
     def remove(self):
         '''
@@ -85,6 +88,16 @@ class notification(multi_line_label):
         if len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
+class minister_notification(notification):
+    '''
+    Notification that is a message from a minister and has a minister portrait attached
+    '''
+    def remove(self):
+        super().remove()
+        for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+            current_minister_image.remove()
+        
+        
 class zoom_notification(notification):
     '''
     Notification that selects a certain tile or mob and moves the minimap to it when first displayed

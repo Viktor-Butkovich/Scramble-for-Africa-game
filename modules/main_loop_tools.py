@@ -191,6 +191,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_combat'):
         return(False)
+    elif global_manager.get('ongoing_trial'):
+        return(False)
     elif global_manager.get('making_choice'):
         return(False)
     elif not global_manager.get('player_turn'):

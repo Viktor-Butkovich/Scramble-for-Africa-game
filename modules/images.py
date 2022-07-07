@@ -290,7 +290,6 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
         '''
         super().remove()
         self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
-        
 
 class minister_type_image(tooltip_free_image): #image of minister type icon
     '''
@@ -332,7 +331,7 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
         '''
         self.current_minister = new_minister
         if not new_minister == 'none':
-            self.minister_type = new_minister.current_position#new_minister.current_position
+            self.minister_type = new_minister.current_position #new_minister.current_position
         current_minister_type = self.minister_type
         if (not self.attached_label == 'none') and (not self.attached_label.actor == 'none'):
             current_minister_type = self.attached_label.actor.controlling_minister_type

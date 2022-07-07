@@ -275,11 +275,11 @@ class actor():
                         return() #only surface-level mobs can have inventories and need to roll for attrition
                     
                 if (random.randrange(1, 7) <= 2 and transportation_minister.check_corruption()): #1/18 chance of corruption check to take commodities - 1/36 chance for most corrupt to steal
-                    self.trigger_inventory_attrition(transportation_minister)
+                    self.trigger_inventory_attrition(transportation_minister, True)
                 elif current_cell.local_attrition('inventory') and transportation_minister.no_corruption_roll(6) < 4: #1/6 chance of doing tile conditions check, if passes minister needs to make a 4+ roll to avoid attrition
                     self.trigger_inventory_attrition(transportation_minister)
 
-    def trigger_inventory_attrition(self, transportation_minister): #later add input to see if corruption or real attrition to change how much minister has stolen
+    def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
         Description:
             Removes up to half of this unit's stored commodities when inventory attrition occurs. The inventory attrition may result from poor terrain/storage conditions or from the transportation minister stealing commodites. Also
@@ -292,6 +292,8 @@ class actor():
         lost_commodities_message = ''
         types_lost_list = []
         amounts_lost_list = []
+        if stealing:
+            value_stolen = 0
         for current_commodity in self.get_held_commodities():
             initial_amount = self.get_inventory(current_commodity)
             amount_lost = random.randrange(0, int(initial_amount / 2) + 2) #0-50%
@@ -301,6 +303,8 @@ class actor():
                 types_lost_list.append(current_commodity)
                 amounts_lost_list.append(amount_lost)
                 self.change_inventory(current_commodity, -1 * amount_lost)
+                if stealing:
+                    value_stolen += (self.global_manager.get('commodity_prices')[current_commodity] * amount_lost)
         for current_index in range(0, len(types_lost_list)):
             lost_commodity = types_lost_list[current_index]
             amount_lost = amounts_lost_list[current_index]
@@ -343,7 +347,8 @@ class actor():
             elif self.actor_type == 'mob':
                 notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
                     self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
-            
+        if stealing and value_stolen > 0:
+            transportation_minister.steal_money(value_stolen, 'inventory attrition')
     
     def set_name(self, new_name):
         '''
