@@ -168,7 +168,7 @@ class flavor_text_manager_template():
         '''
         return(random.choice(self.subject_dict[subject]))
 
-    def generate_minister_name(self):
+    def generate_minister_name(self, background):
         '''
         Description:
             Generates and returns a random combination of minister first and last names
@@ -177,7 +177,15 @@ class flavor_text_manager_template():
         Output:
             string: Returns a random combination of minister first and last names
         '''
-        return(self.generate_flavor_text('minister_first_names') + ' ' + self.generate_flavor_text('minister_last_names'))
+        first_name = self.generate_flavor_text('minister_first_names')
+        titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord']
+        if background in ['royal heir', 'aristocrat']:
+            while not first_name in titles:
+                first_name = self.generate_flavor_text('minister_first_names')
+        else:
+            while first_name in titles:
+                first_name = self.generate_flavor_text('minister_first_names')
+        return(first_name + ' ' + self.generate_flavor_text('minister_last_names'))
 
 class value_tracker():
     '''
@@ -368,6 +376,7 @@ class notification_manager_template():
         self.notification_dice_queue = []
         self.choice_notification_choices_queue = []
         self.choice_notification_info_dict_queue = []
+        self.minister_message_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
         self.notification_modes = ['strategic', 'europe', 'ministers', 'trial']
@@ -544,7 +553,7 @@ class notification_manager_template():
             
         elif notification_type == 'minister':
             new_notification = notifications.minister_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
+                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager, self.minister_message_queue.pop(0))
 
         else:
             new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),

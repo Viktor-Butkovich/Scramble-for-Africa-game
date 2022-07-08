@@ -53,6 +53,7 @@ class save_load_manager_template():
         self.copied_elements.append('transaction_history')
         self.copied_elements.append('previous_financial_report')
         self.copied_elements.append('num_wandering_workers')
+        self.copied_elements.append('prosecution_bribed_judge')
         
     def new_game(self):
         '''
@@ -217,7 +218,8 @@ class save_load_manager_template():
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
             if self.global_manager.get('DEBUG_show_corruption_on_save'):
-                print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
+                print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
+                    ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
 
         with open(file_path, 'wb') as handle: #write wb, read rb

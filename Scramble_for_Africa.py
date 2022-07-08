@@ -25,6 +25,7 @@ try:
     pygame.mixer.init()
 
     global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
+    global_manager.set('startup_complete', False)
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('waltz_2')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
@@ -142,6 +143,58 @@ try:
 
 
     #minister setup
+    global_manager.set('weighted_backgrounds', [
+        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
+        'banker',
+        'merchant',
+        'lawyer',
+        'industrialist', 'industrialist', 'industrialist',
+        'natural scientist',
+        'doctor',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        'politician', 'politician',
+        'army officer',
+        'naval officer',
+        'priest'
+        ]
+    ) #5 low, 9 middle, 9 high, 1 very high
+
+    global_manager.set('background_status_dict', {
+        'lowborn': 1,
+        'banker': 2,
+        'merchant': 2,
+        'lawyer': 2,
+        'army officer': 2,
+        'naval officer': 2,
+        'priest': 2,
+        'natural scientist': 2, 
+        'doctor': 2,
+        'industrialist': 3,
+        'aristocrat': 3,
+        'politician': 3,
+        'royal heir': 4
+        }
+    )
+
+    global_manager.set('background_skills_dict', {
+        'lowborn': ['none'],
+        'banker': ['trade'],
+        'merchant': ['trade'],
+        'lawyer': ['prosecution'],
+        'army officer': ['military'],
+        'naval officer': ['transportation'],
+        'priest': ['religion'],
+        'natural scientist': ['exploration'],
+        'doctor': ['random'],
+        'industrialist': ['construction', 'production', 'transportation'],
+        'aristocrat': ['none', 'random'],
+        'politician': ['none', 'random'],
+        'royal heir': ['none', 'random']
+        }
+    )
+
+    global_manager.set('skill_types', ['military', 'religion', 'trade', 'exploration', 'construction', 'production', 'transportation', 'prosecution'])
     global_manager.set('minister_types', ['General', 'Bishop', 'Minister of Trade', 'Minister of Geography', 'Minister of Engineering', 'Minister of Production', 'Minister of Transportation', 'Prosecutor'])
     global_manager.set('type_minister_dict',
         {
@@ -265,7 +318,6 @@ try:
     global_manager.set('theft_type_descriptions',
         {
         'trial fees': 'trial fees',
-        'fabricated evidence': 'evidence fabrication',
         'bribery': 'bribery',
         'loan interest': 'loan interest',
         'exploration': 'exploration',
@@ -280,7 +332,7 @@ try:
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'evidence fabrication', 'trial fees'])
+        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'trial fees'])
     #price setup
 
 
@@ -380,6 +432,7 @@ try:
     global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('choosing_advertised_commodity', False)
     global_manager.set('choosing_advertised_commodity_info_dict', {})
+    global_manager.set('prosecution_bribed_judge', False)
 
     global_manager.set('ongoing_exploration', False)
     global_manager.set('ongoing_trade', False)
@@ -530,7 +583,10 @@ try:
     
     defense_current_y = trial_display_default_y
     defense_x = (global_manager.get('default_display_width') / 2) + (distance_to_center - button_separation) + distance_to_notification
+
+
     
+    #defense_current_y -= button_separation * 2
     defense_type_image = images.minister_type_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
     global_manager.get('defense_info_display_list').append(defense_type_image)
@@ -539,6 +595,10 @@ try:
     defense_portrait_image = buttons.minister_portrait_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', global_manager)
     global_manager.get('defense_info_display_list').append(defense_portrait_image)
+
+    defense_current_y -= 35
+    defense_label = labels.label(scaling.scale_coordinates(defense_x, defense_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['trial'],
+        'misc/default_label.png', 'Defense', global_manager)
 
     defense_info_display_labels = ['minister_name', 'minister_office', 'evidence']
     for current_actor_label_type in defense_info_display_labels:
@@ -559,6 +619,10 @@ try:
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', global_manager)
     global_manager.get('prosecution_info_display_list').append(prosecution_portrait_image)
 
+    prosecution_current_y -= 35
+    prosecution_label = labels.label(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['trial'],
+        'misc/default_label.png', 'Prosecution', global_manager)
+
     prosecution_info_display_labels = ['minister_name', 'minister_office']
     for current_actor_label_type in prosecution_info_display_labels:
         prosecution_current_y -= 35
@@ -577,7 +641,7 @@ try:
     minister_display_current_y = minister_display_top_y
     global_manager.set('minister_ordered_list_start_y', minister_display_current_y)
     #minister background image
-    minister_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    minister_free_image_background = actor_display_images.minister_background_image('misc/mob_background.png', scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager),
         scaling.scale_height(125, global_manager), ['ministers'], global_manager)
     global_manager.get('minister_info_display_list').append(minister_free_image_background)
 
@@ -597,7 +661,7 @@ try:
 
 
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'evidence', 'background', 'social status']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         global_manager.get('minister_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager),
@@ -787,20 +851,20 @@ try:
     #minister table setup
     table_width = 400
     table_height = 800
-    minister_table = images.free_image('misc/minister_table.png', scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2), 0, global_manager), scaling.scale_width(table_width, global_manager),
+    minister_table = images.free_image('misc/minister_table.png', scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2), 55, global_manager), scaling.scale_width(table_width, global_manager),
         scaling.scale_height(table_height, global_manager), ['ministers'], global_manager)
 
     position_icon_width = 125
     for current_index in range(0, 8): #creates an office icon and a portrait at a section of the table for each minister
         if current_index <= 3: #left side
-            images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) + 10, current_index * 200, global_manager),
+            images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) + 10, current_index * 200 + 95, global_manager),
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
-            buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200, global_manager),
+            buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (table_width / 2) - position_icon_width - 10, current_index * 200 + 95, global_manager),
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
         else:
-            images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width - 10, (current_index - 4) * 200, global_manager),
+            images.minister_type_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width - 10, (current_index - 4) * 200 + 95, global_manager),
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], 'none', global_manager)
-            buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200, global_manager),
+            buttons.minister_portrait_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) + (table_width / 2) - position_icon_width + position_icon_width + 10, (current_index - 4) * 200 + 95, global_manager),
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
 
     available_minister_display_x = global_manager.get('default_display_width')
@@ -842,7 +906,7 @@ try:
     #activating/disabling debugging tools
 
 
-    
+    global_manager.set('startup_complete', True)
     main_loop.main_loop(global_manager)
     pygame.quit()
 

@@ -1,6 +1,7 @@
 #Contains functionality for actor display images
 
 from ..images import free_image
+from ..images import warning_image
 
 class actor_display_free_image(free_image):
     '''
@@ -188,6 +189,26 @@ class mob_background_image(free_image):
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
+
+class minister_background_image(mob_background_image):
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        self.warning_image = warning_image(self, global_manager)
+        self.warning_image.x += self.width * 0.75
+
+    def can_show_warning(self):
+        if not self.actor == 'none':
+            if self.actor.just_removed and self.actor.current_position == 'none':
+                return(True)
+        return(False)
+        
+    def calibrate(self, new_actor):
+        super().calibrate(new_actor)
+        if not new_actor == 'none':
+            if new_actor.current_position == 'none':
+                self.set_image('misc/mob_background.png')
+            else:
+                self.set_image('ministers/icons/' + self.global_manager.get('minister_type_dict')[new_actor.current_position] + '.png')
 
 class label_image(free_image):
     '''

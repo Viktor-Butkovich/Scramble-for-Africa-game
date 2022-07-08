@@ -19,7 +19,6 @@ def end_turn(global_manager):
     Output:
         None
     '''
-    
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
@@ -65,13 +64,13 @@ def start_player_turn(global_manager, first_turn = False):
         manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
         reset_mobs('pmobs', global_manager)
         manage_production(global_manager)
-        manage_subsidies(global_manager) #subsidies given before public opinion changes
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
         manage_loans(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
         manage_ministers(global_manager)
+        manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
 
     global_manager.set('player_turn', True)
@@ -473,7 +472,10 @@ def manage_ministers(global_manager):
     '''
     removed_ministers = []
     for current_minister in global_manager.get('minister_list'):
-        if current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
+        if current_minister.just_removed and current_minister.current_position == 'none':
+            current_minister.respond('fired')
+            current_minister.remove()
+        elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
         elif random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/108 chance of retiring
             removed_ministers.append(current_minister)
@@ -485,6 +487,10 @@ def manage_ministers(global_manager):
             text_tools.print_to_screen("The " + str(current_minister.fabricated_evidence) + " fabricated evidence against " + current_minister.name + " is no longer usable.", global_manager)
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
+
+    if global_manager.get('prosecution_bribed_judge'):
+        text_tools.print_to_screen("The effect of bribing the judge has faded and will not affect the next trial.", global_manager)
+    global_manager.set('prosecution_bribed_judge', False)
             
     while len(removed_ministers) > 0:
         current_minister = removed_ministers.pop(0)

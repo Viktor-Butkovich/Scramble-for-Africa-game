@@ -239,7 +239,7 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
     '''
     Part of a pair of imgaes that shows the controlling minister's position and portrait next to notifications during dice rolls
     '''
-    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager):
+    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager, minister_message_image = False):
         '''
         Description:
             Initializes this object
@@ -259,7 +259,11 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
         if minister_image_type == 'portrait':
             image_id = attached_minister.image_id
         elif minister_image_type == 'position':
-            image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+            if not self.attached_minister.current_position == 'none':
+                image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+            else:
+                image_id = 'misc/mob_background.png'
+        self.minister_message_image = minister_message_image #whether this is an image attached to a minister message notification or an action notification - action notification by default, acts differently
         super().__init__(image_id, coordinates, width, height, modes, global_manager)
         global_manager.get('dice_roll_minister_images').append(self)
         self.to_front = True
@@ -278,6 +282,17 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
             self.set_tooltip(self.attached_minister.tooltip_text)
         else:
             self.set_tooltip([])
+
+    def can_show(self):
+        if super().can_show():
+            if self.minister_message_image:
+                #if len(self.global_manager.get('notification_list')) > 0:
+                current_notification = self.global_manager.get('notification_list')[0]
+                if current_notification.notification_type == 'minister' and current_notification.attached_minister == self.attached_minister:
+                    return(True)
+            else:
+                return(True)
+        return(False)
 
     def remove(self):
         '''
@@ -416,7 +431,7 @@ class warning_image(free_image):
     '''
     Image that appears over the image it is attached to under certain conditions to draw attention from the player
     '''
-    def __init__(self, attached_image, global_manager):
+    def __init__(self, attached_image, global_manager, attachment_type = 'image'):
         '''
         Description:
             Initializes this object
@@ -427,7 +442,14 @@ class warning_image(free_image):
             None
         '''
         self.attached_image = attached_image
-        super().__init__('misc/warning_icon.png', (self.attached_image.x, global_manager.get('display_height') - self.attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
+        if attachment_type == 'image':
+            x_position = self.attached_image.x
+            y_position = global_manager.get('display_height') - self.attached_image.y
+        else:
+            x_position = self.attached_image.x - 100
+            y_position = self.attached_image.y
+            
+        super().__init__('misc/warning_icon.png', (x_position, y_position), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
             global_manager)
 
     def can_show(self):
