@@ -42,6 +42,7 @@ class save_load_manager_template():
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
         self.copied_elements.append('public_opinion')
+        self.copied_elements.append('evil')
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
@@ -152,6 +153,7 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
+        self.global_manager.get('evil_tracker').set(0)
 
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
@@ -264,6 +266,7 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
+        self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
 
         #load grids
         strategic_grid_height = 300

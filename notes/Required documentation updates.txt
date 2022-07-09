@@ -1,21 +1,6 @@
-actor_display_tools/buttons.bribe_judge_button
-trial_utility/manage_defense output
-trial_utility imports
-ministers.minister.__init__
-ministers.minister.to_save_dict
-ministers.minister.respond
-images.dice_roll_minister_image
-notifications.minister_notification
-actor_display_tools/images.minister_background_image
-buttons.minister_portrait_image/can_show_warning
-images.warning_image.__init__
 
 Future plans:
-give visual indication of which ministers were just removed
-add bonus for hiring higher status ministers but more difficult to get rid of them
-add visual indication that judge has been bribed
-add public opinion penalty for removing ministers
-add corruption during trials
+keep track of the player's "evil" actions and have ministers react appropriately
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button

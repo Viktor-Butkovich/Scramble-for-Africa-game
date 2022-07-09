@@ -287,6 +287,7 @@ class slave_worker(worker):
                 resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                 if not resulting_public_opinion == current_public_opinion:
                     text_tools.print_to_screen("Participating in the slave trade has decreased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
+                self.global_manager.get('evil_tracker').change(8)
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
@@ -310,6 +311,7 @@ class slave_worker(worker):
         if not resulting_public_opinion == current_public_opinion:
             text_tools.print_to_screen("Freeing slaves has increased your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
         text_tools.print_to_screen("These freed slaves will wander and eventually settle down in one of your slums", self.global_manager)
+        self.global_manager.get('evil_tracker').change(-2)
         self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
 
     def remove(self):

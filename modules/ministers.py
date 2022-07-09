@@ -22,11 +22,14 @@ class minister():
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'name': string value - Required if from save, this minister's name
                 'current_position': string value - Office that this minister is currently occupying, or 'none' if no office occupied
+                'background': string value - Career background of minister, determines social status and skills
+                'personal savings': double value - How much non-stolen money this minister has based on their social status
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'image_id': string value - File path to the image used by this minister
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
+                'just_removed': boolean value - Whether this minister was just removed from office and will be fired at the end of the turn
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
             global_manager_template global_manager: Object that accesses shared variables
@@ -164,6 +167,9 @@ class minister():
                     print("The theft was not caught by the prosecutor.")
         if self.global_manager.get('DEBUG_show_minister_stealing'):
             print(self.current_position + " " + self.name + " has now stolen a total of " + str(self.stolen_money) + " money.")
+
+        if value > 0:
+            self.global_manager.get('evil_tracker').change(2)
                 
     def to_save_dict(self):
         '''
@@ -175,14 +181,17 @@ class minister():
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
                 'name': string value - This minister's name
                 'current_position': string value - Office that this minister is currently occupying, or 'none' if no office occupied
+                'background': string value - Career background of minister, determines social status and skills
+                'personal savings': double value - How much non-stolen money this minister has based on their social status
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'image_id': string value - File path to the image used by this minister
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
+                'just_removed': boolean value - Whether this minister was just removed from office and will be fired at the end of the turn
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
-        '''
+        '''    
         save_dict = {}
         save_dict['name'] = self.name
         save_dict['current_position'] = self.current_position
@@ -459,16 +468,54 @@ class minister():
         minister_utility.update_available_minister_display(self.global_manager)
 
     def respond(self, event):
+        '''
+        Description:
+            Causes this minister to display a message notification and sometimes cause effects based on their background and social status when an event like being fired happens
+        Input:
+            string event: Type of event the minister is responding to, like 'fired'
+        Output:
+            None
+        '''
         text = ""
         public_opinion_change = 0
+
+        if self.status_number >= 3:
+            if self.background == 'politician':
+                third_party = ['the media', 'the prime minister', 'Parliament']
+            elif self.background == 'industrialist':
+                third_party = ['the business community', 'my investors', 'my friends']
+            else: #royal heir or aristocrat
+                third_party = ['my family', 'my cousins', 'the nobility']
+        
         if event == 'first hired':
             if self.status_number >= 3:
                 public_opinion_change = self.status_number + random.randrange(-1, 2)
-                text += "From: " + self.name + " /n /n"
-                text += "You have my greatest thanks for appointing me to your cabinet - we have a lucrative future together. I'll make sure to put a good word in with my friends back home. /n /n /n"
-                text += "You have gained " + str(public_opinion_change) + " public opinion."
+            text += "From: " + self.name + " /n /n"
+            intro_options = ["You have my greatest thanks for appointing me to your cabinet. ",
+                             "Honored governor, my gratitude knows no limits. ",
+                             "Finally, a chance to bring glory to our empire! "]
+            text += random.choice(intro_options)
+            
+            middle_options = ["I shall ensure my duties are completed with the utmost precision and haste. ",
+                              "I will never betray you, I swear. ",
+                              "Nothing will keep us from completing our divine mission. "]
+            text += random.choice(middle_options)
+
+            if self.status_number >= 3:
+                conclusion_options = ["I'll make sure to put a good word in with " + random.choice(third_party) + " about you.",
+                                      "I'm sure " + random.choice(third_party) + " would enjoy hearing about this wise decision.",
+                                      "Perhaps I could pull some strings with " + random.choice(third_party) + " to help repay you?"]
+                text += random.choice(conclusion_options)
+                text += " /n /n /nYou have gained " + str(public_opinion_change) + " public opinion. /n /n"
                 
-            elif self.status_number == 1:
+            else:
+                heres_to_options = ['victory', 'conquest', 'glory']
+                conclusion_options = ["Please send the other ministers my regards - I look forward to working with them. ",
+                                      "Here's to " + random.choice(heres_to_options) + "!",
+                                      "We're going to make a lot of money together! "]
+                text += random.choice(conclusion_options) + ' /n /n /n'
+            
+            if self.status_number == 1:
                 public_opinion_change = -1
                 text += "While lowborn can easily be removed should they prove incompetent or disloyal, it reflects poorly on the company to appoint them as ministers. /n /n"
                 text += "You have lost " + str(-1 * public_opinion_change) + " public opinion. /n /n"
@@ -476,6 +523,7 @@ class minister():
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
             public_opinion_change = -10 * self.status_number * multiplier #4-6 for lowborn, 32-48 for very high
+            self.global_manager.get('evil_tracker').change(2)
             text += "From: " + self.name + " /n /n"
             intro_options = ["How far our empire has fallen... ",
                              "You have made a very foolish decision in firing me. ",
@@ -490,7 +538,8 @@ class minister():
             elif self.status_number >= 3:
                 warnings = ["You better be careful making enemies in high places, friend. ",
                             'Parliament will cut your funding before you can even say "bribe". ',
-                            "You have no place in our empire, you greedy upstart. "]
+                            "You have no place in our empire, you greedy upstart. ",
+                            "Learn how to respect your betters - we're not savages. "]
                 text += random.choice(warnings)
             else:
                 warnings = ["Think of what will happen to the " + random.choice(self.global_manager.get('commodity_types')) + " prices after the media hears about this! ",
@@ -501,8 +550,72 @@ class minister():
                             "You'll burn in hell for this. ",
                             "Watch your back, friend. "]
                 text += random.choice(warnings)
-            text += ' /n /n /nYou have lost ' + str(-1 * public_opinion_change) + ' public opinion.'
+            text += " /n /n /nYou have lost " + str(-1 * public_opinion_change) + " public opinion. /n"
+            text += self.name + " has been fired and removed from the game. /n /n"
+            
+        elif event == 'prison':
+            text += "From: " + self.name + " /n /n"
+            if self.status_number >= 3:
+                intro_options = ["Do you know what we used to do to upstarts like you?",
+                                 "This is nothing, " + random.choice(third_party) + " will get me out within days.",
+                                 "You better be careful making enemies in high places, friend. "]
+            else:
+                intro_options = ["I would've gotten away with it, too, if it weren't for that meddling prosecutor.",
+                                 "Get off your high horse - we could have done great things together.",
+                                 "How much money would it take to change your mind?"]
+            intro_options.append("Do you even know how many we killed? We all deserve this.")
+            intro_options.append("I'm innocent, I swear!")
+            intro_options.append("You'll join me here soon: sic semper tyrannis.")
+            
+            text += random.choice(intro_options)
+            text += " /n /n /n"
+            text += self.name + " is now in prison and has been removed from the game. /n /n"
 
+        elif event == 'retirement':
+            if self.current_position == 'none':
+                text = self.name + " no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n"
+            else:
+                if random.randrange(0, 100) < self.global_manager.get('evil'):
+                    tone = 'guilty'
+                else:
+                    tone = 'content'
+                    
+                if self.stolen_money >= 10.0 and random.randrange(1, 7) >= 4:
+                    tone = 'confession'
+                    
+                if tone == 'guilty':
+                    intro_options = ["I can't believe some of the things I saw here. ",
+                                     "What gave us the right to conquer this place? ",
+                                     "I see them every time I close my eyes - I can't keep doing this."]
+                    middle_options = ["I hear God weeping at the crimes we commit in His name.",
+                                      "We sent so many young men to die just to fill our coffers. ",
+                                      "We're no better than the wild beasts we fear. "]
+                    conclusion_options = ["I pray we will be forgiven for the things we've done, and you ought to do the same. ",
+                                          "Was it all worth it? ",
+                                          "I promise to never again set foot on this stolen continent. "]
+                elif tone == 'content':
+                    intro_options = ["I'm sorry to say it, but I've gotten too old for this. ",
+                                     "This has been a pleasant journey, but life has greater opportunities planned for me. ",
+                                     "Unfortunately, I can no longer work in your cabinet - I am needed back home. "]
+                    middle_options = ["Can you believe it, though? We singlehandedly civilized this place. ",
+                                      "I wish I could stay. The thrill of adventure, the wonders I've seen here. It's like I was made for this. ",
+                                      "Never has the world seen such glory as what we have brought here. "]
+                    conclusion_options = ["I trust you'll continue to champion the cause of our God and our empire. ",
+                                          "I hope to live many more years, but my best were spent here with you. ",
+                                          "Promise me you'll protect what we built here. Never forget our mission, and never grow complacent. "]
+                elif tone == 'confession':
+                    intro_options = ["You fool! I took " + str(self.stolen_money) + " money from behind your back, and you just looked the other way. ",
+                                     "I'll have an amazing retirement with the " + str(self.stolen_money) + " money you let me steal. ",
+                                     "I could tell you just how much money I stole from you over the years, but I'll spare you the tears. "]
+                    middle_options = ["We represent the empire's best, but so many of the ministers are just thieves behind your back. ",
+                                      "Did you really believe all those setbacks and delays I invented? ",
+                                      "Believe it or not, I was always one of the lesser offenders. "]
+                    conclusion_options = ["We aren't so different, you and I - we're both just here to make money. Who ever cared about the empire? ",
+                                          "You'll never see me again, of course, but I wish I could see the look on your face. ",
+                                          "If I had the chance, I'd do it all again. "]
+                text += random.choice(intro_options) + random.choice(middle_options) + random.choice(conclusion_options)
+                text += ' /n /n /n' + self.current_position + " " + self.name + " has chosen to step down and retire. /n /n"
+                text += "Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n"
         self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
         if not text == "":
             self.display_message(text)

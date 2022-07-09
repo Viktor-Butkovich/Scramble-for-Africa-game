@@ -37,12 +37,13 @@ def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
     Output:
         dictionary: Keys corresponding to values containing information about the defense's strategy
             'num_lawyers': int value - Number of defense lawyers working to cancel out evidence
+            'defense_bribed_judge': boolean value - Whether the defense chose to bribe the judge
             'corruption_evidence': int value - Base amount of evidence in the case before lawyers intervene
             'effective_evidence': int value - Amount of evidence that is not cancelled out by defense lawyers
     '''
     defense = global_manager.get('displayed_defense')
     prosecutor = global_manager.get('displayed_prosecution')
-    max_defense_fund = 0.5 * (defense.stolen_money + defense.personal_savings) #pay up to 50% of savings
+    max_defense_fund = 0.75 * (defense.stolen_money + defense.personal_savings) #pay up to 75% of savings
     building_defense = True
     num_lawyers = 0
     defense_bribed_judge = False
@@ -180,11 +181,12 @@ def trial(global_manager): #called by choice notification button
         text += "As the defense decided not to hire any additional lawyers, each piece of evidence remains usable, allowing " + str(defense_info_dict['effective_evidence']) + " evidence rolls to attempt to win the trial. /n /n"
     else:
         text += "The defense hired " + str(defense_info_dict['num_lawyers']) + " additional lawyer" + utility.generate_plural(defense_info_dict['num_lawyers']) + ", cancelling out " + str(defense_info_dict['num_lawyers']) + " piece"
-        text += utility.generate_plural(defense_info_dict['num_lawyers']) + " of evidence. This leaves " + str(defense_info_dict['effective_evidence']) + " evidence rolls to attempt to win the trial. /n /n"    
+        text += utility.generate_plural(defense_info_dict['num_lawyers']) + " of evidence. This leaves " + str(effective_evidence) + " evidence roll"
+        text += utility.generate_plural(effective_evidence) + " to attempt to win the trial. /n /n"    
     
     text += str(defense_info_dict['corruption_evidence']) + ' initial evidence - '
     text += str(defense_info_dict['num_lawyers']) + ' defense lawyers '
-    if judge_bias < 0:
+    if judge_modifier < 0:
         text += '- ' + str(judge_modifier) + ' judge bias '
     elif judge_bias > 0:
         text += '+ ' + str(judge_modifier) + ' judge bias '
@@ -258,6 +260,7 @@ def complete_trial(final_roll, global_manager):
         notification_tools.display_notification(text, 'default', global_manager)
         
         defense.appoint('none')
+        defense.respond('prison')
         defense.remove()
 
     else:

@@ -98,7 +98,7 @@ class pmob(mob):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
-                if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
+                if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) <= 2:
                     self.attrition_death()
 
     def attrition_death(self):
@@ -111,6 +111,7 @@ class pmob(mob):
         Output:
             None
         '''
+        self.global_manager.get('evil_tracker').change(3)
         if self.is_officer or self.is_worker:
             self.temp_disable_movement()
             self.replace()
@@ -651,18 +652,21 @@ class pmob(mob):
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
                 enemy.die()
+                self.global_manager.get('evil_tracker').change(8)
             elif combat_type == 'defending':
                 enemy.retreat()
                 enemy.set_disorganized(True)
         elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
             if combat_type == 'attacking':
                 self.retreat()
+                self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 enemy.retreat()
         elif conclusion == 'lose':
             if combat_type == 'attacking':
                 self.retreat()
                 self.set_disorganized(True)
+                self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 current_cell = self.images[0].current_cell
                 self.die()

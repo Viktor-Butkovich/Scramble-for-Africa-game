@@ -113,6 +113,15 @@ class minister_notification(notification):
         self.notification_type = 'minister'
         
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
+                if there is one
+        Input:
+            None
+        Output:
+            None
+        '''
         super().remove()
         for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
             if current_minister_image.attached_minister == self.attached_minister:

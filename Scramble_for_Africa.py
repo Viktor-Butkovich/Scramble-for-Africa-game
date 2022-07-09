@@ -504,6 +504,8 @@ try:
     global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
     labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'public_opinion', global_manager)
+    
+    global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
     #value tracker setup
 
 
@@ -630,8 +632,14 @@ try:
             scaling.scale_height(30, global_manager), ['trial'], 'misc/default_label.png', current_actor_label_type, 'minister', global_manager))    
 
     launch_trial_button_width = 150
-    down_arrow_button = buttons.button(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300, global_manager),
+    launch_trial_button = buttons.button(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (launch_trial_button_width / 2), trial_display_default_y - 300, global_manager),
         scaling.scale_width(launch_trial_button_width, global_manager), scaling.scale_height(launch_trial_button_width, global_manager), 'blue', 'launch trial', 'none', ['trial'], 'buttons/to_trial_button.png', global_manager)
+
+    bribed_judge_indicator = images.indicator_image('misc/bribed_judge.png', scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y + 200, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'prosecution_bribed_judge', global_manager)
+    non_bribed_judge_indicator = images.indicator_image('misc/non_bribed_judge.png', scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y + 200, global_manager),
+        scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'not prosecution_bribed_judge', global_manager)
+        #image_id, coordinates, width, height, modes, indicator_type, global_manager
     #trial setup
 
 
@@ -897,11 +905,14 @@ try:
     global_manager.set('DEBUG_damaged_buildings', False) #False by default
     #causes all buildings to be damaged on startup
     
-    global_manager.set('DEBUG_show_corruption_on_save', True) #False by default
+    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
 
-    global_manager.set('DEBUG_show_minister_stealing', True) #False by default
+    global_manager.set('DEBUG_show_minister_stealing', False) #False by default
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
+
+    global_manager.set('DEBUG_show_evil', False) #False by default
+    #prints the players "evil" number at the end of each turn
     
     #activating/disabling debugging tools
 

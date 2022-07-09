@@ -1282,6 +1282,14 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         self.calibrate('none')
 
     def can_show_warning(self):
+        '''
+        Description:
+            Returns whether this image should display its warning image. It should be shown when this image is visible and its attached minister is about to be fired at the end of the turn
+        Input:
+            None
+        Output:
+            Returns whether this image should display its warning image
+        '''
         if not self.current_minister == 'none':
             if self.current_minister.just_removed and self.current_minister.current_position == 'none':
                 return(True)

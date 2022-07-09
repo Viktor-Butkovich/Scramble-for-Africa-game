@@ -213,6 +213,9 @@ def manage_public_opinion(global_manager):
     elif current_public_opinion > 50:
         global_manager.get('public_opinion_tracker').change(-1)
         text_tools.print_to_screen("Trending toward a neutral attitude, public opinion toward your company decreased from " + str(current_public_opinion) + " to " + str(current_public_opinion - 1), global_manager)
+    global_manager.get('evil_tracker').change(-1)
+    if global_manager.get('DEBUG_show_evil'):
+        print("Evil number: " + str(global_manager.get('evil')))
     
 def manage_subsidies(global_manager):
     '''
@@ -477,7 +480,7 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/108 chance of retiring
+        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 3 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
             removed_ministers.append(current_minister)
 
         if current_minister.fabricated_evidence > 0:
@@ -494,12 +497,9 @@ def manage_ministers(global_manager):
             
     while len(removed_ministers) > 0:
         current_minister = removed_ministers.pop(0)
-        if current_minister.current_position == 'none':
-            text = current_minister.name + " no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n"
-        else:
-            text = current_minister.current_position + " " + current_minister.name + " has chosen to step down and retire. /n /n"
-            text += "Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n"
-        notification_tools.display_notification(text, 'default', global_manager)
+        current_minister.respond('retirement')
+
+        #notification_tools.display_notification(text, 'default', global_manager)
         
         if not current_minister.current_position == 'none':
             current_minister.appoint('none')

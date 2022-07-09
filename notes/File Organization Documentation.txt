@@ -27,6 +27,7 @@ SFA folder
 		    class actor_display_free_image(modules.images.free_image)
 		    class actor_display_infrastructure_connection_image
 		    class mob_background_image
+		        class minister_background_image
 		    class label_image(modules.images.free_image)
 
             buttons.py
@@ -58,6 +59,7 @@ SFA folder
 		        class remove_minister_button
 		        class to_trial_button
 		        class fabricate_evidence_button
+			  class bribe_judge_button
 		        class hire_african_workers_button
 		        class buy_slaves_button
 
@@ -247,6 +249,7 @@ SFA folder
 	          class tooltip_free_image
 	              class dice_roll_minister_image
 	              class minister_type_image
+			  class indicator_image
 	          class warning_image
 	          class loading_image_template
 	      class actor_image
@@ -323,7 +326,8 @@ SFA folder
         notifications.py
             imports time, labels, text_tools, utility, scaling, actor_utility
             class notification(labels.multi_line_label)
-	      class zoom_notification
+		    class minister_notification
+	          class zoom_notification
 
         save_load_tools.py
 	      imports random, pickle, scaling, notification_tools, game_transitions, grids, data_managers, turn_management_tools, text_tools, market_tools, minister_utility
@@ -353,6 +357,16 @@ SFA folder
                 class abstract_tile
 	          class resource_icon
                 class status_icon
+
+        trial_utility.py
+		imports random, utility, notification_tools, scaling, game_transitions, minister_utility, dice_utility
+		def start_trial
+		def manage_defense
+		def get_lawyer_cost
+		def get_fabricated_evidence_cost
+		def trial
+		def display_evidence_roll
+		def complete_trial
 
 	  turn_management_tools.py
 	      imports random, text_tools, actor_utility, market_tools, notification_tools, utility
