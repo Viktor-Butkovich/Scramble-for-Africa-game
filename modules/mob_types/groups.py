@@ -130,6 +130,7 @@ class group(pmob):
         Output:
             None
         '''
+        self.global_manager.get('evil_tracker').change(3)
         self.temp_disable_movement()
         if self.in_vehicle:
             zoom_destination = self.vehicle

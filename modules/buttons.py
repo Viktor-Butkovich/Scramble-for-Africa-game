@@ -256,15 +256,15 @@ class button():
                 "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
-                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points."])
+                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points"])
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
-                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points."])
+                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points"])
         elif self.button_type == 'take loan':
             self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
                 "Costs an entire turn of movement points."])
         elif self.button_type == 'convert':
-            self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village.",
+            self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
@@ -282,10 +282,13 @@ class button():
             self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
-                self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance.",
-                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial."])
+                self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance",
+                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial"])
             else:
                 self.set_tooltip(['placeholder'])
+        elif self.button_type == 'bribe judge':
+            self.set_tooltip(["Spends " + str(self.get_cost()) + " money to attempt to bribe the judge for the next trial this turn",
+                "While having unpredictable results, bribing the judge may swing the trial in your favor or blunt the defense's efforts to do the same"])
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
@@ -669,6 +672,10 @@ class button():
                     else:
                         if not self.global_manager.get('current_game_mode') == 'strategic':
                             game_transitions.set_game_mode('strategic', self.global_manager)
+                        for current_minister in self.global_manager.get('minister_list'):
+                            if current_minister.just_removed and current_minister.current_position == 'none':
+                                text = "If you do not reappoint " + current_minister.name + " by the end of the turn, he will be considered fired, leaving the minister pool and incurring a large public opinion penalty. /n /n"
+                                current_minister.display_message(text)
                         choice_info_dict = {'type': 'end turn'}
                         notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
@@ -1212,6 +1219,9 @@ class switch_game_mode_button(button):
                             text = "WARNING: Your " + str(defense.fabricated_evidence) + " piece" + utility.generate_plural(defense.fabricated_evidence) + " of fabricated evidence against " + defense.current_position + " "
                             text += defense.name + " will disappear at the end of the turn if left unused. /n /n"
                             notification_tools.display_notification(text, 'default', self.global_manager)
+                        if self.global_manager.get('prosecution_bribed_judge'):
+                            text = "WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n"
+                            notification_tools.display_notification(text, 'default', self.global_manager)
                     
                     if self.to_mode == 'main menu':
                         game_transitions.to_main_menu(self.global_manager)
@@ -1259,6 +1269,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             None
         '''
         self.default_image_id = 'ministers/empty_portrait.png'
+        self.current_minister = 'none'
         super().__init__(coordinates, width, height, 'gray', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
         self.minister_type = minister_type #position, like General
         if self.minister_type == 'none': #if available minister portrait
@@ -1267,7 +1278,22 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
         self.global_manager.get('minister_image_list').append(self)
+        self.warning_image = images.warning_image(self, global_manager, 'button')
         self.calibrate('none')
+
+    def can_show_warning(self):
+        '''
+        Description:
+            Returns whether this image should display its warning image. It should be shown when this image is visible and its attached minister is about to be fired at the end of the turn
+        Input:
+            None
+        Output:
+            Returns whether this image should display its warning image
+        '''
+        if not self.current_minister == 'none':
+            if self.current_minister.just_removed and self.current_minister.current_position == 'none':
+                return(True)
+        return(False)
 
     def draw(self):
         '''
@@ -1327,6 +1353,8 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         Output:
             None
         '''
+        if not self.current_minister == 'none':
+            self.tooltip_text = self.current_minister.tooltip_text
         self.set_tooltip(self.tooltip_text)
 
 class cycle_available_ministers_button(button):

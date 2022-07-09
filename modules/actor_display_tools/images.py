@@ -1,6 +1,7 @@
 #Contains functionality for actor display images
 
 from ..images import free_image
+from ..images import warning_image
 
 class actor_display_free_image(free_image):
     '''
@@ -188,6 +189,58 @@ class mob_background_image(free_image):
             self.set_tooltip(tooltip_text)
         else:
             super().update_tooltip()
+
+class minister_background_image(mob_background_image):
+    '''
+    Image that appears behind a minister and changes to match their current office
+    '''
+    def __init__(self, image_id, coordinates, width, height, modes, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            string image_id: File path to the image used by this object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this image can appear
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(image_id, coordinates, width, height, modes, global_manager)
+        self.warning_image = warning_image(self, global_manager)
+        self.warning_image.x += self.width * 0.75
+
+    def can_show_warning(self):
+        '''
+        Description:
+            Returns whether this image should display its warning image. It should be shown when this image is visible and its attached minister is about to be fired at the end of the turn
+        Input:
+            None
+        Output:
+            Returns whether this image should display its warning image
+        '''
+        if not self.actor == 'none':
+            if self.actor.just_removed and self.actor.current_position == 'none':
+                return(True)
+        return(False)
+        
+    def calibrate(self, new_minister):
+        '''
+        Description:
+            Updates which minister is in front of this image and changes its appearance to match the minister's current office
+        Input:
+            string/minister new_minister: The displayed minister that goes in front of this image. If this equals 'none', there is no minister in front of it
+        Output:
+            None
+        '''
+        super().calibrate(new_minister)
+        if not new_minister == 'none':
+            if new_minister.current_position == 'none':
+                self.set_image('misc/mob_background.png')
+            else:
+                self.set_image('ministers/icons/' + self.global_manager.get('minister_type_dict')[new_minister.current_position] + '.png')
 
 class label_image(free_image):
     '''

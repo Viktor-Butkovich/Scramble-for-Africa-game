@@ -60,6 +60,8 @@ def set_game_mode(new_game_mode, global_manager):
     elif previous_game_mode == 'trial':
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')
+    if global_manager.get('startup_complete'):
+        global_manager.get('notification_manager').update_notification_layout()
     
 def create_strategic_map(global_manager):
     '''

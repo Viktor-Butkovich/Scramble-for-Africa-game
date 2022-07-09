@@ -235,11 +235,77 @@ class tooltip_free_image(free_image):
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
+class indicator_image(tooltip_free_image):
+    '''
+    Image that appears under certain conditions based on its type
+    '''
+    def __init__(self, image_id, coordinates, width, height, modes, indicator_type, global_manager, to_front = False):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            string image_id: File path to the image used by this object
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this image
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            string list modes: Game modes during which this button can appear
+            string indicator_type: Type of variable that this indicator is attached to, like 'prosecution_bribed_judge'
+            global_manager_template global_manager: Object that accesses shared variables
+            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+        Output:
+            None
+        '''
+        self.indicator_type = indicator_type
+        super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. Indicator images are shown when their attached variables are at certain values
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can currently appear, otherwise returns False
+        '''
+        if super().can_show():
+            if self.indicator_type == 'prosecution_bribed_judge':
+                if self.global_manager.get('prosecution_bribed_judge'):
+                    return(True)
+            elif self.indicator_type == 'not prosecution_bribed_judge':
+                if not self.global_manager.get('prosecution_bribed_judge'):
+                    return(True)
+            else:
+                return(True)
+        return(False)
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this image's tooltip to what it should be, depending on its attached variable
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.indicator_type == 'prosecution_bribed_judge':
+            text = []
+            text.append('The judge has been bribed, giving you an advantage in the next trial this turn')
+            text.append('This bonus will fade at the end of the turn if not used')
+            self.set_tooltip(text)
+        elif self.indicator_type == 'not prosecution_bribed_judge':
+            text = []
+            text.append('The judge has not yet been bribed')
+            text.append('Bribing the judge may give you an advantage in the next trial this turn or blunt the impact of any bribes made by the defense.')
+            self.set_tooltip(text)
+        else:
+            self.set_tooltip([])
+                
+
 class dice_roll_minister_image(tooltip_free_image): #image that appears during dice rolls showing minister position or portrait
     '''
     Part of a pair of imgaes that shows the controlling minister's position and portrait next to notifications during dice rolls
     '''
-    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager):
+    def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager, minister_message_image = False):
         '''
         Description:
             Initializes this object
@@ -251,6 +317,7 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
             minister attached_minister: Minister attached to this image
             string minister_image_type: Type of minister information shown by this image, like 'portrait' or 'position'
             global_manager_template global_manager: Object that accesses shared variables
+            boolean minister_message_image = False: Whether this image is attached to a minister message or an action notification dice roll
         Output:
             None
         '''
@@ -259,7 +326,11 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
         if minister_image_type == 'portrait':
             image_id = attached_minister.image_id
         elif minister_image_type == 'position':
-            image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+            if not self.attached_minister.current_position == 'none':
+                image_id = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.attached_minister.current_position] + '.png'
+            else:
+                image_id = 'misc/mob_background.png'
+        self.minister_message_image = minister_message_image #whether this is an image attached to a minister message notification or an action notification - action notification by default, acts differently
         super().__init__(image_id, coordinates, width, height, modes, global_manager)
         global_manager.get('dice_roll_minister_images').append(self)
         self.to_front = True
@@ -278,6 +349,25 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
             self.set_tooltip(self.attached_minister.tooltip_text)
         else:
             self.set_tooltip([])
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown. Normal dice roll minister images return the same as superclass, while minister message images are only shown when their minister's message is currently displayed
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image can currently appear, otherwise returns False
+        '''
+        if super().can_show():
+            if self.minister_message_image:
+                #if len(self.global_manager.get('notification_list')) > 0:
+                current_notification = self.global_manager.get('notification_list')[0]
+                if current_notification.notification_type == 'minister' and current_notification.attached_minister == self.attached_minister:
+                    return(True)
+            else:
+                return(True)
+        return(False)
 
     def remove(self):
         '''
@@ -416,18 +506,26 @@ class warning_image(free_image):
     '''
     Image that appears over the image it is attached to under certain conditions to draw attention from the player
     '''
-    def __init__(self, attached_image, global_manager):
+    def __init__(self, attached_image, global_manager, attachment_type = 'image'):
         '''
         Description:
             Initializes this object
         Input:
             image attached_image: Image that this warning appears over under certain conditions
             global_manager_template global_manager: Object that accesses shared variables
+            string attachment_type = 'image': Type of object this image is attached to, like 'image' or 'button'
         Output:
             None
         '''
         self.attached_image = attached_image
-        super().__init__('misc/warning_icon.png', (self.attached_image.x, global_manager.get('display_height') - self.attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
+        if attachment_type == 'image':
+            x_position = self.attached_image.x
+            y_position = global_manager.get('display_height') - self.attached_image.y
+        else:
+            x_position = self.attached_image.x - 100
+            y_position = self.attached_image.y
+            
+        super().__init__('misc/warning_icon.png', (x_position, y_position), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
             global_manager)
 
     def can_show(self):

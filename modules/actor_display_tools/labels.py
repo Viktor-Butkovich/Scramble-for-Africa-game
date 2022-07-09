@@ -131,7 +131,8 @@ class actor_display_label(label):
             if 'ministers' in self.modes:
                 self.attached_buttons.append(buttons.to_trial_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
             if 'trial' in self.modes:
-                self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y), self.height + 11, self.height + 11, self, global_manager))
+                self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y - 25), self.height + 31, self.height + 31, self, global_manager))
+                self.attached_buttons.append(buttons.bribe_judge_button((self.x, self.y - 25), self.height + 31, self.height + 31, self, global_manager))
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
@@ -234,6 +235,15 @@ class actor_display_label(label):
                     tooltip_text.append("A corrupt minister may let goods go missing, steal the money given for a task and report a failure, or otherwise benefit themselves at the expense of your company.")
                     tooltip_text.append("When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.")
                     tooltip_text.append("If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position.")
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'background':
+            tooltip_text = [self.message]
+            tooltip_text.append("A minister's personal background determines their social status and may give them additional expertise in certain areas.")
+            self.set_tooltip(tooltip_text)
+        elif self.actor_label_type == 'social status':
+            tooltip_text = [self.message]
+            tooltip_text.append("A minister's social status determines their power independent of your company.")
+            tooltip_text.append("A minister of higher social status has a much greater ability to either help your company when your goals align, or fight back should they ever diverge.")
             self.set_tooltip(tooltip_text)
         elif self.actor_label_type == 'building workers':
             tooltip_text = [self.message]
@@ -414,7 +424,13 @@ class actor_display_label(label):
                     self.set_label(self.message_start + str(new_actor.corruption_evidence))
                 else:
                     self.set_label(self.message_start + str(new_actor.corruption_evidence) + " (" + str(new_actor.fabricated_evidence) + ")")               
+
+            elif self.actor_label_type == 'background':
+                self.set_label(self.message_start + new_actor.background)
                 
+            elif self.actor_label_type == 'social status':
+                self.set_label(self.message_start + new_actor.status)
+            
             elif self.actor_label_type == 'minister_name':
                 self.set_label(self.message_start + new_actor.name)
                 

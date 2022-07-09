@@ -1924,6 +1924,8 @@ class appoint_minister_button(label_button):
                 self.showing_outline = True
                 appointed_minister = self.global_manager.get('displayed_minister')
                 appointed_minister.appoint(self.appoint_type)
+                if not appointed_minister.just_removed:
+                    appointed_minister.respond('first hired')
             else:
                 text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
 
@@ -1976,6 +1978,12 @@ class remove_minister_button(label_button):
                 self.showing_outline = True
                 appointed_minister = self.global_manager.get('displayed_minister')
                 appointed_minister.appoint('none')
+                public_opinion_penalty = appointed_minister.status_number
+                text = 'You suffer a small public opinion penalty of ' + str(public_opinion_penalty) + ' for removing ' + appointed_minister.name + ' from office. /n /n'
+                text += appointed_minister.name + ' assumes he will be appointed to a different position by the end of the turn, but he will leave permanently and cause a much larger public opinion penalty if not reappointed. /n /n'
+                appointed_minister.display_message(text)
+                appointed_minister.just_removed = True
+                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 
@@ -2087,15 +2095,88 @@ class fabricate_evidence_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.get_cost():
                     self.showing_outline = True
-                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'evidence fabrication')
+                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
                     defense = self.global_manager.get('displayed_defense')
+                    prosecutor = self.global_manager.get('displayed_prosecution')
+                    prosecutor.display_message(prosecutor.current_position + " " + prosecutor.name + " reports that evidence has been successfully fabricated for " + str(self.get_cost()) +
+                        " money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n")
                     defense.fabricated_evidence += 1
                     defense.corruption_evidence += 1
                     minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display_list'), defense) #updates trial display with new evidence
                 else:
                     text_tools.print_to_screen("You do not have the " + str(self.get_cost()) + " money needed to fabricate evidence.", self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)     
+                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)
+
+class bribe_judge_button(label_button):
+    '''
+    Button in the trial screen that bribes the judge to get an advantage in the next trial this turn
+    '''
+    def __init__(self, coordinates, width, height, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'bribe judge', 'none', attached_label.modes, 'buttons/bribe_judge_button.png', attached_label, global_manager)
+
+    def get_cost(self):
+        '''
+        Description:
+            Returns the cost of bribing the judge, which is as much as the first piece of fabricated evidence
+        Input:
+            None
+        Output:
+            Returns the cost of bribing the judge
+        '''
+        return(trial_utility.get_fabricated_evidence_cost(0)) #costs as much as 1st piece of fabricated evidence
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if judge has not been bribed yet, otherwise returns False
+        '''
+        if super().can_show():
+            if not self.global_manager.get('prosecution_bribed_judge'):
+                return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button spends money to bribe the judge
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money') >= self.get_cost():
+                    if not self.global_manager.get('prosecution_bribed_judge'):
+                        self.showing_outline = True
+                        self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
+                        self.global_manager.set('prosecution_bribed_judge', True)
+                        prosecutor = self.global_manager.get('displayed_prosecution')
+                        prosecutor.display_message(prosecutor.current_position + " " + prosecutor.name + " reports that the judge has been successfully bribed for " + str(self.get_cost()) +
+                            " money. /n /nThis may provide a bonus in the next trial this turn. /n /n")
+                    else:
+                        text_tools.print_to_screen("The judge has already been bribed for this trial.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have the " + str(self.get_cost()) + " money needed to bribe the judge.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)  
     
 class hire_african_workers_button(label_button):
     '''

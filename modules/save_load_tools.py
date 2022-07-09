@@ -42,6 +42,7 @@ class save_load_manager_template():
         self.copied_elements.append('money')
         self.copied_elements.append('turn')
         self.copied_elements.append('public_opinion')
+        self.copied_elements.append('evil')
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
@@ -53,6 +54,7 @@ class save_load_manager_template():
         self.copied_elements.append('transaction_history')
         self.copied_elements.append('previous_financial_report')
         self.copied_elements.append('num_wandering_workers')
+        self.copied_elements.append('prosecution_bribed_judge')
         
     def new_game(self):
         '''
@@ -151,6 +153,7 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
+        self.global_manager.get('evil_tracker').set(0)
 
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
@@ -217,7 +220,8 @@ class save_load_manager_template():
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
             if self.global_manager.get('DEBUG_show_corruption_on_save'):
-                print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold))
+                print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
+                    ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
 
         with open(file_path, 'wb') as handle: #write wb, read rb
@@ -262,6 +266,7 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
+        self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
 
         #load grids
         strategic_grid_height = 300

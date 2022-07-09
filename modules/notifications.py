@@ -34,6 +34,7 @@ class notification(multi_line_label):
         self.notification_dice = 0 #by default, do not show any dice when notification shown
         self.global_manager.get('sound_manager').play_sound('opening_letter')
         self.creation_time = time.time()
+        self.notification_type = 'default'
 
     def format_message(self):
         '''
@@ -92,10 +93,39 @@ class minister_notification(notification):
     '''
     Notification that is a message from a minister and has a minister portrait attached
     '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager, attached_minister):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        self.attached_minister = attached_minister
+        self.notification_type = 'minister'
+        
     def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
+                if there is one
+        Input:
+            None
+        Output:
+            None
+        '''
         super().remove()
         for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-            current_minister_image.remove()
+            if current_minister_image.attached_minister == self.attached_minister:
+                current_minister_image.remove()
         
         
 class zoom_notification(notification):
@@ -119,6 +149,7 @@ class zoom_notification(notification):
             None
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        self.notification_type = 'default'
         if self.global_manager.get('strategic_map_grid') in target.grids:
             self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
         if target.actor_type == 'tile':
