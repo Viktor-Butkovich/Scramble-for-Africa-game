@@ -290,7 +290,7 @@ class minister():
                 results.append(self.no_corruption_roll(num_sides))
         return(results)
             
-    def attack_roll_to_list(self, modifier, value, roll_type, num_dice):
+    def attack_roll_to_list(self, own_modifier, enemy_modifier, value, roll_type, num_dice):
         '''
         Description:
             Rolls and returns the result of the inputted number of 6-sided dice along with the enemy unit's roll in combat, modifying the results based on skill and possibly lying about the result based on corruption
@@ -309,9 +309,9 @@ class minister():
                 results.append(0)
             difference = 10
             while difference >= 2: #keep rolling until a combination of attacker and defender rolls with an inconclusive result is found
-                own_roll = random.randrange(1, 7) + modifier
+                own_roll = random.randrange(1, 7)
                 enemy_roll = random.randrange(1, 7)
-                difference = abs(own_roll - enemy_roll)
+                difference = abs((own_roll + own_modifier) - (enemy_roll + enemy_modifier))
             corrupt_index = random.randrange(0, num_dice)
             for i in range(num_dice):
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly to be the chosen result, with the others being lower

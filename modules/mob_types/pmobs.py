@@ -529,7 +529,7 @@ class pmob(mob):
 
         if self.veteran:
             if combat_type == 'attacking': #minister only involved in attacks
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, num_dice - 1)
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, 'combat', num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 results = minister_rolls
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
@@ -547,7 +547,7 @@ class pmob(mob):
             text += ("The higher result, " + str(roll_result + own_combat_modifier) + ", was used. /n")
         else:
             if combat_type == 'attacking': #minister only involved in attacks
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, num_dice - 1)
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, 'combat', num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 result = minister_rolls[0]
             else:

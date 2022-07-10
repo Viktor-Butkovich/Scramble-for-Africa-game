@@ -119,7 +119,7 @@ class village():
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/native_warriors/default.png'
         input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'Native warriors'
+        input_dict['name'] = 'native warriors'
         input_dict['init_type'] = 'native_warriors'
         input_dict['origin_village'] = self
         self.change_population(-1)

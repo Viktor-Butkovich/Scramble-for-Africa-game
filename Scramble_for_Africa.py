@@ -327,6 +327,7 @@ try:
         'construction': 'construction',
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
+        'combat': 'combat',
         'none': 'miscellaneous company activities'
         }
     )
@@ -363,6 +364,7 @@ try:
     global_manager.set('mob_list', [])
     global_manager.set('pmob_list', [])
     global_manager.set('npmob_list', [])
+    global_manager.set('beast_list', [])
     global_manager.set('village_list', [])
     global_manager.set('building_list', [])
     global_manager.set('slums_list', [])
@@ -913,6 +915,9 @@ try:
 
     global_manager.set('DEBUG_show_evil', False) #False by default
     #prints the players "evil" number at the end of each turn
+
+    global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
+    #reveals all cells
     
     #activating/disabling debugging tools
 

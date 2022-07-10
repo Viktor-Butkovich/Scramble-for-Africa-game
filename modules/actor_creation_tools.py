@@ -12,6 +12,7 @@ from .mob_types import work_crews
 from .mob_types import vehicles
 from .mob_types import battalions
 from .mob_types import native_warriors
+from .mob_types import beasts
 from . import buildings
 from . import ministers
 from . import notification_tools
@@ -69,6 +70,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'native_warriors':
             new_actor = native_warriors.native_warriors(from_save, input_dict, global_manager)
+        elif init_type == 'beast':
+            new_actor = beasts.beast(from_save, input_dict, global_manager)
                 
         #groups
         elif init_type == 'porters':

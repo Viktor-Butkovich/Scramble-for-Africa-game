@@ -5,6 +5,16 @@ import random
 from . import scaling
 from . import utility
 
+def spawn_beast(global_manager):
+    input_dict = {}
+    input_dict['coordinates'] = (0, 0)
+    input_dict['grids'] = [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid]
+    input_dict['image'] = 'mobs/beasts/default.png'
+    input_dict['modes'] = ['strategic']
+    input_dict['name'] = 'beast'
+    input_dict['init_type'] = 'beast'
+    global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
+
 def find_closest_available_worker(destination, global_manager):
     '''
     Description:

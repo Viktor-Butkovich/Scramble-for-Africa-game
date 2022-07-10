@@ -423,7 +423,7 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
         if not new_minister == 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
         current_minister_type = self.minister_type
-        if (not self.attached_label == 'none') and (not self.attached_label.actor == 'none'):
+        if (not self.attached_label == 'none') and (not self.attached_label.actor == 'none') and self.attached_label.actor.is_pmob:
             current_minister_type = self.attached_label.actor.controlling_minister_type
         if not current_minister_type == 'none':
             keyword = self.global_manager.get('minister_type_dict')[current_minister_type] #type, like military
@@ -932,6 +932,12 @@ class mob_image(actor_image):
         Output:
             None
         '''
+        #if self.current_cell == 'none':
+        #    if self.grid.is_mini_grid:
+        #        mini_grid_coordinates = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
+        #        self.current_cell = self.grid.find_cell(mini_grid_coordinates[0], mini_grid_coordinates[1])
+        #    else:
+        #        self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
         if not self.current_cell == 'none':
             self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
         self.current_cell = 'none'

@@ -1,6 +1,13 @@
+beasts.py
+turn_management_tools.manage_beasts
+actor_utility.spawn_beast
+mobs.mob.set_hidden
+buttons.same_tile_icon.can_show
+ministers.minister.attack_roll_to_list
 
 Future plans:
-keep track of the player's "evil" actions and have ministers react appropriately
+add evangelist increasing public opinion
+add 2 'interest' categories per minister, one of which is their best skill
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
@@ -15,6 +22,8 @@ possible ui improvement: have green/red letters appear by cursor after user does
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
 Possible/known Errors:
+allow player to exit game and save even when ministers are not appointed
+capitalize first letter of enemy name during combat
 prevent multiple trials from happening in the same turn
 pmobs.display_die creating minister icons without resolution scaling
 native warriors name attribute unnecessarily capitalized

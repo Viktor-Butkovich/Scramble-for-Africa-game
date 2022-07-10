@@ -413,6 +413,7 @@ def manage_lmb_down(clicked_button, global_manager):
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
                             if current_cell.visible:
+                                my_cell = current_cell
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_new_mob = True
                                     current_cell.contained_mobs[0].select()

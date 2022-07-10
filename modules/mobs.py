@@ -246,8 +246,9 @@ class mob(actor):
             None
         '''
         if super().can_show_tooltip():
-            if self.images[0].current_cell.visible:
-                return(True)
+            if not self.images[0].current_cell == 'none':
+                if self.images[0].current_cell.visible:
+                    return(True)
         return(False)
 
     def get_movement_cost(self, x_change, y_change):
@@ -689,6 +690,7 @@ class mob(actor):
         '''
         for current_image in self.images:
             current_image.remove_from_cell()
+        
 
     def show_images(self):
         '''

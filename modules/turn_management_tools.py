@@ -37,6 +37,7 @@ def start_enemy_turn(global_manager):
         None
     '''
     manage_villages(global_manager)
+    manage_beasts(global_manager)
     reset_mobs('npmobs', global_manager)
     manage_enemy_movement(global_manager)
     manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
@@ -80,7 +81,7 @@ def start_player_turn(global_manager, first_turn = False):
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.in_building or end_turn_selected_mob.in_group or end_turn_selected_mob.in_vehicle)) and end_turn_selected_mob in global_manager.get('mob_list'):
+    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.images[0].current_cell == 'none')) and end_turn_selected_mob in global_manager.get('mob_list'):
         #do not attempt to select if none selected or has been removed since end of turn
         end_turn_selected_mob.select()
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
@@ -436,6 +437,15 @@ def manage_villages(global_manager):
             current_village.change_population(1)
 
         current_village.manage_warriors()
+
+def manage_beasts(global_manager):
+    beast_list = global_manager.get('beast_list')
+    for current_beast in beast_list:
+        current_beast.check_despawn()
+
+    while len(beast_list) < 3:
+        actor_utility.spawn_beast(global_manager)
+    
 
 def manage_enemy_movement(global_manager):
     '''
