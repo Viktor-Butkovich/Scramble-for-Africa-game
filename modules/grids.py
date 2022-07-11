@@ -236,6 +236,24 @@ class grid():
             if cell.x == x and cell.y == y:
                 return(cell)
         return('none')
+
+    def choose_cell(self, requirements_dict):
+        allowed_terrains = requirements_dict['allowed_terrains']
+        ocean_allowed = requirements_dict['ocean_allowed']
+        nearby_buildings_allowed = requirements_dict['nearby_buildings_allowed']
+        possible_cells = []
+        for current_cell in self.cell_list:
+            if not current_cell.terrain in allowed_terrains:
+                continue
+            if (not ocean_allowed) and current_cell.y == 0:
+                continue
+            if (not nearby_buildings_allowed) and current_cell.adjacent_to_buildings():
+                continue
+            possible_cells.append(current_cell)
+        if len(possible_cells) == 0:
+            possible_cells.append('none')
+        return(random.choice(possible_cells))
+        
             
     def create_cells(self):
         '''

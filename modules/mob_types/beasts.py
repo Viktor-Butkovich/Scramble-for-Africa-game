@@ -1,5 +1,14 @@
 #Contains functionality for wild beasts
-
+'''
+beast notes:
+lion - clear and hills
+elephant - clear and swamp
+gorilla - jungle and mountain
+Cape buffalo - clear and hills
+crocodile - water and swamp
+hippo - water and swamp
+leopard - jungle and mountain
+'''
 import random
 from .npmobs import npmob
 from .. import utility
@@ -9,31 +18,20 @@ class beast(npmob):
     Beasts that wander the map hidden, prefer certain terrains, attack/demoralize nearby units, and can be tracked down by a safari
     '''
     def __init__(self, from_save, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'grids': grid list value - grids in which this mob's images can appear
-                'image': string value - File path to the image used by this object
-                'name': string value - Required if from save, this mob's name
-                'modes': string list value - Game modes during which this mob's images can appear
-                'movement_points': int value - Required if from save, how many movement points this actor currently has
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
         self.hidden = False
         global_manager.get('beast_list').append(self)
+        self.animal_type = input_dict['animal_type']
+        self.adjective = input_dict['adjective']
+        input_dict['name'] = self.adjective + ' ' + self.animal_type
         super().__init__(from_save, input_dict, global_manager)
+        
         self.npmob_type = 'beast'
         self.hostile = True
+        self.preferred_terrains = global_manager.get('animal_terrain_dict')[self.animal_type]
         if from_save:
             self.set_hidden(input_dict['hidden'])
         else:
-            self.hidden = True
+            self.set_hidden(False)
 
     def to_save_dict(self):
         '''
@@ -58,10 +56,33 @@ class beast(npmob):
         '''
         save_dict = super().to_save_dict()
         save_dict['hidden'] = self.hidden
+        save_dict['preferred_terrains'] = self.preferred_terrains
+        save_dict['adjective'] = self.adjective
+        save_dict['animal_type'] = self.animal_type
         return(save_dict) 
 
+    def find_closest_target(self):
+        target_list = []
+        possible_cells = self.images[0].current_cell.adjacent_list + [self.images[0].current_cell]
+        enemy_found = False
+        for current_cell in possible_cells:
+            if current_cell.terrain in self.preferred_terrains:
+                if not enemy_found:
+                    if current_cell.has_pmob():
+                        target_list = [current_cell]
+                        enemy_found = True
+                    else:
+                        target_list.append(current_cell)
+                else:
+                    if current_cell.has_pmob():
+                        target_list.append(current_cell)
+        if len(target_list) == 0:
+            target_list.append(self.images[0].current_cell)
+        return(random.choice(target_list))
+
     def end_turn_move(self):
-        self.set_hidden(random.choice([True, False]))
+        #self.set_hidden(random.choice([True, False]))
+        self.set_hidden(False)
         if not self.hidden:
             super().end_turn_move()
         
@@ -74,46 +95,8 @@ class beast(npmob):
             self.show_images()
     
     def check_despawn(self):
-        #if random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2:
-        #    self.remove()
-        nothing = 0
-            
-    def hide_images(self):
-        '''
-        Description:
-            Hides this mob's images, allowing it to be hidden but still stored at certain coordinates when it is attached to another actor or otherwise not visible
-        Input:
-            None
-        Output:
-            None
-        '''
-        #print('hiding')
-        #if self.hidden:
-
-        #cells = []
-        #for current_image in self.images:
-        #    cells.append(current_image.current_cell)
-
-        for current_image in self.images:
-            current_image.remove_from_cell()
-            
-        #for current_cell in cells:
-        #    if not current_cell == 'none':
-        #        print(current_cell.contained_mobs)
-
-    def show_images(self):
-        '''
-        Description:
-            Shows this mob's images at its stored coordinates, allowing it to be visible after being attached to another actor or otherwise not visible
-        Input:
-            None
-        Output:
-            None
-        '''
-        #print('showing')
-        #if not self.hidden:
-        for current_image in self.images:
-            current_image.add_to_cell()   
+        if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+            self.remove()  
 
     def remove(self):
         super().remove()

@@ -287,6 +287,12 @@ class cell():
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
 
+    def adjacent_to_buildings(self):
+        for current_adjacent_cell in (self.adjacent_list + [self]):
+            if len(current_adjacent_cell.get_buildings()) > 0:
+                return(True)
+        return(False)
+
     def create_slums(self):
         '''
         Description:

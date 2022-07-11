@@ -138,6 +138,8 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
+        elif self.actor_label_type == 'preferred_terrains':
+            self.message_start = 'Preferred terrain: '
         else:
             self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -298,7 +300,7 @@ class actor_display_label(label):
         self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
-                self.set_label(self.message_start + new_actor.name.capitalize())
+                self.set_label(self.message_start + new_actor.name[:1].capitalize() + new_actor.name[1:])
                 
             elif self.actor_label_type == 'coordinates':
                 self.set_label(self.message_start + '(' + str(new_actor.x) + ', ' + str(new_actor.y) + ')')
@@ -352,6 +354,10 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'combat_strength':
                 self.set_label(self.message_start + str(self.actor.get_combat_strength()))
+
+            elif self.actor_label_type == 'preferred_terrains':
+                if self.actor.is_npmob and self.actor.npmob_type == 'beast':
+                    self.set_label(self.message_start + " " + self.actor.preferred_terrains[0] + ", " + self.actor.preferred_terrains[1] + ", " + self.actor.preferred_terrains[2])
 
             elif self.actor_label_type == 'controllable':
                 if not self.actor.controllable:
@@ -510,6 +516,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister' and not self.actor.controllable:
             return(False)
         elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
+            return(False)
+        elif self.actor_label_type == 'preferred_terrains' and not (self.actor.is_npmob and self.actor.npmob_type == 'beast'):
             return(False)
         else:
             return(result)

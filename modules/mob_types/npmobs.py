@@ -29,6 +29,7 @@ class npmob(mob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.hostile = False
+        self.can_damage_buildings = False
         self.controllable = False
         self.is_npmob = True
         self.saves_normally = True #units like native warriors are attached to other objects and do not save normally
@@ -144,43 +145,45 @@ class npmob(mob):
         '''
         closest_target = self.find_closest_target()
         if not closest_target == 'none':
-            if closest_target.x > self.x: #decides moving left or right
-                horizontal_multiplier = 1
-            elif closest_target.x == self.x:
-                horizontal_multiplier = 0
-            else:
-                horizontal_multiplier = -1
+            if not (closest_target.x == self.x and closest_target.y == self.y): #don't move if target is own tile
+                if closest_target.x > self.x: #decides moving left or right
+                    horizontal_multiplier = 1
+                elif closest_target.x == self.x:
+                    horizontal_multiplier = 0
+                else:
+                    horizontal_multiplier = -1
 
-            if closest_target.y > self.y: #decides moving up or down
-                vertical_multiplier = 1
-            elif closest_target.y == self.y:
-                vertical_multiplier = 0
-            else:
-                vertical_multiplier = -1
+                if closest_target.y > self.y: #decides moving up or down
+                    vertical_multiplier = 1
+                elif closest_target.y == self.y:
+                    vertical_multiplier = 0
+                else:
+                    vertical_multiplier = -1
 
 
-            if horizontal_multiplier == 0:
-                if not vertical_multiplier == 0:
-                    while self.movement_points > 0:
-                        self.move(0, 1 * vertical_multiplier)
-            elif vertical_multiplier == 0:
-                while self.movement_points > 0:
-                    self.move(1 * horizontal_multiplier, 0)
-            else:
-                horizontal_difference = abs(self.x - closest_target.x) #decides moving left/right or up/down
-                vertical_difference = abs(self.y - closest_target.y)
-                total_difference = horizontal_difference + vertical_difference #if horizontal is 3 and vertical is 2, move horizontally if random from 1 to 5 is 3 or lower: 60% chance of moving horizontally, 40% of moving vertically
-                if random.randrange(0, total_difference + 1) <= horizontal_difference: #allows weighting of movement to be more likely to move along more different axis
+                if horizontal_multiplier == 0:
+                    if not vertical_multiplier == 0:
+                        while self.movement_points > 0:
+                            self.move(0, 1 * vertical_multiplier)
+                elif vertical_multiplier == 0:
                     while self.movement_points > 0:
                         self.move(1 * horizontal_multiplier, 0)
                 else:
-                    while self.movement_points > 0:
-                        self.move(0, 1 * vertical_multiplier)
+                    horizontal_difference = abs(self.x - closest_target.x) #decides moving left/right or up/down
+                    vertical_difference = abs(self.y - closest_target.y)
+                    total_difference = horizontal_difference + vertical_difference #if horizontal is 3 and vertical is 2, move horizontally if random from 1 to 5 is 3 or lower: 60% chance of moving horizontally, 40% of moving vertically
+                    if random.randrange(0, total_difference + 1) <= horizontal_difference: #allows weighting of movement to be more likely to move along more different axis
+                        while self.movement_points > 0:
+                            self.move(1 * horizontal_multiplier, 0)
+                    else:
+                        while self.movement_points > 0:
+                            self.move(0, 1 * vertical_multiplier)
             if self.combat_possible():
                 self.global_manager.get('attacker_queue').append(self)
             else:
                 self.kill_noncombatants()
-                self.damage_buildings()
+                if self.can_damage_buildings:
+                    self.damage_buildings()
 
     def move(self, x_change, y_change):
         '''

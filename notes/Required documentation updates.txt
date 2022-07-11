@@ -4,8 +4,14 @@ actor_utility.spawn_beast
 mobs.mob.set_hidden
 buttons.same_tile_icon.can_show
 ministers.minister.attack_roll_to_list
+grids.grid.choose_cell
+cells.cell.adjacent_to_buildings
+npmobs.npmob.end_turn_move can take cell instead of just unit/building
+save_load_tools imports
 
 Future plans:
+make utility capitalize function that does not make rest of word lowercase, use mobs.update_tooltip as example
+mix animal adjectives and types
 add evangelist increasing public opinion
 add 2 'interest' categories per minister, one of which is their best skill
 possibly have adjustable police investment per turn

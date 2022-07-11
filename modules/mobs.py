@@ -480,7 +480,8 @@ class mob(actor):
             None
         '''
         tooltip_list = []
-        tooltip_list.append("Name: " + self.name.capitalize())
+        
+        tooltip_list.append("Name: " + self.name[:1].capitalize() + self.name[1:]) #capitalizes first letter while keeping rest the same
         
         if self.controllable:
             if self.is_group:
@@ -507,11 +508,6 @@ class mob(actor):
 
         else:
             tooltip_list.append("Movement points: ???")
-            if self.hostile:
-                tooltip_list.append("Attitude: Hostile")
-            else:
-                tooltip_list.append("Attitude: Neutral")
-            tooltip_list.append("You do not control this unit")
         
         tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
         if self.disorganized:
@@ -519,11 +515,22 @@ class mob(actor):
 
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn.")
+                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn")
             elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn.")
+                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn")
             elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn.")
+                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn")
+                
+        if self.is_npmob and self.npmob_type == 'beast':
+            tooltip_list.append("This beast tends to live in " + self.preferred_terrains[0] + ", " + self.preferred_terrains[1] + ", and " + self.preferred_terrains[2] + " terrain ")
+            
+        if not self.controllable:
+            if self.hostile:
+                tooltip_list.append("Attitude: Hostile")
+            else:
+                tooltip_list.append("Attitude: Neutral")
+            tooltip_list.append("You do not control this unit")
+            
         self.set_tooltip(tooltip_list)
         
     def remove(self):

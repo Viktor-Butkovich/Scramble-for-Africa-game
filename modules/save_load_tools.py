@@ -12,6 +12,7 @@ from . import turn_management_tools
 from . import text_tools
 from . import market_tools
 from . import minister_utility
+from . import actor_utility
 
 class save_load_manager_template():
     '''
@@ -169,6 +170,10 @@ class save_load_manager_template():
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
+
+        for i in range(1, random.randrange(5, 8)):
+            turn_management_tools.manage_villages(self.global_manager)
+            actor_utility.spawn_beast(self.global_manager)
         
         minister_utility.update_available_minister_display(self.global_manager)
 

@@ -7,11 +7,27 @@ from . import utility
 
 def spawn_beast(global_manager):
     input_dict = {}
-    input_dict['coordinates'] = (0, 0)
+    #possible_terrains = global_manager.get('terrain_list') + ['water']
+    #input_dict['preferred_terrains'] = [random.choice(possible_terrains)]
+    #input_dict['preferred_terrains'].append(random.choice(possible_terrains))
+    #while input_dict['preferred_terrains'][0] == input_dict['preferred_terrains'][1]:
+    #    input_dict['preferred_terrains'][1] = random.choice(possible_terrains)
+
+    requirements_dict = {}
+    requirements_dict['ocean_allowed'] = False
+    requirements_dict['allowed_terrains'] = global_manager.get('terrain_list') + ['water']
+    requirements_dict['nearby_buildings_allowed'] = True
+    spawn_cell = global_manager.get('strategic_map_grid').choose_cell(requirements_dict)
+    if spawn_cell.adjacent_to_buildings():
+        return() #cancel spawn if beast would spawn near buildings, become less common as colony develops
+    terrain_type = spawn_cell.terrain
+    
+    input_dict['coordinates'] = (spawn_cell.x, spawn_cell.y)
     input_dict['grids'] = [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid]
-    input_dict['image'] = 'mobs/beasts/default.png'
     input_dict['modes'] = ['strategic']
-    input_dict['name'] = 'beast'
+    input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
+    input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
+    input_dict['image'] = 'mobs/beasts/default.png'
     input_dict['init_type'] = 'beast'
     global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
 

@@ -87,6 +87,32 @@ try:
         'none': (0, 0, 0)
         }
     )
+
+    global_manager.set('terrain_animal_dict',
+        {
+        'clear': ['lion', 'bull elephant', 'Cape buffalo'],
+        'hills': ['gorilla', 'Cape buffalo', 'hippopotamus'],
+        'jungle': ['gorilla', 'crocodile', 'leopard'],
+        'water': ['crocodile', 'hippopotamus', 'leopard'],
+        'mountain': ['lion', 'gorilla', 'leopard'],
+        'swamp': ['bull elephant', 'crocodile', 'hippopotamus'],
+        'desert': ['lion', 'bull elephant', 'Cape buffalo']
+        }
+    )
+    
+    global_manager.set('animal_terrain_dict',
+        {
+        'lion': ['clear', 'desert', 'mountain'],
+        'bull elephant': ['clear', 'swamp', 'desert'],
+        'Cape buffalo': ['clear', 'hills', 'desert'],
+        'crocodile': ['water', 'swamp', 'jungle'],
+        'hippopotamus': ['water', 'swamp', 'hills'],
+        'gorilla': ['mountain', 'jungle', 'hills'],
+        'leopard': ['jungle', 'mountain', 'water']
+        }
+    )
+
+    global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant'])
     #terrain setup
 
 
@@ -723,7 +749,7 @@ try:
 
 
     #mob info labels setup
-    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'attitude', 'combat_strength', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
     for current_actor_label_type in mob_info_display_labels:
         if current_actor_label_type == 'minister': #how far from edge of screen
             x_displacement = 40
@@ -916,7 +942,7 @@ try:
     global_manager.set('DEBUG_show_evil', False) #False by default
     #prints the players "evil" number at the end of each turn
 
-    global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
+    global_manager.set('DEBUG_remove_fog_of_war', True) #False by default
     #reveals all cells
     
     #activating/disabling debugging tools
