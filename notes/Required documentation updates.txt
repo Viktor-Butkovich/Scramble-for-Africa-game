@@ -8,8 +8,15 @@ grids.grid.choose_cell
 cells.cell.adjacent_to_buildings
 npmobs.npmob.end_turn_move can take cell instead of just unit/building
 save_load_tools imports
+utility.capitalize
+utility.conjugate inputs
+cells.cell.get_best_combatant
+battalions.safaris
+battalions.text_tools
 
 Future plans:
+add canoe to native warriors and expeditions standing in water
+add background to multiple units in tile number
 make utility capitalize function that does not make rest of word lowercase, use mobs.update_tooltip as example
 mix animal adjectives and types
 add evangelist increasing public opinion

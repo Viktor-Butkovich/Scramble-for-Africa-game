@@ -39,6 +39,7 @@ class mob(actor):
         self.is_officer = False
         self.is_work_crew = False
         self.is_battalion = False
+        self.is_safari = False
         self.is_group = False
         self.is_npmob = False
         self.is_pmob = False
@@ -49,6 +50,7 @@ class mob(actor):
         self.controllable = True
         self.just_promoted = False
         self.selected = False
+        self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
         super().__init__(from_save, input_dict, global_manager)
@@ -136,7 +138,10 @@ class mob(actor):
                 input_dict = {}
                 input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
                 input_dict['grid'] = current_grid
-                input_dict['image'] = 'misc/disorganized_icon.png'
+                if self.is_npmob and self.npmob_type == 'beast':
+                    input_dict['image'] = 'misc/injured_icon.png' #beasts are injured instead of disorganized for flavor, same effect
+                else:
+                    input_dict['image'] = 'misc/disorganized_icon.png'
                 input_dict['name'] = 'veteran icon'
                 input_dict['modes'] = ['strategic', 'europe']
                 input_dict['show_terrain'] = False
@@ -511,7 +516,10 @@ class mob(actor):
         
         tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
         if self.disorganized:
-            tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
+            if self.is_npmob and self.npmob_type == 'beast':
+                tooltip_list.append("This unit is currently injured, giving a combat penalty until its next turn")
+            else:
+                tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
 
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):

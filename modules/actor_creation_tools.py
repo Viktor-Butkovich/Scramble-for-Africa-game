@@ -88,6 +88,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = expeditions.expedition(from_save, input_dict, global_manager)
         elif init_type == 'battalion':
             new_actor = battalions.battalion(from_save, input_dict, global_manager)
+        elif init_type == 'safari':
+            new_actor = battalions.safari(from_save, input_dict, global_manager)
 
         #buildings
         elif init_type == 'infrastructure':

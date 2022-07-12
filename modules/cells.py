@@ -427,7 +427,7 @@ class cell():
                 return(True)
         return(False)
 
-    def get_best_combatant(self, mob_type):
+    def get_best_combatant(self, mob_type, target_type = 'human'):
         '''
         Description:
             Finds and returns the best combatant of the inputted type in this cell. Combat ability is based on the unit's combat modifier and veteran status. Assumes that units in vehicles and buildings have already detached upon being
@@ -442,12 +442,13 @@ class cell():
         if mob_type == 'npmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_npmob:
-                    current_combat_modifier = current_mob.get_combat_modifier()
-                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
-                        best_combatants = [current_mob]
-                        best_combat_modifier = current_combat_modifier
-                    elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
-                        best_combatants.append(current_mob)
+                    if (target_type == 'human' and not current_mob.npmob_type == 'beast') or (target_type == 'beast' and current_mob.npmob_type == 'beast'):
+                        current_combat_modifier = current_mob.get_combat_modifier()
+                        if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
+                            best_combatants = [current_mob]
+                            best_combat_modifier = current_combat_modifier
+                        elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
+                            best_combatants.append(current_mob)
         elif mob_type == 'pmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_pmob:

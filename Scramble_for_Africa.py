@@ -112,7 +112,8 @@ try:
         }
     )
 
-    global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant'])
+    global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal'])
+    
     #terrain setup
 
 
@@ -260,10 +261,11 @@ try:
     global_manager.set('minister_portraits', minister_portraits)
 
 
-    global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
+    global_manager.set('officer_types', ['explorer', 'hunter', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
     global_manager.set('officer_group_type_dict',
         {
         'explorer': 'expedition',
+        'hunter': 'safari',
         'engineer': 'construction_gang',
         'driver': 'porters',
         'foreman': 'work_crew',
@@ -277,6 +279,7 @@ try:
     global_manager.set('officer_minister_dict',
         {
         'explorer': type_minister_dict['exploration'],
+        'hunter': type_minister_dict['exploration'],
         'engineer': type_minister_dict['construction'],
         'driver': type_minister_dict['transportation'],
         'foreman': type_minister_dict['production'],
@@ -289,6 +292,7 @@ try:
     global_manager.set('group_minister_dict',
         {
         'expedition': type_minister_dict['exploration'],
+        'safari': type_minister_dict['exploration'],
         'construction_gang': type_minister_dict['construction'],
         'porters': type_minister_dict['transportation'],
         'work_crew': type_minister_dict['production'],
@@ -324,7 +328,8 @@ try:
         'trade': 0,
         'loan': 5,
         'attack': 5,
-        'trial': 5
+        'trial': 5,
+        'hunt': 5
         }
     )
 
@@ -359,7 +364,7 @@ try:
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'trial fees'])
+        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees'])
     #price setup
 
 
@@ -942,7 +947,7 @@ try:
     global_manager.set('DEBUG_show_evil', False) #False by default
     #prints the players "evil" number at the end of each turn
 
-    global_manager.set('DEBUG_remove_fog_of_war', True) #False by default
+    global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
     #reveals all cells
     
     #activating/disabling debugging tools

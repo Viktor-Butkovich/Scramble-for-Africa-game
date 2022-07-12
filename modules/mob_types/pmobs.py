@@ -115,10 +115,10 @@ class pmob(mob):
         if self.is_officer or self.is_worker:
             self.temp_disable_movement()
             self.replace()
-            notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+            notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
                 self.images[0].current_cell.tile, self.global_manager)
         else:
-            notification_tools.display_zoom_notification(self.name.capitalize() + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
+            notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
             self.die()
 
     def to_save_dict(self):
@@ -340,7 +340,7 @@ class pmob(mob):
                             if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
                                 (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
-                                    if (not future_cell.has_npmob()) or self.is_battalion: #non-battalion units can't move into enemies
+                                    if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari: #non-battalion units can't move into enemies
                                         return(True)
                                     else:
                                         text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
@@ -456,9 +456,9 @@ class pmob(mob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
-            message = enemy.name + " are attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = utility.capitalize(enemy.name) + " " + utility.conjugate('be', enemy.number) + " attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
         elif combat_type == 'attacking':
-            message = "Your " + self.name + " is attacking the " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = "Your " + self.name + " " + utility.conjugate('be', self.number) + " attacking the " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
         self.current_combat_type = combat_type
         self.current_enemy = enemy
         
@@ -493,7 +493,7 @@ class pmob(mob):
             num_dice = 2
 
         text = ""
-        text += "The " + self.name + " attempts to defeat the " + enemy.name + ". /n /n"
+        text += "The " + self.name + " " + utility.conjugate('attempt', self.number) +" to defeat the " + enemy.name + ". /n /n"
 
         if self.veteran:
             if self.is_officer:
@@ -506,15 +506,28 @@ class pmob(mob):
                 text += "Your professional imperial soldiers will receive a +2 bonus after their roll. /n"
             else:
                 text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n"
+        elif self.is_safari:
+            if enemy.npmob_type == 'beast':
+                text += "Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n"
+                own_combat_modifier += 3 #target-based modifiers not included in initial combat modifier calculation, cancels out -1 non-combat unit penalty
+            else:
+                text += "Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n"
         elif self.is_officer:
             text += "As a lone officer, your " + self.name + " will receive a -2 penalty after their roll. /n"
         else:
             text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after their roll. /n"
+            
         if self.disorganized:
-            text += "The " + self.name + " are disorganized and will receive a -1 penalty after their roll. /n"
+            text += "The " + self.name + " " + utility.conjugate('be', self.number) + " disorganized and will receive a -1 penalty after their roll. /n"
         elif enemy.disorganized:
-            text += "The " + enemy.name + " are disorganized and will receive a -1 after their roll. /n"
+            if enemy.npmob_type == 'beast':
+                text += "The " + enemy.name + " " + utility.conjugate('be', enemy.number) + " injured and will receive a -1 after its roll. /n"
+            else:
+                text += "The " + enemy.name + " " + utility.conjugate('be', enemy.number) + " disorganized and will receive a -1 after their roll. /n"
 
+        if enemy.npmob_type == 'beast' and not self.is_safari:
+            text += "The " + self.name + " " + utility.conjugate('be', self.number) + " not trained in hunting beasts and will receive a -1 penalty after their roll. /n"
+            own_combat_modifier -= 1
 
         if self.veteran:
             text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
@@ -596,7 +609,10 @@ class pmob(mob):
         text += "/n"
         if conclusion == 'win':
             if combat_type == 'attacking':
-                text += "Your " + self.name + " decisively defeated and destroyed the " + enemy.name + ". /n /n"
+                if enemy.npmob_type == 'beast':
+                    text += "Your " + self.name + " tracked down and killed the " + enemy.name + ". /n /n"
+                else:
+                    text += "Your " + self.name + " decisively defeated and destroyed the " + enemy.name + ". /n /n"
             elif combat_type == 'defending':
                 if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
                     retreat_direction = 'west'
@@ -606,11 +622,18 @@ class pmob(mob):
                     retreat_direction = 'south'
                 elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
                     retreat_direction = 'north'
-                text += "Your " + self.name + " decisively routed the attacking " + enemy.name + ", who were seen scattering to the " + retreat_direction + " and will be vulnerable to counterattack. /n /n"
+                if enemy.npmob_type == 'beast':
+                    text += "Your " + self.name + " injured and scared off the attacking " + enemy.name + ", which was seen running to the " + retreat_direction + " and will be vulnerable as it heals. /n /n"           
+                else:
+                    text += "Your " + self.name + " decisively routed the attacking " + enemy.name + ", who " + utility.conjugate('be', enemy.number, 'preterite') + " seen scattering to the " + retreat_direction
+                    text += " and will be vulnerable to counterattack. /n /n"
             
         elif conclusion == 'draw':
             if combat_type == 'attacking':
-                text += "Your " + self.name + " failed to push back the defending " + enemy.name + " and were forced to withdraw. /n /n"
+                if enemy.npmob_type == 'beast':
+                    text += "Your " + self.name + " failed to track the " + enemy.name + " to its lair and " + utility.conjugate('be', self.number, 'preterite') + " forced to withdraw. /n /n"
+                else:
+                    text += "Your " + self.name + " failed to push back the defending " + enemy.name + " and " + utility.conjugate('be', self.number, 'preterite') + " forced to withdraw. /n /n"
             if combat_type == 'defending':
                 if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
                     retreat_direction = 'west'
@@ -620,16 +643,35 @@ class pmob(mob):
                     retreat_direction = 'south'
                 elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
                     retreat_direction = 'north'
-                text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who were seen withdrawing to the " + retreat_direction + ". /n /n"
+                if enemy.npmob_type == 'beast':
+                    text += "Your " + self.name + " managed to scare off the attacking " + enemy.name + ", which was seen running to the " + retreat_direction + ". /n /n"           
+                else:
+                    text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who " + utility.conjugate('be', enemy.number, 'preterite') + " seen withdrawing to the " + retreat_direction + ". /n /n"
 
         elif conclusion == 'lose':
             if combat_type == 'attacking':
-                text += "The " + enemy.name + " decisively routed your " + self.name + ", who are scattered and will be vulnerable to counterattack. /n /n"
+                if enemy.npmob_type == 'beast':
+                    text += "Your " + self.name + " were slowly picked off as they tracked the " + enemy.name + " to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n"
+                else:
+                    text += "The " + enemy.name + " decisively routed your " + self.name + ", who " + utility.conjugate('be', enemy.number) +"  scattered and will be vulnerable to counterattack. /n /n"
             elif combat_type == 'defending':
-                text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
+                if enemy.npmob_type == 'beast':
+                    if self.number == 1:
+                        text += "The " + enemy.name + " slaughtered your " + self.name + ". /n /n"
+                    else:
+                        text += "The " + enemy.name + " slaughtered most of your " + self.name + " and the survivors deserted, promising to never return. /n /n"
+                else:
+                    if self.number == 1:
+                        text += "The " + enemy.name + " decisively defeated your " + self.name + ", who was either slain or captured. /n /n"
+                    else:
+                        text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
         if (not self.veteran) and own_roll >= 6 and self.is_battalion: #civilian units can not become veterans through combat
-            self.just_promoted = True
-            text += " This battalion's major is now a veteran. /n /n"
+            if self.is_battalion:
+                self.just_promoted = True
+                text += " This battalion's major is now a veteran. /n /n"  
+            elif self.is_safari:
+                self.just_promoted = True
+                text += " This safari's hunter is now a veteran. /n /n"
         notification_tools.display_notification(text + " Click to remove this notification.", 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
 
@@ -652,21 +694,24 @@ class pmob(mob):
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
                 enemy.die()
-                self.global_manager.get('evil_tracker').change(8)
+                if not enemy.npmob_type == 'beast':
+                    self.global_manager.get('evil_tracker').change(8)
             elif combat_type == 'defending':
                 enemy.retreat()
                 enemy.set_disorganized(True)
         elif conclusion == 'draw': #attacker retreats in draw or if more defenders remaining
             if combat_type == 'attacking':
                 self.retreat()
-                self.global_manager.get('evil_tracker').change(4)
+                if not enemy.npmob_type == 'beast':
+                    self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 enemy.retreat()
         elif conclusion == 'lose':
             if combat_type == 'attacking':
                 self.retreat()
                 self.set_disorganized(True)
-                self.global_manager.get('evil_tracker').change(4)
+                if not enemy.npmob_type == 'beast':
+                    self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 current_cell = self.images[0].current_cell
                 self.die()

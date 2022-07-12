@@ -4,6 +4,7 @@ from .groups import group
 from ..tiles import tile
 from .. import actor_utility
 from .. import notification_tools
+from .. import text_tools
 
 class battalion(group):
     '''
@@ -72,7 +73,10 @@ class battalion(group):
         else:
             direction = 'none'
         future_cell = self.grid.find_cell(future_x, future_y)
-        defender = future_cell.get_best_combatant('npmob')
+        if self.is_battalion:
+            defender = future_cell.get_best_combatant('npmob')
+        elif self.is_safari:
+            defender = future_cell.get_best_combatant('npmob', 'beast')
         
         if (not attack_confirmed) and (not defender == 'none'): #if enemy in destination tile and attack not confirmed yet
             if self.global_manager.get('money_tracker').get() >= self.attack_cost:
@@ -84,6 +88,8 @@ class battalion(group):
                     risk_value = -1 * self.get_combat_modifier() #should be low risk with +2/veteran, moderate with +2 or +1/veteran, high with +1
                     if self.veteran: #reduce risk if veteran
                         risk_value -= 1
+                    if self.is_safari:
+                        risk_value -= 1
 
                     if risk_value < -2:
                         message = "RISK: LOW /n /n" + message  
@@ -93,9 +99,13 @@ class battalion(group):
                         message = "RISK: HIGH /n /n" + message
                     elif risk_value > 0:
                         message = "RISK: DEADLY /n /n" + message
-                    
-                    notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "?",
-                        ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+
+                    if defender.npmob_type == 'beast':
+                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to hunt the " + defender.name + " to the " + direction + "?",
+                            ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    else:
+                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "?",
+                            ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_combat', True)
                     for current_grid in self.grids:
                         coordinates = (0, 0)
@@ -112,7 +122,15 @@ class battalion(group):
                         input_dict['show_terrain'] = False
                         self.attack_mark_list.append(tile(False, input_dict, self.global_manager))
             else:
-                text_tools.print_to_screen("You do not have enough money to supply an attack.", self.global_manager)
+                if defender.npmob_type == 'beast':
+                    text_tools.print_to_screen("You do not have enough money to supply a hunt.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough money to supply an attack.", self.global_manager)
+        elif defender == 'none' and ((self.is_battalion and not future_cell.get_best_combatant('npmob', 'beast') == 'none') or (self.is_safari and not future_cell.get_best_combatant('npmob') == 'none')): #if wrong type of defender present
+            if self.is_battalion:
+                text_tools.print_to_screen("Battalions can not attack beasts.", self.global_manager)
+            elif self.is_safari:
+                text_tools.print_to_screen("Safaris can only attack beasts.", self.global_manager)
         else: #if destination empty and 
             super().move(x_change, y_change)
             if not self.in_vehicle:
@@ -144,3 +162,20 @@ class battalion(group):
         for attack_mark in self.attack_mark_list:
             attack_mark.remove()
         self.attack_mark_list = []
+
+class safari(battalion): #specialized battalion led by hunter that fights beasts
+    def __init__(self, from_save, input_dict, global_manager):
+        super().__init__(from_save, input_dict, global_manager)    
+        self.set_group_type('safari')
+        self.is_battalion = False
+        self.is_safari = True
+        self.battalion_type = 'none'
+        self.attack_cost = self.global_manager.get('action_prices')['hunt']
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
+
+    def attempt_local_combat(self):
+        defender = self.images[0].current_cell.get_best_combatant('npmob', 'beast')
+        if not defender == 'none':
+            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting supplies')
+            self.start_combat('attacking', defender)

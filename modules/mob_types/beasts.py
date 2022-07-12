@@ -22,7 +22,10 @@ class beast(npmob):
         global_manager.get('beast_list').append(self)
         self.animal_type = input_dict['animal_type']
         self.adjective = input_dict['adjective']
-        input_dict['name'] = self.adjective + ' ' + self.animal_type
+        if self.adjective == 'king':
+            input_dict['name'] = self.animal_type + ' ' + self.adjective + ' '
+        else:
+            input_dict['name'] = self.adjective + ' ' + self.animal_type
         super().__init__(from_save, input_dict, global_manager)
         
         self.npmob_type = 'beast'

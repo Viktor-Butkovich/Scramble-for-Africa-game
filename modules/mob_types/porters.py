@@ -29,6 +29,7 @@ class porters(group):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
+        self.number = 2 #porters is plural
         self.can_hold_commodities = True
         self.inventory_capacity = 9
         self.set_group_type('porters')

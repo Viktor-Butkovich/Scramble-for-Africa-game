@@ -32,6 +32,7 @@ class worker(pmob):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
+        self.number = 2 #workers is plural
         global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False

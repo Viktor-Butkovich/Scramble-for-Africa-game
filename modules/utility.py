@@ -152,7 +152,7 @@ def add_to_message(message, new):
     '''
     return (message + new)
 
-def conjugate(infinitive, amount):
+def conjugate(infinitive, amount, tense = 'present'):
     '''
     Description:
         Returns a singular or plural conjugated version of the inputted verb
@@ -163,13 +163,25 @@ def conjugate(infinitive, amount):
         string: Returns conjugated word with the correct number, like "is" or "attacks"
     '''
     if infinitive == 'be':
-        if amount == 1:
-            return('is')
-        else:
-            return('are')
+        if tense == 'present':
+            if amount == 1:
+                return('is')
+            else:
+                return('are')
+        elif tense == 'preterite':
+            if amount == 1:
+                return('was')
+            else:
+                return('were')
     else:
         if amount == 1:
             return(infinitive + 's')
         else:
             return(infinitive)
     return('none')
+
+def capitalize(string):
+    if len(string) > 1:
+        return(string[:1].capitalize() + string[1:])
+    else:
+        return(string[:1].capitalize())

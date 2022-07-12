@@ -141,7 +141,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'preferred_terrains':
             self.message_start = 'Preferred terrain: '
         else:
-            self.message_start = self.actor_label_type.capitalize() + ': ' #'worker' -> 'Worker: '
+            self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
 
     def update_tooltip(self):
@@ -165,7 +165,7 @@ class actor_display_label(label):
                 if self.actor.has_crew:
                     name_list = [self.message_start]
                     for current_passenger in self.actor.contained_mobs:
-                        name_list.append("    " + current_passenger.name.capitalize())
+                        name_list.append("    " + utility.capitalize(current_passenger.name))
                     if len(name_list) == 1:
                         name_list[0] = self.message_start + ' none'
                     self.set_tooltip(name_list)
@@ -253,7 +253,7 @@ class actor_display_label(label):
             if (not self.attached_building == 'none'):
                 tooltip_text.append("Work crews: ")
                 for current_work_crew in self.attached_building.contained_work_crews:
-                    tooltip_text.append("    " + current_work_crew.name.capitalize())
+                    tooltip_text.append("    " + utility.capitalize(current_work_crew.name))
                 if len(self.attached_building.contained_work_crews) == 0:
                     tooltip_text[-1] += 'none'
             self.set_tooltip(tooltip_text)
@@ -300,14 +300,14 @@ class actor_display_label(label):
         self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
-                self.set_label(self.message_start + new_actor.name[:1].capitalize() + new_actor.name[1:])
+                self.set_label(self.message_start + utility.capitalize(new_actor.name))
                 
             elif self.actor_label_type == 'coordinates':
                 self.set_label(self.message_start + '(' + str(new_actor.x) + ', ' + str(new_actor.y) + ')')
                 
             elif self.actor_label_type == 'terrain':
                 if new_actor.grid.is_abstract_grid:
-                    self.set_label(new_actor.grid.name.capitalize())
+                    self.set_label(utility.capitalize(new_actor.grid.name))
                 elif self.actor.cell.visible:
                     self.set_label(self.message_start + str(new_actor.cell.terrain))
                 else:
@@ -369,7 +369,7 @@ class actor_display_label(label):
                         self.attached_building = new_actor.cell.get_building('resource')
                         self.attached_list = self.attached_building.contained_work_crews
                         if len(self.attached_list) > self.list_index:
-                            self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
+                            self.set_label(self.message_start + utility.capitalize(self.attached_list[self.list_index].name))
                     else:
                         self.attached_building = 'none'
                         self.attached_list = []
@@ -377,7 +377,7 @@ class actor_display_label(label):
             elif self.actor_label_type == 'crew':
                 if self.actor.is_vehicle:
                     if self.actor.has_crew:
-                        self.set_label(self.message_start + self.actor.crew.name.capitalize())
+                        self.set_label(self.message_start + utility.capitalize(self.actor.crew.name))
                     else:
                         self.set_label(self.message_start + 'none')
                         
@@ -396,14 +396,14 @@ class actor_display_label(label):
                     if len(self.actor.contained_mobs) > 0:
                         self.attached_list = new_actor.contained_mobs
                         if len(self.attached_list) > self.list_index:
-                            self.set_label(self.message_start + self.attached_list[self.list_index].name.capitalize())
+                            self.set_label(self.message_start + utility.capitalize(self.attached_list[self.list_index].name))
 
             elif self.actor_label_type in ['workers', 'officer']:
                 if self.actor.is_group:
                     if self.actor_label_type == 'workers':
-                        self.set_label(self.message_start + str(self.actor.worker.name.capitalize()))
+                        self.set_label(self.message_start + str(utility.capitalize(self.actor.worker.name)))
                     else:
-                        self.set_label(self.message_start + str(self.actor.officer.name.capitalize()))
+                        self.set_label(self.message_start + str(utility.capitalize(self.actor.officer.name)))
             
             elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
                 if self.actor.cell.has_building('village') and self.actor.cell.visible: #if village present

@@ -26,6 +26,7 @@ class native_warriors(npmob):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
+        self.number = 2 #native warriors is plural
         self.hostile = True
         self.can_damage_buildings = True
         self.saves_normally = False #saves as part of village
