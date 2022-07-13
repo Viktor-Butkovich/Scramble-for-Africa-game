@@ -13,12 +13,22 @@ utility.conjugate inputs
 cells.cell.get_best_combatant
 battalions.safaris
 battalions.text_tools
+actor_utility.update_recruitment_descriptions
+actor_creation_tools imports
+actor_creation_tools.display_recruitment_choice_notification input source type
+main imports
+europe_transactions imports
 
 Future plans:
+moving costs 1-3 based on terrain, 4 movement points per turn, special actions require at least 1 and use all remaining movement, roads cost half as much, porter gets 5 movement points, veteran porter gets 6 movement points, 
+	spend normal movement cost to attack but lose all movement points during fighting
+show enemy turn with individual movements like Varision
+add riverboats
+add evidence decay over time
+add forts
+add minister fear mechanic
 add canoe to native warriors and expeditions standing in water
-add background to multiple units in tile number
-make utility capitalize function that does not make rest of word lowercase, use mobs.update_tooltip as example
-mix animal adjectives and types
+add background to multiple units in tile number to improve contrast
 add evangelist increasing public opinion
 add 2 'interest' categories per minister, one of which is their best skill
 possibly have adjustable police investment per turn

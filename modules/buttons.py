@@ -247,7 +247,9 @@ class button():
                     tooltip_text.append("    " + current_mob.name)
             self.set_tooltip(tooltip_text)
         elif self.button_type == 'build train':
-            self.set_tooltip(["Builds a train in this unit's tile", "Can only be built on a train station", "Costs 1 movement point"])
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'train')
+            #self.set_tooltip(self.global_manager.get('recruitment_list_descriptions')['train'])
+            self.set_tooltip(["Attempts to build a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be built on a train station", "Costs 1 movement point"])
         elif self.button_type == 'cycle units':
             self.set_tooltip(["Selects the next unit that has movement remaining"])
         elif self.button_type == 'trade':
@@ -292,14 +294,20 @@ class button():
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
         elif self.button_type == 'hire village worker':
-            self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
-                                str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
+            self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
+            #self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
+            #                    str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
         elif self.button_type == 'hire slums worker':
-            self.set_tooltip(["Hires unemployed workers, reducing the slum's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
-                                str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'slums workers')
+            self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['slums workers'])
+            #self.set_tooltip(["Hires unemployed workers, reducing the slum's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
+            #                    str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
         elif self.button_type == 'buy slaves':
-            self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money to purchase and have an upkeep each turn of " +
-                                str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'slave workers')
+            self.set_tooltip(["Recruits a unit of slave workers for " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money."] + self.global_manager.get('recruitment_list_descriptions')['slave workers'])
+            #self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money to purchase and have an upkeep each turn of " +
+            #                    str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
         else:

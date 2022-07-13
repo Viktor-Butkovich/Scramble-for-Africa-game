@@ -2239,8 +2239,8 @@ class hire_african_workers_button(label_button):
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
-                choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment'}
-                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African worker', self.global_manager)
+                choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
+                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)
 

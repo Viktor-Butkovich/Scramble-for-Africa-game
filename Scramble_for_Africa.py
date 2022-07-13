@@ -18,6 +18,7 @@ import modules.instructions as instructions
 import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
+import modules.actor_utility as actor_utility
 
 try:
     #fundamental setup
@@ -306,10 +307,31 @@ try:
 
 
     #price setup
+    
     global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'ship'])
     global_manager.set('recruitment_costs', {'European workers': 0, 'ship': 5})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
+
+    global_manager.set('num_african_workers', 0)
+    global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
+    global_manager.set('initial_african_worker_upkeep', 4)
+    global_manager.set('min_african_worker_upkeep', 0.5)
+
+    global_manager.set('num_european_workers', 0)
+    global_manager.set('european_worker_upkeep', 0)
+    global_manager.set('initial_european_worker_upkeep', 6)
+    global_manager.set('min_european_worker_upkeep', 0.5)
+
+    global_manager.set('num_slave_workers', 0)
+    global_manager.set('initial_slave_worker_upkeep', 2)
+    global_manager.set('slave_worker_upkeep', 0)
+    global_manager.get('recruitment_costs')['slave workers'] = 5
+    global_manager.set('min_slave_worker_recruitment_cost', 2)
+
+    global_manager.set('recruitment_list_descriptions', {})
+    global_manager.set('recruitment_string_descriptions', {})
+    actor_utility.update_recruitment_descriptions(global_manager)
 
     global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
@@ -323,6 +345,7 @@ try:
         'exploration': 5,
         'convert': 5,
         'religious_campaign': 5,
+        'public_relations_campaign': 5,
         'advertising_campaign': 5,
         'loan_search': 5,
         'trade': 0,
@@ -344,7 +367,7 @@ try:
         'train': 5
        } 
     )
-
+    
     #central place in program to change descriptions of actions to use in prosector reports
     global_manager.set('theft_type_descriptions',
         {
@@ -405,22 +428,6 @@ try:
     global_manager.set('worker_list', [])
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
-
-    global_manager.set('num_african_workers', 0)
-    global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
-    global_manager.set('initial_african_worker_upkeep', 4)
-    global_manager.set('min_african_worker_upkeep', 0.5)
-
-    global_manager.set('num_european_workers', 0)
-    global_manager.set('european_worker_upkeep', 0)
-    global_manager.set('initial_european_worker_upkeep', 6)
-    global_manager.set('min_european_worker_upkeep', 0.5)
-
-    global_manager.set('num_slave_workers', 0)
-    global_manager.set('initial_slave_worker_upkeep', 2)
-    global_manager.set('slave_worker_upkeep', 0)
-    global_manager.get('recruitment_costs')['slave workers'] = 5
-    global_manager.set('min_slave_worker_recruitment_cost', 2)
 
     global_manager.set('minister_limit', 15)
 
