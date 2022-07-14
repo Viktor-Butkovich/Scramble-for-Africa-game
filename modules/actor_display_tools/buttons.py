@@ -1028,11 +1028,11 @@ class convert_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not convert.", self.global_manager)
 
-class religious_campaign_button(label_button):
+class evangelist_campaign_button(label_button):
     '''
     Button that commands an evangelist to start a religious campaign in Europe
     '''
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, campaign_type, global_manager):
         '''
         Description:
             Initializes this object
@@ -1048,7 +1048,8 @@ class religious_campaign_button(label_button):
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, 'religious campaign', keybind_id, modes, image_id, attached_label, global_manager)
+        #'religious campaign' or 'public relations campaign'
+        super().__init__(coordinates, width, height, campaign_type, keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
         '''
@@ -1080,11 +1081,18 @@ class religious_campaign_button(label_button):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points == current_mob.max_movement_points:
-                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
-                            if current_mob.check_if_minister_appointed():
-                                current_mob.start_religious_campaign()
-                        else:
-                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a religious campaign.", self.global_manager)
+                        if self.button_type == 'religious campaign':
+                            if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_religious_campaign()
+                            else:
+                                text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['public_relations_campaign']) + " money needed for a public relations campaign.", self.global_manager)
+                        elif self.button_type == 'public relations campaign':
+                            if self.global_manager.get('money') >= self.global_manager.get('action_prices')['public_relations_campaign']:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_public_relations_campaign()
+                            else:
+                                text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a public relations campaign.", self.global_manager)
                     else:
                         text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
                 else:
@@ -1429,6 +1437,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             image_id = 'buildings/buttons/mission.png'
             self.building_name = 'mission'
             self.requirement = 'can_convert'
+        elif self.building_type == 'fort':
+            image_id = 'buildings/buttons/fort.png'
+            self.building_name = 'fort'
+            self.requirement = 'is_battalion'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
 
     def update_info(self):
@@ -1486,6 +1498,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 can_create = self.attached_label.actor.can_trade
             elif self.requirement == 'can_convert':
                 can_create = self.attached_label.actor.can_convert
+            elif self.requirement == 'is_battalion':
+                can_create = self.attached_label.actor.is_battalion
             if not can_create: #show if unit selected can create this building
                 return(False)
             if not self.attached_tile == 'none':
@@ -1534,6 +1548,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         elif self.building_type == 'mission':
             message.append('Builds a mission, increasing the success chance and reducing the risk when missionaries convert the attached village')
             message.append('Can only be built in a village')
+
+        elif self.building_type == 'fort':
+            message.append('Builds a fort, increasing the combat effectiveness of your units standing in this tile')
             
         else:
             message.append('placeholder')
@@ -1588,6 +1605,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 self.construct()
                                         else:
                                             text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
+                                    elif self.building_type == 'fort':
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            self.construct()
                                 else:
                                     text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
                             else:
@@ -1655,6 +1675,8 @@ class repair_button(label_button):
                 self.requirement = 'can_trade'
             elif self.building_type == 'mission':
                 self.requirement = 'can_convert'
+            elif self.building_type == 'fort':
+                self.requirement = 'is_battalion'
             else:
                 self.requirement = 'none'
         super().__init__(coordinates, width, height, 'construction', keybind_id, modes, image_id, attached_label, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
@@ -1699,8 +1721,8 @@ class repair_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if self.attached_label.actor.can_construct or (self.attached_label.actor.can_trade and self.requirement == 'can_trade') or (self.attached_label.actor.can_convert and self.requirement == 'can_convert'):
-                #construction gangs can repair all buildings, caravans can only repair trading posts, missionaries can only repair missions
+            if self.attached_label.actor.can_construct or (self.attached_label.actor.can_trade and self.requirement == 'can_trade') or (self.attached_label.actor.can_convert and self.requirement == 'can_convert') or (self.attached_label.actor.is_battalion and self.requirement == 'is_battalion'):
+                #construction gangs can repair all buildings, caravans can only repair trading posts, missionaries can only repair missions, battalions can only repair forts
                 attached_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                 if (not attached_building == 'none') and attached_building.damaged:
                     self.update_info()

@@ -99,6 +99,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.trading_post(from_save, input_dict, global_manager)
         elif init_type == 'mission':
             new_actor = buildings.mission(from_save, input_dict, global_manager)
+        elif init_type == 'fort':
+            new_actor = buildings.fort(from_save, input_dict, global_manager)
         elif init_type == 'train_station':
             new_actor = buildings.train_station(from_save, input_dict, global_manager)
         elif init_type == 'port':

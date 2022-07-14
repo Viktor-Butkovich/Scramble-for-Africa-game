@@ -181,6 +181,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_religious_campaign'):
         return(False)
+    elif global_manager.get('ongoing_public_relations_campaign'):
+        return(False)
     elif global_manager.get('ongoing_advertising_campaign'):
         return(False)
     elif global_manager.get('ongoing_loan_search'):

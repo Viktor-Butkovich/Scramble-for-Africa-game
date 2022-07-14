@@ -165,7 +165,7 @@ try:
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'slums'])
+    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums'])
     #commodity setup
 
 
@@ -364,6 +364,7 @@ try:
         'train_station': 5,
         'trading_post': 5,
         'mission': 5,
+        'fort': 5,
         'train': 5
        } 
     )
@@ -387,7 +388,7 @@ try:
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees'])
+        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees'])
     #price setup
 
 
@@ -477,6 +478,7 @@ try:
     global_manager.set('ongoing_exploration', False)
     global_manager.set('ongoing_trade', False)
     global_manager.set('ongoing_religious_campaign', False)
+    global_manager.set('ongoing_public_relations_campaign', False)
     global_manager.set('ongoing_advertising_campaign', False)
     global_manager.set('ongoing_loan_search', False)
     global_manager.set('ongoing_conversion', False)
@@ -805,7 +807,7 @@ try:
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission']
+    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort']
     #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
     for current_actor_image_type in tile_info_display_images:
         if not current_actor_image_type in ['up', 'down', 'right', 'left']:

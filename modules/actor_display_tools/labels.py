@@ -58,12 +58,14 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'mission', global_manager))
+            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'fort', global_manager))
             
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'mission', global_manager))
+            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'fort', global_manager))
 
             self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
             self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
@@ -71,7 +73,8 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'buildings/buttons/train.png', self, global_manager))
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.religious_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))
+            self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, 'religious campaign', global_manager))
             self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
             self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
         elif self.actor_label_type == 'movement':

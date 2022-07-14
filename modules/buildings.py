@@ -407,6 +407,27 @@ class mission(building):
         input_dict['building_type'] = 'mission'
         super().__init__(from_save, input_dict, global_manager)
 
+class fort(building):
+    def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        input_dict['building_type'] = 'fort'
+        super().__init__(from_save, input_dict, global_manager)
+
 class train_station(building):
     '''
     Building along a railroad that allows the construction of train, allows trains to pick up and drop off cargo/passengers, and increases the tile's inventory capacity

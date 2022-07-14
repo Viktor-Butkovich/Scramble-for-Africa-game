@@ -124,7 +124,7 @@ class cell():
                 if random.randrange(1, 7) >= 4: #attrition on 1-3
                     return(False)
 
-            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource'):
+            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource') or self.has_building('fort'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
             elif self.has_building('road') or self.has_building('railroad'):
@@ -133,7 +133,7 @@ class cell():
 
         return(True)
 
-    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, road, railroad, resource, slums. No forts in game yet
+    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, fort, road, railroad, resource, slums. No forts in game yet
         '''
         Description:
             Returns whether this cell has a building of the inputted type, even if the building is damaged

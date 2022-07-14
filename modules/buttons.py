@@ -257,8 +257,11 @@ class button():
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
                 "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
         elif self.button_type == 'religious campaign':
-            self.set_tooltip(["Starts a religious campaign in an effort to find religious volunteers.", "Can only be done in Europe",
+            self.set_tooltip(["Starts a religious campaign in an effort to find church volunteers.", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points"])
+        elif self.button_type == 'public relations campaign':
+            self.set_tooltip(["Starts a public relations campaign to spread word of your company's benevolent goals and righteous deeds in Africa.", "Can only be done in Europe",
+                "If successful, increases your company's public opinion", "Costs an entire turn of movement points"])
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
                 "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points"])
@@ -280,8 +283,11 @@ class button():
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
-        elif self.button_type in ['to trial', 'launch trial']:
-            self.set_tooltip(["Tries this minister for corruption in an attempt to remove them from their current office"])
+        elif self.button_type == 'to trial':
+            self.set_tooltip(["Opens the trial planning screen to attempt to imprison this minister for corruption", "A trial has a higher success chance as more evidence of that minister's corruption is found",
+                "A trial costs " + str(self.global_manager.get('action_prices')['trial']) + " 5 money once finalized"])
+        elif self.button_type == 'launch trial':
+            self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money"])
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
                 self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance",
@@ -762,6 +768,10 @@ class button():
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.religious_campaign()
 
+            elif self.button_type == 'start public relations campaign':
+                evangelist = self.notification.choice_info_dict['evangelist']
+                evangelist.public_relations_campaign()
+
             elif self.button_type == 'start advertising campaign':
                 merchant = self.notification.choice_info_dict['merchant']
                 merchant.advertising_campaign()
@@ -804,6 +814,9 @@ class button():
                 
             elif self.button_type == 'stop religious campaign':
                 self.global_manager.set('ongoing_religious_campaign', False)
+
+            elif self.button_type == 'stop public relations campaign':
+                self.global_manager.set('ongoing_public_relations_campaign', False)
 
             elif self.button_type == 'stop advertising campaign':
                 self.global_manager.set('ongoing_advertising_campaign', False)
