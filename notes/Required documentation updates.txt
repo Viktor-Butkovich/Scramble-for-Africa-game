@@ -23,8 +23,11 @@ officers.evangelist public relations campaign functions
 action_notifications.public_relations_campaign_notification
 buildings.mission and buildings.fort descriptions
 buildings.fort
+main_loop imports
+max_movement_points in mob input and save_dict
 
 Future plans:
+reduce number of times current cell is calculated in npmobs.npmob end turn functions
 improve appearance of combat modifier text
 moving costs 1-3 based on terrain, 4 movement points per turn, special actions require at least 1 and use all remaining movement, roads cost half as much, porter gets 5 movement points, veteran porter gets 6 movement points, 
 	spend normal movement cost to attack but lose all movement points during fighting
@@ -51,6 +54,7 @@ possible ui improvement: have green/red letters appear by cursor after user does
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
 Possible/known Errors:
+should never move camera to invisible enemy during enemy turn
 allow player to exit game and save even when ministers are not appointed
 capitalize first letter of enemy name during combat
 prevent multiple trials from happening in the same turn

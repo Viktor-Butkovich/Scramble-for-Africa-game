@@ -5,6 +5,7 @@ import pygame
 from . import main_loop_tools
 from . import utility
 from . import text_tools
+from . import turn_management_tools
 
 def main_loop(global_manager):
     '''
@@ -190,6 +191,111 @@ def main_loop(global_manager):
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
             global_manager.set('last_selection_outline_switch', time.time())
+
+        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= time.time():
+            print('repeating in 0')
+            #if current_turn == 'enemy':
+            enemy_turn_done = True
+            for enemy in global_manager.get('npmob_list'):
+                if not enemy.turn_done:
+                    enemy_turn_done = False
+                    break
+            if enemy_turn_done:
+                global_manager.set('player_turn', True)
+                turn_management_tools.manage_combat(global_manager)
+                #start_turn('controlled')
+                #end_turn_button.color = (0, 255, 0)
+            else:
+                #update_display()
+                current_enemy = global_manager.get('enemy_turn_queue')[0]
+                print(current_enemy)
+
+                enemy_coordinates = (current_enemy.x, current_enemy.y)
+                removed = False
+                spawning = False
+                did_nothing = False
+                moving = False
+                print(current_enemy.images[0].current_cell == 'none')
+                if not current_enemy.images[0].current_cell == 'none':
+                    print('also')
+                    print(not current_enemy.images[0].current_cell.visible)
+                if current_enemy.npmob_type == 'native_warriors' and current_enemy.despawning:
+                    if current_enemy.selected or (current_enemy.images[0].current_cell == 'none' or (not current_enemy.images[0].current_cell.visible)): #else:
+                        current_enemy.remove()
+                        removed = True
+                        print('repeating in 1')
+                        
+                elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == global_manager.get('turn'):
+                    if (global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y) == (current_enemy.x, current_enemy.y):
+                        spawning = True
+                        current_enemy.show_images()
+                        current_enemy.select()
+                        current_enemy.attack_on_spawn()
+                        current_enemy.turn_done = True
+                        print('repeating in 2')
+                    else:
+                        spawning = True
+                        global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                        print('repeating in 3')
+            
+                elif current_enemy.images[0].current_cell == 'none' or (not current_enemy.images[0].current_cell.visible):
+                    current_enemy.end_turn_move()
+                    moving = True
+                    print('repeating in 4')
+                    
+                elif current_enemy.selected:
+                    if not current_enemy.creation_turn == global_manager.get('turn'): #don't do anything on first turn, but still move camera to spawn location if visible
+                        current_enemy.end_turn_move() #do_turn()
+                        moving = True
+                        if current_enemy.images[0].current_cell.visible:
+                            if not current_enemy.selected:
+                                current_enemy.select()
+                                global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                            else:
+                                global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                        print('repeating in 5')
+                    else:
+                        current_enemy.turn_done = True
+                    
+                if (not (removed or spawning)) and (not current_enemy.creation_turn == global_manager.get('turn')) and (not current_enemy.images[0].current_cell == 'none') and current_enemy.images[0].current_cell.visible:
+                    if current_enemy.npmob_type == 'native_warriors' and current_enemy.find_closest_target() == 'none' and not current_enemy.despawning:
+                        did_nothing = True
+                        current_enemy.turn_done = True
+                    elif current_enemy.npmob_type == 'beast' and (not current_enemy.hidden) and current_enemy.find_closest_target == current_enemy.images[0].current_cell and not current_enemy.images[0].current_cell.has_pmob():
+                        #if staying in own square and not attacking anything, skip
+                        did_nothing = True
+                        current_enemy.turn_done = True
+                    else:
+                        current_enemy.select()
+                        global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                        print('repeating in 6')
+                elif current_enemy.creation_turn == global_manager.get('turn'):
+                    did_nothing = True
+                    current_enemy.turn_done = True
+
+                if removed:
+                    current_enemy.turn_done = True
+                    if current_enemy.images[0].current_cell == 'none' or (not current_enemy.images[0].current_cell.visible):
+                        global_manager.set('end_turn_wait_time', 0)
+                    else:
+                        global_manager.set('end_turn_wait_time', 1)
+                    global_manager.get('enemy_turn_queue').pop(0)
+                else:             
+                    new_enemy_coordinates = (current_enemy.x, current_enemy.y)
+                    if (not spawning) and (did_nothing or current_enemy.images[0].current_cell == 'none' or (not current_enemy.images[0].current_cell.visible)): #do not wait if not visible or nothing to show
+                        global_manager.set('end_turn_wait_time', 0)
+                    elif moving and not enemy.turn_done:#if will move again after this
+                        global_manager.set('end_turn_wait_time', 0.2)
+                    else: #if done with turn
+                        global_manager.set('end_turn_wait_time', 1)
+
+                    if current_enemy.turn_done:
+                        global_manager.get('enemy_turn_queue').pop(0)
+
+            if global_manager.get('DEBUG_fast_turn'):
+                global_manager.set('end_turn_wait_time', 0)
+            global_manager.set('previous_turn_time', time.time())
+    
             
         for actor in global_manager.get('actor_list'):
             for current_image in actor.images:

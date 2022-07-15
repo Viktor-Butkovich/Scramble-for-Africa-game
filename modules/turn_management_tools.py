@@ -20,11 +20,38 @@ def end_turn(global_manager):
         None
     '''
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
-    global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
-            
+
+    actor_utility.deselect_all(global_manager)
+        
+    global_manager.set('player_turn', False)     
     start_enemy_turn(global_manager)
+
+'''
+    if current_game_mode == 'combat' and previous_turn_time + end_turn_wait_time <= time.time():
+        if current_turn == 'enemy':
+            enemy_turn_done = True
+            for enemy in enemy_list:
+                if not enemy.turn_done:
+                    enemy_turn_done = False
+                    break
+            if enemy_turn_done:
+                start_turn('controlled')
+                end_turn_button.color = (0, 255, 0)
+            else:
+                update_display()
+                enemy_coordinates = (enemy_turn_queue[0].x, enemy_turn_queue[0].y)
+                enemy_turn_queue[0].do_turn()
+                new_enemy_coordinates = (enemy_turn_queue[0].x, enemy_turn_queue[0].y)
+                if enemy_coordinates == new_enemy_coordinates:#if didn't move
+                    end_turn_wait_time = 0.8
+                else:#if did move
+                    end_turn_wait_time = 0.1
+                if enemy_turn_queue[0].turn_done:
+                    enemy_turn_queue.pop(0)
+        previous_turn_time = time.time()
+'''
 
 def start_enemy_turn(global_manager):
     '''
@@ -39,8 +66,8 @@ def start_enemy_turn(global_manager):
     manage_villages(global_manager)
     manage_beasts(global_manager)
     reset_mobs('npmobs', global_manager)
-    manage_enemy_movement(global_manager)
-    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+    #manage_enemy_movement(global_manager)
+    #manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
     #the manage_combat function starts the player turn
     
 def start_player_turn(global_manager, first_turn = False):
@@ -106,7 +133,10 @@ def reset_mobs(mob_type, global_manager):
     elif mob_type == 'npmobs':
         for current_npmob in global_manager.get('npmob_list'):
             current_npmob.reset_movement_points()
-            current_npmob.set_disorganized(False) 
+            current_npmob.set_disorganized(False)
+            #if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+            current_npmob.turn_done = False
+            global_manager.get('enemy_turn_queue').append(current_npmob)
     else:
         for current_mob in global_manager.get('mob_list'):
             current_mob.reset_movement_points()

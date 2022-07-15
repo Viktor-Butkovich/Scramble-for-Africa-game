@@ -66,6 +66,7 @@ class save_load_manager_template():
         Output:
             None
         '''
+        self.global_manager.set('creating_new_game', True)
         strategic_grid_height = 300
         strategic_grid_width = 320
         mini_grid_height = 600
@@ -182,6 +183,7 @@ class save_load_manager_template():
         self.global_manager.set('minister_appointment_tutorial_completed', False)
         self.global_manager.set('exit_minister_screen_tutorial_completed', False)
         notification_tools.show_tutorial_notifications(self.global_manager)
+        self.global_manager.set('creating_new_game', False)
         
     def save_game(self, file_path):
         '''

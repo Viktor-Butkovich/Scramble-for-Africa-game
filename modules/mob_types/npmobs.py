@@ -6,7 +6,7 @@ from .. import utility
 from .. import turn_management_tools
 from .. import notification_tools
 
-class npmob(mob):
+class npmob(mob): #if enemy.turn_done
     '''
     Short for non-player-controlled mob, mob not controlled by the player
     '''
@@ -38,6 +38,7 @@ class npmob(mob):
         self.selection_outline_color = 'bright red'
         self.last_move_direction = (0, 0)
         global_manager.get('npmob_list').append(self)
+        self.turn_done = True
     
     def remove(self):
         '''
@@ -92,13 +93,18 @@ class npmob(mob):
         Output:
             None
         '''
-        for current_mob in self.images[0].current_cell.contained_mobs:
+        if self.images[0].current_cell == 'none':
+            current_cell = self.grids[0].find_cell(self.x, self.y)
+        else:
+            current_cell = self.images[0].current_cell
+            
+        for current_mob in current_cell.contained_mobs:
             if current_mob.is_vehicle:
                 current_mob.eject_passengers()
                 current_mob.eject_crew()
-        if self.images[0].current_cell.has_intact_building('resource'):
-            self.images[0].current_cell.get_intact_building('resource').eject_work_crews()
-        defender = self.images[0].current_cell.get_best_combatant('pmob')
+        if current_cell.has_intact_building('resource'):
+            current_cell.get_intact_building('resource').eject_work_crews()
+        defender = current_cell.get_best_combatant('pmob')
         if not defender == 'none':
             defender.start_combat('defending', self)
         else:
@@ -119,7 +125,12 @@ class npmob(mob):
         Output:
             None
         '''
-        noncombatants = self.images[0].current_cell.get_noncombatants('pmob')
+        if self.images[0].current_cell == 'none':
+            current_cell = self.grids[0].find_cell(self.x, self.y)
+        else:
+            current_cell = self.images[0].current_cell
+            
+        noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
             notification_tools.display_notification("The undefended " + current_noncombatant.name + " has been killed by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
             current_noncombatant.die()
@@ -133,7 +144,12 @@ class npmob(mob):
         Output:
             None
         '''
-        for current_building in self.images[0].current_cell.get_intact_buildings():
+        if self.images[0].current_cell == 'none':
+            current_cell = self.grids[0].find_cell(self.x, self.y)
+        else:
+            current_cell = self.images[0].current_cell
+        
+        for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
                 notification_tools.display_notification("The undefended " + current_building.name + " has been damaged by " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ").", 'default', self.global_manager)
                 current_building.set_damaged(True)
@@ -163,28 +179,34 @@ class npmob(mob):
 
                 if horizontal_multiplier == 0:
                     if not vertical_multiplier == 0:
-                        while self.movement_points > 0:
-                            self.move(0, 1 * vertical_multiplier)
+                        #while self.movement_points > 0:
+                        self.move(0, 1 * vertical_multiplier)
                 elif vertical_multiplier == 0:
-                    while self.movement_points > 0:
-                        self.move(1 * horizontal_multiplier, 0)
+                    #while self.movement_points > 0:
+                    self.move(1 * horizontal_multiplier, 0)
                 else:
                     horizontal_difference = abs(self.x - closest_target.x) #decides moving left/right or up/down
                     vertical_difference = abs(self.y - closest_target.y)
                     total_difference = horizontal_difference + vertical_difference #if horizontal is 3 and vertical is 2, move horizontally if random from 1 to 5 is 3 or lower: 60% chance of moving horizontally, 40% of moving vertically
                     if random.randrange(0, total_difference + 1) <= horizontal_difference: #allows weighting of movement to be more likely to move along more different axis
-                        while self.movement_points > 0:
-                            self.move(1 * horizontal_multiplier, 0)
+                        #while self.movement_points > 0:
+                        self.move(1 * horizontal_multiplier, 0)
                     else:
-                        while self.movement_points > 0:
-                            self.move(0, 1 * vertical_multiplier)
+                        #while self.movement_points > 0:
+                        self.move(0, 1 * vertical_multiplier)
+            else:
+                self.movement_points = 0
             if self.combat_possible():
                 self.global_manager.get('attacker_queue').append(self)
             else:
                 self.kill_noncombatants()
                 if self.can_damage_buildings:
                     self.damage_buildings()
-
+            if self.movement_points == 0:
+                self.turn_done = True
+        else:
+            self.turn_done = True
+        
     def move(self, x_change, y_change):
         '''
         Description:
@@ -195,16 +217,18 @@ class npmob(mob):
         Output:
             None
         '''
-        self.change_movement_points(-1)
-        for current_image in self.images:
-            current_image.remove_from_cell()
+        if not (self.npmob_type == 'beast' and self.hidden):
+            for current_image in self.images:
+                current_image.remove_from_cell()
         self.x += x_change
         self.y += y_change
-        for current_image in self.images:
-            current_image.add_to_cell()
+        if not (self.npmob_type == 'beast' and self.hidden):
+            for current_image in self.images:
+                current_image.add_to_cell()
 
-        if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-            self.global_manager.get('sound_manager').play_sound('water')
-        else:
-            self.global_manager.get('sound_manager').play_sound('footsteps')
+            if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
+                self.global_manager.get('sound_manager').play_sound('water')
+            else:
+                self.global_manager.get('sound_manager').play_sound('footsteps')
         self.last_move_direction = (x_change, y_change)
+        self.movement_points -= self.movement_cost

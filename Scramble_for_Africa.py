@@ -38,6 +38,8 @@ try:
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
+    global_manager.set('previous_turn_time', time.time())
+    global_manager.set('end_turn_wait_time', 0.8)
 
     global_manager.set('font_name', 'times new roman')
     global_manager.set('font_size', scaling.scale_width(15, global_manager))
@@ -429,6 +431,7 @@ try:
     global_manager.set('worker_list', [])
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
+    global_manager.set('enemy_turn_queue', [])
 
     global_manager.set('minister_limit', 15)
 
@@ -958,11 +961,15 @@ try:
 
     global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
     #reveals all cells
+
+    global_manager.set('DEBUG_fast_turn', False) #False by default
+    #removes end turn delays
     
     #activating/disabling debugging tools
 
 
     global_manager.set('startup_complete', True)
+    global_manager.set('creating_new_game', False)
     main_loop.main_loop(global_manager)
     pygame.quit()
 

@@ -33,6 +33,13 @@ class native_warriors(npmob):
         self.origin_village = input_dict['origin_village']
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'
+        self.despawning = False
+        if not from_save:
+            self.set_max_movement_points(2)
+            if not global_manager.get('creating_new_game'):
+                self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
+
+    def attack_on_spawn(self):
         if self.combat_possible(): #attack any player-controlled units in tile when spawning
             available_directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] #all directions
             possible_directions = [] #only directions that can be retreated in
@@ -70,5 +77,6 @@ class native_warriors(npmob):
             None
         '''
         if random.randrange(1, 7) >= 4 and random.randrange(1, 7) >= 4: #1/4 chance of despawn
-            self.remove()
+            #self.remove()
+            self.despawning = True
             self.origin_village.change_population(1)

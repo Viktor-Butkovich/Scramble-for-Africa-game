@@ -68,6 +68,7 @@ class mob(actor):
         self.has_infinite_movement = False
         self.temp_movement_disabled = False
         if from_save:
+            self.set_max_movement_points(input_dict['max_movement_points'])
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
             self.creation_turn = input_dict['creation_turn']
@@ -76,7 +77,10 @@ class mob(actor):
         else:
             self.reset_movement_points()
             self.update_tooltip()
-            self.creation_turn = self.global_manager.get('turn')
+            if global_manager.get('creating_new_game'):
+                self.creation_turn = 0
+            else:
+                self.creation_turn = self.global_manager.get('turn')
 
     def to_save_dict(self):
         '''
@@ -101,6 +105,7 @@ class mob(actor):
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
+        save_dict['max_movement_points'] = self.max_movement_points
         save_dict['image'] = self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
@@ -219,8 +224,13 @@ class mob(actor):
             boolean: Returns whether this unit can start any combats in its current cell
         '''
         if self.is_npmob:
-            if self.hostile and self.images[0].current_cell.has_pmob():
-                return(True)
+            if self.hostile:
+                if self.images[0].current_cell == 'none':
+                    print(str(self.x) + ', ' + str(self.y))
+                    if self.grids[0].find_cell(self.x, self.y).has_pmob(): #if hidden and in same tile as pmob
+                        return(True)
+                elif self.images[0].current_cell.has_pmob(): #if visible and in same tile as pmob
+                    return(True)
         elif self.is_pmob:
             if self.images[0].current_cell.has_npmob():
                 return(True)

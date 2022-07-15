@@ -34,7 +34,9 @@ class beast(npmob):
         if from_save:
             self.set_hidden(input_dict['hidden'])
         else:
+            #self.set_hidden(True)
             self.set_hidden(False)
+            self.set_max_movement_points(2)
 
     def to_save_dict(self):
         '''
@@ -66,7 +68,8 @@ class beast(npmob):
 
     def find_closest_target(self):
         target_list = []
-        possible_cells = self.images[0].current_cell.adjacent_list + [self.images[0].current_cell]
+        current_cell = self.grids[0].find_cell(self.x, self.y)
+        possible_cells = current_cell.adjacent_list + [current_cell]
         enemy_found = False
         for current_cell in possible_cells:
             if current_cell.terrain in self.preferred_terrains:
@@ -85,9 +88,13 @@ class beast(npmob):
 
     def end_turn_move(self):
         #self.set_hidden(random.choice([True, False]))
-        self.set_hidden(False)
-        if not self.hidden:
-            super().end_turn_move()
+        #self.set_hidden(False)
+        #if not self.hidden:
+        super().end_turn_move()
+        if self.grids[0].find_cell(self.x, self.y).has_pmob():
+            self.set_hidden(False)
+        #else:
+        #    self.set_hidden(True)
         
 
     def set_hidden(self, new_hidden):
