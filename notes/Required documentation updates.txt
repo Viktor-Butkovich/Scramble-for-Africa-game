@@ -7,6 +7,7 @@ ministers.minister.attack_roll_to_list
 grids.grid.choose_cell
 cells.cell.adjacent_to_buildings
 npmobs.npmob.end_turn_move can take cell instead of just unit/building
+npmobs.npmob.visible
 save_load_tools imports
 utility.capitalize
 utility.conjugate inputs
@@ -25,6 +26,7 @@ buildings.mission and buildings.fort descriptions
 buildings.fort
 main_loop imports
 max_movement_points in mob input and save_dict
+buttons.end_turn_button
 
 Future plans:
 reduce number of times current cell is calculated in npmobs.npmob end turn functions

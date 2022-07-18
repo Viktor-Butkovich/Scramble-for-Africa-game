@@ -1,15 +1,5 @@
-ERROR:root:'str' object has no attribute 'contained_mobs'
+ERROR:root:name 'True5' is not defined
 Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 970, in <module>
-    main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 235, in main_loop
-    current_enemy.end_turn_move() #do_turn()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\beasts.py", line 93, in end_turn_move
-    super().end_turn_move()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\npmobs.py", line 187, in end_turn_move
-    self.move(1 * horizontal_multiplier, 0)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\npmobs.py", line 224, in move
-    current_image.add_to_cell()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 969, in add_to_cell
-    if not self.actor in self.current_cell.contained_mobs and not (self.actor.in_group or self.actor.in_vehicle or self.actor.in_building):
-AttributeError: 'str' object has no attribute 'contained_mobs'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 963, in <module>
+    global_manager.set('DEBUG_remove_fog_of_war', True5) #False by default
+NameError: name 'True5' is not defined

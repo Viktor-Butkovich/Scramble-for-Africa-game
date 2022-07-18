@@ -732,7 +732,7 @@ class pmob(mob):
         self.global_manager.set('ongoing_combat', False)
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-        elif not self.global_manager.get('player_turn'): #if enemy turn and all combats are completed, go to player turn
+        elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
             turn_management_tools.start_player_turn(self.global_manager)
 
     def start_construction(self, building_info_dict):

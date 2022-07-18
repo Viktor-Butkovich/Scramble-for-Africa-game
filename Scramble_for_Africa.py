@@ -472,6 +472,7 @@ try:
     global_manager.set('making_choice', False)
     global_manager.set('loading_save', False)
     global_manager.set('player_turn', True)
+    global_manager.set('enemy_combat_phase', False)
     global_manager.set('choosing_destination', False)
     global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('choosing_advertised_commodity', False)
@@ -574,8 +575,8 @@ try:
     from_trial_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager),
         'blue', pygame.K_ESCAPE, 'ministers', ['trial'], 'buttons/exit_european_hq_button.png', global_manager)
 
-    end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
-        global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'],
+    end_turn_button = buttons.end_turn_button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
+        global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_SPACE, ['strategic', 'europe'],
         'buttons/end_turn_button.png', global_manager)
 
     new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),

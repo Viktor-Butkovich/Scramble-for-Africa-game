@@ -28,31 +28,6 @@ def end_turn(global_manager):
     global_manager.set('player_turn', False)     
     start_enemy_turn(global_manager)
 
-'''
-    if current_game_mode == 'combat' and previous_turn_time + end_turn_wait_time <= time.time():
-        if current_turn == 'enemy':
-            enemy_turn_done = True
-            for enemy in enemy_list:
-                if not enemy.turn_done:
-                    enemy_turn_done = False
-                    break
-            if enemy_turn_done:
-                start_turn('controlled')
-                end_turn_button.color = (0, 255, 0)
-            else:
-                update_display()
-                enemy_coordinates = (enemy_turn_queue[0].x, enemy_turn_queue[0].y)
-                enemy_turn_queue[0].do_turn()
-                new_enemy_coordinates = (enemy_turn_queue[0].x, enemy_turn_queue[0].y)
-                if enemy_coordinates == new_enemy_coordinates:#if didn't move
-                    end_turn_wait_time = 0.8
-                else:#if did move
-                    end_turn_wait_time = 0.1
-                if enemy_turn_queue[0].turn_done:
-                    enemy_turn_queue.pop(0)
-        previous_turn_time = time.time()
-'''
-
 def start_enemy_turn(global_manager):
     '''
     Description:
@@ -101,7 +76,8 @@ def start_player_turn(global_manager, first_turn = False):
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
 
-    global_manager.set('player_turn', True)
+    global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
+    global_manager.set('enemy_combat_phase', False)
     global_manager.get('turn_tracker').change(1)
         
     if not first_turn:

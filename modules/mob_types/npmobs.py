@@ -52,6 +52,15 @@ class npmob(mob): #if enemy.turn_done
         super().remove()
         self.global_manager.set('npmob_list', utility.remove_from_list(self.global_manager.get('npmob_list'), self)) #make a version of npmob_list without self and set npmob_list to it
 
+    def visible(self):
+        if self.npmob_type == 'beast' and self.hidden:
+            return(False)
+        if self.images[0].current_cell == 'none':
+            return(False)
+        if not self.images[0].current_cell.visible:
+            return(False)
+        return(True)
+
     def find_closest_target(self):
         '''
         Description:
@@ -113,7 +122,7 @@ class npmob(mob): #if enemy.turn_done
             
             if len(self.global_manager.get('attacker_queue')) > 0:
                 self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-            elif not self.global_manager.get('player_turn'): #if enemy turn and all combats are completed, go to player turn
+            elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
                 turn_management_tools.start_player_turn(self.global_manager)
 
     def kill_noncombatants(self):

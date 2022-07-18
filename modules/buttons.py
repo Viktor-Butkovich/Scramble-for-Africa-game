@@ -906,6 +906,20 @@ class button():
             return(True)
         return(False)
 
+class end_turn_button(button):
+    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
+        super().__init__(coordinates, width, height, color, 'start end turn', keybind_id, modes, image_id, global_manager)
+        self.warning_image = images.warning_image(self, global_manager, 'button')
+        #self.warning_image.y -= self.height + 5
+        self.warning_image.x += 100
+        self.warning_image.set_image('misc/enemy_turn_icon.png')
+        self.warning_image.to_front = True
+
+    def can_show_warning(self): #show warning if enemy movements or combat are still occurring
+        if self.global_manager.get('player_turn') and not self.global_manager.get('enemy_combat_phase'):
+            return(False)
+        return(True)
+        
 class cycle_same_tile_button(button):
     '''
     Button that appears near the displayed tile and cycles the order of mobs displayed in a tile
