@@ -117,38 +117,52 @@ class button():
                 adjacent_cell = current_mob.images[0].current_cell.adjacent_cells[non_cardinal_direction]
                 if not adjacent_cell == 'none':
                     if current_mob.can_walk:
-                        tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
-                        if current_mob.can_explore:
-                            tooltip_text.append("Costs 0.5 movements points if moving to a water tile")
                         adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-                        message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
-                        if current_mob.can_explore and adjacent_cell.terrain == 'water':
-                            message += "the tile moved to is a water tile"
-                        elif (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                            message += "this tile has a " + local_infrastructure.infrastructure_type + " and the tile moved to has a " + adjacent_infrastructure.infrastructure_type
+                        
+                        message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                        #if 
+                        #tooltip_text.append(
+                        #tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
+                        
+                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                            message += "and connecting roads"
                         elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                            message += "this tile has no road or railroad to connect to the " + adjacent_infrastructure.infrastructure_type + " of the tile moved to"
+                            message += "and no connecting roads"
                         elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                            message += "the tile moved to has no road or railroad to connect to this tile's " + local_infrastructure.infrastructure_type
+                            message += "and no connecting roads" + local_infrastructure.infrastructure_type
                         else: #
-                            message += "there are no roads or railroads between this tile and the tile moved to"
+                            message += "and no connecting roads"
+
+                        tooltip_text.append(message)
+                        tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
+                        tooltip_text.append("Moving between 2 tiles with roads or railroads costs half as many movement points.")
+                        
+                        #message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
+                        #if current_mob.can_explore and adjacent_cell.terrain == 'water':
+                        #    message += "the tile moved to is a water tile"
+                        #elif (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                        #    message += "this tile has a " + local_infrastructure.infrastructure_type + " and the tile moved to has a " + adjacent_infrastructure.infrastructure_type
+                        #elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                        #    message += "this tile has no road or railroad to connect to the " + adjacent_infrastructure.infrastructure_type + " of the tile moved to"
+                        #elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                        #    message += "the tile moved to has no road or railroad to connect to this tile's " + local_infrastructure.infrastructure_type
+                        #else: #
+                        #    message += "there are no roads or railroads between this tile and the tile moved to"
                     else:
                         tooltip_text.append("Costs 1 movement point")
                 else:
-                    message = "Moving in this direction would move off of the map"
-                if not message == "":
-                    tooltip_text.append(message)
+                    tooltip_text.append("Moving in this direction would move off of the map")
                 if current_mob.can_walk:
                     tooltip_text.append("Can move on land")
                 else:
                     tooltip_text.append("Can not move on land")
                 if current_mob.can_swim:
-                    if current_mob.can_explore:
-                        tooltip_text.append("Can move twice as quickly in water")
-                    else:
-                        tooltip_text.append("Can move in water")
+                    #if current_mob.can_explore:
+                    #    tooltip_text.append("Can move twice as quickly in water")
+                    #else:
+                    tooltip_text.append("Can move in water")
                 else:
-                    tooltip_text.append("Can not move in water, but can embark on a ship in the water by moving to it")
+                    tooltip_text.append("Can not move in water, but can embark a ship in the water by moving to it")
                 if current_mob.can_explore:
                     tooltip_text.append("Can attempt to explore unexplored areas by moving into them")
                 else:

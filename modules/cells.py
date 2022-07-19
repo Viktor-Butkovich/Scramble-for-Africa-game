@@ -293,6 +293,12 @@ class cell():
                 return(True)
         return(False)
 
+    def has_destructible_buildings(self):
+        for current_building in self.get_intact_buildings():
+            if current_building.can_damage():
+                return(True)
+        return(False)
+    
     def create_slums(self):
         '''
         Description:

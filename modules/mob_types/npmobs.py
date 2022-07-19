@@ -169,6 +169,12 @@ class npmob(mob): #if enemy.turn_done
             that is far to the north and slightly to the east will be more likely to move north than east
         '''
         closest_target = self.find_closest_target()
+        if self.npmob_type == 'native_warriors' and random.randrange(1, 7) <= 3: #half chance of moving randomly instead
+            if not self.visible():
+                current_cell = self.grids[0].find_cell(self.x, self.y)
+            else:
+                current_cell = self.images[0].current_cell
+            closest_target = random.choice(current_cell.adjacent_list)
         if not closest_target == 'none':
             if not (closest_target.x == self.x and closest_target.y == self.y): #don't move if target is own tile
                 if closest_target.x > self.x: #decides moving left or right
@@ -189,28 +195,47 @@ class npmob(mob): #if enemy.turn_done
                 if horizontal_multiplier == 0:
                     if not vertical_multiplier == 0:
                         #while self.movement_points > 0:
-                        self.move(0, 1 * vertical_multiplier)
+                        if self.movement_points >= self.get_movement_cost(0, 1 * vertical_multiplier):
+                            self.move(0, 1 * vertical_multiplier)
+                        else:
+                            self.movement_points -= 1
                 elif vertical_multiplier == 0:
                     #while self.movement_points > 0:
-                    self.move(1 * horizontal_multiplier, 0)
+                    if self.movement_points >= self.get_movement_cost(1 * horizontal_multiplier, 0):
+                        self.move(1 * horizontal_multiplier, 0)
+                    else:
+                        self.movement_points -= 1
                 else:
                     horizontal_difference = abs(self.x - closest_target.x) #decides moving left/right or up/down
                     vertical_difference = abs(self.y - closest_target.y)
                     total_difference = horizontal_difference + vertical_difference #if horizontal is 3 and vertical is 2, move horizontally if random from 1 to 5 is 3 or lower: 60% chance of moving horizontally, 40% of moving vertically
                     if random.randrange(0, total_difference + 1) <= horizontal_difference: #allows weighting of movement to be more likely to move along more different axis
-                        #while self.movement_points > 0:
-                        self.move(1 * horizontal_multiplier, 0)
+                        if self.movement_points >= self.get_movement_cost(1 * horizontal_multiplier, 0):
+                            self.move(1 * horizontal_multiplier, 0)
+                        else:
+                            self.movement_points -= 1
                     else:
-                        #while self.movement_points > 0:
-                        self.move(0, 1 * vertical_multiplier)
+                        if self.movement_points >= self.get_movement_cost(0, 1 * vertical_multiplier):
+                            self.move(0, 1 * vertical_multiplier)
+                        else:
+                            self.movement_points -= 1
+                if horizontal_multiplier == 0 and vertical_multiplier == 0:
+                    self.movement_points -= 1
             else:
-                self.movement_points = 0
+                self.movement_points -= 1
             if self.combat_possible():
                 self.global_manager.get('attacker_queue').append(self)
+                self.movement_points = 0
             else:
-                self.kill_noncombatants()
-                if self.can_damage_buildings:
-                    self.damage_buildings()
+                if not self.visible():
+                    current_cell = self.grids[0].find_cell(self.x, self.y)
+                else:
+                    current_cell = self.images[0].current_cell
+                if current_cell.has_pmob() or (self.can_damage_buildings and current_cell.has_destructible_buildings()):
+                    self.kill_noncombatants()
+                    if self.can_damage_buildings:
+                        self.damage_buildings()
+                    self.movement_points = 0
             if self.movement_points == 0:
                 self.turn_done = True
         else:
@@ -229,6 +254,7 @@ class npmob(mob): #if enemy.turn_done
         if not (self.npmob_type == 'beast' and self.hidden):
             for current_image in self.images:
                 current_image.remove_from_cell()
+        self.movement_points -= self.get_movement_cost(x_change, y_change)
         self.x += x_change
         self.y += y_change
         if not (self.npmob_type == 'beast' and self.hidden):
@@ -240,4 +266,4 @@ class npmob(mob): #if enemy.turn_done
             else:
                 self.global_manager.get('sound_manager').play_sound('footsteps')
         self.last_move_direction = (x_change, y_change)
-        self.movement_points -= self.movement_cost
+        #self.movement_points -= self.movement_cost

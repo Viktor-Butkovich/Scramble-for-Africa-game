@@ -36,7 +36,10 @@ class beast(npmob):
         else:
             #self.set_hidden(True)
             self.set_hidden(False)
-            self.set_max_movement_points(2)
+            self.set_max_movement_points(4)
+
+    def get_movement_cost(self, x_change, y_change):
+        return(self.movement_cost) #beasts ignore terrain penalties but have less total movement points
 
     def to_save_dict(self):
         '''

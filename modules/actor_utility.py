@@ -20,7 +20,6 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             if current_target == 'explorer':
                 first_line += 'When combined with workers, an explorer becomes an expedition unit that can explore new tiles and move swiftly along rivers.'
                 text_list.append(first_line)
-                text_list.append('other placeholder text')
                 
             elif current_target == 'hunter':
                 first_line += '.'

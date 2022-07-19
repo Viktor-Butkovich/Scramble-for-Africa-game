@@ -116,6 +116,18 @@ try:
     )
 
     global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal'])
+
+    global_manager.set('terrain_movement_cost_dict',
+        {
+        'clear': 1,
+        'hills': 2,
+        'jungle': 3,
+        'water': 1,
+        'mountain': 3,
+        'swamp': 3,
+        'desert': 2
+        }
+    )
     
     #terrain setup
 

@@ -52,10 +52,10 @@ class pmob(mob):
             self.set_name(self.default_name)
         else:
             self.default_name = self.name
+            self.set_max_movement_points(6)
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
-
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1

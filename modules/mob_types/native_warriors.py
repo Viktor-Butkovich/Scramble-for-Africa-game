@@ -35,7 +35,7 @@ class native_warriors(npmob):
         self.npmob_type = 'native_warriors'
         self.despawning = False
         if not from_save:
-            self.set_max_movement_points(2)
+            self.set_max_movement_points(6)
             if not global_manager.get('creating_new_game'):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
 
