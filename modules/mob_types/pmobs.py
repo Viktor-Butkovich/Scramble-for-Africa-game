@@ -52,7 +52,7 @@ class pmob(mob):
             self.set_name(self.default_name)
         else:
             self.default_name = self.name
-            self.set_max_movement_points(6)
+            self.set_max_movement_points(4)
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
@@ -698,6 +698,10 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
+                elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
+                    notification_tools.display_notification("While the attack was successful, this unit did not have the " + str(self.get_movement_cost(0, 0, True)) + " movement points required to fully move into the attacked tile. /n /n",
+                        'default', self.global_manager)
+                    self.retreat()
                 enemy.die()
                 if not enemy.npmob_type == 'beast':
                     self.global_manager.get('evil_tracker').change(8)
@@ -726,6 +730,9 @@ class pmob(mob):
                 if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
                     enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
 
+        if combat_type == 'attacking':
+            self.set_movement_points(0)
+        
         if self.just_promoted:
             self.promote()
             

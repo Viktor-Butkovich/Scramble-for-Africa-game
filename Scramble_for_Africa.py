@@ -564,6 +564,7 @@ try:
         'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
+    global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
     #value tracker setup
 
 
@@ -972,6 +973,9 @@ try:
     global_manager.set('DEBUG_show_evil', False) #False by default
     #prints the players "evil" number at the end of each turn
 
+    global_manager.set('DEBUG_show_fear', False) #False by default
+    #prints the players "fear" number at the end of each turn and says when fear dissuades a minister from stealing
+
     global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
     #reveals all cells
 
@@ -989,7 +993,6 @@ try:
 except Exception as e: #displays error message and records error message in crash log file
     crash_log_file = open("notes/Crash Log.txt", "w")
     crash_log_file.write("") #clears crash report file
-    
     console = logging.StreamHandler() #sets logger to go to both console and crash log file
     logging.basicConfig(filename = "notes/Crash Log.txt")
     logging.getLogger('').addHandler(console)

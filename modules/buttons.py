@@ -118,8 +118,13 @@ class button():
                 if not adjacent_cell == 'none':
                     if current_mob.can_walk:
                         adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-                        
-                        message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                        if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
+                            final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
+                            message = "Attacking an enemy unit only requires 1 movement point, but staying in the enemy's tile afterward would require the usual amount"
+                            tooltip_text.append(message)
+                            message = "Staying afterward would cost " + str(final_movement_cost - 1) + " more movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                        else:
+                            message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
                         #if 
                         #tooltip_text.append(
                         #tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")

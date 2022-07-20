@@ -223,6 +223,8 @@ def manage_public_opinion(global_manager):
     global_manager.get('evil_tracker').change(-1)
     if global_manager.get('DEBUG_show_evil'):
         print("Evil number: " + str(global_manager.get('evil')))
+    if global_manager.get('DEBUG_show_fear'):
+        print("Fear number: " + str(global_manager.get('fear')))
     
 def manage_subsidies(global_manager):
     '''
@@ -525,5 +527,7 @@ def manage_ministers(global_manager):
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
             global_manager.get('actor_creation_manager').create_minister(global_manager)
         notification_tools.display_notification("Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n", 'default', global_manager)
-
-        
+    first_roll = random.randrange(1, 7)
+    second_roll = random.randrange(1, 7)
+    if first_roll == 1 and second_roll <= 3:
+        global_manager.get('fear_tracker').change(-1)

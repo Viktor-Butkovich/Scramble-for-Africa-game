@@ -43,6 +43,47 @@ class battalion(group):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
+    def get_movement_cost(self, x_change, y_change, post_attack = False):
+        cost = self.movement_cost
+        if not (self.is_npmob and not self.visible()):
+            local_cell = self.images[0].current_cell
+        else:
+            local_cell = self.grids[0].find_cell(self.x, self.y)
+
+        
+        direction = 'none'
+        if x_change < 0:
+            direction = 'left'
+        elif x_change > 0:
+            direction = 'right'
+        elif y_change > 0:
+            direction = 'up'
+        elif y_change < 0:
+            direction = 'down'
+        elif x_change == 0 and y_change == 0:
+            direction = 'none'
+            
+        if direction == 'none':
+            adjacent_cell = local_cell
+        else:
+            adjacent_cell = local_cell.adjacent_cells[direction]
+            
+        if not adjacent_cell == 'none':
+            if (not post_attack) and self.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking non-beast
+                cost = 1
+            elif (not post_attack) and self.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none': #if safari attacking beast
+                cost = 1
+            else:
+                cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
+            
+                if self.is_pmob:
+                    if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
+                        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                            cost = cost / 2
+                    if (not adjacent_cell.visible) and self.can_explore:
+                        cost = self.movement_cost
+        return(cost)
+
     def move(self, x_change, y_change, attack_confirmed = False):
         '''
         Description:
@@ -101,10 +142,10 @@ class battalion(group):
                         message = "RISK: DEADLY /n /n" + message
 
                     if defender.npmob_type == 'beast':
-                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to hunt the " + defender.name + " to the " + direction + "?",
+                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to hunt the " + defender.name + " to the " + direction + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed.",
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     else:
-                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "?",
+                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed.",
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_combat', True)
                     for current_grid in self.grids:

@@ -85,6 +85,7 @@ class minister():
             self.just_removed = False
                 
             minister_utility.update_available_minister_display(self.global_manager)
+        self.stolen_already = False
         self.update_tooltip()
 
     def update_tooltip(self):
@@ -227,7 +228,7 @@ class minister():
         if random.randrange(1, 3) == 1: #1/2
             result += self.get_skill_modifier()
 
-        if predetermined_corruption or self.check_corruption(): #true if stealing
+        if (predetermined_corruption or self.check_corruption()) and not self.stolen_already: #true if stealing
             self.steal_money(value, roll_type)
             result = random.randrange(max_crit_fail + 1, min_success) #if crit fail on 1 and success on 4+, do random.randrange(2, 4), pick between 2 and 3
 
@@ -279,15 +280,17 @@ class minister():
         results = []
         if self.check_corruption():
             self.steal_money(value, roll_type)
+            self.stolen_already = True
             corrupt_index = random.randrange(0, num_dice)
-            for i in range(num_dice):
+            for i in range(num_dice): #num_sides, min_success, max_crit_fail, value, roll_type, predetermined_corruption = False
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly and make it the corrupt result, making it a non-critical failure
-                    results.append(self.roll(num_sides, min_success, max_crit_fail, True))
+                    results.append(self.roll(num_sides, min_success, max_crit_fail, value, roll_type, True))
                 else: #for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
-                    results.append(self.roll(num_sides, min_success, 0, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
+                    results.append(self.roll(num_sides, min_success, 0, value, roll_type, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
         else: #if not corrupt, just roll with minister modifier
             for i in range(num_dice):
                 results.append(self.no_corruption_roll(num_sides))
+        self.stolen_already = False
         return(results)
             
     def attack_roll_to_list(self, own_modifier, enemy_modifier, value, roll_type, num_dice):
@@ -305,6 +308,7 @@ class minister():
         results = []
         if self.check_corruption():
             self.steal_money(value, roll_type)
+            self.stolen_already = True
             for i in range(num_dice):
                 results.append(0)
             difference = 10
@@ -325,6 +329,7 @@ class minister():
                 results.append(self.no_corruption_roll(6))
             enemy_roll = random.randrange(1, 7)
             results = [enemy_roll] + results
+        self.stolen_already = False
         return(results)
 
     def appoint(self, new_position):
@@ -409,9 +414,15 @@ class minister():
             boolean: Returns True if this minister will be corrupt for the roll
         '''
         if random.randrange(1, 7) >= self.corruption_threshold:
-            return(True)
+            if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
+                return(True)
+            else:
+                if self.global_manager.get('DEBUG_show_fear'):
+                    print(self.name + " was too afraid to steal money")
+                return(False)
         else:
             return(False)
+
 
     def get_skill_modifier(self):
         '''

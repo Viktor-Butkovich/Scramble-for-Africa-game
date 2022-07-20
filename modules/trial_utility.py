@@ -262,6 +262,8 @@ def complete_trial(final_roll, global_manager):
         defense.appoint('none')
         defense.respond('prison')
         defense.remove()
+        global_manager.get('fear_tracker').change(1)
+        notification_tools.display_notification("Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n", 'default', global_manager)
 
     else:
         text = "You have lost the trial and " + defense.name + " goes unpunished, remaining your " + defense.current_position + ". /n /n"

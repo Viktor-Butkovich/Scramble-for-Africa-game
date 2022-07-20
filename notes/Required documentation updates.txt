@@ -28,8 +28,10 @@ main_loop imports
 max_movement_points in mob and pmob input and save_dict
 buttons.end_turn_button
 cells.cell.has_destructible_buildings
+battalions.battalion.get_movement_cost
 
 Future plans:
+add veteran porters
 make sure battalion attacking movement points work correctly
 increase movement cost when embarking/disembarking
 reduce number of times current cell is calculated in npmobs.npmob end turn functions
@@ -57,6 +59,7 @@ possible ui improvement: have green/red letters appear by cursor after user does
 possibly display a notification when a unit dies and have an optional cause of death parameter
 
 Possible/known Errors:
+minister face being shown twice during fort construction
 should never move camera to invisible enemy during enemy turn
 allow player to exit game and save even when ministers are not appointed
 capitalize first letter of enemy name during combat
