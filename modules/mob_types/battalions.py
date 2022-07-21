@@ -1,8 +1,10 @@
 #Contains functionality for battalions
 import time
+import random
 from .groups import group
 from ..tiles import tile
 from .. import actor_utility
+from .. import utility
 from .. import notification_tools
 from .. import text_tools
 
@@ -210,6 +212,7 @@ class safari(battalion): #specialized battalion led by hunter that fights beasts
         self.set_group_type('safari')
         self.is_battalion = False
         self.is_safari = True
+        self.can_swim = True
         self.battalion_type = 'none'
         self.attack_cost = self.global_manager.get('action_prices')['hunt']
         if not from_save:
@@ -220,3 +223,43 @@ class safari(battalion): #specialized battalion led by hunter that fights beasts
         if not defender == 'none':
             self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting supplies')
             self.start_combat('attacking', defender)
+
+    def track_beasts(self):
+        result = self.controlling_minister.no_corruption_roll(6)
+        beasts_found = []
+        ambush_list = []
+        if result >= 4:
+            for current_beast in self.global_manager.get('beast_list'):
+                if current_beast.hidden:
+                    if utility.find_grid_distance(self, current_beast) <= 1: #if different by 1 in x or y or at same coordinates
+                        beast_cell = self.grids[0].find_cell(current_beast.x, current_beast.y)
+                        if beast_cell.visible: #if beasts's cell has been discovered
+                            current_beast.set_hidden(False)
+                            beasts_found.append(current_beast)
+        text = ""
+        if len(beasts_found) == 0:
+            text += "Though beasts may still be hiding nearby, the safari was not able to successfully track any beasts. /n /n"
+        else:
+            text = ""
+            for current_beast in beasts_found:
+                if current_beast.x == self.x and current_beast.y == self.y:
+                    text += "As the safari starts searching for their quarry, they soon realize that the " + current_beast.name + " had been stalking them the whole time. They have only moments to prepare for the ambush. /n /n"
+                    ambush_list.append(current_beast)
+                elif current_beast.x > self.x:
+                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the east. /n /n"
+                elif current_beast.x < self.x:
+                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the west. /n /n"
+                elif current_beast.y > self.y:
+                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the north. /n /n"
+                elif current_beast.y < self.y:
+                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the south. /n /n"
+                current_beast.set_hidden(False)
+                current_beast.just_revealed = True
+            if result == 6 and not self.veteran:
+                text += "This safari's hunter tracked the " + random.choice(beasts_found).name + " well enough to become a veteran. /n /n"
+                self.promote()
+
+        self.controlling_minister.display_message(text)
+        for current_beast in ambush_list:
+            current_beast.attempt_local_combat()
+        self.change_movement_points(-1)

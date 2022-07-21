@@ -226,7 +226,6 @@ class mob(actor):
         if self.is_npmob:
             if self.hostile:
                 if self.images[0].current_cell == 'none':
-                    print(str(self.x) + ', ' + str(self.y))
                     if self.grids[0].find_cell(self.x, self.y).has_pmob(): #if hidden and in same tile as pmob
                         return(True)
                 elif self.images[0].current_cell.has_pmob(): #if visible and in same tile as pmob
@@ -304,6 +303,17 @@ class mob(actor):
                 if (not adjacent_cell.visible) and self.can_explore:
                     cost = self.movement_cost
         return(cost)
+
+    def can_leave(self):
+        '''
+        Description:
+            Returns whether this mob is allowed to move away from its current cell. By default, mobs are always allowed to move away from their current cells, but subclasses like ship are able to return False
+        Input:
+            None
+        Output:
+            boolean: Returns True
+        '''
+        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
 
     def adjacent_to_water(self):
         '''
@@ -614,7 +624,7 @@ class mob(actor):
             if not self.grid in self.global_manager.get('abstract_grid_list'):
                 if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
                     future_cell = self.grid.find_cell(future_x, future_y)
-                    if future_cell.visible or self.can_explore:
+                    if future_cell.visible or self.can_explore or self.is_npmob:
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
@@ -686,7 +696,28 @@ class mob(actor):
             None
         '''
         original_movement_points = self.movement_points
+        #if direction == 'previous':
         self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+        #elif direction == 'random':
+        #    self.movement_points = 3
+        #    available_directions = []
+        #    if self.can_move(0, 1):
+        #        future_cell = self.grids[0].find_cell(self.x, self.y + 1)
+        #        if not future_cell.has_npmob():
+        #            available_directions.append([0, 1])
+        #    if self.can_move(1, 0):
+        #        future_cell = self.grids[0].find_cell(self.x + 1, self.y)
+        #        if not future_cell.has_npmob():
+        #            available_directions.append([1, 0])
+        #    if self.can_move(0, -1):
+        #        future_cell = self.grids[0].find_cell(self.x, self.y - 1)
+        #        if not future_cell.has_npmob():
+        #            available_directions.append([0, -1])
+        #    if self.can_move(-1, 0):
+        #        future_cell = self.grids[0].find_cell(self.x - 1, self.y)
+        #        if not future_cell.has_npmob():
+        #            available_directions.append([-1, 0])
+            
         self.set_movement_points(original_movement_points) #retreating is free
         
     def touching_mouse(self):

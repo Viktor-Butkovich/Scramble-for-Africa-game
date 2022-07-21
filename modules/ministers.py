@@ -52,6 +52,7 @@ class minister():
             
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
+            self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
             self.image_id = input_dict['image_id']
@@ -75,6 +76,7 @@ class minister():
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
             
             self.skill_setup()
+            self.interests_setup()
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
@@ -105,6 +107,8 @@ class minister():
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
         self.tooltip_text.append("Background: " + self.background)
         self.tooltip_text.append("Social status: " + self.status)
+        self.tooltip_text.append("Interests: " + self.interests[0] + " and " + self.interests[1])
+        self.tooltip_text.append("Evidence: " + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
             self.tooltip_text.append("This minister was just removed from office and expects to be reappointed to an office by the end of the turn.")
             self.tooltip_text.append("If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.")
@@ -198,6 +202,7 @@ class minister():
         save_dict['current_position'] = self.current_position
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
+        save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
         save_dict['image_id'] = self.image_id
         save_dict['stolen_money'] = self.stolen_money
@@ -391,6 +396,27 @@ class minister():
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
                 self.specific_skills[current_minister_type] += 1
+
+    def interests_setup(self):
+        skill_types = self.global_manager.get('skill_types')
+        type_minister_dict = self.global_manager.get('type_minister_dict')
+        highest_skills = []
+        highest_skill_number = 0
+        for current_skill in skill_types:
+            if len(highest_skills) == 0 or self.specific_skills[type_minister_dict[current_skill]] > highest_skill_number:
+                highest_skills = [current_skill]
+                highest_skill_number = self.specific_skills[type_minister_dict[current_skill]]
+            elif self.specific_skills[type_minister_dict[current_skill]] == highest_skill_number:
+                highest_skills.append(current_skill)
+        first_interest = random.choice(highest_skills)
+        second_interest = first_interest
+        while second_interest == first_interest:
+            second_interest = random.choice(skill_types)
+
+        if random.randrange(1, 7) >= 4:
+            self.interests = [first_interest, second_interest]
+        else:
+            self.interests = [second_interest, first_interest]
 
     def corruption_setup(self):
         '''

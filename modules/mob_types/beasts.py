@@ -1,14 +1,4 @@
 #Contains functionality for wild beasts
-'''
-beast notes:
-lion - clear and hills
-elephant - clear and swamp
-gorilla - jungle and mountain
-Cape buffalo - clear and hills
-crocodile - water and swamp
-hippo - water and swamp
-leopard - jungle and mountain
-'''
 import random
 from .npmobs import npmob
 from .. import utility
@@ -34,12 +24,12 @@ class beast(npmob):
         if from_save:
             self.set_hidden(input_dict['hidden'])
         else:
-            #self.set_hidden(True)
-            self.set_hidden(False)
+            self.set_hidden(True)
             self.set_max_movement_points(4)
+        self.just_revealed = False
 
     def get_movement_cost(self, x_change, y_change):
-        return(self.movement_cost) #beasts ignore terrain penalties but have less total movement points
+        return(self.movement_cost) #beasts ignore terrain penalties
 
     def to_save_dict(self):
         '''
@@ -93,13 +83,20 @@ class beast(npmob):
         #self.set_hidden(random.choice([True, False]))
         #self.set_hidden(False)
         #if not self.hidden:
+        self.just_revealed = False
+        self.set_hidden(True)
         super().end_turn_move()
         if self.grids[0].find_cell(self.x, self.y).has_pmob():
             self.set_hidden(False)
         #else:
         #    self.set_hidden(True)
-        
 
+    def retreat(self):
+        if not self.just_revealed:
+            self.set_hidden(True)
+        super().retreat()
+
+        
     def set_hidden(self, new_hidden):
         self.hidden = new_hidden
         if new_hidden == True:
@@ -114,3 +111,6 @@ class beast(npmob):
     def remove(self):
         super().remove()
         self.global_manager.set('beast_list', utility.remove_from_list(self.global_manager.get('beast_list'), self))
+
+    def damage_buildings(self):
+        nothing = 0 #beasts ignore buildings

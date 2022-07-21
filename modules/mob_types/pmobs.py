@@ -304,17 +304,6 @@ class pmob(mob):
         '''
         self.die()
 
-    def can_leave(self):
-        '''
-        Description:
-            Returns whether this mob is allowed to move away from its current cell. By default, mobs are always allowed to move away from their current cells, but subclasses like ship are able to return False
-        Input:
-            None
-        Output:
-            boolean: Returns True
-        '''
-        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
-
     def can_move(self, x_change, y_change):
         '''
         Description:
@@ -483,7 +472,7 @@ class pmob(mob):
         enemy = self.current_enemy
         own_combat_modifier = self.get_combat_modifier()
         enemy_combat_modifier = enemy.get_combat_modifier()
-        if combat_type == 'attacking':
+        if combat_type == 'attacking' or (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
             uses_minister = True
         else:
             uses_minister = False
@@ -551,6 +540,8 @@ class pmob(mob):
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 results = minister_rolls
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
+            elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
+                results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
                 results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
             first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, results[0], own_combat_modifier)
@@ -568,6 +559,8 @@ class pmob(mob):
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, 'combat', num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 result = minister_rolls[0]
+            elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
+                result = self.controlling_minister.no_corruption_roll(6)
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, result, own_combat_modifier)
@@ -670,7 +663,7 @@ class pmob(mob):
                         text += "The " + enemy.name + " decisively defeated your " + self.name + ", who was either slain or captured. /n /n"
                     else:
                         text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
-        if (not self.veteran) and own_roll >= 6 and self.is_battalion: #civilian units can not become veterans through combat
+        if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units can not become veterans through combat
             if self.is_battalion:
                 self.just_promoted = True
                 text += " This battalion's major is now a veteran. /n /n"  

@@ -37,7 +37,7 @@ def find_grid_distance(first, second):
         int: Returns the sum of the horizontal and vertical distance between the positions of the inputted objects
     '''
     horizontal_distance = abs(first.x - second.x)
-    vertical_distance = abs(first.x - second.x)
+    vertical_distance = abs(first.y - second.y)
     if not first.grids[0] in second.grids:
         return(-1)
     return(horizontal_distance + vertical_distance)

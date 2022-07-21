@@ -460,6 +460,10 @@ class cell():
                 if current_mob.is_pmob:
                     if current_mob.get_combat_strength() > 0: #unit with 0 combat strength can not fight
                         current_combat_modifier = current_mob.get_combat_modifier()
+                        if current_mob.is_safari and target_type == 'beast': #more likely to pick safaris for defense against beasts
+                            current_combat_modifier += 3
+                        elif target_type == 'beast':
+                            current_combat_modifier -= 1
                         if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
                             best_combatants = [current_mob]
                             best_combat_modifier = current_combat_modifier

@@ -36,7 +36,10 @@ class npmob(mob): #if enemy.turn_done
         self.npmob_type = 'npmob'
         
         self.selection_outline_color = 'bright red'
-        self.last_move_direction = (0, 0)
+        if self.y == 0: #should fix any case of npmob trying to retreat off the map
+            self.last_move_direction = (0, 1)
+        else:
+            self.last_move_direction = (0, -1)
         global_manager.get('npmob_list').append(self)
         self.turn_done = True
     
@@ -78,18 +81,19 @@ class npmob(mob): #if enemy.turn_done
         min_distance = -1
         closest_targets = ['none']
         for possible_target in target_list:
-            if possible_target.actor_type == 'building' or not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
-                distance = utility.find_grid_distance(self, possible_target)
-                if min_distance == -1 and (not distance == -1): #automatically choose first one to replace initial value
-                    min_distance = distance
-                    closest_targets = [possible_target]
-                else:
-                    if not distance == -1: #if on same grid
-                        if distance < min_distance: #if closer than any previous, replace all previous
-                            min_distance = distance
-                            closest_targets = [possible_target]
-                        elif distance == min_distance: #if as close as previous, add as alternative to previous
-                            closest_targets.append(possible_target)
+            if not possible_target.y == 0: #ignore units in the ocean
+                if possible_target.actor_type == 'building' or not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
+                    distance = utility.find_grid_distance(self, possible_target)
+                    if min_distance == -1 and (not distance == -1): #automatically choose first one to replace initial value
+                        min_distance = distance
+                        closest_targets = [possible_target]
+                    else:
+                        if not distance == -1: #if on same grid
+                            if distance < min_distance: #if closer than any previous, replace all previous
+                                min_distance = distance
+                                closest_targets = [possible_target]
+                            elif distance == min_distance: #if as close as previous, add as alternative to previous
+                                closest_targets.append(possible_target)
         return(random.choice(closest_targets)) #return one of the closest ones, or 'none' if none were found
 
     def attempt_local_combat(self):
@@ -113,7 +117,7 @@ class npmob(mob): #if enemy.turn_done
                 current_mob.eject_crew()
         if current_cell.has_intact_building('resource'):
             current_cell.get_intact_building('resource').eject_work_crews()
-        defender = current_cell.get_best_combatant('pmob')
+        defender = current_cell.get_best_combatant('pmob', self.npmob_type)
         if not defender == 'none':
             defender.start_combat('defending', self)
         else:
@@ -175,6 +179,9 @@ class npmob(mob): #if enemy.turn_done
             else:
                 current_cell = self.images[0].current_cell
             closest_target = random.choice(current_cell.adjacent_list)
+            while current_cell.y == 0: #npmobs avoid the ocean
+                closest_target = random.choice(current_cell.adjacent_list)
+            
         if not closest_target == 'none':
             if not (closest_target.x == self.x and closest_target.y == self.y): #don't move if target is own tile
                 if closest_target.x > self.x: #decides moving left or right

@@ -287,6 +287,8 @@ class button():
         elif self.button_type == 'take loan':
             self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
                 "Costs an entire turn of movement points."])
+        elif self.button_type == 'track beasts':
+            self.set_tooltip(["Attempts to reveal beasts in this tile and adjacent tiles", "If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them", "Can not reveal beasts in unexplored tiles", "Costs 1 movement point"])
         elif self.button_type == 'convert':
             self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village",
                 "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])

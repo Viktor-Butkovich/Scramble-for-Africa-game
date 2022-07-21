@@ -1234,6 +1234,52 @@ class advertising_campaign_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not start an advertising campaign.", self.global_manager)
 
+class track_beasts_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'track beasts', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a safari, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_group and self.attached_label.actor.is_safari)):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('strategic_map_grid') in current_mob.grids:
+                    if current_mob.movement_points >= 1:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['track_beasts']:
+                            if current_mob.check_if_minister_appointed():
+                                current_mob.track_beasts()
+                        else:
+                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['track_beasts']) + " money needed to search for a loan offer.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("Tracking beasts requires 1 movement point.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("A safari can only track beasts in Africa", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not track beasts.", self.global_manager)
+
 class switch_theatre_button(label_button):
     '''
     Button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A destination is chosen when the player clicks a tile in another theatre.

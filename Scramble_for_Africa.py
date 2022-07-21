@@ -366,7 +366,8 @@ try:
         'loan': 5,
         'attack': 5,
         'trial': 5,
-        'hunt': 5
+        'hunt': 5,
+        'track_beasts': 0
         }
     )
 
@@ -728,7 +729,7 @@ try:
 
 
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'evidence', 'background', 'social status']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         global_manager.get('minister_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager),

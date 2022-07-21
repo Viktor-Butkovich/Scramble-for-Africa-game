@@ -498,7 +498,7 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 3 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
+        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
             removed_ministers.append(current_minister)
 
         if current_minister.fabricated_evidence > 0:

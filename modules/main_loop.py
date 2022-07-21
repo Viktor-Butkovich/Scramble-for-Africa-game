@@ -239,7 +239,7 @@ def main_loop(global_manager):
                     if not current_enemy.creation_turn == global_manager.get('turn'): #don't do anything on first turn, but still move camera to spawn location if visible
                         current_enemy.end_turn_move() #do_turn()
                         moving = True
-                        if current_enemy.images[0].current_cell.visible:
+                        if current_enemy.visible():
                             if not current_enemy.selected:
                                 current_enemy.select()
                                 global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
