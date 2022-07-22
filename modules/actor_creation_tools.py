@@ -62,6 +62,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.train(from_save, input_dict, global_manager)
         elif init_type == 'ship':
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
+        elif init_type == 'boat':
+            new_actor = vehicles.boat(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
             if init_type == 'evangelist':
                 new_actor = officers.evangelist(from_save, input_dict, global_manager)

@@ -329,6 +329,20 @@ class mob(actor):
                 return(True)
         return(False)
 
+    def adjacent_to_river(self):
+        '''
+        Description:
+            Returns whether any of the cells directly adjacent to this mob's cell has the water terrain above y == 0. Otherwise, returns False
+        Input:
+            None
+        Output:
+            boolean: Returns True if any of the cells directly adjacent to this mob's cell has the water terrain above y == 0. Otherwise, returns False
+        '''
+        for current_cell in self.images[0].current_cell.adjacent_list:
+            if current_cell.terrain == 'water' and current_cell.visible and not current_cell.y == 0:
+                return(True)
+        return(False)
+
     def change_movement_points(self, change):
         '''
         Description:
@@ -530,7 +544,7 @@ class mob(actor):
                     tooltip_list.append("    Crew: " + self.crew.name.capitalize())
                 else:
                     tooltip_list.append("    Crew: None")
-                    tooltip_list.append("    A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+                    tooltip_list.append("    A " + self.name + " can not move or take passengers or cargo without crew")
                     
                 if len(self.contained_mobs) > 0:
                     tooltip_list.append("    Passengers: ")
@@ -629,7 +643,10 @@ class mob(actor):
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
-                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
+                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
+                            if destination_type == 'water':
+                                if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                    return(False)
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:

@@ -33,38 +33,34 @@ actor_display_tools/buttons/track_beasts_button
 cells.cell.get_best_combatant inputs
 ministers.minister.interests_setup
 ministers.minister.__init__ and to_save_dict inputs interests
+vehicles.boat
+actor_display_tools/build_steamboat_button
+
+Do next: steamboat/steamship, expensive embarking/disembarking, evidence decay, canoes, public opinion from conversion and killing beasts, random effect on public opinion w/ flavor text when you, 
+slave catching (4+ success, 1 causes disorganized, independently affects aggressiveness (1 decreases aggressiveness, 4-6 increases), make sure natural 1 on converting/trading damages mission/trading post, not destroyed, 
+add sentry mode/end turn for unit buttons
 
 Future plans:
-destroy unit if attempting to retreat with no valid destinations
-safari attacks up to 1 beast on sight if tracked on own square, attempt retreat afterward if others still present or beast not dead
-add hunter tracking, beasts hidden except right after revealed and when in combat
-add track beast button, costs 1 movement point but no money
-add veteran porters
-make sure battalion attacking movement points work correctly
+allow moving empty steamboat across land on train
+add steamboat/steamship
 increase movement cost when embarking/disembarking
 reduce number of times current cell is calculated in npmobs.npmob end turn functions
 improve appearance of combat modifier text
-show enemy turn with individual movements like Varision
-add riverboats
 add evidence decay over time
-add forts
-add minister fear mechanic
 add canoe to native warriors and expeditions standing in water
 add background to multiple units in tile number to improve contrast
-add evangelist increasing public opinion
-add 2 'interest' categories per minister, one of which is their best skill
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it
 add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
 change action failed messages to reference minister asking for more time/money rather than the unit officer
 prevent ignored commodity prices from skyrocketing
 add multiple save slots
-Maybe cause health attrition when moving
 Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
-Possibly ministers should still be involved but without corruption when there is no profit to be gained, such as in defensive combat or when avoiding health attrition
 Maybe allow ship's crew to leave while cargo is on board but cargo is lost at end of turn if not replaced
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
 possibly display a notification when a unit dies and have an optional cause of death parameter
+
+Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
 
 Possible/known Errors:
 make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense

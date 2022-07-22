@@ -38,6 +38,8 @@ class expedition(group):
         self.exploration_cost = self.global_manager.get('action_prices')['exploration']#2
         self.can_explore = True
         self.can_swim = True
+        self.can_swim_river = True
+        self.can_swim_ocean = False
         self.set_group_type('expedition')
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
         self.resolve_off_tile_exploration()

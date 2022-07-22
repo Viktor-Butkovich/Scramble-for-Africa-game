@@ -386,6 +386,8 @@ class ship(vehicle):
         self.has_infinite_movement = True
         self.vehicle_type = 'ship'
         self.can_swim = True
+        self.can_swim_river = False
+        self.can_swim_ocean = True
         self.can_walk = False
         self.travel_possible = True #if this mob would ever be able to travel
         self.can_hold_commodities = True
@@ -426,3 +428,20 @@ class ship(vehicle):
             if not self.temp_movement_disabled:
                 return(True)
         return(False)
+
+class boat(ship):
+    def __init__(self, from_save, input_dict, global_manager):
+        super().__init__(from_save, input_dict, global_manager)
+        self.set_max_movement_points(12)
+        self.has_infinite_movement = False
+        self.vehicle_type = 'ship'
+        self.can_swim_river = True
+        self.can_swim_ocean = False
+        self.can_walk = False
+        self.travel_possible = False
+        self.inventory_capacity = 9
+        #if not from_save:
+        #    self.inventory_setup()
+        #    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
+        #else:
+        #    self.load_inventory(input_dict['inventory'])

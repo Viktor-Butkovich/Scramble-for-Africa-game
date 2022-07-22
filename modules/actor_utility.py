@@ -83,8 +83,11 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
             
-        elif current_target == 'ship':
-            text_list.append('While useless by itself, a ship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
+        elif current_target == 'steamship':
+            text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
+            
+        elif current_target == 'steamboat':
+            text_list.append('While useless by itself, a steamboat crewed by workers can quickly transport units and cargo along rivers.')
             
         elif current_target == 'train':
             text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')

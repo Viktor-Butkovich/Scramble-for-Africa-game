@@ -327,13 +327,24 @@ class pmob(mob):
                             if future_cell.terrain == 'water':
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                             if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
-                                (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
+                                (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
+                                
+                                if destination_type == 'water':
+                                    if not (future_cell.has_vehicle('ship') and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
+                                        if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                            if future_y == 0:
+                                                text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
+                                            elif future_y > 0:
+                                                text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
+                                            return(False)
+                                    
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                     if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari: #non-battalion units can't move into enemies
                                         return(True)
                                     else:
                                         text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
                                         return(False)
+                                    
                                 else:
                                     text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
                                     text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
@@ -779,7 +790,7 @@ class pmob(mob):
                 message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
                 message += "It is also required for trains to move and for a train station to be built."
         elif self.building_type == 'port':
-            message += "A port allows ships to enter the tile. It also expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for ships traveling between theatres."
+            message += "A port allows ships to enter the tile. It also expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for steamships traveling between theatres."
             if self.y == 1:
                 message += "A port built here would be adjacent to the ocean."
             else:
@@ -794,6 +805,9 @@ class pmob(mob):
             message += "A mission increases the combat effectiveness of your units standing in this tile."
         elif self.building_type == 'train':
             message += "A train is a unit that can carry commodities and passengers at high speed along railroads. It can only exchange cargo at a train station and must stop moving for the rest of the turn after dropping off cargo. "
+            message += "It also requires an attached worker as crew to function."
+        elif self.building_type == 'steamboat':
+            message += "A steamboat is a unit that can carry commodities and passengers at high speed along rivers. It can only exchange cargo at a port. "
             message += "It also requires an attached worker as crew to function."
         else:
             message += "Placeholder building description"
@@ -820,7 +834,15 @@ class pmob(mob):
             num_dice = 1
         self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type], 'construction')
         text = ""
-        text += "The " + self.name + " attempts to construct a " + self.building_name + ". /n /n"
+        if self.building_name in ['train', 'steamboat']:
+            verb = 'assemble'
+            preterit_verb = 'assembled'
+            noun = 'assembly'
+        else:
+            verb = 'construct'
+            preterit_verb = 'constructed'
+            noun = 'construction'
+        text += "The " + self.name + " attempts to " + verb + " a " + self.building_name + ". /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
         else:
@@ -834,7 +856,7 @@ class pmob(mob):
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('building_prices')[self.building_type], 'construction', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
@@ -857,7 +879,7 @@ class pmob(mob):
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('building_prices')[self.building_type], 'construction')
-            roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
@@ -867,13 +889,13 @@ class pmob(mob):
             
         text += "/n"
         if roll_result >= self.current_min_success:
-            text += "The " + self.name + " successfully constructed the " + self.building_name + ". /n"
+            text += "The " + self.name + " successfully " + preterit_verb + " the " + self.building_name + ". /n"
         else:
-            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the construction of the " + self.building_name + ". /n"
+            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the " + noun + " of the " + self.building_name + ". /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
+            text += " /nThe " + self.officer.name + " managed the " + noun + " well enough to become a veteran. /n"
         if roll_result >= 4:
             notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
         else:
@@ -902,7 +924,7 @@ class pmob(mob):
             input_dict['name'] = self.building_name
             input_dict['modes'] = ['strategic']
             input_dict['init_type'] = self.building_type
-            if not self.building_type == 'train':
+            if not self.building_type in ['train', 'steamboat']:
                 if self.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
                     self.images[0].current_cell.get_building(self.building_type).remove()
             if self.building_type == 'resource':
@@ -930,6 +952,11 @@ class pmob(mob):
                 image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['crew'] = 'none'
+            elif self.building_type == 'steamboat':
+                image_dict = {'default': 'mobs/steamboat/crewed.png', 'crewed': 'mobs/steamboat/crewed.png', 'uncrewed': 'mobs/steamboat/uncrewed.png'}
+                input_dict['image_dict'] = image_dict
+                input_dict['crew'] = 'none'
+                input_dict['init_type'] = 'boat'
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)

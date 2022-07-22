@@ -939,7 +939,7 @@ class trade_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
-                if current_mob.movement_points == current_mob.max_movement_points:
+                if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
@@ -956,7 +956,7 @@ class trade_button(label_button):
                     else:
                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trade']) + " money needed to trade with a village.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("Trading requires an entire turn of movement points.", self.global_manager)
+                    text_tools.print_to_screen("Trading requires all remaining movement points, at least 1", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
 
@@ -1010,7 +1010,7 @@ class convert_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
-                if current_mob.movement_points == current_mob.max_movement_points:
+                if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
@@ -1024,7 +1024,7 @@ class convert_button(label_button):
                     else:
                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['convert']) + " money needed to attempt to convert the natives.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("Converting requires an entire turn of movement points.", self.global_manager)
+                    text_tools.print_to_screen("Converting requires all remaining movement points, at least 1.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not convert.", self.global_manager)
 
@@ -1080,7 +1080,7 @@ class evangelist_campaign_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
-                    if current_mob.movement_points == current_mob.max_movement_points:
+                    if current_mob.movement_points >= 1:
                         if self.button_type == 'religious campaign':
                             if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
                                 if current_mob.check_if_minister_appointed():
@@ -1094,7 +1094,7 @@ class evangelist_campaign_button(label_button):
                             else:
                                 text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a public relations campaign.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("A religious campaign requires an entire turn of movement points.", self.global_manager)
+                        text_tools.print_to_screen("A religious campaign requires all remaining movement points, at least 1.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
             else:
@@ -1151,14 +1151,14 @@ class take_loan_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
-                    if current_mob.movement_points == current_mob.max_movement_points:
+                    if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
                             if current_mob.check_if_minister_appointed():
                                 current_mob.start_loan_search()
                         else:
                             text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['loan_search']) + " money needed to search for a loan offer.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("Searching for a loan offer requires an entire turn of movement points.", self.global_manager)
+                        text_tools.print_to_screen("Searching for a loan offer requires all remaining movement points, at least 1.", self.global_manager)
                 else:
                     text_tools.print_to_screen("A merchant can only search for a loan while in Europe", self.global_manager)
             else:
@@ -1216,7 +1216,7 @@ class advertising_campaign_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if self.global_manager.get('europe_grid') in current_mob.grids:
-                    if current_mob.movement_points == current_mob.max_movement_points:
+                    if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['advertising_campaign']:
                             if current_mob.check_if_minister_appointed():
                                 if not self.global_manager.get('current_game_mode') == 'europe':
@@ -1228,7 +1228,7 @@ class advertising_campaign_button(label_button):
                         else:
                             text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money needed for an advertising campaign.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("An advertising campaign requires an entire turn of movement points.", self.global_manager)
+                        text_tools.print_to_screen("An advertising campaign requires all remaining movement points, at least 1.", self.global_manager)
                 else:
                     text_tools.print_to_screen("Advertising campaigns are only possible in Europe", self.global_manager)
             else:
@@ -1316,7 +1316,7 @@ class switch_theatre_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
-                if current_mob.movement_points == current_mob.max_movement_points:
+                if current_mob.movement_points >= 1:
                     if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                         if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
                             if self.global_manager.get('current_game_mode') == 'strategic':
@@ -1328,7 +1328,7 @@ class switch_theatre_button(label_button):
                     else:
                         text_tools.print_to_screen("You are inland and can not cross the ocean.", self.global_manager) 
                 else:
-                    text_tools.print_to_screen("Crossing the ocean requires an entire turn of movement points.", self.global_manager)
+                    text_tools.print_to_screen("Crossing the ocean requires all remaining movement points, at least 1.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
 
@@ -1407,17 +1407,17 @@ class build_train_button(label_button):
                                         if self.attached_label.actor.check_if_minister_appointed():
                                             self.construct()
                                     else:
-                                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
+                                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to assemble a train.", self.global_manager)
                                 else:
-                                    text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                                    text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
                             else:
-                                text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                                text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
                         else:
-                            text_tools.print_to_screen("A train can only be built on a train station.", self.global_manager)
+                            text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to attempt to build a train.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to assemble a train.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to construct a train.", self.global_manager)
+                    text_tools.print_to_screen("You do not have enough movement points to assemble a train.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not build a train.", self.global_manager)
@@ -1435,6 +1435,97 @@ class build_train_button(label_button):
         building_info_dict['building_type'] = 'train'
         building_info_dict['building_name'] = 'train'
         self.attached_label.actor.start_construction(building_info_dict)
+
+class build_steamboat_button(label_button):
+    '''
+    Button that commands a construction gang to build a steammboat at a port
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'build steamboat', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_construct):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to build a train at a train station
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                self.showing_outline = True
+                if self.attached_label.actor.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
+                        if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
+                            if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
+                                if self.attached_label.actor.images[0].current_cell.has_intact_building('port'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
+                                    if self.attached_label.actor.adjacent_to_river():
+                                        if self.global_manager.get('money') >= self.global_manager.get('building_prices')['steamboat']:
+                                            if self.attached_label.actor.check_if_minister_appointed():
+                                                self.construct()
+                                        else:
+                                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['steamboat']) + " money needed to assemble a steamboat.", self.global_manager)
+                                    else:
+                                        text_tools.print_to_screen("A steamboat assembled here would not be able to access any rivers.", self.global_manager)
+                                else:
+                                    text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                            else:
+                                text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                        else:
+                            text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['steamboat']) + " money needed to assemble a steamboat.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You do not have enough movement points to assemble a steamboat.", self.global_manager)
+                    text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not build a train.", self.global_manager)
+
+    def construct(self):
+        '''
+        Description:
+            Commands the selected mob to construct a steamboat
+        Input:
+            None
+        Output:
+            None
+        '''
+        building_info_dict = {}
+        building_info_dict['building_type'] = 'steamboat'
+        building_info_dict['building_name'] = 'steamboat'
+        self.attached_label.actor.start_construction(building_info_dict)
+
 
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
@@ -1601,7 +1692,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         else:
             message.append('placeholder')
             
-        message.append('Attempting to build costs ' + str(self.global_manager.get('building_prices')[self.building_type]) + ' money and an entire turn of movement points.')
+        message.append('Attempting to build costs ' + str(self.global_manager.get('building_prices')[self.building_type]) + ' money and all remaining movement points, at least 1')
         self.set_tooltip(message)
         
 
@@ -1787,7 +1878,7 @@ class repair_button(label_button):
         message = []
         if self.can_show():
             message.append("Attempts to repair the " + self.building_name + " in this tile, restoring it to full functionality")
-            message.append("Attempting to repair costs " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money and an entire turn of movement points.")
+            message.append("Attempting to repair costs " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money and all remaining movement points, at least 1")
         self.set_tooltip(message)  
 
     def on_click(self):

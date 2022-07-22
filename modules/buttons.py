@@ -125,9 +125,6 @@ class button():
                             message = "Staying afterward would cost " + str(final_movement_cost - 1) + " more movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
                         else:
                             message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
-                        #if 
-                        #tooltip_text.append(
-                        #tooltip_text.append("Costs 1 movement point, or 0.5 movement points if moving between two tiles with roads or railroads")
                         
                         if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
                             message += "and connecting roads"
@@ -141,18 +138,6 @@ class button():
                         tooltip_text.append(message)
                         tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
                         tooltip_text.append("Moving between 2 tiles with roads or railroads costs half as many movement points.")
-                        
-                        #message = "Moving " + direction + " costs " + str(movement_cost) + " movement points because "
-                        #if current_mob.can_explore and adjacent_cell.terrain == 'water':
-                        #    message += "the tile moved to is a water tile"
-                        #elif (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                        #    message += "this tile has a " + local_infrastructure.infrastructure_type + " and the tile moved to has a " + adjacent_infrastructure.infrastructure_type
-                        #elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                        #    message += "this tile has no road or railroad to connect to the " + adjacent_infrastructure.infrastructure_type + " of the tile moved to"
-                        #elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                        #    message += "the tile moved to has no road or railroad to connect to this tile's " + local_infrastructure.infrastructure_type
-                        #else: #
-                        #    message += "there are no roads or railroads between this tile and the tile moved to"
                     else:
                         tooltip_text.append("Costs 1 movement point")
                 else:
@@ -173,62 +158,81 @@ class button():
                 else:
                     tooltip_text.append("Can not move into unexplored areas")
             self.set_tooltip(tooltip_text)
+
         elif self.button_type == 'toggle grid lines':
             self.set_tooltip(['Press to show or hide grid lines'])
+
         elif self.button_type == 'toggle text box':
             self.set_tooltip(['Press to show or hide text box'])
+
         elif self.button_type == 'expand text box':
             self.set_tooltip(['Press to change the size of the text box'])
+
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
+
         elif self.button_type == 'merge':
             if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist':
                 self.set_tooltip(["Merges this evangelist with church volunteers in the same tile to form a group of missionaries.", "Requires that an evangelist is selected in the same tile as church volunteers."])
             else:
                 self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
+
         elif self.button_type == 'split':
             self.set_tooltip(["Splits a group into its worker and officer."])
+
         elif self.button_type == 'crew': #clicked on vehicle side
             self.set_tooltip(["Merges this " + self.vehicle_type + " with a worker in the same tile to form a crewed " + self.vehicle_type + ".",
                 "Requires that an uncrewed " + self.vehicle_type + " is selected in the same tile as a worker."])
+
         elif self.button_type == 'worker to crew': #clicked on worker side
             self.set_tooltip(["Merges this worker with a " + self.vehicle_type + " in the same tile to form a crewed " + self.vehicle_type + ".",
                 "Requires that a worker is selected in the same tile as an uncrewed " + self.vehicle_type + "."])
+
         elif self.button_type == 'uncrew':
             self.set_tooltip(["Orders this " + self.vehicle_type + "'s crew to abandon the " + self.vehicle_type + "."])
+
         elif self.button_type == 'embark':
             self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile.", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type + "."])
+
         elif self.button_type == 'disembark':
             self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type + "."])
+
         elif self.button_type == 'pick up all passengers':
             self.set_tooltip(["Orders this " + self.vehicle_type + " take all non-vehicle units in this tile as passengers."])
+
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'pick up all commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " to the currently displayed unit in this tile"])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'drop commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers 1 unit of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'drop all commodity':
             if not self.attached_label.actor == 'none':
                 self.set_tooltip(["Transfers all units of " + self.attached_label.actor.get_held_commodities()[self.attached_label.commodity_index] + " into this unit's tile"])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
                 self.set_tooltip(["Detaches this work crew from the " + self.attached_label.attached_building.name])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'start end turn': #different from end turn from choice buttons - start end turn brings up a choice notification
             self.set_tooltip(['Ends the current turn'])
+            
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
             if not self.attached_label.actor == 'none':
                 commodity_list = self.attached_label.actor.get_held_commodities()
@@ -242,8 +246,10 @@ class button():
                         "Each unit of " + commodity + " sold has a chance of reducing the price"])
             else:
                 self.set_tooltip(['none'])
+                
         elif self.button_type == 'switch theatre':
            self.set_tooltip(["Moves this ship between Africa and Europe", " Requires that this ship has all of its movement points and is not inland"])
+           
         elif self.button_type == 'cycle passengers':
             tooltip_text = ["Cycles through this " + self.vehicle_type + "'s passengers"]
             tooltip_text.append("Passengers: " )
@@ -258,6 +264,7 @@ class button():
                 for current_work_crew in self.attached_label.actor.cell.get_building('resource').contained_work_crews:
                     tooltip_text.append("    " + current_work_crew.name)
             self.set_tooltip(tooltip_text)
+            
         elif self.button_type == 'cycle tile mobs':
             tooltip_text = ["Cycles through this tile's units"]
             tooltip_text.append("Units: " )
@@ -265,78 +272,103 @@ class button():
                 for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
                     tooltip_text.append("    " + current_mob.name)
             self.set_tooltip(tooltip_text)
+            
         elif self.button_type == 'build train':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'train')
-            #self.set_tooltip(self.global_manager.get('recruitment_list_descriptions')['train'])
-            self.set_tooltip(["Attempts to build a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be built on a train station", "Costs 1 movement point"])
+            self.set_tooltip(["Orders parts for and attepmts to assemble a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be assembled on a train station",
+                "Costs all remaining movement points, at least 1"])
+            
+        elif self.button_type == 'build steamboat':
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'steamboat')
+            self.set_tooltip(["Orders parts for and attempts to assemble a steamboat in this unit's tile for " + str(self.global_manager.get('building_prices')['steamboat']) + " money", "Can only be assembled on a port",
+                "Costs all remaining movement points, at least 1"])
+            
         elif self.button_type == 'cycle units':
             self.set_tooltip(["Selects the next unit that has movement remaining"])
+
         elif self.button_type == 'trade':
             self.set_tooltip(["Attempts to trade with natives, paying consumer goods for random commodities", "Can only be done in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
-                "Has higher success chance and lower risk when a trading post is present", "Costs an entire turn of movement points"])
+                "Has higher success chance and lower risk when a trading post is present", "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find church volunteers.", "Can only be done in Europe",
-                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs an entire turn of movement points"])
+                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'public relations campaign':
             self.set_tooltip(["Starts a public relations campaign to spread word of your company's benevolent goals and righteous deeds in Africa.", "Can only be done in Europe",
-                "If successful, increases your company's public opinion", "Costs an entire turn of movement points"])
+                "If successful, increases your company's public opinion", "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
-                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs an entire turn of movement points"])
+                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'take loan':
             self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
-                "Costs an entire turn of movement points."])
+                "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'track beasts':
             self.set_tooltip(["Attempts to reveal beasts in this tile and adjacent tiles", "If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them", "Can not reveal beasts in unexplored tiles", "Costs 1 movement point"])
+
         elif self.button_type == 'convert':
-            self.set_tooltip(["Attempts to make progress in converting natives", "Can only be done in a village", "If successful, reduces the aggressiveness of the village, improving all company interactions with the village",
-                "Has higher success chance and lower risk when a mission is present", "Costs an entire turn of movement points."])
+            self.set_tooltip(["Attempts to make progress in converting natives for " + str(self.global_manager.get('action_prices')['convert']) + " money", "Can only be done in a village",
+                "If successful, reduces the aggressiveness of the village, improving all company interactions with the village, and increases public opinion", "Has higher success chance and lower risk when a mission is present",
+                "Costs all remaining movement points, at least 1"])
+
         elif self.button_type == 'new game':
             self.set_tooltip(["Starts a new game"])
+
         elif self.button_type == 'save game':
             self.set_tooltip(["Saves this game"])
+
         elif self.button_type == 'load game':
             self.set_tooltip(["Loads a saved game"])
+
         elif self.button_type == 'cycle available ministers':
             self.set_tooltip(["Cycles through the ministers available to be appointed"])
+
         elif self.button_type == 'appoint minister':
             self.set_tooltip(["Appoints this minister as " + self.appoint_type])
+
         elif self.button_type == 'remove minister':
             self.set_tooltip(["Removes this minister from their current office"])
+
         elif self.button_type == 'to trial':
             self.set_tooltip(["Opens the trial planning screen to attempt to imprison this minister for corruption", "A trial has a higher success chance as more evidence of that minister's corruption is found",
                 "A trial costs " + str(self.global_manager.get('action_prices')['trial']) + " 5 money once finalized"])
+
         elif self.button_type == 'launch trial':
             self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money"])
+
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
                 self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance",
                     "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial"])
             else:
                 self.set_tooltip(['placeholder'])
+
         elif self.button_type == 'bribe judge':
             self.set_tooltip(["Spends " + str(self.get_cost()) + " money to attempt to bribe the judge for the next trial this turn",
                 "While having unpredictable results, bribing the judge may swing the trial in your favor or blunt the defense's efforts to do the same"])
+
         elif self.button_type == 'fire':
             self.set_tooltip(["Removes this unit, any units attached to it, and their associated upkeep"])
+
         elif self.button_type == 'hire village worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
             self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
-            #self.set_tooltip(["Hires villagers as workers, reducing the village's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
-            #                    str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
+
         elif self.button_type == 'hire slums worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slums workers')
             self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['slums workers'])
-            #self.set_tooltip(["Hires unemployed workers, reducing the slum's population", "African workers cost nothing to recruit but have an upkeep each turn of " +
-            #                    str(self.global_manager.get('african_worker_upkeep')) + " money. If fired, the workers will eventually move into slums"])
+
         elif self.button_type == 'buy slaves':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slave workers')
             self.set_tooltip(["Recruits a unit of slave workers for " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money."] + self.global_manager.get('recruitment_list_descriptions')['slave workers'])
-            #self.set_tooltip(["Buys slave workers from Arab slave traders", "Slaves currently cost " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money to purchase and have an upkeep each turn of " +
-            #                    str(self.global_manager.get('slave_worker_upkeep')) + " money", "This is a morally reprehensible action and will be faced with a public opinion penalty"])
+
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
+
         else:
             self.set_tooltip(['placeholder'])
             

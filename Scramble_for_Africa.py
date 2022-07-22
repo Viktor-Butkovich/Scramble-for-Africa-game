@@ -322,8 +322,8 @@ try:
 
     #price setup
     
-    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'ship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'ship': 5})
+    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 5})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
 
@@ -380,7 +380,8 @@ try:
         'trading_post': 5,
         'mission': 5,
         'fort': 5,
-        'train': 5
+        'train': 5,
+        'steamboat': 5
        } 
     )
     
@@ -982,6 +983,9 @@ try:
 
     global_manager.set('DEBUG_fast_turn', False) #False by default
     #removes end turn delays
+
+    global_manager.set('DEBUG_reveal_beasts', False) #False by default
+    #reveals beasts on load
     
     #activating/disabling debugging tools
 

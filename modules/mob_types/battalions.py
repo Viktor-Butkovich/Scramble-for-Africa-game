@@ -213,6 +213,8 @@ class safari(battalion): #specialized battalion led by hunter that fights beasts
         self.is_battalion = False
         self.is_safari = True
         self.can_swim = True
+        self.can_swim_river = True
+        self.can_swim_ocean = False
         self.battalion_type = 'none'
         self.attack_cost = self.global_manager.get('action_prices')['hunt']
         if not from_save:

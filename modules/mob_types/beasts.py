@@ -26,6 +26,10 @@ class beast(npmob):
         else:
             self.set_hidden(True)
             self.set_max_movement_points(4)
+            
+        if global_manager.get('DEBUG_reveal_beasts'):
+            self.set_hidden(False)
+            
         self.just_revealed = False
 
     def get_movement_cost(self, x_change, y_change):
@@ -65,16 +69,17 @@ class beast(npmob):
         possible_cells = current_cell.adjacent_list + [current_cell]
         enemy_found = False
         for current_cell in possible_cells:
-            if current_cell.terrain in self.preferred_terrains:
-                if not enemy_found:
-                    if current_cell.has_pmob():
-                        target_list = [current_cell]
-                        enemy_found = True
+            if not (current_cell.y == 0 and self.can_swim and not self.can_swim_ocean): #cancel if trying to go into ocean and can't swim in ocean
+                if current_cell.terrain in self.preferred_terrains:
+                    if not enemy_found:
+                        if current_cell.has_pmob():
+                            target_list = [current_cell]
+                            enemy_found = True
+                        else:
+                            target_list.append(current_cell)
                     else:
-                        target_list.append(current_cell)
-                else:
-                    if current_cell.has_pmob():
-                        target_list.append(current_cell)
+                        if current_cell.has_pmob():
+                            target_list.append(current_cell)
         if len(target_list) == 0:
             target_list.append(self.images[0].current_cell)
         return(random.choice(target_list))
