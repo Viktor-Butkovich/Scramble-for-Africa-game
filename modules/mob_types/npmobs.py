@@ -84,7 +84,7 @@ class npmob(mob): #if enemy.turn_done
         min_distance = -1
         closest_targets = ['none']
         for possible_target in target_list:
-            if (not possible_target.y == 0) or self.can_swim_ocean: #ignore units in the ocean if can't swim in ocean
+            if (not possible_target.y == 0): #ignore units in the ocean if can't swim in ocean
                 if possible_target.actor_type == 'building' or not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
                     distance = utility.find_grid_distance(self, possible_target)
                     if distance <= 6: #will ignore player's units more than 6 tiles away
@@ -98,7 +98,7 @@ class npmob(mob): #if enemy.turn_done
                                     closest_targets = [possible_target]
                                 elif distance == min_distance: #if as close as previous, add as alternative to previous
                                     closest_targets.append(possible_target)
-            return(random.choice(closest_targets)) #return one of the closest ones, or 'none' if none were found
+        return(random.choice(closest_targets)) #return one of the closest ones, or 'none' if none were found
 
     def attempt_local_combat(self):
         '''
@@ -183,10 +183,8 @@ class npmob(mob): #if enemy.turn_done
             else:
                 current_cell = self.images[0].current_cell
             closest_target = random.choice(current_cell.adjacent_list)
-            if not self.can_swim_ocean:
-                while current_cell.y == 0: #npmobs avoid the ocean if can't swim in ocean
-                    closest_target = random.choice(current_cell.adjacent_list)
-            
+            while closest_target.y == 0: #npmobs avoid the ocean if can't swim in ocean
+                closest_target = random.choice(current_cell.adjacent_list)
         if not closest_target == 'none':
             if not (closest_target.x == self.x and closest_target.y == self.y): #don't move if target is own tile
                 if closest_target.x > self.x: #decides moving left or right

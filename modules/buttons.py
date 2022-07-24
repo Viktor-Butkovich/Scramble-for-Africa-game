@@ -107,7 +107,9 @@ class button():
                 direction = 'east'
                 non_cardinal_direction = 'right'
                 x_change = 1
-            tooltip_text = ["Press to move to the " + direction]
+                
+            tooltip_text = []
+                           
             selected_list = actor_utility.get_selected_list(self.global_manager)
             if len(selected_list) > 0:
                 current_mob = selected_list[0]
@@ -115,48 +117,96 @@ class button():
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
                 local_infrastructure = current_mob.images[0].current_cell.get_intact_building('infrastructure')
                 adjacent_cell = current_mob.images[0].current_cell.adjacent_cells[non_cardinal_direction]
+                
                 if not adjacent_cell == 'none':
-                    if current_mob.can_walk:
-                        adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-                        if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
-                            final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
-                            message = "Attacking an enemy unit only requires 1 movement point, but staying in the enemy's tile afterward would require the usual amount"
-                            tooltip_text.append(message)
-                            message = "Staying afterward would cost " + str(final_movement_cost - 1) + " more movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
-                        else:
-                            message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                    passed = False
+                    if (current_mob.can_walk and not adjacent_cell.terrain == 'water'): #if walking unit moving onto land
+                        passed = True
+                    elif (current_mob.can_swim and adjacent_cell.terrain == 'water' and ((current_mob.can_swim_river and adjacent_cell.y > 0) or (current_mob.can_swim_ocean and adjacent_cell.y == 0)) or adjacent_cell.has_vehicle('ship')): #if swimming unit going to correct kind of water or embarking ship
+                        passed = True
+                    elif current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking unit in water:
+                        passed = True
+                    if passed:
+                        if adjacent_cell.visible:
+                            tooltip_text.append("Press to move to the " + direction)
+                            adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
+                            connecting_roads = False
+                            if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
+                                final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
+                                message = "Attacking an enemy unit only requires 1 movement point, but staying in the enemy's tile afterward would require the usual amount"
+                                tooltip_text.append(message)
+                                if current_mob.is_battalion and adjacent_cell.terrain == 'water':
+                                    message = "This unit would be forced to withdraw to its original tile after the attack, as battalions can not move freely through water"
+                                else:
+                                    message = "Staying afterward would cost " + str(final_movement_cost - 1) + " more movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                                    if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                                            connecting_roads = True
+                                            message += "and connecting roads"
+                                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                                            message += "and no connecting roads"
+                                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                                            message += "and no connecting roads" + local_infrastructure.infrastructure_type
+                                        else: 
+                                            message += "and no connecting roads"
                         
-                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                            message += "and connecting roads"
-                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                            message += "and no connecting roads"
-                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                            message += "and no connecting roads" + local_infrastructure.infrastructure_type
-                        else: #
-                            message += "and no connecting roads"
+                            else:
+                                message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                                if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                    if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                                        connecting_roads = True
+                                        message += "and connecting roads"
+                                    elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                                        message += "and no connecting roads"
+                                    elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                                        message += "and no connecting roads" + local_infrastructure.infrastructure_type
+                                    else: #
+                                        message += "and no connecting roads"
 
-                        tooltip_text.append(message)
-                        tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
-                        tooltip_text.append("Moving between 2 tiles with roads or railroads costs half as many movement points.")
+                            tooltip_text.append(message)
+                            tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
+                            if (not current_mob.is_vehicle) and current_mob.images[0].current_cell.terrain == 'water' and current_mob.images[0].current_cell.has_vehicle('ship'):
+                                if (current_mob.images[0].current_cell.y == 0 and not (current_mob.can_swim and current_mob.can_swim_ocean)) or (current_mob.images[0].current_cell.y > 0 and not (current_mob.can_swim and current_mob.can_swim_river)): #if could not naturally move into current tile, must be from vehicle
+                                    tooltip_text.append("Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount")
+                            if connecting_roads:
+                                tooltip_text.append("Moving between 2 tiles with roads or railroads costs half as many movement points.")
+                        elif current_mob.can_explore:
+                            tooltip_text.append("Press to attempt to explore in the " + direction)
+                            tooltip_text.append("Attempting to explore would cost " + str(self.global_manager.get('action_prices')['exploration']) + " money and all remaining movement points, at least 1")
+                        else:
+                            tooltip_text.append("This unit can not currently move to the " + direction)
+                            tooltip_text.append("This unit can not move into unexplored areas")
                     else:
-                        tooltip_text.append("Costs 1 movement point")
+                        tooltip_text.append("This unit can not currently move to the " + direction)
+
                 else:
                     tooltip_text.append("Moving in this direction would move off of the map")
-                if current_mob.can_walk:
-                    tooltip_text.append("Can move on land")
-                else:
-                    tooltip_text.append("Can not move on land")
-                if current_mob.can_swim:
-                    #if current_mob.can_explore:
-                    #    tooltip_text.append("Can move twice as quickly in water")
-                    #else:
-                    tooltip_text.append("Can move in water")
-                else:
-                    tooltip_text.append("Can not move in water, but can embark a ship in the water by moving to it")
-                if current_mob.can_explore:
-                    tooltip_text.append("Can attempt to explore unexplored areas by moving into them")
-                else:
-                    tooltip_text.append("Can not move into unexplored areas")
+                if current_mob.can_walk and current_mob.can_swim: #1??
+                    if current_mob.can_swim_river and current_mob.can_swim_ocean: #111
+                        tooltip_text.append("Can move to land and water")
+                    elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #110
+                        tooltip_text.append("Can move to land and rivers but not ocean")
+                    else: #101
+                        tooltip_text.append("Can move to land and ocean but not rivers")
+                        
+                elif current_mob.can_walk and not current_mob.can_swim: #100
+                    tooltip_text.append("Can move to land but not water")
+                    
+                elif current_mob.can_swim and not current_mob.can_walk: #0??
+                    if current_mob.can_swim_river and current_mob.can_swim_ocean: #011
+                        tooltip_text.append("Can move to water but not land")
+                    elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #010
+                        tooltip_text.append("Can move to rivers but not ocean or land")
+                    else: #101
+                        tooltip_text.append("Can move to ocean but not rivers or land")
+                #000 is not possible
+                    
+                if not current_mob.can_swim:
+                    if current_mob.is_battalion:
+                        tooltip_text.append("However, can embark a ship or attack an enemy in water by moving to it")
+                    else:
+                        tooltip_text.append("However, can embark a ship in the water by moving to it")
+                    
             self.set_tooltip(tooltip_text)
 
         elif self.button_type == 'toggle grid lines':
@@ -800,6 +850,7 @@ class button():
             elif self.button_type == 'save game':
                 if main_loop_tools.action_possible(self.global_manager):
                     self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                    notification_tools.display_notification("Game successfully saved to save1.pickle /n /n", 'default', self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not save the game", self.global_manager)
 
@@ -907,7 +958,9 @@ class button():
                     else:
                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager) 
+                    text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)
+            elif self.button_type == 'confirm main menu':
+                game_transitions.to_main_menu(self.global_manager)
                 
     def on_rmb_release(self):
         '''
@@ -1312,8 +1365,8 @@ class switch_game_mode_button(button):
                             notification_tools.display_notification(text, 'default', self.global_manager)
                     
                     if self.to_mode == 'main menu':
-                        game_transitions.to_main_menu(self.global_manager)
-                    if not self.to_mode == 'previous':
+                        notification_tools.display_choice_notification("Are you sure you want to exit to the main menu without saving? /n /n", ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    elif not self.to_mode == 'previous':
                         game_transitions.set_game_mode(self.to_mode, self.global_manager)
                     else:
                         self.global_manager.set('exit_minister_screen_tutorial_completed', True)

@@ -36,7 +36,7 @@ ministers.minister.__init__ and to_save_dict inputs interests
 vehicles.boat
 actor_display_tools/build_steamboat_button
 
-Do next: steamboat/steamship, expensive embarking/disembarking, evidence decay, canoes, public opinion from conversion and killing beasts, random effect on public opinion w/ flavor text when you, 
+Do next: canoes, public opinion from conversion and killing beasts, random effect on public opinion w/ flavor text when you, 
 slave catching (4+ success, 1 causes disorganized, independently affects aggressiveness (1 decreases aggressiveness, 4-6 increases), make sure natural 1 on converting/trading damages mission/trading post, not destroyed, 
 add sentry mode/end turn for unit buttons
 
@@ -63,6 +63,7 @@ possibly display a notification when a unit dies and have an optional cause of d
 Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
 
 Possible/known Errors:
+make build riverboat and train different buttons
 make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense
 make sure most actions cost remaining movement points instead of maximum
 minister face being shown twice during fort construction

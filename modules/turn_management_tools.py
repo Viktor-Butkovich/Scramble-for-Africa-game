@@ -509,6 +509,17 @@ def manage_ministers(global_manager):
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
 
+        evidence_lost = 0
+        for i in range(current_minister.corruption_evidence):
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                evidence_lost += 1
+        if evidence_lost > 0:
+            if evidence_lost == current_minister.corruption_evidence:
+                current_minister.display_message("All of the " + str(current_minister.corruption_evidence) + " evidence of " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            else:
+                current_minister.display_message(str(evidence_lost) + " of the " + str(current_minister.corruption_evidence) + " evidence of " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            current_minister.corruption_evidence -= evidence_lost
+
     if global_manager.get('prosecution_bribed_judge'):
         text_tools.print_to_screen("The effect of bribing the judge has faded and will not affect the next trial.", global_manager)
     global_manager.set('prosecution_bribed_judge', False)

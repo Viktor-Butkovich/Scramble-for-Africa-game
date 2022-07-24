@@ -675,6 +675,8 @@ class mob(actor):
         '''
         self.end_turn_destination = 'none' #cancels planned movements
         self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change))
+        if self.is_pmob:
+            previous_cell = self.images[0].current_cell
         for current_image in self.images:
             current_image.remove_from_cell()
         self.x += x_change
@@ -693,14 +695,22 @@ class mob(actor):
             vehicle = self.images[0].current_cell.get_vehicle('ship')
             if self.is_worker and not vehicle.has_crew:
                 self.crew_vehicle(vehicle)
+                self.set_movement_points(0)
             else:
                 self.embark_vehicle(vehicle)
+                self.set_movement_points(0)
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
             self.manage_inventory_attrition()
+            if previous_cell.terrain == 'water' and previous_cell.has_vehicle('ship') and not self.is_vehicle: #if disembarking from ship, use all of movement points
+                if previous_cell.y == 0 and not (self.can_swim and self.can_swim_ocean): #if came from ship in ocean
+                    self.set_movement_points(0)
+                elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
+                    self.set_movement_points(0)
+                    
         self.last_move_direction = (x_change, y_change)
 
     def retreat(self):

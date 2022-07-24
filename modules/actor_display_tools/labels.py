@@ -318,7 +318,13 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(utility.capitalize(new_actor.grid.name))
                 elif self.actor.cell.visible:
-                    self.set_label(self.message_start + str(new_actor.cell.terrain))
+                    if new_actor.cell.terrain == 'water':
+                        if new_actor.cell.y == 0:
+                            self.set_label(self.message_start + 'ocean ' + str(new_actor.cell.terrain))
+                        else:
+                            self.set_label(self.message_start + 'river ' + str(new_actor.cell.terrain))
+                    else:
+                        self.set_label(self.message_start + str(new_actor.cell.terrain))
                 else:
                     self.set_label(self.message_start + 'unknown')
                     

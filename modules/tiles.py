@@ -296,7 +296,14 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['default'] = 'scenery/terrain/jungle.png'
             
         elif new_terrain == 'water':
-            self.image_dict['default'] = 'scenery/terrain/water.png'
+            current_y = self.y
+            if self.cell.grid.is_mini_grid:
+                current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
+                
+            if current_y == 0:
+                self.image_dict['default'] = 'scenery/terrain/ocean_water.png'
+            else:
+                self.image_dict['default'] = 'scenery/terrain/river_water.png'
             
         elif new_terrain == 'mountain':
             self.image_dict['default'] = 'scenery/terrain/mountain.png'
@@ -325,13 +332,22 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
             if self.cell.visible:
-                tooltip_message.append('This is ' + utility.generate_article(self.cell.terrain) + ' ' + self.cell.terrain + ' tile.')
+                if self.cell.terrain == 'water':
+                    current_y = self.y
+                    if self.cell.grid.is_mini_grid:
+                        current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
+                    if current_y == 0:
+                        tooltip_message.append('This is an ocean water tile')
+                    else:
+                        tooltip_message.append('This is a river water tile')
+                else:
+                    tooltip_message.append('This is ' + utility.generate_article(self.cell.terrain) + ' ' + self.cell.terrain + ' tile')
                 if not self.cell.village == 'none': #if village present, show village
                     tooltip_message += self.cell.village.get_tooltip()
                 elif not self.cell.resource == 'none': #if not village but other resource present, show resource
-                    tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource.')
+                    tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
             else:
-                tooltip_message .append('This tile has not been explored.')
+                tooltip_message .append('This tile has not been explored')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])

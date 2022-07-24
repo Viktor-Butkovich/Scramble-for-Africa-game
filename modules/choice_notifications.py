@@ -159,6 +159,9 @@ class choice_button(button):
             
         elif button_type in ['none', 'stop exploration', 'stop attack']:
             self.message = 'Do nothing'
+
+        elif button_type == 'confirm main menu':
+            self.message = 'Confirm'
     
         else:
             self.message = button_type.capitalize() #stop trading -> Stop trading
@@ -243,6 +246,9 @@ class choice_button(button):
 
         elif self.button_type == 'reject loan offer':
             self.set_tooltip(['Rejects the loan offer'])
+
+        elif self.button_type == 'confirm main menu':
+            self.set_tooltip(['Exits to the main menu without saving'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']

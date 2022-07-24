@@ -399,6 +399,7 @@ try:
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
         'combat': 'combat',
+        'production': 'production',
         'none': 'miscellaneous company activities'
         }
     )
@@ -578,7 +579,7 @@ try:
     europe_to_strategic_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
         pygame.K_ESCAPE, 'strategic', ['europe'], 'buttons/exit_european_hq_button.png', global_manager)
 
-    to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager),
+    to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager),
         scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'none', 'main menu', ['strategic', 'europe', 'ministers'], 'buttons/exit_european_hq_button.png', global_manager)
 
     to_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
@@ -626,10 +627,10 @@ try:
     expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
         'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
 
-    instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
-        scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
+    #instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+    #    scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
 
-    save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+    save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
     cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
@@ -981,14 +982,13 @@ try:
     global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
     #reveals all cells
 
-    global_manager.set('DEBUG_fast_turn', False) #False by default
+    global_manager.set('DEBUG_fast_turn', True) #False by default
     #removes end turn delays
 
     global_manager.set('DEBUG_reveal_beasts', False) #False by default
     #reveals beasts on load
     
     #activating/disabling debugging tools
-
 
     global_manager.set('startup_complete', True)
     global_manager.set('creating_new_game', False)
@@ -1002,7 +1002,7 @@ except Exception as e: #displays error message and records error message in cras
     logging.basicConfig(filename = "notes/Crash Log.txt")
     logging.getLogger('').addHandler(console)
     
-    logging.error(e, exc_info=True) #sends error message to console and crash log file
+    logging.error(e, exc_info = True) #sends error message to console and crash log file
     
     crash_log_file.close()
     pygame.quit()

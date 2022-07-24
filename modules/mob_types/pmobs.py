@@ -326,17 +326,25 @@ class pmob(mob):
                             destination_type = 'land'
                             if future_cell.terrain == 'water':
                                 destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
-                            if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
-                                (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
-                                
+                            passed = False
+                            if destination_type == 'land':
+                                if self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'):
+                                    passed = True
+                            elif destination_type == 'water':
+                                if destination_type == 'water':
+                                    if self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible) or (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')):
+                                        passed = True
+
+                            if passed:
                                 if destination_type == 'water':
                                     if not (future_cell.has_vehicle('ship') and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
-                                        if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
-                                            if future_y == 0:
-                                                text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
-                                            elif future_y > 0:
-                                                text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
-                                            return(False)
+                                        if not (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')): #battalions can attack enemies in water, but must retreat afterward
+                                            if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                                if future_y == 0:
+                                                    text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
+                                                elif future_y > 0:
+                                                    text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
+                                                return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                     if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari: #non-battalion units can't move into enemies
@@ -702,8 +710,12 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
+                elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
+                    notification_tools.display_notification("While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n",
+                        'default', self.global_manager)
+                    self.retreat()
                 elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
-                    notification_tools.display_notification("While the attack was successful, this unit did not have the " + str(self.get_movement_cost(0, 0, True)) + " movement points required to fully move into the attacked tile. /n /n",
+                    notification_tools.display_notification("While the attack was successful, this unit did not have the " + str(self.get_movement_cost(0, 0, True)) + " movement points required to fully move into the attacked tile and was forced to withdraw. /n /n",
                         'default', self.global_manager)
                     self.retreat()
                 enemy.die()
