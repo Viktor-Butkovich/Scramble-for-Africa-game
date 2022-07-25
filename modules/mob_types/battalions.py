@@ -215,6 +215,12 @@ class safari(battalion): #specialized battalion led by hunter that fights beasts
         self.can_swim = True
         self.can_swim_river = True
         self.can_swim_ocean = False
+        
+        self.has_canoes = True
+        self.image_dict['canoes'] = input_dict['canoes_image']
+        self.image_dict['no_canoes'] = self.image_dict['default']
+        self.update_canoes()
+        
         self.battalion_type = 'none'
         self.attack_cost = self.global_manager.get('action_prices')['hunt']
         if not from_save:

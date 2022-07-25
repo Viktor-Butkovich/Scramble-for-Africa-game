@@ -44,7 +44,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             elif current_target == 'merchant':
                 first_line += ' and can personally search for loans and conduct advertising campaings in Europe.'
                 text_list.append(first_line)
-                text_list.append('other placeholder text')
+                text_list.append('When combined with workers, a merchant becomes a caravan that can build trading posts and trade with native villages.')
                 
             elif current_target == 'evangelist':
                 first_line += ' and can personally conduct religious campaigns and public relations campaigns in Europe.'
@@ -302,7 +302,8 @@ def get_migration_destinations(global_manager):
     for current_building in global_manager.get('building_list'):
         if current_building.building_type in ['port', 'train_station', 'resource']:
             if not current_building.images[0].current_cell in return_list:
-                return_list.append(current_building.images[0].current_cell)
+                if not current_building.damaged:
+                    return_list.append(current_building.images[0].current_cell)
     return(return_list)
 
 def get_migration_sources(global_manager):

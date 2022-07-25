@@ -464,6 +464,8 @@ class actor_display_label(label):
             elif self.actor_label_type == 'slums':
                 if self.actor.cell.has_building('slums'):
                     self.set_label(self.message_start + str(self.actor.cell.get_building('slums').available_workers))
+            elif self.actor_label_type == 'canoes':
+                self.set_label("Equipped with canoes to move along rivers")
             
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
@@ -536,6 +538,8 @@ class actor_display_label(label):
         elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
             return(False)
         elif self.actor_label_type == 'preferred_terrains' and not (self.actor.is_npmob and self.actor.npmob_type == 'beast'):
+            return(False)
+        elif self.actor_label_type == 'canoes' and not self.actor.has_canoes:
             return(False)
         else:
             return(result)

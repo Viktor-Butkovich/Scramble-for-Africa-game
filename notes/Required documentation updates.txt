@@ -35,6 +35,9 @@ ministers.minister.interests_setup
 ministers.minister.__init__ and to_save_dict inputs interests
 vehicles.boat
 actor_display_tools/build_steamboat_button
+mobs.mobs.update_canoes
+mobs.to_save_dict
+expeditions.expedition, battalions.safari, and native_warriors.native_warrior inputs for canoe_image
 
 Do next: canoes, public opinion from conversion and killing beasts, random effect on public opinion w/ flavor text when you, 
 slave catching (4+ success, 1 causes disorganized, independently affects aggressiveness (1 decreases aggressiveness, 4-6 increases), make sure natural 1 on converting/trading damages mission/trading post, not destroyed, 

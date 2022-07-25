@@ -34,6 +34,12 @@ class native_warriors(npmob):
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'
         self.despawning = False
+        
+        self.has_canoes = True
+        self.image_dict['canoes'] = input_dict['canoes_image']
+        self.image_dict['no_canoes'] = self.image_dict['default']
+        self.update_canoes()
+        
         if not from_save:
             self.set_max_movement_points(6)
             if not global_manager.get('creating_new_game'):

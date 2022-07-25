@@ -118,6 +118,7 @@ class village():
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/native_warriors/default.png'
+        input_dict['canoes_image'] = 'mobs/native_warriors/canoe_default.png'
         input_dict['modes'] = ['strategic']
         input_dict['name'] = 'native warriors'
         input_dict['init_type'] = 'native_warriors'

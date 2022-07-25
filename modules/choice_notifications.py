@@ -333,11 +333,5 @@ class recruitment_choice_button(choice_button):
                     input_dict['name'] = 'steamship'
                     input_dict['crew'] = 'none'
                     input_dict['init_type'] = 'ship'
-                #elif self.recruitment_type == 'steamboat':
-                #    image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/steamboat/uncrewed.png'}
-                #    input_dict['image_dict'] = image_dict
-                #    input_dict['name'] = 'steamboat'
-                #    input_dict['crew'] = 'none'
-                #    input_dict['init_type'] = 'boat'
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         super().on_click()

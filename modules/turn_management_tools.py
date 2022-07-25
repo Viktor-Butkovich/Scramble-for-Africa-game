@@ -514,10 +514,14 @@ def manage_ministers(global_manager):
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
                 evidence_lost += 1
         if evidence_lost > 0:
-            if evidence_lost == current_minister.corruption_evidence:
-                current_minister.display_message("All of the " + str(current_minister.corruption_evidence) + " evidence of " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            if current_minister.current_position == 'none':
+                current_position = ''
             else:
-                current_minister.display_message(str(evidence_lost) + " of the " + str(current_minister.corruption_evidence) + " evidence of " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+                current_position = current_minister.current_position
+            if evidence_lost == current_minister.corruption_evidence:
+                current_minister.display_message("All of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            else:
+                current_minister.display_message(str(evidence_lost) + " of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
             current_minister.corruption_evidence -= evidence_lost
 
     if global_manager.get('prosecution_bribed_judge'):

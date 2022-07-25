@@ -275,5 +275,7 @@ class npmob(mob): #if enemy.turn_done
                 self.global_manager.get('sound_manager').play_sound('water')
             else:
                 self.global_manager.get('sound_manager').play_sound('footsteps')
+        if self.has_canoes:
+            self.update_canoes()
         self.last_move_direction = (x_change, y_change)
         #self.movement_points -= self.movement_cost

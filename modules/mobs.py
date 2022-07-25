@@ -63,6 +63,7 @@ class mob(actor):
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
+        self.has_canoes = False
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
@@ -109,6 +110,9 @@ class mob(actor):
         save_dict['image'] = self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
+        if self.has_canoes:
+            save_dict['canoes_image'] = self.image_dict['canoes']
+            save_dict['image'] = self.image_dict['no_canoes']
         return(save_dict)        
 
     def temp_disable_movement(self):
@@ -710,8 +714,20 @@ class mob(actor):
                     self.set_movement_points(0)
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
                     self.set_movement_points(0)
-                    
+
+        if self.has_canoes:
+            self.update_canoes()
         self.last_move_direction = (x_change, y_change)
+
+    def update_canoes(self):
+        if self.is_npmob and not self.visible():
+            return()
+
+        if self.images[0].current_cell.terrain == 'water' and self.y > 0:
+            self.set_image('canoes')
+        else:
+            self.set_image('no_canoes')
+            
 
     def retreat(self):
         '''

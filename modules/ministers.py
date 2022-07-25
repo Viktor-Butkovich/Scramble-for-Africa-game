@@ -89,7 +89,6 @@ class minister():
             minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
         self.update_tooltip()
-        self.corruption_evidence = 1
 
     def update_tooltip(self):
         '''
