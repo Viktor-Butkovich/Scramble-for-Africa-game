@@ -341,6 +341,14 @@ class button():
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
                 "Has higher success chance and lower risk when a trading post is present", "Costs all remaining movement points, at least 1"])
 
+        elif self.button_type == 'capture slaves':
+            self.set_tooltip(["Attempts to capture villagers as slaves", "Can only be done in a village", "Regardless the capture's success, this may increase the village's aggressiveness and/or decrease public opinion",
+                "Has higher success chance and lower risk when aggressiveness is low", "Costs all remaining movement points, at least 1"])
+
+        elif self.button_type == 'capture slaves':
+            self.set_tooltip(["Uses a local labor broker to find and hire a unit of African workers from a nearby village", "Upon recruitment, the worker will automatically merge with this unit",
+                "The worker's initial recruitment cost will depend on the chosen village's distance and aggressiveness", "Automatically finds the best deal based on nearby villages, even unexplored ones", "Can only be done at a port"])
+
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find church volunteers.", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1"])
@@ -406,15 +414,20 @@ class button():
 
         elif self.button_type == 'hire village worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
-            self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
+            self.set_tooltip(["Recruits a unit of African workers for 0 money"] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
+
+        elif self.button_type == 'labor broker':
+            actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
+            self.set_tooltip(["Uses a local labor broker to recruit a unit of African workers from a nearby village", "Has a cost based on the aggressiveness and distance of the chosen village",
+                "Automatically finds the cheapest available worker"] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
 
         elif self.button_type == 'hire slums worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slums workers')
-            self.set_tooltip(["Recruits a unit of African workers for 0 money."] + self.global_manager.get('recruitment_list_descriptions')['slums workers'])
+            self.set_tooltip(["Recruits a unit of African workers for 0 money"] + self.global_manager.get('recruitment_list_descriptions')['slums workers'])
 
         elif self.button_type == 'buy slaves':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slave workers')
-            self.set_tooltip(["Recruits a unit of slave workers for " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money."] + self.global_manager.get('recruitment_list_descriptions')['slave workers'])
+            self.set_tooltip(["Recruits a unit of slave workers for " + str(self.global_manager.get('recruitment_costs')['slave workers']) + " money"] + self.global_manager.get('recruitment_list_descriptions')['slave workers'])
 
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
@@ -872,6 +885,10 @@ class button():
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.religious_campaign()
 
+            elif self.button_type == 'start capture slaves':
+                battalion = self.notification.choice_info_dict['battalion']
+                battalion.capture_slaves()
+
             elif self.button_type == 'start public relations campaign':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.public_relations_campaign()
@@ -924,6 +941,9 @@ class button():
 
             elif self.button_type == 'stop advertising campaign':
                 self.global_manager.set('ongoing_advertising_campaign', False)
+
+            elif self.button_type == 'stop capture slaves':
+                self.global_manager.set('ongoing_slave_capture', False)
 
             elif self.button_type in ['stop loan search', 'decline loan offer']:
                 self.global_manager.set('ongoing_loan_search', False)

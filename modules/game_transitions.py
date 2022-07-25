@@ -119,6 +119,9 @@ def to_main_menu(global_manager, override = False):
         None
     '''
     #if main_loop_tools.action_possible(global_manager) or override: #if game over, go to main menu regardless of circumstances
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+    minister_utility.calibrate_minister_info_display(global_manager, 'none')
     set_game_mode('main_menu', global_manager)
     for current_actor in global_manager.get('actor_list'):
         current_actor.remove()

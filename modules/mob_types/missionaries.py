@@ -1,5 +1,6 @@
 #Contains functionality for missionaries
 
+import random
 from .groups import group
 from .. import actor_utility
 from .. import dice_utility
@@ -73,7 +74,7 @@ class missionaries(group):
         if population_modifier < 0:
             message += "The high population of this village will require more effort to convert. /n"
         elif population_modifier > 0:
-            message += "The low population of this village will require less effort to convert /n"
+            message += "The low population of this village will require less effort to convert. /n"
         self.current_roll_modifier += population_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -170,20 +171,24 @@ class missionaries(group):
         else:
             text += "The missionaries made little progress in converting the natives. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died "
-            if village.cell.has_building('mission'):
-                text += "and the mission building has been destroyed."
+            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. " # The entire group of missionaries has died"
+            #if village.cell.has_intact_building('mission'):
+            #    text += " and the village's mission has been damaged."
             text += ". /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
             text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
             text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
+            
+        public_opinion_increase = 0
         if roll_result >= self.current_min_success:
+            public_opinion_increase = random.randrange(1, 4)
+            text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
             notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('conversion_result', [self, roll_result, village])
+        self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase])
 
     def complete_conversion(self):
         '''
@@ -197,12 +202,14 @@ class missionaries(group):
         '''
         roll_result = self.global_manager.get('conversion_result')[1]
         village = self.global_manager.get('conversion_result')[2]
+        public_opinion_increase = self.global_manager.get('conversion_result')[3]
         if roll_result >= self.current_min_success: #if campaign succeeded
             village.change_aggressiveness(-1)
+            self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         if roll_result <= self.current_max_crit_fail:
-            self.die()
-            if village.cell.has_building('mission'):
-                village.cell.get_building('mission').remove()
+            warrior = village.spawn_warrior()
+            warrior.show_images()
+            warrior.attack_on_spawn()
         self.global_manager.set('ongoing_conversion', False)

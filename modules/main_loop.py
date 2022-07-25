@@ -6,6 +6,7 @@ from . import main_loop_tools
 from . import utility
 from . import text_tools
 from . import turn_management_tools
+from . import actor_utility
 
 def main_loop(global_manager):
     '''
@@ -235,6 +236,8 @@ def main_loop(global_manager):
                             current_enemy.turn_done = True 
             
                 elif not current_enemy.visible(): #if not just spawned and hidden, do action without displaying
+                    if current_enemy.selected:
+                        actor_utility.deselect_all(global_manager)
                     current_enemy.end_turn_move()
                     moving = True
                     
@@ -248,6 +251,8 @@ def main_loop(global_manager):
                                 global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
                             else:
                                 global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
+                        else:
+                            actor_utility.deselect_all(global_manager)
                     else:
                         current_enemy.turn_done = True
                     
@@ -260,7 +265,7 @@ def main_loop(global_manager):
                         #if beasts stand still and don't attack anything, no movement is shown
                         did_nothing = True
                         current_enemy.turn_done = True
-                    else: #if unit will do an action, move the camera to it and select it
+                    elif current_enemy.visible(): #if unit will do an action, move the camera to it and select it
                         current_enemy.select()
                         global_manager.get('minimap_grid').calibrate(current_enemy.x, current_enemy.y)
                                                                      

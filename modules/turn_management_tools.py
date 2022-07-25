@@ -334,7 +334,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                 
                 source_village_list.append(source_village)
                 destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
-                if not destination.has_slums():
+                if not destination.has_building('slums'):
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
                 source_village.change_population(-1 * num_migrated)

@@ -50,16 +50,25 @@ class native_warriors(npmob):
             available_directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] #all directions
             possible_directions = [] #only directions that can be retreated in
             for direction in available_directions:
-                cell = self.images[0].current_cell.grid.find_cell(self.x - direction[0], self.y - direction[0])
+                cell = self.images[0].current_cell.grid.find_cell(self.x - direction[0], self.y - direction[1])
                 if not cell == 'none':
-                    if not cell.has_pmob() and not cell.terrain == 'water':
+                    if not cell.has_pmob() and not cell.y == 0: #can't retreat to ocean or into player units
                         possible_directions.append(direction)
             if len(possible_directions) > 0:
                 self.last_move_direction = random.choice(possible_directions)
-                self.global_manager.get('attacker_queue').append(self)
+                if self.global_manager.get('player_turn'):
+                    if self.grids[0].find_cell(self.x, self.y).get_best_combatant('pmob', self.npmob_type) == 'none':
+                        self.kill_noncombatants()
+                        self.damage_buildings()
+                    else:
+                        self.attempt_local_combat() #if spawned by failed trade or conversion during player turn, attack immediately
+                else:
+                    self.global_manager.get('attacker_queue').append(self)
             else:
                 self.remove()
                 self.origin_village.change_population(1) #despawn if pmob on tile and can't retreat anywhere
+        else:
+            self.damage_buildings()
 
     def remove(self):
         '''

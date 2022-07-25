@@ -149,18 +149,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             message = 'Are you sure you want to ' + verb + ' ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
         actor_utility.update_recruitment_descriptions(global_manager, recruitment_type)
         message += global_manager.get('recruitment_string_descriptions')[recruitment_type]
-        #message += utility.generate_capitalized_article(recruitment_name) + ' ' + recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit. '
-        #if recruitment_name == 'European workers':
-        #    message += 'European workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('european_worker_upkeep')) + ' money. '
-        #    message += 'Expanding the labor pool, such as by firing European workers, may decrease the upkeep cost. '
-        #elif recruitment_name == 'African workers':
-        #    if source_type == 'village':
-        #    elif source_type == 'slums':
-        #    message += 'African workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money. '
-        #    message += 'Expanding the labor pool, such as by convincing villagers to become workers, firing African workers, or freeing slaves may decrease the upkeep cost. '
-        #elif recruitment_name == 'slave workers':
-        #    message += 'Slaves have a set upkeep cost each turn of ' + str(global_manager.get('slave_worker_upkeep')) + ' money. '
-        #    message += 'Buying slaves is a morally reprehensible action and will be faced with a public opinion penalty. '
         
         notification_tools.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
 

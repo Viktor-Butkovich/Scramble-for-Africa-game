@@ -365,6 +365,7 @@ try:
         'trade': 0,
         'loan': 5,
         'attack': 5,
+        'capture_slaves': 5,
         'trial': 5,
         'hunt': 5,
         'track_beasts': 0
@@ -400,12 +401,13 @@ try:
         'inventory attrition': 'missing commodities',
         'combat': 'combat',
         'production': 'production',
+        'slave capture': 'capturing slaves',
         'none': 'miscellaneous company activities'
         }
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees'])
+        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
     #price setup
 
 
@@ -504,6 +506,7 @@ try:
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
+    global_manager.set('ongoing_slave_capture', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -970,7 +973,7 @@ try:
     global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
 
-    global_manager.set('DEBUG_show_minister_stealing', False) #False by default
+    global_manager.set('DEBUG_show_minister_stealing', True) #False by default
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
 
     global_manager.set('DEBUG_show_evil', False) #False by default
@@ -982,7 +985,7 @@ try:
     global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
     #reveals all cells
 
-    global_manager.set('DEBUG_fast_turn', True) #False by default
+    global_manager.set('DEBUG_fast_turn', False) #False by default
     #removes end turn delays
 
     global_manager.set('DEBUG_reveal_beasts', False) #False by default

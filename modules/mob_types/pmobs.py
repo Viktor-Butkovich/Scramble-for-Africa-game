@@ -628,6 +628,8 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if enemy.npmob_type == 'beast':
                     text += "Your " + self.name + " tracked down and killed the " + enemy.name + ". /n /n"
+                    self.public_opinion_increase = random.randrange(1, 7)
+                    text += "Sensationalized stories of your safari's exploits and the death of the " + enemy.name + " increase public opinion by " + str(self.public_opinion_increase) + ". /n /n"
                 else:
                     text += "Your " + self.name + " decisively defeated and destroyed the " + enemy.name + ". /n /n"
             elif combat_type == 'defending':
@@ -673,15 +675,31 @@ class pmob(mob):
                     text += "The " + enemy.name + " decisively routed your " + self.name + ", who " + utility.conjugate('be', enemy.number) +"  scattered and will be vulnerable to counterattack. /n /n"
             elif combat_type == 'defending':
                 if enemy.npmob_type == 'beast':
+                    self.public_opinion_change = random.randrange(1, 4) * -1
                     if self.number == 1:
                         text += "The " + enemy.name + " slaughtered your " + self.name + ". /n /n"
                     else:
                         text += "The " + enemy.name + " slaughtered most of your " + self.name + " and the survivors deserted, promising to never return. /n /n"
+                    killed_by_beast_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere beasts. /n /n",
+                                              "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few wild animals."
+                                              'Sensationalized news stories circulate of "brave conquerors" aimlessly wandering the jungle at the mercy of beasts, no better than savages.']
+                    text += random.choice(killed_by_beast_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
                 else:
+                    self.public_opinion_change = random.randrange(-3, 4)
                     if self.number == 1:
                         text += "The " + enemy.name + " decisively defeated your " + self.name + ", who was either slain or captured. /n /n"
                     else:
                         text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
+                    if self.public_opinion_change > 0:
+                        killed_by_natives_flavor = ["Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n",
+                                                  "Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place."
+                                                  "Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors."]
+                        text += random.choice(killed_by_natives_flavor) + " Public opinion has increased by " + str(self.public_opinion_change) + ". /n /n"
+                    elif self.public_opinion_change < 0:
+                        killed_by_natives_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere savages. /n /n",
+                                                  "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future."
+                                                  "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in some jungle."]
+                        text += random.choice(killed_by_natives_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
         if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units can not become veterans through combat
             if self.is_battalion:
                 self.just_promoted = True
@@ -721,6 +739,8 @@ class pmob(mob):
                 enemy.die()
                 if not enemy.npmob_type == 'beast':
                     self.global_manager.get('evil_tracker').change(8)
+                else:
+                    self.global_manager.get('public_opinion_tracker').change(self.public_opinion_increase)
             elif combat_type == 'defending':
                 enemy.retreat()
                 enemy.set_disorganized(True)
@@ -739,12 +759,13 @@ class pmob(mob):
                     self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 current_cell = self.images[0].current_cell
+                if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
+                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
                 self.die()
                 if current_cell.get_best_combatant('pmob') == 'none':
                     enemy.kill_noncombatants()
                     enemy.damage_buildings()
-                if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
-                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
+                self.global_manager.get('public_opinion_tracker').change(self.public_opinion_change)
 
         if combat_type == 'attacking':
             self.set_movement_points(0)
@@ -814,7 +835,7 @@ class pmob(mob):
         elif self.building_type == 'mission':
             message += "A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting."
         elif self.building_type == 'fort':
-            message += "A mission increases the combat effectiveness of your units standing in this tile."
+            message += "A fort increases the combat effectiveness of your units standing in this tile."
         elif self.building_type == 'train':
             message += "A train is a unit that can carry commodities and passengers at high speed along railroads. It can only exchange cargo at a train station and must stop moving for the rest of the turn after dropping off cargo. "
             message += "It also requires an attached worker as crew to function."

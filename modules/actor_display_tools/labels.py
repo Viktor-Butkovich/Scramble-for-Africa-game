@@ -45,6 +45,7 @@ class actor_display_label(label):
             self.message_start = 'Name: '
             self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/merge_button.png', self, global_manager))
             self.attached_buttons.append(buttons.split_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_n, self.modes, 'buttons/split_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.labor_broker_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, 'buttons/labor_broker_button.png', self, global_manager))
             self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_b, self.modes, 'buttons/embark_ship_button.png', self, 'ship', global_manager))
             self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_b, self.modes, 'buttons/embark_train_button.png', self, 'train', global_manager))
             self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, 'ship', global_manager))
@@ -71,7 +72,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
             
             self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'buildings/buttons/train.png', self, global_manager))
-            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'buildings/buttons/steamboat.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'buildings/buttons/steamboat.png', self, global_manager))
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))
@@ -79,6 +80,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
             self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
             self.attached_buttons.append(buttons.track_beasts_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/track_beasts_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.capture_slaves_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/capture_slaves_button.png', self, global_manager))
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
         elif self.actor_label_type == 'building work crews':

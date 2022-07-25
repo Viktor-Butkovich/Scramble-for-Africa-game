@@ -18,13 +18,14 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         if current_target in global_manager.get('officer_types'):
             first_line = utility.capitalize(current_target) + "s are controlled by the " + global_manager.get('officer_minister_dict')[current_target]
             if current_target == 'explorer':
-                first_line += 'When combined with workers, an explorer becomes an expedition unit that can explore new tiles and move swiftly along rivers.'
+                first_line += '.'
                 text_list.append(first_line)
+                text_list.append('When combined with workers, an explorer becomes an expedition unit that can explore new tiles and move swiftly along rivers with canoes.')
                 
             elif current_target == 'hunter':
                 first_line += '.'
                 text_list.append(first_line)
-                text_list.append('When combined with workers, a hunter becomes a safari unit that can attack and more easily detect and defend against beasts.')
+                text_list.append('When combined with workers, a hunter becomes a safari unit that can attack and more easily detect and defend against beasts and move swiftly along rivers with canoes.')
                 
             elif current_target == 'engineer':
                 first_line += '.'
@@ -54,7 +55,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             elif current_target == 'major':
                 first_line += '.'
                 text_list.append(first_line)
-                text_list.append('When combined with workers, a major becomes a battalion unit that can build forts, has a very high combat strength, and can attack non-beast enemies.')
+                text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
                 
         elif current_target == 'European workers':
             text_list.append('European workers have an upkeep of ' + str(global_manager.get('european_worker_upkeep')) + ' money each turn.')
@@ -70,14 +71,14 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
-            text_list.append('African workers have a constant upkeep of ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
             
         elif current_target == 'village workers':
-            text_list.append('African workers have a constant upkeep of ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
             text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')

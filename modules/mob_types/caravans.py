@@ -184,9 +184,9 @@ class caravan(group):
             text += "/nThe villagers are not willing to trade. /n"
             if roll_result <= self.current_max_crit_fail:
                 text += " /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n"
-                text += " /nEveryone in the caravan has died "
-                if village.cell.has_building('trading_post'):
-                    text += "and the trading post has been destroyed"
+                #text += " /nThe entire caravan has died"
+                #if village.cell.has_intact_building('trading_post'):
+                #    text += " and the village's trading post has been damaged"
                 text += ". /n"
                 notification_tools.display_notification(text + " /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
             else:
@@ -232,7 +232,7 @@ class caravan(group):
 
         roll_result = 0
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer gooods'], 'trade', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer goods'], 'trade', 2)
             first_roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
     
@@ -254,7 +254,7 @@ class caravan(group):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer gooods'], 'trade')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('commodity_prices')['consumer goods'], 'trade')
             roll_list = dice_utility.roll_to_list(6, "Trade roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result) #0 requirement for critical fail means critical fails will not occur
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                             

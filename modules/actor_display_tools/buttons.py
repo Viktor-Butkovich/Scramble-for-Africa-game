@@ -2,6 +2,7 @@
 
 from ..buttons import button
 from .. import main_loop_tools
+from .. import utility
 from .. import actor_utility
 from .. import minister_utility
 from .. import trial_utility
@@ -945,8 +946,10 @@ class trade_button(label_button):
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
                                 if current_mob.get_inventory('consumer goods') > 0:
-                                    if current_mob.check_if_minister_appointed():
+                                    if minister_utility.positions_filled(): #current_mob.check_if_minister_appointed():
                                         current_mob.start_trade()
+                                    else:
+                                        text_tools.print_to_screen("You can not do any actions until all ministers have been appointed.", self.global_manager)
                                 else:
                                     text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
                             else:
@@ -1027,6 +1030,59 @@ class convert_button(label_button):
                     text_tools.print_to_screen("Converting requires all remaining movement points, at least 1.", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not convert.", self.global_manager)
+
+class capture_slaves_button(label_button):
+    '''
+    Button that commands a battalion to capture slaves from a village
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'capture slaves', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.is_battalion):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a battalion to capture slaves from a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['capture_slaves']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.has_building('village'):
+                            if current_cell.get_building('village').population > 0:
+                                if current_mob.check_if_minister_appointed():
+                                    current_mob.start_capture_slaves()
+                            else:
+                                text_tools.print_to_screen("This village has no remaining population to be captured.", self.global_manager)
+                        else:
+                            text_tools.print_to_screen("Capturing slaves is only possible in a village.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['capture_slaves']) + " money needed to attempt to capture slaves.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("Capturing slaves requires all remaining movement points, at least 1.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not capture slaves.", self.global_manager)
 
 class evangelist_campaign_button(label_button):
     '''
@@ -1163,6 +1219,72 @@ class take_loan_button(label_button):
                     text_tools.print_to_screen("A merchant can only search for a loan while in Europe", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not search for a loan offer.", self.global_manager)
+
+class labor_broker_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'labor broker', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not (self.attached_label.actor.is_officer or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if self.global_manager.get('strategic_map_grid') in current_mob.grids:
+                    if current_mob.images[0].current_cell.has_intact_building('port'):
+                        cost_info_list = self.get_cost()
+                        if not cost_info_list == 'none':
+                            if self.global_manager.get('money_tracker').get() >= cost_info_list[1]:
+                                choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
+                                    'source_type': 'labor broker', 'village': cost_info_list[0]}
+                                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+                            else:
+                                text_tools.print_to_screen("You can not afford the recruitment cost of " + str(cost_info_list[1]) + " for the cheapest available worker. ", self.global_manager)
+                        else:
+                            text_tools.print_to_screen("There are no eligible villages to recruit workers from.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("A labor broker can only be used at a port.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("A labor broker can only be used at a port.", self.global_manager)
+            else:
+                text_tools.print_to_screen("You are busy and can not use a labor broker.", self.global_manager)
+
+    def get_cost(self):
+        lowest_cost_village = 'none'
+        lowest_cost = 0
+        for current_village in self.global_manager.get('village_list'):
+            if current_village.population > 0:
+                distance = int(utility.find_object_distance(current_village, self.attached_label.actor))
+                cost = (5 * current_village.aggressiveness) + distance
+                if cost < lowest_cost or lowest_cost_village == 'none':
+                    lowest_cost_village = current_village
+                    lowest_cost = cost
+        if lowest_cost_village == 'none':
+            return('none')
+        else:
+            return([lowest_cost_village, lowest_cost])
 
 class advertising_campaign_button(label_button):
     '''
@@ -2435,8 +2557,9 @@ class buy_slaves_button(label_button):
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
         if super().can_show():
-            if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
-                return(True)
+            if not self.global_manager.get('displayed_tile') == 'none':
+                if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
+                    return(True)
         return(False)
 
     def on_click(self):

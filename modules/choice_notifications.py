@@ -5,6 +5,7 @@ from .buttons import button
 from .notifications import notification
 from . import text_tools
 from . import scaling
+from . import market_tools
 
 class choice_notification(notification):
     '''
@@ -144,6 +145,9 @@ class choice_button(button):
 
         elif button_type == 'start converting':
             self.message = 'Convert'
+
+        elif button_type == 'start capture slaves':
+            self.message = 'Capture slaves'
             
         elif button_type in ['stop religious campaign', 'stop public relations campaign', 'stop advertising campaign']:
             self.message = 'Stop campaign'
@@ -157,7 +161,7 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type in ['none', 'stop exploration', 'stop attack']:
+        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves']:
             self.message = 'Do nothing'
 
         elif button_type == 'confirm main menu':
@@ -209,7 +213,10 @@ class choice_button(button):
             None
         '''
         if self.button_type == 'recruitment':
-            self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+            if self.recruitment_type in ['African worker village', 'African worker slums', 'African worker labor broker']:
+                self.set_tooltip(['Recruit an African worker for ' + str(self.cost) + ' money'])
+            else:
+                self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
@@ -241,6 +248,9 @@ class choice_button(button):
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
 
+        elif self.button_type == 'start capture slaves':
+            self.set_tooltip(['Start attempting to capture native villagers as slaves'])
+
         elif self.button_type == 'accept loan offer':
             self.set_tooltip(['Accepts the loan offer'])
 
@@ -249,6 +259,9 @@ class choice_button(button):
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])
+
+        elif self.button_type == 'none':
+            self.set_tooltip(['Do nothing'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']
@@ -302,6 +315,25 @@ class recruitment_choice_button(choice_button):
                 self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
             elif self.recruitment_type == 'African worker slums':
                 self.global_manager.get('displayed_tile').cell.get_building('slums').recruit_worker()
+            elif self.recruitment_type == 'African worker labor broker':
+                recruiter = self.global_manager.get('displayed_mob')
+                input_dict['coordinates'] = (recruiter.x, recruiter.y)
+                input_dict['grids'] = recruiter.grids
+                input_dict['image'] = 'mobs/African workers/default.png'
+                input_dict['modes'] = ['strategic']
+                input_dict['name'] = 'African workers'
+                input_dict['init_type'] = 'workers'
+                input_dict['worker_type'] = 'African'
+                
+                self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit recruitment')
+                self.notification.choice_info_dict['village'].change_population(-1)
+                market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
+
+                worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                if recruiter.is_vehicle:
+                    worker.crew_vehicle(recruiter)
+                else:
+                    self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]

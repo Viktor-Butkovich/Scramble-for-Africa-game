@@ -7,6 +7,7 @@ from .. import actor_utility
 from .. import utility
 from .. import notification_tools
 from .. import text_tools
+from .. import dice_utility
 
 class battalion(group):
     '''
@@ -174,8 +175,11 @@ class battalion(group):
                 text_tools.print_to_screen("Battalions can not attack beasts.", self.global_manager)
             elif self.is_safari:
                 text_tools.print_to_screen("Safaris can only attack beasts.", self.global_manager)
-        else: #if destination empty and 
+        else: #if destination empty and
+            initial_movement_points = self.movement_points
             super().move(x_change, y_change)
+            if attack_confirmed:
+                self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
             if not self.in_vehicle:
                 self.attempt_local_combat()
 
@@ -205,6 +209,184 @@ class battalion(group):
         for attack_mark in self.attack_mark_list:
             attack_mark.remove()
         self.attack_mark_list = []
+
+    def start_capture_slaves(self):
+        village = self.images[0].current_cell.get_building('village')
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = 2 #higher than usual
+        self.current_min_crit_success = self.default_min_crit_success
+        message = "Are you sure you want to attempt to capture slaves? If successful, captures 1 of the village's population as a unit of slave workers. /n /n"
+        message += "Regardless of success, this may increase the village's aggressiveness and/or decrease public opinion. /n /n"
+        message += "The attack will cost " + str(self.global_manager.get('action_prices')['capture_slaves']) + " money. /n /n "
+            
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
+            message += "The villagers are hostile and are likely to resist capture. /n /n"
+        elif aggressiveness_modifier > 0:
+            message += "The villagers are friendly and may not suspect your harmful intentions. /n /n"
+        else:
+            message += "The villagers are wary of the battalion and may resist capture. /n /n"
+        self.current_roll_modifier += aggressiveness_modifier
+
+        risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = "RISK: LOW /n /n" + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = "RISK: HIGH /n /n" + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = "RISK: DEADLY /n /n" + message
+            
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'battalion': self,'type': 'start capture slaves'}
+        self.current_roll_modifier = 0
+        self.global_manager.set('ongoing_slave_capture', True)
+        notification_tools.display_choice_notification(message, ['start capture slaves', 'stop capture slaves'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def capture_slaves(self):
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+
+        if not self.global_manager.get('action_prices')['capture_slaves'] == 0:
+            self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['capture_slaves'] * -1, 'slave capture')
+        self.global_manager.get('evil_tracker').change(3)
+        village = self.images[0].current_cell.get_building('village')
+        text = ""
+        text += "The battalion tries to capture the natives as slaves. /n /n"
+
+        if not self.veteran:    
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'slave_capture', self.global_manager, num_dice)
+        else:
+            text += ("The veteran major can roll twice and pick the higher result. /n /n")
+            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'slave_capture', self.global_manager, num_dice)
+
+        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        minister_corrupt = self.controlling_minister.check_corruption()
+        if minister_corrupt:
+            self.controlling_minister.steal_money(self.global_manager.get('action_prices')['capture_slaves'], 'slave capture')
+            
+        if self.veteran:
+            if minister_corrupt:
+                first_roll = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+                second_roll = random.randrange(1, self.current_min_success)
+                if random.randrange(1, 7) >= 4:
+                    results = [first_roll, second_roll]
+                else:
+                    results = [second_roll, first_roll]
+            else:
+                results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
+            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
+            first_roll_list = dice_utility.roll_to_list(6, "Slave capture roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+           
+            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = "CRITICAL FAILURE"
+                elif i >= self.current_min_crit_success:
+                    word = "CRITICAL SUCCESS"
+                elif i >= self.current_min_success:
+                    word = "SUCCESS"
+                else:
+                    word = "FAILURE"
+                result_outcome_dict[i] = word
+            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+        else:
+            if minister_corrupt:
+                result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+            else:
+                result = self.controlling_minister.no_corruption_roll(6)
+            roll_list = dice_utility.roll_to_list(6, "Slave capture roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + "Click to continue.", 'slave_capture', self.global_manager, num_dice)
+            
+        text += "/n"
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += "/nThe battalion successfully captured enough slaves to create a slave workers unit. /n "
+        else:
+            text += "/nA majority of the natives managed to evade capture. /n "
+        if roll_result <= self.current_max_crit_fail:
+            text += "/nAngered by the battalion's brutal attempts at subjugation, the natives attack the battalion. /n " # The entire group of missionaries has died"
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += " /nThe major has gained insights into the optimal strategies to intimidate and defeat the African natives. /n"
+            text += " /nThe major is now a veteran and will be more successful in future ventures. /n"
+
+        if (not minister_corrupt) and random.randrange(1, 7) >= 4 and (not village.aggressiveness >= 9):
+            village_aggressiveness_increase = 1
+            text += " /nThe natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n"
+        else:
+            village_aggressiveness_increase = 0
+            
+        public_opinion_decrease = 0
+        if not minister_corrupt:
+            public_opinion_decrease = -1 * random.randrange(0, 3)
+            text += "/nRumors of your company's brutal treatment of the natives reaches Europe, decreasing public opinion by " + str(-1 * public_opinion_decrease) + ". /n"
+
+        if roll_result >= self.current_min_success:
+            notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_slave_capture', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
+
+    def complete_capture_slaves(self):
+        roll_result = self.global_manager.get('capture_slaves_result')[1]
+        village = self.global_manager.get('capture_slaves_result')[2]
+        public_opinion_decrease = self.global_manager.get('capture_slaves_result')[3]
+        village_aggressiveness_increase = self.global_manager.get('capture_slaves_result')[4]
+        
+        village.change_aggressiveness(village_aggressiveness_increase)
+        if roll_result >= self.current_min_success: #if campaign succeeded
+
+            input_dict = {}
+            input_dict['coordinates'] = (self.x, self.y)
+            input_dict['grids'] = self.grids
+            input_dict['image'] = 'mobs/slave workers/default.png'
+            input_dict['name'] = 'slave workers'
+            input_dict['modes'] = ['strategic']
+            input_dict['init_type'] = 'slaves'
+            input_dict['purchased'] = False
+            input_dict['worker_type'] = 'slave' #not european - doesn't count as a European worker for upkeep
+            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
+            village.change_population(-1)
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+
+        if roll_result <= self.current_max_crit_fail:
+            warrior = village.spawn_warrior()
+            warrior.show_images()
+            warrior.attack_on_spawn()
+        self.global_manager.set('ongoing_slave_capture', False)
+
+
 
 class safari(battalion): #specialized battalion led by hunter that fights beasts
     def __init__(self, from_save, input_dict, global_manager):
