@@ -23,7 +23,7 @@ class choice_notification(notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             string list button_types: List of strings that correspond to the button types of this notification's choice buttons, like ['end turn', 'none'] for an end turn button and a do nothing button
-            dictionary choice_info_dict: string keys corresponding to various values used by this notification's choice buttons when clicked
+            dictionary choice_info_dict: String keys corresponding to various values used by this notification's choice buttons when clicked
             int notification_dice: Number of dice attached to this notification, allowing the correct ones to be shown during the notification when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:

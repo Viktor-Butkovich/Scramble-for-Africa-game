@@ -973,7 +973,7 @@ try:
     global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
     #prints the corruption and skill levels of each minister to the console when saving the game
 
-    global_manager.set('DEBUG_show_minister_stealing', True) #False by default
+    global_manager.set('DEBUG_show_minister_stealing', False) #False by default
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
 
     global_manager.set('DEBUG_show_evil', False) #False by default

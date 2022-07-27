@@ -288,12 +288,28 @@ class cell():
         return(contained_buildings_list)
 
     def adjacent_to_buildings(self):
+        '''
+        Description:
+            Finds and returns if this cell is adjacent to any buildings, used for beast spawning
+        Input:
+            None
+        Output:
+            boolean: Returns if this cell is adjacent to any buildings
+        '''
         for current_adjacent_cell in (self.adjacent_list + [self]):
             if len(current_adjacent_cell.get_buildings()) > 0:
                 return(True)
         return(False)
 
     def has_destructible_buildings(self):
+        '''
+        Description:
+            Finds and returns if this cell is adjacent has any buildings that can be damaged by native warriors (not roads or railroads), used for native warriors cell targeting
+        Input:
+            None
+        Output:
+            boolean: Returns if this cell has any buildings that can be damaged by native warriors
+        '''
         for current_building in self.get_intact_buildings():
             if current_building.can_damage():
                 return(True)
@@ -318,7 +334,7 @@ class cell():
         if self.tile == self.global_manager.get('displayed_tile'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
 
-    def has_vehicle(self, vehicle_type):
+    def has_vehicle(self, vehicle_type, is_worker = False):
         '''
         Description:
             Returns whether this cell contains a crewed vehicle of the inputted type
@@ -328,11 +344,11 @@ class cell():
             boolean: Returns True if this cell contains a crewed vehicle of the inputted type, otherwise returns False
         '''
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
-    def get_vehicle(self, vehicle_type):
+    def get_vehicle(self, vehicle_type, is_worker = False):
         '''
         Description:
             Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
@@ -342,7 +358,7 @@ class cell():
             string/vehicle: Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
         '''
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 
@@ -440,6 +456,8 @@ class cell():
                 attacked
         Input:
             string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for the most powerful npmob and vice versa
+            string target_type = 'human': Regardless of the mob type being searched for, target_type gives information about the npmob: when a pmob searches for an npmob, it will search for a 'human' or 'beast' npmob. When an npmob
+                searches for a pmob, it will say whether it is a 'human' or 'beast' to correctly choose pmobs specialized at fighting that npmob type, like safaris against beasts
         Output;
             mob: Returns the best combatant of the inputted type in this cell
         '''

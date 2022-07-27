@@ -6,6 +6,16 @@ from . import scaling
 from . import utility
 
 def update_recruitment_descriptions(global_manager, target = 'all'):
+    '''
+    Description:
+        Updates the descriptions of recruitable units for use in various parts of the program. Updates all units during setup and can target a certain unit to update prices, etc. when the information is needed later in the game.
+            Creates list versions for tooltips and string versions for notifications
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string target = 'all': Targets a certain unit type, or 'all' by default, to update while minimizing unnecessary calculations
+    Output:
+        None
+    '''
     if target == 'all':
         targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
     else:
@@ -100,13 +110,15 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         recruitment_string_descriptions[current_target] = text
             
 def spawn_beast(global_manager):
+    '''
+    Description:
+        Attempts to spawn a beast at a random part of the map, choosing a tile and then choosing a type of animal that can spawn in that tile. The spawn attepmt fails and does nothing if the chosen tile is next to any player buildings
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     input_dict = {}
-    #possible_terrains = global_manager.get('terrain_list') + ['water']
-    #input_dict['preferred_terrains'] = [random.choice(possible_terrains)]
-    #input_dict['preferred_terrains'].append(random.choice(possible_terrains))
-    #while input_dict['preferred_terrains'][0] == input_dict['preferred_terrains'][1]:
-    #    input_dict['preferred_terrains'][1] = random.choice(possible_terrains)
-
     requirements_dict = {}
     requirements_dict['ocean_allowed'] = False
     requirements_dict['allowed_terrains'] = global_manager.get('terrain_list') + ['water']

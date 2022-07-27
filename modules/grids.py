@@ -238,6 +238,14 @@ class grid():
         return('none')
 
     def choose_cell(self, requirements_dict):
+        '''
+        Description:
+            Uses a series of requirements to choose and a return a random cell in this grid that fits those requirements
+        Input:
+            dictionary choice_info_dict: String keys corresponding to various values such as 'allowed_terrains', 'ocean_allowed', and 'nearby_buildings_allowed' to use as requirements for the chosen cell
+        Output:
+            cell: Returns a random cell in this grid that fits the inputted requirements
+        '''
         allowed_terrains = requirements_dict['allowed_terrains']
         ocean_allowed = requirements_dict['ocean_allowed']
         nearby_buildings_allowed = requirements_dict['nearby_buildings_allowed']

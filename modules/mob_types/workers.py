@@ -26,6 +26,7 @@ class worker(pmob):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker_type': string value - Type of worker this is, like 'European'. Each type of worker has a separate upkeep, labor pool, and abilities
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -116,16 +117,7 @@ class worker(pmob):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': string value - File path to the image used by this object
+                Along with superclass outputs, also saves the following values:
                 'worker_type': string value - Type of worker this is, like 'European'. Each type of worker has a separate upkeep, labor pool, and abilities
         '''
         save_dict = super().to_save_dict()

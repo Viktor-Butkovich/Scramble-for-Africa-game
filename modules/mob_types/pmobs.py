@@ -33,6 +33,7 @@ class pmob(mob):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -61,6 +62,30 @@ class pmob(mob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.attached_dice_list = []
+
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                Along with superclass outputs, also saves the following values:
+                'default_name': string value - This actor's name without modifications like veteran
+                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+        '''
+        save_dict = super().to_save_dict()
+        if self.end_turn_destination == 'none':
+            save_dict['end_turn_destination'] = 'none'
+        else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
+            for grid_type in self.global_manager.get('grid_types_list'):
+                if self.end_turn_destination.grid == self.global_manager.get(grid_type):
+                    save_dict['end_turn_destination_grid_type'] = grid_type
+            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
+        save_dict['default_name'] = self.default_name
+        return(save_dict)
 
     def replace(self):
         '''
@@ -120,37 +145,6 @@ class pmob(mob):
         else:
             notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
             self.die()
-
-    def to_save_dict(self):
-        '''
-        Description:
-            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
-        Input:
-            None
-        Output:
-            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'default_name': string value - This actor's name without modifications like veteran
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': string value - File path to the image used by this object
-        '''
-        save_dict = super().to_save_dict()
-        if self.end_turn_destination == 'none':
-            save_dict['end_turn_destination'] = 'none'
-        else: #end turn destination is a tile and can't be pickled, need to save its location to find it again after loading
-            for grid_type in self.global_manager.get('grid_types_list'):
-                if self.end_turn_destination.grid == self.global_manager.get(grid_type):
-                    save_dict['end_turn_destination_grid_type'] = grid_type
-            save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
-        save_dict['default_name'] = self.default_name
-        return(save_dict)
 
     def remove(self):
         '''
@@ -332,12 +326,13 @@ class pmob(mob):
                                     passed = True
                             elif destination_type == 'water':
                                 if destination_type == 'water':
-                                    if self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible) or (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')):
+                                    if self.can_swim or (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle) or (self.can_explore and not future_cell.visible) or (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')):
+                                        
                                         passed = True
 
                             if passed:
                                 if destination_type == 'water':
-                                    if not (future_cell.has_vehicle('ship') and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
+                                    if not (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
                                         if not (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')): #battalions can attack enemies in water, but must retreat afterward
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
                                                 if future_y == 0:
@@ -681,7 +676,7 @@ class pmob(mob):
                     else:
                         text += "The " + enemy.name + " slaughtered most of your " + self.name + " and the survivors deserted, promising to never return. /n /n"
                     killed_by_beast_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere beasts. /n /n",
-                                              "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few wild animals."
+                                              "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few wild animals.",
                                               'Sensationalized news stories circulate of "brave conquerors" aimlessly wandering the jungle at the mercy of beasts, no better than savages.']
                     text += random.choice(killed_by_beast_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
                 else:
@@ -692,12 +687,12 @@ class pmob(mob):
                         text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
                     if self.public_opinion_change > 0:
                         killed_by_natives_flavor = ["Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n",
-                                                  "Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place."
+                                                  "Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.",
                                                   "Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors."]
                         text += random.choice(killed_by_natives_flavor) + " Public opinion has increased by " + str(self.public_opinion_change) + ". /n /n"
                     elif self.public_opinion_change < 0:
                         killed_by_natives_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere savages. /n /n",
-                                                  "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future."
+                                                  "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future.",
                                                   "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in some jungle."]
                         text += random.choice(killed_by_natives_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
         if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units can not become veterans through combat

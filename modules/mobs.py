@@ -25,6 +25,7 @@ class mob(actor):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -91,18 +92,13 @@ class mob(actor):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': string value - File path to the image used by this object
-                'creation_turn': int value - Turn number on which this unit was created
+                Along with superclass outputs, also saves the following values:
+                'movement_points': int value - How many movement points this mob currently has
+                'max_movement_points': int value - Maximum number of movemet points this mob can have
+                'image': string value - File path to the image used by this mob
+                'creation_turn': int value - Turn number on which this mob was created
                 'disorganized': boolean value - Whether this unit is currently disorganized
+                'canoes_image': string value - Only saved if this unit has canoes, file path to the image used by this mob when it is in river water
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
@@ -694,9 +690,9 @@ class mob(actor):
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
             
-        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
-            vehicle = self.images[0].current_cell.get_vehicle('ship')
+            vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
             if self.is_worker and not vehicle.has_crew:
                 self.crew_vehicle(vehicle)
                 self.set_movement_points(0)
@@ -720,6 +716,14 @@ class mob(actor):
         self.last_move_direction = (x_change, y_change)
 
     def update_canoes(self):
+        '''
+        Description:
+            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.is_npmob and not self.visible():
             return()
 
@@ -739,27 +743,7 @@ class mob(actor):
             None
         '''
         original_movement_points = self.movement_points
-        #if direction == 'previous':
         self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
-        #elif direction == 'random':
-        #    self.movement_points = 3
-        #    available_directions = []
-        #    if self.can_move(0, 1):
-        #        future_cell = self.grids[0].find_cell(self.x, self.y + 1)
-        #        if not future_cell.has_npmob():
-        #            available_directions.append([0, 1])
-        #    if self.can_move(1, 0):
-        #        future_cell = self.grids[0].find_cell(self.x + 1, self.y)
-        #        if not future_cell.has_npmob():
-        #            available_directions.append([1, 0])
-        #    if self.can_move(0, -1):
-        #        future_cell = self.grids[0].find_cell(self.x, self.y - 1)
-        #        if not future_cell.has_npmob():
-        #            available_directions.append([0, -1])
-        #    if self.can_move(-1, 0):
-        #        future_cell = self.grids[0].find_cell(self.x - 1, self.y)
-        #        if not future_cell.has_npmob():
-        #            available_directions.append([-1, 0])
             
         self.set_movement_points(original_movement_points) #retreating is free
         

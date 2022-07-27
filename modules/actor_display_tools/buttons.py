@@ -946,7 +946,7 @@ class trade_button(label_button):
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
                                 if current_mob.get_inventory('consumer goods') > 0:
-                                    if minister_utility.positions_filled(): #current_mob.check_if_minister_appointed():
+                                    if minister_utility.positions_filled(self.global_manager): #current_mob.check_if_minister_appointed():
                                         current_mob.start_trade()
                                     else:
                                         text_tools.print_to_screen("You can not do any actions until all ministers have been appointed.", self.global_manager)
@@ -1100,6 +1100,7 @@ class evangelist_campaign_button(label_button):
             string list modes: Game modes during which this button can appear
             string image_id: File path to the image used by this object
             label attached_label: Label that this button is attached to
+            string campaign_type: 'religious campaign' or 'public relations campaign', determines which kind of evangelist campaign this button starts
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1125,7 +1126,8 @@ class evangelist_campaign_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands an evangelist to start a religious campaign
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands an evangelist to start a religious or public relations campaign, depending on button's campaign
+                type
         Input:
             None
         Output:
@@ -1221,7 +1223,25 @@ class take_loan_button(label_button):
                 text_tools.print_to_screen("You are busy and can not search for a loan offer.", self.global_manager)
 
 class labor_broker_button(label_button):
+    '''
+    Buttons that commands a vehicle without crew or an officer to use a labor broker in a port to recruit a worker from a nearby village, with a price based on the village's aggressiveness and distance
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'labor broker', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
@@ -1231,7 +1251,7 @@ class labor_broker_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not an officer or a vehicle without crew, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
@@ -1242,7 +1262,7 @@ class labor_broker_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands an officer or vehicle without crew to use a labor broker in a port
         Input:
             None
         Output:
@@ -1272,6 +1292,14 @@ class labor_broker_button(label_button):
                 text_tools.print_to_screen("You are busy and can not use a labor broker.", self.global_manager)
 
     def get_cost(self):
+        '''
+        Description:
+            Calculates and returns the cost of using a labor broker in a port at the currently selected unit's location, based on nearby villages' aggressiveness and distance from the port
+        Input:
+            None
+        Output:
+            string/list: If no valid villages are found, returns 'none'. Otherwise, returns a list with the village as the first item and the cost as the second item
+        '''
         lowest_cost_village = 'none'
         lowest_cost = 0
         for current_village in self.global_manager.get('village_list'):
@@ -1357,7 +1385,25 @@ class advertising_campaign_button(label_button):
                 text_tools.print_to_screen("You are busy and can not start an advertising campaign.", self.global_manager)
 
 class track_beasts_button(label_button):
+    '''
+    Button that orders a safari to spend 1 movement point to attempt to reveal beasts in its tile and adjacent explored tiles
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'track beasts', keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
@@ -1378,7 +1424,7 @@ class track_beasts_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a merchant to start a loan search
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a safari to attempt to track beasts
         Input:
             None
         Output:
@@ -1473,7 +1519,7 @@ class switch_theatre_button(label_button):
 
 class build_train_button(label_button):
     '''
-    Button that commands a construction gang to build a train at a train station
+    Button that commands a construction gang to assemble a train at a train station
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -1511,7 +1557,7 @@ class build_train_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to build a train at a train station
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to assemble a train at a train station
         Input:
             None
         Output:
@@ -1560,7 +1606,7 @@ class build_train_button(label_button):
 
 class build_steamboat_button(label_button):
     '''
-    Button that commands a construction gang to build a steammboat at a port
+    Button that commands a construction gang to assemble a steammboat at a port
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -1598,7 +1644,7 @@ class build_steamboat_button(label_button):
     def on_click(self):
         '''
         Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to build a train at a train station
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a construction gang to assemble a steamboat at a port
         Input:
             None
         Output:

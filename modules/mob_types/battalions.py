@@ -11,7 +11,7 @@ from .. import dice_utility
 
 class battalion(group):
     '''
-    A group with a major officer that can attack enemy units
+    A group with a major officer that can attack non-beast enemies
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -28,6 +28,7 @@ class battalion(group):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
@@ -47,13 +48,23 @@ class battalion(group):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
     def get_movement_cost(self, x_change, y_change, post_attack = False):
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Only works when one inputted amount is 0 and the other is 1 or -1, with 0 and -1 representing moving 1 cell downward
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean post_attack = False: Whether this movement is occuring directly after an attack order or not. A battalion/safari can move into a cell to attack it by using only 1 movement point but must return afterward if not
+                enough movement points to move there normally
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
         cost = self.movement_cost
         if not (self.is_npmob and not self.visible()):
             local_cell = self.images[0].current_cell
         else:
             local_cell = self.grids[0].find_cell(self.x, self.y)
 
-        
         direction = 'none'
         if x_change < 0:
             direction = 'left'
@@ -186,7 +197,7 @@ class battalion(group):
     def attempt_local_combat(self):
         '''
         Description:
-            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local npmob and pay to supply the attack
+            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local non-beast npmob and pay to supply the attack
         Input:
             None
         Output:
@@ -211,6 +222,15 @@ class battalion(group):
         self.attack_mark_list = []
 
     def start_capture_slaves(self):
+        '''
+        Description:
+            Used when the player clicks on the start capturing slaves, displays a choice notification that allows the player to capture slaves or not. Choosing to capture slaves starts the slave capture and consumes the battalion's
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         village = self.images[0].current_cell.get_building('village')
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
@@ -252,6 +272,14 @@ class battalion(group):
         notification_tools.display_choice_notification(message, ['start capture slaves', 'stop capture slaves'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def capture_slaves(self):
+        '''
+        Description:
+            Controls the slave capture process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
@@ -357,6 +385,15 @@ class battalion(group):
         self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
 
     def complete_capture_slaves(self):
+        '''
+        Description:
+            Used when the player finishes rolling for slave capture, shows the conversion's results and makes any changes caused by the result. If successful, capture village population unit as slaves, promotes major to a veteran on
+                critical success. Native warriors spawn on critical failure. Regardless of success, may decrease public opinion and/or increase aggressiveness
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('capture_slaves_result')[1]
         village = self.global_manager.get('capture_slaves_result')[2]
         public_opinion_decrease = self.global_manager.get('capture_slaves_result')[3]
@@ -388,8 +425,33 @@ class battalion(group):
 
 
 
-class safari(battalion): #specialized battalion led by hunter that fights beasts
+class safari(battalion):
+    '''
+    A group with a hunter officer that can track down and attack beast enemies
+    '''
     def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this group's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this group's name
+                'modes': string list value - Game modes during which this group's images can appear
+                'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
+                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
+                'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
+                'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
+                'canoes_image': string value - File path tothe image used by this object when it is in a river
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(from_save, input_dict, global_manager)    
         self.set_group_type('safari')
         self.is_battalion = False
@@ -409,13 +471,30 @@ class safari(battalion): #specialized battalion led by hunter that fights beasts
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
     def attempt_local_combat(self):
+        '''
+        Description:
+            When this unit moves, it checks if combat is possible in the cell it moved into. If combat is possible, it will immediately start a combat with the strongest local beast npmob and pay to supply the hunt
+        Input:
+            None
+        Output:
+            None
+        '''
         defender = self.images[0].current_cell.get_best_combatant('npmob', 'beast')
         if not defender == 'none':
             self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting supplies')
             self.start_combat('attacking', defender)
 
     def track_beasts(self):
+        '''
+        Description:
+            Spends 1 movement point to check this tile and all adjacent explored tiles for beasts, revealing all nearby beasts on a 4+ roll. If a 6 is rolled, hunter becomes veteran. If a beast is found on the safari's tile, it will
+                attack and be revealed afterward for the safari to follow up against
+        '''
         result = self.controlling_minister.no_corruption_roll(6)
+        if self.veteran:
+            second_result = self.controlling_minister.no_corruption_roll(6)
+            if second_result > result:
+                result = second_result
         beasts_found = []
         ambush_list = []
         if result >= 4:

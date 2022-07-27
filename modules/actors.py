@@ -77,7 +77,13 @@ class actor():
                     else:
                         init_type = 'workers'
                 elif self.is_vehicle:
-                    init_type = self.vehicle_type
+                    if self.vehicle_type == 'train':
+                        init_type = 'train'
+                    elif self.vehicle_type == 'ship':
+                        if self.can_swim_river:
+                            init_type = 'boat'
+                        else:
+                            init_type = 'ship'
                 elif self.is_officer:
                     init_type = self.officer_type
                 elif self.is_group:

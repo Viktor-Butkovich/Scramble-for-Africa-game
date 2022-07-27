@@ -21,6 +21,8 @@ class native_warriors(npmob):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
+                'canoes_image': string value - File path tothe image used by this object when it is in a river
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -41,11 +43,19 @@ class native_warriors(npmob):
         self.update_canoes()
         
         if not from_save:
-            self.set_max_movement_points(6)
+            self.set_max_movement_points(4)
             if not global_manager.get('creating_new_game'):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
 
     def attack_on_spawn(self):
+        '''
+        Description:
+            Upon spawning, checks if there are any pmobs or destructible buildings in this tile and attacks them as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.combat_possible(): #attack any player-controlled units in tile when spawning
             available_directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] #all directions
             possible_directions = [] #only directions that can be retreated in

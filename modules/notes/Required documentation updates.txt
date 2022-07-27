@@ -1,0 +1,81 @@
+mobs_types.beasts.py
+turn_management_tools.manage_beasts
+actor_utility.spawn_beast
+mobs.mob.set_hidden
+buttons.same_tile_icon.can_show
+ministers.minister.attack_roll_to_list
+grids.grid.choose_cell
+mobs_types.cells.cell.adjacent_to_buildings
+mobs_types.npmobs.npmob.end_turn_move can take cell instead of just unit/building
+mobs_types.npmobs.npmob.visible
+save_load_tools imports
+utility.capitalize
+utility.conjugate inputs
+cells.cell.get_best_combatant
+mobs_types.battalions.safaris
+mobs_types.battalions.text_tools
+mob_types.battalions imports
+actor_utility.update_recruitment_descriptions
+actor_creation_tools imports
+actor_creation_tools.display_recruitment_choice_notification input source type
+main imports
+europe_transactions imports
+change actor_display_tools/buttons.religious_campaign_button to evangelist_campaign button, changed inputs
+mobs_types.officers.evangelist public relations campaign functions
+action_notifications.public_relations_campaign_notification
+buildings.mission and buildings.fort descriptions
+buildings.fort
+main_loop imports
+max_movement_points in mob and pmob input and save_dict
+buttons.end_turn_button
+cells.cell.has_destructible_buildings
+mobs_types.battalions.battalion.get_movement_cost
+actor_display_tools/buttons/track_beasts_button
+cells.cell.get_best_combatant inputs
+ministers.minister.interests_setup
+ministers.minister.__init__ and to_save_dict inputs interests
+mobs_types.vehicles.boat
+actor_display_tools/build_steamboat_button
+mobs.mobs.update_canoes
+mobs.to_save_dict
+expeditions.expedition, battalions.safari, and native_warriors.native_warrior inputs for canoe_image
+mobs_types.missionaries imports
+battalions.battalion.slave_capture
+actor_display_tools/buttons.capture_slaves_button
+actor_display_tools/buttons.labor_broker_button
+actor_display_tools/buttons imports
+action_notifications.capture_slaves_notification
+choice_notifications imports
+
+Do next: add sentry mode/end turn for unit buttons, labor brokers
+
+Future plans:
+allow moving empty steamboat across land on train
+reduce number of times current cell is calculated in npmobs.npmob end turn functions
+improve appearance of combat modifier text
+add background to multiple units in tile number to improve contrast
+possibly have adjustable police investment per turn
+add flavor text for police informants, investigations, etc instead of prosecutor finding it
+add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
+change action failed messages to reference minister asking for more time/money rather than the unit officer
+prevent ignored commodity prices from skyrocketing
+add multiple save slots
+Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
+possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
+possibly display a notification when a unit dies and have an optional cause of death parameter
+
+Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
+
+Possible/known Errors:
+change check if minister appointed to minister_utility.positions_filled across the board, need prosecutor appointed during other minister's actions, etc.
+make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense
+minister face being shown twice during fort construction
+should never move camera to invisible enemy during enemy turn
+allow player to exit game and save even when ministers are not appointed
+capitalize first letter of enemy name during combat
+prevent multiple trials from happening in the same turn
+pmobs.display_die creating minister icons without resolution scaling
+damaging a building should remove its work crews, even if no enemies are present
+Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water
+Make sure worker changed to workers in text descriptions throughout the program
+incorrect spacing on generate article when blank output is returned

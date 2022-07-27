@@ -32,6 +32,7 @@ class officer(pmob):
                 'end_turn_destination': string or int tuple - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'veteran': boolean value - Required if from save, whether this officer is a veteran
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -80,7 +81,7 @@ class officer(pmob):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                Same pairs as superclass, along with:
+                Along with superclass outputs, also saves the following values:
                 'officer_type': Type of officer that this is, like 'explorer' or 'engineer'
                 'veteran': Whether this officer is a veteran
         '''
@@ -192,9 +193,6 @@ class officer(pmob):
         '''
         super().remove()
         self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))
-        #for current_status_icon in self.status_icons:
-        #    current_status_icon.remove()
-        #self.status_icons = []
 
 class evangelist(officer):
     '''
@@ -215,6 +213,7 @@ class evangelist(officer):
                 'end_turn_destination': string or int tuple - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'veteran': boolean value - Required if from save, whether this officer is a veteran
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -368,7 +367,6 @@ class evangelist(officer):
             input_dict['init_type'] = 'church_volunteers'
             input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep
             self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
-            #new_church_volunteers = workers.church_volunteers(False, input_dict, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()
@@ -380,7 +378,16 @@ class evangelist(officer):
             self.die()
         self.global_manager.set('ongoing_religious_campaign', False)
 
-    def start_public_relations_campaign(self): 
+    def start_public_relations_campaign(self):
+        '''
+        Description:
+            Used when the player clicks on the start PR campaign button, displays a choice notification that allows the player to campaign or not. Choosing to campaign starts the campaign process and consumes the evangelist's
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
@@ -409,7 +416,15 @@ class evangelist(officer):
             
         notification_tools.display_choice_notification(message, ['start public relations campaign', 'stop public relations campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
-    def public_relations_campaign(self): 
+    def public_relations_campaign(self):
+        '''
+        Description:
+            Controls the PR campaign process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = 0
         self.just_promoted = False
         self.set_movement_points(0)
@@ -434,11 +449,9 @@ class evangelist(officer):
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['public_relations_campaign'], 'public relations campaign', 2)
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Public relations campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
@@ -486,16 +499,21 @@ class evangelist(officer):
         self.global_manager.set('public_relations_campaign_result', [self, roll_result, public_relations_change])
 
     def complete_public_relations_campaign(self):
+        '''
+        Description:
+            Used when the player finishes rolling for a PR campaign, shows the campaign's results and making any changes caused by the result. If successful, increases public opinion by random amount, promotes evangelist to a veteran on
+                critical success. Evangelist dies on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
         roll_result = self.global_manager.get('public_relations_campaign_result')[1]
         if roll_result >= self.current_min_success: #if campaign succeeded
             self.global_manager.get('public_opinion_tracker').change(self.global_manager.get('public_relations_campaign_result')[2])
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()
-            #for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
-            #    if not current_image.current_cell == 'none':
-            #        while not self == current_image.current_cell.contained_mobs[0]:
-            #            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         elif roll_result <= self.current_max_crit_fail:
             self.die()
         self.global_manager.set('ongoing_public_relations_campaign', False)
@@ -519,6 +537,7 @@ class merchant(officer):
                 'end_turn_destination': string or int tuple - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'veteran': boolean value - Required if from save, whether this officer is a veteran
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -541,7 +560,6 @@ class merchant(officer):
         Output:
             None
         '''
-        #self.global_manager.get('money_tracker').change(100)
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
@@ -593,9 +611,11 @@ class merchant(officer):
                 found_loan = True
             else:
                 interest += 1
+        corrupt = False
         if self.controlling_minister.check_corruption():
             interest += 2 #increase interest by 20% if corrupt
-            self.controlling_minister.steal_money(20, 'loan interest')
+            corrupt = True
+            #self.controlling_minister.steal_money(20, 'loan interest') #money stolen once loan actually accepted
             
         if roll == 6 and interest == initial_interest and not self.veteran: #if rolled 6 on first try, promote
             just_promoted = True
@@ -607,6 +627,7 @@ class merchant(officer):
         choice_info_dict = {}
         choice_info_dict['principal'] = principal
         choice_info_dict['interest'] = interest
+        choice_info_dict['corrupt'] = corrupt
 
         total_paid = interest * 10 #12 interest -> 120 paid
         interest_percent = (interest - 10) * 10 #12 interest -> 20%

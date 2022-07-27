@@ -72,12 +72,7 @@ class building(actor):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this building's images can appear
-                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
+                Along with superclass outputs, also saves the following values:
                 'building_type': string value - Type of building, like 'port'
                 'image': string value - File path to the image used by this object
                 'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
@@ -159,6 +154,12 @@ class building(actor):
             tooltip_text.append("Allows trains to drop off or pick up cargo or passengers in this tile")
         elif self.building_type == 'slums':
             tooltip_text.append("Contains " + str(self.available_workers) + " African workers in search of employment")
+        elif self.building_type == 'trading_post':
+            tooltip_text.append("Increases the success chance of caravans trading with this tile's village")
+        elif self.building_type == 'mission':
+            tooltip_text.append("Increases the success chance of missionaries converting this tile's village")
+        elif self.building_type == 'fort':
+            tooltip_text.append("Grants a +1 combat modifier to your units fighting in this tile")
 
         if self.damaged:
             tooltip_text.append("This building is damaged and is currently not functional.")
@@ -336,15 +337,7 @@ class infrastructure_building(building):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this building's images can appear
-                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
-                'building_type': string value - Type of building, like 'infrastructure'
-                'image': string value - File path to the image used by this object
-                'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
+                Along with superclass outputs, also saves the following values:
                 'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
         '''
         save_dict = super().to_save_dict()
@@ -364,7 +357,7 @@ class infrastructure_building(building):
 
 class trading_post(building):
     '''
-    Building in a village that allows trade with the village
+    Building in a village that increases success chance of trading
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -387,6 +380,9 @@ class trading_post(building):
         super().__init__(from_save, input_dict, global_manager)
 
 class mission(building):
+    '''
+    Building in village that increases success chance of conversion
+    '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
@@ -408,6 +404,9 @@ class mission(building):
         super().__init__(from_save, input_dict, global_manager)
 
 class fort(building):
+    '''
+    Building that grants a +1 combat modifier to your units fighting in its tile
+    '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
         Description:
@@ -455,7 +454,7 @@ class train_station(building):
 
 class port(building):
     '''
-    Building adjacent to water that allows ships to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
+    Building adjacent to water that allows steamships/steamboats to enter the tile, allows ships to travel to this tile if it is along the ocean, and increases the tile's inventory capacity
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -526,14 +525,7 @@ class resource_building(building):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this building's images can appear
-                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
-                'building_type': string value - Type of building, like 'infrastructure'
-                'image': string value - File path to the image used by this object
+                Along with superclass outputs, also saves the following values:
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
                 'resource_type': string value - Type of resource produced by this building, like 'exotic wood'
                 'scale': int value - Maximum number of work crews that can be attached to this building
@@ -799,15 +791,7 @@ class slums(building):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this building's images can appear
-                'grid_type': string value - String matching the global manager key of this building's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this building's inventory dictionary only containing commodity types with 1+ units held
-                'building_type': string value - Type of building, like 'port'
-                'image': string value - File path to the image used by this object
-                'contained_work_crews': dictionary list value - list of dictionaries of saved information necessary to recreate each work crew working in this building
+                Along with superclass outputs, also saves the following values:
                 'available_workers': int value - Number of unemployed workers in this slum
         '''
         save_dict = super().to_save_dict()

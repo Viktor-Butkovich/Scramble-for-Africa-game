@@ -128,7 +128,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 'cost': double value - Recruitment cost of the unit
                 'mob_image_id': string value - File path to the image used by the recruited unit
                 'type': string value - Type of choice notification to display, always 'recruitment' for recruitment notificatoins
-                'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'
+                'source_type': string value - Only used when recruiting African workers, tracks whether workers came from available village workers, slums, or a labor broker
             string recruitment_name: Name used in the notification to signify the unit, like 'explorer'
             global_manager_template global_manager: Object that accesses shared variables
         Output:

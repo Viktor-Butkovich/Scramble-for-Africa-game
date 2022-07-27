@@ -393,7 +393,7 @@ class button():
 
         elif self.button_type == 'to trial':
             self.set_tooltip(["Opens the trial planning screen to attempt to imprison this minister for corruption", "A trial has a higher success chance as more evidence of that minister's corruption is found",
-                "A trial costs " + str(self.global_manager.get('action_prices')['trial']) + " 5 money once finalized"])
+                "A trial costs " + str(self.global_manager.get('action_prices')['trial']) + " money once finalized"])
 
         elif self.button_type == 'launch trial':
             self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money"])
@@ -964,6 +964,9 @@ class button():
                 input_dict['principal'] = self.notification.choice_info_dict['principal']
                 input_dict['interest'] = self.notification.choice_info_dict['interest']
                 input_dict['remaining_duration'] = 10
+                if self.notification.choice_info_dict['corrupt']:
+                    self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan interest')
+                    
                 new_loan = market_tools.loan(False, input_dict, self.global_manager)
                 self.global_manager.set('ongoing_loan_search', False)
 
@@ -1033,15 +1036,40 @@ class button():
         return(False)
 
 class end_turn_button(button):
+    '''
+    Button that ends the turn when pressed and changes appearance based on the current turn
+    '''
     def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, color, 'start end turn', keybind_id, modes, image_id, global_manager)
         self.warning_image = images.warning_image(self, global_manager, 'button')
-        #self.warning_image.y -= self.height + 5
         self.warning_image.x += 100
         self.warning_image.set_image('misc/enemy_turn_icon.png')
         self.warning_image.to_front = True
 
     def can_show_warning(self): #show warning if enemy movements or combat are still occurring
+        '''
+        Description:
+            Whether this button can show its enemy turn version using the 'warning' system, returning True if is the enemy's turn or if it is the enemy combat phase (not technically during enemy turn)
+        Input:
+            none
+        Output:
+            boolean: Returns whether this button's enemy turn version should be shown
+        '''
         if self.global_manager.get('player_turn') and not self.global_manager.get('enemy_combat_phase'):
             return(False)
         return(True)
@@ -1162,7 +1190,7 @@ class same_tile_icon(button):
         Input:
             None
         Output:
-            boolean: Returns False if there is no tile selected, otherwise returns same as superclass
+            boolean: Returns False if there is no tile selected or if the selected tile has not been explored, otherwise returns same as superclass
         '''
         if (not self.global_manager.get('displayed_tile') == 'none') and self.global_manager.get('displayed_tile').cell.visible:
             return(super().can_show())

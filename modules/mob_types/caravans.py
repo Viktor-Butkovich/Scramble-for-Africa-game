@@ -27,6 +27,7 @@ class caravan(group):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
@@ -103,7 +104,7 @@ class caravan(group):
         '''
         Description:
             Used when the player decides to start trading, allows the player to roll a die to see if the villagers are willing to trade. If they are willing to trade, displays a choice notification that allows the player to start the
-                transaction process or not. Otherwise, stops the trading process
+                transaction process or not. Otherwise, stops the trading process. Native warriors spawn on critical failure
         Input:
             notification notification: the current trade notification, used to access information relating to the trade such as which village is being traded with
         Output:
@@ -184,9 +185,6 @@ class caravan(group):
             text += "/nThe villagers are not willing to trade. /n"
             if roll_result <= self.current_max_crit_fail:
                 text += " /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n"
-                #text += " /nThe entire caravan has died"
-                #if village.cell.has_intact_building('trading_post'):
-                #    text += " and the village's trading post has been damaged"
                 text += ". /n"
                 notification_tools.display_notification(text + " /nClick to close this notification. ", 'stop_trade_attacked', self.global_manager)
             else:

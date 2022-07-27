@@ -159,6 +159,7 @@ def conjugate(infinitive, amount, tense = 'present'):
     Input:
         string infinitive: base word to conjugate, like "be" or "attack"
         int amount: quantity of subject, determining if singular or plural verb should be used
+        string tense = 'present': tense of verb, determining version of verb, like 'was' or 'is', to use
     Output:
         string: Returns conjugated word with the correct number, like "is" or "attacks"
     '''
@@ -181,6 +182,14 @@ def conjugate(infinitive, amount, tense = 'present'):
     return('none')
 
 def capitalize(string):
+    '''
+    Description:
+        Capitalizes the first letter of the inputted string and returns the resulting string. Unlike python's default capitalize method, does not make the rest of the string lowercase
+    Input:
+        string string: string that is being capitalized
+    Output:
+        string: Returns capitalized string
+    '''
     if len(string) > 1:
         return(string[:1].capitalize() + string[1:])
     else:

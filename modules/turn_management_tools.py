@@ -447,6 +447,14 @@ def manage_villages(global_manager):
         current_village.manage_warriors()
 
 def manage_beasts(global_manager):
+    '''
+    Description:
+        Controls beast spawning/despawning
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     beast_list = global_manager.get('beast_list')
     for current_beast in beast_list:
         current_beast.check_despawn()

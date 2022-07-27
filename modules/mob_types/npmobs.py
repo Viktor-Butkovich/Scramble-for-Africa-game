@@ -23,6 +23,7 @@ class npmob(mob): #if enemy.turn_done
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -59,6 +60,14 @@ class npmob(mob): #if enemy.turn_done
         self.global_manager.set('npmob_list', utility.remove_from_list(self.global_manager.get('npmob_list'), self)) #make a version of npmob_list without self and set npmob_list to it
 
     def visible(self):
+        '''
+        Description:
+            Returns whether this unit is currently visible to the player. Non-tracked beasts, not-yet-spawned native warriors, and npmobs in unexplored tiles are not visible
+        Input:
+            None
+        Output:
+            boolean: Returns whether this unit is currently visible to the player
+        '''
         if self.npmob_type == 'beast' and self.hidden:
             return(False)
         if self.images[0].current_cell == 'none':
@@ -173,8 +182,13 @@ class npmob(mob): #if enemy.turn_done
             
     def end_turn_move(self):
         '''
-        Moves this npmob towards pmobs and buildings at the end of the turn and schedules this npmob to start combat if any pmobs are encountered. Movement is weighted based on the distance on each axis, so movement towards a pmob
-            that is far to the north and slightly to the east will be more likely to move north than east
+        Description: Moves this npmob towards pmobs and buildings at the end of the turn and schedules this npmob to start combat if any pmobs are encountered. Movement is weighted based on the distance on each axis, so movement towards a pmob
+            that is far to the north and slightly to the east will be more likely to move north than east. An npmob will use end_turn_move each time it moves during the enemy turn, which may happen multiple times depending on distance
+            moved
+        Input:
+            None
+        Output:
+            None
         '''
         closest_target = self.find_closest_target()
         if self.npmob_type == 'native_warriors' and random.randrange(1, 7) <= 3: #half chance of moving randomly instead
@@ -278,4 +292,3 @@ class npmob(mob): #if enemy.turn_done
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)
-        #self.movement_points -= self.movement_cost
