@@ -5,6 +5,7 @@ from .buttons import button
 from .notifications import notification
 from . import text_tools
 from . import scaling
+from . import market_tools
 
 class choice_notification(notification):
     '''
@@ -22,7 +23,7 @@ class choice_notification(notification):
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
             string list button_types: List of strings that correspond to the button types of this notification's choice buttons, like ['end turn', 'none'] for an end turn button and a do nothing button
-            dictionary choice_info_dict: string keys corresponding to various values used by this notification's choice buttons when clicked
+            dictionary choice_info_dict: String keys corresponding to various values used by this notification's choice buttons when clicked
             int notification_dice: Number of dice attached to this notification, allowing the correct ones to be shown during the notification when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -134,7 +135,7 @@ class choice_button(button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
             
-        elif button_type == 'start religious campaign' or button_type == 'start advertising campaign':
+        elif button_type in ['start religious campaign', 'start public relations campaign', 'start advertising campaign']:
             self.message = 'Start campaign'
             if button_type == 'start advertising campaign':
                 self.commodity = self.notification.choice_info_dict['commodity']
@@ -144,8 +145,11 @@ class choice_button(button):
 
         elif button_type == 'start converting':
             self.message = 'Convert'
+
+        elif button_type == 'start capture slaves':
+            self.message = 'Capture slaves'
             
-        elif button_type == 'stop religious campaign' or button_type == 'stop advertising campaign':
+        elif button_type in ['stop religious campaign', 'stop public relations campaign', 'stop advertising campaign']:
             self.message = 'Stop campaign'
 
         elif button_type == 'stop loan search':
@@ -157,8 +161,11 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type in ['none', 'stop exploration', 'stop attack']:
+        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves']:
             self.message = 'Do nothing'
+
+        elif button_type == 'confirm main menu':
+            self.message = 'Confirm'
     
         else:
             self.message = button_type.capitalize() #stop trading -> Stop trading
@@ -206,7 +213,10 @@ class choice_button(button):
             None
         '''
         if self.button_type == 'recruitment':
-            self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+            if self.recruitment_type in ['African worker village', 'African worker slums', 'African worker labor broker']:
+                self.set_tooltip(['Recruit an African worker for ' + str(self.cost) + ' money'])
+            else:
+                self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
@@ -226,6 +236,9 @@ class choice_button(button):
         elif self.button_type == 'start religious campaign':
             self.set_tooltip(['Start a religious campaign, possibly convincing church volunteers to join you'])
 
+        elif self.button_type == 'start public relations campaign':
+            self.set_tooltip(["Start a public relations campaign, possibly improving your company's public opinion"])
+
         elif self.button_type == 'start advertising campaign':
             self.set_tooltip(['Starts an advertising campaign for ' + self.commodity])
 
@@ -235,11 +248,20 @@ class choice_button(button):
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
 
+        elif self.button_type == 'start capture slaves':
+            self.set_tooltip(['Start attempting to capture native villagers as slaves'])
+
         elif self.button_type == 'accept loan offer':
             self.set_tooltip(['Accepts the loan offer'])
 
         elif self.button_type == 'reject loan offer':
             self.set_tooltip(['Rejects the loan offer'])
+
+        elif self.button_type == 'confirm main menu':
+            self.set_tooltip(['Exits to the main menu without saving'])
+
+        elif self.button_type == 'none':
+            self.set_tooltip(['Do nothing'])
             
         else:
             self.set_tooltip([self.button_type.capitalize()]) #stop trading -> ['Stop trading']
@@ -293,6 +315,25 @@ class recruitment_choice_button(choice_button):
                 self.global_manager.get('displayed_tile').cell.get_building('village').recruit_worker()
             elif self.recruitment_type == 'African worker slums':
                 self.global_manager.get('displayed_tile').cell.get_building('slums').recruit_worker()
+            elif self.recruitment_type == 'African worker labor broker':
+                recruiter = self.global_manager.get('displayed_mob')
+                input_dict['coordinates'] = (recruiter.x, recruiter.y)
+                input_dict['grids'] = recruiter.grids
+                input_dict['image'] = 'mobs/African workers/default.png'
+                input_dict['modes'] = ['strategic']
+                input_dict['name'] = 'African workers'
+                input_dict['init_type'] = 'workers'
+                input_dict['worker_type'] = 'African'
+                
+                self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit recruitment')
+                self.notification.choice_info_dict['village'].change_population(-1)
+                market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
+
+                worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                if recruiter.is_vehicle:
+                    worker.crew_vehicle(recruiter)
+                else:
+                    self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]
@@ -318,13 +359,10 @@ class recruitment_choice_button(choice_button):
                     input_dict['name'] = 'African workers'
                     input_dict['init_type'] = 'workers'
                     input_dict['worker_type'] = 'African'
-                #elif self.recruitment_type == 'slave workers':
-                #    input_dict['name'] = 'slave workers'
-                #    input_dict['init_type'] = 'slaves'
-                elif self.recruitment_type == 'ship':
-                    image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/ship/uncrewed.png'}
+                elif self.recruitment_type == 'steamship':
+                    image_dict = {'default': self.mob_image_id, 'crewed': self.mob_image_id, 'uncrewed': 'mobs/steamship/uncrewed.png'}
                     input_dict['image_dict'] = image_dict
-                    input_dict['name'] = 'ship'
+                    input_dict['name'] = 'steamship'
                     input_dict['crew'] = 'none'
                     input_dict['init_type'] = 'ship'
                 self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)

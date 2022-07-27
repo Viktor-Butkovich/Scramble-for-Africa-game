@@ -118,27 +118,30 @@ def to_main_menu(global_manager, override = False):
     Output:
         None
     '''
-    if main_loop_tools.action_possible(global_manager) or override: #if game over, go to main menu regardless of circumstances
-        set_game_mode('main_menu', global_manager)
-        for current_actor in global_manager.get('actor_list'):
-            current_actor.remove()
-        for current_grid in global_manager.get('grid_list'):
-            current_grid.remove()
-        for current_village in global_manager.get('village_list'):
-            current_village.remove()
-        for current_minister in global_manager.get('minister_list'):
-            current_minister.remove()
-        for current_notification in global_manager.get('notification_list'):
-            current_notification.remove()
-        for current_die in global_manager.get('dice_list'):
-            current_die.remove()
-        global_manager.set('loan_list', [])
-        global_manager.set('displayed_mob', 'none')
-        global_manager.set('displayed_tile', 'none')
-        global_manager.set('end_turn_selected_mob', 'none')
-        global_manager.set('message', '')
-        if not global_manager.get('current_instructions_page') == 'none':
-            global_manager.get('current_instructions_page').remove()
-            global_manager.set('current_instructions_page', 'none')
-    else:
-        text_tools.print_to_screen("You are busy and can not exit to the main menu.", global_manager)
+    #if main_loop_tools.action_possible(global_manager) or override: #if game over, go to main menu regardless of circumstances
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
+    minister_utility.calibrate_minister_info_display(global_manager, 'none')
+    set_game_mode('main_menu', global_manager)
+    for current_actor in global_manager.get('actor_list'):
+        current_actor.remove()
+    for current_grid in global_manager.get('grid_list'):
+        current_grid.remove()
+    for current_village in global_manager.get('village_list'):
+        current_village.remove()
+    for current_minister in global_manager.get('minister_list'):
+        current_minister.remove()
+    for current_notification in global_manager.get('notification_list'):
+        current_notification.remove()
+    for current_die in global_manager.get('dice_list'):
+        current_die.remove()
+    global_manager.set('loan_list', [])
+    global_manager.set('displayed_mob', 'none')
+    global_manager.set('displayed_tile', 'none')
+    global_manager.set('end_turn_selected_mob', 'none')
+    global_manager.set('message', '')
+    if not global_manager.get('current_instructions_page') == 'none':
+        global_manager.get('current_instructions_page').remove()
+        global_manager.set('current_instructions_page', 'none')
+    #else:
+    #    text_tools.print_to_screen("You are busy and can not exit to the main menu.", global_manager)

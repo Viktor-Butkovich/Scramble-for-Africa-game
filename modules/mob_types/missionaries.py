@@ -1,5 +1,6 @@
 #Contains functionality for missionaries
 
+import random
 from .groups import group
 from .. import actor_utility
 from .. import dice_utility
@@ -25,6 +26,7 @@ class missionaries(group):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
             global_manager_template global_manager: Object that accesses shared variables
@@ -32,6 +34,7 @@ class missionaries(group):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
+        self.number = 2 #missionaries is plural
         self.can_convert = True
         self.set_group_type('missionaries')
         if not from_save:
@@ -40,7 +43,7 @@ class missionaries(group):
     def start_converting(self):
         '''
         Description:
-            Used when the player clicks on the start converting button, displays a choice notification that allows the player to caonvert or not. Choosing to campaign starts the conversion process and consumes the missionaries'
+            Used when the player clicks on the start converting button, displays a choice notification that allows the player to convert or not. Choosing to convert starts the conversion process and consumes the missionaries'
                 movement points
         Input:
             None
@@ -72,7 +75,7 @@ class missionaries(group):
         if population_modifier < 0:
             message += "The high population of this village will require more effort to convert. /n"
         elif population_modifier > 0:
-            message += "The low population of this village will require less effort to convert /n"
+            message += "The low population of this village will require less effort to convert. /n"
         self.current_roll_modifier += population_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -169,26 +172,30 @@ class missionaries(group):
         else:
             text += "The missionaries made little progress in converting the natives. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. The entire group of missionaries has died "
-            if village.cell.has_building('mission'):
-                text += "and the mission building has been destroyed."
+            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. " # The entire group of missionaries has died"
+            #if village.cell.has_intact_building('mission'):
+            #    text += " and the village's mission has been damaged."
             text += ". /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
             text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
             text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
+            
+        public_opinion_increase = 0
         if roll_result >= self.current_min_success:
+            public_opinion_increase = random.randrange(1, 4)
+            text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
             notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('conversion_result', [self, roll_result, village])
+        self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase])
 
     def complete_conversion(self):
         '''
         Description:
             Used when the player finishes rolling for religious conversion, shows the conversion's results and makes any changes caused by the result. If successful, reduces village aggressiveness, promotes evangelist to a veteran on
-                critical success. Missionaries die on critical failure
+                critical success. Native warriors spawn on critical failure
         Input:
             None
         Output:
@@ -196,12 +203,14 @@ class missionaries(group):
         '''
         roll_result = self.global_manager.get('conversion_result')[1]
         village = self.global_manager.get('conversion_result')[2]
+        public_opinion_increase = self.global_manager.get('conversion_result')[3]
         if roll_result >= self.current_min_success: #if campaign succeeded
             village.change_aggressiveness(-1)
+            self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         if roll_result <= self.current_max_crit_fail:
-            self.die()
-            if village.cell.has_building('mission'):
-                village.cell.get_building('mission').remove()
+            warrior = village.spawn_warrior()
+            warrior.show_images()
+            warrior.attack_on_spawn()
         self.global_manager.set('ongoing_conversion', False)

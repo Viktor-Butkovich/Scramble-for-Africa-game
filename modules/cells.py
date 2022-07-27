@@ -46,9 +46,14 @@ class cell():
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
         if not save_dict == 'none':
             self.save_dict = save_dict
+            if global_manager.get('DEBUG_remove_fog_of_war'):
+                save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
         else:
-            self.set_visibility(False)
+            if global_manager.get('DEBUG_remove_fog_of_war'):
+                self.set_visibility(True)
+            else:
+                self.set_visibility(False)
 
     def to_save_dict(self):
         '''
@@ -119,7 +124,7 @@ class cell():
                 if random.randrange(1, 7) >= 4: #attrition on 1-3
                     return(False)
 
-            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource'):
+            if self.has_building('village') or self.has_building('train_station') or self.has_building('port') or self.has_building('resource') or self.has_building('fort'):
                 if random.randrange(1, 7) >= 3: #removes 2/3 of attrition
                     return(False)
             elif self.has_building('road') or self.has_building('railroad'):
@@ -128,7 +133,7 @@ class cell():
 
         return(True)
 
-    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, road, railroad, resource, slums. No forts in game yet
+    def has_building(self, building_type): #accepts village, train_station, port, trading_post, mission, fort, road, railroad, resource, slums. No forts in game yet
         '''
         Description:
             Returns whether this cell has a building of the inputted type, even if the building is damaged
@@ -282,6 +287,34 @@ class cell():
                 contained_buildings_list.append(self.contained_buildings[current_building_type])
         return(contained_buildings_list)
 
+    def adjacent_to_buildings(self):
+        '''
+        Description:
+            Finds and returns if this cell is adjacent to any buildings, used for beast spawning
+        Input:
+            None
+        Output:
+            boolean: Returns if this cell is adjacent to any buildings
+        '''
+        for current_adjacent_cell in (self.adjacent_list + [self]):
+            if len(current_adjacent_cell.get_buildings()) > 0:
+                return(True)
+        return(False)
+
+    def has_destructible_buildings(self):
+        '''
+        Description:
+            Finds and returns if this cell is adjacent has any buildings that can be damaged by native warriors (not roads or railroads), used for native warriors cell targeting
+        Input:
+            None
+        Output:
+            boolean: Returns if this cell has any buildings that can be damaged by native warriors
+        '''
+        for current_building in self.get_intact_buildings():
+            if current_building.can_damage():
+                return(True)
+        return(False)
+    
     def create_slums(self):
         '''
         Description:
@@ -301,7 +334,7 @@ class cell():
         if self.tile == self.global_manager.get('displayed_tile'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
 
-    def has_vehicle(self, vehicle_type):
+    def has_vehicle(self, vehicle_type, is_worker = False):
         '''
         Description:
             Returns whether this cell contains a crewed vehicle of the inputted type
@@ -311,11 +344,11 @@ class cell():
             boolean: Returns True if this cell contains a crewed vehicle of the inputted type, otherwise returns False
         '''
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
                 return(True)
         return(False)
 
-    def get_vehicle(self, vehicle_type):
+    def get_vehicle(self, vehicle_type, is_worker = False):
         '''
         Description:
             Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
@@ -325,7 +358,7 @@ class cell():
             string/vehicle: Returns the first crewed vehicle of the inputted type in this cell, or 'none' if none are present
         '''
         for current_mob in self.contained_mobs:
-            if current_mob.is_vehicle and current_mob.has_crew and current_mob.vehicle_type == vehicle_type:
+            if current_mob.is_vehicle and (current_mob.has_crew or is_worker) and current_mob.vehicle_type == vehicle_type:
                 return(current_mob)
         return('none')
 
@@ -416,13 +449,15 @@ class cell():
                 return(True)
         return(False)
 
-    def get_best_combatant(self, mob_type):
+    def get_best_combatant(self, mob_type, target_type = 'human'):
         '''
         Description:
             Finds and returns the best combatant of the inputted type in this cell. Combat ability is based on the unit's combat modifier and veteran status. Assumes that units in vehicles and buildings have already detached upon being
                 attacked
         Input:
             string mob_type: Can be npmob or pmob, determines what kind of mob is searched for. An attacking pmob will search for the most powerful npmob and vice versa
+            string target_type = 'human': Regardless of the mob type being searched for, target_type gives information about the npmob: when a pmob searches for an npmob, it will search for a 'human' or 'beast' npmob. When an npmob
+                searches for a pmob, it will say whether it is a 'human' or 'beast' to correctly choose pmobs specialized at fighting that npmob type, like safaris against beasts
         Output;
             mob: Returns the best combatant of the inputted type in this cell
         '''
@@ -431,17 +466,22 @@ class cell():
         if mob_type == 'npmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_npmob:
-                    current_combat_modifier = current_mob.get_combat_modifier()
-                    if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
-                        best_combatants = [current_mob]
-                        best_combat_modifier = current_combat_modifier
-                    elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
-                        best_combatants.append(current_mob)
+                    if (target_type == 'human' and not current_mob.npmob_type == 'beast') or (target_type == 'beast' and current_mob.npmob_type == 'beast'):
+                        current_combat_modifier = current_mob.get_combat_modifier()
+                        if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier: #if first mob or better than previous mobs, set as only best
+                            best_combatants = [current_mob]
+                            best_combat_modifier = current_combat_modifier
+                        elif current_combat_modifier == best_combat_modifier: #if equal to previous mobs, add to best
+                            best_combatants.append(current_mob)
         elif mob_type == 'pmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_pmob:
                     if current_mob.get_combat_strength() > 0: #unit with 0 combat strength can not fight
                         current_combat_modifier = current_mob.get_combat_modifier()
+                        if current_mob.is_safari and target_type == 'beast': #more likely to pick safaris for defense against beasts
+                            current_combat_modifier += 3
+                        elif target_type == 'beast':
+                            current_combat_modifier -= 1
                         if best_combatants[0] == 'none' or current_combat_modifier > best_combat_modifier:
                             best_combatants = [current_mob]
                             best_combat_modifier = current_combat_modifier

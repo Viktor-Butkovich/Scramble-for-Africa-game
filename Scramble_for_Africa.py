@@ -18,6 +18,7 @@ import modules.instructions as instructions
 import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
+import modules.actor_utility as actor_utility
 
 try:
     #fundamental setup
@@ -37,6 +38,8 @@ try:
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
+    global_manager.set('previous_turn_time', time.time())
+    global_manager.set('end_turn_wait_time', 0.8)
 
     global_manager.set('font_name', 'times new roman')
     global_manager.set('font_size', scaling.scale_width(15, global_manager))
@@ -87,6 +90,45 @@ try:
         'none': (0, 0, 0)
         }
     )
+
+    global_manager.set('terrain_animal_dict',
+        {
+        'clear': ['lion', 'bull elephant', 'Cape buffalo'],
+        'hills': ['gorilla', 'Cape buffalo', 'hippopotamus'],
+        'jungle': ['gorilla', 'crocodile', 'leopard'],
+        'water': ['crocodile', 'hippopotamus', 'leopard'],
+        'mountain': ['lion', 'gorilla', 'leopard'],
+        'swamp': ['bull elephant', 'crocodile', 'hippopotamus'],
+        'desert': ['lion', 'bull elephant', 'Cape buffalo']
+        }
+    )
+    
+    global_manager.set('animal_terrain_dict',
+        {
+        'lion': ['clear', 'desert', 'mountain'],
+        'bull elephant': ['clear', 'swamp', 'desert'],
+        'Cape buffalo': ['clear', 'hills', 'desert'],
+        'crocodile': ['water', 'swamp', 'jungle'],
+        'hippopotamus': ['water', 'swamp', 'hills'],
+        'gorilla': ['mountain', 'jungle', 'hills'],
+        'leopard': ['jungle', 'mountain', 'water']
+        }
+    )
+
+    global_manager.set('animal_adjectives', ['man-eating', 'bloodthirsty', 'rampaging', 'giant', 'ravenous', 'ferocious', 'king', 'lurking', 'spectral', 'infernal'])
+
+    global_manager.set('terrain_movement_cost_dict',
+        {
+        'clear': 1,
+        'hills': 2,
+        'jungle': 3,
+        'water': 1,
+        'mountain': 3,
+        'swamp': 3,
+        'desert': 2
+        }
+    )
+    
     #terrain setup
 
 
@@ -137,7 +179,7 @@ try:
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'slums'])
+    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums'])
     #commodity setup
 
 
@@ -234,10 +276,11 @@ try:
     global_manager.set('minister_portraits', minister_portraits)
 
 
-    global_manager.set('officer_types', ['explorer', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
+    global_manager.set('officer_types', ['explorer', 'hunter', 'engineer', 'driver', 'foreman', 'merchant', 'evangelist', 'major']) #change to driver
     global_manager.set('officer_group_type_dict',
         {
         'explorer': 'expedition',
+        'hunter': 'safari',
         'engineer': 'construction_gang',
         'driver': 'porters',
         'foreman': 'work_crew',
@@ -251,6 +294,7 @@ try:
     global_manager.set('officer_minister_dict',
         {
         'explorer': type_minister_dict['exploration'],
+        'hunter': type_minister_dict['exploration'],
         'engineer': type_minister_dict['construction'],
         'driver': type_minister_dict['transportation'],
         'foreman': type_minister_dict['production'],
@@ -263,6 +307,7 @@ try:
     global_manager.set('group_minister_dict',
         {
         'expedition': type_minister_dict['exploration'],
+        'safari': type_minister_dict['exploration'],
         'construction_gang': type_minister_dict['construction'],
         'porters': type_minister_dict['transportation'],
         'work_crew': type_minister_dict['production'],
@@ -276,10 +321,31 @@ try:
 
 
     #price setup
-    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'ship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'ship': 5})
+    
+    global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 5})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
+
+    global_manager.set('num_african_workers', 0)
+    global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
+    global_manager.set('initial_african_worker_upkeep', 4)
+    global_manager.set('min_african_worker_upkeep', 0.5)
+
+    global_manager.set('num_european_workers', 0)
+    global_manager.set('european_worker_upkeep', 0)
+    global_manager.set('initial_european_worker_upkeep', 6)
+    global_manager.set('min_european_worker_upkeep', 0.5)
+
+    global_manager.set('num_slave_workers', 0)
+    global_manager.set('initial_slave_worker_upkeep', 2)
+    global_manager.set('slave_worker_upkeep', 0)
+    global_manager.get('recruitment_costs')['slave workers'] = 5
+    global_manager.set('min_slave_worker_recruitment_cost', 2)
+
+    global_manager.set('recruitment_list_descriptions', {})
+    global_manager.set('recruitment_string_descriptions', {})
+    actor_utility.update_recruitment_descriptions(global_manager)
 
     global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
@@ -293,12 +359,16 @@ try:
         'exploration': 5,
         'convert': 5,
         'religious_campaign': 5,
+        'public_relations_campaign': 5,
         'advertising_campaign': 5,
         'loan_search': 5,
         'trade': 0,
         'loan': 5,
         'attack': 5,
-        'trial': 5
+        'capture_slaves': 5,
+        'trial': 5,
+        'hunt': 5,
+        'track_beasts': 0
         }
     )
 
@@ -310,10 +380,12 @@ try:
         'train_station': 5,
         'trading_post': 5,
         'mission': 5,
-        'train': 5
+        'fort': 5,
+        'train': 5,
+        'steamboat': 5
        } 
     )
-
+    
     #central place in program to change descriptions of actions to use in prosector reports
     global_manager.set('theft_type_descriptions',
         {
@@ -327,12 +399,15 @@ try:
         'construction': 'construction',
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
+        'combat': 'combat',
+        'production': 'production',
+        'slave capture': 'capturing slaves',
         'none': 'miscellaneous company activities'
         }
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'construction', 'attrition replacements', 'trial fees'])
+        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
     #price setup
 
 
@@ -363,6 +438,7 @@ try:
     global_manager.set('mob_list', [])
     global_manager.set('pmob_list', [])
     global_manager.set('npmob_list', [])
+    global_manager.set('beast_list', [])
     global_manager.set('village_list', [])
     global_manager.set('building_list', [])
     global_manager.set('slums_list', [])
@@ -372,22 +448,7 @@ try:
     global_manager.set('worker_list', [])
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
-
-    global_manager.set('num_african_workers', 0)
-    global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
-    global_manager.set('initial_african_worker_upkeep', 4)
-    global_manager.set('min_african_worker_upkeep', 0.5)
-
-    global_manager.set('num_european_workers', 0)
-    global_manager.set('european_worker_upkeep', 0)
-    global_manager.set('initial_european_worker_upkeep', 6)
-    global_manager.set('min_european_worker_upkeep', 0.5)
-
-    global_manager.set('num_slave_workers', 0)
-    global_manager.set('initial_slave_worker_upkeep', 2)
-    global_manager.set('slave_worker_upkeep', 0)
-    global_manager.get('recruitment_costs')['slave workers'] = 5
-    global_manager.set('min_slave_worker_recruitment_cost', 2)
+    global_manager.set('enemy_turn_queue', [])
 
     global_manager.set('minister_limit', 15)
 
@@ -428,6 +489,7 @@ try:
     global_manager.set('making_choice', False)
     global_manager.set('loading_save', False)
     global_manager.set('player_turn', True)
+    global_manager.set('enemy_combat_phase', False)
     global_manager.set('choosing_destination', False)
     global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('choosing_advertised_commodity', False)
@@ -437,12 +499,14 @@ try:
     global_manager.set('ongoing_exploration', False)
     global_manager.set('ongoing_trade', False)
     global_manager.set('ongoing_religious_campaign', False)
+    global_manager.set('ongoing_public_relations_campaign', False)
     global_manager.set('ongoing_advertising_campaign', False)
     global_manager.set('ongoing_loan_search', False)
     global_manager.set('ongoing_conversion', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
+    global_manager.set('ongoing_slave_capture', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -506,6 +570,7 @@ try:
         'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
+    global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
     #value tracker setup
 
 
@@ -517,7 +582,7 @@ try:
     europe_to_strategic_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
         pygame.K_ESCAPE, 'strategic', ['europe'], 'buttons/exit_european_hq_button.png', global_manager)
 
-    to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager),
+    to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager),
         scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'none', 'main menu', ['strategic', 'europe', 'ministers'], 'buttons/exit_european_hq_button.png', global_manager)
 
     to_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
@@ -529,8 +594,8 @@ try:
     from_trial_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager),
         'blue', pygame.K_ESCAPE, 'ministers', ['trial'], 'buttons/exit_european_hq_button.png', global_manager)
 
-    end_turn_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
-        global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'start end turn', pygame.K_SPACE, ['strategic', 'europe'],
+    end_turn_button = buttons.end_turn_button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') - 50,
+        global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_SPACE, ['strategic', 'europe'],
         'buttons/end_turn_button.png', global_manager)
 
     new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
@@ -565,10 +630,10 @@ try:
     expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
         'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
 
-    instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
-        scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
+    #instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+    #    scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
 
-    save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+    save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
     cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
@@ -669,7 +734,7 @@ try:
 
 
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'evidence', 'background', 'social status']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         global_manager.get('minister_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager), scaling.scale_width(10, global_manager),
@@ -721,7 +786,7 @@ try:
 
 
     #mob info labels setup
-    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'attitude', 'combat_strength', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
     for current_actor_label_type in mob_info_display_labels:
         if current_actor_label_type == 'minister': #how far from edge of screen
             x_displacement = 40
@@ -765,7 +830,7 @@ try:
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission']
+    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort']
     #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
     for current_actor_image_type in tile_info_display_images:
         if not current_actor_image_type in ['up', 'down', 'right', 'left']:
@@ -913,23 +978,34 @@ try:
 
     global_manager.set('DEBUG_show_evil', False) #False by default
     #prints the players "evil" number at the end of each turn
+
+    global_manager.set('DEBUG_show_fear', False) #False by default
+    #prints the players "fear" number at the end of each turn and says when fear dissuades a minister from stealing
+
+    global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
+    #reveals all cells
+
+    global_manager.set('DEBUG_fast_turn', False) #False by default
+    #removes end turn delays
+
+    global_manager.set('DEBUG_reveal_beasts', False) #False by default
+    #reveals beasts on load
     
     #activating/disabling debugging tools
 
-
     global_manager.set('startup_complete', True)
+    global_manager.set('creating_new_game', False)
     main_loop.main_loop(global_manager)
     pygame.quit()
 
 except Exception as e: #displays error message and records error message in crash log file
     crash_log_file = open("notes/Crash Log.txt", "w")
     crash_log_file.write("") #clears crash report file
-    
     console = logging.StreamHandler() #sets logger to go to both console and crash log file
     logging.basicConfig(filename = "notes/Crash Log.txt")
     logging.getLogger('').addHandler(console)
     
-    logging.error(e, exc_info=True) #sends error message to console and crash log file
+    logging.error(e, exc_info = True) #sends error message to console and crash log file
     
     crash_log_file.close()
     pygame.quit()

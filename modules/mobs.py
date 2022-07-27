@@ -25,6 +25,7 @@ class mob(actor):
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -39,6 +40,7 @@ class mob(actor):
         self.is_officer = False
         self.is_work_crew = False
         self.is_battalion = False
+        self.is_safari = False
         self.is_group = False
         self.is_npmob = False
         self.is_pmob = False
@@ -49,6 +51,7 @@ class mob(actor):
         self.controllable = True
         self.just_promoted = False
         self.selected = False
+        self.number = 1 #how many entities are in a unit, used for verb conjugation
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
         super().__init__(from_save, input_dict, global_manager)
@@ -61,11 +64,13 @@ class mob(actor):
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
         self.can_walk = True #if can enter land areas
+        self.has_canoes = False
         self.max_movement_points = 1
         self.movement_cost = 1
         self.has_infinite_movement = False
         self.temp_movement_disabled = False
         if from_save:
+            self.set_max_movement_points(input_dict['max_movement_points'])
             self.set_movement_points(input_dict['movement_points'])
             self.update_tooltip()
             self.creation_turn = input_dict['creation_turn']
@@ -74,7 +79,10 @@ class mob(actor):
         else:
             self.reset_movement_points()
             self.update_tooltip()
-            self.creation_turn = self.global_manager.get('turn')
+            if global_manager.get('creating_new_game'):
+                self.creation_turn = 0
+            else:
+                self.creation_turn = self.global_manager.get('turn')
 
     def to_save_dict(self):
         '''
@@ -84,24 +92,23 @@ class mob(actor):
             None
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
-                'init_type': string value - Represents the type of actor this is, used to initialize the correct type of object on loading
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'modes': string list value - Game modes during which this actor's images can appear
-                'grid_type': string value - String matching the global manager key of this actor's primary grid, allowing loaded object to start in that grid
-                'name': string value - This actor's name
-                'inventory': string/string dictionary value - Version of this actor's inventory dictionary only containing commodity types with 1+ units held
-                'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
-                'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
-                'movement_points': int value - How many movement points this actor currently has
-                'image': string value - File path to the image used by this object
-                'creation_turn': int value - Turn number on which this unit was created
+                Along with superclass outputs, also saves the following values:
+                'movement_points': int value - How many movement points this mob currently has
+                'max_movement_points': int value - Maximum number of movemet points this mob can have
+                'image': string value - File path to the image used by this mob
+                'creation_turn': int value - Turn number on which this mob was created
                 'disorganized': boolean value - Whether this unit is currently disorganized
+                'canoes_image': string value - Only saved if this unit has canoes, file path to the image used by this mob when it is in river water
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
+        save_dict['max_movement_points'] = self.max_movement_points
         save_dict['image'] = self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
+        if self.has_canoes:
+            save_dict['canoes_image'] = self.image_dict['canoes']
+            save_dict['image'] = self.image_dict['no_canoes']
         return(save_dict)        
 
     def temp_disable_movement(self):
@@ -136,7 +143,10 @@ class mob(actor):
                 input_dict = {}
                 input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
                 input_dict['grid'] = current_grid
-                input_dict['image'] = 'misc/disorganized_icon.png'
+                if self.is_npmob and self.npmob_type == 'beast':
+                    input_dict['image'] = 'misc/injured_icon.png' #beasts are injured instead of disorganized for flavor, same effect
+                else:
+                    input_dict['image'] = 'misc/disorganized_icon.png'
                 input_dict['name'] = 'veteran icon'
                 input_dict['modes'] = ['strategic', 'europe']
                 input_dict['show_terrain'] = False
@@ -214,8 +224,12 @@ class mob(actor):
             boolean: Returns whether this unit can start any combats in its current cell
         '''
         if self.is_npmob:
-            if self.hostile and self.images[0].current_cell.has_pmob():
-                return(True)
+            if self.hostile:
+                if self.images[0].current_cell == 'none':
+                    if self.grids[0].find_cell(self.x, self.y).has_pmob(): #if hidden and in same tile as pmob
+                        return(True)
+                elif self.images[0].current_cell.has_pmob(): #if visible and in same tile as pmob
+                    return(True)
         elif self.is_pmob:
             if self.images[0].current_cell.has_npmob():
                 return(True)
@@ -246,8 +260,9 @@ class mob(actor):
             None
         '''
         if super().can_show_tooltip():
-            if self.images[0].current_cell.visible:
-                return(True)
+            if not self.images[0].current_cell == 'none':
+                if self.images[0].current_cell.visible:
+                    return(True)
         return(False)
 
     def get_movement_cost(self, x_change, y_change):
@@ -260,21 +275,45 @@ class mob(actor):
         Output:
             double: How many movement points would be spent by moving by the inputted amount
         '''
-        local_cell = self.images[0].current_cell
-        if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-            direction = 'non'
-            if x_change < 0:
-                direction = 'left'
-            elif x_change > 0:
-                direction = 'right'
-            elif y_change > 0:
-                direction = 'up'
-            elif y_change < 0:
-                direction = 'down'
-            adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
-            if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-                return(self.movement_cost / 2.0)
-        return(self.movement_cost)
+        cost = self.movement_cost
+        if not (self.is_npmob and not self.visible()):
+            local_cell = self.images[0].current_cell
+        else:
+            local_cell = self.grids[0].find_cell(self.x, self.y)
+
+        
+        direction = 'none'
+        if x_change < 0:
+            direction = 'left'
+        elif x_change > 0:
+            direction = 'right'
+        elif y_change > 0:
+            direction = 'up'
+        elif y_change < 0:
+            direction = 'down'
+            
+        adjacent_cell = local_cell.adjacent_cells[direction]
+        if not adjacent_cell == 'none':
+            cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
+        
+            if self.is_pmob:
+                if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
+                    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                        cost = cost / 2
+                if (not adjacent_cell.visible) and self.can_explore:
+                    cost = self.movement_cost
+        return(cost)
+
+    def can_leave(self):
+        '''
+        Description:
+            Returns whether this mob is allowed to move away from its current cell. By default, mobs are always allowed to move away from their current cells, but subclasses like ship are able to return False
+        Input:
+            None
+        Output:
+            boolean: Returns True
+        '''
+        return(True) #different in subclasses, controls whether anything in starting tile would prevent leaving, while can_move sees if anything in destination would prevent entering
 
     def adjacent_to_water(self):
         '''
@@ -287,6 +326,20 @@ class mob(actor):
         '''
         for current_cell in self.images[0].current_cell.adjacent_list:
             if current_cell.terrain == 'water' and current_cell.visible:
+                return(True)
+        return(False)
+
+    def adjacent_to_river(self):
+        '''
+        Description:
+            Returns whether any of the cells directly adjacent to this mob's cell has the water terrain above y == 0. Otherwise, returns False
+        Input:
+            None
+        Output:
+            boolean: Returns True if any of the cells directly adjacent to this mob's cell has the water terrain above y == 0. Otherwise, returns False
+        '''
+        for current_cell in self.images[0].current_cell.adjacent_list:
+            if current_cell.terrain == 'water' and current_cell.visible and not current_cell.y == 0:
                 return(True)
         return(False)
 
@@ -479,7 +532,8 @@ class mob(actor):
             None
         '''
         tooltip_list = []
-        tooltip_list.append("Name: " + self.name.capitalize())
+        
+        tooltip_list.append("Name: " + self.name[:1].capitalize() + self.name[1:]) #capitalizes first letter while keeping rest the same
         
         if self.controllable:
             if self.is_group:
@@ -490,7 +544,7 @@ class mob(actor):
                     tooltip_list.append("    Crew: " + self.crew.name.capitalize())
                 else:
                     tooltip_list.append("    Crew: None")
-                    tooltip_list.append("    A " + self.vehicle_type + " can not move or take passengers or cargo without crew")
+                    tooltip_list.append("    A " + self.name + " can not move or take passengers or cargo without crew")
                     
                 if len(self.contained_mobs) > 0:
                     tooltip_list.append("    Passengers: ")
@@ -506,23 +560,32 @@ class mob(actor):
 
         else:
             tooltip_list.append("Movement points: ???")
+        
+        tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
+        if self.disorganized:
+            if self.is_npmob and self.npmob_type == 'beast':
+                tooltip_list.append("This unit is currently injured, giving a combat penalty until its next turn")
+            else:
+                tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
+
+        if not self.end_turn_destination == 'none':
+            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn")
+            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
+                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn")
+                
+        if self.is_npmob and self.npmob_type == 'beast':
+            tooltip_list.append("This beast tends to live in " + self.preferred_terrains[0] + ", " + self.preferred_terrains[1] + ", and " + self.preferred_terrains[2] + " terrain ")
+            
+        if not self.controllable:
             if self.hostile:
                 tooltip_list.append("Attitude: Hostile")
             else:
                 tooltip_list.append("Attitude: Neutral")
             tooltip_list.append("You do not control this unit")
-        
-        tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
-        if self.disorganized:
-            tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
-
-        if not self.end_turn_destination == 'none':
-            if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn.")
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn.")
-            elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn.")
+            
         self.set_tooltip(tooltip_list)
         
     def remove(self):
@@ -575,12 +638,15 @@ class mob(actor):
             if not self.grid in self.global_manager.get('abstract_grid_list'):
                 if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
                     future_cell = self.grid.find_cell(future_x, future_y)
-                    if future_cell.visible or self.can_explore:
+                    if future_cell.visible or self.can_explore or self.is_npmob:
                         destination_type = 'land'
                         if future_cell.terrain == 'water':
                             destination_type = 'water' #if can move to destination, possible to move onto ship in water, possible to 'move' into non-visible water while exploring
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
-                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))): 
+                            (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
+                            if destination_type == 'water':
+                                if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                    return(False)
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:
@@ -609,6 +675,8 @@ class mob(actor):
         '''
         self.end_turn_destination = 'none' #cancels planned movements
         self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change))
+        if self.is_pmob:
+            previous_cell = self.images[0].current_cell
         for current_image in self.images:
             current_image.remove_from_cell()
         self.x += x_change
@@ -622,20 +690,48 @@ class mob(actor):
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
             
-        if self.images[0].current_cell.has_vehicle('ship') and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
             self.selected = False
-            vehicle = self.images[0].current_cell.get_vehicle('ship')
+            vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
             if self.is_worker and not vehicle.has_crew:
                 self.crew_vehicle(vehicle)
+                self.set_movement_points(0)
             else:
                 self.embark_vehicle(vehicle)
+                self.set_movement_points(0)
             vehicle.select()
         if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
             self.manage_inventory_attrition()
+            if previous_cell.terrain == 'water' and previous_cell.has_vehicle('ship') and not self.is_vehicle: #if disembarking from ship, use all of movement points
+                if previous_cell.y == 0 and not (self.can_swim and self.can_swim_ocean): #if came from ship in ocean
+                    self.set_movement_points(0)
+                elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
+                    self.set_movement_points(0)
+
+        if self.has_canoes:
+            self.update_canoes()
         self.last_move_direction = (x_change, y_change)
+
+    def update_canoes(self):
+        '''
+        Description:
+            If this unit is visible to the player, updates its image to include canoes or not depending on if the unit is in river water
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.is_npmob and not self.visible():
+            return()
+
+        if self.images[0].current_cell.terrain == 'water' and self.y > 0:
+            self.set_image('canoes')
+        else:
+            self.set_image('no_canoes')
+            
 
     def retreat(self):
         '''
@@ -648,6 +744,7 @@ class mob(actor):
         '''
         original_movement_points = self.movement_points
         self.move(-1 * self.last_move_direction[0], -1 * self.last_move_direction[1])
+            
         self.set_movement_points(original_movement_points) #retreating is free
         
     def touching_mouse(self):
@@ -689,6 +786,7 @@ class mob(actor):
         '''
         for current_image in self.images:
             current_image.remove_from_cell()
+        
 
     def show_images(self):
         '''

@@ -236,6 +236,32 @@ class grid():
             if cell.x == x and cell.y == y:
                 return(cell)
         return('none')
+
+    def choose_cell(self, requirements_dict):
+        '''
+        Description:
+            Uses a series of requirements to choose and a return a random cell in this grid that fits those requirements
+        Input:
+            dictionary choice_info_dict: String keys corresponding to various values such as 'allowed_terrains', 'ocean_allowed', and 'nearby_buildings_allowed' to use as requirements for the chosen cell
+        Output:
+            cell: Returns a random cell in this grid that fits the inputted requirements
+        '''
+        allowed_terrains = requirements_dict['allowed_terrains']
+        ocean_allowed = requirements_dict['ocean_allowed']
+        nearby_buildings_allowed = requirements_dict['nearby_buildings_allowed']
+        possible_cells = []
+        for current_cell in self.cell_list:
+            if not current_cell.terrain in allowed_terrains:
+                continue
+            if (not ocean_allowed) and current_cell.y == 0:
+                continue
+            if (not nearby_buildings_allowed) and current_cell.adjacent_to_buildings():
+                continue
+            possible_cells.append(current_cell)
+        if len(possible_cells) == 0:
+            possible_cells.append('none')
+        return(random.choice(possible_cells))
+        
             
     def create_cells(self):
         '''
@@ -566,7 +592,7 @@ class mini_grid(grid):
                     current_cell.reset_buildings()
             self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
             for current_mob in self.global_manager.get('mob_list'):
-                if not (current_mob.in_group or current_mob.in_vehicle or current_mob.in_building): #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
+                if not (current_mob.images[0].current_cell == 'none'): #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
                     for current_image in current_mob.images:
                         if current_image.grid == self:
                             current_image.add_to_cell()

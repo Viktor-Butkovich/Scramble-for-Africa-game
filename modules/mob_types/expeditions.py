@@ -27,8 +27,10 @@ class expedition(group):
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
+                'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
                 'worker': worker or dictionary value - If creating a new group, equals a worker that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the worker
                 'officer': worker or dictionary value - If creating a new group, equals an officer that is part of this group. If loading, equals a dictionary of the saved information necessary to recreate the officer
+                'canoes_image': string value - File path tothe image used by this object when it is in a river
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -38,6 +40,14 @@ class expedition(group):
         self.exploration_cost = self.global_manager.get('action_prices')['exploration']#2
         self.can_explore = True
         self.can_swim = True
+        self.can_swim_river = True
+        self.can_swim_ocean = False
+        
+        self.has_canoes = True
+        self.image_dict['canoes'] = input_dict['canoes_image']
+        self.image_dict['no_canoes'] = self.image_dict['default']
+        self.update_canoes()
+        
         self.set_group_type('expedition')
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
         self.resolve_off_tile_exploration()
@@ -258,17 +268,17 @@ class expedition(group):
         died = False
         if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
-            self.move(x_change, y_change)
-        else:
-            self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change)) #when exploring, movement points should be consumed regardless of exploration success or destination
+            if self.movement_points >= self.get_movement_cost(x_change, y_change):
+                self.move(x_change, y_change)
+            else:
+                notification_tools.display_notification("This unit's " + str(self.movement_points) + " remaining movement points are not enough to move into the newly explored tile. /n /n", 'default', self.global_manager)
+                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        self.set_movement_points(0)
         if self.just_promoted:
             self.promote()
         elif roll_result <= self.current_max_crit_fail:
             self.die()
             died = True
-        #copy_dice_list = self.global_manager.get('dice_list')
-        #for current_die in copy_dice_list:
-        #    current_die.remove()
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
     def resolve_off_tile_exploration(self):
@@ -297,30 +307,3 @@ class expedition(group):
 
                     self.destination_cells.append(target_cell)
                     notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
-                    
-    def get_movement_cost(self, x_change, y_change):
-        '''
-        Description:
-            Returns the cost in movement points of moving by the inputted amounts. Expeditions can move for half cost to water tiles
-        Input:
-            int x_change: How many cells would be moved to the right in the hypothetical movement
-            int y_change: How many cells would be moved upward in the hypothetical movement
-        Output:
-            double: How many movement points would be spent by moving by the inputted amount
-        '''
-        local_cell = self.images[0].current_cell
-        direction = 'non'
-        if x_change < 0:
-            direction = 'left'
-        elif x_change > 0:
-            direction = 'right'
-        elif y_change > 0:
-            direction = 'up'
-        elif y_change < 0:
-            direction = 'down'
-        adjacent_cell = self.images[0].current_cell.adjacent_cells[direction]
-        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-            return(self.movement_cost / 2.0)
-        elif adjacent_cell.terrain == 'water':
-            return(self.movement_cost / 2.0)
-        return(self.movement_cost)

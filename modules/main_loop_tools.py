@@ -181,6 +181,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_religious_campaign'):
         return(False)
+    elif global_manager.get('ongoing_public_relations_campaign'):
+        return(False)
     elif global_manager.get('ongoing_advertising_campaign'):
         return(False)
     elif global_manager.get('ongoing_loan_search'):
@@ -192,6 +194,8 @@ def action_possible(global_manager):
     elif global_manager.get('ongoing_combat'):
         return(False)
     elif global_manager.get('ongoing_trial'):
+        return(False)
+    elif global_manager.get('ongoing_slave_capture'):
         return(False)
     elif global_manager.get('making_choice'):
         return(False)
@@ -413,6 +417,7 @@ def manage_lmb_down(clicked_button, global_manager):
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
                             if current_cell.visible:
+                                my_cell = current_cell
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_new_mob = True
                                     current_cell.contained_mobs[0].select()

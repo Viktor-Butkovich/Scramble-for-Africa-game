@@ -112,20 +112,21 @@ class village():
         Input:
             None
         Output:
-            None
+            native_warriors: Returns the created native warriors unit
         '''
         input_dict = {}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/native_warriors/default.png'
+        input_dict['canoes_image'] = 'mobs/native_warriors/canoe_default.png'
         input_dict['modes'] = ['strategic']
-        input_dict['name'] = 'Native warriors'
+        input_dict['name'] = 'native warriors'
         input_dict['init_type'] = 'native_warriors'
         input_dict['origin_village'] = self
         self.change_population(-1)
         if self.available_workers > self.population: #if available worker leaves to be warrior, reduce number of available workers
             self.set_available_workers(self.population)
-        self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        return(self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager))
 
     def recruit_worker(self):
         '''

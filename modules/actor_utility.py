@@ -5,6 +5,138 @@ import random
 from . import scaling
 from . import utility
 
+def update_recruitment_descriptions(global_manager, target = 'all'):
+    '''
+    Description:
+        Updates the descriptions of recruitable units for use in various parts of the program. Updates all units during setup and can target a certain unit to update prices, etc. when the information is needed later in the game.
+            Creates list versions for tooltips and string versions for notifications
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string target = 'all': Targets a certain unit type, or 'all' by default, to update while minimizing unnecessary calculations
+    Output:
+        None
+    '''
+    if target == 'all':
+        targets_to_update = global_manager.get('recruitment_types') + ['slums workers', 'village workers', 'slaves']
+    else:
+        targets_to_update = [target]
+
+    for current_target in targets_to_update:
+        recruitment_list_descriptions = global_manager.get('recruitment_list_descriptions')
+        recruitment_string_descriptions = global_manager.get('recruitment_string_descriptions')
+        text_list = []
+        if current_target in global_manager.get('officer_types'):
+            first_line = utility.capitalize(current_target) + "s are controlled by the " + global_manager.get('officer_minister_dict')[current_target]
+            if current_target == 'explorer':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, an explorer becomes an expedition unit that can explore new tiles and move swiftly along rivers with canoes.')
+                
+            elif current_target == 'hunter':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, a hunter becomes a safari unit that can attack and more easily detect and defend against beasts and move swiftly along rivers with canoes.')
+                
+            elif current_target == 'engineer':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, an engineer becomes a construction gang unit that can build buildings, roads, railroads, and trains.')
+                
+            elif current_target == 'driver':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, a driver becomes a porters unit that can move quickly and transport commodities.')
+                
+            elif current_target == 'foreman':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, a foreman becomes a work crew unit that can produce commodities when attached to a production facility.')
+                
+            elif current_target == 'merchant':
+                first_line += ' and can personally search for loans and conduct advertising campaings in Europe.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, a merchant becomes a caravan that can build trading posts and trade with native villages.')
+                
+            elif current_target == 'evangelist':
+                first_line += ' and can personally conduct religious campaigns and public relations campaigns in Europe.'
+                text_list.append(first_line)
+                text_list.append('When combined with religious volunteers, an evangelist becomes a missionaries unit that can build missions and lower the aggressiveness of native villages.')
+                
+            elif current_target == 'major':
+                first_line += '.'
+                text_list.append(first_line)
+                text_list.append('When combined with workers, a major becomes a battalion unit that has a very high combat strength, and can attack non-beast enemies, build forts, and capture slaves.')
+                
+        elif current_target == 'European workers':
+            text_list.append('European workers have an upkeep of ' + str(global_manager.get('european_worker_upkeep')) + ' money each turn.')
+            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
+            text_list.append('Each unit of European workers hired or sent as replacements may increase the upkeep of all European workers.')
+            text_list.append('European workers tend to be more susceptible to attrition but are more accustomed to using modern weaponry.')
+            
+        elif current_target == 'slave workers':
+            text_list.append('Slave workers have a constant upkeep of ' + str(global_manager.get('slave_worker_upkeep')) + ' money each turn.')
+            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
+            text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
+            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
+            text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+            
+        elif current_target == 'slums workers':
+            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
+            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
+            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
+            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
+            
+        elif current_target == 'village workers':
+            text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
+            text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
+            text_list.append('There are a limited number of African workers at villages and slums, and hiring any may increase the upkeep of all African workers.')
+            text_list.append('Attracting new African workers to your colony through trading consumer goods may decrease the upkeep of all African workers.')
+            text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
+            
+        elif current_target == 'steamship':
+            text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
+            
+        elif current_target == 'steamboat':
+            text_list.append('While useless by itself, a steamboat crewed by workers can quickly transport units and cargo along rivers.')
+            
+        elif current_target == 'train':
+            text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')
+        recruitment_list_descriptions[current_target] = text_list
+
+        text = ''
+        for current_line in recruitment_list_descriptions[current_target]:
+            text += current_line + ' /n /n' #replaces each tooltip list line with newline characters for notification descriptions
+        recruitment_string_descriptions[current_target] = text
+            
+def spawn_beast(global_manager):
+    '''
+    Description:
+        Attempts to spawn a beast at a random part of the map, choosing a tile and then choosing a type of animal that can spawn in that tile. The spawn attepmt fails and does nothing if the chosen tile is next to any player buildings
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    input_dict = {}
+    requirements_dict = {}
+    requirements_dict['ocean_allowed'] = False
+    requirements_dict['allowed_terrains'] = global_manager.get('terrain_list') + ['water']
+    requirements_dict['nearby_buildings_allowed'] = True
+    spawn_cell = global_manager.get('strategic_map_grid').choose_cell(requirements_dict)
+    if spawn_cell.adjacent_to_buildings():
+        return() #cancel spawn if beast would spawn near buildings, become less common as colony develops
+    terrain_type = spawn_cell.terrain
+    
+    input_dict['coordinates'] = (spawn_cell.x, spawn_cell.y)
+    input_dict['grids'] = [global_manager.get('strategic_map_grid'), global_manager.get('strategic_map_grid').mini_grid]
+    input_dict['modes'] = ['strategic']
+    input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
+    input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
+    input_dict['image'] = 'mobs/beasts/default.png'
+    input_dict['init_type'] = 'beast'
+    global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
+
 def find_closest_available_worker(destination, global_manager):
     '''
     Description:
@@ -183,7 +315,8 @@ def get_migration_destinations(global_manager):
     for current_building in global_manager.get('building_list'):
         if current_building.building_type in ['port', 'train_station', 'resource']:
             if not current_building.images[0].current_cell in return_list:
-                return_list.append(current_building.images[0].current_cell)
+                if not current_building.damaged:
+                    return_list.append(current_building.images[0].current_cell)
     return(return_list)
 
 def get_migration_sources(global_manager):

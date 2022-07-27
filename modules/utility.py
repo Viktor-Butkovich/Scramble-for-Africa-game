@@ -37,7 +37,7 @@ def find_grid_distance(first, second):
         int: Returns the sum of the horizontal and vertical distance between the positions of the inputted objects
     '''
     horizontal_distance = abs(first.x - second.x)
-    vertical_distance = abs(first.x - second.x)
+    vertical_distance = abs(first.y - second.y)
     if not first.grids[0] in second.grids:
         return(-1)
     return(horizontal_distance + vertical_distance)
@@ -152,24 +152,45 @@ def add_to_message(message, new):
     '''
     return (message + new)
 
-def conjugate(infinitive, amount):
+def conjugate(infinitive, amount, tense = 'present'):
     '''
     Description:
         Returns a singular or plural conjugated version of the inputted verb
     Input:
         string infinitive: base word to conjugate, like "be" or "attack"
         int amount: quantity of subject, determining if singular or plural verb should be used
+        string tense = 'present': tense of verb, determining version of verb, like 'was' or 'is', to use
     Output:
         string: Returns conjugated word with the correct number, like "is" or "attacks"
     '''
     if infinitive == 'be':
-        if amount == 1:
-            return('is')
-        else:
-            return('are')
+        if tense == 'present':
+            if amount == 1:
+                return('is')
+            else:
+                return('are')
+        elif tense == 'preterite':
+            if amount == 1:
+                return('was')
+            else:
+                return('were')
     else:
         if amount == 1:
             return(infinitive + 's')
         else:
             return(infinitive)
     return('none')
+
+def capitalize(string):
+    '''
+    Description:
+        Capitalizes the first letter of the inputted string and returns the resulting string. Unlike python's default capitalize method, does not make the rest of the string lowercase
+    Input:
+        string string: string that is being capitalized
+    Output:
+        string: Returns capitalized string
+    '''
+    if len(string) > 1:
+        return(string[:1].capitalize() + string[1:])
+    else:
+        return(string[:1].capitalize())

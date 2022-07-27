@@ -12,6 +12,7 @@ from . import turn_management_tools
 from . import text_tools
 from . import market_tools
 from . import minister_utility
+from . import actor_utility
 
 class save_load_manager_template():
     '''
@@ -43,6 +44,7 @@ class save_load_manager_template():
         self.copied_elements.append('turn')
         self.copied_elements.append('public_opinion')
         self.copied_elements.append('evil')
+        self.copied_elements.append('fear')
         self.copied_elements.append('commodity_prices')
         self.copied_elements.append('african_worker_upkeep')
         self.copied_elements.append('european_worker_upkeep')
@@ -65,6 +67,7 @@ class save_load_manager_template():
         Output:
             None
         '''
+        self.global_manager.set('creating_new_game', True)
         strategic_grid_height = 300
         strategic_grid_width = 320
         mini_grid_height = 600
@@ -154,6 +157,7 @@ class save_load_manager_template():
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
         self.global_manager.get('evil_tracker').set(0)
+        self.global_manager.get('fear_tracker').set(1)
 
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
@@ -169,6 +173,10 @@ class save_load_manager_template():
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
+
+        for i in range(1, random.randrange(5, 8)):
+            turn_management_tools.manage_villages(self.global_manager)
+            actor_utility.spawn_beast(self.global_manager)
         
         minister_utility.update_available_minister_display(self.global_manager)
 
@@ -177,6 +185,7 @@ class save_load_manager_template():
         self.global_manager.set('minister_appointment_tutorial_completed', False)
         self.global_manager.set('exit_minister_screen_tutorial_completed', False)
         notification_tools.show_tutorial_notifications(self.global_manager)
+        self.global_manager.set('creating_new_game', False)
         
     def save_game(self, file_path):
         '''
@@ -267,6 +276,7 @@ class save_load_manager_template():
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
         self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
+        self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
 
         #load grids
         strategic_grid_height = 300

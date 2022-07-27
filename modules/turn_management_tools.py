@@ -20,10 +20,12 @@ def end_turn(global_manager):
         None
     '''
     global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
-    global_manager.set('player_turn', False)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
-            
+
+    actor_utility.deselect_all(global_manager)
+        
+    global_manager.set('player_turn', False)     
     start_enemy_turn(global_manager)
 
 def start_enemy_turn(global_manager):
@@ -37,9 +39,10 @@ def start_enemy_turn(global_manager):
         None
     '''
     manage_villages(global_manager)
+    manage_beasts(global_manager)
     reset_mobs('npmobs', global_manager)
-    manage_enemy_movement(global_manager)
-    manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
+    #manage_enemy_movement(global_manager)
+    #manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
     #the manage_combat function starts the player turn
     
 def start_player_turn(global_manager, first_turn = False):
@@ -73,14 +76,15 @@ def start_player_turn(global_manager, first_turn = False):
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
 
-    global_manager.set('player_turn', True)
+    global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
+    global_manager.set('enemy_combat_phase', False)
     global_manager.get('turn_tracker').change(1)
         
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
     end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.in_building or end_turn_selected_mob.in_group or end_turn_selected_mob.in_vehicle)) and end_turn_selected_mob in global_manager.get('mob_list'):
+    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.images[0].current_cell == 'none')) and end_turn_selected_mob in global_manager.get('mob_list'):
         #do not attempt to select if none selected or has been removed since end of turn
         end_turn_selected_mob.select()
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
@@ -105,7 +109,10 @@ def reset_mobs(mob_type, global_manager):
     elif mob_type == 'npmobs':
         for current_npmob in global_manager.get('npmob_list'):
             current_npmob.reset_movement_points()
-            current_npmob.set_disorganized(False) 
+            current_npmob.set_disorganized(False)
+            #if not current_npmob.creation_turn == global_manager.get('turn'): #if not created this turn
+            current_npmob.turn_done = False
+            global_manager.get('enemy_turn_queue').append(current_npmob)
     else:
         for current_mob in global_manager.get('mob_list'):
             current_mob.reset_movement_points()
@@ -216,6 +223,8 @@ def manage_public_opinion(global_manager):
     global_manager.get('evil_tracker').change(-1)
     if global_manager.get('DEBUG_show_evil'):
         print("Evil number: " + str(global_manager.get('evil')))
+    if global_manager.get('DEBUG_show_fear'):
+        print("Fear number: " + str(global_manager.get('fear')))
     
 def manage_subsidies(global_manager):
     '''
@@ -325,7 +334,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                 
                 source_village_list.append(source_village)
                 destination = random.choice(weighted_destination_cell_list) #random.choice(destination_cell_list)
-                if not destination.has_slums():
+                if not destination.has_building('slums'):
                     destination.create_slums()
                 source_village.change_available_workers(-1 * num_migrated)
                 source_village.change_population(-1 * num_migrated)
@@ -437,6 +446,23 @@ def manage_villages(global_manager):
 
         current_village.manage_warriors()
 
+def manage_beasts(global_manager):
+    '''
+    Description:
+        Controls beast spawning/despawning
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    beast_list = global_manager.get('beast_list')
+    for current_beast in beast_list:
+        current_beast.check_despawn()
+
+    if random.randrange(1, 7) == 1:
+        actor_utility.spawn_beast(global_manager)
+    
+
 def manage_enemy_movement(global_manager):
     '''
     Description:
@@ -480,7 +506,7 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 3 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
+        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
             removed_ministers.append(current_minister)
 
         if current_minister.fabricated_evidence > 0:
@@ -490,6 +516,21 @@ def manage_ministers(global_manager):
             text_tools.print_to_screen("The " + str(current_minister.fabricated_evidence) + " fabricated evidence against " + current_minister.name + " is no longer usable.", global_manager)
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
+
+        evidence_lost = 0
+        for i in range(current_minister.corruption_evidence):
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                evidence_lost += 1
+        if evidence_lost > 0:
+            if current_minister.current_position == 'none':
+                current_position = ''
+            else:
+                current_position = current_minister.current_position
+            if evidence_lost == current_minister.corruption_evidence:
+                current_minister.display_message("All of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            else:
+                current_minister.display_message(str(evidence_lost) + " of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+            current_minister.corruption_evidence -= evidence_lost
 
     if global_manager.get('prosecution_bribed_judge'):
         text_tools.print_to_screen("The effect of bribing the judge has faded and will not affect the next trial.", global_manager)
@@ -509,5 +550,7 @@ def manage_ministers(global_manager):
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
             global_manager.get('actor_creation_manager').create_minister(global_manager)
         notification_tools.display_notification("Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n", 'default', global_manager)
-
-        
+    first_roll = random.randrange(1, 7)
+    second_roll = random.randrange(1, 7)
+    if first_roll == 1 and second_roll <= 3:
+        global_manager.get('fear_tracker').change(-1)

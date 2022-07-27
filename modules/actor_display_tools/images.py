@@ -51,7 +51,7 @@ class actor_display_free_image(free_image):
                     self.set_image(new_actor.cell.get_building('resource').image_dict['default']) #matches resource building
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission', 'slums']:
+            elif self.actor_image_type in ['port', 'train_station', 'trading_post', 'mission', 'slums', 'fort']:
                 if new_actor.cell.has_building(self.actor_image_type):
                     self.set_image(new_actor.cell.get_building(self.actor_image_type).images[0].image_id)
                     #self.set_image('buildings/' + self.actor_image_type + '.png')

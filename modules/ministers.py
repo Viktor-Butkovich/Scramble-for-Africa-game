@@ -26,6 +26,7 @@ class minister():
                 'personal savings': double value - How much non-stolen money this minister has based on their social status
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
+                'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'image_id': string value - File path to the image used by this minister
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
@@ -52,6 +53,7 @@ class minister():
             
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
+            self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
             self.image_id = input_dict['image_id']
@@ -75,6 +77,7 @@ class minister():
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
             
             self.skill_setup()
+            self.interests_setup()
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
@@ -85,6 +88,7 @@ class minister():
             self.just_removed = False
                 
             minister_utility.update_available_minister_display(self.global_manager)
+        self.stolen_already = False
         self.update_tooltip()
 
     def update_tooltip(self):
@@ -104,6 +108,8 @@ class minister():
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
         self.tooltip_text.append("Background: " + self.background)
         self.tooltip_text.append("Social status: " + self.status)
+        self.tooltip_text.append("Interests: " + self.interests[0] + " and " + self.interests[1])
+        self.tooltip_text.append("Evidence: " + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
             self.tooltip_text.append("This minister was just removed from office and expects to be reappointed to an office by the end of the turn.")
             self.tooltip_text.append("If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.")
@@ -185,6 +191,7 @@ class minister():
                 'personal savings': double value - How much non-stolen money this minister has based on their social status
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
+                'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'image_id': string value - File path to the image used by this minister
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
@@ -197,6 +204,7 @@ class minister():
         save_dict['current_position'] = self.current_position
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
+        save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
         save_dict['image_id'] = self.image_id
         save_dict['stolen_money'] = self.stolen_money
@@ -227,8 +235,9 @@ class minister():
         if random.randrange(1, 3) == 1: #1/2
             result += self.get_skill_modifier()
 
-        if predetermined_corruption or self.check_corruption(): #true if stealing
-            self.steal_money(value, roll_type)
+        if (predetermined_corruption or self.check_corruption()):
+            if not self.stolen_already: #true if stealing
+                self.steal_money(value, roll_type)
             result = random.randrange(max_crit_fail + 1, min_success) #if crit fail on 1 and success on 4+, do random.randrange(2, 4), pick between 2 and 3
 
         if result < min_result:
@@ -279,23 +288,26 @@ class minister():
         results = []
         if self.check_corruption():
             self.steal_money(value, roll_type)
+            self.stolen_already = True
             corrupt_index = random.randrange(0, num_dice)
-            for i in range(num_dice):
+            for i in range(num_dice): #num_sides, min_success, max_crit_fail, value, roll_type, predetermined_corruption = False
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly and make it the corrupt result, making it a non-critical failure
-                    results.append(self.roll(num_sides, min_success, max_crit_fail, True))
+                    results.append(self.roll(num_sides, min_success, max_crit_fail, value, roll_type, True))
                 else: #for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
-                    results.append(self.roll(num_sides, min_success, 0, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
+                    results.append(self.roll(num_sides, min_success, 0, value, roll_type, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
         else: #if not corrupt, just roll with minister modifier
             for i in range(num_dice):
                 results.append(self.no_corruption_roll(num_sides))
+        self.stolen_already = False
         return(results)
             
-    def attack_roll_to_list(self, modifier, value, roll_type, num_dice):
+    def attack_roll_to_list(self, own_modifier, enemy_modifier, value, roll_type, num_dice):
         '''
         Description:
             Rolls and returns the result of the inputted number of 6-sided dice along with the enemy unit's roll in combat, modifying the results based on skill and possibly lying about the result based on corruption
         Input:
-            int modifier: Modifier added to the friendly unit's roll, used to create realistic inconclusive results when corrupt
+            int own_modifier: Modifier added to the friendly unit's roll, used to create realistic inconclusive results when corrupt
+            int enemy_modifier: Modifier added to the enemy unit's roll, used to create realistic inconclusive results when corrupt
             double value: Amount of money being spent by company to make this roll, can be stolen
             string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught
             int num_dice: number of dice rolled by the friendly unit, not including the one die rolled by the enemy unit
@@ -305,13 +317,14 @@ class minister():
         results = []
         if self.check_corruption():
             self.steal_money(value, roll_type)
+            self.stolen_already = True
             for i in range(num_dice):
                 results.append(0)
             difference = 10
             while difference >= 2: #keep rolling until a combination of attacker and defender rolls with an inconclusive result is found
-                own_roll = random.randrange(1, 7) + modifier
+                own_roll = random.randrange(1, 7)
                 enemy_roll = random.randrange(1, 7)
-                difference = abs(own_roll - enemy_roll)
+                difference = abs((own_roll + own_modifier) - (enemy_roll + enemy_modifier))
             corrupt_index = random.randrange(0, num_dice)
             for i in range(num_dice):
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly to be the chosen result, with the others being lower
@@ -325,6 +338,7 @@ class minister():
                 results.append(self.no_corruption_roll(6))
             enemy_roll = random.randrange(1, 7)
             results = [enemy_roll] + results
+        self.stolen_already = False
         return(results)
 
     def appoint(self, new_position):
@@ -387,6 +401,35 @@ class minister():
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
                 self.specific_skills[current_minister_type] += 1
 
+    def interests_setup(self):
+        '''
+        Description:
+            Chooses and sets 2 interest categories for this minister. One of a minister's interests is one of their best skills, while the other is randomly chosen
+        Input:
+            None
+        Output:
+            None
+        '''
+        skill_types = self.global_manager.get('skill_types')
+        type_minister_dict = self.global_manager.get('type_minister_dict')
+        highest_skills = []
+        highest_skill_number = 0
+        for current_skill in skill_types:
+            if len(highest_skills) == 0 or self.specific_skills[type_minister_dict[current_skill]] > highest_skill_number:
+                highest_skills = [current_skill]
+                highest_skill_number = self.specific_skills[type_minister_dict[current_skill]]
+            elif self.specific_skills[type_minister_dict[current_skill]] == highest_skill_number:
+                highest_skills.append(current_skill)
+        first_interest = random.choice(highest_skills)
+        second_interest = first_interest
+        while second_interest == first_interest:
+            second_interest = random.choice(skill_types)
+
+        if random.randrange(1, 7) >= 4:
+            self.interests = [first_interest, second_interest]
+        else:
+            self.interests = [second_interest, first_interest]
+
     def corruption_setup(self):
         '''
         Description:
@@ -409,9 +452,15 @@ class minister():
             boolean: Returns True if this minister will be corrupt for the roll
         '''
         if random.randrange(1, 7) >= self.corruption_threshold:
-            return(True)
+            if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
+                return(True)
+            else:
+                if self.global_manager.get('DEBUG_show_fear'):
+                    print(self.name + " was too afraid to steal money")
+                return(False)
         else:
             return(False)
+
 
     def get_skill_modifier(self):
         '''

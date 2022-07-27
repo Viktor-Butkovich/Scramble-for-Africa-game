@@ -12,10 +12,12 @@ from .mob_types import work_crews
 from .mob_types import vehicles
 from .mob_types import battalions
 from .mob_types import native_warriors
+from .mob_types import beasts
 from . import buildings
 from . import ministers
 from . import notification_tools
 from . import utility
+from . import actor_utility
 from . import market_tools
 from . import dice
 
@@ -60,6 +62,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.train(from_save, input_dict, global_manager)
         elif init_type == 'ship':
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
+        elif init_type == 'boat':
+            new_actor = vehicles.boat(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
             if init_type == 'evangelist':
                 new_actor = officers.evangelist(from_save, input_dict, global_manager)
@@ -69,6 +73,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'native_warriors':
             new_actor = native_warriors.native_warriors(from_save, input_dict, global_manager)
+        elif init_type == 'beast':
+            new_actor = beasts.beast(from_save, input_dict, global_manager)
                 
         #groups
         elif init_type == 'porters':
@@ -85,6 +91,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = expeditions.expedition(from_save, input_dict, global_manager)
         elif init_type == 'battalion':
             new_actor = battalions.battalion(from_save, input_dict, global_manager)
+        elif init_type == 'safari':
+            new_actor = battalions.safari(from_save, input_dict, global_manager)
 
         #buildings
         elif init_type == 'infrastructure':
@@ -93,6 +101,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.trading_post(from_save, input_dict, global_manager)
         elif init_type == 'mission':
             new_actor = buildings.mission(from_save, input_dict, global_manager)
+        elif init_type == 'fort':
+            new_actor = buildings.fort(from_save, input_dict, global_manager)
         elif init_type == 'train_station':
             new_actor = buildings.train_station(from_save, input_dict, global_manager)
         elif init_type == 'port':
@@ -118,23 +128,27 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 'cost': double value - Recruitment cost of the unit
                 'mob_image_id': string value - File path to the image used by the recruited unit
                 'type': string value - Type of choice notification to display, always 'recruitment' for recruitment notificatoins
-                'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'
+                'source_type': string value - Only used when recruiting African workers, tracks whether workers came from available village workers, slums, or a labor broker
             string recruitment_name: Name used in the notification to signify the unit, like 'explorer'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        message = 'Are you sure you want to recruit ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + '? '
-        message += utility.generate_capitalized_article(recruitment_name) + ' ' + recruitment_name + ' would cost ' + str(choice_info_dict['cost']) + ' money to recruit. '
-        if recruitment_name == 'European workers':
-            message += 'European workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('european_worker_upkeep')) + ' money. '
-            message += 'Expanding the labor pool, such as by firing European workers, may decrease the upkeep cost. '
-        elif recruitment_name == 'African workers':
-            message += 'African workers have a varying upkeep cost each turn that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money. '
-            message += 'Expanding the labor pool, such as by convincing villagers to become workers, firing African workers, or freeing slaves may decrease the upkeep cost. '
-        elif recruitment_name == 'slave worker':
-            message += 'Slaves have a set upkeep cost each turn of ' + str(global_manager.get('slave_worker_upkeep')) + ' money. '
-            message += 'Buying slaves is a morally reprehensible action and will be faced with a public opinion penalty. '
+        recruitment_type = recruitment_name
+        if recruitment_name in ['slave workers', 'ship']:
+            verb = 'purchase'
+        elif recruitment_name in ['African workers', 'European workers']:
+            verb = 'hire'
+            if recruitment_name == 'African workers':
+                recruitment_type = choice_info_dict['source_type'] + ' workers' #slums workers or village workers
+        else:
+            verb = 'recruit'
+        if recruitment_name in ['slave workers', 'African workers', 'European workers']:
+            message = 'Are you sure you want to ' + verb + ' a unit of ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
+        else:
+            message = 'Are you sure you want to ' + verb + ' ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
+        actor_utility.update_recruitment_descriptions(global_manager, recruitment_type)
+        message += global_manager.get('recruitment_string_descriptions')[recruitment_type]
         
         notification_tools.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -157,6 +171,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
         input_dict['image'] = 'mobs/' + officer.officer_type + '/' + input_dict['init_type'] + '_' + worker.worker_type + '.png' #mobs/merchant/caravan.png
+        if input_dict['init_type'] in ['safari', 'expedition']:
+            input_dict['canoes_image'] = 'mobs/' + officer.officer_type + '/canoe_' + worker.worker_type + '.png'
         if not officer.officer_type == 'major':
             name = ''
             for character in input_dict['init_type']:

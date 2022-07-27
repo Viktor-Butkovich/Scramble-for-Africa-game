@@ -9,6 +9,7 @@ from . import notification_tools
 from . import text_tools
 from . import market_tools
 from . import utility
+from . import actor_utility
 
 class recruitment_button(button):
     '''
@@ -75,7 +76,11 @@ class recruitment_button(button):
         Output:
             None
         '''
-        self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'])
+        actor_utility.update_recruitment_descriptions(self.global_manager, self.recruitment_type)
+        if self.recruitment_type == 'European workers':
+            self.set_tooltip(['Recruits a unit of ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
+        else:
+            self.set_tooltip(['Recruits ' + utility.generate_article(self.recruitment_type) + ' ' + self.recruitment_name + ' for ' + str(self.cost) + ' money.'] + self.global_manager.get('recruitment_list_descriptions')[self.recruitment_type])
 
 class buy_commodity_button(button):
     '''

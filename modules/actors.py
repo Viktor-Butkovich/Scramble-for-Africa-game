@@ -77,7 +77,13 @@ class actor():
                     else:
                         init_type = 'workers'
                 elif self.is_vehicle:
-                    init_type = self.vehicle_type
+                    if self.vehicle_type == 'train':
+                        init_type = 'train'
+                    elif self.vehicle_type == 'ship':
+                        if self.can_swim_river:
+                            init_type = 'boat'
+                        else:
+                            init_type = 'ship'
                 elif self.is_officer:
                     init_type = self.officer_type
                 elif self.is_group:
@@ -276,8 +282,21 @@ class actor():
                     
                 if (random.randrange(1, 7) <= 2 and transportation_minister.check_corruption()): #1/18 chance of corruption check to take commodities - 1/36 chance for most corrupt to steal
                     self.trigger_inventory_attrition(transportation_minister, True)
+                    return()
                 elif current_cell.local_attrition('inventory') and transportation_minister.no_corruption_roll(6) < 4: #1/6 chance of doing tile conditions check, if passes minister needs to make a 4+ roll to avoid attrition
                     self.trigger_inventory_attrition(transportation_minister)
+                    return()
+
+            #this part of function only reached if no inventory attrition was triggered
+            if self.actor_type == 'mob' and self.is_pmob and self.is_group and self.group_type == 'porters' and (not self.veteran) and random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6: #1/36 chance of porters promoting on successful inventory attrition roll
+                self.promote()
+                self.select()
+                current_movement_points = self.movement_points
+                self.set_max_movement_points(6)
+                self.set_movement_points(current_movement_points + 2)
+                if self.global_manager.get('strategic_map_grid') in self.grids:
+                    self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+                notification_tools.display_notification("By avoiding losses and damage to the carried commodities, the porters' driver is now a veteran and will have more movement points each turn.", 'default', self.global_manager)
 
     def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
