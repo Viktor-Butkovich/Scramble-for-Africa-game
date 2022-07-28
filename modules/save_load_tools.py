@@ -164,7 +164,7 @@ class save_load_manager_template():
 
         self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
 
-        self.global_manager.set('available_minister_left_index', 0)
+        self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
 
         self.global_manager.set('num_african_workers', 0)
         self.global_manager.set('num_european_workers', 0)
@@ -353,7 +353,7 @@ class save_load_manager_template():
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
         for current_minister_dict in saved_minister_dicts:
             self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
-        self.global_manager.set('available_minister_left_index', 0)
+        self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()
         

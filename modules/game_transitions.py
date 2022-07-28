@@ -55,8 +55,12 @@ def set_game_mode(new_game_mode, global_manager):
     if previous_game_mode in ['strategic', 'europe']:
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
-    elif previous_game_mode == 'ministers':
+
+    if new_game_mode == 'ministers':
+        global_manager.set('available_minister_left_index', -2)
+        minister_utility.update_available_minister_display(global_manager)
         minister_utility.calibrate_minister_info_display(global_manager, 'none')
+        
     elif previous_game_mode == 'trial':
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')

@@ -359,11 +359,11 @@ class minister():
             current_pmob.update_controlling_minister()
         if not new_position == 'none': #if appointing
             self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 2:
-                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display up because available minister was removed
+            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 3:
+                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display up because available minister was removed
         else:
             self.global_manager.get('available_minister_list').append(self)
-            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display to newly fired minister
+            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display to newly fired minister
         for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
@@ -511,7 +511,7 @@ class minister():
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
-        self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+        #self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
         self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
         minister_utility.update_available_minister_display(self.global_manager)

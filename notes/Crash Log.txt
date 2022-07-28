@@ -1,13 +1,17 @@
-ERROR:root:'str' object has no attribute 'contained_mobs'
+ERROR:root:list index out of range
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1001, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 208, in main_loop
-    turn_management_tools.manage_combat(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 509, in manage_combat
-    start_player_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 102, in start_player_turn
-    cycled_mob.move_to_front()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 508, in move_to_front
-    while not current_cell.contained_mobs[0] == self: #move to front of tile
-AttributeError: 'str' object has no attribute 'contained_mobs'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 158, in main_loop
+    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 191, in on_click
+    super().on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 980, in on_click
+    game_transitions.to_main_menu(self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\game_transitions.py", line 137, in to_main_menu
+    current_minister.remove()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 517, in remove
+    minister_utility.update_available_minister_display(self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\minister_utility.py", line 92, in update_available_minister_display
+    calibrate_minister_info_display(global_manager, available_minister_list[available_minister_left_index + 2])
+IndexError: list index out of range

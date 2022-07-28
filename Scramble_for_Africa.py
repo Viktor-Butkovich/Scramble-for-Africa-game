@@ -523,7 +523,7 @@ try:
     old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)
-    global_manager.set('available_minister_left_index', 0)
+    global_manager.set('available_minister_left_index', -2) #so that first index is in middle
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
     global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
     global_manager.set('current_game_mode', 'none')
@@ -944,11 +944,11 @@ try:
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
 
     available_minister_display_x = global_manager.get('default_display_width')
-    available_minister_display_y = 500
+    available_minister_display_y = 770
     cycle_left_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), pygame.K_w, ['ministers'], 'buttons/cycle_ministers_up_button.png', 'left', global_manager)
 
-    for i in range(0, 3):
+    for i in range(0, 5):
         available_minister_display_y -= (position_icon_width + 10)
         current_portrait = buttons.minister_portrait_image(scaling.scale_coordinates(available_minister_display_x - position_icon_width, available_minister_display_y, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], 'none', global_manager)

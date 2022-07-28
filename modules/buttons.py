@@ -1507,7 +1507,12 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             None
         '''
         if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
-            minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+            if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
+                own_index = self.global_manager.get('available_minister_list').index(self.current_minister)
+                self.global_manager.set('available_minister_left_index', own_index - 2)
+                minister_utility.update_available_minister_display(self.global_manager)
+            else: #if cabinet portrait
+                minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)            
 
     def calibrate(self, new_minister):
         '''
@@ -1576,12 +1581,12 @@ class cycle_available_ministers_button(button):
             boolean: Returns False if clicking this button would move more than 1 past the edge of the list of available ministers, otherwise returns same as superclass
         '''
         if self.direction == 'left':
-            if self.global_manager.get('available_minister_left_index') > -1:
+            if self.global_manager.get('available_minister_left_index') > -2:
                 return(super().can_show())
             else:
                 return(False)
         elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
-            if not self.global_manager.get('available_minister_left_index') + 3 > len(self.global_manager.get('available_minister_list')):
+            if not self.global_manager.get('available_minister_left_index') + 4 > len(self.global_manager.get('available_minister_list')):
                 return(super().can_show())
             else:
                 return(False)
@@ -1600,7 +1605,7 @@ class cycle_available_ministers_button(button):
         if self.direction == 'right':
             self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
         minister_utility.update_available_minister_display(self.global_manager)
-        self.global_manager.get('available_minister_portrait_list')[1].on_click() #select new middle portrait
+        self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
 
 class commodity_button(button):
     '''
