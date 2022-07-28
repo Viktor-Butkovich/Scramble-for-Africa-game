@@ -399,7 +399,8 @@ try:
         'construction': 'construction',
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
-        'combat': 'combat',
+        'combat': 'combat supplies',
+        'hunting': 'hunting supplies',
         'production': 'production',
         'slave capture': 'capturing slaves',
         'none': 'miscellaneous company activities'
@@ -407,7 +408,7 @@ try:
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
+        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
     #price setup
 
 
@@ -474,7 +475,6 @@ try:
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
     global_manager.set('combatant_images', [])
-    global_manager.set('end_turn_selected_mob', 'none')
     pygame.key.set_repeat(300, 200)
     global_manager.set('crashed', False)
     global_manager.set('lmb_down', False)
@@ -507,6 +507,7 @@ try:
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
     global_manager.set('ongoing_slave_capture', False)
+    global_manager.set('game_over', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -554,9 +555,14 @@ try:
 
 
     #value tracker setup
+    global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
+    labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+        'misc/default_label.png', 'public_opinion', global_manager)
+    
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
     labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager)
+
     global_manager.set('previous_financial_report', 'none')
     show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
         scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
@@ -564,12 +570,9 @@ try:
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
     labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'turn', global_manager)
-
-    global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
-    labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
-        'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
+    
     global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
     #value tracker setup
 

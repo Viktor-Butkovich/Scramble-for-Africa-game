@@ -9,7 +9,6 @@ from . import choice_notifications
 from . import action_notifications
 from . import scaling
 from . import text_tools
-from . import game_transitions
 
 class global_manager_template():
     '''
@@ -301,9 +300,6 @@ class money_tracker(value_tracker):
                 change_type = 'misc. expenses'
         self.transaction_history[change_type] += value_change
         super().change(value_change)
-        if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
-            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def set(self, new_value):
         '''
@@ -315,9 +311,6 @@ class money_tracker(value_tracker):
             None
         '''
         super().set(round(new_value, 1))
-        if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
-            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def prepare_financial_report(self):
         '''

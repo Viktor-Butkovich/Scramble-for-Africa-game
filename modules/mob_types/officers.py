@@ -366,14 +366,14 @@ class evangelist(officer):
             input_dict['modes'] = ['strategic', 'europe']
             input_dict['init_type'] = 'church_volunteers'
             input_dict['worker_type'] = 'religious' #not european - doesn't count as a European worker for upkeep
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            church_volunteers = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
-            self.select()
-            for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
-                if not current_image.current_cell == 'none':
-                    while not self == current_image.current_cell.contained_mobs[0]:
-                        current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+            self.global_manager.get('actor_creation_manager').create_group(church_volunteers, self, self.global_manager)
+            #for current_image in self.images: #move mob to front of each stack it is in - also used in button.same_tile_icon.on_click(), make this a function of all mobs to move to front of tile
+            #    if not current_image.current_cell == 'none':
+            #        while not self == current_image.current_cell.contained_mobs[0]:
+            #            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         elif roll_result <= self.current_max_crit_fail:
             self.die()
         self.global_manager.set('ongoing_religious_campaign', False)

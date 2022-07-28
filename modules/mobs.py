@@ -690,7 +690,7 @@ class mob(actor):
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
             
-        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water' and ((not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river)): #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
             if self.is_worker and not vehicle.has_crew:
@@ -726,7 +726,9 @@ class mob(actor):
         '''
         if self.is_npmob and not self.visible():
             return()
-
+        elif self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
+            return()
+        
         if self.images[0].current_cell.terrain == 'water' and self.y > 0:
             self.set_image('canoes')
         else:

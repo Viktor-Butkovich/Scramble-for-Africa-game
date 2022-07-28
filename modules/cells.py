@@ -435,6 +435,12 @@ class cell():
                 return(True)
         return(False)
 
+    def get_pmob(self):
+        for current_mob in self.contained_mobs:
+            if current_mob.is_pmob:
+                return(current_mob)
+        return('none')
+
     def has_npmob(self):
         '''
         Description:

@@ -165,7 +165,10 @@ class choice_button(button):
             self.message = 'Do nothing'
 
         elif button_type == 'confirm main menu':
-            self.message = 'Confirm'
+            self.message = 'Main menu'
+
+        elif button_type == 'quit':
+            self.message = 'Exit game'
     
         else:
             self.message = button_type.capitalize() #stop trading -> Stop trading
@@ -259,6 +262,9 @@ class choice_button(button):
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])
+
+        elif self.button_type == 'quit':
+            self.set_tooltip(['Exits the game without saving'])
 
         elif self.button_type == 'none':
             self.set_tooltip(['Do nothing'])

@@ -327,7 +327,6 @@ class pmob(mob):
                             elif destination_type == 'water':
                                 if destination_type == 'water':
                                     if self.can_swim or (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle) or (self.can_explore and not future_cell.visible) or (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')):
-                                        
                                         passed = True
 
                             if passed:
@@ -342,7 +341,7 @@ class pmob(mob):
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
-                                    if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari: #non-battalion units can't move into enemies
+                                    if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari or (self.can_explore and not future_cell.visible): #non-battalion units can't move into enemies
                                         return(True)
                                     else:
                                         text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
@@ -433,7 +432,8 @@ class pmob(mob):
         for current_image in self.images:
             current_image.add_to_cell()
         vehicle.selected = False
-        self.set_disorganized(True)
+        if self.images[0].current_cell.get_intact_building('port') == 'none':
+            self.set_disorganized(True)
         self.select()
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
@@ -550,7 +550,11 @@ class pmob(mob):
 
         if self.veteran:
             if combat_type == 'attacking': #minister only involved in attacks
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, 'combat', num_dice - 1)
+                if self.is_battalion:
+                    cost_type = 'combat'
+                elif self.is_safari:
+                    cost_type = 'hunting'
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 results = minister_rolls
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
@@ -570,7 +574,11 @@ class pmob(mob):
             text += ("The higher result, " + str(roll_result + own_combat_modifier) + ", was used. /n")
         else:
             if combat_type == 'attacking': #minister only involved in attacks
-                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, 'combat', num_dice - 1)
+                if self.is_battalion:
+                    cost_type = 'combat'
+                elif self.is_safari:
+                    cost_type = 'hunting'
+                minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 result = minister_rolls[0]
             elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
@@ -760,6 +768,8 @@ class pmob(mob):
                 if current_cell.get_best_combatant('pmob') == 'none':
                     enemy.kill_noncombatants()
                     enemy.damage_buildings()
+                    if enemy.npmob_type == 'beast':
+                        enemy.set_hidden(True)
                 self.global_manager.get('public_opinion_tracker').change(self.public_opinion_change)
 
         if combat_type == 'attacking':
@@ -809,8 +819,8 @@ class pmob(mob):
         message += "The planning and materials will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
         message += "If successful, a " + self.building_name + " will be built. " #change to match each building
         if self.building_type == 'resource':
-            message += "Each work crew attached to a " + self.building_name + " produces 1 unit of " + self.attached_resource + " each turn. "
-            message += "It also expands the tile's warehouse capacity."
+            message += "A " + self.building_name + " expands the tile's warehouse capacity, and each work crew attached to it can attempt to produce " + self.attached_resource + " each turn. /n /n"
+            message += "Upgrades to the " + self.building_name + " can increase the maximum number of work crews attached and/or how much " + self.attached_resource + " each attached work crew can attempt to produce each turn."
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
                 message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad."
@@ -818,13 +828,13 @@ class pmob(mob):
                 message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
                 message += "It is also required for trains to move and for a train station to be built."
         elif self.building_type == 'port':
-            message += "A port allows ships to enter the tile. It also expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for steamships traveling between theatres."
+            message += "A port allows ships to enter the tile and expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for steamships traveling between theatres."
             if self.y == 1:
                 message += "A port built here would be adjacent to the ocean."
             else:
                 message += "A port built here would not be adjacent to the ocean."
         elif self.building_type == 'train_station':
-            message += "A train station is required for a train to pick up or drop off cargo and passengers. It also expands the tile's warehouse capacity. A train can only be built at a train station."
+            message += "A train station is required for a train to pick up or drop off cargo and passengers, allows trains to be built, and expands the tile's warehouse capacity"
         elif self.building_type == 'trading_post':
             message += "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
         elif self.building_type == 'mission':

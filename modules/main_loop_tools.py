@@ -197,6 +197,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_slave_capture'):
         return(False)
+    elif global_manager.get('game_over'):
+        return(False)
     elif global_manager.get('making_choice'):
         return(False)
     elif not global_manager.get('player_turn'):

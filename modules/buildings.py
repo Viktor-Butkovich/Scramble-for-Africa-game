@@ -133,11 +133,7 @@ class building(actor):
         '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
-            tooltip_text.append("Work crew capacity: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
-            if len(self.contained_work_crews) == 0:
-                tooltip_text.append("Work crews: none")
-            else:
-                tooltip_text.append("Work crews: ")
+            tooltip_text.append("Work crews: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             for current_work_crew in self.contained_work_crews:
                 tooltip_text.append("    " + current_work_crew.name)
             tooltip_text.append("Lets " + str(self.scale) + " attached work crews each attempt to produce " + str(self.efficiency) + " units of " + self.resource_type + " each turn")
@@ -546,11 +542,17 @@ class resource_building(building):
         Output:
             None
         '''
-        self.ejected_work_crews = []
+        #self.ejected_work_crews = []
         for current_work_crew in self.contained_work_crews:
-            self.ejected_work_crews.append(current_work_crew)
+            if not current_work_crew in self.ejected_work_crews:
+                self.ejected_work_crews.append(current_work_crew)
         for current_work_crew in self.ejected_work_crews:
             current_work_crew.leave_building(self)
+
+    def set_damaged(self, new_value):
+        if new_value == True:
+            self.eject_work_crews()
+        super().set_damaged(new_value)
 
     def reattach_work_crews(self):
         '''

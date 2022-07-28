@@ -345,10 +345,6 @@ class button():
             self.set_tooltip(["Attempts to capture villagers as slaves", "Can only be done in a village", "Regardless the capture's success, this may increase the village's aggressiveness and/or decrease public opinion",
                 "Has higher success chance and lower risk when aggressiveness is low", "Costs all remaining movement points, at least 1"])
 
-        elif self.button_type == 'capture slaves':
-            self.set_tooltip(["Uses a local labor broker to find and hire a unit of African workers from a nearby village", "Upon recruitment, the worker will automatically merge with this unit",
-                "The worker's initial recruitment cost will depend on the chosen village's distance and aggressiveness", "Automatically finds the best deal based on nearby villages, even unexplored ones", "Can only be done at a port"])
-
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Starts a religious campaign in an effort to find church volunteers.", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1"])
@@ -418,9 +414,9 @@ class button():
 
         elif self.button_type == 'labor broker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
-            self.set_tooltip(["Uses a local labor broker to recruit a unit of African workers from a nearby village", "Has a cost based on the aggressiveness and distance of the chosen village",
-                "Automatically finds the cheapest available worker"] + self.global_manager.get('recruitment_list_descriptions')['village workers'])
-
+            self.set_tooltip(["Uses a local labor broker to find and hire a unit of African workers from a nearby village", "The worker's initial recruitment cost varies with the chosen village's distance and aggressiveness, and even unexplored villages may be chosen",
+                "Automatically finds the cheapest available worker"] + self.global_manager.get('recruitment_list_descriptions')['village workers'] + ["Can only be done at a port"])
+            
         elif self.button_type == 'hire slums worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slums workers')
             self.set_tooltip(["Recruits a unit of African workers for 0 money"] + self.global_manager.get('recruitment_list_descriptions')['slums workers'])
@@ -846,10 +842,6 @@ class button():
                         mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
                         cycled_mob.select()
                         cycled_mob.move_to_front()
-                        #for current_image in cycled_mob.images:
-                        #    current_cell = cycled_mob.images[0].current_cell
-                        #    while not current_cell.contained_mobs[0] == cycled_mob: #move to front of tile
-                        #        current_cell.contained_mobs.append(current_cell.contained_mobs.pop(0))
                         if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
                             cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
                         else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
@@ -982,8 +974,13 @@ class button():
                         text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)
+                    
             elif self.button_type == 'confirm main menu':
+                self.global_manager.set('game_over', False)
                 game_transitions.to_main_menu(self.global_manager)
+
+            elif self.button_type == 'quit':
+                self.global_manager.set('crashed', True)
                 
     def on_rmb_release(self):
         '''
@@ -1400,7 +1397,7 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)) or self.to_mode == 'ministers':
+                if (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)) or self.to_mode in ['ministers', 'main menu']:
 
                     if self.to_mode == 'ministers' and 'trial' in self.modes:
                         defense = self.global_manager.get('displayed_defense')

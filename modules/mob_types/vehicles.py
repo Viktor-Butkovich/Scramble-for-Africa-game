@@ -459,3 +459,15 @@ class boat(ship):
         self.can_walk = False
         self.travel_possible = False
         self.inventory_capacity = 9
+
+    def get_movement_cost(self, x_change, y_change):
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Unlike most pmobs, steamboats use their default movement cost to move to all water or port tiles
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
+        return(self.movement_cost)

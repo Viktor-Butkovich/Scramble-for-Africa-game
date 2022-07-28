@@ -5,6 +5,7 @@ from .buttons import button
 from . import scaling
 from . import text_tools
 from . import utility
+from . import market_tools
 
 class label(button):
     '''
@@ -127,8 +128,8 @@ class value_label(label):
         Output:
             None
         '''
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
         self.value_name = value_name
+        super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
         self.display_name = text_tools.remove_underscores(self.value_name) #public_opinion to public opinion
         self.tracker = self.global_manager.get(value_name + '_tracker')
         self.tracker.value_label = self
@@ -143,7 +144,14 @@ class value_label(label):
         Output:
             None
         '''
-        self.set_label(self.display_name + ': ' + str(new_value))
+        self.set_label(utility.capitalize(self.display_name + ': ' + str(new_value)))
+
+    def update_tooltip(self):
+        tooltip_text = [self.message]
+        if self.value_name == 'public_opinion':
+            tooltip_text.append("Public opinion represents your company's reputation and expectations for its success and is used to calculate government subsidies")
+            tooltip_text.append("Public opinion tends to approach the netural value of 50 over time")
+        self.set_tooltip(tooltip_text)
 
 class money_label(value_label):
     '''
@@ -193,18 +201,36 @@ class money_label(value_label):
         
         tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
         if num_african_workers > 0:
-            tooltip_text.append("Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
+            tooltip_text.append("    Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
+        else:
+            tooltip_text.append("    Any free African workers would each be paid " + str(african_worker_upkeep) + " money.")
         if num_european_workers > 0:
-            tooltip_text.append("Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+            tooltip_text.append("    Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+        else:
+            tooltip_text.append("    Any European workers would each be paid " + str(african_worker_upkeep) + " money.")
         if num_slave_workers > 0:
-            tooltip_text.append("Each of your " + str(num_slave_workers) + " slave workers will be paid " + str(slave_worker_upkeep) + " money, totaling to " + str(total_slave_worker_upkeep) + " money.")
-        tooltip_text.append("Religious volunteers cost no upkeep.")
+            tooltip_text.append("    Each of your " + str(num_slave_workers) + " slave workers will be cost " + str(slave_worker_upkeep) + " in upkeep, totaling to " + str(total_slave_worker_upkeep) + " money.")
+        else:
+            tooltip_text.append("    Any slave workers would cost " + str(african_worker_upkeep) + " money in upkeep.")
+        tooltip_text.append("    Church volunteers do not need to be paid.")
+
+        tooltip_text.append("")
+        tooltip_text.append("While public opinion and government subsidies are not entirely predictable, your company is estimated to receive " + str(market_tools.calculate_subsidies(self.global_manager, True)) + " money in subsidies this turn")
 
         if len(self.global_manager.get('loan_list')) > 0:
             tooltip_text.append("")
             tooltip_text.append("Loans: ")
             for current_loan in self.global_manager.get('loan_list'):
                 tooltip_text.append('    ' + current_loan.get_description())
+
+        tooltip_text.append("")
+        estimated_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)
+        if estimated_money_change > 0:
+            tooltip_text.append("Between these revenues and expenses, your company is expected to gain about " + str(estimated_money_change) + " money at the end of the turn.")
+        elif estimated_money_change < 0:
+            tooltip_text.append("Between these revenues and expenses, your company is expected to lose about " + str(-1 * estimated_money_change) + " money at the end of the turn.")
+        else:
+            tooltip_text.append("Between these revenues and expenses, your company is expected to neither gain nor lose money at the end of the turn.")
         
         self.set_tooltip(tooltip_text)
 

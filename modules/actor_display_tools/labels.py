@@ -147,6 +147,8 @@ class actor_display_label(label):
             self.message_start = 'Combat strength: '
         elif self.actor_label_type == 'preferred_terrains':
             self.message_start = 'Preferred terrain: '
+        elif self.actor_label_type == 'building workers':
+            self.message_start = 'Work crews: '
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -259,14 +261,12 @@ class actor_display_label(label):
             tooltip_text.append("While some interests are derived from a minister's legitimate talent or experience in a particular field, others are mere fancies")
             self.set_tooltip(tooltip_text)        
         elif self.actor_label_type == 'building workers':
-            tooltip_text = [self.message]
+            tooltip_text = []
             tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang")
             if (not self.attached_building == 'none'):
-                tooltip_text.append("Work crews: ")
+                tooltip_text.append("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 for current_work_crew in self.attached_building.contained_work_crews:
                     tooltip_text.append("    " + utility.capitalize(current_work_crew.name))
-                if len(self.attached_building.contained_work_crews) == 0:
-                    tooltip_text[-1] += 'none'
             self.set_tooltip(tooltip_text)
         elif self.actor_label_type == 'building efficiency':
             tooltip_text = [self.message]

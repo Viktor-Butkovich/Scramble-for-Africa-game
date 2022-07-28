@@ -19,7 +19,6 @@ def end_turn(global_manager):
     Output:
         None
     '''
-    global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
 
@@ -75,6 +74,7 @@ def start_player_turn(global_manager, first_turn = False):
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
+        game_end_check(global_manager)
 
     global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
     global_manager.set('enemy_combat_phase', False)
@@ -83,12 +83,28 @@ def start_player_turn(global_manager, first_turn = False):
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
-    end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.images[0].current_cell == 'none')) and end_turn_selected_mob in global_manager.get('mob_list'):
-        #do not attempt to select if none selected or has been removed since end of turn
-        end_turn_selected_mob.select()
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
-    else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
+    actor_utility.deselect_all(global_manager)
+    found_mob = False
+    centered_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
+    if not centered_cell.get_pmob() == 'none':
+        found_mob = True
+        current_mob = centered_cell.get_pmob()
+        current_mob.select()
+        current_mob.grids[0].mini_grid.calibrate(current_mob.x, current_mob.y)
+    if not found_mob: #if no mobs in current minimap tile, select first in list
+        pmob_list = global_manager.get('pmob_list')
+        for cycled_index in range(len(global_manager.get('pmob_list'))):
+            current_mob = pmob_list[cycled_index]
+            if not current_mob.images[0].current_cell == 'none':
+                current_mob.select()
+                current_mob.move_to_front()
+                if not current_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
+                    current_mob.grids[0].mini_grid.calibrate(current_mob.x, current_mob.y)
+                else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
+                found_mob = True
+                break
+    if not found_mob: #if no pmobs to select, calibrate to minimap tile to show any changes
         if not global_manager.get('displayed_tile') == 'none':
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
 
@@ -235,7 +251,7 @@ def manage_subsidies(global_manager):
     Output:
         None
     '''
-    subsidies_received = round(global_manager.get('public_opinion') / 10, 1) #4.9 for 49 public opinion
+    subsidies_received = market_tools.calculate_subsidies(global_manager)
     text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government based on your public opinion and colonial efforts", global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 
@@ -554,3 +570,10 @@ def manage_ministers(global_manager):
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
         global_manager.get('fear_tracker').change(-1)
+
+def game_end_check(global_manager):
+    if global_manager.get('money') < 0:
+        global_manager.set('game_over', True)
+        text = ""
+        text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
+        notification_tools.display_choice_notification(text, ['confirm main menu', 'quit'], {}, global_manager)

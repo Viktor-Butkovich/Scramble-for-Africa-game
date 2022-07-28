@@ -50,7 +50,8 @@ class expedition(group):
         
         self.set_group_type('expedition')
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
-        self.resolve_off_tile_exploration()
+        if not self.images[0].current_cell == 'none': #if did not just board vehicle
+            self.resolve_off_tile_exploration()
 
     def move(self, x_change, y_change):
         '''
@@ -269,7 +270,10 @@ class expedition(group):
         if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
             if self.movement_points >= self.get_movement_cost(x_change, y_change):
-                self.move(x_change, y_change)
+                if self.can_move(x_change, y_change): #checks for npmobs in explored tile
+                    self.move(x_change, y_change)
+                else:
+                    self.global_manager.get('minimap_grid').calibrate(self.x, self.y) #changes minimap to show unexplored tile without moving
             else:
                 notification_tools.display_notification("This unit's " + str(self.movement_points) + " remaining movement points are not enough to move into the newly explored tile. /n /n", 'default', self.global_manager)
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)

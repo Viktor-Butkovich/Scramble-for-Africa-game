@@ -63,6 +63,8 @@ class group(pmob):
                 self.set_movement_points(self.officer.movement_points)
             else:
                 self.set_movement_points(self.worker.movement_points)
+            if self.veteran:
+                self.set_name("veteran " + self.name)
         else:
             if self.veteran:
                 #self.set_name("Veteran " + self.name.lower())

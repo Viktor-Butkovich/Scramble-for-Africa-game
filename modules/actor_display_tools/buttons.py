@@ -1255,7 +1255,7 @@ class labor_broker_button(label_button):
         '''
         result = super().can_show()
         if result:
-            if (not (self.attached_label.actor.is_officer or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
+            if (not ((self.attached_label.actor.is_officer and not self.attached_label.actor.officer_type == 'evangelist') or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
                 return(False)
         return(result)
 
@@ -1487,12 +1487,12 @@ class switch_theatre_button(label_button):
                 if current_mob.movement_points >= 1:
                     if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                         if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
-                            if self.global_manager.get('current_game_mode') == 'strategic':
-                                current_mob.end_turn_destination = 'none'
-                                self.global_manager.set('choosing_destination', True)
-                                self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
-                            else:
-                                text_tools.print_to_screen("You can not switch theatres from the European HQ screen.", self.global_manager)
+                            if not self.global_manager.get('current_game_mode') == 'strategic':
+                                game_transitions.set_game_mode('strategic', self.global_manager)
+                                current_mob.select()
+                            current_mob.end_turn_destination = 'none'
+                            self.global_manager.set('choosing_destination', True)
+                            self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
                     else:
                         text_tools.print_to_screen("You are inland and can not cross the ocean.", self.global_manager) 
                 else:
@@ -1824,10 +1824,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         message = []
         if self.building_type == 'resource':
             if self.attached_resource == 'none':
-                message.append('Builds a building that produces commodities over time.')
+                message.append('Builds a resource production facility to which work crews can attach to produces commodities over time.')
                 message.append('Can only be built in the same tile as a resource.')
             else:
-                message.append('Builds a ' + self.building_name + ' that produces ' + self.attached_resource + ' over time')
+                message.append('Builds a ' + self.building_name + ' to which work crews can attach to produce ' + self.attached_resource + ' over time')
                 message.append('Can only be built in the same tile as a ' + self.attached_resource + ' resource.')
 
         elif self.building_type == 'port':

@@ -135,6 +135,46 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
                 global_manager.get('recruitment_costs')['slave workers'] = changed_price
                 text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
+def calculate_subsidies(global_manager, projected = False):
+    public_opinion = global_manager.get('public_opinion')
+    if projected:
+        if public_opinion < 50:
+            public_opinion += 1
+        elif public_opinion > 50:
+            public_opinion -= 1
+    else:
+        public_opinion += random.randrange(-10, 11)
+    return(round(public_opinion / 10, 1)) #4.9 for 49 public opinion
+
+def calculate_total_worker_upkeep(global_manager):
+    num_african_workers = global_manager.get('num_african_workers')
+    african_worker_upkeep = global_manager.get('african_worker_upkeep')
+    total_african_worker_upkeep = round(num_african_workers * african_worker_upkeep, 1)
+
+    num_european_workers = global_manager.get('num_european_workers')
+    european_worker_upkeep = global_manager.get('european_worker_upkeep')
+    total_european_worker_upkeep = round(num_european_workers * european_worker_upkeep, 1)
+
+    num_slave_workers = global_manager.get('num_slave_workers')
+    slave_worker_upkeep = global_manager.get('slave_worker_upkeep')
+    total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 1)
+        
+    num_workers = num_african_workers + num_european_workers + num_slave_workers
+    total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 1)
+    return(total_upkeep)
+
+def calculate_end_turn_money_change(global_manager):
+    estimated_change = 0
+    
+    estimated_change += calculate_subsidies(global_manager, True)
+
+    estimated_change -= calculate_total_worker_upkeep(global_manager)
+    
+    for current_loan in global_manager.get('loan_list'):
+        estimated_change -= current_loan.interest
+
+    return(estimated_change)
+    
 class loan():
     '''
     Object corresponding to a loan with principal, interest, and duration

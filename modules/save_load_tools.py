@@ -253,8 +253,6 @@ class save_load_manager_template():
         
         text_tools.print_to_screen("", self.global_manager)
         text_tools.print_to_screen("Loading " + file_path, self.global_manager)
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn') + 1), self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:
@@ -277,6 +275,9 @@ class save_load_manager_template():
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
         self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
+
+        text_tools.print_to_screen("", self.global_manager)
+        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn')), self.global_manager)
 
         #load grids
         strategic_grid_height = 300
