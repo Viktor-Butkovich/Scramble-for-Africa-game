@@ -65,6 +65,8 @@ class vehicle(pmob):
                 self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
+        if not self.has_crew:
+            self.remove_from_turn_queue()
 
     def manage_health_attrition(self, current_cell = 'default'):
         '''
@@ -88,7 +90,7 @@ class vehicle(pmob):
                 worker_type = current_sub_mob.worker_type
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
-            if current_cell.local_attrition():
+            if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
                 if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew:

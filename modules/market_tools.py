@@ -144,7 +144,7 @@ def calculate_subsidies(global_manager, projected = False):
             public_opinion -= 1
     else:
         public_opinion += random.randrange(-10, 11)
-    return(round(public_opinion / 10, 1)) #4.9 for 49 public opinion
+    return(round(public_opinion / 5, 1)) #9.8 for 49 public opinion
 
 def calculate_total_worker_upkeep(global_manager):
     num_african_workers = global_manager.get('num_african_workers')

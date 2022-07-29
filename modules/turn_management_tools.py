@@ -24,7 +24,8 @@ def end_turn(global_manager):
 
     actor_utility.deselect_all(global_manager)
         
-    global_manager.set('player_turn', False)     
+    global_manager.set('player_turn', False)
+    global_manager.set('player_turn_queue', [])
     start_enemy_turn(global_manager)
 
 def start_enemy_turn(global_manager):
@@ -84,29 +85,7 @@ def start_player_turn(global_manager, first_turn = False):
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
             
     actor_utility.deselect_all(global_manager)
-    found_mob = False
-    centered_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
-    if not centered_cell.get_pmob() == 'none':
-        found_mob = True
-        current_mob = centered_cell.get_pmob()
-        current_mob.select()
-        current_mob.grids[0].mini_grid.calibrate(current_mob.x, current_mob.y)
-    if not found_mob: #if no mobs in current minimap tile, select first in list
-        pmob_list = global_manager.get('pmob_list')
-        for cycled_index in range(len(global_manager.get('pmob_list'))):
-            current_mob = pmob_list[cycled_index]
-            if not current_mob.images[0].current_cell == 'none':
-                current_mob.select()
-                current_mob.move_to_front()
-                if not current_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
-                    current_mob.grids[0].mini_grid.calibrate(current_mob.x, current_mob.y)
-                else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
-                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_mob.images[0].current_cell.tile)
-                found_mob = True
-                break
-    if not found_mob: #if no pmobs to select, calibrate to minimap tile to show any changes
-        if not global_manager.get('displayed_tile') == 'none':
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+    game_transitions.cycle_player_turn(global_manager, True)
 
 def reset_mobs(mob_type, global_manager):
     '''
@@ -176,6 +155,8 @@ def manage_production(global_manager):
     for current_resource_building in global_manager.get('resource_building_list'):
         if not current_resource_building.damaged:
             current_resource_building.produce()
+            if len(current_resource_building.contained_work_crews) == 0:
+                global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report

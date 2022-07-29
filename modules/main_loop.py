@@ -43,6 +43,7 @@ def main_loop(global_manager):
                                     current_button.on_click()
                                     current_button.has_released = False
                                     current_button.being_pressed = True
+                                    break
                             else:#stop confirming an important button press if user starts doing something else
                                 current_button.confirming = False
                                 current_button.being_pressed = False

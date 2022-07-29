@@ -50,6 +50,7 @@ class work_crew(group):
         self.building = building
         self.selected = False
         self.hide_images()
+        self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.images[0].current_cell.tile) #update tile ui with worked building
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
@@ -66,6 +67,7 @@ class work_crew(group):
         self.in_building = False
         self.building = 'none'
         self.show_images()
+        self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
         self.select()

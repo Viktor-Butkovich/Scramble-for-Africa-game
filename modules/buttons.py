@@ -298,7 +298,8 @@ class button():
                 self.set_tooltip(['none'])
                 
         elif self.button_type == 'switch theatre':
-           self.set_tooltip(["Moves this ship between Africa and Europe", " Requires that this ship has all of its movement points and is not inland"])
+           self.set_tooltip(["Moves this steamship across the ocean to another theatre at the end of the turn", "Once clicked, the mouse pointer can be used to click on the destination",
+                "The destination, once chosen, will having a flashing yellow outline", "Requires that this steamship is able to move"])
            
         elif self.button_type == 'cycle passengers':
             tooltip_text = ["Cycles through this " + self.vehicle_type + "'s passengers"]
@@ -334,8 +335,13 @@ class button():
                 "Costs all remaining movement points, at least 1"])
             
         elif self.button_type == 'cycle units':
-            self.set_tooltip(["Selects the next unit that has movement remaining"])
-
+            tooltip_text = ["Selects the next unit in the turn order"]
+            turn_queue = self.global_manager.get('player_turn_queue')
+            if len(turn_queue) > 0:
+                for current_pmob in turn_queue:
+                    tooltip_text.append("    " + utility.capitalize(current_pmob.name))
+            self.set_tooltip(tooltip_text)
+                   
         elif self.button_type == 'trade':
             self.set_tooltip(["Attempts to trade with natives, paying consumer goods for random commodities", "Can only be done in a village", "The number of possible trades per turn depends on the village's population and aggressiveness",
                 "Each trade spends a unit of consumer goods for a chance of a random commodity", "Regardless of a trade's success, the lure of consumer goods has a chance of convincing natives to become available workers",
@@ -415,7 +421,7 @@ class button():
         elif self.button_type == 'labor broker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
             self.set_tooltip(["Uses a local labor broker to find and hire a unit of African workers from a nearby village", "The worker's initial recruitment cost varies with the chosen village's distance and aggressiveness, and even unexplored villages may be chosen",
-                "Automatically finds the cheapest available worker"] + self.global_manager.get('recruitment_list_descriptions')['village workers'] + ["Can only be done at a port"])
+                "Automatically finds the cheapest available worker"] + self.global_manager.get('recruitment_list_descriptions')['village workers'] + ["Can only be done at a port", "Requires all movement points, at least 1"])
             
         elif self.button_type == 'hire slums worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'slums workers')
@@ -428,6 +434,19 @@ class button():
         elif self.button_type == 'show previous financial report':
             self.set_tooltip(["Displays the previous turn's financial report"])
 
+        elif self.button_type in ['enable sentry mode', 'disable sentry mode']:
+            if self.button_type == 'enable sentry mode':
+                verb = 'enable'
+            elif self.button_type == 'disable sentry mode':
+                verb = 'disable'
+            self.set_tooltip([utility.capitalize(verb) + "s sentry mode for this unit", "A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units"])
+
+        elif self.button_type == 'wake up all':
+            self.set_tooltip(["Disables sentry mode for all units", "A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units"])
+
+        elif self.button_type == 'end unit turn':
+            self.set_tooltip(["Ends this unit's turn, skipping it when cycling through unmoved units for the rest of the turn"])
+            
         else:
             self.set_tooltip(['placeholder'])
             
@@ -677,6 +696,8 @@ class button():
                                     mob.move(x_change, y_change)
                                     self.global_manager.set('show_selection_outlines', True)
                                     self.global_manager.set('last_selection_outline_switch', time.time())
+                                    if mob.sentry_mode:
+                                        mob.set_sentry_mode(False)
                             else:
                                 text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
                         elif len(selected_list) < 1:
@@ -732,6 +753,8 @@ class button():
                                     can_drop_off = False
                                     text_tools.print_to_screen("A train can only drop off cargo at a train station.", self.global_manager)
                                 if can_drop_off:
+                                    if displayed_mob.sentry_mode:
+                                        displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                     displayed_tile.change_inventory(commodity, num_commodity)
                                     if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
@@ -768,6 +791,8 @@ class button():
                                         else:
                                             amount_transferred = displayed_mob.get_inventory_remaining()
                                             text_tools.print_to_screen("This unit can currently only pick up " + str(amount_transferred) + " units of " + commodity + ".", self.global_manager)
+                                        if displayed_mob.sentry_mode:
+                                            displayed_mob.set_sentry_mode(False)
                                         displayed_mob.change_inventory(commodity, amount_transferred)
                                         displayed_tile.change_inventory(commodity, -1 * amount_transferred)
                                 else:
@@ -824,28 +849,7 @@ class button():
 
             elif self.button_type == 'cycle units':
                 if main_loop_tools.action_possible(self.global_manager):
-                    mob_list = self.global_manager.get('pmob_list')
-                    cycled_mob = 'none'
-                    cycled_index = 0
-                    for current_mob_index in range(len(mob_list)):
-                        current_mob = mob_list[current_mob_index]
-                        if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
-                            if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
-                                if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
-                                    if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
-                                        cycled_mob = current_mob
-                                        cycled_index = current_mob_index
-                                        break
-                    if cycled_mob == 'none':
-                        text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
-                    else:
-                        mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
-                        cycled_mob.select()
-                        cycled_mob.move_to_front()
-                        if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
-                            cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
-                        else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
-                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
+                    game_transitions.cycle_player_turn(self.global_manager)
                 else:
                     text_tools.print_to_screen("You are busy and can not cycle through units.", self.global_manager)
 
@@ -981,6 +985,12 @@ class button():
 
             elif self.button_type == 'quit':
                 self.global_manager.set('crashed', True)
+
+            elif self.button_type == 'wake up all':
+                for current_pmob in self.global_manager.get('pmob_list'):
+                    if current_pmob.sentry_mode:
+                        current_pmob.set_sentry_mode(False)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob'))
                 
     def on_rmb_release(self):
         '''

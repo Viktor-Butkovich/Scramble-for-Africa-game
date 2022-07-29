@@ -31,6 +31,7 @@ class native_warriors(npmob):
         self.number = 2 #native warriors is plural
         self.hostile = True
         self.can_damage_buildings = True
+        self.aggro_distance = 3
         self.saves_normally = False #saves as part of village
         self.origin_village = input_dict['origin_village']
         self.origin_village.attached_warriors.append(self)
@@ -41,7 +42,6 @@ class native_warriors(npmob):
         self.image_dict['canoes'] = input_dict['canoes_image']
         self.image_dict['no_canoes'] = self.image_dict['default']
         self.update_canoes()
-        
         if not from_save:
             self.set_max_movement_points(4)
             if not global_manager.get('creating_new_game'):

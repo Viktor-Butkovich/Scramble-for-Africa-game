@@ -13,6 +13,7 @@ from .. import scaling
 from .. import images
 from .. import dice_utility
 from .. import turn_management_tools
+from ..tiles import status_icon
 
 class pmob(mob):
     '''
@@ -37,7 +38,8 @@ class pmob(mob):
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
-        '''   
+        '''
+        self.sentry_mode = False
         super().__init__(from_save, input_dict, global_manager)
         self.selection_outline_color = 'bright green'
         global_manager.get('pmob_list').append(self)
@@ -51,12 +53,19 @@ class pmob(mob):
                 self.end_turn_destination = end_turn_destination_grid.find_cell(end_turn_destination_x, end_turn_destination_y).tile
             self.default_name = input_dict['default_name']
             self.set_name(self.default_name)
+            self.set_sentry_mode(input_dict['sentry_mode'])
+            if input_dict['in_turn_queue'] and input_dict['end_turn_destination'] == 'none':
+                self.add_to_turn_queue()
+            else:
+                self.remove_from_turn_queue()
         else:
             self.default_name = self.name
             self.set_max_movement_points(4)
             actor_utility.deselect_all(self.global_manager)
             self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            self.set_sentry_mode(False)
+            self.add_to_turn_queue()
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -85,7 +94,58 @@ class pmob(mob):
                     save_dict['end_turn_destination_grid_type'] = grid_type
             save_dict['end_turn_destination'] = (self.end_turn_destination.x, self.end_turn_destination.y)
         save_dict['default_name'] = self.default_name
+        save_dict['sentry_mode'] = self.sentry_mode
+        save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
         return(save_dict)
+
+    def set_sentry_mode(self, new_value):
+        old_value = self.sentry_mode
+        if not old_value == new_value:
+            self.sentry_mode = new_value
+            if new_value == True:
+                for current_grid in self.grids:
+                    if current_grid == self.global_manager.get('minimap_grid'):
+                        sentry_icon_x, sentry_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    elif current_grid == self.global_manager.get('europe_grid'):
+                        sentry_icon_x, sentry_icon_y = (0, 0)
+                    else:
+                        sentry_icon_x, sentry_icon_y = (self.x, self.y)
+                    input_dict = {}
+                    input_dict['coordinates'] = (sentry_icon_x, sentry_icon_y)
+                    input_dict['grid'] = current_grid
+                    input_dict['image'] = 'misc/sentry_icon.png'
+                    input_dict['name'] = 'sentry icon'
+                    input_dict['modes'] = ['strategic', 'europe']
+                    input_dict['show_terrain'] = False
+                    input_dict['actor'] = self
+                    input_dict['status_icon_type'] = 'sentry'
+                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+                self.remove_from_turn_queue()
+                if self.global_manager.get('displayed_mob') == self:
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
+            else:
+                remaining_icons = []
+                for current_status_icon in self.status_icons:
+                    if current_status_icon.status_icon_type == 'sentry':
+                        current_status_icon.remove()
+                    else:
+                        remaining_icons.append(current_status_icon)
+                self.status_icons = remaining_icons
+                if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
+                    self.add_to_turn_queue()
+            if self == self.global_manager.get('displayed_mob'):
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        
+
+    def add_to_turn_queue(self):
+        if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
+            turn_queue = self.global_manager.get('player_turn_queue')
+            if not self in turn_queue:
+                turn_queue.append(self)
+
+    def remove_from_turn_queue(self):
+        turn_queue = self.global_manager.get('player_turn_queue')
+        self.global_manager.set('player_turn_queue', utility.remove_from_list(turn_queue, self))
 
     def replace(self):
         '''
@@ -159,6 +219,7 @@ class pmob(mob):
             current_tile = self.images[0].current_cell.tile
             for current_commodity in self.global_manager.get('commodity_types'):
                 current_tile.change_inventory(current_commodity, self.get_inventory(current_commodity))
+        self.remove_from_turn_queue()
         super().remove()
         self.global_manager.set('pmob_list', utility.remove_from_list(self.global_manager.get('pmob_list'), self)) #make a version of pmob_list without self and set pmob_list to it
 
@@ -406,6 +467,7 @@ class pmob(mob):
                 else:
                     self.images[0].current_cell.tile.change_inventory(current_commodity, 1)
         self.hide_images()
+        self.remove_from_turn_queue()
         vehicle.contained_mobs.append(self)
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
@@ -434,7 +496,18 @@ class pmob(mob):
         vehicle.selected = False
         if self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
+        if self.can_trade and self.can_hold_commodities: #if caravan
+            consumer_goods_present = vehicle.get_inventory('consumer goods')
+            if consumer_goods_present > 0:
+                consumer_goods_transferred = consumer_goods_present
+                if consumer_goods_transferred > self.inventory_capacity:
+                    consumer_goods_transferred = self.inventory_capacity
+                vehicle.change_inventory('consumer goods', -1 * consumer_goods_transferred)
+                self.change_inventory('consumer goods', consumer_goods_transferred)
+                text_tools.print_to_screen(utility.capitalize(self.name) + " automatically took " + str(consumer_goods_transferred) + " consumer goods from " + vehicle.name + "'s cargo.", self.global_manager)
+                
         self.select()
+        self.add_to_turn_queue()
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
@@ -452,6 +525,8 @@ class pmob(mob):
             None
         '''
         if combat_type == 'defending': #if being attacked on main grid, move minimap there to show location
+            if self.sentry_mode:
+                self.set_sentry_mode(False)
             if self.global_manager.get('strategic_map_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
                 self.select()
@@ -1027,9 +1102,9 @@ class pmob(mob):
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
-            minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            minister_position_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
                 'position', self.global_manager)
-            minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
+            minister_portrait_icon = images.dice_roll_minister_image(scaling.scale_coordinates(minister_icon_coordinates[0], minister_icon_coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
                 'portrait', self.global_manager)
         
     def start_repair(self, building_info_dict):

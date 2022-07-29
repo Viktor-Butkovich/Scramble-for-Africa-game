@@ -4,6 +4,32 @@ import random
 
 from . import scaling
 from . import utility
+from . import text_tools
+
+
+    
+    #mob_list = self.global_manager.get('pmob_list')
+    #cycled_mob = 'none'
+    #cycled_index = 0
+    #for current_mob_index in range(len(mob_list)):
+    #    current_mob = mob_list[current_mob_index]
+    #    if current_mob.movement_points > 0 and not (current_mob.in_vehicle or current_mob.in_group or current_mob.in_building): #find mob that is independent and can move
+    #        if not (current_mob.is_vehicle and not current_mob.has_crew): #skip uncrewed vehicles
+    #            if not current_mob == self.global_manager.get('displayed_mob'): #skip the currently selected mob
+    #                if self.global_manager.get('current_game_mode') in current_mob.modes: #skip units that are not on the current game mode, like ones in Africa when looking at Europe
+    #                    cycled_mob = current_mob
+    #                    cycled_index = current_mob_index
+    #                    break
+    #if cycled_mob == 'none':
+    #    text_tools.print_to_screen("There are no units that have movement points remaining.", self.global_manager)
+    #else:
+    #    mob_list.append(mob_list.pop(cycled_index)) #moves unit to end of mob list, allowing other unit to be selected next time
+    #    cycled_mob.select()
+    #    cycled_mob.move_to_front()
+    #    if not cycled_mob.grids[0].mini_grid == 'none': #if cycled unit is on the strategic map, calibrate minimap to it
+    #        cycled_mob.grids[0].mini_grid.calibrate(cycled_mob.x, cycled_mob.y)
+    #    else: #if on Europe or other abstract grid, calibrate tile info display but not minimap to it
+    #        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_mob.images[0].current_cell.tile)
 
 def update_recruitment_descriptions(global_manager, target = 'all'):
     '''

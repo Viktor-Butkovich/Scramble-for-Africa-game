@@ -25,25 +25,29 @@ Units disembarking in a port should not become disorganized
 add at least 2 more available ministers slots
 available ministers display should correctly move out of blank space when ministers leave
 Selecting minister in available minister display should always center the display on that minister
+make beast behavior less predictable, won't just attack every turn and don't say retreat direction unless injured?
+reduce aggro range of native warriors
+add sentry mode and end turn for unit buttons
+add wake up all units button
+tab cycling should skip ships with an end turn destination
+acquired commodity cost should be shown in trading notification
+labor broker should take all remaining movement points, at least 1
+caravan disembarking vehicle should automatically take up to 9 consumer goods from its cargo
+balance improvements such as doubling subsidies, gain public opinion on exploration
+production report should show any resource your company has the capacity to produce, even if there are no work crews currently attempting to produce it
+reduce attrition for units in vehicles, including crew
+check resolution scaling
 
 Future plans:
-make beast behavior less predictable, won't just attack every turn and don't say retreat direction unless injured?
-add sentry mode and end turn for unit buttons
-acquired commodity cost should be shown in trading notification
-balance improvements such as doubling subsidies, gain public opinion on exploration
-labor broker should take all remaining movement points, at least 1
-production report should show any resource your company has the capacity to produce, even if there are no work crews currently attempting to produce it
-reduce aggro range of native warriors
 improve description of worker recruitment when using labor broker to not use generic recruitment text
-caravan disembarking vehicle should automatically take up to 9 consumer goods from its cargo
-reduce attrition for units in vehicles, including crew
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
 Maybe automatically unload ship cargo and passengers upon entering ports
 add are you sure message for removing ministers
 remove religious/ethnic references relating to slave traders
-ship travel button should show in tooltip that it moves at the end of the turn, tab cycling should skip ships with an end turn destination, add buttons to go to slave traders and europe, tab should switch screens if on Europe screen like ad
+ship travel button should show in tooltip that it moves at the end of the turn, add buttons to go to slave traders and europe, tab should switch screens if on Europe screen like ad
 
 Later:
+have chance of explorer promotion on automatic exploration
 improve terrain appearances, especially hills
 improve button images for labor broker, switch screens, etc.
 minister of trade should sell commodities at end of turn and report how much they were sold for, allow for attrition
@@ -75,8 +79,10 @@ Fixable:
 Slave 'recruitment' notification should use the term 'purchase' and not 'recruit' on choice button
 Make sure cost of trials, capture slaves, and other actions are correctly shown in actor display button tooltip
 pmobs.display_die creating minister icons without resolution scaling
+ship tooltip after attrition not correctly showing no movement
 
 Investigating:
+some notifications slightly too short for click to remove message when display height manually lowered
 safari not correctly having enough movement to follow up after hunting, possibly relating to water
 Disorganized flag and tooltip not showing correctly, especially when creating group or after disembarking ship
 Fix inconsistent minister faces during dice rolls, appears twice on forts, in incorrect place other times, issues with multiple minister messages in a row

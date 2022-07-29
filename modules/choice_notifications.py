@@ -337,9 +337,12 @@ class recruitment_choice_button(choice_button):
 
                 worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
                 if recruiter.is_vehicle:
+                    recruiter.temp_disable_movement()
                     worker.crew_vehicle(recruiter)
                 else:
+                    recruiter.set_movement_points(0)
                     self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
+                    
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]

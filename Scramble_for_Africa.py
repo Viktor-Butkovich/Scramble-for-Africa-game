@@ -450,6 +450,7 @@ try:
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
     global_manager.set('enemy_turn_queue', [])
+    global_manager.set('player_turn_queue', [])
 
     global_manager.set('minister_limit', 15)
 
@@ -556,19 +557,19 @@ try:
 
     #value tracker setup
     global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
-    labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    labels.value_label(scaling.scale_coordinates(330, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    labels.money_label(scaling.scale_coordinates(330, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager)
 
     global_manager.set('previous_financial_report', 'none')
-    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
+    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
         scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
-    labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    labels.value_label(scaling.scale_coordinates(495, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'turn', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
@@ -579,6 +580,9 @@ try:
 
 
     #button setup
+    wake_up_all_button = buttons.button(scaling.scale_coordinates(225, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', 'wake up all', 'none', ['strategic', 'europe'], 'buttons/disable_sentry_mode_button.png', global_manager)
+    
     strategic_to_europe_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
         pygame.K_e, 'europe', ['strategic'], 'buttons/european_hq_button.png', global_manager)
 
@@ -782,6 +786,11 @@ try:
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
     global_manager.get('mob_info_display_list').append(mob_free_image)
 
+    #sentry mode icon image
+    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'sentry_icon', global_manager) #coordinates, width, height, modes, global_manager
+    global_manager.get('mob_info_display_list').append(mob_free_image)
+    
     fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
         scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
     #mob info images setup

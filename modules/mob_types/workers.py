@@ -175,6 +175,8 @@ class worker(pmob):
             if not current_image.current_cell == 'none':
                 while not moved_mob == current_image.current_cell.contained_mobs[0]:
                     current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        self.remove_from_turn_queue()
+        vehicle.add_to_turn_queue()
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
             vehicle.select()
 
@@ -199,6 +201,8 @@ class worker(pmob):
         vehicle.end_turn_destination = 'none'
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
+        vehicle.remove_from_turn_queue()
+        self.add_to_turn_queue()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):
@@ -213,6 +217,7 @@ class worker(pmob):
         self.in_group = True
         self.selected = False
         self.hide_images()
+        self.remove_from_turn_queue()
 
     def leave_group(self, group):
         '''
@@ -229,6 +234,8 @@ class worker(pmob):
         self.show_images()
         self.disorganized = group.disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
+        if self.movement_points > 0:
+            self.add_to_turn_queue()
 
     def remove(self):
         '''

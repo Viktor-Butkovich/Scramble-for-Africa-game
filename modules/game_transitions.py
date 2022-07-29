@@ -7,6 +7,27 @@ from . import tiles
 from . import actor_utility
 from . import minister_utility
 
+def cycle_player_turn(global_manager, start_of_turn = False):
+    turn_queue = global_manager.get('player_turn_queue')
+    if len(turn_queue) == 0:
+        if not start_of_turn:
+            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+            actor_utility.deselect_all(global_manager)
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+    else:
+        if len(turn_queue) == 1 and not start_of_turn:
+            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+        if global_manager.get('current_game_mode') == 'europe' and turn_queue[0].grids[0] == global_manager.get('strategic_map_grid'):
+            set_game_mode('strategic', global_manager)
+                
+        turn_queue[0].select()
+        turn_queue[0].move_to_front()
+        if not turn_queue[0].grids[0].mini_grid == 'none':
+            turn_queue[0].grids[0].mini_grid.calibrate(turn_queue[0].x, turn_queue[0].y)
+        else:
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), turn_queue[0].images[0].current_cell.tile)
+        turn_queue.append(turn_queue.pop(0))
+
 def set_game_mode(new_game_mode, global_manager):
     '''
     Description:
@@ -144,6 +165,7 @@ def to_main_menu(global_manager, override = False):
     global_manager.set('displayed_tile', 'none')
     global_manager.set('end_turn_selected_mob', 'none')
     global_manager.set('message', '')
+    global_manager.set('player_turn_queue', [])
     if not global_manager.get('current_instructions_page') == 'none':
         global_manager.get('current_instructions_page').remove()
         global_manager.set('current_instructions_page', 'none')

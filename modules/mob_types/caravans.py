@@ -266,7 +266,7 @@ class caravan(group):
         notification_type = 'none'
         if roll_result >= self.current_min_success:
             commodity = random.choice(self.global_manager.get('collectable_resources'))
-            text += "/n The merchant managed to buy a unit of " + commodity + ". /n /n"
+            text += "/n The merchant managed to buy a unit of " + commodity + " (currently worth " + str(self.global_manager.get('commodity_prices')[commodity]) + " money). /n /n"
             notification_type = 'successful_commodity_trade'
         else:
             text += "/n The merchant bought items that turned out to be worthless. /n /n"

@@ -1,6 +1,7 @@
 #Contains functionality for expeditions
 
 import time
+import random
 from .groups import group
 from ..tiles import tile
 from .. import actor_utility
@@ -50,6 +51,7 @@ class expedition(group):
         
         self.set_group_type('expedition')
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+        self.public_opinion_increases = []
         if not self.images[0].current_cell == 'none': #if did not just board vehicle
             self.resolve_off_tile_exploration()
 
@@ -134,6 +136,7 @@ class expedition(group):
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
             self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+            self.public_opinion_increases = []
             self.resolve_off_tile_exploration()
 
     def disembark_vehicle(self, vehicle):
@@ -147,6 +150,7 @@ class expedition(group):
         '''
         super().disembark_vehicle(vehicle)
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+        self.public_opinion_increases = []
         self.resolve_off_tile_exploration()
 
     def start_exploration(self, x_change, y_change):
@@ -229,27 +233,38 @@ class expedition(group):
         notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager, num_dice)
             
         text += "/n"
+        public_opinion_increase = 0
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default
+            public_opinion_increase = random.randrange(0, 3)
             if not future_cell.resource == 'none':
-                text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n"
+                if future_cell.resource == 'natives':
+                    text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile containing the village of " + future_cell.village.name + ". /n /n"
+                else:
+                    text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n /n"
+                public_opinion_increase += 3
             else:
-                text += "The expedition has  discovered a " + future_cell.terrain.upper() + " tile. /n"
+                text += "The expedition has  discovered a " + future_cell.terrain.upper() + " tile. /n /n"
         else:
-            text += "You were not able to explore the tile. /n"
+            text += "You were not able to explore the tile. /n /n"
         if roll_result <= self.current_max_crit_fail:
-            text += "Everyone in the expedition has died. /n" #actual death occurs when exploration completes
+            text += "Everyone in the expedition has died. /n /n" #actual death occurs when exploration completes
+
+        if public_opinion_increase > 0:
+            text += "The Royal Geographical Society is pleased with these findings, increasing your public opinion by " + str(public_opinion_increase) + ". /n /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.veteran = True
             self.just_promoted = True
-            text += "This explorer is now a veteran. /n"
+            text += "This explorer is now a veteran. /n /n"
+        
         if roll_result >= self.current_min_success:
             self.destination_cell = future_cell
             self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+            self.public_opinion_increases = []
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change])
+        self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change, public_opinion_increase])
 
     def complete_exploration(self): #roll_result, x_change, y_change
         '''
@@ -265,6 +280,7 @@ class expedition(group):
         roll_result = exploration_result[1]
         x_change = exploration_result[2]
         y_change = exploration_result[3]
+        self.global_manager.get('public_opinion_tracker').change(exploration_result[4])
         future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
         died = False
         if roll_result >= self.current_min_success:
@@ -304,10 +320,19 @@ class expedition(group):
                         text = "From the water, the expedition has discovered a "
                     elif target_cell.terrain == 'water':
                         text = "The expedition has discovered a "
+                    public_opinion_increase = random.randrange(0, 3)
                     if not target_cell.resource == 'none':
-                        text += target_cell.terrain.upper() + " tile with a " + target_cell.resource.upper() + " resource to the " + cardinal_directions[current_direction] + ". /n"
+                        if target_cell.resource == 'natives':
+                            text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + " that contains the village of " + target_cell.village.name + ". /n /n"
+                        else:
+                            text += target_cell.terrain.upper() + " tile with a " + target_cell.resource.upper() + " resource to the " + cardinal_directions[current_direction] + ". /n /n"
+                        public_opinion_increase += 3
                     else:
-                        text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + ". /n"
+                        text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + ". /n /n"
 
+                    if public_opinion_increase > 0:
+                        text += "The Royal Geographical Society is pleased with these findings, increasing your public opinion by " + str(public_opinion_increase) + ". /n /n"
+                    
                     self.destination_cells.append(target_cell)
+                    self.public_opinion_increases.append(public_opinion_increase)
                     notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)

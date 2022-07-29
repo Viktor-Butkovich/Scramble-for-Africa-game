@@ -135,7 +135,7 @@ class save_load_manager_template():
         input_dict['modes'] = ['strategic']
         input_dict['tile_image_id'] = 'locations/slave_traders.png' 
         input_dict['grid_line_width'] = 3
-        input_dict['name'] = 'Arab slave traders'
+        input_dict['name'] = 'Slave traders'
         slave_traders_grid = grids.abstract_grid(False, input_dict, self.global_manager)
         self.global_manager.set('slave_traders_grid', slave_traders_grid)
 
@@ -322,7 +322,7 @@ class save_load_manager_template():
                     input_dict['modes'] = ['strategic']
                     input_dict['origin_coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y, self.global_manager)
                     input_dict['tile_image_id'] = 'locations/slave_traders.png' 
-                    input_dict['name'] = 'Arab slave traders'
+                    input_dict['name'] = 'Slave traders'
                     slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('slave_traders_grid', slave_traders_grid)
                     

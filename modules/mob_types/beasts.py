@@ -98,12 +98,16 @@ class beast(npmob):
         target_list = []
         current_cell = self.grids[0].find_cell(self.x, self.y)
         possible_cells = current_cell.adjacent_list + [current_cell]
+        if random.randrange(1, 7) >= 3: #1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
+            ignoring_pmobs = True
+        else:
+            ignoring_pmobs = False
         enemy_found = False
         for current_cell in possible_cells:
             if not (current_cell.y == 0 and self.can_swim and not self.can_swim_ocean): #cancel if trying to go into ocean and can't swim in ocean
                 if current_cell.terrain in self.preferred_terrains:
                     if not enemy_found:
-                        if current_cell.has_pmob():
+                        if current_cell.has_pmob() and not ignoring_pmobs:
                             target_list = [current_cell]
                             enemy_found = True
                         else:

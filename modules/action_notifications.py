@@ -211,9 +211,10 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        current_expedition = actor_utility.get_selected_list(global_manager)[0]
+        current_expedition = global_manager.get('displayed_mob')
         self.notification_images = []
         explored_cell = current_expedition.destination_cells.pop(0)
+        public_opinion_increase = current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
         explored_terrain_image_id = explored_cell.tile.image_dict['default']
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
@@ -224,6 +225,7 @@ class off_tile_exploration_notification(action_notification):
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         global_manager.set('ongoing_exploration', True)
         explored_cell.set_visibility(True)
+        global_manager.get('public_opinion_tracker').change(public_opinion_increase)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 

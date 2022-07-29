@@ -463,6 +463,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                 chooser.end_turn_destination = target_cell.tile
                                 global_manager.set('show_selection_outlines', True)
                                 global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
+                                chooser.remove_from_turn_queue()
                         else: #can not move to same continent
                             text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
             global_manager.set('choosing_destination', False)

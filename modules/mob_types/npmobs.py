@@ -38,7 +38,7 @@ class npmob(mob): #if enemy.turn_done
         self.is_npmob = True
         self.saves_normally = True #units like native warriors are attached to other objects and do not save normally
         self.npmob_type = 'npmob'
-        
+        self.aggro_distance = 0
         self.selection_outline_color = 'bright red'
         if self.y == 0: #should fix any case of npmob trying to retreat off the map
             self.last_move_direction = (0, 1)
@@ -96,7 +96,7 @@ class npmob(mob): #if enemy.turn_done
             if (not possible_target.y == 0): #ignore units in the ocean if can't swim in ocean
                 if possible_target.actor_type == 'building' or not (possible_target.in_vehicle or possible_target.in_group or possible_target.in_building):
                     distance = utility.find_grid_distance(self, possible_target)
-                    if distance <= 6: #will ignore player's units more than 6 tiles away
+                    if distance <= self.aggro_distance: #will ignore player's units more than 6 tiles away
                         if min_distance == -1 and (not distance == -1): #automatically choose first one to replace initial value
                             min_distance = distance
                             closest_targets = [possible_target]

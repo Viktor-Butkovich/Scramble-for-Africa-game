@@ -392,7 +392,7 @@ class notification_manager_template():
             self.notification_height += height_difference #increase height by height change
             #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-            self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid_origin_x'), self.global_manager) - (self.notification_width + 40))
+            self.notification_x = self.global_manager.get('minimap_grid_origin_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
             self.notification_x = 610
 
@@ -408,7 +408,7 @@ class notification_manager_template():
         new_message = []
         next_line = ""
         next_word = ""
-        font_size = scaling.scale_width(25, self.global_manager)
+        font_size = 25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
@@ -432,7 +432,7 @@ class notification_manager_template():
         next_line += next_word
         new_message.append(next_line)
         new_message.append("Click to remove this notification.")
-        return(len(new_message) * font_size)#self.message = new_message
+        return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
             
     def notification_to_front(self, message):
         '''
