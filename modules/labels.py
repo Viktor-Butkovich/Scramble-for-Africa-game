@@ -207,11 +207,11 @@ class money_label(value_label):
         if num_european_workers > 0:
             tooltip_text.append("    Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
         else:
-            tooltip_text.append("    Any European workers would each be paid " + str(african_worker_upkeep) + " money.")
+            tooltip_text.append("    Any European workers would each be paid " + str(european_worker_upkeep) + " money.")
         if num_slave_workers > 0:
-            tooltip_text.append("    Each of your " + str(num_slave_workers) + " slave workers will be cost " + str(slave_worker_upkeep) + " in upkeep, totaling to " + str(total_slave_worker_upkeep) + " money.")
+            tooltip_text.append("    Each of your " + str(num_slave_workers) + " slave workers will cost " + str(slave_worker_upkeep) + " in upkeep, totaling to " + str(total_slave_worker_upkeep) + " money.")
         else:
-            tooltip_text.append("    Any slave workers would cost " + str(african_worker_upkeep) + " money in upkeep.")
+            tooltip_text.append("    Any slave workers would cost " + str(slave_worker_upkeep) + " money in upkeep.")
         tooltip_text.append("    Church volunteers do not need to be paid.")
 
         tooltip_text.append("")

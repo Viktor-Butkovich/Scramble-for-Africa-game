@@ -2378,9 +2378,9 @@ class appoint_minister_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 appointed_minister = self.global_manager.get('displayed_minister')
-                appointed_minister.appoint(self.appoint_type)
                 if not appointed_minister.just_removed:
                     appointed_minister.respond('first hired')
+                appointed_minister.appoint(self.appoint_type)
             else:
                 text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
 

@@ -276,6 +276,8 @@ class village():
             self.population = 9
         elif self.population < 0:
             self.population = 0
+        if self.available_workers > self.population:
+            self.set_available_workers(self.population)
         if self.cell.visible:
             for current_tile in self.tiles:
                 current_tile.update_resource_icon()

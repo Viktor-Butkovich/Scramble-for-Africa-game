@@ -37,8 +37,11 @@ balance improvements such as doubling subsidies, gain public opinion on explorat
 production report should show any resource your company has the capacity to produce, even if there are no work crews currently attempting to produce it
 reduce attrition for units in vehicles, including crew
 check resolution scaling
+minister tutorial message showing before minister message
 
 Future plans:
+make health attrition a zoom notification
+make commodities lost message both a zoom and minister message notification?
 improve description of worker recruitment when using labor broker to not use generic recruitment text
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
 Maybe automatically unload ship cargo and passengers upon entering ports

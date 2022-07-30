@@ -310,7 +310,7 @@ class expedition(group):
         Output:
             None
         '''
-        cardinal_directions = {'up': 'North', 'down': 'South', 'right': 'East', 'left': 'West'}
+        cardinal_directions = {'up': 'north', 'down': 'south', 'right': 'east', 'left': 'west'}
         current_cell = self.images[0].current_cell
         for current_direction in ['up', 'down', 'left', 'right']:
             target_cell = current_cell.adjacent_cells[current_direction]

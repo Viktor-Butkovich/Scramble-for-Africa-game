@@ -580,7 +580,7 @@ class mob(actor):
             elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
                 tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn")
             elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn")
+                tooltip_list.append("This unit has been issued an order to travel to the slave traders at the end of the turn")
                 
         if self.is_npmob and self.npmob_type == 'beast':
             tooltip_list.append("This beast tends to live in " + self.preferred_terrains[0] + ", " + self.preferred_terrains[1] + ", and " + self.preferred_terrains[2] + " terrain ")
