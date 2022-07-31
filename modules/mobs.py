@@ -561,6 +561,8 @@ class mob(actor):
             
             if not self.has_infinite_movement:
                 tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+            elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
+                tooltip_list.append("No movement")
             else:
                 tooltip_list.append("Movement points: Infinite")
 
@@ -710,7 +712,7 @@ class mob(actor):
                 self.embark_vehicle(vehicle)
                 self.set_movement_points(0)
             vehicle.select()
-        if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
+        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain

@@ -1555,6 +1555,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             None
         '''
         if not self.current_minister == 'none':
+            self.current_minister.update_tooltip()
             self.tooltip_text = self.current_minister.tooltip_text
         self.set_tooltip(self.tooltip_text)
 

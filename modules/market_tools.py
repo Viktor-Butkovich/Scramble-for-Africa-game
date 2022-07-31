@@ -82,7 +82,7 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     for i in range(num_sold):
         global_manager.get('money_tracker').change(sell_price, 'commodities sold')
         seller.change_inventory(sold_commodity, -1)
-        if random.randrange(1, 7) <= 2: #1/3 chance
+        if random.randrange(1, 7) <= 1: #1/6 chance
             change_price(sold_commodity, -1, global_manager)
     text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
     new_price = global_manager.get('commodity_prices')[sold_commodity]
@@ -144,7 +144,10 @@ def calculate_subsidies(global_manager, projected = False):
             public_opinion -= 1
     else:
         public_opinion += random.randrange(-10, 11)
-    return(round(public_opinion / 5, 1)) #9.8 for 49 public opinion
+    subsidies = round(public_opinion / 5, 1)
+    if subsidies < 0:
+        subsidies = 0
+    return(subsidies) #9.8 for 49 public opinion
 
 def calculate_total_worker_upkeep(global_manager):
     num_african_workers = global_manager.get('num_african_workers')

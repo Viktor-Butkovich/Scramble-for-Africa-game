@@ -124,16 +124,17 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        inventory_used = self.get_inventory_used()
-        amount_to_remove = inventory_used - self.inventory_capacity
-        if amount_to_remove > 0:
-            commodity_types = self.get_held_commodities()
-            amount_removed = 0
-            while amount_removed < amount_to_remove:
-                commodity_removed = random.choice(commodity_types)
-                if self.get_inventory(commodity_removed) > 0:
-                    self.change_inventory(commodity_removed, -1)
-                    amount_removed += 1
+        if self.can_hold_commodities and not self.can_hold_infinite_commodities:
+            inventory_used = self.get_inventory_used()
+            amount_to_remove = inventory_used - self.inventory_capacity
+            if amount_to_remove > 0:
+                commodity_types = self.get_held_commodities()
+                amount_removed = 0
+                while amount_removed < amount_to_remove:
+                    commodity_removed = random.choice(commodity_types)
+                    if self.get_inventory(commodity_removed) > 0:
+                        self.change_inventory(commodity_removed, -1)
+                        amount_removed += 1
         
     def change_inventory(self, commodity, change):
         '''

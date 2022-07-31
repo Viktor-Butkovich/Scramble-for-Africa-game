@@ -26,7 +26,8 @@ def cycle_player_turn(global_manager, start_of_turn = False):
             turn_queue[0].grids[0].mini_grid.calibrate(turn_queue[0].x, turn_queue[0].y)
         else:
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), turn_queue[0].images[0].current_cell.tile)
-        turn_queue.append(turn_queue.pop(0))
+        if not start_of_turn:
+            turn_queue.append(turn_queue.pop(0))
 
 def set_game_mode(new_game_mode, global_manager):
     '''

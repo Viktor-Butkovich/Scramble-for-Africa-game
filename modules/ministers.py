@@ -89,6 +89,11 @@ class minister():
                 
             minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
+        #if not self.current_position == 'Prosecutor':
+        #    self.corruption_threshold = 0
+        #else:
+        #    self.corruption_threshold = 10
+        #    self.general_skill = 3
         self.update_tooltip()
 
     def update_tooltip(self):

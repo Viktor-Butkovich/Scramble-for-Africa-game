@@ -71,8 +71,8 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
             self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
             
-            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'buildings/buttons/train.png', self, global_manager))
-            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'buildings/buttons/steamboat.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'mobs/train/button.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'mobs/steamboat/button.png', self, global_manager))
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))

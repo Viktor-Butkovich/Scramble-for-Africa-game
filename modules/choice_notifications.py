@@ -6,6 +6,7 @@ from .notifications import notification
 from . import text_tools
 from . import scaling
 from . import market_tools
+from . import utility
 
 class choice_notification(notification):
     '''
@@ -116,8 +117,13 @@ class choice_button(button):
         '''
         self.notification = notification
         if button_type == 'recruitment':
-            self.message = 'Recruit'
             self.recruitment_type = self.notification.choice_info_dict['recruitment_type']
+            if self.recruitment_type in ['steamship', 'slave workers']:
+                self.message = 'Purchase'
+                self.verb = 'purchase'
+            else:
+                self.message = 'Hire'
+                self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
             self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
             
@@ -217,9 +223,9 @@ class choice_button(button):
         '''
         if self.button_type == 'recruitment':
             if self.recruitment_type in ['African worker village', 'African worker slums', 'African worker labor broker']:
-                self.set_tooltip(['Recruit an African worker for ' + str(self.cost) + ' money'])
+                self.set_tooltip([utility.capitalize(self.verb) + ' an African worker for ' + str(self.cost) + ' money'])
             else:
-                self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+                self.set_tooltip([utility.capitalize(self.verb) + ' a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])

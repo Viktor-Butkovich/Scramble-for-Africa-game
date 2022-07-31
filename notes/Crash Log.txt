@@ -1,13 +1,11 @@
-ERROR:root:'resource_building' object has no attribute 'resource'
+ERROR:root:'zoom_notification' object has no attribute 'reselect'
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1010, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 209, in main_loop
-    turn_management_tools.manage_combat(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 488, in manage_combat
-    start_player_turn(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 69, in start_player_turn
-    manage_production(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 159, in manage_production
-    global_manager.get('attempted_commodities').append(current_resource_building.resource)
-AttributeError: 'resource_building' object has no attribute 'resource'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 159, in main_loop
+    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 73, in on_click
+    self.remove()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 183, in remove
+    if self.reselect:
+AttributeError: 'zoom_notification' object has no attribute 'reselect'

@@ -135,7 +135,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             None
         '''
         recruitment_type = recruitment_name
-        if recruitment_name in ['slave workers', 'ship']:
+        if recruitment_name in ['slave workers', 'steamship']:
             verb = 'purchase'
         elif recruitment_name in ['African workers', 'European workers']:
             verb = 'hire'
@@ -143,7 +143,9 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                 recruitment_type = choice_info_dict['source_type'] + ' workers' #slums workers or village workers
         else:
             verb = 'recruit'
-        if recruitment_name in ['slave workers', 'African workers', 'European workers']:
+        if recruitment_name == 'African workers' and choice_info_dict['source_type'] == 'labor broker':
+            message = 'Are you sure you want to pay a labor broker ' + str(choice_info_dict['cost']) + ' money to hire a unit of African workers from a nearby village? /n /n' 
+        elif recruitment_name in ['slave workers', 'African workers', 'European workers']:
             message = 'Are you sure you want to ' + verb + ' a unit of ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'
         else:
             message = 'Are you sure you want to ' + verb + ' ' + utility.generate_article(recruitment_name) + ' ' + recruitment_name + ' for ' + str(choice_info_dict['cost']) + ' money? /n /n'

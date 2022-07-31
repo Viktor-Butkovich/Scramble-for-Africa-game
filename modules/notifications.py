@@ -6,6 +6,7 @@ from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility
+from . import game_transitions
 
 class notification(multi_line_label):
     '''
@@ -150,10 +151,35 @@ class zoom_notification(notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.notification_type = 'default'
+        self.reselect = True
         if self.global_manager.get('strategic_map_grid') in target.grids:
             self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
         if target.actor_type == 'tile':
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target)
+            if not target.cell.grid.mini_grid == 'none':
+                target.grids[0].mini_grid.calibrate(target.x, target.y)
         elif target.actor_type == 'mob':
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), target)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)
+            if not target.images[0].current_cell == 'none': #if non-hidden mob, move to front of tile and select
+                if self.global_manager.get('displayed_mob') == target:
+                    self.reselect = False
+                target.select()
+                target.move_to_front()
+                #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)
+                if (not target.grids[0].mini_grid == 'none'): #if not in abstract grid, calibrate mini map to mob location
+                   target.grids[0].mini_grid.calibrate(target.x, target.y)
+
+            else: #if hidden mob, move to location and select tile
+                target.grids[0].mini_grid.calibrate(target.x, target.y)
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), target.grids[0].find_cell(target.x, target.y).tile)
+            
+            #target.move_to_front()
+            #target.select()
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), target)
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)
+
+    def remove(self):
+        #if len(self.global_manager.get('notification_manager').
+        if self.reselect:
+            game_transitions.cycle_player_turn(self.global_manager, True)
+        super().remove()
+

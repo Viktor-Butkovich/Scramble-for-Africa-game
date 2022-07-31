@@ -83,9 +83,10 @@ def start_player_turn(global_manager, first_turn = False):
         
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
-            
-    actor_utility.deselect_all(global_manager)
-    game_transitions.cycle_player_turn(global_manager, True)
+
+    if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
+        actor_utility.deselect_all(global_manager)
+        game_transitions.cycle_player_turn(global_manager, True)
 
 def reset_mobs(mob_type, global_manager):
     '''
@@ -299,6 +300,15 @@ def manage_worker_migration(global_manager):
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         trigger_worker_migration(global_manager)
+
+    for current_slums in global_manager.get('slums_list'):
+        population_increase = 0
+        for current_worker in range(current_slums.available_workers):
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                population_increase += 1
+                market_tools.attempt_worker_upkeep_change('decrease', 'African', global_manager)
+        if population_increase > 0:
+            current_slums.change_population(population_increase)
 
 def trigger_worker_migration(global_manager): #resolves migration if it occurs
     '''
