@@ -503,10 +503,10 @@ class resource_building(building):
         self.scale = 1
         self.efficiency = 1
         self.num_upgrades = 0
+        self.ejected_work_crews = []
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
         self.set_default_inventory_capacity(9)
-        self.ejected_work_crews = []
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')

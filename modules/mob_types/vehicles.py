@@ -177,7 +177,8 @@ class vehicle(pmob):
         while len(self.contained_mobs) > 0:
             current_mob = self.contained_mobs.pop(0)
             current_mob.disembark_vehicle(self)
-            self.ejected_passengers.append(current_mob)
+            if (not self.global_manager.get('player_turn')) or self.global_manager.get('enemy_combat_phase'):
+                self.ejected_passengers.append(current_mob)
 
     def reembark(self):
         '''

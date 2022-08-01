@@ -133,7 +133,7 @@ class button():
                             connecting_roads = False
                             if (current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none') or (current_mob.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none'):
                                 final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
-                                message = "Attacking an enemy unit only requires 1 movement point, but staying in the enemy's tile afterward would require the usual amount"
+                                message = "Attacking an enemy unit costs 5 money and requires only 1 movement point, but staying in the enemy's tile afterward would require the usual movement"
                                 tooltip_text.append(message)
                                 if current_mob.is_battalion and adjacent_cell.terrain == 'water':
                                     message = "This unit would be forced to withdraw to its original tile after the attack, as battalions can not move freely through water"
@@ -219,36 +219,45 @@ class button():
             self.set_tooltip(['Press to change the size of the text box'])
 
         elif self.button_type == 'instructions':
-            self.set_tooltip(["Shows the game's instructions.", "Press this when instructions are not opened to open them.", "Press this when instructions are opened to close them."])
+            self.set_tooltip(["Shows the game's instructions", "Press this when instructions are not opened to open them", "Press this when instructions are opened to close them"])
 
         elif self.button_type == 'merge':
             if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist':
-                self.set_tooltip(["Merges this evangelist with church volunteers in the same tile to form a group of missionaries.", "Requires that an evangelist is selected in the same tile as church volunteers."])
+                self.set_tooltip(["Merges this evangelist with church volunteers in the same tile to form a group of missionaries", "Requires that an evangelist is selected in the same tile as church volunteers"])
             else:
-                self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer.", "Requires that an officer is selected in the same tile as a worker."])
+                self.set_tooltip(["Merges this officer with a worker in the same tile to form a group with a type based on that of the officer", "Requires that an officer is selected in the same tile as a worker"])
 
         elif self.button_type == 'split':
-            self.set_tooltip(["Splits a group into its worker and officer."])
+            self.set_tooltip(["Splits a group into its worker and officer"])
 
         elif self.button_type == 'crew': #clicked on vehicle side
-            self.set_tooltip(["Merges this " + self.vehicle_type + " with a worker in the same tile to form a crewed " + self.vehicle_type + ".",
-                "Requires that an uncrewed " + self.vehicle_type + " is selected in the same tile as a worker."])
+            self.set_tooltip(["Merges this " + self.vehicle_type + " with a worker in the same tile to form a crewed " + self.vehicle_type,
+                "Requires that an uncrewed " + self.vehicle_type + " is selected in the same tile as a worker"])
 
         elif self.button_type == 'worker to crew': #clicked on worker side
-            self.set_tooltip(["Merges this worker with a " + self.vehicle_type + " in the same tile to form a crewed " + self.vehicle_type + ".",
-                "Requires that a worker is selected in the same tile as an uncrewed " + self.vehicle_type + "."])
+            self.set_tooltip(["Merges this worker with a " + self.vehicle_type + " in the same tile to form a crewed " + self.vehicle_type,
+                "Requires that a worker is selected in the same tile as an uncrewed " + self.vehicle_type])
 
         elif self.button_type == 'uncrew':
             self.set_tooltip(["Orders this " + self.vehicle_type + "'s crew to abandon the " + self.vehicle_type + "."])
 
         elif self.button_type == 'embark':
-            self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile.", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type + "."])
+            self.set_tooltip(["Orders this unit to embark a " + self.vehicle_type + " in the same tile", "Requires that a unit is selected in the same tile as a crewed " + self.vehicle_type])
 
         elif self.button_type == 'disembark':
-            self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type + "."])
+            if self.vehicle_type == 'train':
+                self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type])
+            else:
+                self.set_tooltip(["Orders this unit to disembark the " + self.vehicle_type, "Disembarking a unit outside of a port renders it disorganized until the next turn, decreasing its combat effectiveness"])
 
-        elif self.button_type == 'pick up all passengers':
-            self.set_tooltip(["Orders this " + self.vehicle_type + " take all non-vehicle units in this tile as passengers."])
+        elif self.button_type == 'embark all':
+            self.set_tooltip(["Orders this " + self.vehicle_type + " to take all non-vehicle units in this tile as passengers"])
+
+        elif self.button_type == 'disembark all':
+            if self.vehicle_type == 'train':
+                self.set_tooltip(["Orders this " + self.vehicle_type + " to disembark all of its passengers"])
+            else:
+                self.set_tooltip(["Orders this " + self.vehicle_type + " to disembark all of its passengers", "Disembarking a unit outside of a port renders it disorganized until the next turn, decreasing its combat effectiveness"])
 
         elif self.button_type == 'pick up commodity':
             if not self.attached_label.actor == 'none':
@@ -326,7 +335,7 @@ class button():
             
         elif self.button_type == 'build train':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'train')
-            self.set_tooltip(["Orders parts for and attepmts to assemble a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be assembled on a train station",
+            self.set_tooltip(["Orders parts for and attempts to assemble a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be assembled on a train station",
                 "Costs all remaining movement points, at least 1"])
             
         elif self.button_type == 'build steamboat':
@@ -348,31 +357,32 @@ class button():
                 "Has higher success chance and lower risk when a trading post is present", "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'capture slaves':
-            self.set_tooltip(["Attempts to capture villagers as slaves", "Can only be done in a village", "Regardless the capture's success, this may increase the village's aggressiveness and/or decrease public opinion",
-                "Has higher success chance and lower risk when aggressiveness is low", "Costs all remaining movement points, at least 1"])
+            self.set_tooltip(["Attempts to capture villagers as slaves for " + str(self.global_manager.get('action_prices')['capture_slaves']) + " money", "Can only be done in a village",
+                "Regardless the capture's success, this may increase the village's aggressiveness and/or decrease public opinion", "Has higher success chance and lower risk when aggressiveness is low",
+                "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'religious campaign':
-            self.set_tooltip(["Starts a religious campaign in an effort to find church volunteers.", "Can only be done in Europe",
+            self.set_tooltip(["Attempts to campaign for church volunteers for " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money", "Can only be done in Europe",
                 "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'public relations campaign':
-            self.set_tooltip(["Starts a public relations campaign to spread word of your company's benevolent goals and righteous deeds in Africa.", "Can only be done in Europe",
-                "If successful, increases your company's public opinion", "Costs all remaining movement points, at least 1"])
+            self.set_tooltip(["Attempts to spread word of your company's benevolent goals and righteous deeds in Africa for " + str(self.global_manager.get('action_prices')['public_relations_campaign']) + " money",
+                "Can only be done in Europe", "If successful, increases your company's public opinion", "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'advertising campaign':
-            self.set_tooltip(["Starts an advertising campaign to increase a certain commodity's price.", "Can only be done in Europe",
-                "If successful, increases the price of a selected commodity while randomly decreasing the price of another", "Costs all remaining movement points, at least 1"])
+            self.set_tooltip(["Attempts to increase a chosen commodity's popularity for " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money", "Can only be done in Europe",
+                "If successful, increases the price of a chosen commodity while randomly decreasing the price of another", "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'take loan':
-            self.set_tooltip(["Finds a loan offer for 100 money and an interest rate based on the merchant's experience and the minister's skill and corruption.", "Can only be done in Europe",
-                "Costs all remaining movement points, at least 1"])
+            self.set_tooltip(["Attempts to find a 100 money loan offer with a favorable interest rate for " + str(self.global_manager.get('action_prices')['loan_search']) + " money", "Can only be done in Europe",
+                "While automatically successful, the offered interest rate may vary", "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'track beasts':
             self.set_tooltip(["Attempts to reveal beasts in this tile and adjacent tiles", "If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them", "Can not reveal beasts in unexplored tiles", "Costs 1 movement point"])
 
         elif self.button_type == 'convert':
-            self.set_tooltip(["Attempts to make progress in converting natives for " + str(self.global_manager.get('action_prices')['convert']) + " money", "Can only be done in a village",
-                "If successful, reduces the aggressiveness of the village, improving all company interactions with the village, and increases public opinion", "Has higher success chance and lower risk when a mission is present",
+            self.set_tooltip(["Attempts to convert some of this village's inhabitants to Christianity for " + str(self.global_manager.get('action_prices')['convert']) + " money", "Can only be done in a village",
+                "If successful, reduces the aggressiveness of the village and increases public opinion", "Has higher success chance and lower risk when a mission is present",
                 "Costs all remaining movement points, at least 1"])
 
         elif self.button_type == 'new game':
@@ -395,20 +405,20 @@ class button():
 
         elif self.button_type == 'to trial':
             self.set_tooltip(["Opens the trial planning screen to attempt to imprison this minister for corruption", "A trial has a higher success chance as more evidence of that minister's corruption is found",
-                "A trial costs " + str(self.global_manager.get('action_prices')['trial']) + " money once finalized"])
+                "While entering this screen is free, a trial costs " + str(self.global_manager.get('action_prices')['trial']) + " money once started"])
 
         elif self.button_type == 'launch trial':
             self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money"])
 
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
-                self.set_tooltip(["Spends " + str(self.get_cost()) + " money to create fake evidence against this minister to improve the trial's success chance",
-                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence is never preserved after a failed trial"])
+                self.set_tooltip(["Creates a unit of fake evidence against this minister to improve the trial's success chance for " + str(self.get_cost()) + " money",
+                    "Each piece of evidence fabricated in a trial becomes increasingly expensive.", "Unlike real evidence, fabricated evidence disappears at the end of the turn and is never preserved after a failed trial"])
             else:
                 self.set_tooltip(['placeholder'])
 
         elif self.button_type == 'bribe judge':
-            self.set_tooltip(["Spends " + str(self.get_cost()) + " money to attempt to bribe the judge for the next trial this turn",
+            self.set_tooltip(["Bribes the judge of the next trial this turn for " + str(self.get_cost()) + " money",
                 "While having unpredictable results, bribing the judge may swing the trial in your favor or blunt the defense's efforts to do the same"])
 
         elif self.button_type == 'fire':

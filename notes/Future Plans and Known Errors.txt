@@ -8,20 +8,26 @@ ship tooltip after attrition not correctly showing no movement
 changed color of europe transaction buttons
 added slums growth
 steamships drop commodities/passengers on entering port
+fixed repair button tooltip issue
+fixed work crew health attrition showing 'default' as location
+Maybe automatically unload ship cargo and passengers upon entering ports
+improve description of worker recruitment when using labor broker to not use generic recruitment text
+minister stays selected after being appointed
+Make sure cost of trials, capture slaves, and other actions are correctly shown in actor display button tooltip
 
 Future plans:
 make commodities lost message both a zoom and minister message notification?
-improve description of worker recruitment when using labor broker to not use generic recruitment text
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
-Maybe automatically unload ship cargo and passengers upon entering ports
 add are you sure message for removing ministers
 
 Later:
+minister skill increase over time
 have chance of explorer promotion on automatic exploration
 improve terrain appearances, especially hills
 improve button images for labor broker, switch screens, etc.
 minister of trade should sell commodities at end of turn and report how much they were sold for, allow for attrition
 add bridges
+incease construction costs based on terrain
 if no save file present, autosave on game creation
 Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
 change action failed messages to reference minister asking for more time/money rather than the unit officer
@@ -42,19 +48,21 @@ Reduce number of commodities that can be shown at once in inventory and maybe mo
 Maybe only show inventory capacity on units with inventory capacity or tiles that have inventory capacity or are carrying goods that will be lost at end of turn
 Add slave trade suppression, gain progress over time for large public opinion bonus and maybe spawns free African workers
 maybe have selected unit blink like in other games to make it more clear that it is selected
+improved minister face locations
 
 Possible/known Errors:
 
 Fixable:
-Make sure cost of trials, capture slaves, and other actions are correctly shown in actor display button tooltip
+trains able to use embark/disembark all outside of train stations - maybe just give train and ship lots of movement points like riverboat, infinite movement confusing
 pmobs.display_die creating minister icons without resolution scaling?
 
 Investigating:
+infinite loop and phantom officers sometimes created when ship travels to port
 check behavior of native warriors spawning when surrounded
 some notifications slightly too short for click to remove message when display height manually lowered
 safari not correctly having enough movement to follow up after hunting, possibly relating to water
 Disorganized flag and tooltip not showing correctly, especially when creating group or after disembarking ship
-Fix inconsistent minister faces during dice rolls, appears twice on forts, in incorrect place other times, issues with multiple minister messages in a row
+Fix inconsistent minister faces, issues with multiple minister messages in a row
 change check if minister appointed to minister_utility.positions_filled across the board, need prosecutor appointed during other minister's actions, etc.
 make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense
 minister face being shown twice during fort construction

@@ -1,11 +1,13 @@
-ERROR:root:'zoom_notification' object has no attribute 'reselect'
+ERROR:root:'str' object has no attribute 'adjacent_cells'
 Traceback (most recent call last):
   File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1010, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 159, in main_loop
-    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 73, in on_click
-    self.remove()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 183, in remove
-    if self.reselect:
-AttributeError: 'zoom_notification' object has no attribute 'reselect'
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 43, in main_loop
+    current_button.on_click()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 706, in on_click
+    mob.move(x_change, y_change)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\expeditions.py", line 140, in move
+    self.resolve_off_tile_exploration()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\expeditions.py", line 316, in resolve_off_tile_exploration
+    target_cell = current_cell.adjacent_cells[current_direction]
+AttributeError: 'str' object has no attribute 'adjacent_cells'

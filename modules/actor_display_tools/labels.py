@@ -100,7 +100,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
             self.attached_buttons.append(buttons.cycle_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_4, self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
-            self.attached_buttons.append(buttons.pick_up_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.embark_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.disembark_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_x, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
             keybind = 'none'

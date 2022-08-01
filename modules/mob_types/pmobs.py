@@ -974,7 +974,7 @@ class pmob(mob):
 
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
@@ -1098,7 +1098,7 @@ class pmob(mob):
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
         self.attached_dice_list.append(new_die)
         if uses_minister:
-            if self.is_battalion: #combat has a different dice layout
+            if self.global_manager.get('ongoing_combat'): #combat has a different dice layout
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
@@ -1178,7 +1178,7 @@ class pmob(mob):
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])

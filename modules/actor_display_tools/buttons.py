@@ -136,7 +136,7 @@ class worker_crew_vehicle_button(label_button):
         self.was_showing = result
         return(result)
 
-class pick_up_all_passengers_button(label_button):
+class embark_all_passengers_button(label_button):
     '''
     Button that commands a vehicle to take all other mobs in its tile as passengers
     '''
@@ -157,7 +157,7 @@ class pick_up_all_passengers_button(label_button):
             None
         '''
         self.vehicle_type = 'none'
-        super().__init__(coordinates, width, height, 'pick up all passengers', keybind_id, modes, image_id, attached_label, global_manager)
+        super().__init__(coordinates, width, height, 'embark all', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
         '''
@@ -179,7 +179,7 @@ class pick_up_all_passengers_button(label_button):
                     if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                         passenger.embark_vehicle(vehicle)
             else:
-                text_tools.print_to_screen("You are busy and can not pick up passengers.", self.global_manager)
+                text_tools.print_to_screen("You are busy and can not embark all passengers.", self.global_manager)
 
     def can_show(self):
         '''
@@ -197,6 +197,36 @@ class pick_up_all_passengers_button(label_button):
             if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
                 self.vehicle_type = self.attached_label.actor.vehicle_type
                 self.image.set_image('buttons/embark_' + self.vehicle_type + '_button.png')
+        return(result)
+
+class disembark_all_passengers_button(label_button):
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        self.vehicle_type = 'none'
+        super().__init__(coordinates, width, height, 'disembark all', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def on_click(self):
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                vehicle = self.attached_label.actor
+                if vehicle.sentry_mode:
+                    vehicle.set_sentry_mode(False)
+                vehicle.eject_passengers()
+                #for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                #    passenger = contained_mob
+                #    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
+                #        passenger.embark_vehicle(vehicle)
+            else:
+                text_tools.print_to_screen("You are busy and can not disembark all passengers.", self.global_manager)
+
+    def can_show(self):
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
+                return(False)
+            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = self.attached_label.actor.vehicle_type
+                self.image.set_image('buttons/disembark_' + self.vehicle_type + '_button.png')
         return(result)
 
 class crew_vehicle_button(label_button):
@@ -2136,6 +2166,10 @@ class repair_button(label_button):
                         self.attached_resource = 'none'
                         self.building_name = 'none'
                         #self.image.set_image(self.global_manager.get('resource_building_button_dict')['none'])
+        else:
+            if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+                self.attached_tile = self.attached_mob.images[0].current_cell.tile
+                self.building_name = self.building_type
 
     def can_show(self):
         '''
@@ -2381,6 +2415,7 @@ class appoint_minister_button(label_button):
                 if not appointed_minister.just_removed:
                     appointed_minister.respond('first hired')
                 appointed_minister.appoint(self.appoint_type)
+                minister_utility.calibrate_minister_info_display(self.global_manager, appointed_minister)
             else:
                 text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
 

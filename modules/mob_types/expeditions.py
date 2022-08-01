@@ -135,9 +135,10 @@ class expedition(group):
                 text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
-            self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
-            self.public_opinion_increases = []
-            self.resolve_off_tile_exploration()
+            if not self.images[0].current_cell == 'none': #if not in vehicle
+                self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
+                self.public_opinion_increases = []
+                self.resolve_off_tile_exploration()
 
     def disembark_vehicle(self, vehicle):
         '''
@@ -206,7 +207,7 @@ class expedition(group):
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])

@@ -140,7 +140,7 @@ class group(pmob):
             destination_type = 'vehicle'
             destination_message = " from the " + self.name + " aboard the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
         elif self.in_building:
-            zoom_destination = self.building.images[0].current_cell.tile
+            zoom_destination = self.building.images[0].current_cell.get_intact_building('resource')
             destination_type = 'building'
             destination_message = " from the " + self.name + " working in the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
         else:
