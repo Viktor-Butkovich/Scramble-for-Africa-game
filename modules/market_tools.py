@@ -78,16 +78,17 @@ def sell(seller, sold_commodity, num_sold, global_manager):
     Output:
         None
     '''
-    sell_price = global_manager.get('commodity_prices')[sold_commodity]
+    global_manager.get('sold_commodities')[sold_commodity] += num_sold
+    #sell_price = global_manager.get('commodity_prices')[sold_commodity]
     for i in range(num_sold):
-        global_manager.get('money_tracker').change(sell_price, 'commodities sold')
+    #    global_manager.get('money_tracker').change(sell_price, 'commodities sold')
         seller.change_inventory(sold_commodity, -1)
-        if random.randrange(1, 7) <= 1: #1/6 chance
-            change_price(sold_commodity, -1, global_manager)
-    text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
-    new_price = global_manager.get('commodity_prices')[sold_commodity]
-    if new_price < sell_price:
-        text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
+    #    if random.randrange(1, 7) <= 1: #1/6 chance
+    #        change_price(sold_commodity, -1, global_manager)
+    #text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
+    #new_price = global_manager.get('commodity_prices')[sold_commodity]
+    #if new_price < sell_price:
+    #    text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
 
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
     '''

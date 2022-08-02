@@ -137,9 +137,11 @@ try:
     global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
     global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
     global_manager.set('commodity_prices', {})
+    global_manager.set('sold_commodities', {})
 
     for current_commodity in global_manager.get('commodity_types'):
         global_manager.get('commodity_prices')[current_commodity] = 0
+        global_manager.get('sold_commodities')[current_commodity] = 0
 
     global_manager.set('commodities_produced', {})
     for current_commodity in global_manager.get('collectable_resources'):
@@ -403,6 +405,7 @@ try:
         'hunting': 'hunting supplies',
         'production': 'production',
         'slave capture': 'capturing slaves',
+        'sold commodities': 'commodity sales',
         'none': 'miscellaneous company activities'
         }
     )
@@ -1002,6 +1005,9 @@ try:
 
     global_manager.set('DEBUG_reveal_beasts', False) #False by default
     #reveals beasts on load
+
+    global_manager.set('DEBUG_infinite_commodities', False) #False by default
+    #gives 10 of each commodity in Europe on new game
     
     #activating/disabling debugging tools
 

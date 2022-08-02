@@ -159,7 +159,10 @@ class actor():
         '''
         self.inventory = {}
         for current_commodity in self.global_manager.get('commodity_types'):
-            self.inventory[current_commodity] = 0
+            if self.global_manager.get('DEBUG_infinite_commodities') and self.name == 'Europe':
+                self.inventory[current_commodity] = 10
+            else:
+                self.inventory[current_commodity] = 0
 
     def drop_inventory(self):
         '''

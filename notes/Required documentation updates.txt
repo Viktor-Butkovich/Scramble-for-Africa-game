@@ -19,3 +19,4 @@ notifications imports
 choice_notifications imports
 actor_display_tools/buttons.pick_up_all_passengers_button changed to embark_all_passengers_button
 actor_display_tools/buttons.disembark_all_passengers_button
+turn_management_tools.manage_commodity_sales

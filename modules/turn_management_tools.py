@@ -72,6 +72,7 @@ def start_player_turn(global_manager, first_turn = False):
         manage_loans(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
+        manage_commodity_sales(global_manager)
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
@@ -151,17 +152,27 @@ def manage_production(global_manager):
         None
     '''
     global_manager.set('attempted_commodities', [])
+    expected_production = {}
     for current_commodity in global_manager.get('collectable_resources'):
         global_manager.get('commodities_produced')[current_commodity] = 0
+        expected_production[current_commodity] = 0
     for current_resource_building in global_manager.get('resource_building_list'):
         if not current_resource_building.damaged:
+            for current_work_crew in current_resource_building.contained_work_crews:
+                if current_work_crew.movement_points >= 1:
+                    if current_work_crew.veteran:
+                        expected_production[current_resource_building.resource_type] += 0.75 * current_resource_building.efficiency
+                    else:
+                        expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
             if len(current_resource_building.contained_work_crews) == 0:
                 global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
+    production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
+    
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
-        notification_text = "Production report: /n /n "
+        text = production_minister.current_position + " " + production_minister.name + " reports the following commodity production: /n /n"
         while len(displayed_commodities) < len(attempted_commodities):
             max_produced = 0
             max_commodity = 'none'
@@ -171,8 +182,8 @@ def manage_production(global_manager):
                         max_commodity = current_commodity
                         max_produced = global_manager.get('commodities_produced')[current_commodity]
             displayed_commodities.append(max_commodity)
-            notification_text += (max_commodity.capitalize() + ": " + str(max_produced) + ' /n ')
-        notification_tools.display_notification(notification_text, 'default', global_manager)       
+            text += max_commodity.capitalize() + ": " + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
+        production_minister.display_message(text)       
 
 def manage_upkeep(global_manager):
     '''
@@ -568,3 +579,49 @@ def game_end_check(global_manager):
         text = ""
         text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
         notification_tools.display_choice_notification(text, ['confirm main menu', 'quit'], {}, global_manager)
+
+def manage_commodity_sales(global_manager):
+    sold_commodities = global_manager.get('sold_commodities')
+    trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
+    stealing = False
+    money_stolen = 0
+    if trade_minister.check_corruption():
+        stealing = True
+    text = trade_minister.current_position + " " + trade_minister.name + " reports the following commodity sales: /n /n"
+    any_sold = False
+    for current_commodity in global_manager.get('commodity_types'):
+        if sold_commodities[current_commodity] > 0:
+            any_sold = True
+            sell_price = global_manager.get('commodity_prices')[current_commodity]
+            expected_revenue = sold_commodities[current_commodity] * sell_price
+            actual_revenue = 0
+            #sell_price += random.randrange(-1, 2) + trade_minister.get_roll_modifier()
+            if stealing and sell_price > 1:
+                money_stolen += sold_commodities[current_commodity]
+                sell_price -= 1
+            if sell_price <= 0:
+                sell_price = 1
+                
+            for i in range(sold_commodities[current_commodity]):
+                individual_sell_price = sell_price + random.randrange(-1, 2) + trade_minister.get_roll_modifier()
+                global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
+                actual_revenue += individual_sell_price
+                if random.randrange(1, 7) <= 1: #1/6 chance
+                    market_tools.change_price(current_commodity, -1, global_manager)
+
+            text += str(sold_commodities[current_commodity]) + " " + current_commodity + " sold for " + str(actual_revenue) + " money (expected " + str(expected_revenue) + ") /n /n"
+
+    if any_sold:
+        trade_minister.display_message(text)
+    if money_stolen > 0:
+        trade_minister.steal_money(money_stolen, 'sold commodities')
+    #sell_price = global_manager.get('commodity_prices')[sold_commodity]
+    #for i in range(num_sold):
+    #    global_manager.get('money_tracker').change(sell_price, 'commodities sold')
+        #seller.change_inventory(sold_commodity, -1)
+    #    if random.randrange(1, 7) <= 1: #1/6 chance
+    #        change_price(sold_commodity, -1, global_manager)
+    #text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
+    #new_price = global_manager.get('commodity_prices')[sold_commodity]
+    #if new_price < sell_price:
+    #    text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
