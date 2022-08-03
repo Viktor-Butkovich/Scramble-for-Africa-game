@@ -57,6 +57,7 @@ class save_load_manager_template():
         self.copied_elements.append('previous_financial_report')
         self.copied_elements.append('num_wandering_workers')
         self.copied_elements.append('prosecution_bribed_judge')
+        self.copied_elements.append('sold_commodities')
         
     def new_game(self):
         '''

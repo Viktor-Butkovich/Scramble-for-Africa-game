@@ -151,20 +151,28 @@ class button():
                                             message += "and no connecting roads"
                         
                             else:
-                                message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
-                                if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
-                                    if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                                        connecting_roads = True
-                                        message += "and connecting roads"
-                                    elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                                        message += "and no connecting roads"
-                                    elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                                        message += "and no connecting roads" + local_infrastructure.infrastructure_type
-                                    else: #
-                                        message += "and no connecting roads"
+                                if current_mob.is_vehicle and current_mob.vehicle_type == 'train':
+                                    if (not adjacent_infrastructure == 'none') and adjacent_infrastructure.infrastructure_type == 'railroad' and (not local_infrastructure == 'none') and local_infrastructure.infrastructure_type == 'railroad':
+                                        message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has connecting railroads"
+                                    else:
+                                        message = "Not possible because the adjacent tile does not have connecting railroads"
+                                    tooltip_text.append(message)
+                                    tooltip_text.append("A train can only move along railroads")
+                                else:
+                                    message = "Costs " + str(movement_cost) + " movement point" + utility.generate_plural(movement_cost) + " because the adjacent tile has " + adjacent_cell.terrain + " terrain "
+                                    if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                                            connecting_roads = True
+                                            message += "and connecting roads"
+                                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                                            message += "and no connecting roads"
+                                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                                            message += "and no connecting roads" + local_infrastructure.infrastructure_type
+                                        else: #
+                                            message += "and no connecting roads"
 
-                            tooltip_text.append(message)
-                            tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
+                                    tooltip_text.append(message)
+                                    tooltip_text.append("Moving into a " + adjacent_cell.terrain + " tile costs " + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + " movement points")
                             if (not current_mob.is_vehicle) and current_mob.images[0].current_cell.terrain == 'water' and current_mob.images[0].current_cell.has_vehicle('ship'):
                                 if (current_mob.images[0].current_cell.y == 0 and not (current_mob.can_swim and current_mob.can_swim_ocean)) or (current_mob.images[0].current_cell.y > 0 and not (current_mob.can_swim and current_mob.can_swim_river)): #if could not naturally move into current tile, must be from vehicle
                                     tooltip_text.append("Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount")
@@ -767,8 +775,8 @@ class button():
                                         displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                     displayed_tile.change_inventory(commodity, num_commodity)
-                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
-                                        displayed_mob.set_movement_points(0)
+                                    #if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                                    #    displayed_mob.set_movement_points(0)
                                     if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
                                         text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
                                         text_tools.print_to_screen("Any commodities exceeding this tile's inventory capacity of " + str(displayed_tile.inventory_capacity) + " will disappear at the end of the turn.", self.global_manager)

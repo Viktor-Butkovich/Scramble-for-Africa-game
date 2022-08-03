@@ -754,14 +754,18 @@ class merchant(officer):
             advertised_original_price = self.global_manager.get('commodity_prices')[self.current_advertised_commodity]
             unadvertised_original_price = self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity]
             text += "The merchant successfully advertised for " + self.current_advertised_commodity + ", increasing its price from " + str(advertised_original_price) + " to "
-            text += str(advertised_original_price + increase) + ". The price of " + self.current_unadvertised_commodity + " decreased from " + str(unadvertised_original_price) + " to " + str(unadvertised_original_price - 1) + ". /n /n"
+            unadvertised_final_price = unadvertised_original_price - increase
+            if unadvertised_final_price < 1:
+                unadvertised_final_price = 1
+            text += str(advertised_original_price + increase) + ". The price of " + self.current_unadvertised_commodity + " decreased from " + str(unadvertised_original_price) + " to " + str(unadvertised_final_price) + ". /n /n"
         else:
             text += "The merchant failed to increase the popularity of " + self.current_advertised_commodity + ". /n /n"
         if roll_result <= self.current_max_crit_fail:
             text += "Embarassed by this utter failure, the merchant quits your company. /n /n" 
 
-        if (not self.veteran) and roll_result >= self.current_min_crit_success:
-            self.just_promoted = True
+        if roll_result >= self.current_min_crit_success:
+            if not self.veteran:
+                self.just_promoted = True
             text += "The advertising campaign was so popular that the value of " + self.current_advertised_commodity + " increased by 2 instead of 1. /n /n"
         if roll_result >= self.current_min_success:
             notification_tools.display_notification(text + "Click to remove this notification.", 'final_advertising_campaign', self.global_manager)
@@ -786,7 +790,7 @@ class merchant(officer):
             if roll_result >= self.current_min_crit_success:
                 increase += 1
             market_tools.change_price(self.current_advertised_commodity, increase, self.global_manager)
-            market_tools.change_price(self.current_unadvertised_commodity, -1, self.global_manager)
+            market_tools.change_price(self.current_unadvertised_commodity, -1 * increase, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()

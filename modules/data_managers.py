@@ -310,7 +310,7 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
-        super().set(round(new_value, 1))
+        super().set(round(new_value, 2))
 
     def prepare_financial_report(self):
         '''
@@ -346,9 +346,9 @@ class money_tracker(value_tracker):
         if total_expenses == 0:
             notification_text += '  None /n'
         notification_text += ' /n'
-        notification_text += 'Total revenue: ' + str(round(total_revenue, 1)) + ' /n'
-        notification_text += 'Total expenses: ' + str(round(total_expenses, 1)) + ' /n'
-        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 1)) + ' /n'
+        notification_text += 'Total revenue: ' + str(round(total_revenue, 2)) + ' /n'
+        notification_text += 'Total expenses: ' + str(round(total_expenses, 2)) + ' /n'
+        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 2)) + ' /n'
         return(notification_text)
                     
 class notification_manager_template():

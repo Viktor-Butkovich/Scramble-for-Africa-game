@@ -184,8 +184,9 @@ class missionaries(group):
             
         public_opinion_increase = 0
         if roll_result >= self.current_min_success:
-            public_opinion_increase = random.randrange(1, 4)
-            text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
+            public_opinion_increase = random.randrange(0, 2)
+            if public_opinion_increase > 0:
+                text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
             notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)

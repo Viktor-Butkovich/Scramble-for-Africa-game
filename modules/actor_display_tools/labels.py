@@ -349,14 +349,14 @@ class actor_display_label(label):
                     
             elif self.actor_label_type == 'movement':
                 if self.actor.controllable:
-                    if not new_actor.has_infinite_movement:
+                    if (new_actor.is_vehicle and new_actor.has_crew and (not new_actor.has_infinite_movement) and not new_actor.temp_movement_disabled) or not new_actor.is_vehicle: #if riverboat/train with crew or normal unit
                         self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
-                    else:
-                        if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                    else: #if ship or riverboat/train without crew
+                        if not new_actor.has_infinite_movement:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")
-                            else:
-                                self.set_label("Infinite movement until cargo/passenger dropped")
+                            #else:
+                            #    self.set_label("Infinite movement until cargo/passenger dropped")
                         else:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")

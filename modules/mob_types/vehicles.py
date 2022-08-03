@@ -84,6 +84,9 @@ class vehicle(pmob):
         else:
             sub_mobs = [self.crew]
         sub_mobs += self.contained_mobs
+
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        
         for current_sub_mob in sub_mobs:
             worker_type = 'none'
             if current_sub_mob.is_worker:
@@ -91,7 +94,7 @@ class vehicle(pmob):
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
             if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew:
                             self.crew_attrition_death()
@@ -325,8 +328,9 @@ class train(vehicle):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.set_max_movement_points(10)
-        self.has_infinite_movement = True
+        self.set_max_movement_points(16)
+        self.has_infinite_movement = False
+        #self.has_infinite_movement = True
         self.vehicle_type = 'train'
         self.can_swim = False
         self.can_walk = True
@@ -355,6 +359,9 @@ class train(vehicle):
                 text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
                 return(False)
         return(result)
+
+    def get_movement_cost(self, x_change, y_change):
+        return(self.movement_cost) #trains ignore terrain penalties
 
 class ship(vehicle):
     '''

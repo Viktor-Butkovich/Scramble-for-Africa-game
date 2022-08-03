@@ -591,12 +591,14 @@ class resource_building(building):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')
@@ -642,7 +644,7 @@ class resource_building(building):
         Output:
             None
         '''
-        return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+        return(self.global_manager.get('base_upgrade_price') * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 
     def get_build_cost(self):
         '''

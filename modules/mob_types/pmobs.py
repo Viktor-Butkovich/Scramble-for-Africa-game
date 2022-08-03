@@ -179,7 +179,8 @@ class pmob(mob):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
@@ -891,7 +892,11 @@ class pmob(mob):
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
         message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
-        message += "The planning and materials will cost " + str(self.global_manager.get('building_prices')[self.building_type]) + " money. /n /n"
+        if self.building_type == 'infrastructure':
+            cost = self.global_manager.get('building_prices')[self.building_name]
+        else:
+            cost = self.global_manager.get('building_prices')[self.building_type]
+        message += "The planning and materials will cost " + str(cost) + " money. /n /n"
         message += "If successful, a " + self.building_name + " will be built. " #change to match each building
         if self.building_type == 'resource':
             message += "A " + self.building_name + " expands the tile's warehouse capacity, and each work crew attached to it can attempt to produce " + self.attached_resource + " each turn. /n /n"
@@ -945,7 +950,13 @@ class pmob(mob):
             num_dice = 2
         else:
             num_dice = 1
-        self.global_manager.get('money_tracker').change(-1 * self.global_manager.get('building_prices')[self.building_type], 'construction')
+            
+        if self.building_type == 'infrastructure':
+            cost = self.global_manager.get('building_prices')[self.building_name]
+        else:
+            cost = self.global_manager.get('building_prices')[self.building_type]
+            
+        self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
         text = ""
         if self.building_name in ['train', 'steamboat']:
             verb = 'assemble'
@@ -967,7 +978,7 @@ class pmob(mob):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('building_prices')[self.building_type], 'construction', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
@@ -991,7 +1002,7 @@ class pmob(mob):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('building_prices')[self.building_type], 'construction')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction')
             roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 

@@ -128,6 +128,18 @@ try:
         'desert': 2
         }
     )
+
+    global_manager.set('terrain_build_cost_multiplier_dict',
+        {
+        'clear': 1,
+        'hills': 2,
+        'jungle': 3,
+        'water': 1,
+        'mountain': 3,
+        'swamp': 3,
+        'desert': 2
+        }
+    )
     
     #terrain setup
 
@@ -349,9 +361,9 @@ try:
     global_manager.set('recruitment_string_descriptions', {})
     actor_utility.update_recruitment_descriptions(global_manager)
 
-    global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
+    global_manager.set('worker_upkeep_fluctuation_amount', 0.25)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
-    global_manager.set('base_upgrade_price', 5) #times # upgrades + 1: 5 for 1st upgrade, 10 for 2nd, 15 for 3rd, etc.
+    global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
     global_manager.set('commodity_min_starting_price', 2)
     global_manager.set('commodity_max_starting_price', 5)
     global_manager.set('consumer_goods_starting_price', 3)
@@ -376,10 +388,11 @@ try:
 
     global_manager.set('building_prices',
         {
-        'resource': 5,
-        'infrastructure': 5,
-        'port': 5,
-        'train_station': 5,
+        'resource': 10,
+        'road': 5,
+        'railroad': 15,
+        'port': 25,
+        'train_station': 10,
         'trading_post': 5,
         'mission': 5,
         'fort': 5,
@@ -572,7 +585,7 @@ try:
         scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
-    labels.value_label(scaling.scale_coordinates(495, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    labels.value_label(scaling.scale_coordinates(545, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'turn', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
@@ -1008,6 +1021,12 @@ try:
 
     global_manager.set('DEBUG_infinite_commodities', False) #False by default
     #gives 10 of each commodity in Europe on new game
+
+    global_manager.set('DEBUG_band_of_thieves', False) #False by default
+    #causes all ministers to be corrupt whenever possible
+
+    global_manager.set('DEBUG_ministry_of_magic', True) #False by default
+    #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
     
     #activating/disabling debugging tools
 

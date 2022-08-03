@@ -147,7 +147,7 @@ class exploration_notification(action_notification):
         '''
         self.is_last = is_last
         if self.is_last:
-            current_expedition = actor_utility.get_selected_list(global_manager)[0]
+            current_expedition = global_manager.get('displayed_mob') #actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
@@ -368,7 +368,6 @@ class religious_campaign_notification(action_notification):
         ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
-            current_head_missionary = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -533,7 +532,7 @@ class advertising_campaign_notification(action_notification):
         ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
-            current_merchant = actor_utility.get_selected_list(global_manager)[0]
+            current_merchant = global_manager.get('displayed_mob')#actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_advertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500,
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -599,7 +598,6 @@ class conversion_notification(action_notification):
         ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
-            current_head_missionary = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
@@ -657,7 +655,7 @@ class capture_slaves_notification(action_notification):
         ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
-            current_major = actor_utility.get_selected_list(global_manager)[0]
+            #current_major = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             self.notification_images.append(free_image('mobs/slave workers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -718,7 +716,7 @@ class construction_notification(action_notification):
         '''
         self.is_last = is_last
         if self.is_last: #if last, show result
-            current_constructor = actor_utility.get_selected_list(global_manager)[0]
+            #current_constructor = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 

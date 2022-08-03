@@ -172,12 +172,18 @@ class embark_all_passengers_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
                 vehicle = self.attached_label.actor
-                if vehicle.sentry_mode:
-                    vehicle.set_sentry_mode(False)
-                for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-                    passenger = contained_mob
-                    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
-                        passenger.embark_vehicle(vehicle)
+                can_embark = True
+                if self.vehicle_type == 'train':
+                    if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                        text_tools.print_to_screen("A train can only pick up passengers at a train station.", self.global_manager)
+                        can_embark = False
+                if can_embark:
+                    if vehicle.sentry_mode:
+                        vehicle.set_sentry_mode(False)
+                    for contained_mob in vehicle.images[0].current_cell.contained_mobs:
+                        passenger = contained_mob
+                        if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
+                            passenger.embark_vehicle(vehicle)
             else:
                 text_tools.print_to_screen("You are busy and can not embark all passengers.", self.global_manager)
 
@@ -209,13 +215,15 @@ class disembark_all_passengers_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
                 vehicle = self.attached_label.actor
-                if vehicle.sentry_mode:
-                    vehicle.set_sentry_mode(False)
-                vehicle.eject_passengers()
-                #for contained_mob in vehicle.images[0].current_cell.contained_mobs:
-                #    passenger = contained_mob
-                #    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
-                #        passenger.embark_vehicle(vehicle)
+                can_disembark = True
+                if self.vehicle_type == 'train':
+                    if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
+                        text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
+                        can_disembark = False
+                if can_disembark:
+                    if vehicle.sentry_mode:
+                        vehicle.set_sentry_mode(False)
+                    vehicle.eject_passengers()
             else:
                 text_tools.print_to_screen("You are busy and can not disembark all passengers.", self.global_manager)
 
@@ -685,8 +693,8 @@ class disembark_vehicle_button(label_button):
                             text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
                             can_disembark = False
                     if can_disembark:
-                        if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
-                            self.attached_label.actor.set_movement_points(0)
+                        #if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
+                        #    self.attached_label.actor.set_movement_points(0)
                         passenger = self.attached_label.attached_list[self.attached_label.list_index]
                         if passenger.sentry_mode:
                             passenger.set_sentry_mode(False)
@@ -1793,7 +1801,7 @@ class build_steamboat_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_label.actor.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
+                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['steamboat']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if self.attached_label.actor.images[0].current_cell.has_intact_building('port'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
@@ -2000,8 +2008,15 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             
         else:
             message.append('placeholder')
-            
-        message.append('Attempting to build costs ' + str(self.global_manager.get('building_prices')[self.building_type]) + ' money and all remaining movement points, at least 1')
+
+        if self.building_type == 'infrastructure':
+            if self.building_name in ['road', 'railroad']:
+                cost = self.global_manager.get('building_prices')[self.building_name]
+            else:
+                cost = 0
+        else:
+            cost = self.global_manager.get('building_prices')[self.building_type]
+        message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
         self.set_tooltip(message)
         
 
@@ -2018,7 +2033,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type]:
+                    if self.building_type == 'infrastructure':
+                        cost = self.global_manager.get('building_prices')[self.building_name]
+                    else:
+                        cost = self.global_manager.get('building_prices')[self.building_type]
+                    if self.global_manager.get('money') >= cost:
                         current_building = self.attached_tile.cell.get_building(self.building_type)
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
@@ -2076,7 +2095,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                             else:
                                 text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')[self.building_type]) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
+                        if self.building_type == 'infrastructure':
+                            cost = self.global_manager.get('building_prices')[self.building_name]
+                        else:
+                            cost = self.global_manager.get('building_prices')[self.building_type]
+                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)

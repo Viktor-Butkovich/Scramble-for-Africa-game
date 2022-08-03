@@ -88,6 +88,8 @@ def start_player_turn(global_manager, first_turn = False):
     if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
         actor_utility.deselect_all(global_manager)
         game_transitions.cycle_player_turn(global_manager, True)
+    elif not global_manager.get('displayed_mob').selected:
+        global_manager.get('displayed_mob').select()
 
 def reset_mobs(mob_type, global_manager):
     '''
@@ -194,12 +196,12 @@ def manage_upkeep(global_manager):
     Output:
         None
     '''
-    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 1)
-    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 1)
-    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 1)
+    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 2)
+    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 2)
+    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 2)
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
-    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
-    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
+    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 2)
+    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 2), 'worker upkeep')
 
 def manage_loans(global_manager):
     '''
@@ -275,26 +277,26 @@ def manage_worker_price_changes(global_manager):
     european_worker_roll = random.randrange(1, 7)
     if european_worker_roll >= 5:
         current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_european_worker_upkeep'):
             global_manager.set('european_worker_upkeep', changed_price)
             text_tools.print_to_screen("An influx of workers from Europe has decreased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif european_worker_roll == 1:
         current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         global_manager.set('european_worker_upkeep', changed_price)
         text_tools.print_to_screen("An shortage of workers from Europe has increased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
     slave_worker_roll = random.randrange(1, 7)
     if slave_worker_roll >= 5:
         current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
             global_manager.get('recruitment_costs')['slave workers'] = changed_price
             text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif slave_worker_roll == 1:
         current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         global_manager.get('recruitment_costs')['slave workers'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
@@ -585,8 +587,6 @@ def manage_commodity_sales(global_manager):
     trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
     stealing = False
     money_stolen = 0
-    if trade_minister.check_corruption():
-        stealing = True
     text = trade_minister.current_position + " " + trade_minister.name + " reports the following commodity sales: /n /n"
     any_sold = False
     for current_commodity in global_manager.get('commodity_types'):
@@ -595,15 +595,14 @@ def manage_commodity_sales(global_manager):
             sell_price = global_manager.get('commodity_prices')[current_commodity]
             expected_revenue = sold_commodities[current_commodity] * sell_price
             actual_revenue = 0
-            #sell_price += random.randrange(-1, 2) + trade_minister.get_roll_modifier()
-            if stealing and sell_price > 1:
-                money_stolen += sold_commodities[current_commodity]
-                sell_price -= 1
-            if sell_price <= 0:
-                sell_price = 1
                 
             for i in range(sold_commodities[current_commodity]):
                 individual_sell_price = sell_price + random.randrange(-1, 2) + trade_minister.get_roll_modifier()
+                if trade_minister.check_corruption() and individual_sell_price > 1:
+                    money_stolen += 1
+                    individual_sell_price -= 1
+                if individual_sell_price < 1:
+                    individual_sell_price = 1
                 global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
@@ -615,13 +614,6 @@ def manage_commodity_sales(global_manager):
         trade_minister.display_message(text)
     if money_stolen > 0:
         trade_minister.steal_money(money_stolen, 'sold commodities')
-    #sell_price = global_manager.get('commodity_prices')[sold_commodity]
-    #for i in range(num_sold):
-    #    global_manager.get('money_tracker').change(sell_price, 'commodities sold')
-        #seller.change_inventory(sold_commodity, -1)
-    #    if random.randrange(1, 7) <= 1: #1/6 chance
-    #        change_price(sold_commodity, -1, global_manager)
-    #text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
-    #new_price = global_manager.get('commodity_prices')[sold_commodity]
-    #if new_price < sell_price:
-    #    text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
+
+    for current_commodity in global_manager.get('commodity_types'):
+        global_manager.get('sold_commodities')[current_commodity] = 0

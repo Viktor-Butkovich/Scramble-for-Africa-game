@@ -237,9 +237,10 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        if random.randrange(1, 3) == 1: #1/2
-            result += self.get_skill_modifier()
-
+        #if random.randrange(1, 3) == 1: #1/2
+        #    result += self.get_skill_modifier()
+        result += self.get_roll_modifier()
+        
         if (predetermined_corruption or self.check_corruption()):
             if not self.stolen_already: #true if stealing
                 self.steal_money(value, roll_type)
@@ -251,7 +252,8 @@ class minister():
             result = max_result
 
         #if corrupt, chance to choose random non-critical failure result
-            
+        if result > num_sides:
+            result = num_sides
         return(result)
 
     def no_corruption_roll(self, num_sides):
@@ -266,14 +268,15 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        if random.randrange(1, 3) == 1: #1/2
-            result += self.get_skill_modifier()
-
+        #if random.randrange(1, 3) == 1: #1/2
+        #    result += self.get_skill_modifier()
+        result += self.get_roll_modifier()
+        
         if result < min_result:
             result = min_result
         elif result > max_result:
             result = max_result
-            
+
         return(result)
 
     def roll_to_list(self, num_sides, min_success, max_crit_fail, value, roll_type, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
@@ -456,6 +459,11 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
+        if self.global_manager.get('DEBUG_band_of_thieves'):
+            return(True)
+        elif self.global_manager.get('DEBUG_ministry_of_magic'):
+            return(False)
+            
         if random.randrange(1, 7) >= self.corruption_threshold:
             if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
                 return(True)
@@ -496,6 +504,8 @@ class minister():
         Output:
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
+        if self.global_manager.get('DEBUG_ministry_of_magic'):
+            return(5)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             return(self.get_skill_modifier())
         else:
