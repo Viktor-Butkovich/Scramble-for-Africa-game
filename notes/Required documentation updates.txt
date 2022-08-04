@@ -21,3 +21,4 @@ actor_display_tools/buttons.pick_up_all_passengers_button changed to embark_all_
 actor_display_tools/buttons.disembark_all_passengers_button
 turn_management_tools.manage_commodity_sales
 vehicles.train.get_movement_cost
+actor_utility.get_building_cost

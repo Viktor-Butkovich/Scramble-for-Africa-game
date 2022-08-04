@@ -1025,7 +1025,7 @@ try:
     global_manager.set('DEBUG_band_of_thieves', False) #False by default
     #causes all ministers to be corrupt whenever possible
 
-    global_manager.set('DEBUG_ministry_of_magic', True) #False by default
+    global_manager.set('DEBUG_ministry_of_magic', False) #False by default
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
     
     #activating/disabling debugging tools

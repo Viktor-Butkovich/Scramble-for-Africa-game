@@ -343,13 +343,15 @@ class button():
             
         elif self.button_type == 'build train':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'train')
-            self.set_tooltip(["Orders parts for and attempts to assemble a train in this unit's tile for " + str(self.global_manager.get('building_prices')['train']) + " money", "Can only be assembled on a train station",
-                "Costs all remaining movement points, at least 1"])
+            cost = actor_utility.get_building_cost(self.global_manager, self.global_manager.get('displayed_mob'), 'train')
+            self.set_tooltip(["Orders parts for and attempts to assemble a train in this unit's tile for " + str(cost) + " money", "Can only be assembled on a train station",
+                "Costs all remaining movement points, at least 1", "Unlike buildings, the cost of vehicle assembly is not impacted by local terrain"])
             
         elif self.button_type == 'build steamboat':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'steamboat')
-            self.set_tooltip(["Orders parts for and attempts to assemble a steamboat in this unit's tile for " + str(self.global_manager.get('building_prices')['steamboat']) + " money", "Can only be assembled on a port",
-                "Costs all remaining movement points, at least 1"])
+            cost = actor_utility.get_building_cost(self.global_manager, self.global_manager.get('displayed_mob'), 'train')
+            self.set_tooltip(["Orders parts for and attempts to assemble a steamboat in this unit's tile for " + str(cost) + " money", "Can only be assembled on a port",
+                "Costs all remaining movement points, at least 1", "Unlike buildings, the cost of vehicle assembly is not impacted by local terrain"])
             
         elif self.button_type == 'cycle units':
             tooltip_text = ["Selects the next unit in the turn order"]

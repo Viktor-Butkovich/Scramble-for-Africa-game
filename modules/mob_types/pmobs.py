@@ -892,11 +892,14 @@ class pmob(mob):
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
         message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
-        if self.building_type == 'infrastructure':
-            cost = self.global_manager.get('building_prices')[self.building_name]
-        else:
-            cost = self.global_manager.get('building_prices')[self.building_type]
+        
+        cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
+        #if self.building_type == 'infrastructure':
+        #    cost = self.global_manager.get('building_prices')[self.building_name]
+        #else:
+        #    cost = self.global_manager.get('building_prices')[self.building_type]
         message += "The planning and materials will cost " + str(cost) + " money. /n /n"
+        
         message += "If successful, a " + self.building_name + " will be built. " #change to match each building
         if self.building_type == 'resource':
             message += "A " + self.building_name + " expands the tile's warehouse capacity, and each work crew attached to it can attempt to produce " + self.attached_resource + " each turn. /n /n"
@@ -951,13 +954,12 @@ class pmob(mob):
         else:
             num_dice = 1
             
-        if self.building_type == 'infrastructure':
-            cost = self.global_manager.get('building_prices')[self.building_name]
-        else:
-            cost = self.global_manager.get('building_prices')[self.building_type]
-            
-        self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
-        text = ""
+        #if self.building_type == 'infrastructure':
+        #    cost = self.global_manager.get('building_prices')[self.building_name]
+        #else:
+        #    cost = self.global_manager.get('building_prices')[self.building_type]
+        cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
+
         if self.building_name in ['train', 'steamboat']:
             verb = 'assemble'
             preterit_verb = 'assembled'
@@ -966,6 +968,10 @@ class pmob(mob):
             verb = 'construct'
             preterit_verb = 'constructed'
             noun = 'construction'
+
+        self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
+        text = ""
+
         text += "The " + self.name + " attempts to " + verb + " a " + self.building_name + ". /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)

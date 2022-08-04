@@ -249,11 +249,11 @@ class building(actor):
     def get_build_cost(self):
         '''
         Description:
-            Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+            Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts or terrain
         Input:
             None
         Output:
-            double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+            double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts or terrain
         '''
         return(self.global_manager.get('building_prices')[self.building_type])
 
@@ -649,7 +649,7 @@ class resource_building(building):
     def get_build_cost(self):
         '''
         Description:
-            Returns the total cost of building this building, including all of its upgrades but not failed attempts
+            Returns the total cost of building this building, including all of its upgrades but not failed attempts or terrain
         Input:
             None
         Output:

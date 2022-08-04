@@ -490,17 +490,23 @@ class resource_icon(tile):
         if self.resource == 'natives':
             attached_village = self.attached_tile.cell.get_building('village')
             if attached_village.population == 0: #0
-                self.image_dict['small'] = 'scenery/resources/small/natives0.png'
-                self.image_dict['large'] = 'scenery/resources/natives0.png'
+                key = '0'
             elif attached_village.population <= 3: #1-3
-                self.image_dict['small'] = 'scenery/resources/small/natives1.png'
-                self.image_dict['large'] = 'scenery/resources/natives1.png'
+                key = '1'
             elif attached_village.population <= 6: #4-6
-                self.image_dict['small'] = 'scenery/resources/small/natives2.png'
-                self.image_dict['large'] = 'scenery/resources/natives2.png'
+                key = '2'
             else: #7-10
-                self.image_dict['small'] = 'scenery/resources/small/natives3.png'
-                self.image_dict['large'] = 'scenery/resources/natives3.png'
+                key = '3'
+
+            if attached_village.aggressiveness <= 3: #1-3
+                key += '1'
+            elif attached_village.aggressiveness <= 6: #4-6
+                key += '2'
+            else: #7-10
+                key += '3'
+
+            self.image_dict['small'] = 'scenery/resources/natives/small/' + key + '.png'
+            self.image_dict['large'] = 'scenery/resources/natives/' + key + '.png'
         building_present = False
         for building_type in self.global_manager.get('building_types'):
             if self.attached_tile.cell.has_building(building_type): #if any building present

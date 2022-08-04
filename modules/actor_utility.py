@@ -6,6 +6,21 @@ from . import scaling
 from . import utility
 from . import text_tools
 
+def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
+    if building_type == 'infrastructure':
+        building_type = building_name #road or railroad
+    base_price = global_manager.get('building_prices')[building_type]
+
+    if building_type in ['train', 'steamboat']:
+        cost_multiplier = 1
+    elif constructor == 'none' or not global_manager.get('strategic_map_grid') in constructor.grids:
+        cost_multiplier = 1
+    else:
+        terrain = constructor.images[0].current_cell.terrain
+        cost_multiplier = global_manager.get('terrain_build_cost_multiplier_dict')[terrain]
+
+    return(base_price * cost_multiplier)
+
 def update_recruitment_descriptions(global_manager, target = 'all'):
     '''
     Description:

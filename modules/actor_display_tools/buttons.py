@@ -1712,17 +1712,15 @@ class build_train_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_label.actor.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
+                    cost = actor_utility.get_building_cost(self.global_manager, self.attached_label.actor, 'train')
+                    if self.global_manager.get('money') >= cost: #self.global_manager.get('building_prices')['train']:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if self.attached_label.actor.images[0].current_cell.has_intact_building('train_station'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['train']:
-                                        if self.attached_label.actor.check_if_minister_appointed():
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
-                                            self.construct()
-                                    else:
-                                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to assemble a train.", self.global_manager)
+                                    if self.attached_label.actor.check_if_minister_appointed():
+                                        if self.attached_label.actor.sentry_mode:
+                                            self.attached_label.actor.set_sentry_mode(False)
+                                        self.construct()
                                 else:
                                     text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
                             else:
@@ -1730,7 +1728,7 @@ class build_train_button(label_button):
                         else:
                             text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['train']) + " money needed to assemble a train.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to assemble a train.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to assemble a train.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
@@ -1801,18 +1799,16 @@ class build_steamboat_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_label.actor.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')['steamboat']:
+                    cost = actor_utility.get_building_cost(self.global_manager, self.attached_label.actor, 'steamboat')
+                    if self.global_manager.get('money') >= cost:
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if self.attached_label.actor.images[0].current_cell.has_intact_building('port'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.attached_label.actor.adjacent_to_river():
-                                        if self.global_manager.get('money') >= self.global_manager.get('building_prices')['steamboat']:
-                                            if self.attached_label.actor.check_if_minister_appointed():
-                                                if self.attached_label.actor.sentry_mode:
-                                                    self.attached_label.actor.set_sentry_mode(False)
-                                                self.construct()
-                                        else:
-                                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['steamboat']) + " money needed to assemble a steamboat.", self.global_manager)
+                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            if self.attached_label.actor.sentry_mode:
+                                                self.attached_label.actor.set_sentry_mode(False)
+                                            self.construct()
                                     else:
                                         text_tools.print_to_screen("A steamboat assembled here would not be able to access any rivers.", self.global_manager)
                                 else:
@@ -1822,7 +1818,7 @@ class build_steamboat_button(label_button):
                         else:
                             text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('building_prices')['steamboat']) + " money needed to assemble a steamboat.", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to assemble a steamboat.", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to assemble a steamboat.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
@@ -1991,9 +1987,12 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if self.building_name == 'railroad':
                 message.append("Upgrades this tile's road into a railroad, allowing trains to move through this tile")
                 message.append("Retains the benefits of a road")
-            else:
+            elif self.building_name == 'road':
                 message.append('Builds a road, halving the cost to move between this tile and other tiles with roads or railroads')
                 message.append('A road can be upgraded into a railroad that allows trains to move through this tile')
+            else:
+                self.set_tooltip(message) #can't get building cost without road/railroad type
+                return()
                 
         elif self.building_type == 'trading_post':
             message.append('Builds a trading post, increasing the success chance and reducing the risk when caravans trade with the attached village')
@@ -2009,14 +2008,22 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         else:
             message.append('placeholder')
 
-        if self.building_type == 'infrastructure':
-            if self.building_name in ['road', 'railroad']:
-                cost = self.global_manager.get('building_prices')[self.building_name]
-            else:
-                cost = 0
-        else:
-            cost = self.global_manager.get('building_prices')[self.building_type]
+        base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
+        cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
+
+        #if self.building_type == 'infrastructure':
+        #    if self.building_name in ['road', 'railroad']:
+        #        cost = self.global_manager.get('building_prices')[self.building_name]
+        #    else:
+        #        cost = 0
+        #else:
+        #    cost = self.global_manager.get('building_prices')[self.building_type]
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
+        if self.building_type in ['train', 'steamboat']:
+            message.append("Unlike buildings, the cost of vehicle assembly is not impacted by local terrain")
+        if (not self.attached_mob == 'none') and self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
+            terrain = self.attached_mob.images[0].current_cell.terrain
+            message.append("A " + self.building_name + " costs " + str(base_cost) + " money by default, which is multiplied by " + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + " when built in " + terrain + " terrain")
         self.set_tooltip(message)
         
 
@@ -2033,10 +2040,11 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
-                    if self.building_type == 'infrastructure':
-                        cost = self.global_manager.get('building_prices')[self.building_name]
-                    else:
-                        cost = self.global_manager.get('building_prices')[self.building_type]
+                    cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
+                    #if self.building_type == 'infrastructure':
+                    #    cost = self.global_manager.get('building_prices')[self.building_name]
+                    #else:
+                    #    cost = self.global_manager.get('building_prices')[self.building_type]
                     if self.global_manager.get('money') >= cost:
                         current_building = self.attached_tile.cell.get_building(self.building_type)
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
@@ -2095,10 +2103,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                             else:
                                 text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
                     else:
-                        if self.building_type == 'infrastructure':
-                            cost = self.global_manager.get('building_prices')[self.building_name]
-                        else:
-                            cost = self.global_manager.get('building_prices')[self.building_type]
+                        #if self.building_type == 'infrastructure':
+                        #    cost = self.global_manager.get('building_prices')[self.building_name]
+                        #else:
+                        #    cost = self.global_manager.get('building_prices')[self.building_type]
                         text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
@@ -2242,13 +2250,15 @@ class repair_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('building_prices')[self.building_type] / 2:
+                    attached_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
+                    cost = attached_building.get_repair_cost()
+                    if self.global_manager.get('money') >= cost: #self.global_manager.get('building_prices')[self.building_type] / 2:
                         if self.attached_mob.sentry_mode:
                             self.attached_mob.set_sentry_mode(False)
-                        current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
+                        #current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                         self.repair()
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money needed to attempt to repair the " + self.building_name + ".", self.global_manager)
+                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to repair the " + self.building_name + ".", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to repair a building.", self.global_manager)
                     text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
@@ -2352,6 +2362,7 @@ class upgrade_button(label_button):
             else:
                 message.append('placeholder')
             message.append('Attempting to upgrade costs ' + str(self.attached_building.get_upgrade_cost()) + ' money and increases with each future upgrade to this building.')
+            message.append("Unlike new buildings, the cost of building upgrades is not impacted by local terrain")
         self.set_tooltip(message)
         
 

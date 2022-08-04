@@ -98,6 +98,8 @@ class caravan(group):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         message += "In each trade, the merchant trades 1 of his " + str(self.get_inventory('consumer goods')) + " consumer goods for items that may or may not be valuable. /n /n"
         message += "Trading may also convince villagers to become available for hire as workers. "
+        #if self.current_min_success > 6:
+        #    notification_tools.display_notification(message + "As a " + str(self.current_min_success) + "+ would be required to succeed this roll, it is impossible and may not be attempted. Build a trading post to reduce the roll's difficulty.", 'default', self.global_manager)
         notification_tools.display_choice_notification(message, ['start trading', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def willing_to_trade(self, notification):

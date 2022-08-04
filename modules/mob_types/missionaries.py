@@ -73,9 +73,9 @@ class missionaries(group):
 
         population_modifier = village.get_population_modifier()
         if population_modifier < 0:
-            message += "The high population of this village will require more effort to convert. /n"
+            message += "The high population of this village will require more effort to convert. /n /n"
         elif population_modifier > 0:
-            message += "The low population of this village will require less effort to convert. /n"
+            message += "The low population of this village will require less effort to convert. /n /n"
         self.current_roll_modifier += population_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -98,8 +98,12 @@ class missionaries(group):
         
         choice_info_dict = {'evangelist': self,'type': 'start converting'}
         self.current_roll_modifier = 0
-        self.global_manager.set('ongoing_conversion', True)
-        notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+        if self.current_min_success > 6:
+            message += "As a " + str(self.current_min_success) + "+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll's difficulty. /n /n"
+            notification_tools.display_notification(message, 'default', self.global_manager)
+        else:
+            self.global_manager.set('ongoing_conversion', True)
+            notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
         '''

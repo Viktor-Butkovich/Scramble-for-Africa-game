@@ -29,6 +29,7 @@ minister face being shown twice during fort construction
 should never move camera to invisible enemy during enemy turn
 
 Future plans:
+change background of village based on aggressiveness
 make actor_utility.get_building_cost(building_type, building_name)
 increase building costs based on terrain, multiplying with movement cost
 make commodities lost message both a zoom and minister message notification?
@@ -71,6 +72,7 @@ Possible/known Errors:
 Fixable:
 
 Investigating:
+incorrect inventory capacity upon constructing certain building combinations, fixed after save and load
 minister face not appearing correctly when minister retires after trading report
 infinite loop and phantom officers sometimes created when ship travels to port
 check behavior of native warriors spawning when surrounded
