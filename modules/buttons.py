@@ -1138,6 +1138,8 @@ class cycle_same_tile_button(button):
                 moved_mob = cycled_tile.cell.contained_mobs.pop(0)
                 cycled_tile.cell.contained_mobs.append(moved_mob)
                 cycled_tile.cell.contained_mobs[0].select()
+                if cycled_tile.cell.contained_mobs[0].is_pmob:
+                    cycled_tile.cell.contained_mobs[0].selection_sound()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_tile) #updates mob info display list to show changed passenger order
             else:
                 text_tools.print_to_screen("You are busy and can not cycle units.", self.global_manager)
@@ -1202,7 +1204,9 @@ class same_tile_icon(button):
         if self.can_show() and (not self.is_last) and (not self.attached_mob == 'none'):
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.showing_outline = True
-                self.attached_mob.select() 
+                self.attached_mob.select()
+                if self.attached_mob.is_pmob:
+                    self.attached_mob.selection_sound()
                 for current_image in self.attached_mob.images: #move mob to front of each stack it is in
                     if not current_image.current_cell == 'none':
                         while not self.attached_mob == current_image.current_cell.contained_mobs[0]:

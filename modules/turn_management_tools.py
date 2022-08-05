@@ -168,7 +168,8 @@ def manage_production(global_manager):
                         expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
             if len(current_resource_building.contained_work_crews) == 0:
-                global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
+                if not current_resource_building.resource_type in global_manager.get('attempted_commodities'):
+                    global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
     production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]

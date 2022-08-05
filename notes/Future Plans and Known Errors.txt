@@ -1,55 +1,22 @@
-Completed:
-fixed commodities left in abstract grids disappearing
-improved zoom notifications
-remove religious/ethnic references relating to slave traders
-ship travel button should show in tooltip that it moves at the end of the turn, add buttons to go to slave traders and europe, tab should switch screens if on Europe screen like ad
-Slave 'recruitment' notification should use the term 'purchase' and not 'recruit' on choice button
-ship tooltip after attrition not correctly showing no movement
-changed color of europe transaction buttons
-added slums growth
-steamships drop commodities/passengers on entering port
-fixed repair button tooltip issue
-fixed work crew health attrition showing 'default' as location
-Maybe automatically unload ship cargo and passengers upon entering ports
-improve description of worker recruitment when using labor broker to not use generic recruitment text
-minister stays selected after being appointed
-Make sure cost of trials, capture slaves, and other actions are correctly shown in actor display button tooltip
-change worker cost increments to 0.25
-change icon locations - veteran center left, sentry center, disorganized center right
-increase building default costs - upgrade starts at 20 and doubles, rail 15, port 25, resource 10, train station 10
-reduce public opinion boost for successful conversion to 0-1
-change trade to have corruption roll for each unit sold, one evidence check at the end
-make critical advertising reduce other price by 2
-make trains have movement points and ignore terrain penalties
-minister of trade should sell commodities at end of turn and report how much they were sold for, allow for corruption
-Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
-fix rounding error on money change
-trains able to use embark/disembark all outside of train stations
-minister face being shown twice during fort construction
-should never move camera to invisible enemy during enemy turn
 
 Future plans:
-change background of village based on aggressiveness
-make actor_utility.get_building_cost(building_type, building_name)
-increase building costs based on terrain, multiplying with movement cost
 make commodities lost message both a zoom and minister message notification?
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
 add are you sure message for removing ministers
+minister skill increase over time
+cost of Europe campaigns should double for each time done that turn
 
 Later:
 add archaeology mechanic, expedition goes to friendly village and looks for rumors, gains mission to go out to certain tile(s) and investigate - if true, chance of special bonus for rest of game
 ^ has categories like archaeology, paleontology, zoology, botany, anthropology (modern), theological (prester john)
 ^ objectives could appear in explored or unexplored tiles, not ocean, do investigation campaign on objective to see if it is there, random missions from geographic society, chance of one each turn
-minister skill increase over time
 have chance of explorer promotion on automatic exploration
 improve terrain appearances, especially hills
 improve button images for labor broker, switch screens, etc.
 add bridges
-incease construction costs based on terrain
 if no save file present, autosave on game creation
 Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
 change action failed messages to reference minister asking for more time/money rather than the unit officer
-prevent ignored commodity prices from skyrocketing?
 add multiple save slots
 possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
 possibly display a notification when a unit dies and have an optional cause of death parameter
@@ -66,6 +33,8 @@ Maybe only show inventory capacity on units with inventory capacity or tiles tha
 Add slave trade suppression, gain progress over time for large public opinion bonus and maybe spawns free African workers
 maybe have selected unit blink like in other games to make it more clear that it is selected
 improved minister face locations
+limit advertising to once per commodity per turn?
+production corruption decreases prices?
 
 Possible/known Errors:
 

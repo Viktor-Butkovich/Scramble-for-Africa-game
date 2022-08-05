@@ -343,7 +343,10 @@ class recruitment_choice_button(choice_button):
 
                 worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
                 if recruiter.is_vehicle:
-                    recruiter.temp_disable_movement()
+                    #if recruiter.has_infinite_movement:
+                    #    recruiter.temp_disable_movement()
+                    #else:
+                    recruiter.set_movement_points(0)
                     worker.crew_vehicle(recruiter)
                 else:
                     recruiter.set_movement_points(0)

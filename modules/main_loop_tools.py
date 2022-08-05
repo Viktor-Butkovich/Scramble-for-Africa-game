@@ -388,6 +388,8 @@ def manage_rmb_down(clicked_button, global_manager):
                             if global_manager.get('minimap_grid') in moved_mob.grids:
                                 global_manager.get('minimap_grid').calibrate(moved_mob.x, moved_mob.y)
                             moved_mob.select()
+                            if moved_mob.is_pmob:
+                                moved_mob.selection_sound()
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), moved_mob.images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
@@ -423,6 +425,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_new_mob = True
                                     current_cell.contained_mobs[0].select()
+                                    if current_cell.contained_mobs[0].is_pmob:
+                                        current_cell.contained_mobs[0].selection_sound()
                                     if current_grid == global_manager.get('minimap_grid'):
                                         main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
                                         main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)

@@ -19,7 +19,8 @@ def cycle_player_turn(global_manager, start_of_turn = False):
             text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
         if global_manager.get('current_game_mode') == 'europe' and turn_queue[0].grids[0] == global_manager.get('strategic_map_grid'):
             set_game_mode('strategic', global_manager)
-                
+        if not turn_queue[0].selected:
+            turn_queue[0].selection_sound()
         turn_queue[0].select()
         turn_queue[0].move_to_front()
         if not turn_queue[0].grids[0].mini_grid == 'none':

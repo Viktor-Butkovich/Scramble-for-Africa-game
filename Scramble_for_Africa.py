@@ -391,7 +391,7 @@ try:
         'resource': 10,
         'road': 5,
         'railroad': 15,
-        'port': 25,
+        'port': 15,
         'train_station': 10,
         'trading_post': 5,
         'mission': 5,

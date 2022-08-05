@@ -426,8 +426,6 @@ class battalion(group):
             warrior.attack_on_spawn()
         self.global_manager.set('ongoing_slave_capture', False)
 
-
-
 class safari(battalion):
     '''
     A group with a hunter officer that can track down and attack beast enemies

@@ -98,6 +98,15 @@ class pmob(mob):
         save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
         return(save_dict)
 
+    def selection_sound(self):
+        if self.is_officer or self.is_group or self.is_vehicle:
+            if self.is_battalion or self.is_safari:
+                self.global_manager.get('sound_manager').play_sound('bolt action 2')
+            possible_sounds = ['voices/voice 1', 'voices/voice 2']
+            if self.is_vehicle and self.vehicle_type == 'ship':
+                possible_sounds.append('voices/ship 2')
+            self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+
     def set_sentry_mode(self, new_value):
         old_value = self.sentry_mode
         if not old_value == new_value:
@@ -547,6 +556,7 @@ class pmob(mob):
             num_dice = 2
             
         notification_tools.display_notification(message, 'combat', self.global_manager, num_dice)
+        self.global_manager.get('sound_manager').play_sound('bolt action 1')
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):
@@ -1089,9 +1099,13 @@ class pmob(mob):
                 input_dict['init_type'] = 'boat'
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
-            self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+            new_building = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
+            if self.building_type in ['steamboat', 'train']:
+                new_building.move_to_front()
+                new_building.select()
+            else:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
         self.global_manager.set('ongoing_construction', False)
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail, uses_minister = True):

@@ -1,8 +1,10 @@
 #Contains functionality for work crews
 
+import random
 from .groups import group
 from .. import actor_utility
 from .. import utility
+from .. import market_tools
 
 class work_crew(group):
     '''
@@ -88,10 +90,10 @@ class work_crew(group):
                 self.global_manager.get('attempted_commodities').append(building.resource_type)
             for current_attempt in range(building.efficiency):
                 if self.veteran:
-                    results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]#self.controlling_minister.roll_to_list(6, 4, 0, 2) #rolls 2 dice if veteran, takes higher result
+                    results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
                     roll_result = max(results[0], results[1])
                 else:
-                    roll_result = self.controlling_minister.no_corruption_roll(6)#self.controlling_minister.roll(6, 4, 0) #CHANGE TO NO CORRUPTION ROLLS HERE AND 3 LINES UP, TEST HEALTH ATTRITION FOR WORKERS AND INVENTORY ATTRITION
+                    roll_result = self.controlling_minister.no_corruption_roll(6)
                     
                 if roll_result >= 4: #4+ required on D6 for production
                     if not self.controlling_minister.check_corruption():
@@ -104,3 +106,5 @@ class work_crew(group):
                         value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
+                if random.randrange(1, 7) <= 1: #1/6 chance
+                    market_tools.change_price(building.resource_type, -1, self.global_manager)

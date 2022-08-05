@@ -45,11 +45,11 @@ class beast(npmob):
         if from_save:
             self.set_hidden(input_dict['hidden'])
         else:
-            self.set_hidden(True)
+            self.set_hidden(True, True)
             self.set_max_movement_points(4)
             
         if global_manager.get('DEBUG_reveal_beasts'):
-            self.set_hidden(False)
+            self.set_hidden(False, True)
             
         self.just_revealed = False
 
@@ -149,7 +149,7 @@ class beast(npmob):
         super().retreat()
 
         
-    def set_hidden(self, new_hidden):
+    def set_hidden(self, new_hidden, on_load = False):
         '''
         Description:
             Sets this beast's new hidden status. A hidden beast can move around the map as usual and can not be attacked until revealed. A beast reveals itself as it attacks (hiding itself afterward) and can be revealed by a safari
@@ -160,6 +160,9 @@ class beast(npmob):
             self.hide_images()
         else:
             self.show_images()
+            if not on_load:
+                self.global_manager.get('sound_manager').play_sound('beasts/' + self.animal_type)
+            
     
     def check_despawn(self):
         '''

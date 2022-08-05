@@ -299,6 +299,11 @@ class money_tracker(value_tracker):
             else:
                 change_type = 'misc. expenses'
         self.transaction_history[change_type] += value_change
+        if not value_change == 0:
+            if abs(value_change) < 15:
+                self.global_manager.get('sound_manager').play_sound('coins 1')
+            else:
+                self.global_manager.get('sound_manager').play_sound('coins 2')
         super().change(value_change)
 
     def set(self, new_value):

@@ -284,11 +284,11 @@ class npmob(mob): #if enemy.turn_done
         if not (self.npmob_type == 'beast' and self.hidden):
             for current_image in self.images:
                 current_image.add_to_cell()
-
-            if (self.is_vehicle and self.vehicle_type == 'ship') or self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
-                self.global_manager.get('sound_manager').play_sound('water')
-            else:
-                self.global_manager.get('sound_manager').play_sound('footsteps')
+            if self.visible():
+                if self.images[0].current_cell.terrain == 'water': #do terrain check before embarking on ship
+                    self.global_manager.get('sound_manager').play_sound('water')
+                else:
+                    self.global_manager.get('sound_manager').play_sound('footsteps')
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)
