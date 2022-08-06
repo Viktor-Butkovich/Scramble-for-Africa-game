@@ -56,6 +56,7 @@ class vehicle(pmob):
                 self.has_crew = True
                 self.set_image('uncrewed')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
+            self.selection_sound()
         else: #create crew and passengers through recruitment_manager and embark them
             if input_dict['crew'] == 'none':
                 self.crew = 'none'

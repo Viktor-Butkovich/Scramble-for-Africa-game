@@ -366,7 +366,7 @@ try:
     global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
     global_manager.set('commodity_min_starting_price', 2)
     global_manager.set('commodity_max_starting_price', 5)
-    global_manager.set('consumer_goods_starting_price', 3)
+    global_manager.set('consumer_goods_starting_price', 1)
 
     global_manager.set('action_prices',
         {
@@ -873,7 +873,7 @@ try:
 
 
     #tile info labels setup
-    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'building efficiency', 'building work crews', 'current building work crew', 'native population', 'slums', 'native available workers', 'native aggressiveness']
+    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums', 'native population', 'native available workers', 'native aggressiveness', 'building efficiency', 'building work crews', 'current building work crew']
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type == 'current building work crew':
             x_displacement = 50
@@ -1027,6 +1027,9 @@ try:
 
     global_manager.set('DEBUG_ministry_of_magic', False) #False by default
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
+
+    global_manager.set('DEBUG_farm_upstate', False)
+    #retires all appointed ministers at the end of the turn
     
     #activating/disabling debugging tools
 

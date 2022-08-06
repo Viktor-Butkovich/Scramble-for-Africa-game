@@ -170,6 +170,7 @@ def manage_production(global_manager):
             if len(current_resource_building.contained_work_crews) == 0:
                 if not current_resource_building.resource_type in global_manager.get('attempted_commodities'):
                     global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
+
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
     production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
@@ -184,6 +185,7 @@ def manage_production(global_manager):
                     if global_manager.get('commodities_produced')[current_commodity] >= max_produced:
                         max_commodity = current_commodity
                         max_produced = global_manager.get('commodities_produced')[current_commodity]
+                        expected_production[max_commodity] = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
             text += max_commodity.capitalize() + ": " + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
         production_minister.display_message(text)       
@@ -527,8 +529,11 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
+        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('DEBUG_farm_upstate'):
             removed_ministers.append(current_minister)
+        else: #if not retired/fired
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
+                current_minister.gain_experience()
 
         if current_minister.fabricated_evidence > 0:
             prosecutor = global_manager.get('current_ministers')['Prosecutor']
@@ -595,6 +600,7 @@ def manage_commodity_sales(global_manager):
             any_sold = True
             sell_price = global_manager.get('commodity_prices')[current_commodity]
             expected_revenue = sold_commodities[current_commodity] * sell_price
+            expected_revenue = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_revenue, False)
             actual_revenue = 0
                 
             for i in range(sold_commodities[current_commodity]):

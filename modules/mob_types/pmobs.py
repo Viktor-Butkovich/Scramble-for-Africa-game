@@ -100,7 +100,7 @@ class pmob(mob):
 
     def selection_sound(self):
         if self.is_officer or self.is_group or self.is_vehicle:
-            if self.is_battalion or self.is_safari:
+            if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
                 self.global_manager.get('sound_manager').play_sound('bolt action 2')
             possible_sounds = ['voices/voice 1', 'voices/voice 2']
             if self.is_vehicle and self.vehicle_type == 'ship':

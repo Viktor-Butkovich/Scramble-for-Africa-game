@@ -1011,6 +1011,13 @@ class button():
                     if current_pmob.sentry_mode:
                         current_pmob.set_sentry_mode(False)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob'))
+
+            elif self.button_type == 'confirm remove minister':
+                removed_minister = self.global_manager.get('displayed_minister')
+                removed_minister.appoint('none')
+                public_opinion_penalty = removed_minister.status_number
+                removed_minister.just_removed = True
+                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
                 
     def on_rmb_release(self):
         '''
@@ -1540,13 +1547,16 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
-            if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
-                own_index = self.global_manager.get('available_minister_list').index(self.current_minister)
-                self.global_manager.set('available_minister_left_index', own_index - 2)
-                minister_utility.update_available_minister_display(self.global_manager)
-            else: #if cabinet portrait
-                minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)            
+        if main_loop_tools.action_possible(self.global_manager):
+            if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
+                if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
+                    own_index = self.global_manager.get('available_minister_list').index(self.current_minister)
+                    self.global_manager.set('available_minister_left_index', own_index - 2)
+                    minister_utility.update_available_minister_display(self.global_manager)
+                else: #if cabinet portrait
+                    minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+        else:
+            text_tools.print_to_screen("You are busy and can not select other ministers.", self.global_manager)
 
     def calibrate(self, new_minister):
         '''
@@ -1635,12 +1645,15 @@ class cycle_available_ministers_button(button):
         Output:
             None
         '''
-        if self.direction == 'left':
-            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
-        if self.direction == 'right':
-            self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
-        minister_utility.update_available_minister_display(self.global_manager)
-        self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
+        if main_loop_tools.action_possible(self.global_manager):
+            if self.direction == 'left':
+                self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+            if self.direction == 'right':
+                self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') + 1)
+            minister_utility.update_available_minister_display(self.global_manager)
+            self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
+        else:
+            text_tools.print_to_screen("You are busy and can not select other ministers.", self.global_manager)
 
 class commodity_button(button):
     '''

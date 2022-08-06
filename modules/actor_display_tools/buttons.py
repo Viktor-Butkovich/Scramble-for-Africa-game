@@ -8,6 +8,7 @@ from .. import minister_utility
 from .. import trial_utility
 from .. import text_tools
 from .. import game_transitions
+from .. import notification_tools
 
 class label_button(button):
     '''
@@ -49,7 +50,7 @@ class label_button(button):
         return(False)
 
     def set_y(self, attached_label): 
-        '''
+        ''' 
         Description:
             Sets this button's y position to line up the center of this button and its label
         Input:
@@ -2324,6 +2325,7 @@ class upgrade_button(label_button):
         Output:
             None
         '''
+        self.attached_building = 'none'
         self.attached_mob = self.attached_label.actor #new_attached_mob
         if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
@@ -2506,13 +2508,22 @@ class remove_minister_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.showing_outline = True
                 appointed_minister = self.global_manager.get('displayed_minister')
-                appointed_minister.appoint('none')
+                #appointed_minister.appoint('none')
                 public_opinion_penalty = appointed_minister.status_number
-                text = 'You suffer a small public opinion penalty of ' + str(public_opinion_penalty) + ' for removing ' + appointed_minister.name + ' from office. /n /n'
-                text += appointed_minister.name + ' assumes he will be appointed to a different position by the end of the turn, but he will leave permanently and cause a much larger public opinion penalty if not reappointed. /n /n'
-                appointed_minister.display_message(text)
-                appointed_minister.just_removed = True
-                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+                text = "Are you sure you want to remove " + appointed_minister.name + " from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n."
+                text += "Removing " + appointed_minister.name + " from office would incur a small public opinion penalty of " + str(public_opinion_penalty) + ", even if he were reappointed. /n /n"
+                text += appointed_minister.name + " would expect to be reappointed to a different position by the end of the turn, and would be fired permanently and incur a much larger public opinion penalty if not reappointed. /n /n"
+                if appointed_minister.status_number >= 3:
+                    if appointed_minister.status_number == 4:
+                        text += appointed_minister.name + " is of extremely high social status, and firing him would cause a national outrage. /n /n"
+                    else:
+                        text += appointed_minister.name + " is of high social status, and firing him would reflect particularly poorly on your company. /n /n"
+                elif appointed_minister.status_number == 1:
+                    text += appointed_minister.name + " is of low social status, and firing him would have a relatively minimal impact on your company's reputation. /n /n"
+                notification_tools.display_choice_notification(text, ['confirm remove minister', 'none'], {}, self.global_manager)
+                #appointed_minister.display_message(text)
+                #appointed_minister.just_removed = True
+                #self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
             else:
                 text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
 

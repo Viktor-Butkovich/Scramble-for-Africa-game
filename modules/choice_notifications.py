@@ -173,6 +173,9 @@ class choice_button(button):
         elif button_type == 'confirm main menu':
             self.message = 'Main menu'
 
+        elif button_type == 'confirm remove minister':
+            self.message = 'Confirm'
+
         elif button_type == 'quit':
             self.message = 'Exit game'
     

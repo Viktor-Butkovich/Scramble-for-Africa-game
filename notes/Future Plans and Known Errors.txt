@@ -1,10 +1,20 @@
+Completed:
+vehicles should decrease both health and inventory attrition
+commodities going missing in transport should also decrease market prices
+minister skill increase over time
+switch port and train station icon locations
+make officers/ships say message on recruitment
+prosecutor should control production/trade estimates, inaccurate if low skill check
+slums label appearing in the middle of village labels when both present?
+make sure spawning warrior from crit fail when available workers = population removes an available worker
+issues with same minister appearing in multiple notifications in a row
+add are you sure message for removing ministers
 
 Future plans:
 make commodities lost message both a zoom and minister message notification?
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
-add are you sure message for removing ministers
-minister skill increase over time
 cost of Europe campaigns should double for each time done that turn
+add warning at end of turn for any commodities above local inventory capacities
 
 Later:
 add archaeology mechanic, expedition goes to friendly village and looks for rumors, gains mission to go out to certain tile(s) and investigate - if true, chance of special bonus for rest of game
@@ -34,13 +44,14 @@ Add slave trade suppression, gain progress over time for large public opinion bo
 maybe have selected unit blink like in other games to make it more clear that it is selected
 improved minister face locations
 limit advertising to once per commodity per turn?
-production corruption decreases prices?
+upgrade buttons not disappearing correctly upon leaving tile
 
 Possible/known Errors:
 
 Fixable:
 
 Investigating:
+incorrect railroad images occasionally occurring when new ones are created, fixed after save and load
 incorrect inventory capacity upon constructing certain building combinations, fixed after save and load
 minister face not appearing correctly when minister retires after trading report
 infinite loop and phantom officers sometimes created when ship travels to port

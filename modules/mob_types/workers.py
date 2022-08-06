@@ -52,6 +52,7 @@ class worker(pmob):
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+            self.selection_sound()
 
     def replace(self, attached_group = 'none'):
         '''

@@ -18,8 +18,13 @@ actor_utility imports
 mob_types/expeditions imports
 notifications imports
 choice_notifications imports
+actors imports
 actor_display_tools/buttons.pick_up_all_passengers_button changed to embark_all_passengers_button
 actor_display_tools/buttons.disembark_all_passengers_button
+actor_display_tools/buttons import
 turn_management_tools.manage_commodity_sales
 vehicles.train.get_movement_cost
 actor_utility.get_building_cost
+mob_types/pmobs.pmob.selection_sound
+ministers.minister.estimate_expected
+ministers/minister.gain_experience

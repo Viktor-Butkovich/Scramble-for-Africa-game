@@ -30,7 +30,7 @@ def adjust_prices(global_manager):
     
     if consumer_goods_roll == 1:
         change_price('consumer goods', 1, global_manager)
-    elif consumer_goods_roll >= 5:
+    elif consumer_goods_roll >= 4:
         change_price('consumer goods', -1, global_manager)
 
 def change_price(changed_commodity, num_change, global_manager):

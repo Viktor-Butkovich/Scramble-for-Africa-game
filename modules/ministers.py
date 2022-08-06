@@ -474,6 +474,21 @@ class minister():
         else:
             return(False)
 
+    def gain_experience(self):
+        if not self.current_position == 'none':
+            if self.specific_skills[self.current_position] < 3:
+                self.specific_skills[self.current_position] += 1
+
+    def estimate_expected(self, base, allow_decimals = True):
+        if self.no_corruption_roll(6) >= 4:
+            return(base)
+        else:
+            multiplier = random.randrange(80, 121)
+            multiplier /= 100
+            if allow_decimals:
+                return(round(base * multiplier, 2))
+            else:
+                return(round(base * multiplier))
 
     def get_skill_modifier(self):
         '''
@@ -554,6 +569,8 @@ class minister():
         if event == 'first hired':
             if self.status_number >= 3:
                 public_opinion_change = self.status_number + random.randrange(-1, 2)
+                if self.status_number == 4:
+                    public_opinion_change += 6
             text += "From: " + self.name + " /n /n"
             intro_options = ["You have my greatest thanks for appointing me to your cabinet. ",
                              "Honored governor, my gratitude knows no limits. ",
