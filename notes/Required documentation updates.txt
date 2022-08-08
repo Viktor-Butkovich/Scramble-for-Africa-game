@@ -28,3 +28,7 @@ actor_utility.get_building_cost
 mob_types/pmobs.pmob.selection_sound
 ministers.minister.estimate_expected
 ministers/minister.gain_experience
+actor_utility.reset_action_prices
+trial_utility imports
+mob_types/caravans imports
+turn_management_tools.remove_excess_inventory

@@ -1,22 +1,20 @@
 Completed:
-vehicles should decrease both health and inventory attrition
-commodities going missing in transport should also decrease market prices
-minister skill increase over time
-switch port and train station icon locations
-make officers/ships say message on recruitment
-prosecutor should control production/trade estimates, inaccurate if low skill check
-slums label appearing in the middle of village labels when both present?
-make sure spawning warrior from crit fail when available workers = population removes an available worker
-issues with same minister appearing in multiple notifications in a row
-add are you sure message for removing ministers
+slums label appearing in middle of resource production facility labels
+steamboat shouldn't show travel button
+combat strength of crewed vehicles should be same as workers, not 0
+cost of Europe campaigns should double for each time done that turn
+change flavor text for caravan trading with village to say not willing to trade any more with _this_ caravan
+add warning at end of turn for any commodities above local inventory capacities
+give warning notification for village with mission increasing to 4 aggressiveness
+add public opinion penalty for firing European workers
 
 Future plans:
 make commodities lost message both a zoom and minister message notification?
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
-cost of Europe campaigns should double for each time done that turn
-add warning at end of turn for any commodities above local inventory capacities
+only allow European workers to crew steamships, no slaves crewing vehicles
 
 Later:
+add mode like sentry to not replace attrition losses for a certain unit
 add archaeology mechanic, expedition goes to friendly village and looks for rumors, gains mission to go out to certain tile(s) and investigate - if true, chance of special bonus for rest of game
 ^ has categories like archaeology, paleontology, zoology, botany, anthropology (modern), theological (prester john)
 ^ objectives could appear in explored or unexplored tiles, not ocean, do investigation campaign on objective to see if it is there, random missions from geographic society, chance of one each turn
@@ -49,17 +47,16 @@ upgrade buttons not disappearing correctly upon leaving tile
 Possible/known Errors:
 
 Fixable:
+incorrect minister face locations on certain resolutions, possibly ones where height is disproportionately large compared to width
 
 Investigating:
 incorrect railroad images occasionally occurring when new ones are created, fixed after save and load
 incorrect inventory capacity upon constructing certain building combinations, fixed after save and load
-minister face not appearing correctly when minister retires after trading report
 infinite loop and phantom officers sometimes created when ship travels to port
 check behavior of native warriors spawning when surrounded
 some notifications slightly too short for click to remove message when display height manually lowered
 safari not correctly having enough movement to follow up after hunting, possibly relating to water
 Disorganized flag and tooltip not showing correctly, especially when creating group or after disembarking ship
-Fix inconsistent minister faces, issues with multiple minister messages in a row
 change check if minister appointed to minister_utility.positions_filled across the board, need prosecutor appointed during other minister's actions, etc.
 make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense
 Make sure worker changed to workers in text descriptions throughout the program

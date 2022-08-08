@@ -338,14 +338,22 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    if new_actor.cell.has_building('village') and new_actor.cell.visible:
-                        self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
-                    elif not new_actor.cell.has_building(self.actor_label_type): #if no building built, show resource: name
+                    #if new_actor.cell.has_building('village') and new_actor.cell.visible:
+                    #    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
+                    if not (new_actor.cell.has_building('resource') or new_actor.cell.has_building('village')): #if no building built, show resource: name
                         self.set_label(self.message_start + new_actor.cell.resource)
-                    else:
-                        self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
+                    #else:
+                    #    self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
                 else:
                     self.set_label(self.message_start + 'unknown')
+
+            elif self.actor_label_type == 'resource building':
+                if (not new_actor.grid.is_abstract_grid) and new_actor.cell.visible and new_actor.cell.has_building('resource'):
+                    self.set_label('Resource building: ' + new_actor.cell.get_building('resource').name)
+
+            elif self.actor_label_type == 'village':
+                if new_actor.cell.visible and new_actor.cell.has_building('village') and new_actor.cell.visible:
+                    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
                     
             elif self.actor_label_type == 'movement':
                 if self.actor.controllable:
@@ -529,7 +537,11 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and self.actor.grid.is_abstract_grid: #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+            return(False)
+        elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
+            return(False)
+        elif self.actor_label_type == 'village' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('village'))):
             return(False)
         elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle: #do not show passenger or crew labels for non-vehicle mobs
             return(False)

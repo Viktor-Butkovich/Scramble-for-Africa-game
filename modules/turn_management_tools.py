@@ -19,6 +19,7 @@ def end_turn(global_manager):
     Output:
         None
     '''
+    remove_excess_inventory(global_manager)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
 
@@ -76,6 +77,7 @@ def start_player_turn(global_manager, first_turn = False):
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
+        actor_utility.reset_action_prices(global_manager)
         game_end_check(global_manager)
 
     global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
@@ -142,6 +144,12 @@ def manage_attrition(global_manager):
         current_tile = current_cell.tile
         if len(current_tile.get_held_commodities()) > 0:
             current_tile.manage_inventory_attrition()
+
+def remove_excess_inventory(global_manager):
+    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    for current_cell in terrain_cells:
+        current_tile = current_cell.tile
+        if len(current_tile.get_held_commodities()) > 0:
             current_tile.remove_excess_inventory()
     
 def manage_production(global_manager):
@@ -291,7 +299,7 @@ def manage_worker_price_changes(global_manager):
         text_tools.print_to_screen("An shortage of workers from Europe has increased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
     slave_worker_roll = random.randrange(1, 7)
-    if slave_worker_roll >= 5:
+    if slave_worker_roll == 6:
         current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
@@ -455,12 +463,16 @@ def manage_villages(global_manager):
         None
     '''
     for current_village in global_manager.get('village_list'):
+        previous_aggressiveness = current_village.aggressiveness
         roll = random.randrange(1, 7)
         if roll <= 2: #1-2
             current_village.change_aggressiveness(-1)
         #3-4 does nothing
         elif roll >= 5: #5-6
             current_village.change_aggressiveness(1)
+        if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
+            text = "The previously pacified village at (" + str(current_village.cell.x) + ", " + str(current_village.cell.y) + ") has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n"
+            notification_tools.display_zoom_notification(text, current_village.cell.tile, global_manager)
 
         roll = random.randrange(1, 7)
         second_roll = random.randrange(1, 7)

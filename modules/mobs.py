@@ -210,7 +210,7 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
-        if self.is_officer or self.is_vehicle:
+        if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
         return(result)
 

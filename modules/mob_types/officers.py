@@ -285,8 +285,10 @@ class evangelist(officer):
             num_dice = 2
         else:
             num_dice = 1
-        
+
+        price = self.global_manager.get('action_prices')['religious_campaign']
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
+        actor_utility.double_action_price(self.global_manager, 'religious_campaign')
         text = ""
         text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
         if not self.veteran:    
@@ -300,7 +302,7 @@ class evangelist(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['religious_campaign'], 'religious campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
@@ -324,7 +326,7 @@ class evangelist(officer):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['religious_campaign'], 'religious campaign')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign')
             roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
@@ -437,8 +439,10 @@ class evangelist(officer):
             num_dice = 2
         else:
             num_dice = 1
-        
+
+        price = self.global_manager.get('action_prices')['public_relations_campaign']
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['public_relations_campaign'] * -1, 'public relations campaigns')
+        actor_utility.double_action_price(self.global_manager, 'public_relations_campaign')
         text = ""
         text += "The evangelist campaigns to increase your company's public opinion with word of your company's benevolent goals and righteous deeds in Africa. /n /n"
         if not self.veteran:    
@@ -452,7 +456,7 @@ class evangelist(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['public_relations_campaign'], 'public relations campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign', 2)
             first_roll_list = dice_utility.roll_to_list(6, "Public relations campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
@@ -474,7 +478,7 @@ class evangelist(officer):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['religious_campaign'], 'religious campaign')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign')
             roll_list = dice_utility.roll_to_list(6, "Public relations campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
@@ -600,8 +604,10 @@ class merchant(officer):
         self.set_movement_points(0)
 
         num_dice = 0 #don't show dice roll for loan
-        
+
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
+        actor_utility.double_action_price(self.global_manager, 'loan_search')
+        
         principal = 100
         initial_interest = 11
         interest = initial_interest
@@ -701,8 +707,11 @@ class merchant(officer):
             num_dice = 2
         else:
             num_dice = 1
-        
+
+        price = self.global_manager.get('action_prices')['advertising_campaign']
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
+        actor_utility.double_action_price(self.global_manager, 'advertising_campaign')
+        
         text = ""
         text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
         if not self.veteran:    
@@ -716,7 +725,7 @@ class merchant(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['advertising_campaign'], 'advertising campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising campaign', 2)
             first_roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
@@ -738,7 +747,7 @@ class merchant(officer):
                 result_outcome_dict[i] = word
             text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['advertising_campaign'], 'advertising campaign')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising campaign')
             roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 

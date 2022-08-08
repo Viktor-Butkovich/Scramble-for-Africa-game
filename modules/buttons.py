@@ -373,19 +373,22 @@ class button():
 
         elif self.button_type == 'religious campaign':
             self.set_tooltip(["Attempts to campaign for church volunteers for " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money", "Can only be done in Europe",
-                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1"])
+                "If successful, recruits a free unit of church volunteers that can join with an evangelist to form a group of missionaries that can convert native villages", "Costs all remaining movement points, at least 1",
+                "Each religious campaign attempted doubles the cost of other religious campaigns in the same turn"])
 
         elif self.button_type == 'public relations campaign':
             self.set_tooltip(["Attempts to spread word of your company's benevolent goals and righteous deeds in Africa for " + str(self.global_manager.get('action_prices')['public_relations_campaign']) + " money",
-                "Can only be done in Europe", "If successful, increases your company's public opinion", "Costs all remaining movement points, at least 1"])
+                "Can only be done in Europe", "If successful, increases your company's public opinion", "Costs all remaining movement points, at least 1",
+                "Each public relations campaign attempted doubles the cost of other public relations campaigns in the same turn"])
 
         elif self.button_type == 'advertising campaign':
             self.set_tooltip(["Attempts to increase a chosen commodity's popularity for " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money", "Can only be done in Europe",
-                "If successful, increases the price of a chosen commodity while randomly decreasing the price of another", "Costs all remaining movement points, at least 1"])
+                "If successful, increases the price of a chosen commodity while randomly decreasing the price of another", "Costs all remaining movement points, at least 1",
+                "Each advertising campaign attempted doubles the cost of other advertising campaigns in the same turn"])
 
         elif self.button_type == 'take loan':
             self.set_tooltip(["Attempts to find a 100 money loan offer with a favorable interest rate for " + str(self.global_manager.get('action_prices')['loan_search']) + " money", "Can only be done in Europe",
-                "While automatically successful, the offered interest rate may vary", "Costs all remaining movement points, at least 1"])
+                "While automatically successful, the offered interest rate may vary", "Costs all remaining movement points, at least 1", "Each loan search attempted doubles the cost of other loan searches in the same turn"])
 
         elif self.button_type == 'track beasts':
             self.set_tooltip(["Attempts to reveal beasts in this tile and adjacent tiles", "If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them", "Can not reveal beasts in unexplored tiles", "Costs 1 movement point"])
@@ -415,10 +418,11 @@ class button():
 
         elif self.button_type == 'to trial':
             self.set_tooltip(["Opens the trial planning screen to attempt to imprison this minister for corruption", "A trial has a higher success chance as more evidence of that minister's corruption is found",
-                "While entering this screen is free, a trial costs " + str(self.global_manager.get('action_prices')['trial']) + " money once started"])
+                "While entering this screen is free, a trial costs " + str(self.global_manager.get('action_prices')['trial']) + " money once started", "Each trial attempted doubles the cost of other trials in the same turn"])
 
         elif self.button_type == 'launch trial':
-            self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money"])
+            self.set_tooltip(["Tries the defending minister in an attempt to remove him from office and imprison him for corruption", "Costs " + str(self.global_manager.get('action_prices')['trial']) + " money",
+                "Each trial attempted doubles the cost of other trials in the same turn"])
 
         elif self.button_type == 'fabricate evidence':
             if self.global_manager.get('current_game_mode') == 'trial':
@@ -847,6 +851,11 @@ class button():
                             if current_minister.just_removed and current_minister.current_position == 'none':
                                 text = "If you do not reappoint " + current_minister.name + " by the end of the turn, he will be considered fired, leaving the minister pool and incurring a large public opinion penalty. /n /n"
                                 current_minister.display_message(text)
+                        for current_cell in self.global_manager.get('strategic_map_grid').cell_list:
+                            if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
+                                text = "The warehouses at (" + str(current_cell.x) + ", " + str(current_cell.y) + ") are not sufficient to hold the commodities stored there. /n /n"
+                                text += "Any commodities exceeding the tile's storage capacity will be lost at the end of the turn. /n /n"
+                                notification_tools.display_zoom_notification(text, current_cell.tile, self.global_manager)
                         choice_info_dict = {'type': 'end turn'}
                         notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
@@ -1350,7 +1359,12 @@ class fire_unit_button(button):
                 message = "Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n "
                 if self.attached_mob.is_worker:
                     if self.attached_mob.worker_type in ['European', 'religious']:
-                        message += "Unlike African workers, fired European workers will never settle in slums and are truly removed from the game."
+                        if self.attached_mob.worker_type == 'European':
+                            message += "Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n"
+                            message += "Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n"
+                        else:
+                            message += "Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n"
+                            message += "Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n"
                     elif self.attached_mob.worker_type == 'African':
                         message += "Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again."
                     elif self.attached_mob.worker_type == 'slave':

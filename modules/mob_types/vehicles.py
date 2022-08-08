@@ -44,6 +44,7 @@ class vehicle(pmob):
         self.contained_mobs = []
         self.ejected_crew = 'none'
         self.ejected_passengers = []
+        self.travel_possible = False
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
@@ -435,9 +436,10 @@ class ship(vehicle):
         Output:
             boolean: Returs True if this ship has any crew, otherwise returns False
         '''
-        if self.has_crew:
-            if not self.temp_movement_disabled:
-                return(True)
+        if self.travel_possible:
+            if self.has_crew:
+                if not self.temp_movement_disabled:
+                    return(True)
         return(False)
 
 class boat(ship):

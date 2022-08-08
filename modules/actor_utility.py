@@ -6,6 +6,13 @@ from . import scaling
 from . import utility
 from . import text_tools
 
+def reset_action_prices(global_manager):
+    for current_action_type in global_manager.get('action_types'):
+        global_manager.get('action_prices')[current_action_type] = global_manager.get('base_action_prices')[current_action_type]
+
+def double_action_price(global_manager, action_type):
+    global_manager.get('action_prices')[action_type] *= 2
+
 def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
     if building_type == 'infrastructure':
         building_type = building_name #road or railroad

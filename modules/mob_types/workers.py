@@ -139,8 +139,14 @@ class worker(pmob):
         if self.worker_type in ['African', 'European']: #not religious volunteers
             market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
         if self.worker_type == 'African':
-            text_tools.print_to_screen("These fired workers will wander and eventually settle down in one of your slums", self.global_manager)
+            text_tools.print_to_screen("These fired workers will wander and eventually settle down in one of your slums.", self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+        if self.worker_type in ['European', 'religious']:
+            current_public_opinion = self.global_manager.get('public_opinion')
+            self.global_manager.get('public_opinion_tracker').change(-1)
+            resulting_public_opinion = self.global_manager.get('public_opinion')
+            if not current_public_opinion == resulting_public_opinion:
+                text_tools.print_to_screen("Firing " + self.name + " reflected poorly on your company and reduced your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
 
     def can_show_tooltip(self):
         '''

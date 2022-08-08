@@ -58,6 +58,7 @@ class save_load_manager_template():
         self.copied_elements.append('num_wandering_workers')
         self.copied_elements.append('prosecution_bribed_judge')
         self.copied_elements.append('sold_commodities')
+        self.copied_elements.append('action_prices')
         
     def new_game(self):
         '''
@@ -174,6 +175,7 @@ class save_load_manager_template():
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
+        actor_utility.reset_action_prices(self.global_manager)
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_tools.manage_villages(self.global_manager)

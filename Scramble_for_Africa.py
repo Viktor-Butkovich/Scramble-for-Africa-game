@@ -337,7 +337,7 @@ try:
     #price setup
     
     global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 5})
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
 
@@ -368,7 +368,8 @@ try:
     global_manager.set('commodity_max_starting_price', 5)
     global_manager.set('consumer_goods_starting_price', 1)
 
-    global_manager.set('action_prices',
+    global_manager.set('action_types', ['exploration', 'convert', 'religious_campaign', 'public_relations_campaign', 'advertising_campaign', 'loan_search', 'trade', 'loan', 'attack', 'capture_slaves', 'trial', 'hunt', 'track_beasts'])
+    global_manager.set('base_action_prices',
         {
         'exploration': 5,
         'convert': 5,
@@ -386,6 +387,9 @@ try:
         }
     )
 
+    global_manager.set('action_prices', {})
+    actor_utility.reset_action_prices(global_manager)    
+
     global_manager.set('building_prices',
         {
         'resource': 10,
@@ -396,8 +400,8 @@ try:
         'trading_post': 5,
         'mission': 5,
         'fort': 5,
-        'train': 5,
-        'steamboat': 5
+        'train': 10,
+        'steamboat': 10
        } 
     )
     
@@ -873,7 +877,9 @@ try:
 
 
     #tile info labels setup
-    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums', 'native population', 'native available workers', 'native aggressiveness', 'building efficiency', 'building work crews', 'current building work crew']
+    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
+                                'resource building', 'building efficiency', 'building work crews', 'current building work crew',
+                                'village', 'native population', 'native available workers', 'native aggressiveness']
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type == 'current building work crew':
             x_displacement = 50
@@ -1025,7 +1031,7 @@ try:
     global_manager.set('DEBUG_band_of_thieves', False) #False by default
     #causes all ministers to be corrupt whenever possible
 
-    global_manager.set('DEBUG_ministry_of_magic', False) #False by default
+    global_manager.set('DEBUG_ministry_of_magic', True) #False by default
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
     global_manager.set('DEBUG_farm_upstate', False)
