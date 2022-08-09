@@ -193,7 +193,7 @@ try:
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums'])
+    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
     #commodity setup
 
 
@@ -400,6 +400,7 @@ try:
         'trading_post': 5,
         'mission': 5,
         'fort': 5,
+        'warehouses': 5,
         'train': 10,
         'steamboat': 10
        } 
@@ -1031,7 +1032,7 @@ try:
     global_manager.set('DEBUG_band_of_thieves', False) #False by default
     #causes all ministers to be corrupt whenever possible
 
-    global_manager.set('DEBUG_ministry_of_magic', True) #False by default
+    global_manager.set('DEBUG_ministry_of_magic', False) #False by default
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
     global_manager.set('DEBUG_farm_upstate', False)

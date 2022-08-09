@@ -134,11 +134,11 @@ def generate_capitalized_article(word):
     plural_exceptions = []
     a_an_exceptions = ['European', 'unit']
     if word[-1] == 's' and (not word in plural_exceptions):
-        return('')
+        return(' ')
     elif word[0] in vowels and (not word in a_an_exceptions):
-        return('An')
+        return('An ')
     else:
-        return('A')
+        return('A ')
     
 def add_to_message(message, new):
     '''

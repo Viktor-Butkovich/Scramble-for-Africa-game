@@ -2010,10 +2010,13 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
 
         elif self.building_type == 'fort':
             message.append('Builds a fort, increasing the combat effectiveness of your units standing in this tile')
-            
+    
         else:
             message.append('placeholder')
 
+        if self.building_type in ['train_station', 'port', 'resource']:
+            message.append("Also upgrades this tile's warehouses by 9 inventory capacity, or creates new warehouses if none are present")
+        
         base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
         cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
 
@@ -2025,11 +2028,14 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         #else:
         #    cost = self.global_manager.get('building_prices')[self.building_type]
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
+        #if self.building_type == 'warehouses':
+        #    message.append("Upgrading warehouses has a base cost of " + str(self.global_manager.get('building_prices')['warehouses']) + ", which doubles for each time warehouses have already been upgraded in this tile")
         if self.building_type in ['train', 'steamboat']:
             message.append("Unlike buildings, the cost of vehicle assembly is not impacted by local terrain")
+            
         if (not self.attached_mob == 'none') and self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
             terrain = self.attached_mob.images[0].current_cell.terrain
-            message.append("A " + self.building_name + " costs " + str(base_cost) + " money by default, which is multiplied by " + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + " when built in " + terrain + " terrain")
+            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + " " + utility.conjugate("cost", self.building_name) + " " + str(base_cost) + " money by default, which is multiplied by " + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + " when built in " + terrain + " terrain")
         self.set_tooltip(message)
         
 
@@ -2056,46 +2062,53 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
                                 if not self.attached_tile.cell.terrain == 'water':
-                                    if self.building_type == 'resource':
-                                        if not self.attached_resource == 'none':
-                                            if self.attached_label.actor.check_if_minister_appointed():
+                                    if self.attached_label.actor.check_if_minister_appointed():
+                                        if self.building_type == 'resource':
+                                            if not self.attached_resource == 'none':
+                                                #if self.attached_label.actor.check_if_minister_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
-                                        else:
-                                            text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
-                                    elif self.building_type == 'port':
-                                        if self.attached_mob.adjacent_to_water():
-                                            if not self.attached_mob.images[0].current_cell.terrain == 'water':
-                                                if self.attached_label.actor.check_if_minister_appointed():
+                                            else:
+                                                text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
+                                        elif self.building_type == 'port':
+                                            if self.attached_mob.adjacent_to_water():
+                                                if not self.attached_mob.images[0].current_cell.terrain == 'water':
+                                                    #if self.attached_label.actor.check_if_minister_appointed():
                                                     if self.attached_label.actor.sentry_mode:
                                                         self.attached_label.actor.set_sentry_mode(False)
                                                     self.construct()
-                                        else:
-                                            text_tools.print_to_screen("This building can only be built in tiles adjacent to discovered water.", self.global_manager)
-                                    elif self.building_type == 'train_station':
-                                        if self.attached_tile.cell.has_intact_building('railroad'):
-                                            if self.attached_label.actor.check_if_minister_appointed():
+                                            else:
+                                                text_tools.print_to_screen("This building can only be built in tiles adjacent to discovered water.", self.global_manager)
+                                        elif self.building_type == 'train_station':
+                                            if self.attached_tile.cell.has_intact_building('railroad'):
+                                                #if self.attached_label.actor.check_if_minister_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
-                                        else:
-                                            text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
-                                    elif self.building_type == 'infrastructure':
-                                        if self.attached_label.actor.check_if_minister_appointed():
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
-                                            self.construct()
-                                    elif self.building_type == 'trading_post' or self.building_type == 'mission':
-                                        if self.attached_tile.cell.has_building('village'):
-                                            if self.attached_label.actor.check_if_minister_appointed():
+                                            else:
+                                                text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
+                                        #elif self.building_type == 'warehouses':
+                                        #    #if self.attached_label.actor.check_if_minister_appointed():
+                                        #    if self.attached_label.actor.images[0].current_cell.warehouse_level > 0:
+                                        #        if not self.attached_label.actor.images[0].current_cell.get_building('warehouses').damaged:
+                                        #            if self.attached_label.actor.sentry_mode:
+                                        #                self.attached_label.actor.set_sentry_mode(False)
+                                        #            self.construct()
+                                        #        else:
+                                        #            text_tools.print_to_screen("Warehouses can only be 
+                                        #    else:
+                                        #        text_tools.print_to_screen("Warehouses can only be improved where warehouses are already present")
+                                        elif self.building_type == 'trading_post' or self.building_type == 'mission':
+                                            if self.attached_tile.cell.has_building('village'):
+                                                #if self.attached_label.actor.check_if_minister_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
-                                        else:
-                                            text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
-                                    elif self.building_type == 'fort':
-                                        if self.attached_label.actor.check_if_minister_appointed():
+                                            else:
+                                                text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
+                                        elif self.building_type in ['infrastructure', 'fort']:
+                                            #if self.attached_label.actor.check_if_minister_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)
                                             self.construct()
@@ -2240,6 +2253,8 @@ class repair_button(label_button):
         message = []
         if self.can_show():
             message.append("Attempts to repair the " + self.building_name + " in this tile, restoring it to full functionality")
+            if self.building_type in ['port', 'train_station', 'resource']:
+                message.append("If successful, also automatically repairs this tile's warehouses")
             message.append("Attempting to repair costs " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money and all remaining movement points, at least 1")
         self.set_tooltip(message)  
 
@@ -2331,7 +2346,7 @@ class upgrade_button(label_button):
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
             if self.attached_mob.can_construct:
                 if not self.attached_tile.cell.contained_buildings[self.base_building_type] == 'none':
-                    self.attached_building = self.attached_tile.cell.contained_buildings[self.base_building_type]
+                    self.attached_building = self.attached_tile.cell.get_intact_building(self.base_building_type) #contained_buildings[self.base_building_type]
 
     def can_show(self):
         '''
@@ -2366,6 +2381,8 @@ class upgrade_button(label_button):
                 message.append("Increases the maximum number of work crews that can be attached to this " + self.attached_building.name + " from " + str(self.attached_building.scale) + " to " + str(self.attached_building.scale + 1) + ".")
             elif self.upgrade_type == 'efficiency':
                 message.append("Increases the number of " + self.attached_building.resource_type + " production attempts made by work crews attached to this " + self.attached_building.name + " from " + str(self.attached_building.efficiency) + " to " + str(self.attached_building.efficiency + 1) + " per turn.")
+            elif self.upgrade_type == 'warehouse_level':
+                message.append("Increases the level of this tile's warehouses from " + str(self.attached_building.warehouse_level) + " to " + str(self.attached_building.warehouse_level + 1) + ", increasing inventory capacity by 9")
             else:
                 message.append('placeholder')
             message.append('Attempting to upgrade costs ' + str(self.attached_building.get_upgrade_cost()) + ' money and increases with each future upgrade to this building.')

@@ -13,6 +13,7 @@ from .. import scaling
 from .. import images
 from .. import dice_utility
 from .. import turn_management_tools
+from .. import minister_utility
 from ..tiles import status_icon
 
 class pmob(mob):
@@ -261,12 +262,12 @@ class pmob(mob):
         Output:
             boolean: Returns whether there is currently an appointed minister to control this unit
         '''
-        if not self.controlling_minister == 'none':
+        if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
             return(True)
         else:
-            keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
+            #keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
             text_tools.print_to_screen("", self.global_manager)
-            text_tools.print_to_screen("You can not do " + keyword + " actions because a " + self.controlling_minister_type + " has not been appointed", self.global_manager)
+            text_tools.print_to_screen("You can not do that until all ministers have been appointed", self.global_manager)
             text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", self.global_manager)
             return(False)
 
@@ -1100,6 +1101,19 @@ class pmob(mob):
             else:
                 input_dict['image'] = 'buildings/' + self.building_type + '.png'
             new_building = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+
+            if self.building_type in ['port', 'train_station', 'resource']:
+                warehouses = self.images[0].current_cell.get_building('warehouses')
+                if not warehouses == 'none':
+                    if warehouses.damaged:
+                        warehouses.set_damaged(False)
+                    warehouses.upgrade()
+                else:
+                    input_dict['image'] = 'misc/empty.png'
+                    input_dict['name'] = 'warehouses'
+                    input_dict['init_type'] = 'warehouses'
+                    self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+                    
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
                 new_building.move_to_front()

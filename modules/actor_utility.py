@@ -16,7 +16,14 @@ def double_action_price(global_manager, action_type):
 def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
     if building_type == 'infrastructure':
         building_type = building_name #road or railroad
-    base_price = global_manager.get('building_prices')[building_type]
+
+    if building_type == 'warehouses':
+        if constructor == 'none':
+            base_price = 5
+        else:
+            base_price = constructor.images[0].current_cell.get_warehouses_cost()
+    else:
+        base_price = global_manager.get('building_prices')[building_type]
 
     if building_type in ['train', 'steamboat']:
         cost_multiplier = 1

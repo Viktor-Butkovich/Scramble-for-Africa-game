@@ -68,8 +68,9 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'mission', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_v, self.modes, self, 'fort', global_manager))
 
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_k, self.modes, self, 'warehouses', 'warehouse_level', global_manager))
             
             self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'mobs/train/button.png', self, global_manager))
             self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'mobs/steamboat/button.png', self, global_manager))

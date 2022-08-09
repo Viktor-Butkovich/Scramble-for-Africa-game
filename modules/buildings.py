@@ -40,6 +40,8 @@ class building(actor):
         self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
+        if input_dict['building_type'] == 'warehouses':
+            self.image_dict['damaged'] = self.image_dict['default']
         self.images = []
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
@@ -51,9 +53,9 @@ class building(actor):
             for current_work_crew in input_dict['contained_work_crews']:
                 self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
             if self.can_damage():
-                self.set_damaged(input_dict['damaged'])
+                self.set_damaged(input_dict['damaged'], True)
         elif self.can_damage():
-            self.set_damaged(False)
+            self.set_damaged(False, True)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
@@ -62,7 +64,7 @@ class building(actor):
         self.set_inventory_capacity(self.default_inventory_capacity)
         if global_manager.get('DEBUG_damaged_buildings'):
             if self.can_damage():
-                self.set_damaged(True)
+                self.set_damaged(True, True)
 
     def to_save_dict(self):
         '''
@@ -156,13 +158,15 @@ class building(actor):
             tooltip_text.append("Increases the success chance of missionaries converting this tile's village")
         elif self.building_type == 'fort':
             tooltip_text.append("Grants a +1 combat modifier to your units fighting in this tile")
+        elif self.building_type == "warehouses":
+            tooltip_text.append("Level " + str(self.warehouse_level) + " warehouses allow an inventory capacity of " + str(9 * self.warehouse_level))
 
         if self.damaged:
             tooltip_text.append("This building is damaged and is currently not functional.")
             
         self.set_tooltip(tooltip_text)
 
-    def set_damaged(self, new_value):
+    def set_damaged(self, new_value, mid_setup = False):
         '''
         Description:
             Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities
@@ -182,6 +186,9 @@ class building(actor):
             self.set_inventory_capacity(self.default_inventory_capacity)
             self.image_dict['default'] = self.image_dict['intact']
             self.set_image('default')
+
+        if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
+            self.images[0].current_cell.get_building('warehouses').set_damaged(new_value)
 
     def set_default_inventory_capacity(self, new_value):
         '''
@@ -446,7 +453,7 @@ class train_station(building):
         '''
         input_dict['building_type'] = 'train_station'
         super().__init__(from_save, input_dict, global_manager)
-        self.set_default_inventory_capacity(9)
+        #self.set_default_inventory_capacity(9)
 
 class port(building):
     '''
@@ -472,7 +479,36 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
+        #self.set_default_inventory_capacity(9)
+
+class warehouses(building):
+    def __init__(self, from_save, input_dict, global_manager):
+        input_dict['building_type'] = 'warehouses'
+        self.warehouse_level = 1
+        super().__init__(from_save, input_dict, global_manager)
         self.set_default_inventory_capacity(9)
+        if from_save:
+            while self.warehouse_level < input_dict['warehouse_level']:
+                self.upgrade()
+                
+        if global_manager.get('DEBUG_damaged_buildings'):
+            if self.can_damage():
+                self.set_damaged(True, True)
+                
+    def to_save_dict(self):
+        save_dict = super().to_save_dict()
+        save_dict['warehouse_level'] = self.warehouse_level
+        return(save_dict)
+
+    def can_upgrade(self, upgrade_type = 'warehouse_level'):
+        return(True)
+
+    def get_upgrade_cost(self):
+        return(self.images[0].current_cell.get_warehouses_cost())
+
+    def upgrade(self, upgrade_type = 'warehouse_level'):
+        self.warehouse_level += 1
+        self.set_default_inventory_capacity(self.default_inventory_capacity + 9)
 
 class resource_building(building):
     '''
@@ -506,7 +542,7 @@ class resource_building(building):
         self.ejected_work_crews = []
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        self.set_default_inventory_capacity(9)
+        #self.set_default_inventory_capacity(9)
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')

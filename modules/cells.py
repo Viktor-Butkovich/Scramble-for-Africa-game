@@ -314,6 +314,21 @@ class cell():
             if current_building.can_damage():
                 return(True)
         return(False)
+
+    def get_warehouses_cost(self):
+        warehouses = self.get_building('warehouses')
+        if warehouses == 'none':
+            warehouses_built = 0
+        else:
+            warehouses_built = warehouses.warehouse_level
+        if self.has_building('port'):
+            warehouses_built -= 1
+        if self.has_building('train_station'):
+            warehouses_built -= 1
+        if self.has_building('resource'):
+            warehouses_built -= 1
+
+        return(self.global_manager.get('building_prices')['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
     
     def create_slums(self):
         '''

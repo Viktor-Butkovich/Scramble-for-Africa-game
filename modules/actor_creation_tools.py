@@ -107,6 +107,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = buildings.train_station(from_save, input_dict, global_manager)
         elif init_type == 'port':
             new_actor = buildings.port(from_save, input_dict, global_manager)
+        elif init_type == 'warehouses':
+            new_actor = buildings.warehouses(from_save, input_dict, global_manager)
         elif init_type == 'resource':
             new_actor = buildings.resource_building(from_save, input_dict, global_manager)
         elif init_type == 'slums':
