@@ -1641,6 +1641,7 @@ class switch_theatre_button(label_button):
                             if not self.global_manager.get('current_game_mode') == 'strategic':
                                 game_transitions.set_game_mode('strategic', self.global_manager)
                                 current_mob.select()
+                            current_mob.clear_automatic_route()
                             current_mob.end_turn_destination = 'none'
                             self.global_manager.set('choosing_destination', True)
                             self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
@@ -2858,3 +2859,53 @@ class buy_slaves_button(label_button):
                     text_tools.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not buy slaves.", self.global_manager)
+
+
+            self.attached_buttons.append(buttons.clear_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/clear_automatic_route_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.draw_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/draw_automatic_route_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.follow_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/follow_automatic_route_button.png', self, global_manager))
+
+class automatic_route_button(label_button):
+    def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        if super().can_show():
+            attached_mob = self.global_manager.get('displayed_mob')
+            if attached_mob.inventory_capacity > 0:
+                if self.button_type in ['clear automatic route', 'follow automatic route']:
+                    if len(attached_mob.base_automatic_route) > 0:
+                        return(True)
+                else:
+                    return(True)
+                #elif self.button_type == 'draw automatic route':
+                #    if len(attached_mob.base_automatic_route) == 0:
+                #        return(True)
+        return(False)
+
+    def on_click(self):
+        attached_mob = self.global_manager.get('displayed_mob')
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('strategic_map_grid') in attached_mob.grids:
+                    self.showing_outline = True
+                    if self.button_type == 'clear automatic route':
+                        attached_mob.clear_automatic_route()
+                        
+                    elif self.button_type == 'draw automatic route':
+                        attached_mob.clear_automatic_route()
+                        attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
+                        self.global_manager.set('drawing_automatic_route', True)
+                        
+                    elif self.button_type == 'follow automatic route':
+                        if attached_mob.can_follow_automatic_route():
+                            attached_mob.follow_automatic_route()
+                        else:
+                            text_tools.print_to_screen("This unit is currently not able to progress along its designated route.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You can only create movement routes in Africa.", self.global_manager)
+            else:
+                if self.button_type == 'follow automatic route':
+                    text_tools.print_to_screen("You are busy and can not move this unit.", self.global_manager)
+                else:
+                    text_tools.print_to_screen("You are busy and can not modify this unit's movement route.", self.global_manager)

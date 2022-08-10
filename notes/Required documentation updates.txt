@@ -34,3 +34,12 @@ trial_utility imports
 mob_types/caravans imports
 turn_management_tools.remove_excess_inventory
 buildings.warehouses
+pmobs.pmob.__init__ inputs
+pmobs.pmob.to_save_dict outputs
+pmobs.pmob automatic route functions
+pmobs.pmob.can_move inputs
+actor_display_tools/buttons.clear_automatic_route button
+actor_display_tools/buttons.draw_automatic_route button
+actor_display_tools/buttons.follow_automatic_route button
+main_loop_tools imports
+tiles.draw_destination_outline inputs

@@ -1,30 +1,13 @@
-ERROR:root:No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+ERROR:root:vehicle.can_move() takes 3 positional arguments but 4 were given
 Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 640, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1045, in <module>
+  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1050, in <module>
     main_loop.main_loop(global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 43, in main_loop
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 173, in main_loop
     current_button.on_click()
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 896, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 356, in load_game
-    self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 111, in create
-    new_actor = buildings.warehouses(from_save, input_dict, global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 486, in __init__
-    super().__init__(from_save, input_dict, global_manager)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 65, in __init__
-    self.set_damaged(True, True)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buildings.py", line 182, in set_damaged
-    self.set_image('default')
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actors.py", line 125, in set_image
-    current_image.set_image(new_image)
-  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 643, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/misc/empty_damaged.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\actor_display_tools\buttons.py", line 2902, in on_click
+    attached_mob.follow_automatic_route()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 150, in follow_automatic_route
+    while self.can_follow_automatic_route():
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 144, in can_follow_automatic_route
+    return(self.can_move(x_change, y_change, False))
+TypeError: vehicle.can_move() takes 3 positional arguments but 4 were given

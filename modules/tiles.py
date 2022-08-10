@@ -84,7 +84,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
                 equivalent_tile.resource_icon.update_resource_icon()
 
-    def draw_destination_outline(self): #called directly by mobs
+    def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
         Description:
             Draws an outline around this tile when the displayed mob has a pending movement order to move to this tile
@@ -95,7 +95,11 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         for current_image in self.images:
             outline = self.cell.Rect
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (outline), current_image.outline_width)
+            if color == 'default':
+                color = self.global_manager.get('color_dict')[self.selection_outline_color]
+            else:
+                color = self.global_manager.get('color_dict')[color] #converts input string to RGB tuple
+            pygame.draw.rect(self.global_manager.get('game_display'), color, (outline), current_image.outline_width)
 
     def draw_actor_match_outline(self, called_by_equivalent):
         '''

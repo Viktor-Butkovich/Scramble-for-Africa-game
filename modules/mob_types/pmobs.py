@@ -59,6 +59,8 @@ class pmob(mob):
                 self.add_to_turn_queue()
             else:
                 self.remove_from_turn_queue()
+            self.base_automatic_route = input_dict['base_automatic_route']
+            self.in_progress_automatic_route = input_dict['in_progress_automatic_route']
         else:
             self.default_name = self.name
             self.set_max_movement_points(4)
@@ -67,11 +69,17 @@ class pmob(mob):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
             self.set_sentry_mode(False)
             self.add_to_turn_queue()
+            self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
+            self.in_progress_automatic_route = [] #first item is next step, last item is current location
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.attached_dice_list = []
+
+        #self.base_automatic_route = [0, 1, 2, 3, 4]
+        #self.calculate_automatic_route()
+        #self.follow_automatic_route()
 
     def to_save_dict(self):
         '''
@@ -97,7 +105,73 @@ class pmob(mob):
         save_dict['default_name'] = self.default_name
         save_dict['sentry_mode'] = self.sentry_mode
         save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
+        save_dict['base_automatic_route'] = self.base_automatic_route
+        save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         return(save_dict)
+
+    def add_to_automatic_route(self, new_coordinates):
+        self.base_automatic_route.append(new_coordinates)
+        self.calculate_automatic_route()
+
+    def calculate_automatic_route(self):
+        reversed_base_automatic_route = utility.copy_list(self.base_automatic_route)
+        reversed_base_automatic_route.reverse()
+    
+        self.in_progress_automatic_route = ['start']
+        #imagine base route is [0, 1, 2, 3, 4]
+        #reverse route is [4, 3, 2, 1, 0]
+        for current_index in range(1, len(self.base_automatic_route)): #first destination is 2nd item in list
+            self.in_progress_automatic_route.append(self.base_automatic_route[current_index])
+        #now in progress route is ['start', 1, 2, 3, 4]
+
+        self.in_progress_automatic_route.append('end')
+        for current_index in range(1, len(reversed_base_automatic_route)):
+            self.in_progress_automatic_route.append(reversed_base_automatic_route[current_index])
+        #now in progress route is ['start', 1, 2, 3, 4, 'end', 3, 2, 1, 0]
+
+    def can_follow_automatic_route(self):
+        next_step = self.in_progress_automatic_route[0]
+        if next_step == 'end': #can drop off freely
+            return(True)
+        elif next_step == 'start': #only start round trip if there is something to deliver
+            if self.images[0].current_cell.tile.get_inventory_used() > 0:
+                return(True)
+            else:
+                return(False)
+        else: #must have enough movement points, not blocked
+            x_change = next_step[0] - self.x
+            y_change = next_step[1] - self.y
+            return(self.can_move(x_change, y_change, False))
+
+    def follow_automatic_route(self):
+        progressed = False
+        
+        if len(self.in_progress_automatic_route) > 0:
+            while self.can_follow_automatic_route():
+                next_step = self.in_progress_automatic_route[0]
+                if next_step == 'start':
+                    self.pick_up_all_commodities()
+                elif next_step == 'end':
+                    self.drop_inventory()
+                else:
+                    x_change = next_step[0] - self.x
+                    y_change = next_step[1] - self.y
+                    self.move(x_change, y_change)
+                progressed = True
+                self.in_progress_automatic_route.append(self.in_progress_automatic_route.pop(0)) #move first item to end
+                
+        return(progressed) #returns whether unit did anything to show unit in movement routes report
+
+    def pick_up_all_commodities(self):
+        tile = self.images[0].current_cell.tile
+        while self.get_inventory_remaining() > 0 and tile.get_inventory_used() > 0:
+            commodity = tile.get_held_commodities()[0]
+            self.change_inventory(commodity, 1)
+            tile.change_inventory(commodity, -1)
+
+    def clear_automatic_route(self):
+        self.base_automatic_route = []
+        self.in_progress_automatic_route = []
 
     def selection_sound(self):
         if self.is_officer or self.is_group or self.is_vehicle:
@@ -247,11 +321,30 @@ class pmob(mob):
             for current_image in self.images:
                 if not current_image.current_cell == 'none' and self == current_image.current_cell.contained_mobs[0]: #only draw outline if on top of stack
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (current_image.outline), current_image.outline_width)
+
+                    if len(self.base_automatic_route) > 0:
+                        start_coordinates = self.base_automatic_route[0]
+                        end_coordinates = self.base_automatic_route[-1]
+                        for current_coordinates in self.base_automatic_route:
+                            current_tile = self.grids[0].find_cell(current_coordinates[0], current_coordinates[1]).tile
+                            equivalent_tile = current_tile.get_equivalent_tile()
+                            if current_coordinates == start_coordinates:
+                                color = 'purple'
+                            elif current_coordinates == end_coordinates:
+                                color = 'yellow'
+                            else:
+                                color = 'bright blue'
+                            current_tile.draw_destination_outline(color)
+                            if not equivalent_tile == 'none':
+                                equivalent_tile.draw_destination_outline(color)
+                    
             if (not self.end_turn_destination == 'none') and self.end_turn_destination.images[0].can_show(): #only show outline if tile is showing
                 self.end_turn_destination.draw_destination_outline()
                 equivalent_tile = self.end_turn_destination.get_equivalent_tile()
                 if not equivalent_tile == 'none':
                     equivalent_tile.draw_destination_outline()
+                        
+                    
 
     def check_if_minister_appointed(self):
         '''
@@ -370,7 +463,7 @@ class pmob(mob):
         '''
         self.die()
 
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change, can_print = True):
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc.
@@ -406,42 +499,49 @@ class pmob(mob):
                                     if not (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
                                         if not (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')): #battalions can attack enemies in water, but must retreat afterward
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
-                                                if future_y == 0:
-                                                    text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
-                                                elif future_y > 0:
-                                                    text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
+                                                if can_print:
+                                                    if future_y == 0:
+                                                        text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
+                                                    elif future_y > 0:
+                                                        text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                     if (not future_cell.has_npmob()) or self.is_battalion or self.is_safari or (self.can_explore and not future_cell.visible): #non-battalion units can't move into enemies
                                         return(True)
                                     else:
-                                        text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
+                                        if can_print:
+                                            text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
                                         return(False)
-                                    
                                 else:
-                                    text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                                    text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
+                                    if can_print:
+                                        text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
+                                        text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 #if future_cell.visible or self.can_explore: #already checked earlier
-                                text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
+                                if can_print:
+                                    text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 #if future_cell.visible or self.can_explore: #already checked earlier
-                                text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                                if can_print:
+                                    text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
                                 return(False)
                         else:
-                            text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
+                            if can_print:
+                                text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
                             return(False)
                     else:
                         text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
                         return(False)
                 else:
-                    text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
+                    if can_print:
+                        text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
                     return(False)
         else:
-            text_tools.print_to_screen("You can not move units before a Minister of Transportation has been appointed.", self.global_manager)
+            if can_print:
+                text_tools.print_to_screen("You can not move units before a Minister of Transportation has been appointed.", self.global_manager)
             return(False)
 
     def can_show_tooltip(self):
@@ -487,6 +587,7 @@ class pmob(mob):
             vehicle.select()
         if not self.global_manager.get('loading_save'):
             self.global_manager.get('sound_manager').play_sound('footsteps')
+        self.clear_automatic_route()
 
     def disembark_vehicle(self, vehicle):
         '''

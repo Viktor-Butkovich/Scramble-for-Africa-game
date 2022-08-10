@@ -14,6 +14,10 @@ make commodities lost message both a zoom and minister message notification?
 Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
 only allow European workers to crew steamships, no slaves crewing vehicles
 autosave on game creation if no save game present, add delete save game button that prevents loading
+move construction and repair functions to groups rather than pmobs
+control which tiles trains can use in automatic routes
+clear movement route when pressing movement button or going to other grid
+don't select units as they move if doing automated route
 
 Later:
 add automated trade routes
@@ -52,6 +56,7 @@ Possible/known Errors:
 Fixable:
 incorrect minister face locations on certain resolutions, possibly ones where height is disproportionately large compared to width
 fix other resolution issues, expanded text box too high, notification too large/small
+update mob info display of selected unit at beginning of turn
 
 Investigating:
 incorrect railroad images occasionally occurring when new ones are created, fixed after save and load

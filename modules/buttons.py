@@ -226,6 +226,9 @@ class button():
         elif self.button_type == 'expand text box':
             self.set_tooltip(['Press to change the size of the text box'])
 
+        elif self.button_type == 'execute movement routes':
+            self.set_tooltip(['Press to move all valid units along their designated movement routes'])
+
         elif self.button_type == 'instructions':
             self.set_tooltip(["Shows the game's instructions", "Press this when instructions are not opened to open them", "Press this when instructions are opened to close them"])
 
@@ -470,6 +473,18 @@ class button():
 
         elif self.button_type == 'end unit turn':
             self.set_tooltip(["Ends this unit's turn, skipping it when cycling through unmoved units for the rest of the turn"])
+
+        elif self.button_type == 'clear automatic route':
+            self.set_tooltip(["Removes this unit's currently designated movement route"])
+            
+        elif self.button_type == 'draw automatic route':
+            self.set_tooltip(["Starts customizing a new movement route for this unit", "Add to the route by clicking on valid tiles adjacent to the current destination",
+                "The start is outlined in purple, the destination is outlined in yellow, and the path is outlined in blue",
+                "When moving along its route, a unit will pick up as many commodities as possible at the start and drop them at the destination",
+                "A unit may not be able to move along its route because of enemy units, a lack of movement points, or not having any commodities to pick up at the start"])
+            
+        elif self.button_type == 'follow automatic route':
+            self.set_tooltip(["Moves this unit along its currently designated movement route"])
             
         else:
             self.set_tooltip(['placeholder'])
@@ -722,6 +737,7 @@ class button():
                                     self.global_manager.set('last_selection_outline_switch', time.time())
                                     if mob.sentry_mode:
                                         mob.set_sentry_mode(False)
+                                    mob.clear_automatic_route()
                             else:
                                 text_tools.print_to_screen("You can not move while in the European HQ screen.", self.global_manager)
                         elif len(selected_list) < 1:
@@ -750,6 +766,69 @@ class button():
                     self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
                 else:
                     self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
+
+            elif self.button_type == 'execute movement routes':
+                if not self.global_manager.get('current_game_mode') == 'strategic':
+                    game_transitions.set_game_mode('strategic', self.global_manager)
+                            
+                unit_types = ['porters', 'steamboat', 'steamship', 'train']
+                moved_units = {}
+                attempted_units = {}
+                for current_unit_type in unit_types:
+                    moved_units[current_unit_type] = 0
+                    attempted_units[current_unit_type] = 0
+                    
+                for current_pmob in self.global_manager.get('pmob_list'):
+                    if len(current_pmob.base_automatic_route) > 0:
+                        if current_pmob.is_vehicle:
+                            if current_pmob.vehicle_type == 'train':
+                                unit_type = 'train'
+                            elif current_pmob.can_swim_ocean:
+                                unit_type = 'steamship'
+                            else:
+                                unit_type = 'steamboat'
+                        else:
+                            unit_type = 'porters'
+                        attempted_units[unit_type] += 1
+                        
+                        progressed = current_pmob.follow_automatic_route()
+                        if progressed:
+                            moved_units[unit_type] += 1
+
+                types_moved = 0
+                text = ""
+                for current_unit_type in unit_types:
+                    if attempted_units[current_unit_type] > 0:
+                        
+                        if current_unit_type == 'porters':
+                            singular = 'unit of porters'
+                            plural = 'units of porters'
+                        else:
+                            singular = current_unit_type
+                            plural = singular + 's'
+                        types_moved += 1
+                        num_attempted = attempted_units[current_unit_type]
+                        num_progressed = moved_units[current_unit_type]
+                        if num_attempted == num_progressed:
+                            if num_attempted == 1:
+                                text += "The " + singular + " with a designated movement route was able to be moved. /n /n"
+                            else:
+                                text += "All " + str(num_attempted) + " of the " + plural + " with designated movement routes were able to be moved. /n /n"
+                        else:
+                            if num_progressed == 0:
+                                if num_attempted == 1:
+                                    text += "The " + singular + " with a designated movement route was not able to be moved. /n /n" 
+                                else:
+                                    text += "None of the " + plural + " with designated movement routes were able to be moved. /n /n"
+                            else:
+                                text += "Only " + str(num_moved) + " of the " + str(num_attempted) + " " + plural + " with designated movement routes were able to be moved. /n /n"
+
+                transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+                if types_moved > 0:
+                    transportation_minister.display_message(text)
+                else:
+                    transportation_minister.display_message("There were no units with designated movement routes to move. /n /n")
+                
 
             elif self.button_type == 'do something':
                 text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)

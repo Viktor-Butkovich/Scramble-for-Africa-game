@@ -261,7 +261,7 @@ class vehicle(pmob):
             save_dict['passenger_dicts'].append(current_mob.to_save_dict())
         return(save_dict)
 
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change, can_print = True):
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
@@ -274,11 +274,13 @@ class vehicle(pmob):
         '''
         if self.has_crew:
             if not self.temp_movement_disabled:
-                return(super().can_move(x_change, y_change))
+                return(super().can_move(x_change, y_change, can_print))
             else:
-                text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
+                if can_print:
+                    text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
         else:
-            text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
+            if can_print:
+                text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):

@@ -42,6 +42,6 @@ class mouse_follower(free_image):
         Output:
             None
         '''
-        if self.global_manager.get('choosing_destination') or self.global_manager.get('choosing_advertised_commodity'):
+        if self.global_manager.get('choosing_destination') or self.global_manager.get('choosing_advertised_commodity') or self.global_manager.get('drawing_automatic_route'):
             self.update()
             super().draw()

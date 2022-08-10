@@ -6,6 +6,7 @@ from . import scaling
 from . import text_tools
 from . import actor_utility
 from . import minister_utility
+from . import utility
 
 def update_display(global_manager):
     '''
@@ -209,6 +210,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('making_choice'):
         return(False)
+    elif global_manager.get('drawing_automatic_route'):
+        return(False)
     return(True)
 
 def draw_loading_screen(global_manager):
@@ -391,6 +394,13 @@ def manage_rmb_down(clicked_button, global_manager):
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), moved_mob.images[0].current_cell.tile)
+    elif global_manager.get('drawing_automatic_route'):
+        global_manager.set('drawing_automatic_route', False)
+        if len(global_manager.get('displayed_mob').base_automatic_route) > 0:
+            text_tools.print_to_screen("Route saved", global_manager)
+        else:
+            global_manager.get('displayed_mob').clear_automatic_route()
+            text_tools.print_to_screen("The created route must go between at least 2 tiles", global_manager)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -406,8 +416,8 @@ def manage_lmb_down(clicked_button, global_manager):
     Output:
         None
     '''
-    if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity'):
-        if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
+    if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route'):
+        if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
             mouse_x, mouse_y = pygame.mouse.get_pos()
             selected_new_mob = False
             if (not global_manager.get('capital')):
@@ -443,6 +453,7 @@ def manage_lmb_down(clicked_button, global_manager):
                     
             else:
                 click_move_minimap(global_manager)
+                
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
             chooser = global_manager.get('choosing_destination_info_dict')['chooser']
             chose_destination = False
@@ -472,9 +483,32 @@ def manage_lmb_down(clicked_button, global_manager):
                             text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
             global_manager.set('choosing_destination', False)
             global_manager.set('choosing_destination_info_dict', {})
+            
         elif (not clicked_button) and global_manager.get('choosing_advertised_commodity'):
             global_manager.set('choosing_advertised_commodity', False)
             global_manager.set('choosing_advertised_commodity_info_dict', {})
+            
+        elif (not clicked_button) and global_manager.get('drawing_automatic_route'):
+            #chooser = global_manager.get('choosing_destination_info_dict')['chooser']
+            #chose_destination = False
+            for current_grid in global_manager.get('grid_list'): #destination_grids:
+                for current_cell in current_grid.cell_list:
+                    if current_cell.touching_mouse():
+                        click_move_minimap(global_manager)
+                        #target_cell = 'none'
+                        if current_cell.grid.is_abstract_grid:
+                            text_tools.print_to_screen("Only tiles adjacent to the most recently chosen destination can be added to the movement route.", global_manager)
+                        else:
+                            displayed_mob = global_manager.get('displayed_mob')
+                            target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
+                            destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
+                            previous_destination_x, previous_destination_y = displayed_mob.base_automatic_route[-1]
+                            if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
+                                displayed_mob.add_to_automatic_route((destination_x, destination_y))
+                                global_manager.set('last_selection_outline_switch', time.time())
+                            else:
+                                text_tools.print_to_screen("Only tiles adjacent to the most recently chosen destination can be added to the movement route.", global_manager)
+                                
         elif not clicked_button:
             click_move_minimap(global_manager)
 
