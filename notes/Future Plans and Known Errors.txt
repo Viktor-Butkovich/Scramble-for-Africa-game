@@ -8,18 +8,19 @@ add warning at end of turn for any commodities above local inventory capacities
 give warning notification for village with mission increasing to 4 aggressiveness
 add public opinion penalty for firing European workers
 add warehouses
-
-Future plans:
-make commodities lost message both a zoom and minister message notification?
-Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
-only allow European workers to crew steamships, no slaves crewing vehicles
-autosave on game creation if no save game present, add delete save game button that prevents loading
-move construction and repair functions to groups rather than pmobs
+add automatic movement routes
 control which tiles trains can use in automatic routes
 clear movement route when pressing movement button or going to other grid
-don't select units as they move if doing automated route
+only allow European workers to crew steamships, no slaves crewing vehicles
+
+Future plans:
 
 Later:
+make commodities lost message both a zoom and minister message notification?
+Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
+autosave on game creation if no save game present, add delete save game button that prevents loading
+move construction and repair functions to groups rather than pmobs
+don't select units as they move if doing automated route
 add automated trade routes
 add mode like sentry to not replace attrition losses for a certain unit
 add archaeology mechanic, expedition goes to friendly village and looks for rumors, gains mission to go out to certain tile(s) and investigate - if true, chance of special bonus for rest of game

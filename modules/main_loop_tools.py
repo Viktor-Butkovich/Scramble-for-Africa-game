@@ -395,12 +395,21 @@ def manage_rmb_down(clicked_button, global_manager):
                                 moved_mob.selection_sound()
                             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), moved_mob.images[0].current_cell.tile)
     elif global_manager.get('drawing_automatic_route'):
+        stopping = True
         global_manager.set('drawing_automatic_route', False)
-        if len(global_manager.get('displayed_mob').base_automatic_route) > 0:
-            text_tools.print_to_screen("Route saved", global_manager)
+        if len(global_manager.get('displayed_mob').base_automatic_route) > 1:
+            destination_coordinates = (global_manager.get('displayed_mob').base_automatic_route[-1][0], global_manager.get('displayed_mob').base_automatic_route[-1][1])
+            if global_manager.get('displayed_mob').is_vehicle and global_manager.get('displayed_mob').vehicle_type == 'train' and not global_manager.get('strategic_map_grid').find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
+                global_manager.get('displayed_mob').clear_automatic_route()
+                text_tools.print_to_screen("A train's automatic route must start and end at a train station.", global_manager)
+                text_tools.print_to_screen("The invalid route has been erased.", global_manager)
+            else:
+                text_tools.print_to_screen("Route saved", global_manager)
         else:
             global_manager.get('displayed_mob').clear_automatic_route()
             text_tools.print_to_screen("The created route must go between at least 2 tiles", global_manager)
+        global_manager.get('minimap_grid').calibrate(global_manager.get('displayed_mob').x, global_manager.get('displayed_mob').y)
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_mob').images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -479,6 +488,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                 global_manager.set('show_selection_outlines', True)
                                 global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
                                 chooser.remove_from_turn_queue()
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), chooser)
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), chooser.images[0].current_cell.tile)
                         else: #can not move to same continent
                             text_tools.print_to_screen("You can only send ships to other theatres.", global_manager)
             global_manager.set('choosing_destination', False)
@@ -494,17 +505,45 @@ def manage_lmb_down(clicked_button, global_manager):
             for current_grid in global_manager.get('grid_list'): #destination_grids:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
-                        click_move_minimap(global_manager)
                         #target_cell = 'none'
                         if current_cell.grid.is_abstract_grid:
                             text_tools.print_to_screen("Only tiles adjacent to the most recently chosen destination can be added to the movement route.", global_manager)
                         else:
                             displayed_mob = global_manager.get('displayed_mob')
-                            target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
-                            destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
+                            if current_cell.grid.is_mini_grid:
+                                target_tile = current_cell.tile.get_equivalent_tile()
+                                if target_tile == 'none':
+                                    return()
+                                target_cell = target_tile.cell
+                            else:
+                                target_cell = current_cell
+                            #target_cell = global_manager.get('strategic_map_grid').find_cell(global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y)
+                            destination_x, destination_y = (target_cell.x, target_cell.y)#target_cell.tile.get_main_grid_coordinates()
                             previous_destination_x, previous_destination_y = displayed_mob.base_automatic_route[-1]
                             if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
+                                destination_infrastructure = target_cell.get_building('infrastructure')
+                                if not target_cell.visible:
+                                    text_tools.print_to_screen("Movement routes can not be created through unexplored tiles.", global_manager)
+                                    return()
+                                elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
+                                    text_tools.print_to_screen("Trains can only create movement routes along railroads.", global_manager)
+                                    return()
+                                elif target_cell.terrain == 'water' and not displayed_mob.can_swim:
+                                    text_tools.print_to_screen("This unit can not create movement routes through water.", global_manager)
+                                    return()
+                                elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:
+                                    text_tools.print_to_screen("This unit can not create movement routes through ocean water.", global_manager)
+                                    return()
+                                elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_river) and destination_y > 0:
+                                    text_tools.print_to_screen("This unit can not create movement routes through river water.", global_manager)
+                                    return()
+                                elif (not target_cell.terrain == 'water') and (not displayed_mob.can_walk) and not target_cell.has_intact_building('port'):
+                                    text_tools.print_to_screen("This unit can not create movement routes on land, except through ports.", global_manager)
+                                    return()
+                                                                     
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))
+                                click_move_minimap(global_manager)
+                                global_manager.set('show_selection_outlines', True)
                                 global_manager.set('last_selection_outline_switch', time.time())
                             else:
                                 text_tools.print_to_screen("Only tiles adjacent to the most recently chosen destination can be added to the movement route.", global_manager)

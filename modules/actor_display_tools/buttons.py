@@ -102,10 +102,17 @@ class worker_crew_vehicle_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 selected_list = actor_utility.get_selected_list(self.global_manager)
-                vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type)
                 crew = self.attached_label.actor
+                vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, crew.worker_type)
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
+                        #if vehicle.can_swim and vehicle.can_swim_ocean and not crew.worker_type == 'European':
+                        #    text_tools.print_to_screen("Only European workers can crew steamships.", self.global_manager)
+                        #    return()
+                        #elif crew.worker_type == 'slave':
+                        #    text_tools.print_to_screen("Slave workers can not crew vehicles.", self.global_manager)
+                        #    return()
+                            
                         if crew.sentry_mode:
                             crew.set_sentry_mode(False)
                         if vehicle.sentry_mode:
@@ -114,7 +121,12 @@ class worker_crew_vehicle_button(label_button):
                     else:
                         text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
+                    if crew.worker_type == 'slave':
+                        text_tools.print_to_screen("Slave workers can not crew vehicles.", self.global_manager)
+                    elif crew.worker_type == 'African' and not self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, 'European') == 'none':
+                        text_tools.print_to_screen("Only European workers can crew steamships.", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
@@ -277,7 +289,13 @@ class crew_vehicle_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):    
                 vehicle = self.attached_label.actor
-                crew = vehicle.images[0].current_cell.get_worker(['African', 'European', 'slave']) #'none'
+                is_steamship = False
+                if vehicle.can_swim and vehicle.can_swim_ocean: #if steamship
+                    is_steamship = True
+                    crew = vehicle.images[0].current_cell.get_worker(['European'])
+                else: 
+                    crew = vehicle.images[0].current_cell.get_worker(['African', 'European']) #'none'
+                
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
                         if crew.sentry_mode:
@@ -286,9 +304,15 @@ class crew_vehicle_button(label_button):
                             vehicle.set_sentry_mode(False)
                         crew.crew_vehicle(vehicle)
                     else:
-                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                        if is_steamship:
+                            text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a European worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                        else:
+                            text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a non-slave worker to crew the " + self.vehicle_type + ".", self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                    if is_steamship:
+                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a European worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                    else:
+                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a non-slave worker to crew the " + self.vehicle_type + ".", self.global_manager)
             else:
                 text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
 
@@ -367,6 +391,7 @@ class uncrew_vehicle_button(label_button):
                 crew = vehicle.crew
                 if len(vehicle.contained_mobs) == 0 and len(vehicle.get_held_commodities()) == 0:
                     crew.uncrew_vehicle(vehicle)
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
                 else:
                     text_tools.print_to_screen("You can not remove the crew from a " + self.vehicle_type + " with passengers or cargo.", self.global_manager)
             else:
@@ -2860,11 +2885,6 @@ class buy_slaves_button(label_button):
             else:
                 text_tools.print_to_screen("You are busy and can not buy slaves.", self.global_manager)
 
-
-            self.attached_buttons.append(buttons.clear_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/clear_automatic_route_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.draw_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/draw_automatic_route_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.follow_automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/follow_automatic_route_button.png', self, global_manager))
-
 class automatic_route_button(label_button):
     def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
         super().__init__(coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager)
@@ -2872,7 +2892,7 @@ class automatic_route_button(label_button):
     def can_show(self):
         if super().can_show():
             attached_mob = self.global_manager.get('displayed_mob')
-            if attached_mob.inventory_capacity > 0:
+            if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
                 if self.button_type in ['clear automatic route', 'follow automatic route']:
                     if len(attached_mob.base_automatic_route) > 0:
                         return(True)
@@ -2893,6 +2913,9 @@ class automatic_route_button(label_button):
                         attached_mob.clear_automatic_route()
                         
                     elif self.button_type == 'draw automatic route':
+                        if attached_mob.is_vehicle and attached_mob.vehicle_type == 'train' and not attached_mob.images[0].current_cell.has_intact_building('train_station'):
+                            text_tools.print_to_screen("A train can only start a movement route from a train station.", self.global_manager)
+                            return()
                         attached_mob.clear_automatic_route()
                         attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
                         self.global_manager.set('drawing_automatic_route', True)

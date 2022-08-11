@@ -595,6 +595,12 @@ class mob(actor):
             tooltip_list.append("You do not control this unit")
         elif self.is_pmob and self.sentry_mode:
             tooltip_list.append("This unit is in sentry mode")
+
+        if self.is_pmob:
+            if len(self.base_automatic_route) > 1:
+                start_coordinates = self.base_automatic_route[0]
+                end_coordinates = self.base_automatic_route[-1]
+                tooltip_list.append("This unit has a designated movement route of length " + str(len(self.base_automatic_route)) + ", picking up commodities at (" + str(start_coordinates[0]) + ", " + str(start_coordinates[1]) + ") and dropping them off at (" + str(end_coordinates[0]) + ", " + str(end_coordinates[1]) + ")") 
             
         self.set_tooltip(tooltip_list)
         

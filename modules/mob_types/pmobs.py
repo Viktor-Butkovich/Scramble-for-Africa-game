@@ -112,6 +112,8 @@ class pmob(mob):
     def add_to_automatic_route(self, new_coordinates):
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
+        if self == self.global_manager.get('displayed_mob'):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def calculate_automatic_route(self):
         reversed_base_automatic_route = utility.copy_list(self.base_automatic_route)
@@ -131,11 +133,17 @@ class pmob(mob):
 
     def can_follow_automatic_route(self):
         next_step = self.in_progress_automatic_route[0]
-        if next_step == 'end': #can drop off freely
-            return(True)
-        elif next_step == 'start': #only start round trip if there is something to deliver
-            if self.images[0].current_cell.tile.get_inventory_used() > 0:
+        if next_step == 'end': #can drop off freely unless train without train station
+            if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
                 return(True)
+            else:
+                return(False)
+        elif next_step == 'start': 
+            if len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0 or self.get_inventory_used() > 0: #only start round trip if there is something to deliver, either from tile or in inventory already
+                if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')): #can pick up freely unless train without train station
+                    return(True)
+                else:
+                    return(False)
             else:
                 return(False)
         else: #must have enough movement points, not blocked
@@ -150,28 +158,32 @@ class pmob(mob):
             while self.can_follow_automatic_route():
                 next_step = self.in_progress_automatic_route[0]
                 if next_step == 'start':
-                    self.pick_up_all_commodities()
+                    self.pick_up_all_commodities(True)
                 elif next_step == 'end':
                     self.drop_inventory()
                 else:
                     x_change = next_step[0] - self.x
                     y_change = next_step[1] - self.y
                     self.move(x_change, y_change)
+                    if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
+                        self.pick_up_all_commodities(True)
                 progressed = True
                 self.in_progress_automatic_route.append(self.in_progress_automatic_route.pop(0)) #move first item to end
                 
         return(progressed) #returns whether unit did anything to show unit in movement routes report
 
-    def pick_up_all_commodities(self):
+    def pick_up_all_commodities(self, ignore_consumer_goods = False):
         tile = self.images[0].current_cell.tile
-        while self.get_inventory_remaining() > 0 and tile.get_inventory_used() > 0:
-            commodity = tile.get_held_commodities()[0]
+        while self.get_inventory_remaining() > 0 and len(tile.get_held_commodities(ignore_consumer_goods)) > 0:
+            commodity = tile.get_held_commodities(ignore_consumer_goods)[0]
             self.change_inventory(commodity, 1)
             tile.change_inventory(commodity, -1)
 
     def clear_automatic_route(self):
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
+        if self == self.global_manager.get('displayed_mob'):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def selection_sound(self):
         if self.is_officer or self.is_group or self.is_vehicle:

@@ -346,7 +346,7 @@ class train(vehicle):
         else:
             self.load_inventory(input_dict['inventory'])
 
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change, can_print = True):
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
@@ -357,10 +357,11 @@ class train(vehicle):
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
-        result = super().can_move(x_change, y_change)
+        result = super().can_move(x_change, y_change, can_print)
         if result:
             if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
-                text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
+                if can_print:
+                    text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
                 return(False)
         return(result)
 

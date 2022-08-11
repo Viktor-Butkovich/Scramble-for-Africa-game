@@ -43,3 +43,5 @@ actor_display_tools/buttons.draw_automatic_route button
 actor_display_tools/buttons.follow_automatic_route button
 main_loop_tools imports
 tiles.draw_destination_outline inputs
+actors.get_held_commodities inputs
+cells.cell.get_uncrewed_vehicle inputs

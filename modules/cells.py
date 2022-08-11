@@ -391,7 +391,7 @@ class cell():
                 return(True)
         return(False)
 
-    def get_uncrewed_vehicle(self, vehicle_type):
+    def get_uncrewed_vehicle(self, vehicle_type, worker_type = 'default'):
         '''
         Description:
             Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
@@ -400,9 +400,12 @@ class cell():
         Output:
             string/vehicle: Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
         '''
+        if worker_type == 'slave':
+            return('none')
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
-                return(current_mob)
+                if not (worker_type == 'African' and current_mob.can_swim and current_mob.can_swim_ocean):
+                    return(current_mob)
         return('none')
 
     def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):

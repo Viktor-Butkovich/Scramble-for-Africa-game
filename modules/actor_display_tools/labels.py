@@ -453,7 +453,10 @@ class actor_display_label(label):
             elif self.actor_label_type == 'passengers':
                 if self.actor.is_vehicle:
                     if not self.actor.has_crew:
-                        self.set_label("A " + self.actor.vehicle_type + " requires crew to function")
+                        if self.actor.can_swim and self.actor.can_swim_ocean:
+                            self.set_label("Requires a European worker crew to function")
+                        elif self.actor.vehicle_type == 'train':
+                            self.set_label("Requires a non-slave worker crew to function")
                     else:
                         if len(self.actor.contained_mobs) == 0:
                             self.set_label(self.message_start + 'none')

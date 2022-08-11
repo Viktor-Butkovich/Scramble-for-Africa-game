@@ -68,7 +68,8 @@ try:
         'dark blue': (0, 0, 150),
         'yellow': (255, 255, 0),
         'brown': (132, 94, 59),
-        'purple': (177, 156, 217)
+        'purple': (127, 0, 170)
+        #'purple': (191, 0, 255)
         }
     )
     #fundamental setup

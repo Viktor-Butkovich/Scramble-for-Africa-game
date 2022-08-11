@@ -83,7 +83,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
                 text_list.append('When combined with workers, a foreman becomes a work crew unit that can produce commodities when attached to a production facility.')
                 
             elif current_target == 'merchant':
-                first_line += ' and can personally search for loans and conduct advertising campaings in Europe.'
+                first_line += ' and can personally search for loans and conduct advertising campaigns in Europe.'
                 text_list.append(first_line)
                 text_list.append('When combined with workers, a merchant becomes a caravan that can build trading posts and trade with native villages.')
                 
@@ -126,12 +126,15 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             
         elif current_target == 'steamship':
             text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
+            text_list.append('Crewing a steamship requires an advanced level of technological training, which is generally only available to European workers in this time period.')
             
         elif current_target == 'steamboat':
             text_list.append('While useless by itself, a steamboat crewed by workers can quickly transport units and cargo along rivers.')
+            text_list.append('Crewing a steamboat requires a basic level of technological training, which is generally unavailable to slave workers.')
             
         elif current_target == 'train':
             text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')
+            text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
         recruitment_list_descriptions[current_target] = text_list
 
         text = ''

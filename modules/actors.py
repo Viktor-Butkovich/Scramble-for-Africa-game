@@ -246,7 +246,7 @@ class actor():
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
 
-    def get_held_commodities(self):
+    def get_held_commodities(self, ignore_consumer_goods = False):
         '''
         Description:
             Returns a list of the types of commodities held by this actor
@@ -259,7 +259,8 @@ class actor():
             held_commodities = []
             for current_commodity in self.global_manager.get('commodity_types'):
                 if self.get_inventory(current_commodity) > 0:
-                    held_commodities.append(current_commodity)
+                    if not (current_commodity == 'consumer goods' and ignore_consumer_goods):
+                        held_commodities.append(current_commodity)
             return(held_commodities)
         else:
             return([])
