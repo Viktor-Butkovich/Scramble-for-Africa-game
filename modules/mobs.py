@@ -135,26 +135,26 @@ class mob(actor):
         if new_value == True:
             for current_grid in self.grids:
                 if current_grid == self.global_manager.get('minimap_grid'):
-                    veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+                    disorganized_icon_x, disorganized_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
                 elif current_grid == self.global_manager.get('europe_grid'):
-                    veteran_icon_x, veteran_icon_y = (0, 0)
+                    disorganized_icon_x, disorganized_icon_y = (0, 0)
                 else:
-                    veteran_icon_x, veteran_icon_y = (self.x, self.y)
+                    disorganized_icon_x, disorganized_icon_y = (self.x, self.y)
                 input_dict = {}
-                input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
+                input_dict['coordinates'] = (disorganized_icon_x, disorganized_icon_y)
                 input_dict['grid'] = current_grid
                 if self.is_npmob and self.npmob_type == 'beast':
                     input_dict['image'] = 'misc/injured_icon.png' #beasts are injured instead of disorganized for flavor, same effect
                 else:
                     input_dict['image'] = 'misc/disorganized_icon.png'
-                input_dict['name'] = 'veteran icon'
+                input_dict['name'] = 'disorganized icon'
                 input_dict['modes'] = ['strategic', 'europe']
                 input_dict['show_terrain'] = False
                 input_dict['actor'] = self
                 input_dict['status_icon_type'] = 'disorganized'
                 self.status_icons.append(status_icon(False, input_dict, self.global_manager))
             if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
         else:
             remaining_icons = []
             for current_status_icon in self.status_icons:
@@ -210,7 +210,7 @@ class mob(actor):
         result = base + 3
         if self.veteran:
             result += 1
-        if self.is_officer or self.is_vehicle:
+        if self.is_officer or (self.is_vehicle and self.crew == 'none'):
             result = 0
         return(result)
 
@@ -356,6 +356,8 @@ class mob(actor):
             self.movement_points += change
             if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
                 self.movement_points = round(self.movement_points)
+            if self.is_pmob and self.movement_points <= 0:
+                self.remove_from_turn_queue()
             if self.global_manager.get('displayed_mob') == self: #update mob info display to show new movement points
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -371,6 +373,8 @@ class mob(actor):
         self.movement_points = new_value
         if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
             self.movement_points = round(self.movement_points)
+        if self.is_pmob and self.movement_points <= 0:
+            self.remove_from_turn_queue()
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -390,6 +394,8 @@ class mob(actor):
             self.movement_points = self.max_movement_points
             if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
                 self.movement_points = round(self.movement_points)
+            if self.is_pmob and (not self.images[0].current_cell == 'none') and not (self.is_vehicle and self.crew == 'none'):
+                self.add_to_turn_queue()
             if self.global_manager.get('displayed_mob') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
@@ -555,6 +561,8 @@ class mob(actor):
             
             if not self.has_infinite_movement:
                 tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+            elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
+                tooltip_list.append("No movement")
             else:
                 tooltip_list.append("Movement points: Infinite")
 
@@ -574,17 +582,25 @@ class mob(actor):
             elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
                 tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn")
             elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to the Arab slave traders at the end of the turn")
+                tooltip_list.append("This unit has been issued an order to travel to the slave traders at the end of the turn")
                 
         if self.is_npmob and self.npmob_type == 'beast':
             tooltip_list.append("This beast tends to live in " + self.preferred_terrains[0] + ", " + self.preferred_terrains[1] + ", and " + self.preferred_terrains[2] + " terrain ")
             
-        if not self.controllable:
+        if self.is_npmob:
             if self.hostile:
                 tooltip_list.append("Attitude: Hostile")
             else:
                 tooltip_list.append("Attitude: Neutral")
             tooltip_list.append("You do not control this unit")
+        elif self.is_pmob and self.sentry_mode:
+            tooltip_list.append("This unit is in sentry mode")
+
+        if self.is_pmob:
+            if len(self.base_automatic_route) > 1:
+                start_coordinates = self.base_automatic_route[0]
+                end_coordinates = self.base_automatic_route[-1]
+                tooltip_list.append("This unit has a designated movement route of length " + str(len(self.base_automatic_route)) + ", picking up commodities at (" + str(start_coordinates[0]) + ", " + str(start_coordinates[1]) + ") and dropping them off at (" + str(end_coordinates[0]) + ", " + str(end_coordinates[1]) + ")") 
             
         self.set_tooltip(tooltip_list)
         
@@ -673,6 +689,8 @@ class mob(actor):
         Output:
             None
         '''
+        if self.is_pmob and self.sentry_mode:
+            self.set_sentry_mode(False)
         self.end_turn_destination = 'none' #cancels planned movements
         self.change_movement_points(-1 * self.get_movement_cost(x_change, y_change))
         if self.is_pmob:
@@ -690,7 +708,7 @@ class mob(actor):
         else:
             self.global_manager.get('sound_manager').play_sound('footsteps')
             
-        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and (not self.can_swim) and self.images[0].current_cell.terrain == 'water': #board if moving to ship in water
+        if self.images[0].current_cell.has_vehicle('ship', self.is_worker) and (not self.is_vehicle) and self.images[0].current_cell.terrain == 'water' and ((not self.can_swim) or (self.y == 0 and not self.can_swim_ocean) or (self.y > 0 and not self.can_swim_river)): #board if moving to ship in water
             self.selected = False
             vehicle = self.images[0].current_cell.get_vehicle('ship', self.is_worker)
             if self.is_worker and not vehicle.has_crew:
@@ -700,7 +718,7 @@ class mob(actor):
                 self.embark_vehicle(vehicle)
                 self.set_movement_points(0)
             vehicle.select()
-        if self.can_construct and self.selected: #if can construct, update mob display to show new building possibilities in new tile
+        if (self.can_construct or self.can_trade or self.can_convert or self.is_battalion) and self.selected: #if can build any type of building, update mob display to show new building possibilities in new tile
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
@@ -726,7 +744,9 @@ class mob(actor):
         '''
         if self.is_npmob and not self.visible():
             return()
-
+        elif self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
+            return()
+        
         if self.images[0].current_cell.terrain == 'water' and self.y > 0:
             self.set_image('canoes')
         else:

@@ -19,13 +19,14 @@ def end_turn(global_manager):
     Output:
         None
     '''
-    global_manager.set('end_turn_selected_mob', global_manager.get('displayed_mob'))
+    remove_excess_inventory(global_manager)
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.end_turn_move()
 
     actor_utility.deselect_all(global_manager)
         
-    global_manager.set('player_turn', False)     
+    global_manager.set('player_turn', False)
+    global_manager.set('player_turn_queue', [])
     start_enemy_turn(global_manager)
 
 def start_enemy_turn(global_manager):
@@ -72,9 +73,12 @@ def start_player_turn(global_manager, first_turn = False):
         manage_loans(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
+        manage_commodity_sales(global_manager)
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
+        actor_utility.reset_action_prices(global_manager)
+        game_end_check(global_manager)
 
     global_manager.set('player_turn', True) #player_turn also set to True in main_loop when enemies done moving
     global_manager.set('enemy_combat_phase', False)
@@ -82,15 +86,12 @@ def start_player_turn(global_manager, first_turn = False):
         
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
-            
-    end_turn_selected_mob = global_manager.get('end_turn_selected_mob')
-    if (not end_turn_selected_mob == 'none') and (not (end_turn_selected_mob.images[0].current_cell == 'none')) and end_turn_selected_mob in global_manager.get('mob_list'):
-        #do not attempt to select if none selected or has been removed since end of turn
-        end_turn_selected_mob.select()
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), end_turn_selected_mob.images[0].current_cell.tile)
-    else: #if no mob selected at end of turn, calibrate to minimap tile to show any changes
-        if not global_manager.get('displayed_tile') == 'none':
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_tile'))
+
+    if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
+        actor_utility.deselect_all(global_manager)
+        game_transitions.cycle_player_turn(global_manager, True)
+    elif not global_manager.get('displayed_mob').selected:
+        global_manager.get('displayed_mob').select()
 
 def reset_mobs(mob_type, global_manager):
     '''
@@ -143,6 +144,20 @@ def manage_attrition(global_manager):
         current_tile = current_cell.tile
         if len(current_tile.get_held_commodities()) > 0:
             current_tile.manage_inventory_attrition()
+
+def remove_excess_inventory(global_manager):
+    '''
+    Description:
+        Removes any commodities that exceed their tile's storage capacities
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    for current_cell in terrain_cells:
+        current_tile = current_cell.tile
+        if len(current_tile.get_held_commodities()) > 0:
             current_tile.remove_excess_inventory()
     
 def manage_production(global_manager):
@@ -155,15 +170,29 @@ def manage_production(global_manager):
         None
     '''
     global_manager.set('attempted_commodities', [])
+    expected_production = {}
     for current_commodity in global_manager.get('collectable_resources'):
         global_manager.get('commodities_produced')[current_commodity] = 0
+        expected_production[current_commodity] = 0
     for current_resource_building in global_manager.get('resource_building_list'):
         if not current_resource_building.damaged:
+            for current_work_crew in current_resource_building.contained_work_crews:
+                if current_work_crew.movement_points >= 1:
+                    if current_work_crew.veteran:
+                        expected_production[current_resource_building.resource_type] += 0.75 * current_resource_building.efficiency
+                    else:
+                        expected_production[current_resource_building.resource_type] += 0.5 * current_resource_building.efficiency
             current_resource_building.produce()
+            if len(current_resource_building.contained_work_crews) == 0:
+                if not current_resource_building.resource_type in global_manager.get('attempted_commodities'):
+                    global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
+
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
+    production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
+    
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
-        notification_text = "Production report: /n /n "
+        text = production_minister.current_position + " " + production_minister.name + " reports the following commodity production: /n /n"
         while len(displayed_commodities) < len(attempted_commodities):
             max_produced = 0
             max_commodity = 'none'
@@ -172,9 +201,10 @@ def manage_production(global_manager):
                     if global_manager.get('commodities_produced')[current_commodity] >= max_produced:
                         max_commodity = current_commodity
                         max_produced = global_manager.get('commodities_produced')[current_commodity]
+                        expected_production[max_commodity] = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
-            notification_text += (max_commodity.capitalize() + ": " + str(max_produced) + ' /n ')
-        notification_tools.display_notification(notification_text, 'default', global_manager)       
+            text += max_commodity.capitalize() + ": " + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
+        production_minister.display_message(text)       
 
 def manage_upkeep(global_manager):
     '''
@@ -185,12 +215,12 @@ def manage_upkeep(global_manager):
     Output:
         None
     '''
-    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 1)
-    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 1)
-    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 1)
+    african_worker_upkeep = round(global_manager.get('num_african_workers') * global_manager.get('african_worker_upkeep'), 2)
+    european_worker_upkeep = round(global_manager.get('num_european_workers') * global_manager.get('european_worker_upkeep'), 2)
+    slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 2)
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
-    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 1)
-    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 1), 'worker upkeep')
+    total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 2)
+    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 2), 'worker upkeep')
 
 def manage_loans(global_manager):
     '''
@@ -235,7 +265,7 @@ def manage_subsidies(global_manager):
     Output:
         None
     '''
-    subsidies_received = round(global_manager.get('public_opinion') / 10, 1) #4.9 for 49 public opinion
+    subsidies_received = market_tools.calculate_subsidies(global_manager)
     text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government based on your public opinion and colonial efforts", global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 
@@ -266,26 +296,26 @@ def manage_worker_price_changes(global_manager):
     european_worker_roll = random.randrange(1, 7)
     if european_worker_roll >= 5:
         current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_european_worker_upkeep'):
             global_manager.set('european_worker_upkeep', changed_price)
             text_tools.print_to_screen("An influx of workers from Europe has decreased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif european_worker_roll == 1:
         current_price = global_manager.get('european_worker_upkeep')
-        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 1)
+        changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         global_manager.set('european_worker_upkeep', changed_price)
         text_tools.print_to_screen("An shortage of workers from Europe has increased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
     slave_worker_roll = random.randrange(1, 7)
-    if slave_worker_roll >= 5:
+    if slave_worker_roll == 6:
         current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
             global_manager.get('recruitment_costs')['slave workers'] = changed_price
             text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
     elif slave_worker_roll == 1:
         current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 1)
+        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         global_manager.get('recruitment_costs')['slave workers'] = changed_price
         text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
         
@@ -302,6 +332,15 @@ def manage_worker_migration(global_manager):
     num_slums_workers = actor_utility.get_num_available_workers('slums', global_manager)
     if num_village_workers > num_slums_workers and random.randrange(1, 7) >= 5: #1/3 chance of activating
         trigger_worker_migration(global_manager)
+
+    for current_slums in global_manager.get('slums_list'):
+        population_increase = 0
+        for current_worker in range(current_slums.available_workers):
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                population_increase += 1
+                market_tools.attempt_worker_upkeep_change('decrease', 'African', global_manager)
+        if population_increase > 0:
+            current_slums.change_population(population_increase)
 
 def trigger_worker_migration(global_manager): #resolves migration if it occurs
     '''
@@ -432,12 +471,16 @@ def manage_villages(global_manager):
         None
     '''
     for current_village in global_manager.get('village_list'):
+        previous_aggressiveness = current_village.aggressiveness
         roll = random.randrange(1, 7)
         if roll <= 2: #1-2
             current_village.change_aggressiveness(-1)
         #3-4 does nothing
         elif roll >= 5: #5-6
             current_village.change_aggressiveness(1)
+        if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
+            text = "The previously pacified village at (" + str(current_village.cell.x) + ", " + str(current_village.cell.y) + ") has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n"
+            notification_tools.display_zoom_notification(text, current_village.cell.tile, global_manager)
 
         roll = random.randrange(1, 7)
         second_roll = random.randrange(1, 7)
@@ -506,8 +549,11 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100)):
+        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('DEBUG_farm_upstate'):
             removed_ministers.append(current_minister)
+        else: #if not retired/fired
+            if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
+                current_minister.gain_experience()
 
         if current_minister.fabricated_evidence > 0:
             prosecutor = global_manager.get('current_ministers')['Prosecutor']
@@ -554,3 +600,63 @@ def manage_ministers(global_manager):
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
         global_manager.get('fear_tracker').change(-1)
+
+def game_end_check(global_manager):
+    '''
+    Description:
+        Checks each turn if the company is below 0 money, causing the player to lose the game
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if global_manager.get('money') < 0:
+        global_manager.set('game_over', True)
+        text = ""
+        text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
+        notification_tools.display_choice_notification(text, ['confirm main menu', 'quit'], {}, global_manager)
+
+def manage_commodity_sales(global_manager):
+    '''
+    Description:
+        Orders the minister of trade to process all commodity sales started in the player's turn, allowing the minister to use skill/corruption to modify how much money is received by the company
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    sold_commodities = global_manager.get('sold_commodities')
+    trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
+    stealing = False
+    money_stolen = 0
+    text = trade_minister.current_position + " " + trade_minister.name + " reports the following commodity sales: /n /n"
+    any_sold = False
+    for current_commodity in global_manager.get('commodity_types'):
+        if sold_commodities[current_commodity] > 0:
+            any_sold = True
+            sell_price = global_manager.get('commodity_prices')[current_commodity]
+            expected_revenue = sold_commodities[current_commodity] * sell_price
+            expected_revenue = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_revenue, False)
+            actual_revenue = 0
+                
+            for i in range(sold_commodities[current_commodity]):
+                individual_sell_price = sell_price + random.randrange(-1, 2) + trade_minister.get_roll_modifier()
+                if trade_minister.check_corruption() and individual_sell_price > 1:
+                    money_stolen += 1
+                    individual_sell_price -= 1
+                if individual_sell_price < 1:
+                    individual_sell_price = 1
+                global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
+                actual_revenue += individual_sell_price
+                if random.randrange(1, 7) <= 1: #1/6 chance
+                    market_tools.change_price(current_commodity, -1, global_manager)
+
+            text += str(sold_commodities[current_commodity]) + " " + current_commodity + " sold for " + str(actual_revenue) + " money (expected " + str(expected_revenue) + ") /n /n"
+
+    if any_sold:
+        trade_minister.display_message(text)
+    if money_stolen > 0:
+        trade_minister.steal_money(money_stolen, 'sold commodities')
+
+    for current_commodity in global_manager.get('commodity_types'):
+        global_manager.get('sold_commodities')[current_commodity] = 0

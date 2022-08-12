@@ -36,6 +36,7 @@ try:
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
+    
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
     global_manager.set('previous_turn_time', time.time())
@@ -67,7 +68,9 @@ try:
         'blue': (0, 0, 200),
         'dark blue': (0, 0, 150),
         'yellow': (255, 255, 0),
-        'brown': (132, 94, 59)
+        'brown': (132, 94, 59),
+        'purple': (127, 0, 170)
+        #'purple': (191, 0, 255)
         }
     )
     #fundamental setup
@@ -128,6 +131,18 @@ try:
         'desert': 2
         }
     )
+
+    global_manager.set('terrain_build_cost_multiplier_dict',
+        {
+        'clear': 1,
+        'hills': 2,
+        'jungle': 3,
+        'water': 1,
+        'mountain': 3,
+        'swamp': 3,
+        'desert': 2
+        }
+    )
     
     #terrain setup
 
@@ -137,9 +152,11 @@ try:
     global_manager.set('commodity_types', ['consumer goods', 'coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
     global_manager.set('collectable_resources', ['coffee', 'copper', 'diamond', 'exotic wood', 'fruit', 'gold', 'iron', 'ivory', 'rubber'])
     global_manager.set('commodity_prices', {})
+    global_manager.set('sold_commodities', {})
 
     for current_commodity in global_manager.get('commodity_types'):
         global_manager.get('commodity_prices')[current_commodity] = 0
+        global_manager.get('sold_commodities')[current_commodity] = 0
 
     global_manager.set('commodities_produced', {})
     for current_commodity in global_manager.get('collectable_resources'):
@@ -179,7 +196,7 @@ try:
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums'])
+    global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
     #commodity setup
 
 
@@ -323,7 +340,7 @@ try:
     #price setup
     
     global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 5})
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10})
     for current_officer in global_manager.get('officer_types'):
         global_manager.get('recruitment_costs')[current_officer] = 5
 
@@ -347,14 +364,15 @@ try:
     global_manager.set('recruitment_string_descriptions', {})
     actor_utility.update_recruitment_descriptions(global_manager)
 
-    global_manager.set('worker_upkeep_fluctuation_amount', 0.2)
+    global_manager.set('worker_upkeep_fluctuation_amount', 0.25)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
-    global_manager.set('base_upgrade_price', 5) #times # upgrades + 1: 5 for 1st upgrade, 10 for 2nd, 15 for 3rd, etc.
+    global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
     global_manager.set('commodity_min_starting_price', 2)
     global_manager.set('commodity_max_starting_price', 5)
-    global_manager.set('consumer_goods_starting_price', 3)
+    global_manager.set('consumer_goods_starting_price', 1)
 
-    global_manager.set('action_prices',
+    global_manager.set('action_types', ['exploration', 'convert', 'religious_campaign', 'public_relations_campaign', 'advertising_campaign', 'loan_search', 'trade', 'loan', 'attack', 'capture_slaves', 'trial', 'hunt', 'track_beasts'])
+    global_manager.set('base_action_prices',
         {
         'exploration': 5,
         'convert': 5,
@@ -372,17 +390,22 @@ try:
         }
     )
 
+    global_manager.set('action_prices', {})
+    actor_utility.reset_action_prices(global_manager)    
+
     global_manager.set('building_prices',
         {
-        'resource': 5,
-        'infrastructure': 5,
-        'port': 5,
-        'train_station': 5,
+        'resource': 10,
+        'road': 5,
+        'railroad': 15,
+        'port': 15,
+        'train_station': 10,
         'trading_post': 5,
         'mission': 5,
         'fort': 5,
-        'train': 5,
-        'steamboat': 5
+        'warehouses': 5,
+        'train': 10,
+        'steamboat': 10
        } 
     )
     
@@ -399,15 +422,17 @@ try:
         'construction': 'construction',
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
-        'combat': 'combat',
+        'combat': 'combat supplies',
+        'hunting': 'hunting supplies',
         'production': 'production',
         'slave capture': 'capturing slaves',
+        'sold commodities': 'commodity sales',
         'none': 'miscellaneous company activities'
         }
     )
 
     global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'attacker supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
+        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
     #price setup
 
 
@@ -449,6 +474,7 @@ try:
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
     global_manager.set('enemy_turn_queue', [])
+    global_manager.set('player_turn_queue', [])
 
     global_manager.set('minister_limit', 15)
 
@@ -474,7 +500,6 @@ try:
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
     global_manager.set('combatant_images', [])
-    global_manager.set('end_turn_selected_mob', 'none')
     pygame.key.set_repeat(300, 200)
     global_manager.set('crashed', False)
     global_manager.set('lmb_down', False)
@@ -494,6 +519,7 @@ try:
     global_manager.set('choosing_destination_info_dict', {})
     global_manager.set('choosing_advertised_commodity', False)
     global_manager.set('choosing_advertised_commodity_info_dict', {})
+    global_manager.set('drawing_automatic_route', False)
     global_manager.set('prosecution_bribed_judge', False)
 
     global_manager.set('ongoing_exploration', False)
@@ -507,6 +533,7 @@ try:
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
     global_manager.set('ongoing_slave_capture', False)
+    global_manager.set('game_over', False)
 
     global_manager.set('r_shift', 'up')
     global_manager.set('l_shift', 'up')
@@ -522,7 +549,7 @@ try:
     old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)
-    global_manager.set('available_minister_left_index', 0)
+    global_manager.set('available_minister_left_index', -2) #so that first index is in middle
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
     global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
     global_manager.set('current_game_mode', 'none')
@@ -554,28 +581,33 @@ try:
 
 
     #value tracker setup
+    global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
+    labels.value_label(scaling.scale_coordinates(330, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+        'misc/default_label.png', 'public_opinion', global_manager)
+    
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-    labels.money_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    labels.money_label(scaling.scale_coordinates(330, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager)
+
     global_manager.set('previous_financial_report', 'none')
-    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(215, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
+    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
         scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
-    labels.value_label(scaling.scale_coordinates(465, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    labels.value_label(scaling.scale_coordinates(545, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'turn', global_manager)
-
-    global_manager.set('public_opinion_tracker', data_managers.value_tracker('public_opinion', 0, 0, 100, global_manager))
-    labels.value_label(scaling.scale_coordinates(245, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
-        'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('evil_tracker', data_managers.value_tracker('evil', 0, 0, 100, global_manager))
+    
     global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
     #value tracker setup
 
 
 
     #button setup
+    wake_up_all_button = buttons.button(scaling.scale_coordinates(165, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', 'wake up all', 'none', ['strategic', 'europe'], 'buttons/disable_sentry_mode_button.png', global_manager)
+    
     strategic_to_europe_button = buttons.switch_game_mode_button(scaling.scale_coordinates(europe_grid_x - 85, europe_grid_y, global_manager), scaling.scale_width(60, global_manager), scaling.scale_height(60, global_manager), 'blue',
         pygame.K_e, 'europe', ['strategic'], 'buttons/european_hq_button.png', global_manager)
 
@@ -627,7 +659,7 @@ try:
         'move right', pygame.K_d, ['strategic'], 'buttons/right_button.png', global_manager)
 
 
-    expand_text_box_button = buttons.button(scaling.scale_coordinates(75, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
+    expand_text_box_button = buttons.button(scaling.scale_coordinates(55, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
         'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
 
     #instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
@@ -636,8 +668,11 @@ try:
     save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
-    cycle_units_button = buttons.button(scaling.scale_coordinates(150, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
+    cycle_units_button = buttons.button(scaling.scale_coordinates(110, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
+
+    cycle_units_button = buttons.button(scaling.scale_coordinates(220, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
+        'execute movement routes', 'none', ['strategic', 'europe'], 'buttons/execute_movement_routes_button.png', global_manager)
     #button setup
 
 
@@ -779,6 +814,11 @@ try:
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
     global_manager.get('mob_info_display_list').append(mob_free_image)
 
+    #sentry mode icon image
+    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'sentry_icon', global_manager) #coordinates, width, height, modes, global_manager
+    global_manager.get('mob_info_display_list').append(mob_free_image)
+    
     fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
         scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
     #mob info images setup
@@ -845,7 +885,9 @@ try:
 
 
     #tile info labels setup
-    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'building efficiency', 'building work crews', 'current building work crew', 'native population', 'slums', 'native available workers', 'native aggressiveness']
+    tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
+                                'resource building', 'building efficiency', 'building work crews', 'current building work crew',
+                                'village', 'native population', 'native available workers', 'native aggressiveness']
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type == 'current building work crew':
             x_displacement = 50
@@ -941,11 +983,11 @@ try:
                 scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], global_manager.get('minister_types')[current_index], global_manager)
 
     available_minister_display_x = global_manager.get('default_display_width')
-    available_minister_display_y = 500
+    available_minister_display_y = 770
     cycle_left_button = buttons.cycle_available_ministers_button(scaling.scale_coordinates(available_minister_display_x - (position_icon_width / 2) - 25, available_minister_display_y, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), pygame.K_w, ['ministers'], 'buttons/cycle_ministers_up_button.png', 'left', global_manager)
 
-    for i in range(0, 3):
+    for i in range(0, 5):
         available_minister_display_y -= (position_icon_width + 10)
         current_portrait = buttons.minister_portrait_image(scaling.scale_coordinates(available_minister_display_x - position_icon_width, available_minister_display_y, global_manager),
             scaling.scale_width(position_icon_width, global_manager), scaling.scale_height(position_icon_width, global_manager), ['ministers'], 'none', global_manager)
@@ -990,6 +1032,18 @@ try:
 
     global_manager.set('DEBUG_reveal_beasts', False) #False by default
     #reveals beasts on load
+
+    global_manager.set('DEBUG_infinite_commodities', False) #False by default
+    #gives 10 of each commodity in Europe on new game
+
+    global_manager.set('DEBUG_band_of_thieves', False) #False by default
+    #causes all ministers to be corrupt whenever possible
+
+    global_manager.set('DEBUG_ministry_of_magic', False) #False by default
+    #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
+
+    global_manager.set('DEBUG_farm_upstate', False)
+    #retires all appointed ministers at the end of the turn
     
     #activating/disabling debugging tools
 

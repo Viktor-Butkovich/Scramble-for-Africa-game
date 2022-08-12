@@ -45,11 +45,11 @@ class beast(npmob):
         if from_save:
             self.set_hidden(input_dict['hidden'])
         else:
-            self.set_hidden(True)
+            self.set_hidden(True, True)
             self.set_max_movement_points(4)
             
         if global_manager.get('DEBUG_reveal_beasts'):
-            self.set_hidden(False)
+            self.set_hidden(False, True)
             
         self.just_revealed = False
 
@@ -98,12 +98,16 @@ class beast(npmob):
         target_list = []
         current_cell = self.grids[0].find_cell(self.x, self.y)
         possible_cells = current_cell.adjacent_list + [current_cell]
+        if random.randrange(1, 7) >= 3: #1/3 chance of moving to pmob if present, 2/3 chance of moving randomly, possibly torward pmob but not necessarily
+            ignoring_pmobs = True
+        else:
+            ignoring_pmobs = False
         enemy_found = False
         for current_cell in possible_cells:
             if not (current_cell.y == 0 and self.can_swim and not self.can_swim_ocean): #cancel if trying to go into ocean and can't swim in ocean
                 if current_cell.terrain in self.preferred_terrains:
                     if not enemy_found:
-                        if current_cell.has_pmob():
+                        if current_cell.has_pmob() and not ignoring_pmobs:
                             target_list = [current_cell]
                             enemy_found = True
                         else:
@@ -145,7 +149,7 @@ class beast(npmob):
         super().retreat()
 
         
-    def set_hidden(self, new_hidden):
+    def set_hidden(self, new_hidden, on_load = False):
         '''
         Description:
             Sets this beast's new hidden status. A hidden beast can move around the map as usual and can not be attacked until revealed. A beast reveals itself as it attacks (hiding itself afterward) and can be revealed by a safari
@@ -156,6 +160,9 @@ class beast(npmob):
             self.hide_images()
         else:
             self.show_images()
+            if not on_load:
+                self.global_manager.get('sound_manager').play_sound('beasts/' + self.animal_type)
+            
     
     def check_despawn(self):
         '''

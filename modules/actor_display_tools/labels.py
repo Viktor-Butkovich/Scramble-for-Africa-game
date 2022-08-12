@@ -45,59 +45,73 @@ class actor_display_label(label):
             self.message_start = 'Name: '
             self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/merge_button.png', self, global_manager))
             self.attached_buttons.append(buttons.split_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_n, self.modes, 'buttons/split_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.labor_broker_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, 'buttons/labor_broker_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.labor_broker_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/labor_broker_button.png', self, global_manager))
             self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_b, self.modes, 'buttons/embark_ship_button.png', self, 'ship', global_manager))
             self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_b, self.modes, 'buttons/embark_train_button.png', self, 'train', global_manager))
             self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, 'ship', global_manager))
             self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/crew_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_g, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
             self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height + 11, self.height + 11, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
 
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_g, self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'mission', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'fort', global_manager))
+            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_v, self.modes, self, 'fort', global_manager))
             
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'resource', global_manager))
+            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_g, self.modes, self, 'resource', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_p, self.modes, self, 'port', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, self, 'train_station', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'trading_post', global_manager))
             self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, self, 'mission', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, self, 'fort', global_manager))
+            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_v, self.modes, self, 'fort', global_manager))
 
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, self, 'resource', 'scale', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
+            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_k, self.modes, self, 'warehouses', 'warehouse_level', global_manager))
             
-            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'buildings/buttons/train.png', self, global_manager))
-            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'buildings/buttons/steamboat.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_y, self.modes, 'mobs/train/button.png', self, global_manager))
+            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_u, self.modes, 'mobs/steamboat/button.png', self, global_manager))
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, 'religious campaign', global_manager))
-            self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'ministers/icons/trade.png', self, global_manager))
+            self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_r, self.modes, 'ministers/icons/trade.png', self, global_manager))
             self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
             self.attached_buttons.append(buttons.track_beasts_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/track_beasts_button.png', self, global_manager))
             self.attached_buttons.append(buttons.capture_slaves_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_t, self.modes, 'buttons/capture_slaves_button.png', self, global_manager))
+            
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
+            self.attached_buttons.append(buttons.enable_sentry_mode_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/enable_sentry_mode_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.disable_sentry_mode_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/disable_sentry_mode_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.end_unit_turn_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_f, self.modes, 'buttons/end_unit_turn_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'clear automatic route', 'none', self.modes, 'buttons/clear_automatic_route_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'draw automatic route', 'none', self.modes, 'buttons/draw_automatic_route_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + 6, self.height + 6, 'follow automatic route', 'none', self.modes, 'buttons/follow_automatic_route_button.png', self, global_manager))
+            
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
             self.attached_buttons.append(buttons.cycle_work_crews_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
+
         elif self.actor_label_type == 'building work crew':
             self.message_start = ''
             self.attached_building = 'none'
             self.attached_buttons.append(buttons.remove_work_crew_button((self.x, self.y), self.height + 6, self.height + 6, 'none', self.modes, 'buttons/remove_work_crew_button.png', self, 'resource', global_manager))
+
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
             self.attached_buttons.append(buttons.crew_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, global_manager))
             self.attached_buttons.append(buttons.uncrew_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_n, self.modes, 'buttons/uncrew_ship_button.png', self, global_manager))
+
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
             self.attached_buttons.append(buttons.cycle_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_4, self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
-            self.attached_buttons.append(buttons.pick_up_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.embark_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.disembark_all_passengers_button((self.x, self.y), self.height + 6, self.height + 6, pygame.K_x, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
+
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
             keybind = 'none'
@@ -108,31 +122,41 @@ class actor_display_label(label):
             elif self.list_index == 2:
                 keybind = pygame.K_3
             self.attached_buttons.append(buttons.disembark_vehicle_button((self.x, self.y), self.height + 6, self.height + 6, keybind, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
+
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
+
         elif self.actor_label_type == 'native aggressiveness':
             self.message_start = 'Aggressiveness: '
+
         elif self.actor_label_type == 'native population':
             self.message_start = 'Total population: '
+
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'village', global_manager))
+
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
+
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
-            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/slave workers/button.png', self, global_manager))
+            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y - 24), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/slave workers/button.png', self, global_manager))
+
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
             self.image_y_displacement = 5
+
         elif self.actor_label_type == 'minister_name':
             self.message_start = 'Name: '
+
         elif self.actor_label_type == 'minister_office':
             self.message_start = 'Office: '
             self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, global_manager))
             for current_position in global_manager.get('minister_types'):
                 self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + 6, self.height + 6, self, current_position, global_manager))
+
         elif self.actor_label_type == 'evidence':
             self.message_start = 'Evidence: '
             if 'ministers' in self.modes:
@@ -140,13 +164,20 @@ class actor_display_label(label):
             if 'trial' in self.modes:
                 self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y - 25), self.height + 31, self.height + 31, self, global_manager))
                 self.attached_buttons.append(buttons.bribe_judge_button((self.x, self.y - 25), self.height + 31, self.height + 31, self, global_manager))
+
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
             self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + 30, self.height + 30, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
+
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
+
         elif self.actor_label_type == 'preferred_terrains':
             self.message_start = 'Preferred terrain: '
+
+        elif self.actor_label_type == 'building workers':
+            self.message_start = 'Work crews: '
+
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
@@ -167,6 +198,7 @@ class actor_display_label(label):
                 self.set_tooltip(tooltip_text)
             else:
                 super().update_tooltip()
+                
         elif self.actor_label_type == 'passengers':
             if (not self.actor == 'none'):
                 if self.actor.has_crew:
@@ -178,6 +210,7 @@ class actor_display_label(label):
                     self.set_tooltip(name_list)
                 else:
                     super().update_tooltip()
+                    
         elif self.actor_label_type == 'crew':
             if (not self.actor == 'none') and self.actor.has_crew:
                 self.actor.crew.update_tooltip()
@@ -185,6 +218,7 @@ class actor_display_label(label):
                 self.set_tooltip(tooltip_text)
             else:
                 super().update_tooltip()
+                
         elif self.actor_label_type == 'tooltip':
             if not self.actor == 'none':
                 self.actor.update_tooltip()
@@ -195,6 +229,7 @@ class actor_display_label(label):
                         tooltip_text.append('')
                         tooltip_text += current_building.tooltip_text  
                 self.set_tooltip(tooltip_text)
+                
         elif self.actor_label_type in ['native aggressiveness', 'native population', 'native available workers']:
             tooltip_text = [self.message]
             if self.actor_label_type == 'native aggressiveness':
@@ -204,6 +239,7 @@ class actor_display_label(label):
             elif self.actor_label_type == 'native available workers':
                 tooltip_text.append("The portion of this village's population that would be willing to work for your company")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             tooltip_text = [self.message]
             if self.actor_label_type == 'mob inventory capacity':
@@ -219,6 +255,7 @@ class actor_display_label(label):
                         tooltip_text.append("This tile can retain a maximum of " + str(self.actor.inventory_capacity) + " commodities")
                         tooltip_text.append("If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'minister':
             tooltip_text = []
             if not self.actor == 'none':
@@ -229,6 +266,7 @@ class actor_display_label(label):
                     tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit",
                                     "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed"]
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'evidence':
             tooltip_text = []
             if not self.actor == 'none':
@@ -245,39 +283,44 @@ class actor_display_label(label):
                     tooltip_text.append("When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.")
                     tooltip_text.append("If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'background':
             tooltip_text = [self.message]
             tooltip_text.append("A minister's personal background determines their social status and may give them additional expertise in certain areas")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'social status':
             tooltip_text = [self.message]
             tooltip_text.append("A minister's social status determines their power independent of your company.")
             tooltip_text.append("A minister of higher social status has a much greater ability to either help your company when your goals align, or fight back should they ever diverge")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'interests':
             tooltip_text = [self.message]
             tooltip_text.append("While some interests are derived from a minister's legitimate talent or experience in a particular field, others are mere fancies")
-            self.set_tooltip(tooltip_text)        
+            self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'building workers':
-            tooltip_text = [self.message]
+            tooltip_text = []
             tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang")
             if (not self.attached_building == 'none'):
-                tooltip_text.append("Work crews: ")
+                tooltip_text.append("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 for current_work_crew in self.attached_building.contained_work_crews:
                     tooltip_text.append("    " + utility.capitalize(current_work_crew.name))
-                if len(self.attached_building.contained_work_crews) == 0:
-                    tooltip_text[-1] += 'none'
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'building efficiency':
             tooltip_text = [self.message]
             tooltip_text.append("Each work crew attached to this building can produce up to the building efficiency in commodities each turn")
             tooltip_text.append("Increase work crew efficiency by upgrading the building's efficiency with a construction gang")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'slums':
             tooltip_text = [self.message]
             tooltip_text.append("Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work")
             tooltip_text.append("Slums can form around ports, train stations, and resource production facilities")
             self.set_tooltip(tooltip_text)
+            
         elif self.actor_label_type == 'combat_strength':
             tooltip_text = [self.message]
             tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type")
@@ -296,6 +339,7 @@ class actor_display_label(label):
                     else:
                         tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer")
             self.set_tooltip(tooltip_text)
+            
         else:
             super().update_tooltip()
 
@@ -334,25 +378,33 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    if new_actor.cell.has_building('village') and new_actor.cell.visible:
-                        self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
-                    elif not new_actor.cell.has_building(self.actor_label_type): #if no building built, show resource: name
+                    #if new_actor.cell.has_building('village') and new_actor.cell.visible:
+                    #    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
+                    if not (new_actor.cell.has_building('resource') or new_actor.cell.has_building('village')): #if no building built, show resource: name
                         self.set_label(self.message_start + new_actor.cell.resource)
-                    else:
-                        self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
+                    #else:
+                    #    self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
                 else:
                     self.set_label(self.message_start + 'unknown')
+
+            elif self.actor_label_type == 'resource building':
+                if (not new_actor.grid.is_abstract_grid) and new_actor.cell.visible and new_actor.cell.has_building('resource'):
+                    self.set_label('Resource building: ' + new_actor.cell.get_building('resource').name)
+
+            elif self.actor_label_type == 'village':
+                if new_actor.cell.visible and new_actor.cell.has_building('village') and new_actor.cell.visible:
+                    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
                     
             elif self.actor_label_type == 'movement':
                 if self.actor.controllable:
-                    if not new_actor.has_infinite_movement:
+                    if (new_actor.is_vehicle and new_actor.has_crew and (not new_actor.has_infinite_movement) and not new_actor.temp_movement_disabled) or not new_actor.is_vehicle: #if riverboat/train with crew or normal unit
                         self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
-                    else:
-                        if new_actor.is_vehicle and new_actor.vehicle_type == 'train':
+                    else: #if ship or riverboat/train without crew
+                        if not new_actor.has_infinite_movement:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")
-                            else:
-                                self.set_label("Infinite movement until cargo/passenger dropped")
+                            #else:
+                            #    self.set_label("Infinite movement until cargo/passenger dropped")
                         else:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label("No movement")
@@ -401,7 +453,10 @@ class actor_display_label(label):
             elif self.actor_label_type == 'passengers':
                 if self.actor.is_vehicle:
                     if not self.actor.has_crew:
-                        self.set_label("A " + self.actor.vehicle_type + " requires crew to function")
+                        if self.actor.can_swim and self.actor.can_swim_ocean:
+                            self.set_label("Requires a European worker crew to function")
+                        elif self.actor.vehicle_type == 'train':
+                            self.set_label("Requires a non-slave worker crew to function")
                     else:
                         if len(self.actor.contained_mobs) == 0:
                             self.set_label(self.message_start + 'none')
@@ -525,7 +580,11 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and self.actor.grid.is_abstract_grid: #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+            return(False)
+        elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
+            return(False)
+        elif self.actor_label_type == 'village' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('village'))):
             return(False)
         elif self.actor_label_type in ['crew', 'passengers'] and not self.actor.is_vehicle: #do not show passenger or crew labels for non-vehicle mobs
             return(False)

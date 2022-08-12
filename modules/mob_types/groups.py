@@ -63,6 +63,8 @@ class group(pmob):
                 self.set_movement_points(self.officer.movement_points)
             else:
                 self.set_movement_points(self.worker.movement_points)
+            if self.veteran:
+                self.set_name("veteran " + self.name)
         else:
             if self.veteran:
                 #self.set_name("Veteran " + self.name.lower())
@@ -113,11 +115,14 @@ class group(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+    
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                 self.attrition_death('officer')
         if current_cell.local_attrition():
-            if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                 worker_type = self.worker.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')
@@ -138,7 +143,7 @@ class group(pmob):
             destination_type = 'vehicle'
             destination_message = " from the " + self.name + " aboard the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
         elif self.in_building:
-            zoom_destination = self.building.images[0].current_cell.tile
+            zoom_destination = self.building.images[0].current_cell.get_intact_building('resource')
             destination_type = 'building'
             destination_message = " from the " + self.name + " working in the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
         else:

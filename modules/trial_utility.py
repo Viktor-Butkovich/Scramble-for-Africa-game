@@ -5,6 +5,7 @@ from . import scaling
 from . import game_transitions
 from . import minister_utility
 from . import dice_utility
+from . import actor_utility
 
 def start_trial(global_manager): #called by launch trial button in middle of trial screen
     '''
@@ -120,12 +121,14 @@ def trial(global_manager): #called by choice notification button
     Output:
         None
     '''
+    price = global_manager.get('action_prices')['trial']
     global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial fees')
+    actor_utility.double_action_price(global_manager, 'trial')
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
     prosecutor_corrupt = prosecution.check_corruption()
     if prosecutor_corrupt:
-        prosecution.steal_money(global_manager.get('action_prices')['trial'], 'trial fees')
+        prosecution.steal_money(price, 'trial fees')
         prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial fees')
         if global_manager.get('prosecution_bribed_judge'):
             prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial fees')

@@ -52,6 +52,7 @@ class worker(pmob):
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+            self.selection_sound()
 
     def replace(self, attached_group = 'none'):
         '''
@@ -138,8 +139,14 @@ class worker(pmob):
         if self.worker_type in ['African', 'European']: #not religious volunteers
             market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
         if self.worker_type == 'African':
-            text_tools.print_to_screen("These fired workers will wander and eventually settle down in one of your slums", self.global_manager)
+            text_tools.print_to_screen("These fired workers will wander and eventually settle down in one of your slums.", self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+        if self.worker_type in ['European', 'religious']:
+            current_public_opinion = self.global_manager.get('public_opinion')
+            self.global_manager.get('public_opinion_tracker').change(-1)
+            resulting_public_opinion = self.global_manager.get('public_opinion')
+            if not current_public_opinion == resulting_public_opinion:
+                text_tools.print_to_screen("Firing " + self.name + " reflected poorly on your company and reduced your public opinion from " + str(current_public_opinion) + " to " + str(resulting_public_opinion) + ".", self.global_manager)
 
     def can_show_tooltip(self):
         '''
@@ -175,6 +182,8 @@ class worker(pmob):
             if not current_image.current_cell == 'none':
                 while not moved_mob == current_image.current_cell.contained_mobs[0]:
                     current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
+        self.remove_from_turn_queue()
+        vehicle.add_to_turn_queue()
         if not vehicle.initializing: #don't select vehicle if loading in at start of game
             vehicle.select()
 
@@ -191,13 +200,16 @@ class worker(pmob):
         self.x = vehicle.x
         self.y = vehicle.y
         self.show_images()
-        self.set_disorganized(True)
+        if self.images[0].current_cell.get_intact_building('port') == 'none':
+            self.set_disorganized(True)
         vehicle.crew = 'none'
         vehicle.has_crew = False
         vehicle.set_image('uncrewed')
         vehicle.end_turn_destination = 'none'
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
+        vehicle.remove_from_turn_queue()
+        self.add_to_turn_queue()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):
@@ -212,6 +224,7 @@ class worker(pmob):
         self.in_group = True
         self.selected = False
         self.hide_images()
+        self.remove_from_turn_queue()
 
     def leave_group(self, group):
         '''
@@ -228,6 +241,8 @@ class worker(pmob):
         self.show_images()
         self.disorganized = group.disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
+        if self.movement_points > 0:
+            self.add_to_turn_queue()
 
     def remove(self):
         '''

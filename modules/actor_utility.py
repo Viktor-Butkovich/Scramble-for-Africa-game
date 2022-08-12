@@ -4,6 +4,64 @@ import random
 
 from . import scaling
 from . import utility
+from . import text_tools
+
+def reset_action_prices(global_manager):
+    '''
+    Description:
+        Resets the costs of any actions that were increased during the previous turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_action_type in global_manager.get('action_types'):
+        global_manager.get('action_prices')[current_action_type] = global_manager.get('base_action_prices')[current_action_type]
+
+def double_action_price(global_manager, action_type):
+    '''
+    Description:
+        Doubles the price of a certain action type each time it is done, usually for ones that do not require workers
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string action_type: Type of action to double the price of
+    Output:
+        None
+    '''
+    global_manager.get('action_prices')[action_type] *= 2
+
+def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
+    '''
+    Description:
+        Returns the cost of the inputted unit attempting to construct the inputted building
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        pmob/string constructor: Unit attempting to construct the building, or 'none' if no location/unit type is needed
+        string building_type: Type of building to build, like 'infrastructure'
+        string building_name = 'n/a': Name of building being built, used to differentiate roads from railroads
+    Output:
+        int: Returns the cost of the inputted unit attempting to construct the inputted building
+    '''
+    if building_type == 'infrastructure':
+        building_type = building_name #road or railroad
+
+    if building_type == 'warehouses':
+        if constructor == 'none':
+            base_price = 5
+        else:
+            base_price = constructor.images[0].current_cell.get_warehouses_cost()
+    else:
+        base_price = global_manager.get('building_prices')[building_type]
+
+    if building_type in ['train', 'steamboat']:
+        cost_multiplier = 1
+    elif constructor == 'none' or not global_manager.get('strategic_map_grid') in constructor.grids:
+        cost_multiplier = 1
+    else:
+        terrain = constructor.images[0].current_cell.terrain
+        cost_multiplier = global_manager.get('terrain_build_cost_multiplier_dict')[terrain]
+
+    return(base_price * cost_multiplier)
 
 def update_recruitment_descriptions(global_manager, target = 'all'):
     '''
@@ -53,7 +111,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
                 text_list.append('When combined with workers, a foreman becomes a work crew unit that can produce commodities when attached to a production facility.')
                 
             elif current_target == 'merchant':
-                first_line += ' and can personally search for loans and conduct advertising campaings in Europe.'
+                first_line += ' and can personally search for loans and conduct advertising campaigns in Europe.'
                 text_list.append(first_line)
                 text_list.append('When combined with workers, a merchant becomes a caravan that can build trading posts and trade with native villages.')
                 
@@ -96,12 +154,15 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             
         elif current_target == 'steamship':
             text_list.append('While useless by itself, a steamship crewed by workers can quickly transport units and cargo through coastal waters and between theatres.')
+            text_list.append('Crewing a steamship requires an advanced level of technological training, which is generally only available to European workers in this time period.')
             
         elif current_target == 'steamboat':
             text_list.append('While useless by itself, a steamboat crewed by workers can quickly transport units and cargo along rivers.')
+            text_list.append('Crewing a steamboat requires a basic level of technological training, which is generally unavailable to slave workers.')
             
         elif current_target == 'train':
             text_list.append('While useless by itself, a train crewed by workers can quickly transport units and cargo through railroads between train stations.')
+            text_list.append('Crewing a train requires a basic level of technological training, which is generally unavailable to slave workers.')
         recruitment_list_descriptions[current_target] = text_list
 
         text = ''

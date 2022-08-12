@@ -65,12 +65,17 @@ class construction_gang(group):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start upgrade'}
         self.global_manager.set('ongoing_construction', True)
-        message = "Are you sure you want to start upgrading the " + self.building_name + "'s " + self.upgrade_type + "? /n /n"
+        if self.building_name == 'warehouses':
+            message = "Are you sure you want to start upgrading this tile's warehouses? /n /n"
+        else:
+            message = "Are you sure you want to start upgrading the " + self.building_name + "'s " + self.upgrade_type + "? /n /n"
         message += "The planning and materials will cost " + str(self.upgraded_building.get_upgrade_cost()) + " money.  Each upgrade to a building increases the cost of all future upgrades for that building. /n /n"
         if self.upgrade_type == 'efficiency':
             message += "If successful, each work crew attached to this " + self.building_name + " will be able to make an additional attempt to produce commodities each turn."
         elif self.upgrade_type == 'scale':
-            message += "If successful, the maximum number of work crews able to be attached to this " + self.building_name + " will increase by 1"
+            message += "If successful, the maximum number of work crews able to be attached to this " + self.building_name + " will increase by 1."
+        elif self.upgrade_type == 'warehouse_level':
+            message += "If successful, the warehouses' level will increase by 1, increasing the tile's inventory capacity by 9."
         else:
             message += "Placeholder upgrade description"
         message += " /n /n"
@@ -98,7 +103,10 @@ class construction_gang(group):
         
         self.global_manager.get('money_tracker').change(self.upgraded_building.get_upgrade_cost() * -1, 'construction')
         text = ""
-        text += "The " + self.name + " attempts to upgrade the " + self.building_name + "'s " + self.upgrade_type + ". /n /n"
+        if self.building_name == 'warehouses':
+            text += "The " + self.name + " attempts to upgrade the warehouses. /n /n"
+        else:
+            text += "The " + self.name + " attempts to upgrade the " + self.building_name + "'s " + self.upgrade_type + ". /n /n"
         if not self.veteran:    
             notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
         else:
@@ -115,7 +123,7 @@ class construction_gang(group):
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])

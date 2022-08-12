@@ -57,6 +57,8 @@ class save_load_manager_template():
         self.copied_elements.append('previous_financial_report')
         self.copied_elements.append('num_wandering_workers')
         self.copied_elements.append('prosecution_bribed_judge')
+        self.copied_elements.append('sold_commodities')
+        self.copied_elements.append('action_prices')
         
     def new_game(self):
         '''
@@ -135,7 +137,7 @@ class save_load_manager_template():
         input_dict['modes'] = ['strategic']
         input_dict['tile_image_id'] = 'locations/slave_traders.png' 
         input_dict['grid_line_width'] = 3
-        input_dict['name'] = 'Arab slave traders'
+        input_dict['name'] = 'Slave traders'
         slave_traders_grid = grids.abstract_grid(False, input_dict, self.global_manager)
         self.global_manager.set('slave_traders_grid', slave_traders_grid)
 
@@ -164,7 +166,7 @@ class save_load_manager_template():
 
         self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
 
-        self.global_manager.set('available_minister_left_index', 0)
+        self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
 
         self.global_manager.set('num_african_workers', 0)
         self.global_manager.set('num_european_workers', 0)
@@ -173,6 +175,7 @@ class save_load_manager_template():
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
+        actor_utility.reset_action_prices(self.global_manager)
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_tools.manage_villages(self.global_manager)
@@ -253,8 +256,6 @@ class save_load_manager_template():
         
         text_tools.print_to_screen("", self.global_manager)
         text_tools.print_to_screen("Loading " + file_path, self.global_manager)
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn') + 1), self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:
@@ -277,6 +278,9 @@ class save_load_manager_template():
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
         self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
+
+        text_tools.print_to_screen("", self.global_manager)
+        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn')), self.global_manager)
 
         #load grids
         strategic_grid_height = 300
@@ -321,7 +325,7 @@ class save_load_manager_template():
                     input_dict['modes'] = ['strategic']
                     input_dict['origin_coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y, self.global_manager)
                     input_dict['tile_image_id'] = 'locations/slave_traders.png' 
-                    input_dict['name'] = 'Arab slave traders'
+                    input_dict['name'] = 'Slave traders'
                     slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('slave_traders_grid', slave_traders_grid)
                     
@@ -352,7 +356,7 @@ class save_load_manager_template():
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
         for current_minister_dict in saved_minister_dicts:
             self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
-        self.global_manager.set('available_minister_left_index', 0)
+        self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()
         

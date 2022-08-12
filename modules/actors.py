@@ -8,6 +8,7 @@ from . import notification_tools
 from . import utility
 from . import actor_utility
 from . import scaling
+from . import market_tools
 
 class actor():
     '''
@@ -159,7 +160,10 @@ class actor():
         '''
         self.inventory = {}
         for current_commodity in self.global_manager.get('commodity_types'):
-            self.inventory[current_commodity] = 0
+            if self.global_manager.get('DEBUG_infinite_commodities') and self.name == 'Europe':
+                self.inventory[current_commodity] = 10
+            else:
+                self.inventory[current_commodity] = 0
 
     def drop_inventory(self):
         '''
@@ -242,12 +246,12 @@ class actor():
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
 
-    def get_held_commodities(self):
+    def get_held_commodities(self, ignore_consumer_goods = False):
         '''
         Description:
             Returns a list of the types of commodities held by this actor
         Input:
-            None
+            boolean ignore_consumer_goods = False: Whether to include consumer goods from tile
         Output:
             string list: Types of commodities held by this actor
         '''
@@ -255,7 +259,8 @@ class actor():
             held_commodities = []
             for current_commodity in self.global_manager.get('commodity_types'):
                 if self.get_inventory(current_commodity) > 0:
-                    held_commodities.append(current_commodity)
+                    if not (current_commodity == 'consumer goods' and ignore_consumer_goods):
+                        held_commodities.append(current_commodity)
             return(held_commodities)
         else:
             return([])
@@ -270,7 +275,7 @@ class actor():
             None
         '''
         if self.get_inventory_used() > 0:
-            if random.randrange(1, 7) <= 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if random.randrange(1, 7) <= 1 or self.global_manager.get('DEBUG_boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
                 transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell#self.trigger_inventory_attrition()
@@ -324,6 +329,9 @@ class actor():
                 self.change_inventory(current_commodity, -1 * amount_lost)
                 if stealing:
                     value_stolen += (self.global_manager.get('commodity_prices')[current_commodity] * amount_lost)
+                    for i in range(amount_lost):
+                        if random.randrange(1, 7) <= 1: #1/6 chance
+                            market_tools.change_price(current_commodity, -1, self.global_manager)
         for current_index in range(0, len(types_lost_list)):
             lost_commodity = types_lost_list[current_index]
             amount_lost = amounts_lost_list[current_index]
@@ -361,11 +369,15 @@ class actor():
                 location_message = 'in the Arab slave markets'
             
             if self.actor_type == 'tile':
-                notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
-                    was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+                transportation_minister.display_message("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
+                    was_word + " lost, damaged, or misplaced. /n /n")
+                #notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
+                #    was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
             elif self.actor_type == 'mob':
-                notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
-                    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+                transportation_minister.display_message("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
+                    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n")
+                #notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
+                #    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
         if stealing and value_stolen > 0:
             transportation_minister.steal_money(value_stolen, 'inventory attrition')
     

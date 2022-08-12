@@ -44,6 +44,7 @@ class vehicle(pmob):
         self.contained_mobs = []
         self.ejected_crew = 'none'
         self.ejected_passengers = []
+        self.travel_possible = False
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict = input_dict['image_dict'] #should have default and uncrewed
         self.is_vehicle = True
@@ -56,6 +57,7 @@ class vehicle(pmob):
                 self.has_crew = True
                 self.set_image('uncrewed')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
+            self.selection_sound()
         else: #create crew and passengers through recruitment_manager and embark them
             if input_dict['crew'] == 'none':
                 self.crew = 'none'
@@ -65,6 +67,8 @@ class vehicle(pmob):
                 self.global_manager.get('actor_creation_manager').create(True, current_passenger, self.global_manager).embark_vehicle(self) #create passengers and merge as passengers
         self.initializing = False
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
+        if not self.has_crew:
+            self.remove_from_turn_queue()
 
     def manage_health_attrition(self, current_cell = 'default'):
         '''
@@ -82,14 +86,17 @@ class vehicle(pmob):
         else:
             sub_mobs = [self.crew]
         sub_mobs += self.contained_mobs
+
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        
         for current_sub_mob in sub_mobs:
             worker_type = 'none'
             if current_sub_mob.is_worker:
                 worker_type = current_sub_mob.worker_type
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
-            if current_cell.local_attrition():
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew:
                             self.crew_attrition_death()
@@ -175,7 +182,8 @@ class vehicle(pmob):
         while len(self.contained_mobs) > 0:
             current_mob = self.contained_mobs.pop(0)
             current_mob.disembark_vehicle(self)
-            self.ejected_passengers.append(current_mob)
+            if (not self.global_manager.get('player_turn')) or self.global_manager.get('enemy_combat_phase'):
+                self.ejected_passengers.append(current_mob)
 
     def reembark(self):
         '''
@@ -253,7 +261,7 @@ class vehicle(pmob):
             save_dict['passenger_dicts'].append(current_mob.to_save_dict())
         return(save_dict)
 
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change, can_print = True):
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
@@ -261,16 +269,19 @@ class vehicle(pmob):
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean can_print = True: Whether to print messages to explain why a unit can't move in a certain direction
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
         if self.has_crew:
             if not self.temp_movement_disabled:
-                return(super().can_move(x_change, y_change))
+                return(super().can_move(x_change, y_change, can_print))
             else:
-                text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
+                if can_print:
+                    text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
         else:
-            text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
+            if can_print:
+                text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -289,6 +300,11 @@ class vehicle(pmob):
             current_mob.in_vehicle = True
             current_mob.selected = False
             current_mob.hide_images()
+        if new_grid == self.global_manager.get('europe_grid') or self.images[0].current_cell.has_intact_building('port'):
+            self.eject_passengers()
+            self.drop_inventory()
+        elif new_grid == self.global_manager.get('slave_traders_grid'):
+            self.eject_passengers()
 
 class train(vehicle):
     '''
@@ -317,8 +333,9 @@ class train(vehicle):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.set_max_movement_points(10)
-        self.has_infinite_movement = True
+        self.set_max_movement_points(16)
+        self.has_infinite_movement = False
+        #self.has_infinite_movement = True
         self.vehicle_type = 'train'
         self.can_swim = False
         self.can_walk = True
@@ -330,7 +347,7 @@ class train(vehicle):
         else:
             self.load_inventory(input_dict['inventory'])
 
-    def can_move(self, x_change, y_change):
+    def can_move(self, x_change, y_change, can_print = True):
         '''
         Description:
             Returns whether this mob can move to the tile x_change to the right of it and y_change above it. Movement can be prevented by not being able to move on water/land, the edge of the map, limited movement points, etc. Vehicles
@@ -338,15 +355,29 @@ class train(vehicle):
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean can_print = True: Whether to print messages to explain why a unit can't move in a certain direction
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
-        result = super().can_move(x_change, y_change)
+        result = super().can_move(x_change, y_change, can_print)
         if result:
             if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
-                text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
+                if can_print:
+                    text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
                 return(False)
         return(result)
+
+    def get_movement_cost(self, x_change, y_change):
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Unlike most pmobs, trains use their default movement cost to move to all railroad tiles
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
+        return(self.movement_cost)
 
 class ship(vehicle):
     '''
@@ -419,9 +450,10 @@ class ship(vehicle):
         Output:
             boolean: Returs True if this ship has any crew, otherwise returns False
         '''
-        if self.has_crew:
-            if not self.temp_movement_disabled:
-                return(True)
+        if self.travel_possible:
+            if self.has_crew:
+                if not self.temp_movement_disabled:
+                    return(True)
         return(False)
 
 class boat(ship):
@@ -459,3 +491,15 @@ class boat(ship):
         self.can_walk = False
         self.travel_possible = False
         self.inventory_capacity = 9
+
+    def get_movement_cost(self, x_change, y_change):
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Unlike most pmobs, steamboats use their default movement cost to move to all water or port tiles
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
+        return(self.movement_cost)

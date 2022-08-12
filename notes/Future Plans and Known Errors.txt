@@ -1,80 +1,51 @@
+
+
 Future plans:
-make beast behavior less predictable, won't just attack every turn and don't say retreat direction unless injured?
-add sentry mode and end turn for unit buttons
-acquired commodity cost should be shown in trading notification
-balance improvements such as doubling subsidies, gain public opinion on exploration
-labor broker should take all remaining movement points, at least 1
-minister of trade should sell commodities at end of turn and report how much they were sold for, allow for attrition
-add more elegant 'out of money' screen, make sure financial report from lost game does not show up when loading or making new game
-improve consistency in how actor display and value tracker labels are capitalized
-add bridges
-production report should show any resource your company has the capacity to produce, even if there are no work crews currently attempting to produce it
-reduce aggro range of native warriors
-improve description of worker recruitment when using labor broker to not use generic recruitment text
+update mob info display of selected unit at beginning of turn
+make commodities lost message both a zoom and minister message notification?
+Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
+autosave on game creation if no save game present, add delete save game button that prevents loading
+move construction and repair functions to groups rather than pmobs
+don't select units as they move if doing automated route
+add automated trade routes
+add mode like sentry to not replace attrition losses for a certain unit
+add archaeology mechanic, expedition goes to friendly village and looks for rumors, gains mission to go out to certain tile(s) and investigate - if true, chance of special bonus for rest of game
+^ has categories like archaeology, paleontology, zoology, botany, anthropology (modern), theological (prester john)
+^ objectives could appear in explored or unexplored tiles, not ocean, do investigation campaign on objective to see if it is there, random missions from geographic society, chance of one each turn
+have chance of explorer promotion on automatic exploration
 improve terrain appearances, especially hills
 improve button images for labor broker, switch screens, etc.
-caravan disembarking vehicle should automatically take up to 9 consumer goods from its cargo
-reduce attrition for units in vehicles, including crew
-Selecting minister in available minister display should always center the display on that minister
-maybe have selected unit blink like in other games to make it more clear that it is selected
-Ministers should maybe give public opinion refund for reappointing to same position within the same turn, make sure no exploits possible
-Add slave trade suppression, gain progress over time for large public opinion bonus and maybe spawns free African workers
-Units disembarking in a port should not become disorganized
-Maybe automatically unload ship cargo and passengers upon entering ports
-Reduce number of commodities that can be shown at once in inventory and maybe move inventory display farther right to reduce overlapping
-Maybe only show inventory capacity on units with inventory capacity or tiles that have inventory capacity or are carrying goods that will be lost at end of turn
-expand buttons where possible across the board
-make movement buttons more visible/closer to other action buttons, maybe next to fire button
-add are you sure message for removing ministers
-add at least 2 more available ministers slots
-remove religious/ethnic references relating to slave traders
-ship travel button should show in tooltip that it moves at the end of the turn, tab cycling should skip ships with an end turn destination, add buttons to go to slave traders and europe, tab/g should switch screens if on Europe screen like ad
+add bridges
+if no save file present, autosave on game creation
+Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
+change action failed messages to reference minister asking for more time/money rather than the unit officer
+add multiple save slots
+possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
+possibly display a notification when a unit dies and have an optional cause of death parameter
 allow moving empty steamboat across land on train
 reduce number of times current cell is calculated in npmobs.npmob end turn functions
 improve appearance of combat modifier text
 add background to multiple units in tile number to improve contrast
 possibly have adjustable police investment per turn
 add flavor text for police informants, investigations, etc instead of prosecutor finding it
-add notification and public opinion penalty to actor_display_tools/buttons.remove_minister_button
-change action failed messages to reference minister asking for more time/money rather than the unit officer
-prevent ignored commodity prices from skyrocketing?
-add multiple save slots
-Change the remove crew button to use the vehicles.eject_crew function and add a button using the eject_passengers function as an opposite of the 'z' button
-possible ui improvement: have green/red letters appear by cursor after user does action that grants/requires money
-possibly display a notification when a unit dies and have an optional cause of death parameter
-
-
-Country bonuses: English merchant gets bonus on advertising, German major gets bonus against natives, Belgian major gets bonus on catching slaves, French evangelist gets bonus on converting
+make movement buttons more visible/closer to other action buttons, maybe next to fire button
+expand buttons where possible across the board
+Reduce number of commodities that can be shown at once in inventory and maybe move inventory display farther right to reduce overlapping
+Maybe only show inventory capacity on units with inventory capacity or tiles that have inventory capacity or are carrying goods that will be lost at end of turn
+Add slave trade suppression, gain progress over time for large public opinion bonus and maybe spawns free African workers
+maybe have selected unit blink like in other games to make it more clear that it is selected
+improved minister face locations
+limit advertising to once per commodity per turn?
+upgrade buttons not disappearing correctly upon leaving tile
 
 Possible/known Errors:
-steamboats should only require and use 1 movement point to land instead of using the movement cost of the port's terrain
+incorrect notification heights on certain resolutions
+incorrect railroad images occasionally occurring when new ones are created, fixed after save and load
+infinite loop and phantom officers sometimes created when ship travels to port
+check behavior of native warriors spawning when surrounded
 safari not correctly having enough movement to follow up after hunting, possibly relating to water
-incorrect turn number displaying in text box after loading
-hunting attack roll should be for hunting expenses, not combat
-fix incorrect risk messages involving safaris and disorganized units
-allow explorers to attempt to explore tile with an enemy in it
-safari not correctly auto-embarking steamship when moving from river
-ensure that veteran safari gets 2 dice for tracking
-build resource production facility notifications and 'building workers' labels should mention work crews
-fix labor broker tooltip to mention port requirement
-evangelist should not be able to use labor broker
-Missionaries not correctly having veteran title, maybe from officer but not group promoting or from officer being veteran before merge
 Disorganized flag and tooltip not showing correctly, especially when creating group or after disembarking ship
-available ministers display should correctly move out of blank space when ministers leave
-A fort's tooltip description in a tile should describe what it does
-Fix inconsistent minister faces during dice rolls, appears twice on forts, in incorrect place other times, issues with multiple minister messages in a row
-Slave 'recruitment' notification should use the term 'purchase' and not 'recruit' on choice button
-upkeep of all worker types should be visible and apparent, not just ones that are currently being used
-Make sure cost of trials, capture slaves, and other actions are correctly shown in actor display button tooltip
 change check if minister appointed to minister_utility.positions_filled across the board, need prosecutor appointed during other minister's actions, etc.
 make sure defending minister or lack thereof is shown in pmobs line 556, not all units use minister for defense
-minister face being shown twice during fort construction
-should never move camera to invisible enemy during enemy turn
-allow player to exit game and save even when ministers are not appointed
-capitalize first letter of enemy name during combat
-prevent multiple trials from happening in the same turn
-pmobs.display_die creating minister icons without resolution scaling
-damaging a building should remove its work crews, even if no enemies are present
-Make sure to test expedition exploring tile with native warriors - untested and unusual interaction. Should explore but remain in starting tile, go in and return without taking damage, still exploring nearby water
 Make sure worker changed to workers in text descriptions throughout the program
 incorrect spacing on generate article when blank output is returned

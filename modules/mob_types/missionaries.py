@@ -73,9 +73,9 @@ class missionaries(group):
 
         population_modifier = village.get_population_modifier()
         if population_modifier < 0:
-            message += "The high population of this village will require more effort to convert. /n"
+            message += "The high population of this village will require more effort to convert. /n /n"
         elif population_modifier > 0:
-            message += "The low population of this village will require less effort to convert. /n"
+            message += "The low population of this village will require less effort to convert. /n /n"
         self.current_roll_modifier += population_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -98,8 +98,12 @@ class missionaries(group):
         
         choice_info_dict = {'evangelist': self,'type': 'start converting'}
         self.current_roll_modifier = 0
-        self.global_manager.set('ongoing_conversion', True)
-        notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+        if self.current_min_success > 6:
+            message += "As a " + str(self.current_min_success) + "+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll's difficulty. /n /n"
+            notification_tools.display_notification(message, 'default', self.global_manager)
+        else:
+            self.global_manager.set('ongoing_conversion', True)
+            notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
         '''
@@ -140,7 +144,7 @@ class missionaries(group):
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
             second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
-            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
@@ -184,8 +188,9 @@ class missionaries(group):
             
         public_opinion_increase = 0
         if roll_result >= self.current_min_success:
-            public_opinion_increase = random.randrange(1, 4)
-            text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
+            public_opinion_increase = random.randrange(0, 2)
+            if public_opinion_increase > 0:
+                text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
             notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)

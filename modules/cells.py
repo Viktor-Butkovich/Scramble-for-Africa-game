@@ -314,6 +314,21 @@ class cell():
             if current_building.can_damage():
                 return(True)
         return(False)
+
+    def get_warehouses_cost(self):
+        warehouses = self.get_building('warehouses')
+        if warehouses == 'none':
+            warehouses_built = 0
+        else:
+            warehouses_built = warehouses.warehouse_level
+        if self.has_building('port'):
+            warehouses_built -= 1
+        if self.has_building('train_station'):
+            warehouses_built -= 1
+        if self.has_building('resource'):
+            warehouses_built -= 1
+
+        return(self.global_manager.get('building_prices')['warehouses'] * (2 ** warehouses_built)) #5 * 2^0 = 5 if none built, 5 * 2^1 = 10 if 1 built, 20, 40...
     
     def create_slums(self):
         '''
@@ -376,18 +391,22 @@ class cell():
                 return(True)
         return(False)
 
-    def get_uncrewed_vehicle(self, vehicle_type):
+    def get_uncrewed_vehicle(self, vehicle_type, worker_type = 'default'):
         '''
         Description:
             Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
         Input:
             string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+            string worker_type = 'default': If a worker type is inputted, only vehicles that the inputted worker type oculd crew are returned
         Output:
             string/vehicle: Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
         '''
+        if worker_type == 'slave':
+            return('none')
         for current_mob in self.contained_mobs:
             if current_mob.is_vehicle and (not current_mob.has_crew) and current_mob.vehicle_type == vehicle_type:
-                return(current_mob)
+                if not (worker_type == 'African' and current_mob.can_swim and current_mob.can_swim_ocean):
+                    return(current_mob)
         return('none')
 
     def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
@@ -434,6 +453,20 @@ class cell():
             if len(self.get_intact_building('resource').contained_work_crews) > 0:
                 return(True)
         return(False)
+
+    def get_pmob(self):
+        '''
+        Description:
+            Returns the first pmob in this cell, or 'none' if none are present
+        Input:
+            None
+        Output:
+            string/pmob: Returns the first pmob in this cell, or 'none' if none are present
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob.is_pmob:
+                return(current_mob)
+        return('none')
 
     def has_npmob(self):
         '''

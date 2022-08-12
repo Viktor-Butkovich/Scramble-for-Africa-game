@@ -9,7 +9,6 @@ from . import choice_notifications
 from . import action_notifications
 from . import scaling
 from . import text_tools
-from . import game_transitions
 
 class global_manager_template():
     '''
@@ -300,10 +299,12 @@ class money_tracker(value_tracker):
             else:
                 change_type = 'misc. expenses'
         self.transaction_history[change_type] += value_change
+        if not value_change == 0:
+            if abs(value_change) < 15:
+                self.global_manager.get('sound_manager').play_sound('coins 1')
+            else:
+                self.global_manager.get('sound_manager').play_sound('coins 2')
         super().change(value_change)
-        if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
-            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
 
     def set(self, new_value):
         '''
@@ -314,10 +315,7 @@ class money_tracker(value_tracker):
         Output:
             None
         '''
-        super().set(round(new_value, 1))
-        if self.get() < 0:
-            game_transitions.to_main_menu(self.global_manager, True) #end game when money less than 0
-            text_tools.print_to_screen("You ran out of money. GAME OVER", self.global_manager)
+        super().set(round(new_value, 2))
 
     def prepare_financial_report(self):
         '''
@@ -353,9 +351,9 @@ class money_tracker(value_tracker):
         if total_expenses == 0:
             notification_text += '  None /n'
         notification_text += ' /n'
-        notification_text += 'Total revenue: ' + str(round(total_revenue, 1)) + ' /n'
-        notification_text += 'Total expenses: ' + str(round(total_expenses, 1)) + ' /n'
-        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 1)) + ' /n'
+        notification_text += 'Total revenue: ' + str(round(total_revenue, 2)) + ' /n'
+        notification_text += 'Total expenses: ' + str(round(total_expenses, 2)) + ' /n'
+        notification_text += 'Total profit: ' + str(round(total_revenue + total_expenses, 2)) + ' /n'
         return(notification_text)
                     
 class notification_manager_template():
@@ -399,7 +397,7 @@ class notification_manager_template():
             self.notification_height += height_difference #increase height by height change
             #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
-            self.notification_x = (scaling.unscale_width(self.global_manager.get('minimap_grid_origin_x'), self.global_manager) - (self.notification_width + 40))
+            self.notification_x = self.global_manager.get('minimap_grid_origin_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
             self.notification_x = 610
 
@@ -415,7 +413,7 @@ class notification_manager_template():
         new_message = []
         next_line = ""
         next_word = ""
-        font_size = scaling.scale_width(25, self.global_manager)
+        font_size = 25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
@@ -439,7 +437,7 @@ class notification_manager_template():
         next_line += next_word
         new_message.append(next_line)
         new_message.append("Click to remove this notification.")
-        return(len(new_message) * font_size)#self.message = new_message
+        return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
             
     def notification_to_front(self, message):
         '''

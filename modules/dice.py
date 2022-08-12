@@ -31,7 +31,10 @@ class die(button):
         self.outcome_color_dict = outcome_color_dict #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
         self.rolls_completed = 0
         self.num_sides = num_sides
-        self.num_rolls = random.randrange(-3, 4) + 7 #4-10
+        if global_manager.get('DEBUG_ministry_of_magic'):
+            self.num_rolls = 1
+        else:
+            self.num_rolls = random.randrange(-3, 4) + 7 #4-10
         self.roll_interval = 0.3
         self.rolling = False
         self.last_roll = 0
@@ -121,6 +124,15 @@ class die(button):
         '''
         self.last_roll = time.time()
         self.rolling = True
+        dice_list = self.global_manager.get('dice_list')
+        if self == dice_list[0]: #only 1 die at a time makes noise
+            if len(dice_list) == 1:
+                self.global_manager.get('sound_manager').play_sound('dice 1')
+            elif len(dice_list) == 2:
+                self.global_manager.get('sound_manager').play_sound('dice 2')
+            else:
+                self.global_manager.get('sound_manager').play_sound('dice 3')
+                
         
     def roll(self):
         '''

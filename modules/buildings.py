@@ -40,6 +40,8 @@ class building(actor):
         self.inventory_capacity = 0
         no_png_image = input_dict['image'][0:len(input_dict['image']) - 4]
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
+        if input_dict['building_type'] == 'warehouses':
+            self.image_dict['damaged'] = self.image_dict['default']
         self.images = []
         for current_grid in self.grids:
             self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
@@ -51,9 +53,9 @@ class building(actor):
             for current_work_crew in input_dict['contained_work_crews']:
                 self.global_manager.get('actor_creation_manager').create(True, current_work_crew, self.global_manager).work_building(self)
             if self.can_damage():
-                self.set_damaged(input_dict['damaged'])
+                self.set_damaged(input_dict['damaged'], True)
         elif self.can_damage():
-            self.set_damaged(False)
+            self.set_damaged(False, True)
         for current_image in self.images:
             current_image.current_cell.contained_buildings[self.building_type] = self
             current_image.current_cell.tile.update_resource_icon()
@@ -62,7 +64,7 @@ class building(actor):
         self.set_inventory_capacity(self.default_inventory_capacity)
         if global_manager.get('DEBUG_damaged_buildings'):
             if self.can_damage():
-                self.set_damaged(True)
+                self.set_damaged(True, True)
 
     def to_save_dict(self):
         '''
@@ -133,11 +135,7 @@ class building(actor):
         '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
-            tooltip_text.append("Work crew capacity: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
-            if len(self.contained_work_crews) == 0:
-                tooltip_text.append("Work crews: none")
-            else:
-                tooltip_text.append("Work crews: ")
+            tooltip_text.append("Work crews: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             for current_work_crew in self.contained_work_crews:
                 tooltip_text.append("    " + current_work_crew.name)
             tooltip_text.append("Lets " + str(self.scale) + " attached work crews each attempt to produce " + str(self.efficiency) + " units of " + self.resource_type + " each turn")
@@ -160,13 +158,15 @@ class building(actor):
             tooltip_text.append("Increases the success chance of missionaries converting this tile's village")
         elif self.building_type == 'fort':
             tooltip_text.append("Grants a +1 combat modifier to your units fighting in this tile")
+        elif self.building_type == "warehouses":
+            tooltip_text.append("Level " + str(self.warehouse_level) + " warehouses allow an inventory capacity of " + str(9 * self.warehouse_level))
 
         if self.damaged:
             tooltip_text.append("This building is damaged and is currently not functional.")
             
         self.set_tooltip(tooltip_text)
 
-    def set_damaged(self, new_value):
+    def set_damaged(self, new_value, mid_setup = False):
         '''
         Description:
             Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities
@@ -186,6 +186,9 @@ class building(actor):
             self.set_inventory_capacity(self.default_inventory_capacity)
             self.image_dict['default'] = self.image_dict['intact']
             self.set_image('default')
+
+        if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
+            self.images[0].current_cell.get_building('warehouses').set_damaged(new_value)
 
     def set_default_inventory_capacity(self, new_value):
         '''
@@ -253,11 +256,11 @@ class building(actor):
     def get_build_cost(self):
         '''
         Description:
-            Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+            Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts or terrain
         Input:
             None
         Output:
-            double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts
+            double: Returns the total cost of building this building and all of its upgrades, not accounting for failed attempts or terrain
         '''
         return(self.global_manager.get('building_prices')[self.building_type])
 
@@ -450,7 +453,6 @@ class train_station(building):
         '''
         input_dict['building_type'] = 'train_station'
         super().__init__(from_save, input_dict, global_manager)
-        self.set_default_inventory_capacity(9)
 
 class port(building):
     '''
@@ -476,7 +478,82 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
+
+class warehouses(building):
+    '''
+    Buiding attached to a port, train station, and/or resource production facility that stores commodities
+    '''
+    def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
+                'warehouse_level': int value - Required if from save, size of warehouse (9 inventory capacity per level)
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        input_dict['building_type'] = 'warehouses'
+        self.warehouse_level = 1
+        super().__init__(from_save, input_dict, global_manager)
         self.set_default_inventory_capacity(9)
+        if from_save:
+            while self.warehouse_level < input_dict['warehouse_level']:
+                self.upgrade()
+                
+        if global_manager.get('DEBUG_damaged_buildings'):
+            if self.can_damage():
+                self.set_damaged(True, True)
+                
+    def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                Along with superclass outputs, also saves the following values:
+                'warehouse_level': int value - Size of warehouse (9 inventory capacity per level)
+        '''
+        save_dict = super().to_save_dict()
+        save_dict['warehouse_level'] = self.warehouse_level
+        return(save_dict)
+
+    def can_upgrade(self, upgrade_type = 'warehouse_level'):
+        '''
+        Description:
+            Returns whether this building can be upgraded in the inputted field. Warehouses can be upgraded infinitely
+        Input:
+            string upgrade_type = 'warehosue_level': Represents type of upgrade, like 'scale' or 'efficiency'
+        Output:
+            boolean: Returns True if this building can be upgraded in the inputted field, otherwise returns False
+        '''
+        return(True)
+
+    def get_upgrade_cost(self):
+        '''
+        Description:
+            Returns the cost of the next upgrade for this building. The first successful upgrade costs 5 money and each subsequent upgrade costs twice as much as the previous. Building a train station, resource production facility, or
+                port gives a free upgrade that does not affect the costs of future upgrades
+        Input:
+            None
+        Output:
+            None
+        '''
+        return(self.images[0].current_cell.get_warehouses_cost())
+
+    def upgrade(self, upgrade_type = 'warehouse_level'):
+        self.warehouse_level += 1
+        self.set_default_inventory_capacity(self.default_inventory_capacity + 9)
 
 class resource_building(building):
     '''
@@ -507,10 +584,9 @@ class resource_building(building):
         self.scale = 1
         self.efficiency = 1
         self.num_upgrades = 0
+        self.ejected_work_crews = []
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        self.set_default_inventory_capacity(9)
-        self.ejected_work_crews = []
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')
@@ -546,11 +622,26 @@ class resource_building(building):
         Output:
             None
         '''
-        self.ejected_work_crews = []
+        #self.ejected_work_crews = []
         for current_work_crew in self.contained_work_crews:
-            self.ejected_work_crews.append(current_work_crew)
+            if not current_work_crew in self.ejected_work_crews:
+                self.ejected_work_crews.append(current_work_crew)
         for current_work_crew in self.ejected_work_crews:
             current_work_crew.leave_building(self)
+
+    def set_damaged(self, new_value, mid_setup = False):
+        '''
+        Description:
+            Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities. A damaged resource building ejects its work crews when
+                damaged
+        Input:
+            boolean new_value: New damaged/undamaged state of the building
+        Output:
+            None
+        '''
+        if new_value == True:
+            self.eject_work_crews()
+        super().set_damaged(new_value, mid_setup)
 
     def reattach_work_crews(self):
         '''
@@ -589,12 +680,14 @@ class resource_building(building):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+        
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if random.randrange(1, 7) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')
@@ -634,18 +727,18 @@ class resource_building(building):
     def get_upgrade_cost(self):
         '''
         Description:
-            Returns the cost of the next upgrade for this building. The first successful upgrade costs 2 money and each subsequent upgrade costs 2 more
+            Returns the cost of the next upgrade for this building. The first successful upgrade costs 20 money and each subsequent upgrade costs twice as much as the previous
         Input:
             None
         Output:
             None
         '''
-        return(self.global_manager.get('base_upgrade_price') * (self.num_upgrades + 1)) #2 for 1st upgrade, 4 for 2nd, 6 for 3rd, etc.
+        return(self.global_manager.get('base_upgrade_price') * (2 ** self.num_upgrades)) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
 
     def get_build_cost(self):
         '''
         Description:
-            Returns the total cost of building this building, including all of its upgrades but not failed attempts
+            Returns the total cost of building this building, including all of its upgrades but not failed attempts or terrain
         Input:
             None
         Output:

@@ -123,7 +123,7 @@ class minister():
         Output:
             None
         '''
-        minister_icon_coordinates = (self.global_manager.get('notification_manager').notification_x - 140, 440)
+        minister_icon_coordinates = (scaling.scale_width(self.global_manager.get('notification_manager').notification_x - 140, self.global_manager), scaling.scale_height(440, self.global_manager))
         minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
             self, 'position', self.global_manager, True)
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
@@ -232,9 +232,8 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        if random.randrange(1, 3) == 1: #1/2
-            result += self.get_skill_modifier()
-
+        result += self.get_roll_modifier()
+        
         if (predetermined_corruption or self.check_corruption()):
             if not self.stolen_already: #true if stealing
                 self.steal_money(value, roll_type)
@@ -246,7 +245,8 @@ class minister():
             result = max_result
 
         #if corrupt, chance to choose random non-critical failure result
-            
+        if result > num_sides:
+            result = num_sides
         return(result)
 
     def no_corruption_roll(self, num_sides):
@@ -261,14 +261,13 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        if random.randrange(1, 3) == 1: #1/2
-            result += self.get_skill_modifier()
-
+        result += self.get_roll_modifier()
+        
         if result < min_result:
             result = min_result
         elif result > max_result:
             result = max_result
-            
+
         return(result)
 
     def roll_to_list(self, num_sides, min_success, max_crit_fail, value, roll_type, num_dice): #use when multiple dice are being rolled, makes corruption independent of dice
@@ -359,11 +358,11 @@ class minister():
             current_pmob.update_controlling_minister()
         if not new_position == 'none': #if appointing
             self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
-            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 2:
-                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display up because available minister was removed
+            if self.global_manager.get('available_minister_left_index') >= len(self.global_manager.get('available_minister_list')) - 3:
+                self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display up because available minister was removed
         else:
             self.global_manager.get('available_minister_list').append(self)
-            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 2) #move available minister display to newly fired minister
+            self.global_manager.set('available_minister_left_index', len(self.global_manager.get('available_minister_list')) - 3) #move available minister display to newly fired minister
         for current_minister_type_image in self.global_manager.get('minister_image_list'):
             if current_minister_type_image.minister_type == new_position:
                 current_minister_type_image.calibrate(self)
@@ -451,6 +450,11 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
+        if self.global_manager.get('DEBUG_band_of_thieves'):
+            return(True)
+        elif self.global_manager.get('DEBUG_ministry_of_magic'):
+            return(False)
+            
         if random.randrange(1, 7) >= self.corruption_threshold:
             if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
                 return(True)
@@ -461,6 +465,38 @@ class minister():
         else:
             return(False)
 
+    def gain_experience(self):
+        '''
+        Description:
+            Gives this minister a chance of gaining skill in their current cabinet position if they have one
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.current_position == 'none':
+            if self.specific_skills[self.current_position] < 3:
+                self.specific_skills[self.current_position] += 1
+
+    def estimate_expected(self, base, allow_decimals = True):
+        '''
+        Description:
+            Calculates and returns an expected number within a certain range of the inputted base amount, with accuracy based on this minister's skill. A prosecutor will attempt to estimate what the output of production, commodity
+                sales, etc. should be
+        Input:
+            double base: Target amount that estimate is approximating
+        Output:
+            double: Returns the estimaed number
+        '''
+        if self.no_corruption_roll(6) >= 4:
+            return(base)
+        else:
+            multiplier = random.randrange(80, 121)
+            multiplier /= 100
+            if allow_decimals:
+                return(round(base * multiplier, 2))
+            else:
+                return(round(base * multiplier))
 
     def get_skill_modifier(self):
         '''
@@ -491,6 +527,8 @@ class minister():
         Output:
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
+        if self.global_manager.get('DEBUG_ministry_of_magic'):
+            return(5)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             return(self.get_skill_modifier())
         else:
@@ -511,7 +549,7 @@ class minister():
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
-        self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
+        #self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
         self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
         minister_utility.update_available_minister_display(self.global_manager)
@@ -539,6 +577,8 @@ class minister():
         if event == 'first hired':
             if self.status_number >= 3:
                 public_opinion_change = self.status_number + random.randrange(-1, 2)
+                if self.status_number == 4:
+                    public_opinion_change += 6
             text += "From: " + self.name + " /n /n"
             intro_options = ["You have my greatest thanks for appointing me to your cabinet. ",
                              "Honored governor, my gratitude knows no limits. ",

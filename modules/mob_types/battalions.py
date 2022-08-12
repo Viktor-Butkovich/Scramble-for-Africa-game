@@ -143,8 +143,11 @@ class battalion(group):
                     risk_value = -1 * self.get_combat_modifier() #should be low risk with +2/veteran, moderate with +2 or +1/veteran, high with +1
                     if self.veteran: #reduce risk if veteran
                         risk_value -= 1
-                    if self.is_safari:
-                        risk_value -= 1
+                    if defender.npmob_type == 'beast':
+                        if self.is_safari:
+                            risk_value -= 3
+                        elif self.is_battalion:
+                            risk_value += 1
 
                     if risk_value < -2:
                         message = "RISK: LOW /n /n" + message  
@@ -205,7 +208,7 @@ class battalion(group):
         '''
         defender = self.images[0].current_cell.get_best_combatant('npmob')
         if not defender == 'none':
-            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attacker supplies')
+            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'combat supplies')
             self.start_combat('attacking', defender)
 
     def remove_attack_marks(self):
@@ -422,8 +425,6 @@ class battalion(group):
             warrior.show_images()
             warrior.attack_on_spawn()
         self.global_manager.set('ongoing_slave_capture', False)
-
-
 
 class safari(battalion):
     '''

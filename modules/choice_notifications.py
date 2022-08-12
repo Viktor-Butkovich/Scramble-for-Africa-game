@@ -6,6 +6,7 @@ from .notifications import notification
 from . import text_tools
 from . import scaling
 from . import market_tools
+from . import utility
 
 class choice_notification(notification):
     '''
@@ -116,8 +117,13 @@ class choice_button(button):
         '''
         self.notification = notification
         if button_type == 'recruitment':
-            self.message = 'Recruit'
             self.recruitment_type = self.notification.choice_info_dict['recruitment_type']
+            if self.recruitment_type in ['steamship', 'slave workers']:
+                self.message = 'Purchase'
+                self.verb = 'purchase'
+            else:
+                self.message = 'Hire'
+                self.verb = 'hire'
             self.cost = self.notification.choice_info_dict['cost']
             self.mob_image_id = self.notification.choice_info_dict['mob_image_id']
             
@@ -165,7 +171,13 @@ class choice_button(button):
             self.message = 'Do nothing'
 
         elif button_type == 'confirm main menu':
+            self.message = 'Main menu'
+
+        elif button_type == 'confirm remove minister':
             self.message = 'Confirm'
+
+        elif button_type == 'quit':
+            self.message = 'Exit game'
     
         else:
             self.message = button_type.capitalize() #stop trading -> Stop trading
@@ -214,9 +226,9 @@ class choice_button(button):
         '''
         if self.button_type == 'recruitment':
             if self.recruitment_type in ['African worker village', 'African worker slums', 'African worker labor broker']:
-                self.set_tooltip(['Recruit an African worker for ' + str(self.cost) + ' money'])
+                self.set_tooltip([utility.capitalize(self.verb) + ' an African worker for ' + str(self.cost) + ' money'])
             else:
-                self.set_tooltip(['Recruit a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
+                self.set_tooltip([utility.capitalize(self.verb) + ' a ' + self.recruitment_type + ' for ' + str(self.cost) + ' money'])
 
         elif self.button_type == 'end turn':
             self.set_tooltip(['End the current turn'])
@@ -259,6 +271,9 @@ class choice_button(button):
 
         elif self.button_type == 'confirm main menu':
             self.set_tooltip(['Exits to the main menu without saving'])
+
+        elif self.button_type == 'quit':
+            self.set_tooltip(['Exits the game without saving'])
 
         elif self.button_type == 'none':
             self.set_tooltip(['Do nothing'])
@@ -331,9 +346,15 @@ class recruitment_choice_button(choice_button):
 
                 worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
                 if recruiter.is_vehicle:
+                    #if recruiter.has_infinite_movement:
+                    #    recruiter.temp_disable_movement()
+                    #else:
+                    recruiter.set_movement_points(0)
                     worker.crew_vehicle(recruiter)
                 else:
+                    recruiter.set_movement_points(0)
                     self.global_manager.get('actor_creation_manager').create_group(worker, recruiter, self.global_manager)
+                    
             else:
                 input_dict['coordinates'] = (0, 0)
                 input_dict['grids'] = [self.global_manager.get('europe_grid')]

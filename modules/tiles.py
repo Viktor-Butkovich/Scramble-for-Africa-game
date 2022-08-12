@@ -52,7 +52,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
-        elif self.name in ['Europe', 'Arab slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
+        elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
             self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
@@ -84,18 +84,22 @@ class tile(actor): #to do: make terrain tiles a subclass
             if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
                 equivalent_tile.resource_icon.update_resource_icon()
 
-    def draw_destination_outline(self): #called directly by mobs
+    def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
         Description:
             Draws an outline around this tile when the displayed mob has a pending movement order to move to this tile
         Input:
-            None
+            string color = 'default': If an input is given, that color from the color_dict will be used instead of the default destination outline color
         Output:
             None
         '''
         for current_image in self.images:
             outline = self.cell.Rect
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.selection_outline_color], (outline), current_image.outline_width)
+            if color == 'default':
+                color = self.global_manager.get('color_dict')[self.selection_outline_color]
+            else:
+                color = self.global_manager.get('color_dict')[color] #converts input string to RGB tuple
+            pygame.draw.rect(self.global_manager.get('game_display'), color, (outline), current_image.outline_width)
 
     def draw_actor_match_outline(self, called_by_equivalent):
         '''
@@ -124,16 +128,17 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        inventory_used = self.get_inventory_used()
-        amount_to_remove = inventory_used - self.inventory_capacity
-        if amount_to_remove > 0:
-            commodity_types = self.get_held_commodities()
-            amount_removed = 0
-            while amount_removed < amount_to_remove:
-                commodity_removed = random.choice(commodity_types)
-                if self.get_inventory(commodity_removed) > 0:
-                    self.change_inventory(commodity_removed, -1)
-                    amount_removed += 1
+        if self.can_hold_commodities and not self.can_hold_infinite_commodities:
+            inventory_used = self.get_inventory_used()
+            amount_to_remove = inventory_used - self.inventory_capacity
+            if amount_to_remove > 0:
+                commodity_types = self.get_held_commodities()
+                amount_removed = 0
+                while amount_removed < amount_to_remove:
+                    commodity_removed = random.choice(commodity_types)
+                    if self.get_inventory(commodity_removed) > 0:
+                        self.change_inventory(commodity_removed, -1)
+                        amount_removed += 1
         
     def change_inventory(self, commodity, change):
         '''
@@ -489,17 +494,23 @@ class resource_icon(tile):
         if self.resource == 'natives':
             attached_village = self.attached_tile.cell.get_building('village')
             if attached_village.population == 0: #0
-                self.image_dict['small'] = 'scenery/resources/small/natives0.png'
-                self.image_dict['large'] = 'scenery/resources/natives0.png'
+                key = '0'
             elif attached_village.population <= 3: #1-3
-                self.image_dict['small'] = 'scenery/resources/small/natives1.png'
-                self.image_dict['large'] = 'scenery/resources/natives1.png'
+                key = '1'
             elif attached_village.population <= 6: #4-6
-                self.image_dict['small'] = 'scenery/resources/small/natives2.png'
-                self.image_dict['large'] = 'scenery/resources/natives2.png'
+                key = '2'
             else: #7-10
-                self.image_dict['small'] = 'scenery/resources/small/natives3.png'
-                self.image_dict['large'] = 'scenery/resources/natives3.png'
+                key = '3'
+
+            if attached_village.aggressiveness <= 3: #1-3
+                key += '1'
+            elif attached_village.aggressiveness <= 6: #4-6
+                key += '2'
+            else: #7-10
+                key += '3'
+
+            self.image_dict['small'] = 'scenery/resources/natives/small/' + key + '.png'
+            self.image_dict['large'] = 'scenery/resources/natives/' + key + '.png'
         building_present = False
         for building_type in self.global_manager.get('building_types'):
             if self.attached_tile.cell.has_building(building_type): #if any building present

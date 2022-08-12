@@ -124,8 +124,8 @@ class village():
         input_dict['init_type'] = 'native_warriors'
         input_dict['origin_village'] = self
         self.change_population(-1)
-        if self.available_workers > self.population: #if available worker leaves to be warrior, reduce number of available workers
-            self.set_available_workers(self.population)
+        #if self.available_workers > self.population: #if available worker leaves to be warrior, reduce number of available workers
+        #    self.set_available_workers(self.population)
         return(self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager))
 
     def recruit_worker(self):
@@ -276,11 +276,13 @@ class village():
             self.population = 9
         elif self.population < 0:
             self.population = 0
-        if self.cell.visible:
-            for current_tile in self.tiles:
-                current_tile.update_resource_icon()
-            if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+        if self.available_workers > self.population:
+            self.set_available_workers(self.population)
+        #if self.cell.visible:
+        for current_tile in self.tiles:
+            current_tile.update_resource_icon()
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''
@@ -296,5 +298,7 @@ class village():
             self.aggressiveness = 9
         elif self.aggressiveness < 1:
             self.aggressiveness = 1
+        for current_tile in self.tiles:
+            current_tile.update_resource_icon()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed aggressiveness value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)

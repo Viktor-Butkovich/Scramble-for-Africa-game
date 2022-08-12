@@ -6,6 +6,39 @@ from . import text_tools
 from . import tiles
 from . import actor_utility
 from . import minister_utility
+from . import scaling
+
+def cycle_player_turn(global_manager, start_of_turn = False):
+    '''
+    Description:
+        Selects the next unit in the turn order, or gives a message if none remain
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean start_of_turn = False: Whether this is occuring automatically at the start of the turn or due to a player action during the turn
+    Output:
+        None
+    '''
+    turn_queue = global_manager.get('player_turn_queue')
+    if len(turn_queue) == 0:
+        if not start_of_turn:
+            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+            actor_utility.deselect_all(global_manager)
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+    else:
+        if len(turn_queue) == 1 and not start_of_turn:
+            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+        if global_manager.get('current_game_mode') == 'europe' and turn_queue[0].grids[0] == global_manager.get('strategic_map_grid'):
+            set_game_mode('strategic', global_manager)
+        if not turn_queue[0].selected:
+            turn_queue[0].selection_sound()
+        turn_queue[0].select()
+        turn_queue[0].move_to_front()
+        if not turn_queue[0].grids[0].mini_grid == 'none':
+            turn_queue[0].grids[0].mini_grid.calibrate(turn_queue[0].x, turn_queue[0].y)
+        else:
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), turn_queue[0].images[0].current_cell.tile)
+        if not start_of_turn:
+            turn_queue.append(turn_queue.pop(0))
 
 def set_game_mode(new_game_mode, global_manager):
     '''
@@ -27,7 +60,7 @@ def set_game_mode(new_game_mode, global_manager):
         start_loading(global_manager)
         if new_game_mode == 'strategic':
             global_manager.set('current_game_mode', 'strategic')
-            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             #text_tools.print_to_screen("Entering strategic map", global_manager)
             centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
@@ -46,7 +79,7 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         else:
-            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):
@@ -55,8 +88,12 @@ def set_game_mode(new_game_mode, global_manager):
     if previous_game_mode in ['strategic', 'europe']:
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
-    elif previous_game_mode == 'ministers':
+
+    if new_game_mode == 'ministers':
+        global_manager.set('available_minister_left_index', -2)
+        minister_utility.update_available_minister_display(global_manager)
         minister_utility.calibrate_minister_info_display(global_manager, 'none')
+        
     elif previous_game_mode == 'trial':
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')
@@ -140,8 +177,7 @@ def to_main_menu(global_manager, override = False):
     global_manager.set('displayed_tile', 'none')
     global_manager.set('end_turn_selected_mob', 'none')
     global_manager.set('message', '')
+    global_manager.set('player_turn_queue', [])
     if not global_manager.get('current_instructions_page') == 'none':
         global_manager.get('current_instructions_page').remove()
         global_manager.set('current_instructions_page', 'none')
-    #else:
-    #    text_tools.print_to_screen("You are busy and can not exit to the main menu.", global_manager)
