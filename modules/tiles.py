@@ -89,7 +89,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Description:
             Draws an outline around this tile when the displayed mob has a pending movement order to move to this tile
         Input:
-            None
+            string color = 'default': If an input is given, that color from the color_dict will be used instead of the default destination outline color
         Output:
             None
         '''

@@ -36,6 +36,11 @@ class pmob(mob):
                 'end_turn_destination_grid_type': string - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
+                'sentry_mode': boolean value - Required if from save, whether this unit is in sentry mode, preventing it from being in the turn order
+                'in_turn_queue': boolean value - Required if from save, whether this unit is in the turn order, allowing end unit turn commands, etc. to persist after saving/loading
+                'base_automatic_route': int tuple list value - Required if from save, list of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
+                    no automatic movement route has been designated
+                'in_progress_automatic_route': string/int tuple list value - Required if from save, list of the coordinates and string commands this unit will execute, changes as the route is executed
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -77,10 +82,6 @@ class pmob(mob):
         self.default_min_crit_success = 6
         self.attached_dice_list = []
 
-        #self.base_automatic_route = [0, 1, 2, 3, 4]
-        #self.calculate_automatic_route()
-        #self.follow_automatic_route()
-
     def to_save_dict(self):
         '''
         Description:
@@ -93,6 +94,11 @@ class pmob(mob):
                 'default_name': string value - This actor's name without modifications like veteran
                 'end_turn_destination': string or int tuple value- 'none' if no saved destination, destination coordinates if saved destination
                 'end_turn_destination_grid_type': string value - Required if end_turn_destination is not 'none', matches the global manager key of the end turn destination grid, allowing loaded object to have that grid as a destination
+                'sentry_mode': boolean value - Whether this unit is in sentry mode, preventing it from being in the turn order
+                'in_turn_queue': boolean value - Whether this unit is in the turn order, allowing end unit turn commands, etc. to persist after saving/loading
+                'base_automatic_route': int tuple list value - List of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
+                    no automatic movement route has been designated
+                'in_progress_automatic_route': string/int tuple list value - List of the coordinates and string commands this unit will execute, changes as the route is executed
         '''
         save_dict = super().to_save_dict()
         if self.end_turn_destination == 'none':
@@ -110,12 +116,28 @@ class pmob(mob):
         return(save_dict)
 
     def add_to_automatic_route(self, new_coordinates):
+        '''
+        Description:
+            Adds the inputted coordinates to this unit's automated movement route, changing the in-progress route as needed
+        Input:
+            int tuple new_coordinates: New x and y coordinates to add to the route
+        Output:
+            None
+        '''
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
         if self == self.global_manager.get('displayed_mob'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def calculate_automatic_route(self):
+        '''
+        Description:
+            Creates an in-progress movement route based on the base movement route when the base movement route changes
+        Input:
+            None
+        Output:
+            None
+        '''
         reversed_base_automatic_route = utility.copy_list(self.base_automatic_route)
         reversed_base_automatic_route.reverse()
     
@@ -132,6 +154,14 @@ class pmob(mob):
         #now in progress route is ['start', 1, 2, 3, 4, 'end', 3, 2, 1, 0]
 
     def can_follow_automatic_route(self):
+        '''
+        Description:
+            Returns whether the next step of this unit's in-progress movement route could be completed at this moment
+        Input:
+            None
+        Output
+            boolean: Returns whether the next step of this unit's in-progress movement route could be completed at this moment
+        '''
         next_step = self.in_progress_automatic_route[0]
         if next_step == 'end': #can drop off freely unless train without train station
             if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
@@ -152,6 +182,15 @@ class pmob(mob):
             return(self.can_move(x_change, y_change, False))
 
     def follow_automatic_route(self):
+        '''
+        Description:
+            Moves along this unit's in-progress movement route until it can not complete the next step. A unit will wait for commodities to transport from the start, then pick them up and move along the path, picking up others along
+                the way. At the end of the path, it drops all commodities and moves back towards the start
+        Input:
+            None
+        Output:
+            None
+        '''
         progressed = False
         
         if len(self.in_progress_automatic_route) > 0:
@@ -173,6 +212,14 @@ class pmob(mob):
         return(progressed) #returns whether unit did anything to show unit in movement routes report
 
     def pick_up_all_commodities(self, ignore_consumer_goods = False):
+        '''
+        Description:
+            Adds as many local commodities to this unit's inventory as possible, possibly choosing not to pick up consumer goods based on the inputted boolean
+        Input:
+            boolean ignore_consumer_goods = False: Whether to not pick up consumer goods from this unit's tile
+        Output:
+            None
+        '''
         tile = self.images[0].current_cell.tile
         while self.get_inventory_remaining() > 0 and len(tile.get_held_commodities(ignore_consumer_goods)) > 0:
             commodity = tile.get_held_commodities(ignore_consumer_goods)[0]
@@ -180,12 +227,28 @@ class pmob(mob):
             tile.change_inventory(commodity, -1)
 
     def clear_automatic_route(self):
+        '''
+        Description:
+            Removes this unit's saved automatic movement route
+        Input:
+            None
+        Output:
+            None
+        '''
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
         if self == self.global_manager.get('displayed_mob'):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def selection_sound(self):
+        '''
+        Description:
+            Plays a sound when this unit is selected, with a varying sound based on this unit's type
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
                 self.global_manager.get('sound_manager').play_sound('bolt action 2')
@@ -195,6 +258,14 @@ class pmob(mob):
             self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
 
     def set_sentry_mode(self, new_value):
+        '''
+        Description:
+            Sets a new sentry mode of this status, creating a sentry icon or removing the existing one as needed
+        Input:
+            boolean new_value: New sentry mode status for this unit
+        Output:
+            None
+        '''
         old_value = self.sentry_mode
         if not old_value == new_value:
             self.sentry_mode = new_value
@@ -234,12 +305,28 @@ class pmob(mob):
         
 
     def add_to_turn_queue(self):
+        '''
+        Description:
+            At the start of the turn or once removed from another actor/building, attempts to add this unit to the list of units to cycle through with tab. Units in sentry mode or without movement are not added
+        Input:
+            None
+        Output:
+            None
+        '''
         if (not self.sentry_mode) and self.movement_points > 0 and self.end_turn_destination == 'none':
             turn_queue = self.global_manager.get('player_turn_queue')
             if not self in turn_queue:
                 turn_queue.append(self)
 
     def remove_from_turn_queue(self):
+        '''
+        Description:
+            Removes this unit from the list of units to cycle through with tab
+        Input:
+            None
+        Output:
+            None
+        '''
         turn_queue = self.global_manager.get('player_turn_queue')
         self.global_manager.set('player_turn_queue', utility.remove_from_list(turn_queue, self))
 
@@ -381,7 +468,7 @@ class pmob(mob):
         Description:
             Sets the type of minister that controls this unit, like "Minister of Trade"
         Input:
-            Type of minister to control this unit, like "Minister of Trade"
+            string new_type: Type of minister to control this unit, like "Minister of Trade"
         Output:
             None
         '''
@@ -482,6 +569,7 @@ class pmob(mob):
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean can_print = True: Whether to print messages to explain why a unit can't move in a certain direction
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
@@ -1018,10 +1106,7 @@ class pmob(mob):
         message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
-        #if self.building_type == 'infrastructure':
-        #    cost = self.global_manager.get('building_prices')[self.building_name]
-        #else:
-        #    cost = self.global_manager.get('building_prices')[self.building_type]
+
         message += "The planning and materials will cost " + str(cost) + " money. /n /n"
         
         message += "If successful, a " + self.building_name + " will be built. " #change to match each building
@@ -1078,10 +1163,6 @@ class pmob(mob):
         else:
             num_dice = 1
             
-        #if self.building_type == 'infrastructure':
-        #    cost = self.global_manager.get('building_prices')[self.building_name]
-        #else:
-        #    cost = self.global_manager.get('building_prices')[self.building_type]
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
 
         if self.building_name in ['train', 'steamboat']:

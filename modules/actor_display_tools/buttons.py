@@ -106,12 +106,6 @@ class worker_crew_vehicle_button(label_button):
                 vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, crew.worker_type)
                 if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
                     if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
-                        #if vehicle.can_swim and vehicle.can_swim_ocean and not crew.worker_type == 'European':
-                        #    text_tools.print_to_screen("Only European workers can crew steamships.", self.global_manager)
-                        #    return()
-                        #elif crew.worker_type == 'slave':
-                        #    text_tools.print_to_screen("Slave workers can not crew vehicles.", self.global_manager)
-                        #    return()
                             
                         if crew.sentry_mode:
                             crew.set_sentry_mode(False)
@@ -220,11 +214,37 @@ class embark_all_passengers_button(label_button):
         return(result)
 
 class disembark_all_passengers_button(label_button):
+    '''
+    Button that commands a vehicle to eject all of its passengers
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.vehicle_type = 'none'
         super().__init__(coordinates, width, height, 'disembark all', keybind_id, modes, image_id, attached_label, global_manager)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle to eject all of its passengers
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -244,6 +264,14 @@ class disembark_all_passengers_button(label_button):
                 text_tools.print_to_screen("You are busy and can not disembark all passengers.", self.global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
@@ -541,10 +569,36 @@ class split_button(label_button):
                 text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
 
 class enable_sentry_mode_button(label_button):
+    '''
+    Button that enables sentry mode for a unit, causing it to not be added to the turn cycle queue
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'enable sentry mode', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the selected mob is a pmob and is not already in sentry mode, otherwise returns False
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_pmob:
@@ -554,6 +608,14 @@ class enable_sentry_mode_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button activates sentry mode for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
@@ -562,10 +624,36 @@ class enable_sentry_mode_button(label_button):
                 text_tools.print_to_screen("You are busy and can not enable sentry mode.", self.global_manager)
 
 class disable_sentry_mode_button(label_button):
+    '''
+    Button that disables sentry mode for a unit, causing it to not be added to the turn cycle queue
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'disable sentry mode', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the selected mob is a pmob and is in sentry mode, otherwise returns False
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_pmob:
@@ -575,6 +663,14 @@ class disable_sentry_mode_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button deactivates sentry mode for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
@@ -584,10 +680,36 @@ class disable_sentry_mode_button(label_button):
                 text_tools.print_to_screen("You are busy and can not disable sentry mode.", self.global_manager)
 
 class end_unit_turn_button(label_button):
+    '''
+    Button that ends a unit's turn, removing it from the current turn's turn cycle queue
+    '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, 'end unit turn', keybind_id, modes, image_id, attached_label, global_manager)
         
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the selected mob is a pmob in the turn queue, otherwise returns False
+        '''
         result = super().can_show()
         if result:
             if not self.attached_label.actor.is_pmob:
@@ -597,6 +719,14 @@ class end_unit_turn_button(label_button):
         return(result)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button removes the selected unit from the current turn's turn cycle queue
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
@@ -2045,17 +2175,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         
         base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
         cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
-
-        #if self.building_type == 'infrastructure':
-        #    if self.building_name in ['road', 'railroad']:
-        #        cost = self.global_manager.get('building_prices')[self.building_name]
-        #    else:
-        #        cost = 0
-        #else:
-        #    cost = self.global_manager.get('building_prices')[self.building_type]
+        
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
-        #if self.building_type == 'warehouses':
-        #    message.append("Upgrading warehouses has a base cost of " + str(self.global_manager.get('building_prices')['warehouses']) + ", which doubles for each time warehouses have already been upgraded in this tile")
         if self.building_type in ['train', 'steamboat']:
             message.append("Unlike buildings, the cost of vehicle assembly is not impacted by local terrain")
             
@@ -2079,10 +2200,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
                     cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
-                    #if self.building_type == 'infrastructure':
-                    #    cost = self.global_manager.get('building_prices')[self.building_name]
-                    #else:
-                    #    cost = self.global_manager.get('building_prices')[self.building_type]
                     if self.global_manager.get('money') >= cost:
                         current_building = self.attached_tile.cell.get_building(self.building_type)
                         if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
@@ -2114,17 +2231,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 self.construct()
                                             else:
                                                 text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
-                                        #elif self.building_type == 'warehouses':
-                                        #    #if self.attached_label.actor.check_if_minister_appointed():
-                                        #    if self.attached_label.actor.images[0].current_cell.warehouse_level > 0:
-                                        #        if not self.attached_label.actor.images[0].current_cell.get_building('warehouses').damaged:
-                                        #            if self.attached_label.actor.sentry_mode:
-                                        #                self.attached_label.actor.set_sentry_mode(False)
-                                        #            self.construct()
-                                        #        else:
-                                        #            text_tools.print_to_screen("Warehouses can only be 
-                                        #    else:
-                                        #        text_tools.print_to_screen("Warehouses can only be improved where warehouses are already present")
                                         elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                             if self.attached_tile.cell.has_building('village'):
                                                 #if self.attached_label.actor.check_if_minister_appointed():
@@ -2148,10 +2254,6 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                             else:
                                 text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
                     else:
-                        #if self.building_type == 'infrastructure':
-                        #    cost = self.global_manager.get('building_prices')[self.building_name]
-                        #else:
-                        #    cost = self.global_manager.get('building_prices')[self.building_type]
                         text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
                 else:
                     text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
@@ -2886,10 +2988,38 @@ class buy_slaves_button(label_button):
                 text_tools.print_to_screen("You are busy and can not buy slaves.", self.global_manager)
 
 class automatic_route_button(label_button):
+    '''
+    Button that modifies a unit's automatic movement route, with an effect depending on the button's type
+    '''
     def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string button_type: Determines the function of this button, like 'end turn'
+            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         super().__init__(coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager)
 
     def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and follow automatic route buttons require that an automatic
+                route already exists
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should be drawn
+        '''
         if super().can_show():
             attached_mob = self.global_manager.get('displayed_mob')
             if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
@@ -2898,12 +3028,19 @@ class automatic_route_button(label_button):
                         return(True)
                 else:
                     return(True)
-                #elif self.button_type == 'draw automatic route':
-                #    if len(attached_mob.base_automatic_route) == 0:
-                #        return(True)
         return(False)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. Clear automatic route buttons remove the selected unit's automatic route. Draw automatic route buttons enter the route
+            drawing mode, in which the player can click on consecutive tiles to add them to the route. Follow automatic route buttons command the selected unit to execute its in-progress automatic route, stopping when it can not
+            continue the route for any reason
+        Input:
+            None
+        Output:
+            None
+        '''
         attached_mob = self.global_manager.get('displayed_mob')
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager):

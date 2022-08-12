@@ -251,7 +251,7 @@ class actor():
         Description:
             Returns a list of the types of commodities held by this actor
         Input:
-            None
+            boolean ignore_consumer_goods = False: Whether to include consumer goods from tile
         Output:
             string list: Types of commodities held by this actor
         '''

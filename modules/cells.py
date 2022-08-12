@@ -397,6 +397,7 @@ class cell():
             Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
         Input:
             string vehicle_type: 'train' or 'ship', determines what kind of vehicle is searched for
+            string worker_type = 'default': If a worker type is inputted, only vehicles that the inputted worker type oculd crew are returned
         Output:
             string/vehicle: Returns the first uncrewed vehicle of the inputted type in this cell, or 'none' if none are present
         '''
@@ -454,6 +455,14 @@ class cell():
         return(False)
 
     def get_pmob(self):
+        '''
+        Description:
+            Returns the first pmob in this cell, or 'none' if none are present
+        Input:
+            None
+        Output:
+            string/pmob: Returns the first pmob in this cell, or 'none' if none are present
+        '''
         for current_mob in self.contained_mobs:
             if current_mob.is_pmob:
                 return(current_mob)

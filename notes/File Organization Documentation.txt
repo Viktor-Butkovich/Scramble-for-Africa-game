@@ -31,14 +31,18 @@ SFA folder
 		    class label_image(modules.images.free_image)
 
             buttons.py
-		    imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, modules.game_transitions
+		    imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, modules.game_transitions, modules.notification_tools
 	          class label_button(modules.buttons.button)
 		        class worker_crew_vehicle_button
-		        class pick_up_all_passengers_button
+		        class embark_all_passengers_button
+			  class disembark_all_passengers_button
 		        class crew_vehicle_button
 		        class uncrew_vehicle_button
 		        class merge_button
 		        class split_button
+			  class enable_sentry_mode_button
+			  class disable_sentry_mode_button
+			  class end_unit_turn_button
 		        class remove_work_crew_button
 		        class disembark_vehicle_button
 		        class embark_vehicle_button
@@ -66,6 +70,7 @@ SFA folder
 			  class bribe_judge_button
 		        class hire_african_workers_button
 		        class buy_slaves_button
+			  class automatic_route_button
 
         mob_types folder
 	      battalions.py
@@ -77,7 +82,7 @@ SFA folder
 		    imports random, npmobs, modules.utility
 
 	      caravans.py
-		    imports random, math, groups, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
+		    imports random, math, groups, modules.utility, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
 		    class caravan(groups.group)
 	    
 	      construction_gangs.py
@@ -85,7 +90,7 @@ SFA folder
 		    class construction_gang(groups.group)
 
     	      expeditions.py
-		    imports time, groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
+		    imports time, random, groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
 		    class expedition(groups.group)
 	    
             groups.py
@@ -112,7 +117,7 @@ SFA folder
 
 	      pmobs.py
 		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
-		        modules.turn_management_tools
+		        modules.turn_management_tools, modules.minister_utility, modules.tiles
 		    class pmob(modules.mob)
 
 	      porters.py
@@ -127,7 +132,7 @@ SFA folder
 			      class boat
 
 	      work_crews.py
-		    imports groups, modules.actor_utility, modules.utility
+		    imports random, groups, modules.actor_utility, modules.utility, modules.market_tools
 		    class work_crew(groups.group)	
 
 	      workers.py
@@ -157,7 +162,10 @@ SFA folder
 	      class actor_creation_manager_template
 
         actor_utility.py
-            imports random, scaling, utility
+            imports random, scaling, utility, text_tools
+		def reset_action_prices
+		def double_action_price
+		def get_building_cost
 		def update_recruitment_descriptions
 		def spawn_beast
 	      def find_closest_available_worker
@@ -174,7 +182,7 @@ SFA folder
 	      def get_num_available_workers
 
         actors.py
-            imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling
+            imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools
             class actor
 
 	  buildings.py
@@ -186,6 +194,7 @@ SFA folder
 		    class fort
 		    class train_station
 		    class port
+		    class warehouses
 		    class resource_building
 		    class slums
         buttons.py
@@ -205,7 +214,7 @@ SFA folder
             class cell
 
 	  choice_notifications.py
-	      imports pygame, buttons, notifications, text_tools, scaling, market_tools
+	      imports pygame, buttons, notifications, text_tools, scaling, market_tools, utility
 	      class choice_notification(notifications.notification)
 	      class choice_button(buttons.button)
 	          class recruitment_choice_button
@@ -215,7 +224,7 @@ SFA folder
            def read_csv
 
         data_managers.py
-            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, game_transitions
+            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
             class global_manager_template
             class input_manager_template
             class flavor_text_manager_template
@@ -247,6 +256,7 @@ SFA folder
 
         game_transitions.py
             imports time, main_loop_tools, text_tools, tiles, actor_utility, minister_utility
+		def cycle_player_turn
             def set_game_mode
             def create_strategic_map
             def start_loading
@@ -282,7 +292,7 @@ SFA folder
             def display_instructions_page
 
         labels.py
-            imports pygame, buttons, scaling, text_tools, utility
+            imports pygame, buttons, scaling, text_tools, utility, market_tools
             class label(buttons.button)
 	      class value_label
 	      class money_label
@@ -294,7 +304,7 @@ SFA folder
             def main_loop
 
         main_loop_tools.py
-            imports pygame, time, scaling, text_tools, actor_utility, minister_utility
+            imports pygame, time, scaling, text_tools, actor_utility, minister_utility, utility
             def update_display
             def action_possible
             def draw_loading_screen
@@ -309,8 +319,13 @@ SFA folder
 	      class loan
 	      def adjust_prices
 	      def change_price
+		def set_price
 	      def sell
 	      def attempt_worker_upkeep_change
+		def attempt_slave_recruitment_cost_change
+		def calculate_subsidies
+		def calculate_total_worker_upkeep
+		def calculate_end_turn_money_change
 
 	  minister_utility.py
 	      def check_corruption
@@ -339,7 +354,7 @@ SFA folder
             def show_tutorial_notifications
 
         notifications.py
-            imports time, labels, text_tools, utility, scaling, actor_utility
+            imports time, labels, text_tools, utility, scaling, actor_utility, game_transitions
             class notification(labels.multi_line_label)
 		    class minister_notification
 	          class zoom_notification
@@ -390,6 +405,7 @@ SFA folder
 	      def start_player_turn
 	      def reset_mobs
 	      def manage_attrition
+		def remove_excess_inventory
 	      def manage_production
 	      def manage_upkeep
 	      def manage_loans
@@ -405,6 +421,8 @@ SFA folder
 	      def manage_enemy_movement
 	      def manage_combat
 		def manage_ministers
+		def game_end_check
+		def manage_commodity_sales
 
         utility.py
             def find_object_distance

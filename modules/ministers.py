@@ -89,11 +89,6 @@ class minister():
                 
             minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
-        #if not self.current_position == 'Prosecutor':
-        #    self.corruption_threshold = 0
-        #else:
-        #    self.corruption_threshold = 10
-        #    self.general_skill = 3
         self.update_tooltip()
 
     def update_tooltip(self):
@@ -237,8 +232,6 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        #if random.randrange(1, 3) == 1: #1/2
-        #    result += self.get_skill_modifier()
         result += self.get_roll_modifier()
         
         if (predetermined_corruption or self.check_corruption()):
@@ -268,8 +261,6 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        #if random.randrange(1, 3) == 1: #1/2
-        #    result += self.get_skill_modifier()
         result += self.get_roll_modifier()
         
         if result < min_result:
@@ -475,11 +466,28 @@ class minister():
             return(False)
 
     def gain_experience(self):
+        '''
+        Description:
+            Gives this minister a chance of gaining skill in their current cabinet position if they have one
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self.current_position == 'none':
             if self.specific_skills[self.current_position] < 3:
                 self.specific_skills[self.current_position] += 1
 
     def estimate_expected(self, base, allow_decimals = True):
+        '''
+        Description:
+            Calculates and returns an expected number within a certain range of the inputted base amount, with accuracy based on this minister's skill. A prosecutor will attempt to estimate what the output of production, commodity
+                sales, etc. should be
+        Input:
+            double base: Target amount that estimate is approximating
+        Output:
+            double: Returns the estimaed number
+        '''
         if self.no_corruption_roll(6) >= 4:
             return(base)
         else:

@@ -7,13 +7,41 @@ from . import utility
 from . import text_tools
 
 def reset_action_prices(global_manager):
+    '''
+    Description:
+        Resets the costs of any actions that were increased during the previous turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_action_type in global_manager.get('action_types'):
         global_manager.get('action_prices')[current_action_type] = global_manager.get('base_action_prices')[current_action_type]
 
 def double_action_price(global_manager, action_type):
+    '''
+    Description:
+        Doubles the price of a certain action type each time it is done, usually for ones that do not require workers
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        string action_type: Type of action to double the price of
+    Output:
+        None
+    '''
     global_manager.get('action_prices')[action_type] *= 2
 
 def get_building_cost(global_manager, constructor, building_type, building_name = 'n/a'):
+    '''
+    Description:
+        Returns the cost of the inputted unit attempting to construct the inputted building
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        pmob/string constructor: Unit attempting to construct the building, or 'none' if no location/unit type is needed
+        string building_type: Type of building to build, like 'infrastructure'
+        string building_name = 'n/a': Name of building being built, used to differentiate roads from railroads
+    Output:
+        int: Returns the cost of the inputted unit attempting to construct the inputted building
+    '''
     if building_type == 'infrastructure':
         building_type = building_name #road or railroad
 

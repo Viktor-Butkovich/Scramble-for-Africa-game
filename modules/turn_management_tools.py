@@ -146,6 +146,14 @@ def manage_attrition(global_manager):
             current_tile.manage_inventory_attrition()
 
 def remove_excess_inventory(global_manager):
+    '''
+    Description:
+        Removes any commodities that exceed their tile's storage capacities
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
     for current_cell in terrain_cells:
         current_tile = current_cell.tile
@@ -594,6 +602,14 @@ def manage_ministers(global_manager):
         global_manager.get('fear_tracker').change(-1)
 
 def game_end_check(global_manager):
+    '''
+    Description:
+        Checks each turn if the company is below 0 money, causing the player to lose the game
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     if global_manager.get('money') < 0:
         global_manager.set('game_over', True)
         text = ""
@@ -601,6 +617,14 @@ def game_end_check(global_manager):
         notification_tools.display_choice_notification(text, ['confirm main menu', 'quit'], {}, global_manager)
 
 def manage_commodity_sales(global_manager):
+    '''
+    Description:
+        Orders the minister of trade to process all commodity sales started in the player's turn, allowing the minister to use skill/corruption to modify how much money is received by the company
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     sold_commodities = global_manager.get('sold_commodities')
     trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
     stealing = False

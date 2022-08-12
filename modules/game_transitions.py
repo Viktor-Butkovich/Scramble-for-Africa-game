@@ -8,6 +8,15 @@ from . import actor_utility
 from . import minister_utility
 
 def cycle_player_turn(global_manager, start_of_turn = False):
+    '''
+    Description:
+        Selects the next unit in the turn order, or gives a message if none remain
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean start_of_turn = False: Whether this is occuring automatically at the start of the turn or due to a player action during the turn
+    Output:
+        None
+    '''
     turn_queue = global_manager.get('player_turn_queue')
     if len(turn_queue) == 0:
         if not start_of_turn:

@@ -269,6 +269,7 @@ class vehicle(pmob):
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean can_print = True: Whether to print messages to explain why a unit can't move in a certain direction
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
@@ -354,6 +355,7 @@ class train(vehicle):
         Input:
             int x_change: How many cells would be moved to the right in the hypothetical movement
             int y_change: How many cells would be moved upward in the hypothetical movement
+            boolean can_print = True: Whether to print messages to explain why a unit can't move in a certain direction
         Output:
             boolean: Returns True if this mob can move to the proposed destination, otherwise returns False
         '''
@@ -366,7 +368,16 @@ class train(vehicle):
         return(result)
 
     def get_movement_cost(self, x_change, y_change):
-        return(self.movement_cost) #trains ignore terrain penalties
+        '''
+        Description:
+            Returns the cost in movement points of moving by the inputted amounts. Unlike most pmobs, trains use their default movement cost to move to all railroad tiles
+        Input:
+            int x_change: How many cells would be moved to the right in the hypothetical movement
+            int y_change: How many cells would be moved upward in the hypothetical movement
+        Output:
+            double: How many movement points would be spent by moving by the inputted amount
+        '''
+        return(self.movement_cost)
 
 class ship(vehicle):
     '''

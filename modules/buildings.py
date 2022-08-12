@@ -453,7 +453,6 @@ class train_station(building):
         '''
         input_dict['building_type'] = 'train_station'
         super().__init__(from_save, input_dict, global_manager)
-        #self.set_default_inventory_capacity(9)
 
 class port(building):
     '''
@@ -479,10 +478,29 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
-        #self.set_default_inventory_capacity(9)
 
 class warehouses(building):
+    '''
+    Buiding attached to a port, train station, and/or resource production facility that stores commodities
+    '''
     def __init__(self, from_save, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+                'grids': grid list value - grids in which this mob's images can appear
+                'image': string value - File path to the image used by this object
+                'name': string value - Required if from save, this building's name
+                'modes': string list value - Game modes during which this building's images can appear
+                'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
+                'warehouse_level': int value - Required if from save, size of warehouse (9 inventory capacity per level)
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         input_dict['building_type'] = 'warehouses'
         self.warehouse_level = 1
         super().__init__(from_save, input_dict, global_manager)
@@ -496,14 +514,41 @@ class warehouses(building):
                 self.set_damaged(True, True)
                 
     def to_save_dict(self):
+        '''
+        Description:
+            Uses this object's values to create a dictionary that can be saved and used as input to recreate it on loading
+        Input:
+            None
+        Output:
+            dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
+                Along with superclass outputs, also saves the following values:
+                'warehouse_level': int value - Size of warehouse (9 inventory capacity per level)
+        '''
         save_dict = super().to_save_dict()
         save_dict['warehouse_level'] = self.warehouse_level
         return(save_dict)
 
     def can_upgrade(self, upgrade_type = 'warehouse_level'):
+        '''
+        Description:
+            Returns whether this building can be upgraded in the inputted field. Warehouses can be upgraded infinitely
+        Input:
+            string upgrade_type = 'warehosue_level': Represents type of upgrade, like 'scale' or 'efficiency'
+        Output:
+            boolean: Returns True if this building can be upgraded in the inputted field, otherwise returns False
+        '''
         return(True)
 
     def get_upgrade_cost(self):
+        '''
+        Description:
+            Returns the cost of the next upgrade for this building. The first successful upgrade costs 5 money and each subsequent upgrade costs twice as much as the previous. Building a train station, resource production facility, or
+                port gives a free upgrade that does not affect the costs of future upgrades
+        Input:
+            None
+        Output:
+            None
+        '''
         return(self.images[0].current_cell.get_warehouses_cost())
 
     def upgrade(self, upgrade_type = 'warehouse_level'):
@@ -542,7 +587,6 @@ class resource_building(building):
         self.ejected_work_crews = []
         super().__init__(from_save, input_dict, global_manager)
         global_manager.get('resource_building_list').append(self)
-        #self.set_default_inventory_capacity(9)
         if from_save:
             while self.scale < input_dict['scale']:
                 self.upgrade('scale')
@@ -586,6 +630,15 @@ class resource_building(building):
             current_work_crew.leave_building(self)
 
     def set_damaged(self, new_value):
+        '''
+        Description:
+            Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities. A damaged resource building ejects its work crews when
+                damaged
+        Input:
+            boolean new_value: New damaged/undamaged state of the building
+        Output:
+            None
+        '''
         if new_value == True:
             self.eject_work_crews()
         super().set_damaged(new_value)
@@ -674,7 +727,7 @@ class resource_building(building):
     def get_upgrade_cost(self):
         '''
         Description:
-            Returns the cost of the next upgrade for this building. The first successful upgrade costs 2 money and each subsequent upgrade costs 2 more
+            Returns the cost of the next upgrade for this building. The first successful upgrade costs 20 money and each subsequent upgrade costs twice as much as the previous
         Input:
             None
         Output:

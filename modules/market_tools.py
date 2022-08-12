@@ -79,16 +79,8 @@ def sell(seller, sold_commodity, num_sold, global_manager):
         None
     '''
     global_manager.get('sold_commodities')[sold_commodity] += num_sold
-    #sell_price = global_manager.get('commodity_prices')[sold_commodity]
     for i in range(num_sold):
-    #    global_manager.get('money_tracker').change(sell_price, 'commodities sold')
         seller.change_inventory(sold_commodity, -1)
-    #    if random.randrange(1, 7) <= 1: #1/6 chance
-    #        change_price(sold_commodity, -1, global_manager)
-    #text_tools.print_to_screen("You have gained " + str(sell_price * num_sold) + " money from selling " + str(num_sold) + " unit" + utility.generate_plural(num_sold) + " of " + sold_commodity + ".", global_manager)
-    #new_price = global_manager.get('commodity_prices')[sold_commodity]
-    #if new_price < sell_price:
-    #    text_tools.print_to_screen("The price of " + sold_commodity + " has decreased from " + str(sell_price) + " to " + str(new_price) + ".", global_manager)
 
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
     '''
@@ -137,6 +129,15 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
                 text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
 
 def calculate_subsidies(global_manager, projected = False):
+    '''
+    Description:
+        Calculates and returns the company's subsidies for the turn, taking into account the company's public opinion and savings
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean projected = False: Whether these subsidies are projected or actually taking place - projected subsidies have no random element
+    Output:
+        double: Returns the company's subsidies for the turn
+    '''
     public_opinion = global_manager.get('public_opinion')
     if projected:
         if public_opinion < 50:
@@ -145,12 +146,23 @@ def calculate_subsidies(global_manager, projected = False):
             public_opinion -= 1
     else:
         public_opinion += random.randrange(-10, 11)
-    subsidies = round(public_opinion / 5, 1)
-    if subsidies < 0:
+        
+    subsidies = public_opinion / 5
+    for i in range(599, round(global_manager.get('money')), 100): #remove 10% of subsidies for each 100 money over 500
+        subsidies *= 0.9
+    if subsidies < 1:
         subsidies = 0
-    return(subsidies) #9.8 for 49 public opinion
+    return(round(subsidies, 1)) #9.8 for 49 public opinion
 
 def calculate_total_worker_upkeep(global_manager):
+    '''
+    Description:
+        Calculates and returns the total upkeep of the company's workers
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        double: Returns the total upkeep of the company's workers
+    '''
     num_african_workers = global_manager.get('num_african_workers')
     african_worker_upkeep = global_manager.get('african_worker_upkeep')
     total_african_worker_upkeep = round(num_african_workers * african_worker_upkeep, 2)
@@ -168,15 +180,17 @@ def calculate_total_worker_upkeep(global_manager):
     return(total_upkeep)
 
 def calculate_end_turn_money_change(global_manager):
+    '''
+    Description:
+    Calculates and returns an estimate of how much money the company will gain or lose at the end of the turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    '''
     estimated_change = 0
-    
     estimated_change += calculate_subsidies(global_manager, True)
-
     estimated_change -= calculate_total_worker_upkeep(global_manager)
-    
     for current_loan in global_manager.get('loan_list'):
         estimated_change -= current_loan.interest
-
     return(round(estimated_change, 2))
     
 class loan():
