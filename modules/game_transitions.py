@@ -6,6 +6,7 @@ from . import text_tools
 from . import tiles
 from . import actor_utility
 from . import minister_utility
+from . import scaling
 
 def cycle_player_turn(global_manager, start_of_turn = False):
     '''
@@ -59,7 +60,7 @@ def set_game_mode(new_game_mode, global_manager):
         start_loading(global_manager)
         if new_game_mode == 'strategic':
             global_manager.set('current_game_mode', 'strategic')
-            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             #text_tools.print_to_screen("Entering strategic map", global_manager)
             centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
@@ -78,7 +79,7 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         else:
-            global_manager.set('default_text_box_height', 90)#global_manager.set('default_text_box_height', 185)
+            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('current_game_mode', new_game_mode)
     for current_mob in global_manager.get('mob_list'):
@@ -180,5 +181,3 @@ def to_main_menu(global_manager, override = False):
     if not global_manager.get('current_instructions_page') == 'none':
         global_manager.get('current_instructions_page').remove()
         global_manager.set('current_instructions_page', 'none')
-    #else:
-    #    text_tools.print_to_screen("You are busy and can not exit to the main menu.", global_manager)

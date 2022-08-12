@@ -629,7 +629,7 @@ class resource_building(building):
         for current_work_crew in self.ejected_work_crews:
             current_work_crew.leave_building(self)
 
-    def set_damaged(self, new_value):
+    def set_damaged(self, new_value, mid_setup = False):
         '''
         Description:
             Repairs or damages this building based on the inputted value. A damaged building still provides attrition resistance but otherwise loses its specialized capabilities. A damaged resource building ejects its work crews when
@@ -641,7 +641,7 @@ class resource_building(building):
         '''
         if new_value == True:
             self.eject_work_crews()
-        super().set_damaged(new_value)
+        super().set_damaged(new_value, mid_setup)
 
     def reattach_work_crews(self):
         '''

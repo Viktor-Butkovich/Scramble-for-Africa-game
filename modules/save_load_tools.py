@@ -155,7 +155,7 @@ class save_load_manager_template():
                 market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
         self.global_manager.get('money_tracker').reset_transaction_history()
-        self.global_manager.get('money_tracker').set(1000)
+        self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
         self.global_manager.get('evil_tracker').set(0)

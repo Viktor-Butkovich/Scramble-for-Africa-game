@@ -255,7 +255,7 @@ SFA folder
 	      class buy_commodity_button(buttons.button)
 
         game_transitions.py
-            imports time, main_loop_tools, text_tools, tiles, actor_utility, minister_utility
+            imports time, main_loop_tools, text_tools, tiles, actor_utility, minister_utility, scaling
 		def cycle_player_turn
             def set_game_mode
             def create_strategic_map
@@ -471,4 +471,4 @@ SFA folder
     Scramble_for_Africa.py
         imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, instructions, mouse_followers,
 		save_load_tools, actor_creation_tools, actor_utility
-As of last count, this program contains 19,565 lines of code across 54 python files
+As of last count, this program contains 26,525 lines of code across 56 python files

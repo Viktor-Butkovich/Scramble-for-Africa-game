@@ -36,6 +36,7 @@ try:
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
+    
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
     global_manager.set('previous_turn_time', time.time())

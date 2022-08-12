@@ -763,7 +763,7 @@ class button():
 
             elif self.button_type == 'expand text box':
                 if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                    self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - 50) #self.height
+                    self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - scaling.scale_height(50, self.global_manager)) #self.height
                 else:
                     self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
 

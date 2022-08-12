@@ -173,14 +173,17 @@ class zoom_notification(notification):
             else: #if hidden mob, move to location and select tile
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), target.grids[0].find_cell(target.x, target.y).tile)
-            
-            #target.move_to_front()
-            #target.select()
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), target)
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)
 
     def remove(self):
-        #if len(self.global_manager.get('notification_manager').
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
+                if there is one
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.reselect:
             game_transitions.cycle_player_turn(self.global_manager, True)
         super().remove()
