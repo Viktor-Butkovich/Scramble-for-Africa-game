@@ -1,5 +1,6 @@
 #Contains functionality for creating new instances of mobs, buildings, dice, and ministers
 
+import random
 from . import mobs
 from .mob_types import workers
 from .mob_types import officers
@@ -201,7 +202,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        for i in range(0, global_manager.get('minister_limit') - 2):
+        for i in range(0, global_manager.get('minister_limit') - 2 + random.randrange(-2, 3)):
             self.create_minister(global_manager)
 
     def create_minister(self, global_manager):

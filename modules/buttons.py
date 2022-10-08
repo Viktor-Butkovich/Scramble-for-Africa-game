@@ -822,7 +822,7 @@ class button():
                                     else:
                                         text += "None of the " + plural + " made progress on their designated movement routes. /n /n"
                                 else:
-                                    text += "Only " + str(num_moved) + " of the " + str(num_attempted) + " " + plural + " made progress on their designated movement routes. /n /n"
+                                    text += "Only " + str(num_progressed) + " of the " + str(num_attempted) + " " + plural + " made progress on their designated movement routes. /n /n"
 
                     transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
                     if types_moved > 0:

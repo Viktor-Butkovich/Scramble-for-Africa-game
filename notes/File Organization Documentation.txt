@@ -157,7 +157,7 @@ SFA folder
 	      class construction_notification(action_notification)
 
 	  actor_creation_tools.py
-	      imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
+	      imports random, mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
 	          mob_types.battalions, mob_types.native_warriors, mob_types.beasts, buildings, ministers, notification_tools, utility, actor_utility, market_tools, dice
 	      class actor_creation_manager_template
 

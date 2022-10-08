@@ -308,7 +308,7 @@ class vehicle(pmob):
 
 class train(vehicle):
     '''
-    Vehicle that can only move along railroads, has normal inventory capacity, and has 10 movement points
+    Vehicle that can only move along railroads, has large inventory capacity, and has 10 movement points
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -340,7 +340,7 @@ class train(vehicle):
         self.can_swim = False
         self.can_walk = True
         self.can_hold_commodities = True
-        self.inventory_capacity = 9
+        self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
@@ -458,7 +458,7 @@ class ship(vehicle):
 
 class boat(ship):
     '''
-    Vehicle that behaves similarly to a ship but moves in river water instead and has lower inventory capacity and limited movement points
+    Vehicle that behaves similarly to a ship but moves in river water instead and has large inventory capacity and limited movement points
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -490,7 +490,7 @@ class boat(ship):
         self.can_swim_ocean = False
         self.can_walk = False
         self.travel_possible = False
-        self.inventory_capacity = 9
+        self.inventory_capacity = 27#9
 
     def get_movement_cost(self, x_change, y_change):
         '''

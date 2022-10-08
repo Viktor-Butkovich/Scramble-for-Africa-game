@@ -357,7 +357,8 @@ try:
     global_manager.set('num_slave_workers', 0)
     global_manager.set('initial_slave_worker_upkeep', 2)
     global_manager.set('slave_worker_upkeep', 0)
-    global_manager.get('recruitment_costs')['slave workers'] = 5
+    global_manager.set('base_slave_recruitment_cost', 5)
+    global_manager.get('recruitment_costs')['slave workers'] = global_manager.get('base_slave_recruitment_cost')
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
     global_manager.set('recruitment_list_descriptions', {})

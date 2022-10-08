@@ -418,7 +418,7 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
                     wandering_destinations.append(destination)
                 
         if any_migrated:        
-            migration_report_text = 'A wave of migration from villages to your colony has occured as African workers search for employment. /n'
+            migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n'
             for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
                 current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
                 current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
@@ -471,23 +471,25 @@ def manage_villages(global_manager):
         None
     '''
     for current_village in global_manager.get('village_list'):
-        previous_aggressiveness = current_village.aggressiveness
-        roll = random.randrange(1, 7)
-        if roll <= 2: #1-2
-            current_village.change_aggressiveness(-1)
-        #3-4 does nothing
-        elif roll >= 5: #5-6
-            current_village.change_aggressiveness(1)
-        if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-            text = "The previously pacified village at (" + str(current_village.cell.x) + ", " + str(current_village.cell.y) + ") has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n"
-            notification_tools.display_zoom_notification(text, current_village.cell.tile, global_manager)
+        current_village.manage_warriors()
+    
+    for current_village in global_manager.get('village_list'):
+        if current_village.population > 0:
+            previous_aggressiveness = current_village.aggressiveness
+            roll = random.randrange(1, 7)
+            if roll <= 2: #1-2
+                current_village.change_aggressiveness(-1)
+            #3-4 does nothing
+            elif roll >= 5: #5-6
+                current_village.change_aggressiveness(1)
+            if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
+                text = "The previously pacified village at (" + str(current_village.cell.x) + ", " + str(current_village.cell.y) + ") has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n"
+                notification_tools.display_zoom_notification(text, current_village.cell.tile, global_manager)
 
         roll = random.randrange(1, 7)
         second_roll = random.randrange(1, 7)
         if roll == 6 and second_roll == 6:
             current_village.change_population(1)
-
-        current_village.manage_warriors()
 
 def manage_beasts(global_manager):
     '''
