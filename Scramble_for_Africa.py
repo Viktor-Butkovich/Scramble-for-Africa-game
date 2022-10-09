@@ -418,6 +418,7 @@ try:
         'loan interest': 'loan interest',
         'exploration': 'exploration',
         'religious campaign': 'religious campaigning',
+        'public relations campaign': 'public relations campaigning',
         'advertising campaign': 'advertising',
         'trade': 'trading with natives',
         'construction': 'construction',
