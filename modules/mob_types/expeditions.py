@@ -254,7 +254,7 @@ class expedition(group):
             text += "The Royal Geographical Society is pleased with these findings, increasing your public opinion by " + str(public_opinion_increase) + ". /n /n"
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
-            self.veteran = True
+            #self.veteran = True
             self.just_promoted = True
             text += "This explorer is now a veteran. /n /n"
         

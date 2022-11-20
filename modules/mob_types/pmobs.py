@@ -397,10 +397,12 @@ class pmob(mob):
         '''
         self.global_manager.get('evil_tracker').change(3)
         if self.is_officer or self.is_worker:
-            self.temp_disable_movement()
-            self.replace()
             notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
                 self.images[0].current_cell.tile, self.global_manager)
+            self.temp_disable_movement()
+            self.replace()
+            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+            #    self.images[0].current_cell.tile, self.global_manager)
         else:
             notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
             self.die()

@@ -94,7 +94,7 @@ SFA folder
 		    class expedition(groups.group)
 	    
             groups.py
-	          imports random, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
+	          imports random, math, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
                 class group(modules.mobs.mob)
 
 	      missionaries.py

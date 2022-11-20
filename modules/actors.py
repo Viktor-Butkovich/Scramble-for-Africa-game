@@ -297,7 +297,7 @@ class actor():
                 self.promote()
                 self.select()
                 current_movement_points = self.movement_points
-                self.set_max_movement_points(6)
+                #self.set_max_movement_points(6)
                 self.set_movement_points(current_movement_points + 2)
                 if self.global_manager.get('strategic_map_grid') in self.grids:
                     self.global_manager.get('minimap_grid').calibrate(self.x, self.y)

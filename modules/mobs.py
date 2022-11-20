@@ -370,6 +370,8 @@ class mob(actor):
         Output:
             None
         '''
+        if new_value < 0:
+            new_value = 0
         self.movement_points = new_value
         if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
             self.movement_points = round(self.movement_points)

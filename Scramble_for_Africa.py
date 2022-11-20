@@ -1044,7 +1044,7 @@ try:
     global_manager.set('DEBUG_ministry_of_magic', False) #False by default
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
-    global_manager.set('DEBUG_farm_upstate', False)
+    global_manager.set('DEBUG_farm_upstate', False) #False by default
     #retires all appointed ministers at the end of the turn
     
     #activating/disabling debugging tools

@@ -309,11 +309,19 @@ class button():
                 commodity = commodity_list[self.attached_label.commodity_index]
                 sell_price = self.global_manager.get('commodity_prices')[commodity]
                 if self.button_type == 'sell commodity':
-                    self.set_tooltip(["Sells 1 unit of " + commodity + " for " + str(sell_price) + " money", "Each unit of " + commodity + " sold has a chance of reducing the price"])
+                    self.set_tooltip(["Orders your " + self.global_manager.get('type_minister_dict')['trade'] + " to sell 1 unit of " + commodity + " for about " + str(sell_price) + " money at the end of the turn",
+                                      "The amount each commodity was sold for is reported at the beginning of your next turn",
+                                      "Each unit of " + commodity + " sold has a chance of reducing its sale price"])
+                                      #"Sells 1 unit of " + commodity + " for " + str(sell_price) + " money", "Each unit of " + commodity + " sold has a chance of reducing the price"])
                 else:
                     num_present = self.attached_label.actor.get_inventory(commodity)
-                    self.set_tooltip(["Sells your entire stockpile of " + commodity + " for " + str(sell_price) + " money each, totaling to " + str(sell_price * num_present) + " money",
-                        "Each unit of " + commodity + " sold has a chance of reducing the price"])
+                    self.set_tooltip(["Orders your " + self.global_manager.get('type_minister_dict')['trade'] + " to sell your entire stockpile of " + commodity + " for about " + str(sell_price) + " money each at the end of the turn, " +
+                                          "for a total of about " + str(sell_price * num_present) + " money",
+                                      "The amount each commodity was sold for is reported at the beginning of your next turn",
+                                      "Each unit of " + commodity + " sold has a chance of reducing its sale price"])
+                    
+                    #self.set_tooltip(["Sells your entire stockpile of " + commodity + " for " + str(sell_price) + " money each, totaling to " + str(sell_price * num_present) + " money",
+                    #    "Each unit of " + commodity + " sold has a chance of reducing the price"])
             else:
                 self.set_tooltip(['none'])
                 
@@ -1159,6 +1167,11 @@ class button():
         if self.global_manager.get('current_game_mode') in self.modes:
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
+                    return(False)
+            elif self.button_type in ['sell commodity', 'sell all commodity']:
+                if self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
+                    return(True)
+                else:
                     return(False)
             return(True)
         return(False)
