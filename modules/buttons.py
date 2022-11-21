@@ -771,7 +771,7 @@ class button():
 
             elif self.button_type == 'expand text box':
                 if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                    self.global_manager.set('text_box_height', self.global_manager.get('default_display_height') - scaling.scale_height(50, self.global_manager)) #self.height
+                    self.global_manager.set('text_box_height', scaling.scale_height(self.global_manager.get('default_display_height') - 45, self.global_manager)) #self.height
                 else:
                     self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
 
@@ -803,6 +803,8 @@ class button():
                             progressed = current_pmob.follow_automatic_route()
                             if progressed:
                                 moved_units[unit_type] += 1
+                            current_pmob.remove_from_turn_queue()
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
 
                     types_moved = 0
                     text = ""

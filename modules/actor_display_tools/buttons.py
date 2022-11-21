@@ -3063,6 +3063,8 @@ class automatic_route_button(label_button):
                     elif self.button_type == 'follow automatic route':
                         if attached_mob.can_follow_automatic_route():
                             attached_mob.follow_automatic_route()
+                            attached_mob.remove_from_turn_queue()
+                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), attached_mob) #updates mob info display if automatic route changed anything
                         else:
                             text_tools.print_to_screen("This unit is currently not able to progress along its designated route.", self.global_manager)
                 else:

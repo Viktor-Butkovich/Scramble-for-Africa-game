@@ -340,15 +340,17 @@ def draw_text_box(global_manager):
         if text_tools.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
             greatest_width = text_tools.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10, global_manager)
-    x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+    #x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+    x, y = (0, global_manager.get('display_height') - global_manager.get('text_box_height'))
     pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
     if global_manager.get('typing'):
         color = 'red'
     else:
         color = 'black'
-    x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
-    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3, global_manager))
-    pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))),
+    #x, y = (0, 0)
+    #x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
+    pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3, global_manager)) #black text box outline
+    pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))), #input line
         (text_box_width, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))))
 
     global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines

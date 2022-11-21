@@ -229,6 +229,7 @@ SFA folder
             class input_manager_template
             class flavor_text_manager_template
 	      class value_tracker
+		    class public_opinion_tracker
    	          class money_tracker
 	      class notification_manager_template
 	      class sound_manager_template
@@ -321,6 +322,7 @@ SFA folder
 	      def change_price
 		def set_price
 	      def sell
+		def calculate_total_sale_revenue
 	      def attempt_worker_upkeep_change
 		def attempt_slave_recruitment_cost_change
 		def calculate_subsidies

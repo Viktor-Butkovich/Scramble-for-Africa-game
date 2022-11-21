@@ -20,14 +20,14 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     '''
     turn_queue = global_manager.get('player_turn_queue')
     if len(turn_queue) == 0:
-        if not start_of_turn:
+        if not start_of_turn: #print no units message if there are no units in turn queue
             text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
             actor_utility.deselect_all(global_manager)
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
     else:
-        if len(turn_queue) == 1 and not start_of_turn:
-            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
-        if global_manager.get('current_game_mode') == 'europe' and turn_queue[0].grids[0] == global_manager.get('strategic_map_grid'):
+        if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
+            text_tools.print_to_screen("There are no other units left to move this turn.", global_manager)
+        if global_manager.get('current_game_mode') == 'europe' and not global_manager.get('europe_grid') in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
             turn_queue[0].selection_sound()
@@ -62,20 +62,17 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('current_game_mode', 'strategic')
             global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
-            #text_tools.print_to_screen("Entering strategic map", global_manager)
             centered_cell_x, centered_cell_y = global_manager.get('minimap_grid').center_x, global_manager.get('minimap_grid').center_y
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('strategic_map_grid').find_cell(centered_cell_x, centered_cell_y).tile)
                 #calibrate tile info to minimap center
         elif new_game_mode == 'europe':
             global_manager.set('current_game_mode', 'europe')
-            #text_tools.print_to_screen("Entering European Company Headquarters", global_manager)
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main menu':
             global_manager.set('current_game_mode', 'main_menu')
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
-            #text_tools.print_to_screen("Entering minister conference room", global_manager)
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         else:

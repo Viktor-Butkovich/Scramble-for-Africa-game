@@ -252,6 +252,22 @@ class value_tracker():
         if not self.value_label == 'none':
             self.value_label.update_label(self.get())
 
+class public_opinion_tracker(value_tracker):
+    '''
+    Value tracker that tracks public opinion
+    '''
+    def change(self, value_change):
+        '''
+        Description:
+            Changes the value of this tracker's variable by the inputted amount. Only works if this tracker's variable is a type that can be added to, like int, float, or string
+        Input:
+            various types value_change: Amount that this tracker's variable is changed. Must be the same type as this tracker's variable
+        Output:
+            None
+        '''
+        super().change(value_change)
+        self.global_manager.get('money_label').check_for_updates()
+
 class money_tracker(value_tracker):
     '''
     Value tracker that tracks money and causes the game to be lost when money runs out

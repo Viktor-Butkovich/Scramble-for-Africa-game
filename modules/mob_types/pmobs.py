@@ -168,7 +168,7 @@ class pmob(mob):
                 return(True)
             else:
                 return(False)
-        elif next_step == 'start': 
+        elif next_step == 'start':
             if len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0 or self.get_inventory_used() > 0: #only start round trip if there is something to deliver, either from tile or in inventory already
                 if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')): #can pick up freely unless train without train station
                     return(True)
