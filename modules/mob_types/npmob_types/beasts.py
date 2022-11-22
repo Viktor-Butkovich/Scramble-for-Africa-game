@@ -1,8 +1,8 @@
 #Contains functionality for wild beasts
 
 import random
-from .npmobs import npmob
-from .. import utility
+from ..npmobs import npmob
+from ... import utility
 
 class beast(npmob):
     '''

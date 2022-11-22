@@ -1,11 +1,11 @@
 #Contains functionality for missionaries
 
 import random
-from .groups import group
-from .. import actor_utility
-from .. import dice_utility
-from .. import utility
-from .. import notification_tools
+from ..groups import group
+from ... import actor_utility
+from ... import dice_utility
+from ... import utility
+from ... import notification_tools
 
 class missionaries(group):
     '''

@@ -213,6 +213,23 @@ def calculate_end_turn_money_change(global_manager):
         estimated_change -= current_loan.interest
     estimated_change += calculate_total_sale_revenue(global_manager)
     return(round(estimated_change, 2))
+
+def count_available_workers(global_manager):
+    '''
+    Description:
+        Counts and returns the total number of wandering workers and available workers between all villages and slums
+    Input:
+        global_manager_template global_manager: Object that accesses chared variables
+    Output:
+        int: Returns the total number of wandering workers and available workers between all villages and slums
+    '''
+    num_available_workers = 0
+    for current_village in global_manager.get('village_list'):
+        num_available_workers += current_village.available_workers
+    for current_slums in global_manager.get('slums_list'):
+        num_available_workers += current_slums.available_workers
+    num_available_workers += global_manager.get('num_wandering_workers')
+    return(num_available_workers)
     
 class loan():
     '''

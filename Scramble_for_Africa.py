@@ -361,6 +361,8 @@ try:
     global_manager.get('recruitment_costs')['slave workers'] = global_manager.get('base_slave_recruitment_cost')
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
+    global_manager.set('num_wandering_workers', 0)
+
     global_manager.set('recruitment_list_descriptions', {})
     global_manager.set('recruitment_string_descriptions', {})
     actor_utility.update_recruitment_descriptions(global_manager)

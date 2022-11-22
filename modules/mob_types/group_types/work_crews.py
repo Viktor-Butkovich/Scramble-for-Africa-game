@@ -1,10 +1,10 @@
 #Contains functionality for work crews
 
 import random
-from .groups import group
-from .. import actor_utility
-from .. import utility
-from .. import market_tools
+from ..groups import group
+from ... import actor_utility
+from ... import utility
+from ... import market_tools
 
 class work_crew(group):
     '''

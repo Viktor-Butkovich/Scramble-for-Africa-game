@@ -1,8 +1,8 @@
 #Contains functionality for native warriors units
 
 import random
-from .npmobs import npmob
-from .. import utility
+from ..npmobs import npmob
+from ... import utility
 
 class native_warriors(npmob):
     '''

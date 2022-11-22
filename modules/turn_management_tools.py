@@ -631,6 +631,7 @@ def manage_commodity_sales(global_manager):
     trade_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['trade']]
     stealing = False
     money_stolen = 0
+    reported_revenue = 0
     text = trade_minister.current_position + " " + trade_minister.name + " reports the following commodity sales: /n /n"
     any_sold = False
     for current_commodity in global_manager.get('commodity_types'):
@@ -648,13 +649,15 @@ def manage_commodity_sales(global_manager):
                     individual_sell_price -= 1
                 if individual_sell_price < 1:
                     individual_sell_price = 1
-                global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
+                reported_revenue += individual_sell_price#global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_tools.change_price(current_commodity, -1, global_manager)
 
             text += str(sold_commodities[current_commodity]) + " " + current_commodity + " sold for " + str(actual_revenue) + " money (expected " + str(expected_revenue) + ") /n /n"
 
+    global_manager.get('money_tracker').change(reported_revenue, 'commodities sold')
+    
     if any_sold:
         trade_minister.display_message(text)
     if money_stolen > 0:

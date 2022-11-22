@@ -225,7 +225,8 @@ class money_label(value_label):
         
         num_workers = num_african_workers + num_european_workers + num_slave_workers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
-        
+
+        tooltip_text.append("")
         tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
         if num_african_workers > 0:
             tooltip_text.append("    Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
@@ -241,6 +242,10 @@ class money_label(value_label):
             tooltip_text.append("    Any slave workers would cost " + str(slave_worker_upkeep) + " money in upkeep.")
         tooltip_text.append("    Church volunteers do not need to be paid.")
 
+        tooltip_text.append("")
+        num_available_workers = market_tools.count_available_workers(self.global_manager)
+        tooltip_text.append("Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of " + str(num_available_workers) + " African worker" + utility.generate_plural(num_available_workers) + ".")
+        
         if len(self.global_manager.get('loan_list')) > 0:
             tooltip_text.append("")
             tooltip_text.append("Loans: ")
