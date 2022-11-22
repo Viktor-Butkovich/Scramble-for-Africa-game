@@ -1,0 +1,19 @@
+ERROR:root:'num_wandering_workers'
+Traceback (most recent call last):
+  File "C:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 591, in <module>
+    global_manager.set('money_label', labels.money_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\labels.py", line 174, in __init__
+    super().__init__(coordinates, minimum_width, height, modes, image_id, 'money', global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\labels.py", line 132, in __init__
+    super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\labels.py", line 40, in __init__
+    super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id, global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 63, in __init__
+    self.update_tooltip()
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\labels.py", line 245, in update_tooltip
+    num_available_workers = market_tools.count_available_workers(self.global_manager)
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\market_tools.py", line 231, in count_available_workers
+    num_available_workers += global_manager.get('num_wandering_workers')
+  File "C:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 37, in get
+    return(self.global_dict[name])
+KeyError: 'num_wandering_workers'

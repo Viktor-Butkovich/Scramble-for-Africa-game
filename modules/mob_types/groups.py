@@ -1,5 +1,6 @@
 #Contains functionality for group units
 import random
+import math
 from .pmobs import pmob
 from ..tiles import status_icon
 from .. import actor_utility
@@ -46,7 +47,9 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        self.veteran = self.officer.veteran
+        if self.officer.veteran:
+            self.promote()
+        #self.veteran = self.officer.veteran
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -58,19 +61,26 @@ class group(pmob):
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self
-                
-            if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
-                self.set_movement_points(self.officer.movement_points)
+
+            worker_movement_ratio_remaining = self.worker.movement_points / self.worker.max_movement_points
+            officer_movement_ratio_remaining = self.officer.movement_points / self.officer.max_movement_points
+            if worker_movement_ratio_remaining > officer_movement_ratio_remaining:
+                self.set_movement_points(math.floor(self.max_movement_points * officer_movement_ratio_remaining))
             else:
-                self.set_movement_points(self.worker.movement_points)
-            if self.veteran:
-                self.set_name("veteran " + self.name)
-        else:
-            if self.veteran:
+                self.set_movement_points(math.floor(self.max_movement_points * worker_movement_ratio_remaining))
+                
+            #if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
+            #    self.set_movement_points(self.officer.movement_points)
+            #else:
+            #    self.set_movement_points(self.worker.movement_points)
+            #if self.veteran:
+            #    self.set_name("veteran " + self.name)
+        #else:
+            #if self.veteran:
                 #self.set_name("Veteran " + self.name.lower())
-                self.name = self.default_name
-                self.officer.name = self.officer.default_name
-                self.promote() #creates veteran status icons
+                #self.name = self.default_name
+                #self.officer.name = self.officer.default_name
+                #self.promote() #creates veteran status icons
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -223,10 +233,12 @@ class group(pmob):
             None
         '''
         self.just_promoted = False
-        self.veteran = True
-        self.set_name("veteran " + self.name)
-        self.officer.set_name("veteran " + self.officer.name)
-        self.officer.veteran = True
+        if not self.veteran:
+            self.veteran = True
+            self.set_name("veteran " + self.name)
+        if not self.officer.veteran:
+            self.officer.set_name("veteran " + self.officer.name)
+            self.officer.veteran = True
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
@@ -275,13 +287,19 @@ class group(pmob):
             self.drop_inventory()
         self.remove()
         self.worker.leave_group(self)
-        self.worker.set_movement_points(self.movement_points)
+
+        movement_ratio_remaining = self.movement_points / self.max_movement_points
+        self.worker.set_movement_points(math.floor(movement_ratio_remaining * self.worker.max_movement_points))
+        
+        #missing_movement_points = self.max_movement_points - self.movement_points
+        #self.worker.set_movement_points(self.worker.max_movement_points - missing_movement_points)#self.movement_points)
         self.officer.status_icons = self.status_icons
         for current_status_icon in self.status_icons:
             current_status_icon.actor = self.officer
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
-        self.officer.set_movement_points(self.movement_points)
+        self.officer.set_movement_points(math.floor(movement_ratio_remaining * self.officer.max_movement_points))
+        #self.officer.set_movement_points(self.officer.max_movement_points - missing_movement_points)#self.movement_points)
 
     def remove(self):
         '''

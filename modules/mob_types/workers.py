@@ -53,6 +53,7 @@ class worker(pmob):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
             self.selection_sound()
+        self.global_manager.get('money_label').check_for_updates()
 
     def replace(self, attached_group = 'none'):
         '''
@@ -259,6 +260,7 @@ class worker(pmob):
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
         elif self.worker_type == 'African':
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
+        self.global_manager.get('money_label').check_for_updates()
 
 class slave_worker(worker):
     '''
@@ -308,6 +310,7 @@ class slave_worker(worker):
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+        self.global_manager.get('money_label').check_for_updates()
 
     def fire(self):
         '''
@@ -329,7 +332,7 @@ class slave_worker(worker):
         text_tools.print_to_screen("These freed slaves will wander and eventually settle down in one of your slums", self.global_manager)
         self.global_manager.get('evil_tracker').change(-2)
         self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
-
+        
     def remove(self):
         '''
         Description:
@@ -342,6 +345,7 @@ class slave_worker(worker):
         super().remove()
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') - 1)
         self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
+        self.global_manager.get('money_label').check_for_updates()
 
 class church_volunteers(worker):
     '''

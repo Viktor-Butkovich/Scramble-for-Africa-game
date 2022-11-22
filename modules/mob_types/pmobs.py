@@ -168,7 +168,7 @@ class pmob(mob):
                 return(True)
             else:
                 return(False)
-        elif next_step == 'start': 
+        elif next_step == 'start':
             if len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0 or self.get_inventory_used() > 0: #only start round trip if there is something to deliver, either from tile or in inventory already
                 if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')): #can pick up freely unless train without train station
                     return(True)
@@ -205,11 +205,26 @@ class pmob(mob):
                     y_change = next_step[1] - self.y
                     self.move(x_change, y_change)
                     if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')):
-                        self.pick_up_all_commodities(True)
+                        if self.get_next_automatic_stop() == 'end': #only pick up commodities on way to end
+                            self.pick_up_all_commodities(True)
                 progressed = True
                 self.in_progress_automatic_route.append(self.in_progress_automatic_route.pop(0)) #move first item to end
                 
         return(progressed) #returns whether unit did anything to show unit in movement routes report
+
+    def get_next_automatic_stop(self):
+        '''
+        Description:
+            Returns the next stop for this unit's in-progress automatic route, or 'none' if there are stops
+        Input:
+            None
+        Output:
+            string: Returns the next stop for this unit's in-progress automatic route, or 'none' if there are stops
+        '''
+        for current_stop in self.in_progress_automatic_route:
+            if current_stop in ['start', 'end']:
+                return(current_stop)
+        return('none')
 
     def pick_up_all_commodities(self, ignore_consumer_goods = False):
         '''
@@ -382,10 +397,12 @@ class pmob(mob):
         '''
         self.global_manager.get('evil_tracker').change(3)
         if self.is_officer or self.is_worker:
-            self.temp_disable_movement()
-            self.replace()
             notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
                 self.images[0].current_cell.tile, self.global_manager)
+            self.temp_disable_movement()
+            self.replace()
+            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+            #    self.images[0].current_cell.tile, self.global_manager)
         else:
             notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
             self.die()
@@ -1112,21 +1129,26 @@ class pmob(mob):
         message += "If successful, a " + self.building_name + " will be built. " #change to match each building
         if self.building_type == 'resource':
             message += "A " + self.building_name + " expands the tile's warehouse capacity, and each work crew attached to it can attempt to produce " + self.attached_resource + " each turn. /n /n"
-            message += "Upgrades to the " + self.building_name + " can increase the maximum number of work crews attached and/or how much " + self.attached_resource + " each attached work crew can attempt to produce each turn."
+            message += "Upgrades to the " + self.building_name + " can increase the maximum number of work crews attached and/or how much " + self.attached_resource + " each attached work crew can attempt to produce each turn. "
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
-                message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad."
+                message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. "
             elif self.building_name == 'railroad':
                 message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
                 message += "It is also required for trains to move and for a train station to be built."
         elif self.building_type == 'port':
-            message += "A port allows ships to enter the tile and expands the tile's warehouse capacity. A port adjacent to the ocean can be used as a destination or starting point for steamships traveling between theatres."
+            message += "A port allows steamboats and steamships to enter the tile and expands the tile's warehouse capacity. "
             if self.y == 1:
-                message += "A port built here would be adjacent to the ocean."
+                message += "/n /nThis port would be adjacent to the ocean, allowing it to be used as a destination or starting point for steamships traveling between theatres. "
             else:
-                message += "A port built here would not be adjacent to the ocean."
+                message += "/n /nThis port would not be adjacent to the ocean. "
+                
+            if self.adjacent_to_river():
+                message += "/n /nThis port would be adjacent to a river, allowing steamboats to be built there. "
+            else:
+                message += "/n /nThis port would not be adjacent to a river."
         elif self.building_type == 'train_station':
-            message += "A train station is required for a train to pick up or drop off cargo and passengers, allows trains to be built, and expands the tile's warehouse capacity"
+            message += "A train station is required for a train to exchange cargo and passengers, allows trains to be built, and expands the tile's warehouse capacity"
         elif self.building_type == 'trading_post':
             message += "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
         elif self.building_type == 'mission':
@@ -1134,10 +1156,10 @@ class pmob(mob):
         elif self.building_type == 'fort':
             message += "A fort increases the combat effectiveness of your units standing in this tile."
         elif self.building_type == 'train':
-            message += "A train is a unit that can carry commodities and passengers at high speed along railroads. It can only exchange cargo at a train station and must stop moving for the rest of the turn after dropping off cargo. "
+            message += "A train is a unit that can carry commodities and passengers at very high speed along railroads. It can only exchange cargo and passengers at a train station. "
             message += "It also requires an attached worker as crew to function."
         elif self.building_type == 'steamboat':
-            message += "A steamboat is a unit that can carry commodities and passengers at high speed along rivers. It can only exchange cargo at a port. "
+            message += "A steamboat is a unit that can carry commodities and passengers at high speed along rivers. "
             message += "It also requires an attached worker as crew to function."
         else:
             message += "Placeholder building description"

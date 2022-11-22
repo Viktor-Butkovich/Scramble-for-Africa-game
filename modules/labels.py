@@ -173,6 +173,33 @@ class money_label(value_label):
         '''
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'money', global_manager)
 
+    def update_label(self, new_value):
+        '''
+        Description:
+            Updates the value shown by this label when to match the value of its value_tracker. Money labels additionally show the projected income for the next turn
+        Input:
+            int new_value: New value of this label's value_tracker
+        Output:
+            None
+        '''
+        end_turn_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)
+        if end_turn_money_change >= 0:
+            sign = '+'
+        else:
+            sign = ''
+        self.set_label(utility.capitalize(self.display_name + ': ' + str(new_value) + ' (' + sign + str(end_turn_money_change) + ')'))
+
+    def check_for_updates(self):
+        '''
+        Description:
+            Updates the projected income shown by this label when the income would change for any reason, such as when a worker is hired
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.update_label(self.global_manager.get(self.tracker.value_key))
+    
     def update_tooltip(self):
         '''
         Description:
@@ -198,7 +225,8 @@ class money_label(value_label):
         
         num_workers = num_african_workers + num_european_workers + num_slave_workers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
-        
+
+        tooltip_text.append("")
         tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
         if num_african_workers > 0:
             tooltip_text.append("    Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
@@ -215,13 +243,22 @@ class money_label(value_label):
         tooltip_text.append("    Church volunteers do not need to be paid.")
 
         tooltip_text.append("")
-        tooltip_text.append("While public opinion and government subsidies are not entirely predictable, your company is estimated to receive " + str(market_tools.calculate_subsidies(self.global_manager, True)) + " money in subsidies this turn")
-
+        num_available_workers = market_tools.count_available_workers(self.global_manager)
+        tooltip_text.append("Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of " + str(num_available_workers) + " African worker" + utility.generate_plural(num_available_workers) + ".")
+        
         if len(self.global_manager.get('loan_list')) > 0:
             tooltip_text.append("")
             tooltip_text.append("Loans: ")
             for current_loan in self.global_manager.get('loan_list'):
                 tooltip_text.append('    ' + current_loan.get_description())
+
+        tooltip_text.append("")
+        tooltip_text.append("While public opinion and government subsidies are not entirely predictable, your company is estimated to receive " + str(market_tools.calculate_subsidies(self.global_manager, True)) + " money in subsidies this turn")
+
+        total_sale_revenue = market_tools.calculate_total_sale_revenue(self.global_manager)
+        if total_sale_revenue > 0:
+            tooltip_text.append("")
+            tooltip_text.append("Your " + self.global_manager.get('type_minister_dict')['trade'] + " has been ordered to sell commodities at the end of the turn for an estimated total of " + str(total_sale_revenue) + " money")
 
         tooltip_text.append("")
         estimated_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)

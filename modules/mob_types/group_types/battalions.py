@@ -1,13 +1,13 @@
 #Contains functionality for battalions
 import time
 import random
-from .groups import group
-from ..tiles import tile
-from .. import actor_utility
-from .. import utility
-from .. import notification_tools
-from .. import text_tools
-from .. import dice_utility
+from ..groups import group
+from ...tiles import tile
+from ... import actor_utility
+from ... import utility
+from ... import notification_tools
+from ... import text_tools
+from ... import dice_utility
 
 class battalion(group):
     '''

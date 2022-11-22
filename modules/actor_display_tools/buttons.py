@@ -1303,10 +1303,13 @@ class convert_button(label_button):
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').aggressiveness > 1:
-                                if current_mob.check_if_minister_appointed():
-                                    if current_mob.sentry_mode:
-                                        current_mob.set_sentry_mode(False)
-                                    current_mob.start_converting()
+                                if current_cell.get_building('village').population > 0:
+                                    if current_mob.check_if_minister_appointed():
+                                        if current_mob.sentry_mode:
+                                            current_mob.set_sentry_mode(False)
+                                        current_mob.start_converting()
+                                else:
+                                    text_tools.print_to_screen("This village has no population and can not be converted.", self.global_manager)
                             else:
                                 text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
                         else:
@@ -2138,8 +2141,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 message.append('Can only be built in the same tile as a ' + self.attached_resource + ' resource.')
 
         elif self.building_type == 'port':
-            message.append('Builds a port, allowing ships to land in this tile')
-            message.append('Can only be built in a tile adjacent to discovered water')
+            message.append('Builds a port, allowing steamships and steamboats to enter this tile')
+            message.append('Can only be built adjacent to water')
 
         elif self.building_type == 'train_station':
             message.append('Builds a train station, allowing trains to pick up and drop off passengers and cargo')
@@ -3060,6 +3063,8 @@ class automatic_route_button(label_button):
                     elif self.button_type == 'follow automatic route':
                         if attached_mob.can_follow_automatic_route():
                             attached_mob.follow_automatic_route()
+                            attached_mob.remove_from_turn_queue()
+                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), attached_mob) #updates mob info display if automatic route changed anything
                         else:
                             text_tools.print_to_screen("This unit is currently not able to progress along its designated route.", self.global_manager)
                 else:

@@ -1,7 +1,7 @@
 #Contains functionality for porters
 
-from .groups import group
-from .. import actor_utility
+from ..groups import group
+from ... import actor_utility
 
 class porters(group):
     '''
@@ -39,3 +39,7 @@ class porters(group):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
+
+    def promote(self):
+        self.set_max_movement_points(6)
+        super().promote()

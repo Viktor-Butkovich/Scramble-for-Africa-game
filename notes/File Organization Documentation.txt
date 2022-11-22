@@ -11,7 +11,6 @@ SFA folder
         textures
 
     modules folder
-
 	  actor_display_tools folder
 	      labels.py
 		    imports pygame, modules.labels, modules.images, modules.utility, buttons, images
@@ -73,37 +72,57 @@ SFA folder
 			  class automatic_route_button
 
         mob_types folder
-	      battalions.py
-		    imports time, random, groups, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.dice_utility
-		    class battalion(groups.group)
-		        class safari
+		group_types folder
+	          battalions.py
+		        imports time, random, mob_types.groups, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.dice_utility
+		        class battalion(mob_types.groups.group)
+		            class safari
 
-		beasts.py
-		    imports random, npmobs, modules.utility
+	          caravans.py
+		        imports random, math, mob_types.groups, modules.utility, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
+		        class caravan(mob_types.groups.group)
 
-	      caravans.py
-		    imports random, math, groups, modules.utility, modules.actor_utility, modules.dice_utility, modules.notification_tools, modules.market_tools
-		    class caravan(groups.group)
-	    
-	      construction_gangs.py
-		    imports groups, modules.actor_utility, modules.dice_utility, modules.notification_tools
-		    class construction_gang(groups.group)
+	          construction_gangs.py
+		        imports mob_types.groups, modules.actor_utility, modules.dice_utility, modules.notification_tools
+		        class construction_gang(mob_types.groups.group)
 
-    	      expeditions.py
-		    imports time, random, groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
-		    class expedition(groups.group)
-	    
+    	          expeditions.py
+		        imports time, random, mob_types.groups, modules.tiles, modules.actor_utility, modules.text_tools, modules.dice_utility, modules.notification_tools
+		        class expedition(mob_types.groups.group)
+
+	          missionaries.py
+		        imports random, mob_types.groups, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools
+		        class missionaries(mob_types.groups.group)
+
+	          porters.py
+		        imports mob_types.groups, modules.actor_utility
+		        class porters(mob_types.groups.group)
+
+	          work_crews.py
+		        imports random, mob_types.groups, modules.actor_utility, modules.utility, modules.market_tools
+		        class work_crew(mob_types.groups.group)	
+
+		npmob_types folder
+		    beasts.py
+		        imports random, mob_types.npmobs, modules.utility
+			  class beast(mob_types.npmobs.npmob)
+
+	          native_warriors.py
+		        imports random, npmobs, modules.utility
+		        class native_warriors(mob_types.npmobs.npmob)
+
+		officer_types folder
+	          evangelists.py
+		        imports random, mob_types.officers, modules.actor_utility, modules.notification_tools, modules.dice_utility
+			  class evangelist(mob_types.officers.officer)
+		    
+		    merchants.py
+			  imports random, mob_types.officers, modules.actor_utility, modules.notification_tools, modules.dice_utility, modules.market_tools, modules.scaling, modules.images
+			  class merchant(mob_types.officers.officer)	    
+
             groups.py
-	          imports random, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
+	          imports random, math, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
                 class group(modules.mobs.mob)
-
-	      missionaries.py
-		    imports random, groups, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools
-		    class missionaries(groups.group)
-
-	      native_warriors.py
-		    imports random, npmobs, modules.utility
-		    class native_warriors(npmobs.npmob)
 
 	      npmobs.py
 		    imports random, modules.mobs, modules.utility, modules.turn_management_tools
@@ -120,20 +139,12 @@ SFA folder
 		        modules.turn_management_tools, modules.minister_utility, modules.tiles
 		    class pmob(modules.mob)
 
-	      porters.py
-		    imports groups, modules.actor_utility
-		    class porters(groups.group)
-
 	      vehicles.py
 	          imports random, pmobs, modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.buttons
 	          class vehicle(pmobs.pmob)
 		        class train
                     class ship
 			      class boat
-
-	      work_crews.py
-		    imports random, groups, modules.actor_utility, modules.utility, modules.market_tools
-		    class work_crew(groups.group)	
 
 	      workers.py
 	          imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
@@ -157,8 +168,9 @@ SFA folder
 	      class construction_notification(action_notification)
 
 	  actor_creation_tools.py
-	      imports mobs, mob_types.workers, mob_types.officers, mob_types.caravans, mob_types.construction_gangs, mob_types.expeditions, mob_types.missionaries, mob_types.porters, mob_types.work_crews, mob_types.vehicles, 
-	          mob_types.battalions, mob_types.native_warriors, mob_types.beasts, buildings, ministers, notification_tools, utility, actor_utility, market_tools, dice
+	      imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
+		    mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
+		    notification_tools, utility, actor_utility, market_tools, dice
 	      class actor_creation_manager_template
 
         actor_utility.py
@@ -229,6 +241,7 @@ SFA folder
             class input_manager_template
             class flavor_text_manager_template
 	      class value_tracker
+		    class public_opinion_tracker
    	          class money_tracker
 	      class notification_manager_template
 	      class sound_manager_template
@@ -321,11 +334,13 @@ SFA folder
 	      def change_price
 		def set_price
 	      def sell
+		def calculate_total_sale_revenue
 	      def attempt_worker_upkeep_change
 		def attempt_slave_recruitment_cost_change
 		def calculate_subsidies
 		def calculate_total_worker_upkeep
 		def calculate_end_turn_money_change
+		def count_available_workers
 
 	  minister_utility.py
 	      def check_corruption

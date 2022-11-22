@@ -1,9 +1,9 @@
 #Contains functionality for construction gangs
 
-from .groups import group
-from .. import actor_utility
-from .. import dice_utility
-from .. import notification_tools
+from ..groups import group
+from ... import actor_utility
+from ... import dice_utility
+from ... import notification_tools
 
 class construction_gang(group):
     '''
@@ -151,7 +151,10 @@ class construction_gang(group):
             
         text += "/n"
         if roll_result >= self.current_min_success: #4+ required on D6 for upgrade
-            text += "The " + self.name + " successfully upgraded the " + self.building_name + "'s " + self.upgrade_type + ". /n"
+            if self.building_name == 'warehouses':
+                text += "The " + self.name + " successfully upgraded the warehouses. /n"
+            else: 
+                text += "The " + self.name + " successfully upgraded the " + self.building_name + "'s " + self.upgrade_type + ". /n"
         else:
             text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the upgrade. /n"
 

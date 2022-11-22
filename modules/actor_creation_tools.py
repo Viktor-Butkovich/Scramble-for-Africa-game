@@ -1,18 +1,21 @@
 #Contains functionality for creating new instances of mobs, buildings, dice, and ministers
 
-from . import mobs
+import random
 from .mob_types import workers
-from .mob_types import officers
-from .mob_types import caravans
-from .mob_types import construction_gangs
-from .mob_types import expeditions
-from .mob_types import missionaries
-from .mob_types import porters
-from .mob_types import work_crews
+from .mob_types.group_types import battalions
+from .mob_types.group_types import caravans
+from .mob_types.group_types import construction_gangs
+from .mob_types.group_types import expeditions
+from .mob_types.group_types import missionaries
+from .mob_types.group_types import porters
+from .mob_types.group_types import work_crews
+from .mob_types.officer_types import evangelists
+from .mob_types.officer_types import merchants
+from .mob_types.npmob_types import native_warriors
+from .mob_types.npmob_types import beasts
 from .mob_types import vehicles
-from .mob_types import battalions
-from .mob_types import native_warriors
-from .mob_types import beasts
+from .mob_types import officers
+from . import mobs
 from . import buildings
 from . import ministers
 from . import notification_tools
@@ -64,13 +67,17 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_actor = vehicles.ship(from_save, input_dict, global_manager)
         elif init_type == 'boat':
             new_actor = vehicles.boat(from_save, input_dict, global_manager)
+        elif init_type == 'evangelist':
+            new_actor = evangelists.evangelist(from_save, input_dict, global_manager)
+        elif init_type == 'merchant':
+            new_actor = merchants.merchant(from_save, input_dict, global_manager)
         elif init_type in global_manager.get('officer_types'):
-            if init_type == 'evangelist':
-                new_actor = officers.evangelist(from_save, input_dict, global_manager)
-            elif init_type == 'merchant':
-                new_actor = officers.merchant(from_save, input_dict, global_manager)
-            else:
-                new_actor = officers.officer(from_save, input_dict, global_manager)
+            #if init_type == 'evangelist':
+            #    new_actor = officers.evangelist(from_save, input_dict, global_manager)
+            #elif init_type == 'merchant':
+            #    new_actor = officers.merchant(from_save, input_dict, global_manager)
+            #else:
+            new_actor = officers.officer(from_save, input_dict, global_manager)
         elif init_type == 'native_warriors':
             new_actor = native_warriors.native_warriors(from_save, input_dict, global_manager)
         elif init_type == 'beast':
@@ -201,7 +208,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        for i in range(0, global_manager.get('minister_limit') - 2):
+        for i in range(0, global_manager.get('minister_limit') - 2 + random.randrange(-2, 3)):
             self.create_minister(global_manager)
 
     def create_minister(self, global_manager):

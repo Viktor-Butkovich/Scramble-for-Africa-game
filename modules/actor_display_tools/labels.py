@@ -826,9 +826,9 @@ class commodity_display_label(actor_display_label):
             self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'pick up commodity', 'none', self.modes, 'buttons/commodity_pick_up_button.png', self, global_manager))
             self.attached_buttons.append(buttons.label_button((self.x + (self.height + 6), self.y), self.height, self.height, 'pick up all commodity', 'none', self.modes, 'buttons/commodity_pick_up_all_button.png',
                 self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 2), self.y), self.height, self.height, 'sell commodity', 'none', ['europe'], 'buttons/commodity_sell_button.png', self,
+            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 2), self.y), self.height, self.height, 'sell commodity', 'none', self.modes, 'buttons/commodity_sell_button.png', self,
                 global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', ['europe'], 'buttons/commodity_sell_all_button.png', self,
+            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', self.modes, 'buttons/commodity_sell_all_button.png', self,
                 global_manager))
 
     def set_label(self, new_message):

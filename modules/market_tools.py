@@ -48,6 +48,7 @@ def change_price(changed_commodity, num_change, global_manager):
     if global_manager.get('commodity_prices')[changed_commodity] < 1:
         global_manager.get('commodity_prices')[changed_commodity] = 1
     global_manager.get('commodity_prices_label').update_label()
+    global_manager.get('money_label').check_for_updates()
 
 def set_price(changed_commodity, new_value, global_manager):
     '''
@@ -79,8 +80,24 @@ def sell(seller, sold_commodity, num_sold, global_manager):
         None
     '''
     global_manager.get('sold_commodities')[sold_commodity] += num_sold
-    for i in range(num_sold):
-        seller.change_inventory(sold_commodity, -1)
+    #for i in range(num_sold):
+    #    seller.change_inventory(sold_commodity, -1)
+    seller.change_inventory(sold_commodity, -1 * num_sold)
+    global_manager.get('money_label').check_for_updates()
+
+def calculate_total_sale_revenue(global_manager):
+    '''
+    Description:
+        Calculates and returns the total estimated revenue from sold commodities this turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables 
+    Output:
+        int: Returns the total estimated revenue from sold commodities this turn
+    '''
+    total_sale_price = 0
+    for commodity in global_manager.get('commodity_types'):
+        total_sale_price += global_manager.get('sold_commodities')[commodity] * global_manager.get('commodity_prices')[commodity]
+    return(total_sale_price)
 
 def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
     '''
@@ -104,6 +121,7 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
             if changed_price >= global_manager.get('min_' + worker_type.lower() + '_worker_upkeep'):
                 global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
                 text_tools.print_to_screen("Adding " + utility.generate_article(worker_type) + " " + worker_type + " worker to the labor pool decreased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        global_manager.get('money_label').check_for_updates()
 
 def attempt_slave_recruitment_cost_change(change_type, global_manager):
     '''
@@ -182,16 +200,36 @@ def calculate_total_worker_upkeep(global_manager):
 def calculate_end_turn_money_change(global_manager):
     '''
     Description:
-    Calculates and returns an estimate of how much money the company will gain or lose at the end of the turn
+        Calculates and returns an estimate of how much money the company will gain or lose at the end of the turn
     Input:
         global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        double: Returns an estimate of how much money the company will gain or lose at the end of the turn
     '''
     estimated_change = 0
     estimated_change += calculate_subsidies(global_manager, True)
     estimated_change -= calculate_total_worker_upkeep(global_manager)
     for current_loan in global_manager.get('loan_list'):
         estimated_change -= current_loan.interest
+    estimated_change += calculate_total_sale_revenue(global_manager)
     return(round(estimated_change, 2))
+
+def count_available_workers(global_manager):
+    '''
+    Description:
+        Counts and returns the total number of wandering workers and available workers between all villages and slums
+    Input:
+        global_manager_template global_manager: Object that accesses chared variables
+    Output:
+        int: Returns the total number of wandering workers and available workers between all villages and slums
+    '''
+    num_available_workers = 0
+    for current_village in global_manager.get('village_list'):
+        num_available_workers += current_village.available_workers
+    for current_slums in global_manager.get('slums_list'):
+        num_available_workers += current_slums.available_workers
+    num_available_workers += global_manager.get('num_wandering_workers')
+    return(num_available_workers)
     
 class loan():
     '''
@@ -220,6 +258,7 @@ class loan():
         if not from_save:
             self.global_manager.get('money_tracker').change(self.principal, 'loans')
             text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
+            global_manager.get('money_label').check_for_updates()
 
     def to_save_dict(self):
         '''
@@ -279,5 +318,5 @@ class loan():
             string: Returns a description of this loan, includings its principal, interest, remaining duration, and remaining payment
         '''
         message = ""
-        message += str(self.principal) + " money loan with interest payments of " + str(self.interest) + " each turn. " + str(self.remaining_duration) + " turns/" + str(self.total_to_pay) + "money remaining"
+        message += str(self.principal) + " money loan with interest payments of " + str(self.interest) + " each turn. " + str(self.remaining_duration) + " turns/" + str(self.total_to_pay) + " money remaining"
         return(message)

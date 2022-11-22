@@ -370,6 +370,8 @@ class mob(actor):
         Output:
             None
         '''
+        if new_value < 0:
+            new_value = 0
         self.movement_points = new_value
         if self.movement_points == round(self.movement_points): #if whole number, don't show decimal
             self.movement_points = round(self.movement_points)
@@ -559,7 +561,7 @@ class mob(actor):
                 else:
                     tooltip_list.append("    Passengers: None")
             
-            if not self.has_infinite_movement:
+            if (not self.has_infinite_movement) and not (self.is_vehicle and not self.has_crew):
                 tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
             elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
                 tooltip_list.append("No movement")
