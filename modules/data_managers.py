@@ -137,25 +137,29 @@ class flavor_text_manager_template():
         '''
         self.global_manager = global_manager
         self.subject_dict = {}
-        
-        self.explorer_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_explorer.csv')
-        for line in current_flavor_text: #each line is a list
-            self.explorer_flavor_text_list.append(line[0])
-        self.subject_dict['explorer'] = self.explorer_flavor_text_list
-        
-        self.minister_first_names_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_minister_first_names.csv')
-        for line in current_flavor_text:
-            self.minister_first_names_flavor_text_list.append(line[0])
-        self.subject_dict['minister_first_names'] = self.minister_first_names_flavor_text_list
-
-        self.minister_last_names_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_minister_last_names.csv')
-        for line in current_flavor_text:
-            self.minister_last_names_flavor_text_list.append(line[0])
-        self.subject_dict['minister_last_names'] = self.minister_last_names_flavor_text_list
+        self.set_flavor_text('explorer', 'text/flavor_explorer.csv')
+        self.set_flavor_text('minister_first_names', 'text/default.csv')
+        self.set_flavor_text('minister_last_names', 'text/default.csv')
+        print(self.subject_dict['minister_first_names'])
+        #self.set_flavor_text('minister_first_names', 'text/flavor_minister_british_first_names.csv')
+        #self.set_flavor_text('minister_last_names', 'text/flavor_minister_british_first_names.csv')
                 
+    def set_flavor_text(self, topic, file):
+        '''
+        Description:
+            Sets this flavor text manager's list of flavor text for the inputted topic to the contents of the inputted csv file
+        Input:
+            string topic: Topic for the flavor text to set, like 'minister_first_names'
+            string file: File to set flavor text to, like 'text/flavor_minister_first_names.csv'
+        Output:
+            None
+        '''
+        flavor_text_list = []
+        current_flavor_text = csv_tools.read_csv(file)
+        for line in current_flavor_text: #each line is a list
+            flavor_text_list.append(line[0])
+        self.subject_dict[topic] = flavor_text_list
+
     def generate_flavor_text(self, subject):
         '''
         Description:
@@ -177,13 +181,14 @@ class flavor_text_manager_template():
             string: Returns a random combination of minister first and last names
         '''
         first_name = self.generate_flavor_text('minister_first_names')
-        titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord']
-        if background in ['royal heir', 'aristocrat']:
-            while not first_name in titles:
-                first_name = self.generate_flavor_text('minister_first_names')
-        else:
-            while first_name in titles:
-                first_name = self.generate_flavor_text('minister_first_names')
+        if self.global_manager.get('current_country') == self.global_manager.get('Britain'):
+            titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord']
+            if background in ['royal heir', 'aristocrat']:
+                while not first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+            else:
+                while first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
         return(first_name + ' ' + self.generate_flavor_text('minister_last_names'))
 
 class value_tracker():
@@ -393,7 +398,7 @@ class notification_manager_template():
         self.minister_message_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
-        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial']
+        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
 
     def update_notification_layout(self, notification_height = 0):
         '''

@@ -1014,7 +1014,10 @@ class button():
                     text_tools.print_to_screen("You are busy and can not cycle through units.", self.global_manager)
 
             elif self.button_type == 'new game':
-                self.global_manager.get('save_load_manager').new_game()
+                if self.global_manager.get('current_game_mode') == 'new_game_setup':
+                    self.global_manager.get('save_load_manager').new_game()
+                else:
+                    game_transitions.set_game_mode('new_game_setup', self.global_manager)
 
             elif self.button_type == 'save game':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -1573,7 +1576,7 @@ class switch_game_mode_button(button):
         button_type = 'switch_game_mode'
         self.to_mode = to_mode
         self.to_mode_tooltip_dict = {}
-        self.to_mode_tooltip_dict['main menu'] = ["Exits to the main menu", "Does not automatically save the game"]
+        self.to_mode_tooltip_dict['main_menu'] = ["Exits to the main menu", "Does not automatically save the game"]
         self.to_mode_tooltip_dict['strategic'] = ["Enters the strategic map screen"]
         self.to_mode_tooltip_dict['europe'] = ["Enters the European headquarters screen"]
         self.to_mode_tooltip_dict['ministers'] = ["Enters the minister conference room screen"]
@@ -1591,8 +1594,7 @@ class switch_game_mode_button(button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):
-                if (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)) or self.to_mode in ['ministers', 'main menu']:
-
+                if self.to_mode in ['ministers', 'main_menu', 'new_game_setup'] or (self.global_manager.get("minister_appointment_tutorial_completed") and minister_utility.positions_filled(self.global_manager)):
                     if self.to_mode == 'ministers' and 'trial' in self.modes:
                         defense = self.global_manager.get('displayed_defense')
                         if defense.fabricated_evidence > 0:
@@ -1603,7 +1605,7 @@ class switch_game_mode_button(button):
                             text = "WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n"
                             notification_tools.display_notification(text, 'default', self.global_manager)
                     
-                    if self.to_mode == 'main menu':
+                    if self.to_mode == 'main_menu':
                         notification_tools.display_choice_notification("Are you sure you want to exit to the main menu without saving? /n /n", ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
                     elif not self.to_mode == 'previous':
                         game_transitions.set_game_mode(self.to_mode, self.global_manager)

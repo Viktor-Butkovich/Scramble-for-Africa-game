@@ -12,7 +12,7 @@ from .. import notification_tools
 
 class label_button(button):
     '''
-    Button that is attached to a label, has have behavior related to the label, will only show when the label is showing
+    Button that is attached to a label, has have behavior related to the label, and only shows when the label is showing
     '''
     def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
         '''

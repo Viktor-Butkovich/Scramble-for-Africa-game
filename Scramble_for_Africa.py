@@ -19,20 +19,21 @@ import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
 import modules.actor_utility as actor_utility
+import modules.countries as countries
 
 try:
     #fundamental setup
     pygame.init()
     pygame.mixer.init()
 
-    global_manager = data_managers.global_manager_template()#manager of a dictionary of what would be global variables passed between functions and classes
+    global_manager = data_managers.global_manager_template() #manager of a dictionary of what would be global variables passed between functions and classes
     global_manager.set('startup_complete', False)
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('waltz_2')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('europe_grid', 'none')
     resolution_finder = pygame.display.Info()
-    global_manager.set('default_display_width', 1728)#all parts of game made to be at default and scaled to display
+    global_manager.set('default_display_width', 1728) #all parts of game made to be at default and scaled to display
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
@@ -454,6 +455,7 @@ try:
 
     global_manager.set('minister_list', [])
     global_manager.set('available_minister_list', [])
+    global_manager.set('country_list', [])
     global_manager.set('grid_list', [])
     global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
     global_manager.set('abstract_grid_list', [])
@@ -492,6 +494,8 @@ try:
     global_manager.set('mob_ordered_label_list', [])
     global_manager.set('minister_info_display_list', [])
     global_manager.set('minister_ordered_label_list', [])
+    global_manager.set('country_info_display_list', [])
+    global_manager.set('country_ordered_label_list', [])
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_minister', 'none')
     global_manager.set('displayed_defense', 'none')
@@ -560,7 +564,7 @@ try:
     global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
 
-    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial'], global_manager)
+    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
     strategic_grid_height = 300#450
     strategic_grid_width = 320#480
@@ -576,8 +580,9 @@ try:
     global_manager.set('tile_ordered_list_start_y', 0)
     global_manager.set('minister_ordered_list_start_y', 0)
 
-    global_manager.set('current_game_mode', 'main menu') #initial previous game mode
+    global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
     game_transitions.set_game_mode('main_menu', global_manager)
+    global_manager.set('previous_game_mode', 'main_menu') #after set game mode, both previous and current game modes should be main_menu
 
     global_manager.set('mouse_follower', mouse_followers.mouse_follower(global_manager))
     #misc. setup
@@ -616,7 +621,10 @@ try:
         pygame.K_ESCAPE, 'strategic', ['europe'], 'buttons/exit_european_hq_button.png', global_manager)
 
     to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager),
-        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'none', 'main menu', ['strategic', 'europe', 'ministers'], 'buttons/exit_european_hq_button.png', global_manager)
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue', 'none', 'main_menu', ['strategic', 'europe', 'ministers'], 'buttons/exit_european_hq_button.png', global_manager)
+
+    new_game_setup_to_main_menu_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', pygame.K_ESCAPE, 'main_menu', ['new_game_setup'], 'buttons/exit_european_hq_button.png', global_manager)
 
     to_ministers_button = buttons.switch_game_mode_button(scaling.scale_coordinates(0, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', pygame.K_q, 'ministers', ['strategic', 'europe'], 'buttons/european_hq_button.png', global_manager)
@@ -632,7 +640,7 @@ try:
         'buttons/end_turn_button.png', global_manager)
 
     new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
-        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'buttons/new_game_button.png',
+        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu', 'new_game_setup'], 'buttons/new_game_button.png',
         global_manager)
 
     load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 125, global_manager),
@@ -681,6 +689,17 @@ try:
 
 
 
+    #country setup
+    global_manager.set('current_country', 'none')
+    global_manager.set('Britain', countries.country('Britain', 'british', global_manager))
+    global_manager.set('France', countries.country('France', 'french', global_manager))
+
+    global_manager.get('Britain').select()
+    #global_manager.get('France').select()
+    #country setup
+
+
+
     #trial setup
     trial_display_default_y = 500
     button_separation = 100
@@ -690,9 +709,6 @@ try:
     defense_current_y = trial_display_default_y
     defense_x = (global_manager.get('default_display_width') / 2) + (distance_to_center - button_separation) + distance_to_notification
 
-
-    
-    #defense_current_y -= button_separation * 2
     defense_type_image = images.minister_type_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
     global_manager.get('defense_info_display_list').append(defense_type_image)
@@ -1050,6 +1066,8 @@ try:
     #retires all appointed ministers at the end of the turn
     
     #activating/disabling debugging tools
+
+    global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
 
     global_manager.set('startup_complete', True)
     global_manager.set('creating_new_game', False)

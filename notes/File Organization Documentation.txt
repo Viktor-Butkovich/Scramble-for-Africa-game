@@ -231,6 +231,9 @@ SFA folder
 	      class choice_button(buttons.button)
 	          class recruitment_choice_button
 
+	  countries.py
+		class country
+
         csv_tools.py
             imports csv
            def read_csv
@@ -485,5 +488,5 @@ SFA folder
 
     Scramble_for_Africa.py
         imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, instructions, mouse_followers,
-		save_load_tools, actor_creation_tools, actor_utility
+		save_load_tools, actor_creation_tools, actor_utility, countries
 As of last count, this program contains 26,525 lines of code across 56 python files

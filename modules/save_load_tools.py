@@ -105,7 +105,7 @@ class save_load_manager_template():
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
 
-        self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+        #self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
     
 
         europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
@@ -345,7 +345,7 @@ class save_load_manager_template():
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
         
-        self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+        #self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
