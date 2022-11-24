@@ -569,7 +569,7 @@ class minister():
         if self.status_number >= 3:
             if self.background == 'politician':
                 third_party = ['the media', 'the prime minister', 'Parliament']
-            elif self.background == 'industrialist':
+            elif self.background in ['industrialist', 'business magnate']:
                 third_party = ['the business community', 'my investors', 'my friends']
             else: #royal heir or aristocrat
                 third_party = ['my family', 'my cousins', 'the nobility']

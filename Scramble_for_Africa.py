@@ -203,23 +203,6 @@ try:
 
 
     #minister setup
-    global_manager.set('weighted_backgrounds', [
-        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
-        'banker',
-        'merchant',
-        'lawyer',
-        'industrialist', 'industrialist', 'industrialist',
-        'natural scientist',
-        'doctor',
-        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
-        'royal heir',
-        'politician', 'politician',
-        'army officer',
-        'naval officer',
-        'priest'
-        ]
-    ) #5 low, 9 middle, 9 high, 1 very high
-
     global_manager.set('background_status_dict', {
         'lowborn': 1,
         'banker': 2,
@@ -233,6 +216,7 @@ try:
         'industrialist': 3,
         'aristocrat': 3,
         'politician': 3,
+        'business magnate': 4,
         'royal heir': 4
         }
     )
@@ -250,6 +234,7 @@ try:
         'industrialist': ['construction', 'production', 'transportation'],
         'aristocrat': ['none', 'random'],
         'politician': ['none', 'random'],
+        'business magnate': ['construction', 'production', 'transportation'],
         'royal heir': ['none', 'random']
         }
     )
@@ -648,16 +633,16 @@ try:
         global_manager)
 
 
-    button_start_x = 750#x position of leftmost button
-    button_separation = 60#x separation between each button
-    current_button_number = 0#tracks current button to move each one farther right
+    button_start_x = 750 #x position of leftmost button
+    button_separation = 60 #x separation between each button
+    current_button_number = 0 #tracks current button to move each one farther right
 
     left_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'move left', pygame.K_a, ['strategic'], 'buttons/left_button.png', global_manager)
     current_button_number += 1
 
     down_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
-        'move down', pygame.K_s, ['strategic'], 'buttons/down_button.png', global_manager)#movement buttons should be usable in any mode with a grid
+        'move down', pygame.K_s, ['strategic'], 'buttons/down_button.png', global_manager) #movement buttons should be usable in any mode with a grid
 
 
     up_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 80, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
@@ -690,12 +675,43 @@ try:
 
 
     #country setup
+    global_manager.set('country_specific_units', ['major'])
     global_manager.set('current_country', 'none')
-    global_manager.set('Britain', countries.country('Britain', 'british', global_manager))
-    global_manager.set('France', countries.country('France', 'french', global_manager))
+    british_weighted_backgrounds = [
+        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
+        'banker',
+        'merchant',
+        'lawyer',
+        'industrialist', 'industrialist', 'industrialist',
+        'natural scientist',
+        'doctor',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        'politician', 'politician',
+        'army officer',
+        'naval officer',
+        'priest'
+        ]
+    global_manager.set('Britain', countries.country('Britain', 'british', False, False, british_weighted_backgrounds, global_manager))
 
-    global_manager.get('Britain').select()
-    #global_manager.get('France').select()
+    french_weighted_backgrounds = [
+        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
+        'banker',
+        'merchant',
+        'lawyer',
+        'industrialist', 'industrialist', 'industrialist', 'industrialist',
+        'natural scientist',
+        'doctor',
+        'business magnate',
+        'politician', 'politician', 'politician', 'politician', 'politician',
+        'army officer',
+        'naval officer',
+        'priest'
+        ]
+    global_manager.set('France', countries.country('France', 'french', True, True, french_weighted_backgrounds, global_manager))
+
+    #global_manager.get('Britain').select()
+    global_manager.get('France').select()
     #country setup
 
 

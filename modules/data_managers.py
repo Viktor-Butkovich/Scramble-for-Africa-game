@@ -139,7 +139,9 @@ class flavor_text_manager_template():
         self.subject_dict = {}
         self.set_flavor_text('explorer', 'text/flavor_explorer.csv')
         self.set_flavor_text('minister_first_names', 'text/default.csv')
+        self.set_flavor_text('minister_particles', 'text/default.csv')
         self.set_flavor_text('minister_last_names', 'text/default.csv')
+        self.allow_particles = False
         print(self.subject_dict['minister_first_names'])
         #self.set_flavor_text('minister_first_names', 'text/flavor_minister_british_first_names.csv')
         #self.set_flavor_text('minister_last_names', 'text/flavor_minister_british_first_names.csv')
@@ -189,7 +191,19 @@ class flavor_text_manager_template():
             else:
                 while first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
-        return(first_name + ' ' + self.generate_flavor_text('minister_last_names'))
+        name = first_name + ' '
+
+        if self.allow_particles and random.randrange(1, 7) >= 5:
+            name += self.generate_flavor_text('minister_particles')
+        last_name = self.generate_flavor_text('minister_last_names')
+
+        name += last_name
+        if self.allow_double_last_names and random.randrange(1, 7) >= 5:
+            second_last_name = self.generate_flavor_text('minister_last_names')
+            while second_last_name == last_name:
+                second_last_name = self.generate_flavor_text('minister_last_names')
+            name += '-' + second_last_name
+        return(name)
 
 class value_tracker():
     '''
