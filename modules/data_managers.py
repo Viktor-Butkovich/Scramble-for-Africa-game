@@ -142,9 +142,6 @@ class flavor_text_manager_template():
         self.set_flavor_text('minister_particles', 'text/default.csv')
         self.set_flavor_text('minister_last_names', 'text/default.csv')
         self.allow_particles = False
-        print(self.subject_dict['minister_first_names'])
-        #self.set_flavor_text('minister_first_names', 'text/flavor_minister_british_first_names.csv')
-        #self.set_flavor_text('minister_last_names', 'text/flavor_minister_british_first_names.csv')
                 
     def set_flavor_text(self, topic, file):
         '''

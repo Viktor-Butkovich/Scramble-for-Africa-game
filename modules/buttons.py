@@ -1015,7 +1015,10 @@ class button():
 
             elif self.button_type == 'new game':
                 if self.global_manager.get('current_game_mode') == 'new_game_setup':
-                    self.global_manager.get('save_load_manager').new_game()
+                    if not self.global_manager.get('displayed_country') == 'none':
+                        self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
+                    else:
+                        text_tools.print_to_screen("You can not start a game without selecting a country.", self.global_manager)
                 else:
                     game_transitions.set_game_mode('new_game_setup', self.global_manager)
 
@@ -1680,7 +1683,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
     def draw(self):
         '''
         Description:
-            Draws this button's image along with a white background and, if currently selected, a flashing green outline
+            Draws this button's image along with a white background and, if its minister is currently selected, a flashing green outline
         Input:
             None
         Output:
@@ -1746,6 +1749,92 @@ class minister_portrait_image(button): #image of minister's portrait - button su
         if not self.current_minister == 'none':
             self.current_minister.update_tooltip()
             self.tooltip_text = self.current_minister.tooltip_text
+        self.set_tooltip(self.tooltip_text)
+
+class country_selection_image(button): #image of country - button subclass because can be clicked to select country
+    '''
+    Button that can be calibrated to a country to show that country and selects the country when clicked
+    '''
+    def __init__(self, coordinates, width, height, modes, country, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string list modes: Game modes during which this button can appear
+            country country: Country to start this button calibrated to, or 'none' if not initially calibrated to any country
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.default_image_id = 'ministers/empty_portrait.png'
+        self.current_country = 'none'
+        super().__init__(coordinates, width, height, 'gray', 'country images', 'none', modes, self.default_image_id, global_manager)
+        self.global_manager.get('country_selection_image_list').append(self)
+        self.current_country = country
+        self.calibrate(country)
+
+    def draw(self):
+        '''
+        Description:
+            Draws this button's image along with a white background and, if its country is currently selected, a flashing green outline
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show(): #draw outline around portrait if country selected
+            if not self.current_country == 'none':
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
+                if self.global_manager.get('displayed_country') == self.current_country and self.global_manager.get('show_selection_outlines'): 
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+        super().draw()
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button selects its attached country when clicked
+        Input:
+            None
+        Output:
+            None
+        '''
+        if main_loop_tools.action_possible(self.global_manager):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display_list'), self.current_country)
+        else:
+            text_tools.print_to_screen("You are busy and can not select another country.", self.global_manager)
+
+    def calibrate(self, new_country):
+        '''
+        Description:
+            Attaches this button to the inputted country and updates this button's image to that of the country
+        Input:
+            string/country new_country: The country whose information is matched by this button. If this equals 'none', this button is detached from any country
+        Output:
+            None
+        '''
+        if not new_country == 'none':
+            new_country.update_tooltip()
+            self.tooltip_text = new_country.tooltip_text 
+            self.image.set_image(new_country.image_id)
+        else:
+            self.image.set_image(self.default_image_id)
+        self.current_country = new_country
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button copies the tooltip text of its attached country, or says there is no attached country if there is none attached
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.current_country == 'none':
+            self.current_country.update_tooltip()
+            self.tooltip_text = self.current_country.tooltip_text
         self.set_tooltip(self.tooltip_text)
 
 class cycle_available_ministers_button(button):

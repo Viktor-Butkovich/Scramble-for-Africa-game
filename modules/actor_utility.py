@@ -337,10 +337,13 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     Output:
         None
     '''
-    if info_display_list == global_manager.get('tile_info_display_list'):
+    #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
+    if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
         global_manager.set('displayed_tile', new_actor)
-    elif info_display_list == global_manager.get('mob_info_display_list'):
+    elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
         global_manager.set('displayed_mob', new_actor)
+    elif id(info_display_list) == id(global_manager.get('country_info_display_list')):
+        global_manager.set('displayed_country', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
 

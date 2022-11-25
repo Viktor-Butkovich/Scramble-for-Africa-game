@@ -59,17 +59,19 @@ class save_load_manager_template():
         self.copied_elements.append('prosecution_bribed_judge')
         self.copied_elements.append('sold_commodities')
         self.copied_elements.append('action_prices')
+        self.copied_elements.append('current_country_name')
         
-    def new_game(self):
+    def new_game(self, country):
         '''
         Description:
             Creates a new game and leaves the main menu
         Input:
-            None
+            country country: Country being played in the new game
         Output:
             None
         '''
         self.global_manager.set('creating_new_game', True)
+        country.select()
         strategic_grid_height = 300
         strategic_grid_width = 320
         mini_grid_height = 600
@@ -279,6 +281,7 @@ class save_load_manager_template():
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
         self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
+        self.global_manager.get(self.global_manager.get('current_country_name')).select() #selects the country object with the same identifier as the saved country name
 
         text_tools.print_to_screen("", self.global_manager)
         text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn')), self.global_manager)

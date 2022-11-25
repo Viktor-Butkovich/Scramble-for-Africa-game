@@ -435,6 +435,8 @@ def manage_lmb_down(clicked_button, global_manager):
                 actor_utility.deselect_all(global_manager)
             if global_manager.get('current_game_mode') == 'ministers':
                 minister_utility.calibrate_minister_info_display(global_manager, 'none')
+            elif global_manager.get('current_game_mode') == 'new_game_setup':
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display_list'), 'none')
             else:
                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
             for current_grid in global_manager.get('grid_list'):
@@ -582,3 +584,15 @@ def click_move_minimap(global_manager):
                     break
             if breaking:
                  break
+
+def debug_print(global_manager):
+    '''
+    Description:
+        Called by main_loop to print some value whenver p is pressed - printed value modified for various debugging purposes
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    print('')
+    print(global_manager.get('current_country_name'))

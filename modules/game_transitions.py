@@ -86,9 +86,10 @@ def set_game_mode(new_game_mode, global_manager):
     for current_mob in global_manager.get('mob_list'):
         current_mob.selected = False
         
-    if previous_game_mode in ['strategic', 'europe']:
+    if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display_list'), 'none')
 
     if new_game_mode == 'ministers':
         global_manager.set('available_minister_left_index', -2)

@@ -33,7 +33,7 @@ try:
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('europe_grid', 'none')
     resolution_finder = pygame.display.Info()
-    global_manager.set('default_display_width', 1728) #all parts of game made to be at default and scaled to display
+    global_manager.set('default_display_width', 1728) #all parts of game made to be at default_display and scaled to display
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
@@ -430,6 +430,7 @@ try:
     #misc. setup
     global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
     global_manager.set('button_list', [])
+    global_manager.set('recruitment_button_list', [])
     global_manager.set('current_instructions_page', 'none')
     global_manager.set('current_dice_rolling_notification', 'none')
     global_manager.set('current_instructions_page_index', 0)
@@ -449,6 +450,7 @@ try:
     global_manager.set('free_image_list', [])
     global_manager.set('minister_image_list', [])
     global_manager.set('available_minister_portrait_list', [])
+    global_manager.set('country_selection_image_list', [])
     global_manager.set('background_image_list', [])
     global_manager.set('actor_list', [])
     global_manager.set('mob_list', [])
@@ -485,6 +487,7 @@ try:
     global_manager.set('displayed_minister', 'none')
     global_manager.set('displayed_defense', 'none')
     global_manager.set('displayed_prosecution', 'none')
+    global_manager.set('displayed_country', 'none')
     global_manager.set('tile_info_display_list', [])
     global_manager.set('tile_ordered_label_list', [])
     global_manager.set('defense_info_display_list', [])
@@ -674,48 +677,6 @@ try:
 
 
 
-    #country setup
-    global_manager.set('country_specific_units', ['major'])
-    global_manager.set('current_country', 'none')
-    british_weighted_backgrounds = [
-        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
-        'banker',
-        'merchant',
-        'lawyer',
-        'industrialist', 'industrialist', 'industrialist',
-        'natural scientist',
-        'doctor',
-        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
-        'royal heir',
-        'politician', 'politician',
-        'army officer',
-        'naval officer',
-        'priest'
-        ]
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, british_weighted_backgrounds, global_manager))
-
-    french_weighted_backgrounds = [
-        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
-        'banker',
-        'merchant',
-        'lawyer',
-        'industrialist', 'industrialist', 'industrialist', 'industrialist',
-        'natural scientist',
-        'doctor',
-        'business magnate',
-        'politician', 'politician', 'politician', 'politician', 'politician',
-        'army officer',
-        'naval officer',
-        'priest'
-        ]
-    global_manager.set('France', countries.country('France', 'french', True, True, french_weighted_backgrounds, global_manager))
-
-    #global_manager.get('Britain').select()
-    global_manager.get('France').select()
-    #country setup
-
-
-
     #trial setup
     trial_display_default_y = 500
     button_separation = 100
@@ -815,6 +776,100 @@ try:
     actor_display_current_y = actor_display_top_y
     global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
     #minister info labels setup
+
+
+
+    #country info images setup
+    country_display_top_y = global_manager.get('default_display_height') - 205
+    country_display_current_y = country_display_top_y
+    global_manager.set('country_ordered_list_start_y', country_display_current_y)
+    #country background image
+    country_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, country_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+        scaling.scale_height(125, global_manager), ['new_game_setup'], global_manager) #mob and country background images would have the same functionality
+    global_manager.get('country_info_display_list').append(country_free_image_background)
+
+    #country background image's tooltip
+    country_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, country_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
+        ['new_game_setup'], 'misc/empty.png', 'tooltip', 'country', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
+    global_manager.get('country_info_display_list').append(country_free_image_background_tooltip)
+
+    #country image
+    country_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, country_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['new_game_setup'], 'country_default', global_manager) #coordinates, width, height, modes, global_manager
+    global_manager.get('country_info_display_list').append(country_free_image)
+
+    country_display_current_y -= 35
+    #country info images setup
+
+
+
+    #country info labels setup
+    country_info_display_labels = ['country_name']
+    for current_actor_label_type in country_info_display_labels:
+        x_displacement = 0
+        global_manager.get('country_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, country_display_current_y, global_manager), scaling.scale_width(10, global_manager),
+            scaling.scale_height(30, global_manager), ['new_game_setup'], 'misc/default_label.png', current_actor_label_type, 'country', global_manager)) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+
+    actor_display_top_y = global_manager.get('default_display_height') - 205
+    actor_display_current_y = actor_display_top_y
+    global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
+    #country info labels setup
+
+
+
+    #country setup
+    global_manager.set('country_specific_units', ['major'])
+    global_manager.set('current_country', 'none')
+    global_manager.set('current_country_name', 'none')
+    british_weighted_backgrounds = [
+        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
+        'banker',
+        'merchant',
+        'lawyer',
+        'industrialist', 'industrialist', 'industrialist',
+        'natural scientist',
+        'doctor',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        'politician', 'politician',
+        'army officer',
+        'naval officer',
+        'priest'
+        ]
+    global_manager.set('Britain', countries.country('Britain', 'british', False, False, 'locations/europe.png', british_weighted_backgrounds, global_manager))
+
+    french_weighted_backgrounds = [
+        'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
+        'banker',
+        'merchant',
+        'lawyer',
+        'industrialist', 'industrialist', 'industrialist', 'industrialist',
+        'natural scientist',
+        'doctor',
+        'business magnate',
+        'politician', 'politician', 'politician', 'politician', 'politician',
+        'army officer',
+        'naval officer',
+        'priest'
+        ]
+    global_manager.set('France', countries.country('France', 'french', True, True, 'locations/europe.png', french_weighted_backgrounds, global_manager))
+
+    #global_manager.get('Britain').select()
+    #global_manager.get('France').select()
+    #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display_list'), global_manager.get('France'))
+    #country info labels seem not be showing even though they return true for can_show
+    #country setup
+
+
+
+    #country selection interface setup (self, coordinates, width, height, modes, country, global_manager)
+    current_country_index = 0
+    country_image_width = 200
+    country_separation = 50
+    for current_country in global_manager.get('country_list'):
+        buttons.country_selection_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (len(global_manager.get('country_list')) * country_image_width / 2) + (country_image_width + country_separation) * current_country_index, global_manager.get('default_display_height') / 2 + 50, global_manager), scaling.scale_width(country_image_width, global_manager), scaling.scale_height(country_image_width, global_manager), ['new_game_setup'], current_country, global_manager)
+        current_country_index += 1
+    #country selection interface setup
 
 
 

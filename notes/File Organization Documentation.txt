@@ -217,6 +217,7 @@ SFA folder
 	          class same_tile_icon
 	          class switch_game_mode_button
 	          class minister_portrait_image
+			  class country_selection_image
 	          class cycle_available_ministers_button
 	          class commodity_button
 	          class show_previous_financial_report_button
@@ -329,6 +330,7 @@ SFA folder
             def manage_rmb_down
             def manage_lmb_down
 	      def click_move_minimap
+		def debug_print
 
 	  market_tools.py
 	      imports random, text_tools, utility
@@ -489,4 +491,4 @@ SFA folder
     Scramble_for_Africa.py
         imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, instructions, mouse_followers,
 		save_load_tools, actor_creation_tools, actor_utility, countries
-As of last count, this program contains 26,525 lines of code across 56 python files
+As of last count, this program contains 26,958 lines of code across 56 python files

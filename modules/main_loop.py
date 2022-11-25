@@ -35,6 +35,8 @@ def main_loop(global_manager):
             else:
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p: #use p for debug printing
+                    main_loop_tools.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
                     if current_button.can_show() and not global_manager.get('typing'):
                         if current_button.has_keybind:
@@ -109,8 +111,8 @@ def main_loop(global_manager):
                             #input_response = message
                             global_manager.get('input_manager').taking_input = False
                             text_tools.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
-                            input_manager.receive_input(global_manager.get('message'))
-                            check_pointer_removal('not typing')
+                            #input_manager.receive_input(global_manager.get('message'))
+                            #check_pointer_removal('not typing')
                         else:
                             text_tools.print_to_screen(global_manager.get('message'), global_manager)
                         global_manager.set('typing', False)

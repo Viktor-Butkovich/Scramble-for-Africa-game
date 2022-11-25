@@ -148,7 +148,7 @@ class actor_display_label(label):
             self.attached_images.append(minister_type_image((self.x - self.height - 10, self.y), self.height + 10, self.height + 10, self.modes, 'none', self, global_manager))
             self.image_y_displacement = 5
 
-        elif self.actor_label_type == 'minister_name':
+        elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
 
         elif self.actor_label_type == 'minister_office':
@@ -355,6 +355,7 @@ class actor_display_label(label):
         self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
+                print(new_actor.name)
                 self.set_label(self.message_start + utility.capitalize(new_actor.name))
                 
             elif self.actor_label_type == 'coordinates':
@@ -512,7 +513,7 @@ class actor_display_label(label):
             elif self.actor_label_type == 'interests':
                 self.set_label(self.message_start + new_actor.interests[0] + " and " + new_actor.interests[1])
             
-            elif self.actor_label_type == 'minister_name':
+            elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
                 
             elif self.actor_label_type == 'minister_office':
@@ -576,7 +577,9 @@ class actor_display_label(label):
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
         result = super().can_show()
-        if self.actor == 'none':
+        if result ==  False:
+            return(False)
+        elif self.actor == 'none':
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)

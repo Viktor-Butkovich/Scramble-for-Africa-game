@@ -32,13 +32,17 @@ class recruitment_button(button):
             None
         '''
         if recruitment_type in global_manager.get('country_specific_units'):
-            image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/button.png'
-            self.mob_image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
+            if not global_manager.get('current_country') == 'none':
+                image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/button.png'
+                self.mob_image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
+            else:
+                image_id = 'buttons/default_button.png'
+                self.mob_image_id = 'mobs/default/default.png'
         elif recruitment_type in global_manager.get('recruitment_types'):
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
         else:
-            image_id = 'misc/default_button.png'
+            image_id = 'buttons/default_button.png'
             self.mob_image_id = 'mobs/default/default.png'
         self.recruitment_type = recruitment_type
         self.recruitment_name = ''
@@ -48,6 +52,7 @@ class recruitment_button(button):
             else:
                 self.recruitment_name += ' '
         self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
+        global_manager.get('recruitment_button_list').append(self)
         super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
 
     def on_click(self):
@@ -69,6 +74,21 @@ class recruitment_button(button):
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not recruit a unit', self.global_manager)
+
+    def calibrate(self, country):
+        '''
+        Description:
+            Sets this button's image to the country-specific version for its unit, like a British or French major. Should make sure self.recruitment_type is in the country_specific_units 
+                list
+        Input:
+            country country: Country that this button's unit should match
+        Output:
+            None
+        '''
+        #if self.recruitment_type in self.global_manager.get('country_specific_units'):
+        image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/button.png'
+        self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png'
+        self.image.set_image(image_id)
 
     def update_tooltip(self):
         '''
@@ -108,7 +128,7 @@ class buy_commodity_button(button):
         if commodity_type in possible_commodity_types:
             image_id = 'scenery/resources/buttons/' + commodity_type + '.png'
         else:
-            image_id = 'misc/default_button.png'
+            image_id = 'buttons/default_button.png'
         self.commodity_type = commodity_type
         self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
         global_manager.set(commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
