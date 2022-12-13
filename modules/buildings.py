@@ -622,12 +622,10 @@ class resource_building(building):
         Output:
             None
         '''
-        #self.ejected_work_crews = []
         for current_work_crew in self.contained_work_crews:
             if not current_work_crew in self.ejected_work_crews:
                 self.ejected_work_crews.append(current_work_crew)
-        for current_work_crew in self.ejected_work_crews:
-            current_work_crew.leave_building(self)
+                current_work_crew.leave_building(self)
 
     def set_damaged(self, new_value, mid_setup = False):
         '''

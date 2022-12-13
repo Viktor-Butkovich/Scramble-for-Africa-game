@@ -355,7 +355,6 @@ class actor_display_label(label):
         self.actor = new_actor
         if not new_actor == 'none':
             if self.actor_label_type == 'name':
-                print(new_actor.name)
                 self.set_label(self.message_start + utility.capitalize(new_actor.name))
                 
             elif self.actor_label_type == 'coordinates':

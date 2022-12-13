@@ -1067,14 +1067,14 @@ class pmob(mob):
                     self.global_manager.get('evil_tracker').change(4)
             elif combat_type == 'defending':
                 current_cell = self.images[0].current_cell
-                if len(current_cell.contained_mobs) > 2: #if len(self.grids[0].find_cell(self.x, self.y).contained_mobs) > 2: #if len(self.images[0].current_cell.contained_mobs) > 2:
-                    enemy.retreat() #return to original tile if enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
                 self.die()
                 if current_cell.get_best_combatant('pmob') == 'none':
                     enemy.kill_noncombatants()
                     enemy.damage_buildings()
                     if enemy.npmob_type == 'beast':
                         enemy.set_hidden(True)
+                else: #return to original tile if non-defenseless enemies still in other tile, can't be in tile with enemy units or have more than 1 offensive combat per turn
+                    enemy.retreat()
                 self.global_manager.get('public_opinion_tracker').change(self.public_opinion_change)
 
         if combat_type == 'attacking':
