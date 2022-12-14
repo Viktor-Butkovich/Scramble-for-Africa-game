@@ -46,11 +46,11 @@ class cell():
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
         if not save_dict == 'none':
             self.save_dict = save_dict
-            if global_manager.get('DEBUG_remove_fog_of_war'):
+            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
         else:
-            if global_manager.get('DEBUG_remove_fog_of_war'):
+            if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
                 self.set_visibility(True)
             else:
                 self.set_visibility(False)

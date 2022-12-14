@@ -138,7 +138,7 @@ class battalion(group):
                 if self.check_if_minister_appointed():
                     choice_info_dict = {'battalion': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.attack_cost, 'type': 'combat'}
                     
-                    message = ""
+                    message = ''
 
                     risk_value = -1 * self.get_combat_modifier() #should be low risk with +2/veteran, moderate with +2 or +1/veteran, high with +1
                     if self.veteran: #reduce risk if veteran
@@ -150,19 +150,19 @@ class battalion(group):
                             risk_value += 1
 
                     if risk_value < -2:
-                        message = "RISK: LOW /n /n" + message  
+                        message = 'RISK: LOW /n /n' + message  
                     elif risk_value == -2:
-                        message = "RISK: MODERATE /n /n" + message
+                        message = 'RISK: MODERATE /n /n' + message
                     elif risk_value == -1: #2/6 = high risk
-                        message = "RISK: HIGH /n /n" + message
+                        message = 'RISK: HIGH /n /n' + message
                     elif risk_value > 0:
-                        message = "RISK: DEADLY /n /n" + message
+                        message = 'RISK: DEADLY /n /n' + message
 
                     if defender.npmob_type == 'beast':
-                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to hunt the " + defender.name + " to the " + direction + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed.",
+                        notification_tools.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to hunt the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     else:
-                        notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attack the " + defender.name + " to the " + direction + "? /n /nRegardless of the result, the rest of this unit's movement points will be consumed.",
+                        notification_tools.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attack the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_combat', True)
                     for current_grid in self.grids:
@@ -181,14 +181,14 @@ class battalion(group):
                         self.attack_mark_list.append(tile(False, input_dict, self.global_manager))
             else:
                 if defender.npmob_type == 'beast':
-                    text_tools.print_to_screen("You do not have enough money to supply a hunt.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough money to supply a hunt.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough money to supply an attack.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough money to supply an attack.', self.global_manager)
         elif defender == 'none' and ((self.is_battalion and not future_cell.get_best_combatant('npmob', 'beast') == 'none') or (self.is_safari and not future_cell.get_best_combatant('npmob') == 'none')): #if wrong type of defender present
             if self.is_battalion:
-                text_tools.print_to_screen("Battalions can not attack beasts.", self.global_manager)
+                text_tools.print_to_screen('Battalions can not attack beasts.', self.global_manager)
             elif self.is_safari:
-                text_tools.print_to_screen("Safaris can only attack beasts.", self.global_manager)
+                text_tools.print_to_screen('Safaris can only attack beasts.', self.global_manager)
         else: #if destination empty and
             initial_movement_points = self.movement_points
             super().move(x_change, y_change)
@@ -239,17 +239,17 @@ class battalion(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = 2 #higher than usual
         self.current_min_crit_success = self.default_min_crit_success
-        message = "Are you sure you want to attempt to capture slaves? If successful, captures 1 of the village's population as a unit of slave workers. /n /n"
-        message += "Regardless of success, this may increase the village's aggressiveness and/or decrease public opinion. /n /n"
-        message += "The attack will cost " + str(self.global_manager.get('action_prices')['capture_slaves']) + " money. /n /n "
+        message = 'Are you sure you want to attempt to capture slaves? If successful, captures 1 of the village\'s population as a unit of slave workers. /n /n'
+        message += 'Regardless of success, this may increase the village\'s aggressiveness and/or decrease public opinion. /n /n'
+        message += 'The attack will cost ' + str(self.global_manager.get('action_prices')['capture_slaves']) + ' money. /n /n '
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
-            message += "The villagers are hostile and are likely to resist capture. /n /n"
+            message += 'The villagers are hostile and are likely to resist capture. /n /n'
         elif aggressiveness_modifier > 0:
-            message += "The villagers are friendly and may not suspect your harmful intentions. /n /n"
+            message += 'The villagers are friendly and may not suspect your harmful intentions. /n /n'
         else:
-            message += "The villagers are wary of the battalion and may resist capture. /n /n"
+            message += 'The villagers are wary of the battalion and may resist capture. /n /n'
         self.current_roll_modifier += aggressiveness_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -257,13 +257,13 @@ class battalion(group):
             risk_value -= 1
 
         if risk_value < 0: #0/6 = no risk
-            message = "RISK: LOW /n /n" + message  
+            message = 'RISK: LOW /n /n' + message  
         elif risk_value == 0: #1/6 death = moderate risk
-            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
         elif risk_value == 1: #2/6 = high risk
-            message = "RISK: HIGH /n /n" + message
+            message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
-            message = "RISK: DEADLY /n /n" + message
+            message = 'RISK: DEADLY /n /n' + message
             
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
@@ -296,16 +296,16 @@ class battalion(group):
             self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['capture_slaves'] * -1, 'slave capture')
         self.global_manager.get('evil_tracker').change(3)
         village = self.images[0].current_cell.get_building('village')
-        text = ""
-        text += "The battalion tries to capture the natives as slaves. /n /n"
+        text = ''
+        text += 'The battalion tries to capture the natives as slaves. /n /n'
 
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'slave_capture', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'slave_capture', self.global_manager, num_dice)
         else:
-            text += ("The veteran major can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'slave_capture', self.global_manager, num_dice)
+            text += ('The veteran major can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'slave_capture', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -324,10 +324,10 @@ class battalion(group):
             else:
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Slave capture roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -335,54 +335,54 @@ class battalion(group):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             if minister_corrupt:
                 result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
             else:
                 result = self.controlling_minister.no_corruption_roll(6)
-            roll_list = dice_utility.roll_to_list(6, "Slave capture roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'slave_capture', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'slave_capture', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "/nThe battalion successfully captured enough slaves to create a slave workers unit. /n "
+            text += '/nThe battalion successfully captured enough slaves to create a slave workers unit. /n '
         else:
-            text += "/nA majority of the natives managed to evade capture. /n "
+            text += '/nA majority of the natives managed to evade capture. /n '
         if roll_result <= self.current_max_crit_fail:
-            text += "/nAngered by the battalion's brutal attempts at subjugation, the natives attack the battalion. /n " # The entire group of missionaries has died"
+            text += '/nAngered by the battalion\'s brutal attempts at subjugation, the natives attack the battalion. /n ' # The entire group of missionaries has died'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe major has gained insights into the optimal strategies to intimidate and defeat the African natives. /n"
-            text += " /nThe major is now a veteran and will be more successful in future ventures. /n"
+            text += ' /nThe major has gained insights into the optimal strategies to intimidate and defeat the African natives. /n'
+            text += ' /nThe major is now a veteran and will be more successful in future ventures. /n'
 
         if (not minister_corrupt) and random.randrange(1, 7) >= 4 and (not village.aggressiveness >= 9):
             village_aggressiveness_increase = 1
-            text += " /nThe natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n"
+            text += ' /nThe natives of this village have grown wary of and even vengeful torwards the invaders, increasing their aggressiveness by 1. /n'
         else:
             village_aggressiveness_increase = 0
             
         public_opinion_decrease = 0
         if not minister_corrupt:
             public_opinion_decrease = -1 * random.randrange(0, 3)
-            text += "/nRumors of your company's brutal treatment of the natives reaches Europe, decreasing public opinion by " + str(-1 * public_opinion_decrease) + ". /n"
+            text += '/nRumors of your company\'s brutal treatment of the natives reaches Europe, decreasing public opinion by ' + str(-1 * public_opinion_decrease) + '. /n'
 
         if roll_result >= self.current_min_success:
-            notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_slave_capture', self.global_manager)
+            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_slave_capture', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('capture_slaves_result', [self, roll_result, village, public_opinion_decrease, village_aggressiveness_increase])
@@ -506,27 +506,27 @@ class safari(battalion):
                         if beast_cell.visible: #if beasts's cell has been discovered
                             current_beast.set_hidden(False)
                             beasts_found.append(current_beast)
-        text = ""
+        text = ''
         if len(beasts_found) == 0:
-            text += "Though beasts may still be hiding nearby, the safari was not able to successfully track any beasts. /n /n"
+            text += 'Though beasts may still be hiding nearby, the safari was not able to successfully track any beasts. /n /n'
         else:
-            text = ""
+            text = ''
             for current_beast in beasts_found:
                 if current_beast.x == self.x and current_beast.y == self.y:
-                    text += "As the safari starts searching for their quarry, they soon realize that the " + current_beast.name + " had been stalking them the whole time. They have only moments to prepare for the ambush. /n /n"
+                    text += 'As the safari starts searching for their quarry, they soon realize that the ' + current_beast.name + ' had been stalking them the whole time. They have only moments to prepare for the ambush. /n /n'
                     ambush_list.append(current_beast)
                 elif current_beast.x > self.x:
-                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the east. /n /n"
+                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the east. /n /n'
                 elif current_beast.x < self.x:
-                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the west. /n /n"
+                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the west. /n /n'
                 elif current_beast.y > self.y:
-                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the north. /n /n"
+                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the north. /n /n'
                 elif current_beast.y < self.y:
-                    text += "The safari finds signs of " + utility.generate_article(current_beast.name) + " " + current_beast.name + " to the south. /n /n"
+                    text += 'The safari finds signs of ' + utility.generate_article(current_beast.name) + ' ' + current_beast.name + ' to the south. /n /n'
                 current_beast.set_hidden(False)
                 current_beast.just_revealed = True
             if result == 6 and not self.veteran:
-                text += "This safari's hunter tracked the " + random.choice(beasts_found).name + " well enough to become a veteran. /n /n"
+                text += 'This safari\'s hunter tracked the ' + random.choice(beasts_found).name + ' well enough to become a veteran. /n /n'
                 self.promote()
 
         self.controlling_minister.display_message(text)

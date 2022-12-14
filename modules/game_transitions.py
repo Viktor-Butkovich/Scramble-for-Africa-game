@@ -21,12 +21,12 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     turn_queue = global_manager.get('player_turn_queue')
     if len(turn_queue) == 0:
         if not start_of_turn: #print no units message if there are no units in turn queue
-            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+            text_tools.print_to_screen('There are no units left to move this turn.', global_manager)
             actor_utility.deselect_all(global_manager)
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
-            text_tools.print_to_screen("There are no other units left to move this turn.", global_manager)
+            text_tools.print_to_screen('There are no other units left to move this turn.', global_manager)
         if global_manager.get('current_game_mode') == 'europe' and not global_manager.get('europe_grid') in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:

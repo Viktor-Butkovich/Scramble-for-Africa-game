@@ -99,22 +99,22 @@ class expedition(group):
                     self.current_max_crit_fail -= self.current_roll_modifier
                     if self.current_min_success > self.current_min_crit_success:
                         self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
-                    message = ""
+                    message = ''
 
                     risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
                     if self.veteran: #reduce risk if veteran
                         risk_value -= 1
 
                     if risk_value < 0: #0/6 = no risk
-                        message = "RISK: LOW /n /n" + message  
+                        message = 'RISK: LOW /n /n' + message  
                     elif risk_value == 0: #1/6 death = moderate risk
-                        message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+                        message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
                     elif risk_value == 1: #2/6 = high risk
-                        message = "RISK: HIGH /n /n" + message
+                        message = 'RISK: HIGH /n /n' + message
                     elif risk_value > 1: #3/6 or higher = extremely high risk
-                        message = "RISK: DEADLY /n /n" + message
+                        message = 'RISK: DEADLY /n /n' + message
                     
-                    notification_tools.display_choice_notification(message + "Are you sure you want to spend " + str(choice_info_dict['cost']) + " money to attempt an exploration to the " + direction + "?", ['exploration', 'stop exploration'],
+                    notification_tools.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'stop exploration'],
                         choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_exploration', True)
                     for current_grid in self.grids:
@@ -132,7 +132,7 @@ class expedition(group):
                         input_dict['show_terrain'] = False
                         self.global_manager.get('exploration_mark_list').append(tile(False, input_dict, self.global_manager))
             else:
-                text_tools.print_to_screen("You do not have enough money to attempt an exploration.", self.global_manager)
+                text_tools.print_to_screen('You do not have enough money to attempt an exploration.', self.global_manager)
         else: #if moving to explored area, move normally
             super().move(x_change, y_change)
             if not self.images[0].current_cell == 'none': #if not in vehicle
@@ -187,26 +187,26 @@ class expedition(group):
         future_cell = self.grid.find_cell(future_x, future_y)
         
         self.just_promoted = False
-        text = ""
-        text += "The expedition heads towards the " + direction + ". /n /n"
-        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + " /n /n")
+        text = ''
+        text += 'The expedition heads towards the ' + direction + '. /n /n'
+        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + ' /n /n')
         
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'exploration', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'exploration', self.global_manager, num_dice)
         else:
-            text += ("The veteran explorer can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'exploration', self.global_manager, num_dice)
+            text += ('The veteran explorer can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'exploration', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.exploration_cost, 'exploration', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Exploration roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -214,55 +214,55 @@ class expedition(group):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.exploration_cost, 'exploration')
-            roll_list = dice_utility.roll_to_list(6, "Exploration roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Exploration roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'exploration', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'exploration', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         public_opinion_increase = 0
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration by default
             public_opinion_increase = random.randrange(0, 3)
             if not future_cell.resource == 'none':
                 if future_cell.resource == 'natives':
-                    text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile containing the village of " + future_cell.village.name + ". /n /n"
+                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile containing the village of ' + future_cell.village.name + '. /n /n'
                 else:
-                    text += "The expedition has discovered a " + future_cell.terrain.upper() + " tile with a " + future_cell.resource.upper() + " resource. /n /n"
+                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile with a ' + future_cell.resource.upper() + ' resource. /n /n'
                 public_opinion_increase += 3
             else:
-                text += "The expedition has  discovered a " + future_cell.terrain.upper() + " tile. /n /n"
+                text += 'The expedition has  discovered a ' + future_cell.terrain.upper() + ' tile. /n /n'
         else:
-            text += "You were not able to explore the tile. /n /n"
+            text += 'You were not able to explore the tile. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += "Everyone in the expedition has died. /n /n" #actual death occurs when exploration completes
+            text += 'Everyone in the expedition has died. /n /n' #actual death occurs when exploration completes
 
         if public_opinion_increase > 0:
-            text += "The Royal Geographical Society is pleased with these findings, increasing your public opinion by " + str(public_opinion_increase) + ". /n /n"
+            text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             #self.veteran = True
             self.just_promoted = True
-            text += "This explorer is now a veteran. /n /n"
+            text += 'This explorer is now a veteran. /n /n'
         
         if roll_result >= self.current_min_success:
             self.destination_cell = future_cell
             self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
             self.public_opinion_increases = []
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_exploration', self.global_manager)
+            notification_tools.display_notification(text + 'Click to remove this notification.', 'final_exploration', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('exploration_result', [self, roll_result, x_change, y_change, public_opinion_increase])
@@ -292,7 +292,7 @@ class expedition(group):
                 else:
                     self.global_manager.get('minimap_grid').calibrate(self.x, self.y) #changes minimap to show unexplored tile without moving
             else:
-                notification_tools.display_notification("This unit's " + str(self.movement_points) + " remaining movement points are not enough to move into the newly explored tile. /n /n", 'default', self.global_manager)
+                notification_tools.display_notification('This unit\'s ' + str(self.movement_points) + ' remaining movement points are not enough to move into the newly explored tile. /n /n', 'default', self.global_manager)
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         self.set_movement_points(0)
         if self.just_promoted:
@@ -318,21 +318,21 @@ class expedition(group):
             if (not target_cell == 'none') and (not target_cell.visible):
                 if current_cell.terrain == 'water' or target_cell.terrain == 'water': #if on water, discover all adjacent undiscovered tiles. Also, discover all adjacent water tiles, regardless of if currently on water
                     if current_cell.terrain == 'water':
-                        text = "From the water, the expedition has discovered a "
+                        text = 'From the water, the expedition has discovered a '
                     elif target_cell.terrain == 'water':
-                        text = "The expedition has discovered a "
+                        text = 'The expedition has discovered a '
                     public_opinion_increase = random.randrange(0, 3)
                     if not target_cell.resource == 'none':
                         if target_cell.resource == 'natives':
-                            text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + " that contains the village of " + target_cell.village.name + ". /n /n"
+                            text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
                         else:
-                            text += target_cell.terrain.upper() + " tile with a " + target_cell.resource.upper() + " resource to the " + cardinal_directions[current_direction] + ". /n /n"
+                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource to the ' + cardinal_directions[current_direction] + '. /n /n'
                         public_opinion_increase += 3
                     else:
-                        text += target_cell.terrain.upper() + " tile to the " + cardinal_directions[current_direction] + ". /n /n"
+                        text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
 
                     if public_opinion_increase > 0:
-                        text += "The Royal Geographical Society is pleased with these findings, increasing your public opinion by " + str(public_opinion_increase) + ". /n /n"
+                        text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)

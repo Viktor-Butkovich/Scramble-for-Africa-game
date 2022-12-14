@@ -115,12 +115,12 @@ def attempt_worker_upkeep_change(change_type, worker_type, global_manager):
         if change_type == 'increase':
             changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
             global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
-            text_tools.print_to_screen("Hiring " + utility.generate_article(worker_type) + " " + worker_type + " worker increased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            text_tools.print_to_screen('Hiring ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker increased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         elif change_type == 'decrease':
             changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
             if changed_price >= global_manager.get('min_' + worker_type.lower() + '_worker_upkeep'):
                 global_manager.set(worker_type.lower() + '_worker_upkeep', changed_price)
-                text_tools.print_to_screen("Adding " + utility.generate_article(worker_type) + " " + worker_type + " worker to the labor pool decreased " + worker_type + " worker upkeep from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+                text_tools.print_to_screen('Adding ' + utility.generate_article(worker_type) + ' ' + worker_type + ' worker to the labor pool decreased ' + worker_type + ' worker upkeep from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         global_manager.get('money_label').check_for_updates()
 
 def attempt_slave_recruitment_cost_change(change_type, global_manager):
@@ -139,12 +139,12 @@ def attempt_slave_recruitment_cost_change(change_type, global_manager):
         if change_type == 'increase':
             changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
             global_manager.get('recruitment_costs')['slave workers'] = changed_price
-            text_tools.print_to_screen("Buying slave workers increased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            text_tools.print_to_screen('Buying slave workers increased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         elif change_type == 'decrease':
             changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
             if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
                 global_manager.get('recruitment_costs')['slave workers'] = changed_price
-                text_tools.print_to_screen("Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+                text_tools.print_to_screen('Adding slaves to the slave recruitment pool decreased the recruitment cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
 
 def calculate_subsidies(global_manager, projected = False):
     '''
@@ -257,7 +257,7 @@ class loan():
         self.global_manager.get('loan_list').append(self)
         if not from_save:
             self.global_manager.get('money_tracker').change(self.principal, 'loans')
-            text_tools.print_to_screen("You have accepted a " + str(self.principal) + " money loan with interest payments of " + str(self.interest) + "/turn for " + str(self.remaining_duration) + " turns.", self.global_manager)
+            text_tools.print_to_screen('You have accepted a ' + str(self.principal) + ' money loan with interest payments of ' + str(self.interest) + '/turn for ' + str(self.remaining_duration) + ' turns.', self.global_manager)
             global_manager.get('money_label').check_for_updates()
 
     def to_save_dict(self):
@@ -305,7 +305,7 @@ class loan():
             None
         '''
         total_paid = self.interest * 10
-        text_tools.print_to_screen("You have finished paying off the " + str(total_paid) + " money required for your " + str(self.principal) + " money loan", self.global_manager)
+        text_tools.print_to_screen('You have finished paying off the ' + str(total_paid) + ' money required for your ' + str(self.principal) + ' money loan', self.global_manager)
         self.global_manager.set('loan_list', utility.remove_from_list(self.global_manager.get('loan_list'), self))
 
     def get_description(self):
@@ -317,6 +317,6 @@ class loan():
         Output:
             string: Returns a description of this loan, includings its principal, interest, remaining duration, and remaining payment
         '''
-        message = ""
-        message += str(self.principal) + " money loan with interest payments of " + str(self.interest) + " each turn. " + str(self.remaining_duration) + " turns/" + str(self.total_to_pay) + " money remaining"
+        message = ''
+        message += str(self.principal) + ' money loan with interest payments of ' + str(self.interest) + ' each turn. ' + str(self.remaining_duration) + ' turns/' + str(self.total_to_pay) + ' money remaining'
         return(message)

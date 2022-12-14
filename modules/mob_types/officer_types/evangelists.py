@@ -60,20 +60,20 @@ class evangelist(officer):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'evangelist': self,'type': 'start religious campaign'}
         self.global_manager.set('ongoing_religious_campaign', True)
-        message = "Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native "
-        message += "villages. /n /n The campaign will cost " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money. /n /n"
+        message = 'Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native '
+        message += 'villages. /n /n The campaign will cost ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money. /n /n'
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
 
         if risk_value < 0: #0/6 = no risk
-            message = "RISK: LOW /n /n" + message  
+            message = 'RISK: LOW /n /n' + message  
         elif risk_value == 0: #1/6 death = moderate risk
-            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
         elif risk_value == 1: #2/6 = high risk
-            message = "RISK: HIGH /n /n" + message
+            message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
-            message = "RISK: DEADLY /n /n" + message
+            message = 'RISK: DEADLY /n /n' + message
             
         notification_tools.display_choice_notification(message, ['start religious campaign', 'stop religious campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -98,26 +98,26 @@ class evangelist(officer):
         price = self.global_manager.get('action_prices')['religious_campaign']
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
         actor_utility.double_action_price(self.global_manager, 'religious_campaign')
-        text = ""
-        text += "The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n"
+        text = ''
+        text += 'The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'religious_campaign', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'religious_campaign', self.global_manager, num_dice)
         else:
-            text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'religious_campaign', self.global_manager, num_dice)
+            text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'religious_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            first_roll_list = dice_utility.roll_to_list(6, "Religous campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Religous campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -125,38 +125,38 @@ class evangelist(officer):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign')
-            roll_list = dice_utility.roll_to_list(6, "Religious campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'religious_campaign')
+            roll_list = dice_utility.roll_to_list(6, 'Religious campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'religious_campaign', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'religious_campaign', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "Inspired by the evangelist's message to save the heathens from their own ignorance, a group of church volunteers joins you. /n /n"
+            text += 'Inspired by the evangelist\'s message to save the heathens from their own ignorance, a group of church volunteers joins you. /n /n'
         else:
-            text += "Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to gather any volunteers. /n /n"
+            text += 'Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to gather any volunteers. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += "The evangelist is disturbed by the lack of faith of your country's people and decides to abandon your company. /n /n" #actual 'death' occurs when religious campaign completes
+            text += 'The evangelist is disturbed by the lack of faith of your country\'s people and decides to abandon your company. /n /n' #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n"
+            text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         if roll_result >= 4:
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_religious_campaign', self.global_manager)
+            notification_tools.display_notification(text + 'Click to remove this notification.', 'final_religious_campaign', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('religious_campaign_result', [self, roll_result])
@@ -214,20 +214,20 @@ class evangelist(officer):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'evangelist': self,'type': 'start public relations campaign'}
         self.global_manager.set('ongoing_public_relations_campaign', True)
-        message = "Are you sure you want to start a public relations campaign? /n /nIf successful, your company's public opinion will increase by between 1 and 6 /n /n"
-        message += "The campaign will cost " + str(self.global_manager.get('action_prices')['public_relations_campaign']) + " money. /n /n"
+        message = 'Are you sure you want to start a public relations campaign? /n /nIf successful, your company\'s public opinion will increase by between 1 and 6 /n /n'
+        message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money. /n /n'
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
 
         if risk_value < 0: #0/6 = no risk
-            message = "RISK: LOW /n /n" + message  
+            message = 'RISK: LOW /n /n' + message  
         elif risk_value == 0: #1/6 death = moderate risk
-            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
         elif risk_value == 1: #2/6 = high risk
-            message = "RISK: HIGH /n /n" + message
+            message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
-            message = "RISK: DEADLY /n /n" + message
+            message = 'RISK: DEADLY /n /n' + message
             
         notification_tools.display_choice_notification(message, ['start public relations campaign', 'stop public relations campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -252,24 +252,24 @@ class evangelist(officer):
         price = self.global_manager.get('action_prices')['public_relations_campaign']
         self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['public_relations_campaign'] * -1, 'public relations campaigns')
         actor_utility.double_action_price(self.global_manager, 'public_relations_campaign')
-        text = ""
-        text += "The evangelist campaigns to increase your company's public opinion with word of your company's benevolent goals and righteous deeds in Africa. /n /n"
+        text = ''
+        text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'public_relations_campaign', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'public_relations_campaign', self.global_manager, num_dice)
         else:
-            text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'public_relations_campaign', self.global_manager, num_dice)
+            text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'public_relations_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Public relations campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -277,40 +277,40 @@ class evangelist(officer):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign')
-            roll_list = dice_utility.roll_to_list(6, "Public relations campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'public_relations_campaign', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'public_relations_campaign', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         public_relations_change = 0
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
             public_relations_change = random.randrange(1, 7)
-            text += "Met with gullible and enthusiastic audiences, the evangelist successfully improves your company's public opinion by " + str(public_relations_change) + ". /n /n"
+            text += 'Met with gullible and enthusiastic audiences, the evangelist successfully improves your company\'s public opinion by ' + str(public_relations_change) + '. /n /n'
         else:
-            text += "Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to improve your company's public opinion. /n /n"
+            text += 'Whether by a lack of charisma, a reluctant audience, or a doomed cause, the evangelist fails to improve your company\'s public opinion. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += "The evangelist is deeply embarassed by this public failure and decides to abandon your company. /n /n" #actual 'death' occurs when religious campaign completes
+            text += 'The evangelist is deeply embarassed by this public failure and decides to abandon your company. /n /n' #actual 'death' occurs when religious campaign completes
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += "With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n"
+            text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         if roll_result >= 4:
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_public_relations_campaign', self.global_manager)
+            notification_tools.display_notification(text + 'Click to remove this notification.', 'final_public_relations_campaign', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('public_relations_campaign_result', [self, roll_result, public_relations_change])

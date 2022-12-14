@@ -378,7 +378,7 @@ class pmob(mob):
             current_cell = self.images[0].current_cell
         if current_cell.local_attrition():
             transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
@@ -397,14 +397,14 @@ class pmob(mob):
         '''
         self.global_manager.get('evil_tracker').change(3)
         if self.is_officer or self.is_worker:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
                 self.images[0].current_cell.tile, self.global_manager)
             self.temp_disable_movement()
             self.replace()
-            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ") /n /n The unit will remain inactive for the next turn as replacements are found.",
+            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
             #    self.images[0].current_cell.tile, self.global_manager)
         else:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + " has died from attrition at (" + str(self.x) + ", " + str(self.y) + ")", self.images[0].current_cell.tile, self.global_manager)
+            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
             self.die()
 
     def remove(self):
@@ -475,17 +475,17 @@ class pmob(mob):
             return(True)
         else:
             #keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
-            text_tools.print_to_screen("", self.global_manager)
-            text_tools.print_to_screen("You can not do that until all ministers have been appointed", self.global_manager)
-            text_tools.print_to_screen("Press q or the button in the upper left corner of the screen to manage your ministers", self.global_manager)
+            text_tools.print_to_screen('', self.global_manager)
+            text_tools.print_to_screen('You can not do that until all ministers have been appointed', self.global_manager)
+            text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
             return(False)
 
     def set_controlling_minister_type(self, new_type):
         '''
         Description:
-            Sets the type of minister that controls this unit, like "Minister of Trade"
+            Sets the type of minister that controls this unit, like 'Minister of Trade'
         Input:
-            string new_type: Type of minister to control this unit, like "Minister of Trade"
+            string new_type: Type of minister to control this unit, like 'Minister of Trade'
         Output:
             None
         '''
@@ -618,9 +618,9 @@ class pmob(mob):
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
                                                 if can_print:
                                                     if future_y == 0:
-                                                        text_tools.print_to_screen("This unit can not move into the ocean.", self.global_manager)
+                                                        text_tools.print_to_screen('This unit can not move into the ocean.', self.global_manager)
                                                     elif future_y > 0:
-                                                        text_tools.print_to_screen("This unit can not move through rivers.", self.global_manager)
+                                                        text_tools.print_to_screen('This unit can not move through rivers.', self.global_manager)
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
@@ -628,37 +628,37 @@ class pmob(mob):
                                         return(True)
                                     else:
                                         if can_print:
-                                            text_tools.print_to_screen("You can not move through enemy units.", self.global_manager)
+                                            text_tools.print_to_screen('You can not move through enemy units.', self.global_manager)
                                         return(False)
                                 else:
                                     if can_print:
-                                        text_tools.print_to_screen("You do not have enough movement points to move.", self.global_manager)
-                                        text_tools.print_to_screen("You have " + str(self.movement_points) + " movement points while " + str(self.get_movement_cost(x_change, y_change)) + " are required.", self.global_manager)
+                                        text_tools.print_to_screen('You do not have enough movement points to move.', self.global_manager)
+                                        text_tools.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.', self.global_manager)
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
-                                    text_tools.print_to_screen("You can not move on land with this unit unless there is a port.", self.global_manager)
+                                    text_tools.print_to_screen('You can not move on land with this unit unless there is a port.', self.global_manager)
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
-                                    text_tools.print_to_screen("You can not move on water with this unit.", self.global_manager)
+                                    text_tools.print_to_screen('You can not move on water with this unit.', self.global_manager)
                                 return(False)
                         else:
                             if can_print:
-                                text_tools.print_to_screen("You can not move into an unexplored tile.", self.global_manager)
+                                text_tools.print_to_screen('You can not move into an unexplored tile.', self.global_manager)
                             return(False)
                     else:
-                        text_tools.print_to_screen("You can not move off of the map.", self.global_manager)
+                        text_tools.print_to_screen('You can not move off of the map.', self.global_manager)
                         return(False)
                 else:
                     if can_print:
-                        text_tools.print_to_screen("You can not move while in this area.", self.global_manager)
+                        text_tools.print_to_screen('You can not move while in this area.', self.global_manager)
                     return(False)
         else:
             if can_print:
-                text_tools.print_to_screen("You can not move units before a Minister of Transportation has been appointed.", self.global_manager)
+                text_tools.print_to_screen('You can not move units before a Minister of Transportation has been appointed.', self.global_manager)
             return(False)
 
     def can_show_tooltip(self):
@@ -733,7 +733,7 @@ class pmob(mob):
                     consumer_goods_transferred = self.inventory_capacity
                 vehicle.change_inventory('consumer goods', -1 * consumer_goods_transferred)
                 self.change_inventory('consumer goods', consumer_goods_transferred)
-                text_tools.print_to_screen(utility.capitalize(self.name) + " automatically took " + str(consumer_goods_transferred) + " consumer goods from " + vehicle.name + "'s cargo.", self.global_manager)
+                text_tools.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.', self.global_manager)
                 
         self.select()
         self.add_to_turn_queue()
@@ -763,9 +763,9 @@ class pmob(mob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         self.global_manager.set('ongoing_combat', True)
         if combat_type == 'defending':
-            message = utility.capitalize(enemy.name) + " " + utility.conjugate('be', enemy.number) + " attacking your " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = utility.capitalize(enemy.name) + ' ' + utility.conjugate('be', enemy.number) + ' attacking your ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
         elif combat_type == 'attacking':
-            message = "Your " + self.name + " " + utility.conjugate('be', self.number) + " attacking the " + enemy.name + " at (" + str(self.x) + ", " + str(self.y) + ")."
+            message = 'Your ' + self.name + ' ' + utility.conjugate('be', self.number) + ' attacking the ' + enemy.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
         self.current_combat_type = combat_type
         self.current_enemy = enemy
         
@@ -800,56 +800,56 @@ class pmob(mob):
         else:
             num_dice = 2
 
-        text = ""
-        text += "The " + self.name + " " + utility.conjugate('attempt', self.number) +" to defeat the " + enemy.name + ". /n /n"
+        text = ''
+        text += 'The ' + self.name + ' ' + utility.conjugate('attempt', self.number) +' to defeat the ' + enemy.name + '. /n /n'
 
         if self.veteran:
             if self.is_officer:
-                text += "The " + self.name + " can roll twice and pick the higher result. /n"
+                text += 'The ' + self.name + ' can roll twice and pick the higher result. /n'
             elif self.is_group:
-                text += "The " + self.officer.name + " can roll twice and pick the higher result. /n"
+                text += 'The ' + self.officer.name + ' can roll twice and pick the higher result. /n'
 
         if self.is_battalion:
             if self.battalion_type == 'imperial':
-                text += "Your professional imperial soldiers will receive a +2 bonus after their roll. /n"
+                text += 'Your professional imperial soldiers will receive a +2 bonus after their roll. /n'
             else:
-                text += "Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n"
+                text += 'Though your African soldiers are not accustomed to using modern equipment, they will receive a +1 bonus after their roll. /n'
         elif self.is_safari:
             if enemy.npmob_type == 'beast':
-                text += "Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n"
+                text += 'Your safari is trained in hunting beasts and will receive a +2 bonus after their roll. /n'
                 own_combat_modifier += 3 #target-based modifiers not included in initial combat modifier calculation, cancels out -1 non-combat unit penalty
             else:
-                text += "Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n"
+                text += 'Your safari is not accustomed to conventional combat and will receive a -1 penalty after their roll. /n'
         elif self.is_officer:
-            text += "As a lone officer, your " + self.name + " will receive a -2 penalty after their roll. /n"
+            text += 'As a lone officer, your ' + self.name + ' will receive a -2 penalty after their roll. /n'
         else:
-            text += "As a non-military unit, your " + self.name + " will receive a -1 penalty after their roll. /n"
+            text += 'As a non-military unit, your ' + self.name + ' will receive a -1 penalty after their roll. /n'
             
         if self.disorganized:
-            text += "The " + self.name + " " + utility.conjugate('be', self.number) + " disorganized and will receive a -1 penalty after their roll. /n"
+            text += 'The ' + self.name + ' ' + utility.conjugate('be', self.number) + ' disorganized and will receive a -1 penalty after their roll. /n'
         elif enemy.disorganized:
             if enemy.npmob_type == 'beast':
-                text += "The " + enemy.name + " " + utility.conjugate('be', enemy.number) + " injured and will receive a -1 after its roll. /n"
+                text += 'The ' + enemy.name + ' ' + utility.conjugate('be', enemy.number) + ' injured and will receive a -1 after its roll. /n'
             else:
-                text += "The " + enemy.name + " " + utility.conjugate('be', enemy.number) + " disorganized and will receive a -1 after their roll. /n"
+                text += 'The ' + enemy.name + ' ' + utility.conjugate('be', enemy.number) + ' disorganized and will receive a -1 after their roll. /n'
 
         if enemy.npmob_type == 'beast' and not self.is_safari:
-            text += "The " + self.name + " " + utility.conjugate('be', self.number) + " not trained in hunting beasts and will receive a -1 penalty after their roll. /n"
+            text += 'The ' + self.name + ' ' + utility.conjugate('be', self.number) + ' not trained in hunting beasts and will receive a -1 penalty after their roll. /n'
             own_combat_modifier -= 1
 
 
         if self.images[0].current_cell.has_intact_building('fort'):
-            text += "The fort in this tile grants your " + self.name + " a +1 bonus after their roll. /n"
+            text += 'The fort in this tile grants your ' + self.name + ' a +1 bonus after their roll. /n'
             own_combat_modifier += 1
             
         if self.veteran:
-            text += "The outcome will be based on the difference between your highest roll and the enemy's roll. /n /n"
+            text += 'The outcome will be based on the difference between your highest roll and the enemy\'s roll. /n /n'
         else:
-            text += "The outcome will be based on the difference between your roll and the enemy's roll. /n /n"
+            text += 'The outcome will be based on the difference between your roll and the enemy\'s roll. /n /n'
 
-        notification_tools.display_notification(text + "Click to roll. ", 'combat', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to roll. ', 'combat', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -867,16 +867,16 @@ class pmob(mob):
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
                 results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
-            first_roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, results[0], own_combat_modifier)
+            first_roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, results[0], own_combat_modifier)
             self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
            
-            second_roll_list = dice_utility.combat_roll_to_list(6, "second_combat", self.global_manager, results[1], own_combat_modifier)
+            second_roll_list = dice_utility.combat_roll_to_list(6, 'second_combat', self.global_manager, results[1], own_combat_modifier)
             self.display_die((die_x - 120, 440), second_roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
             roll_result = max(first_roll_list[0], second_roll_list[0])
             result_outcome_dict = {}
-            text += ("The higher result, " + str(roll_result + own_combat_modifier) + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result + own_combat_modifier) + ', was used. /n')
         else:
             if combat_type == 'attacking': #minister only involved in attacks
                 if self.is_battalion:
@@ -890,7 +890,7 @@ class pmob(mob):
                 result = self.controlling_minister.no_corruption_roll(6)
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            roll_list = dice_utility.combat_roll_to_list(6, "Combat roll", self.global_manager, result, own_combat_modifier)
+            roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
             self.display_die((die_x, 440), roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
@@ -901,11 +901,11 @@ class pmob(mob):
         if not combat_type == 'attacking':
             enemy_roll = random.randrange(1, 7)
 
-        text += "The enemy rolled a " + str(enemy_roll)
+        text += 'The enemy rolled a ' + str(enemy_roll)
         if enemy_combat_modifier > 0:
-            text += " + " + str(enemy_combat_modifier) + " = " + str(enemy_roll + enemy_combat_modifier)
+            text += ' + ' + str(enemy_combat_modifier) + ' = ' + str(enemy_roll + enemy_combat_modifier)
         elif enemy_combat_modifier < 0:
-            text += " - " + str(enemy_combat_modifier * -1) + " = " + str(enemy_roll + enemy_combat_modifier)
+            text += ' - ' + str(enemy_combat_modifier * -1) + ' = ' + str(enemy_roll + enemy_combat_modifier)
         text += ' /n'
 
         
@@ -926,20 +926,20 @@ class pmob(mob):
             conclusion = 'win'
             description = 'VICTORY'
 
-        text += "Overall result: /n"
-        text += str(own_roll + own_combat_modifier) + " - " + str(enemy_roll + enemy_combat_modifier) + " = " + str(overall_result) + ": " + description + " /n" #1 - 6 = -5: DEFEAT
+        text += 'Overall result: /n'
+        text += str(own_roll + own_combat_modifier) + ' - ' + str(enemy_roll + enemy_combat_modifier) + ' = ' + str(overall_result) + ': ' + description + ' /n' #1 - 6 = -5: DEFEAT
         
-        notification_tools.display_notification(text + "Click to continue.", 'combat', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'combat', self.global_manager, num_dice)
 
-        text += "/n"
+        text += '/n'
         if conclusion == 'win':
             if combat_type == 'attacking':
                 if enemy.npmob_type == 'beast':
-                    text += "Your " + self.name + " tracked down and killed the " + enemy.name + ". /n /n"
+                    text += 'Your ' + self.name + ' tracked down and killed the ' + enemy.name + '. /n /n'
                     self.public_opinion_increase = random.randrange(1, 7)
-                    text += "Sensationalized stories of your safari's exploits and the death of the " + enemy.name + " increase public opinion by " + str(self.public_opinion_increase) + ". /n /n"
+                    text += 'Sensationalized stories of your safari\'s exploits and the death of the ' + enemy.name + ' increase public opinion by ' + str(self.public_opinion_increase) + '. /n /n'
                 else:
-                    text += "Your " + self.name + " decisively defeated and destroyed the " + enemy.name + ". /n /n"
+                    text += 'Your ' + self.name + ' decisively defeated and destroyed the ' + enemy.name + '. /n /n'
             elif combat_type == 'defending':
                 if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
                     retreat_direction = 'west'
@@ -950,17 +950,17 @@ class pmob(mob):
                 elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
                     retreat_direction = 'north'
                 if enemy.npmob_type == 'beast':
-                    text += "Your " + self.name + " injured and scared off the attacking " + enemy.name + ", which was seen running to the " + retreat_direction + " and will be vulnerable as it heals. /n /n"           
+                    text += 'Your ' + self.name + ' injured and scared off the attacking ' + enemy.name + ', which was seen running to the ' + retreat_direction + ' and will be vulnerable as it heals. /n /n'           
                 else:
-                    text += "Your " + self.name + " decisively routed the attacking " + enemy.name + ", who " + utility.conjugate('be', enemy.number, 'preterite') + " seen scattering to the " + retreat_direction
-                    text += " and will be vulnerable to counterattack. /n /n"
+                    text += 'Your ' + self.name + ' decisively routed the attacking ' + enemy.name + ', who ' + utility.conjugate('be', enemy.number, 'preterite') + ' seen scattering to the ' + retreat_direction
+                    text += ' and will be vulnerable to counterattack. /n /n'
             
         elif conclusion == 'draw':
             if combat_type == 'attacking':
                 if enemy.npmob_type == 'beast':
-                    text += "Your " + self.name + " failed to track the " + enemy.name + " to its lair and " + utility.conjugate('be', self.number, 'preterite') + " forced to withdraw. /n /n"
+                    text += 'Your ' + self.name + ' failed to track the ' + enemy.name + ' to its lair and ' + utility.conjugate('be', self.number, 'preterite') + ' forced to withdraw. /n /n'
                 else:
-                    text += "Your " + self.name + " failed to push back the defending " + enemy.name + " and " + utility.conjugate('be', self.number, 'preterite') + " forced to withdraw. /n /n"
+                    text += 'Your ' + self.name + ' failed to push back the defending ' + enemy.name + ' and ' + utility.conjugate('be', self.number, 'preterite') + ' forced to withdraw. /n /n'
             if combat_type == 'defending':
                 if enemy.last_move_direction[0] > 0: #if enemy attacked by going east
                     retreat_direction = 'west'
@@ -971,51 +971,51 @@ class pmob(mob):
                 elif enemy.last_move_direction[1] < 0: #if enemy attacked by going south
                     retreat_direction = 'north'
                 if enemy.npmob_type == 'beast':
-                    text += "Your " + self.name + " managed to scare off the attacking " + enemy.name + ", which was seen running to the " + retreat_direction + ". /n /n"           
+                    text += 'Your ' + self.name + ' managed to scare off the attacking ' + enemy.name + ', which was seen running to the ' + retreat_direction + '. /n /n'           
                 else:
-                    text += "Your " + self.name + " managed to repel the attacking " + enemy.name + ", who " + utility.conjugate('be', enemy.number, 'preterite') + " seen withdrawing to the " + retreat_direction + ". /n /n"
+                    text += 'Your ' + self.name + ' managed to repel the attacking ' + enemy.name + ', who ' + utility.conjugate('be', enemy.number, 'preterite') + ' seen withdrawing to the ' + retreat_direction + '. /n /n'
 
         elif conclusion == 'lose':
             if combat_type == 'attacking':
                 if enemy.npmob_type == 'beast':
-                    text += "Your " + self.name + " were slowly picked off as they tracked the " + enemy.name + " to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n"
+                    text += 'Your ' + self.name + ' were slowly picked off as they tracked the ' + enemy.name + ' to its lair. The survivors eventually fled in terror and will be vulnerable to counterattack. /n /n'
                 else:
-                    text += "The " + enemy.name + " decisively routed your " + self.name + ", who " + utility.conjugate('be', enemy.number) +"  scattered and will be vulnerable to counterattack. /n /n"
+                    text += 'The ' + enemy.name + ' decisively routed your ' + self.name + ', who ' + utility.conjugate('be', enemy.number) +'  scattered and will be vulnerable to counterattack. /n /n'
             elif combat_type == 'defending':
                 if enemy.npmob_type == 'beast':
                     self.public_opinion_change = random.randrange(1, 4) * -1
                     if self.number == 1:
-                        text += "The " + enemy.name + " slaughtered your " + self.name + ". /n /n"
+                        text += 'The ' + enemy.name + ' slaughtered your ' + self.name + '. /n /n'
                     else:
-                        text += "The " + enemy.name + " slaughtered most of your " + self.name + " and the survivors deserted, promising to never return. /n /n"
-                    killed_by_beast_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere beasts. /n /n",
-                                              "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few wild animals.",
-                                              'Sensationalized news stories circulate of "brave conquerors" aimlessly wandering the jungle at the mercy of beasts, no better than savages.']
-                    text += random.choice(killed_by_beast_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
+                        text += 'The ' + enemy.name + ' slaughtered most of your ' + self.name + ' and the survivors deserted, promising to never return. /n /n'
+                    killed_by_beast_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere beasts. /n /n',
+                                              'Parliament concludes that its subsidies are being wasted on incompetents who can\'t deal with a few wild animals.',
+                                              'Sensationalized news stories circulate of \'brave conquerors\' aimlessly wandering the jungle at the mercy of beasts, no better than savages.']
+                    text += random.choice(killed_by_beast_flavor) + ' Public opinion has decreased by ' + str(self.public_opinion_change * -1) + '. /n /n'
                 else:
                     self.public_opinion_change = random.randrange(-3, 4)
                     if self.number == 1:
-                        text += "The " + enemy.name + " decisively defeated your " + self.name + ", who was either slain or captured. /n /n"
+                        text += 'The ' + enemy.name + ' decisively defeated your ' + self.name + ', who was either slain or captured. /n /n'
                     else:
-                        text += "The " + enemy.name + " decisively defeated your " + self.name + ", who have all been slain or captured. /n /n"
+                        text += 'The ' + enemy.name + ' decisively defeated your ' + self.name + ', who have all been slain or captured. /n /n'
                     if self.public_opinion_change > 0:
-                        killed_by_natives_flavor = ["Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n",
-                                                  "Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.",
-                                                  "Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors."]
-                        text += random.choice(killed_by_natives_flavor) + " Public opinion has increased by " + str(self.public_opinion_change) + ". /n /n"
+                        killed_by_natives_flavor = ['Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n',
+                                                  'Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.',
+                                                  'Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors.']
+                        text += random.choice(killed_by_natives_flavor) + ' Public opinion has increased by ' + str(self.public_opinion_change) + '. /n /n'
                     elif self.public_opinion_change < 0:
-                        killed_by_natives_flavor = ["Onlookers in Europe wonder how the world's greatest empire could be bested by mere savages. /n /n",
-                                                  "Parliament concludes that its subsidies are being wasted on incompetents who can't deal with a few savages and considers lowering them in the future.",
-                                                  "Sensationalized news stories circulate of indolent ministers sending the empire's finest to die in some jungle."]
-                        text += random.choice(killed_by_natives_flavor) + " Public opinion has decreased by " + str(self.public_opinion_change * -1) + ". /n /n"
+                        killed_by_natives_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere savages. /n /n',
+                                                  'Parliament concludes that its subsidies are being wasted on incompetents who can\'t deal with a few savages and considers lowering them in the future.',
+                                                  'Sensationalized news stories circulate of indolent ministers sending the empire\'s finest to die in some jungle.']
+                        text += random.choice(killed_by_natives_flavor) + ' Public opinion has decreased by ' + str(self.public_opinion_change * -1) + '. /n /n'
         if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units can not become veterans through combat
             if self.is_battalion:
                 self.just_promoted = True
-                text += " This battalion's major is now a veteran. /n /n"  
+                text += ' This battalion\'s major is now a veteran. /n /n'  
             elif self.is_safari:
                 self.just_promoted = True
-                text += " This safari's hunter is now a veteran. /n /n"
-        notification_tools.display_notification(text + " Click to remove this notification.", 'final_combat', self.global_manager)
+                text += ' This safari\'s hunter is now a veteran. /n /n'
+        notification_tools.display_notification(text + ' Click to remove this notification.', 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
 
 
@@ -1037,11 +1037,11 @@ class pmob(mob):
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
                 elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
-                    notification_tools.display_notification("While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n",
+                    notification_tools.display_notification('While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n',
                         'default', self.global_manager)
                     self.retreat()
                 elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
-                    notification_tools.display_notification("While the attack was successful, this unit did not have the " + str(self.get_movement_cost(0, 0, True)) + " movement points required to fully move into the attacked tile and was forced to withdraw. /n /n",
+                    notification_tools.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                         'default', self.global_manager)
                     self.retreat()
                 enemy.die()
@@ -1120,50 +1120,50 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
-        message = "Are you sure you want to start constructing a " + self.building_name + "? /n /n"
+        message = 'Are you sure you want to start constructing a ' + self.building_name + '? /n /n'
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
 
-        message += "The planning and materials will cost " + str(cost) + " money. /n /n"
+        message += 'The planning and materials will cost ' + str(cost) + ' money. /n /n'
         
-        message += "If successful, a " + self.building_name + " will be built. " #change to match each building
+        message += 'If successful, a ' + self.building_name + ' will be built. ' #change to match each building
         if self.building_type == 'resource':
-            message += "A " + self.building_name + " expands the tile's warehouse capacity, and each work crew attached to it can attempt to produce " + self.attached_resource + " each turn. /n /n"
-            message += "Upgrades to the " + self.building_name + " can increase the maximum number of work crews attached and/or how much " + self.attached_resource + " each attached work crew can attempt to produce each turn. "
+            message += 'A ' + self.building_name + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
+            message += 'Upgrades to the ' + self.building_name + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
-                message += "A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. "
+                message += 'A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. '
             elif self.building_name == 'railroad':
-                message += "A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. "
-                message += "It is also required for trains to move and for a train station to be built."
+                message += 'A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. '
+                message += 'It is also required for trains to move and for a train station to be built.'
         elif self.building_type == 'port':
-            message += "A port allows steamboats and steamships to enter the tile and expands the tile's warehouse capacity. "
+            message += 'A port allows steamboats and steamships to enter the tile and expands the tile\'s warehouse capacity. '
             if self.y == 1:
-                message += "/n /nThis port would be adjacent to the ocean, allowing it to be used as a destination or starting point for steamships traveling between theatres. "
+                message += '/n /nThis port would be adjacent to the ocean, allowing it to be used as a destination or starting point for steamships traveling between theatres. '
             else:
-                message += "/n /nThis port would not be adjacent to the ocean. "
+                message += '/n /nThis port would not be adjacent to the ocean. '
                 
             if self.adjacent_to_river():
-                message += "/n /nThis port would be adjacent to a river, allowing steamboats to be built there. "
+                message += '/n /nThis port would be adjacent to a river, allowing steamboats to be built there. '
             else:
-                message += "/n /nThis port would not be adjacent to a river."
+                message += '/n /nThis port would not be adjacent to a river.'
         elif self.building_type == 'train_station':
-            message += "A train station is required for a train to exchange cargo and passengers, allows trains to be built, and expands the tile's warehouse capacity"
+            message += 'A train station is required for a train to exchange cargo and passengers, allows trains to be built, and expands the tile\'s warehouse capacity'
         elif self.building_type == 'trading_post':
-            message += "A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading."
+            message += 'A trading post increases the likelihood that the natives of the local village will be willing to trade and reduces the risk of hostile interactions when trading.'
         elif self.building_type == 'mission':
-            message += "A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting."
+            message += 'A mission decreases the difficulty of converting the natives of the local village and reduces the risk of hostile interactions when converting.'
         elif self.building_type == 'fort':
-            message += "A fort increases the combat effectiveness of your units standing in this tile."
+            message += 'A fort increases the combat effectiveness of your units standing in this tile.'
         elif self.building_type == 'train':
-            message += "A train is a unit that can carry commodities and passengers at very high speed along railroads. It can only exchange cargo and passengers at a train station. "
-            message += "It also requires an attached worker as crew to function."
+            message += 'A train is a unit that can carry commodities and passengers at very high speed along railroads. It can only exchange cargo and passengers at a train station. '
+            message += 'It also requires an attached worker as crew to function.'
         elif self.building_type == 'steamboat':
-            message += "A steamboat is a unit that can carry commodities and passengers at high speed along rivers. "
-            message += "It also requires an attached worker as crew to function."
+            message += 'A steamboat is a unit that can carry commodities and passengers at high speed along rivers. '
+            message += 'It also requires an attached worker as crew to function.'
         else:
-            message += "Placeholder building description"
-        message += " /n /n"
+            message += 'Placeholder building description'
+        message += ' /n /n'
             
         notification_tools.display_choice_notification(message, ['start construction', 'stop construction'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         
@@ -1197,27 +1197,27 @@ class pmob(mob):
             noun = 'construction'
 
         self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
-        text = ""
+        text = ''
 
-        text += "The " + self.name + " attempts to " + verb + " a " + self.building_name + ". /n /n"
+        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
-            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager, num_dice)
+            text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            first_roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, noun.capitalize() + ' roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -1225,36 +1225,36 @@ class pmob(mob):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, cost, 'construction')
-            roll_list = dice_utility.roll_to_list(6, noun.capitalize() + " roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, noun.capitalize() + ' roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success:
-            text += "The " + self.name + " successfully " + preterit_verb + " the " + self.building_name + ". /n"
+            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + self.building_name + '. /n'
         else:
-            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the " + noun + " of the " + self.building_name + ". /n"
+            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + self.building_name + '. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe " + self.officer.name + " managed the " + noun + " well enough to become a veteran. /n"
+            text += ' /nThe ' + self.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n'
         if roll_result >= 4:
-            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
+            notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('construction_result', [self, roll_result])
@@ -1395,9 +1395,9 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start repair'}
         self.global_manager.set('ongoing_construction', True)
-        message = "Are you sure you want to start repairing the " + self.building_name + "? /n /n"
-        message += "The planning and materials will cost " + str(self.repaired_building.get_repair_cost()) + " money, half the initial cost of the building's construction. /n /n"
-        message += "If successful, the " + self.building_name + " will be restored to full functionality. /n /n"
+        message = 'Are you sure you want to start repairing the ' + self.building_name + '? /n /n'
+        message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
+        message += 'If successful, the ' + self.building_name + ' will be restored to full functionality. /n /n'
             
         notification_tools.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -1421,24 +1421,24 @@ class pmob(mob):
             num_dice = 1
         
         self.global_manager.get('money_tracker').change(self.repaired_building.get_repair_cost() * -1, 'construction')
-        text = ""
-        text += "The " + self.name + " attempts to repair the " + self.building_name + ". /n /n"
+        text = ''
+        text += 'The ' + self.name + ' attempts to repair the ' + self.building_name + '. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
-            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager, num_dice)
+            text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.repaired_building.get_repair_cost(), 'construction', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -1446,36 +1446,36 @@ class pmob(mob):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.repaired_building.get_repair_cost(), 'construction')
-            roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #3+ required on D6 for repair
-            text += "The " + self.name + " successfully repaired the " + self.building_name + ". /n"
+            text += 'The ' + self.name + ' successfully repaired the ' + self.building_name + '. /n'
         else:
-            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the repair. /n"
+            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the repair. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
+            text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
-            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
+            notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('construction_result', [self, roll_result])  

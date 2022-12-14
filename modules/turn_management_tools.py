@@ -56,8 +56,8 @@ def start_player_turn(global_manager, first_turn = False):
     Output:
         None
     '''
-    text_tools.print_to_screen("", global_manager)
-    text_tools.print_to_screen("Turn " + str(global_manager.get('turn') + 1), global_manager)
+    text_tools.print_to_screen('', global_manager)
+    text_tools.print_to_screen('Turn ' + str(global_manager.get('turn') + 1), global_manager)
     if not first_turn:
         for current_pmob in global_manager.get('pmob_list'):
             if current_pmob.is_vehicle:
@@ -192,7 +192,7 @@ def manage_production(global_manager):
     production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
     
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
-        text = production_minister.current_position + " " + production_minister.name + " reports the following commodity production: /n /n"
+        text = production_minister.current_position + ' ' + production_minister.name + ' reports the following commodity production: /n /n'
         while len(displayed_commodities) < len(attempted_commodities):
             max_produced = 0
             max_commodity = 'none'
@@ -203,7 +203,7 @@ def manage_production(global_manager):
                         max_produced = global_manager.get('commodities_produced')[current_commodity]
                         expected_production[max_commodity] = global_manager.get('current_ministers')['Prosecutor'].estimate_expected(expected_production[max_commodity])
             displayed_commodities.append(max_commodity)
-            text += max_commodity.capitalize() + ": " + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
+            text += max_commodity.capitalize() + ': ' + str(max_produced) + ' (expected ' + str(expected_production[max_commodity]) + ') /n /n'
         production_minister.display_message(text)       
 
 def manage_upkeep(global_manager):
@@ -246,15 +246,15 @@ def manage_public_opinion(global_manager):
     current_public_opinion = round(global_manager.get('public_opinion'))
     if current_public_opinion < 50:
         global_manager.get('public_opinion_tracker').change(1)
-        text_tools.print_to_screen("Trending toward a neutral attitude, public opinion toward your company increased from " + str(current_public_opinion) + " to " + str(current_public_opinion + 1), global_manager)
+        text_tools.print_to_screen('Trending toward a neutral attitude, public opinion toward your company increased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion + 1), global_manager)
     elif current_public_opinion > 50:
         global_manager.get('public_opinion_tracker').change(-1)
-        text_tools.print_to_screen("Trending toward a neutral attitude, public opinion toward your company decreased from " + str(current_public_opinion) + " to " + str(current_public_opinion - 1), global_manager)
+        text_tools.print_to_screen('Trending toward a neutral attitude, public opinion toward your company decreased from ' + str(current_public_opinion) + ' to ' + str(current_public_opinion - 1), global_manager)
     global_manager.get('evil_tracker').change(-1)
-    if global_manager.get('DEBUG_show_evil'):
-        print("Evil number: " + str(global_manager.get('evil')))
-    if global_manager.get('DEBUG_show_fear'):
-        print("Fear number: " + str(global_manager.get('fear')))
+    if global_manager.get('effect_manager').effect_active('show_evil'):
+        print('Evil number: ' + str(global_manager.get('evil')))
+    if global_manager.get('effect_manager').effect_active('show_fear'):
+        print('Fear number: ' + str(global_manager.get('fear')))
     
 def manage_subsidies(global_manager):
     '''
@@ -266,7 +266,7 @@ def manage_subsidies(global_manager):
         None
     '''
     subsidies_received = market_tools.calculate_subsidies(global_manager)
-    text_tools.print_to_screen("You received " + str(subsidies_received) + " money in subsidies from the government based on your public opinion and colonial efforts", global_manager)
+    text_tools.print_to_screen('You received ' + str(subsidies_received) + ' money in subsidies from the government based on your public opinion and colonial efforts', global_manager)
     global_manager.get('money_tracker').change(subsidies_received, 'subsidies')
 
 
@@ -299,12 +299,12 @@ def manage_worker_price_changes(global_manager):
         changed_price = round(current_price - global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_european_worker_upkeep'):
             global_manager.set('european_worker_upkeep', changed_price)
-            text_tools.print_to_screen("An influx of workers from Europe has decreased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            text_tools.print_to_screen('An influx of workers from Europe has decreased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
     elif european_worker_roll == 1:
         current_price = global_manager.get('european_worker_upkeep')
         changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         global_manager.set('european_worker_upkeep', changed_price)
-        text_tools.print_to_screen("An shortage of workers from Europe has increased the upkeep of European workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        text_tools.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
 
     slave_worker_roll = random.randrange(1, 7)
     if slave_worker_roll == 6:
@@ -312,12 +312,12 @@ def manage_worker_price_changes(global_manager):
         changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
             global_manager.get('recruitment_costs')['slave workers'] = changed_price
-            text_tools.print_to_screen("An influx of captured slaves has decreased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+            text_tools.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
     elif slave_worker_roll == 1:
         current_price = global_manager.get('recruitment_costs')['slave workers']
         changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
         global_manager.get('recruitment_costs')['slave workers'] = changed_price
-        text_tools.print_to_screen("A shortage of captured slaves has increased the purchase cost of slave workers from " + str(current_price) + " to " + str(changed_price) + ".", global_manager)
+        text_tools.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         
 def manage_worker_migration(global_manager): 
     '''
@@ -421,12 +421,12 @@ def trigger_worker_migration(global_manager): #resolves migration if it occurs
             migration_report_text = 'A wave of migration from villages to your colony has occurred as African workers search for employment. /n'
             for source_village in source_village_list: #1 worker migrated from villageName village to the slums surrounding your iron mine at (0, 0). /n
                 current_line = str(village_num_migrated_dict[source_village]) + ' worker' + utility.generate_plural(village_num_migrated_dict[source_village]) + ' migrated from ' + source_village.name
-                current_line += " village to the slums surrounding your " + village_destination_dict[source_village]
-                current_line += " at (" + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
+                current_line += ' village to the slums surrounding your ' + village_destination_dict[source_village]
+                current_line += ' at (' + str(village_destination_coordinates_dict[source_village][0]) + ', ' + str(village_destination_coordinates_dict[source_village][1]) + ').'
                 migration_report_text += current_line + ' /n'
             for wandering_destination in wandering_destinations:
                 current_line = str(wandering_num_migrated_dict[wandering_destination]) + ' wandering worker' + utility.generate_plural(wandering_num_migrated_dict[wandering_destination]) + ' settled in the slums surrounding your '
-                current_line += wandering_destination_dict[wandering_destination] + " at (" + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
+                current_line += wandering_destination_dict[wandering_destination] + ' at (' + str(wandering_destination_coordinates_dict[wandering_destination][0]) + ', ' + str(wandering_destination_coordinates_dict[wandering_destination][1]) + ').'
                 migration_report_text += current_line + ' /n'
             notification_tools.display_notification(migration_report_text, 'default', global_manager)
     
@@ -483,7 +483,7 @@ def manage_villages(global_manager):
             elif roll >= 5: #5-6
                 current_village.change_aggressiveness(1)
             if current_village.cell.has_intact_building('mission') and previous_aggressiveness == 3 and current_village.aggressiveness == 4:
-                text = "The previously pacified village at (" + str(current_village.cell.x) + ", " + str(current_village.cell.y) + ") has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n"
+                text = 'The previously pacified village at (' + str(current_village.cell.x) + ', ' + str(current_village.cell.y) + ') has increased in aggressiveness and now has a chance of sending out hostile warriors. /n /n'
                 notification_tools.display_zoom_notification(text, current_village.cell.tile, global_manager)
 
         roll = random.randrange(1, 7)
@@ -551,7 +551,7 @@ def manage_ministers(global_manager):
             current_minister.remove()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
-        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('DEBUG_farm_upstate'):
+        elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('effect_manager').effect_active('farm_upstate'):
             removed_ministers.append(current_minister)
         else: #if not retired/fired
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
@@ -561,7 +561,7 @@ def manage_ministers(global_manager):
             prosecutor = global_manager.get('current_ministers')['Prosecutor']
             if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
                 prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated evidence')
-            text_tools.print_to_screen("The " + str(current_minister.fabricated_evidence) + " fabricated evidence against " + current_minister.name + " is no longer usable.", global_manager)
+            text_tools.print_to_screen('The ' + str(current_minister.fabricated_evidence) + ' fabricated evidence against ' + current_minister.name + ' is no longer usable.', global_manager)
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
 
@@ -575,13 +575,13 @@ def manage_ministers(global_manager):
             else:
                 current_position = current_minister.current_position
             if evidence_lost == current_minister.corruption_evidence:
-                current_minister.display_message("All of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+                current_minister.display_message('All of the ' + str(current_minister.corruption_evidence) + ' evidence of ' + current_position + ' ' + current_minister.name + '\'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n')
             else:
-                current_minister.display_message(str(evidence_lost) + " of the " + str(current_minister.corruption_evidence) + " evidence of " + current_position + " " + current_minister.name + "'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n")
+                current_minister.display_message(str(evidence_lost) + ' of the ' + str(current_minister.corruption_evidence) + ' evidence of ' + current_position + ' ' + current_minister.name + '\'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n')
             current_minister.corruption_evidence -= evidence_lost
 
     if global_manager.get('prosecution_bribed_judge'):
-        text_tools.print_to_screen("The effect of bribing the judge has faded and will not affect the next trial.", global_manager)
+        text_tools.print_to_screen('The effect of bribing the judge has faded and will not affect the next trial.', global_manager)
     global_manager.set('prosecution_bribed_judge', False)
             
     while len(removed_ministers) > 0:
@@ -597,7 +597,7 @@ def manage_ministers(global_manager):
     if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
             global_manager.get('actor_creation_manager').create_minister(global_manager)
-        notification_tools.display_notification("Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n", 'default', global_manager)
+        notification_tools.display_notification('Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n', 'default', global_manager)
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
@@ -614,8 +614,8 @@ def game_end_check(global_manager):
     '''
     if global_manager.get('money') < 0:
         global_manager.set('game_over', True)
-        text = ""
-        text += "Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER"
+        text = ''
+        text += 'Your company does not have enough money to pay its expenses and has gone bankrupt. /n /nGAME OVER'
         notification_tools.display_choice_notification(text, ['confirm main menu', 'quit'], {}, global_manager)
 
 def manage_commodity_sales(global_manager):
@@ -632,7 +632,7 @@ def manage_commodity_sales(global_manager):
     stealing = False
     money_stolen = 0
     reported_revenue = 0
-    text = trade_minister.current_position + " " + trade_minister.name + " reports the following commodity sales: /n /n"
+    text = trade_minister.current_position + ' ' + trade_minister.name + ' reports the following commodity sales: /n /n'
     any_sold = False
     for current_commodity in global_manager.get('commodity_types'):
         if sold_commodities[current_commodity] > 0:
@@ -654,7 +654,7 @@ def manage_commodity_sales(global_manager):
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_tools.change_price(current_commodity, -1, global_manager)
 
-            text += str(sold_commodities[current_commodity]) + " " + current_commodity + " sold for " + str(actual_revenue) + " money (expected " + str(expected_revenue) + ") /n /n"
+            text += str(sold_commodities[current_commodity]) + ' ' + current_commodity + ' sold for ' + str(actual_revenue) + ' money (expected ' + str(expected_revenue) + ') /n /n'
 
     global_manager.get('money_tracker').change(reported_revenue, 'commodities sold')
     

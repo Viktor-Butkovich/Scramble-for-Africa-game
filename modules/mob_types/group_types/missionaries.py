@@ -55,27 +55,27 @@ class missionaries(group):
         self.current_min_success = self.default_min_success
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
-        message = "Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n"
-        message += "The conversion will cost " + str(self.global_manager.get('action_prices')['convert']) + " money. /n /n "
+        message = 'Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n'
+        message += 'The conversion will cost ' + str(self.global_manager.get('action_prices')['conversion']) + ' money. /n /n '
                             
         if not village.cell.has_intact_building('mission'): #penalty for no mission
             self.current_roll_modifier -= 1
-            message += "Without an established mission, the missionaries will have difficulty converting the villagers. /n /n"
+            message += 'Without an established mission, the missionaries will have difficulty converting the villagers. /n /n'
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
-            message += "The villagers are hostile and are unlikely to listen to the teachings of the missionaries. /n /n"
+            message += 'The villagers are hostile and are unlikely to listen to the teachings of the missionaries. /n /n'
         elif aggressiveness_modifier > 0:
-            message += "The villagers are friendly and are likely to listen to the teachings of the missionaries. /n /n"
+            message += 'The villagers are friendly and are likely to listen to the teachings of the missionaries. /n /n'
         else:
-            message += "The villagers are wary of the missionaries but may be willing to listen to their teachings. /n /n"
+            message += 'The villagers are wary of the missionaries but may be willing to listen to their teachings. /n /n'
         self.current_roll_modifier += aggressiveness_modifier
 
         population_modifier = village.get_population_modifier()
         if population_modifier < 0:
-            message += "The high population of this village will require more effort to convert. /n /n"
+            message += 'The high population of this village will require more effort to convert. /n /n'
         elif population_modifier > 0:
-            message += "The low population of this village will require less effort to convert. /n /n"
+            message += 'The low population of this village will require less effort to convert. /n /n'
         self.current_roll_modifier += population_modifier
 
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -83,13 +83,13 @@ class missionaries(group):
             risk_value -= 1
 
         if risk_value < 0: #0/6 = no risk
-            message = "RISK: LOW /n /n" + message  
+            message = 'RISK: LOW /n /n' + message  
         elif risk_value == 0: #1/6 death = moderate risk
-            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
         elif risk_value == 1: #2/6 = high risk
-            message = "RISK: HIGH /n /n" + message
+            message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
-            message = "RISK: DEADLY /n /n" + message
+            message = 'RISK: DEADLY /n /n' + message
             
         self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
         self.current_max_crit_fail -= self.current_roll_modifier
@@ -99,7 +99,7 @@ class missionaries(group):
         choice_info_dict = {'evangelist': self,'type': 'start converting'}
         self.current_roll_modifier = 0
         if self.current_min_success > 6:
-            message += "As a " + str(self.current_min_success) + "+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll's difficulty. /n /n"
+            message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll\'s difficulty. /n /n'
             notification_tools.display_notification(message, 'default', self.global_manager)
         else:
             self.global_manager.set('ongoing_conversion', True)
@@ -123,27 +123,27 @@ class missionaries(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['convert'] * -1, 'religious conversion')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['conversion'] * -1, 'religious conversion')
         village = self.images[0].current_cell.get_building('village')
-        text = ""
-        text += "The missionaries try to convert the natives to reduce their aggressiveness. /n /n"
+        text = ''
+        text += 'The missionaries try to convert the natives to reduce their aggressiveness. /n /n'
 
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'convert', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'conversion', self.global_manager, num_dice)
         else:
-            text += ("The veteran evangelist can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'convert', self.global_manager, num_dice)
+            text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'conversion', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'conversion', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['conversion'], 'conversion', 2)
+            first_roll_list = dice_utility.roll_to_list(6, 'Conversion roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
            
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -151,47 +151,47 @@ class missionaries(group):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'conversion')
-            roll_list = dice_utility.roll_to_list(6, "Conversion roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['conversion'], 'conversion')
+            roll_list = dice_utility.roll_to_list(6, 'Conversion roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'conversion', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'conversion', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
-            text += "The missionaries have made progress in converting the natives and have reduced their aggressiveness from " + str(village.aggressiveness) + " to " + str(village.aggressiveness - 1) + ". /n /n"
+            text += 'The missionaries have made progress in converting the natives and have reduced their aggressiveness from ' + str(village.aggressiveness) + ' to ' + str(village.aggressiveness - 1) + '. /n /n'
         else:
-            text += "The missionaries made little progress in converting the natives. /n /n"
+            text += 'The missionaries made little progress in converting the natives. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += "Angered by the missionaries' attempts to destroy their spiritual traditions, the natives attack the missionaries. " # The entire group of missionaries has died"
+            text += 'Angered by the missionaries\' attempts to destroy their spiritual traditions, the natives attack the missionaries. ' # The entire group of missionaries has died'
             #if village.cell.has_intact_building('mission'):
-            #    text += " and the village's mission has been damaged."
-            text += ". /n"
+            #    text += ' and the village's mission has been damaged.'
+            text += '. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n"
-            text += " /nThe evangelist is now a veteran and will be more successful in future ventures. /n"
+            text += ' /nThe evangelist has gained insights into converting natives and demonstrating connections between their beliefs and Christianity. /n'
+            text += ' /nThe evangelist is now a veteran and will be more successful in future ventures. /n'
             
         public_opinion_increase = 0
         if roll_result >= self.current_min_success:
             public_opinion_increase = random.randrange(0, 2)
             if public_opinion_increase > 0:
-                text += "/nWorking to fulfill your company's proclaimed mission of enlightening the heathens of Africa has increased your public opinion by " + str(public_opinion_increase) + ". /n"
-            notification_tools.display_notification(text + "/nClick to remove this notification.", 'final_conversion', self.global_manager)
+                text += '/nWorking to fulfill your company\'s proclaimed mission of enlightening the heathens of Africa has increased your public opinion by ' + str(public_opinion_increase) + '. /n'
+            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_conversion', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase])

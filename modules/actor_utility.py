@@ -84,7 +84,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         recruitment_string_descriptions = global_manager.get('recruitment_string_descriptions')
         text_list = []
         if current_target in global_manager.get('officer_types'):
-            first_line = utility.capitalize(current_target) + "s are controlled by the " + global_manager.get('officer_minister_dict')[current_target]
+            first_line = utility.capitalize(current_target) + 's are controlled by the ' + global_manager.get('officer_minister_dict')[current_target]
             if current_target == 'explorer':
                 first_line += '.'
                 text_list.append(first_line)

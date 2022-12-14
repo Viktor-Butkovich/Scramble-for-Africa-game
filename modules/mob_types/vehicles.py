@@ -96,15 +96,15 @@ class vehicle(pmob):
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
             if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew:
                             self.crew_attrition_death()
                         elif current_sub_mob.is_group:
                             current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
                         else:
-                            text = "The " + current_sub_mob.name + " aboard the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
-                            text += "The " + current_sub_mob.name + " will remain inactive for the next turn as replacements are found."
+                            text = 'The ' + current_sub_mob.name + ' aboard the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
+                            text += 'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
                             current_sub_mob.replace()
                             current_sub_mob.temp_disable_movement()
                             notification_tools.display_zoom_notification(text, self, self.global_manager)
@@ -119,8 +119,8 @@ class vehicle(pmob):
             None
         '''
         self.global_manager.get('evil_tracker').change(3)
-        text = "The " + self.crew.name + " crewing the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") have died from attrition. /n /n "
-        text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+        text = 'The ' + self.crew.name + ' crewing the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
+        text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
         self.crew.replace(self)
         notification_tools.display_zoom_notification(text, self, self.global_manager)
         self.temp_disable_movement()
@@ -278,10 +278,10 @@ class vehicle(pmob):
                 return(super().can_move(x_change, y_change, can_print))
             else:
                 if can_print:
-                    text_tools.print_to_screen("This " + self.name + " is still having its crew replaced and can not move this turn.", self.global_manager)
+                    text_tools.print_to_screen('This ' + self.name + ' is still having its crew replaced and can not move this turn.', self.global_manager)
         else:
             if can_print:
-                text_tools.print_to_screen("A " + self.vehicle_type + " can not move without crew.", self.global_manager)
+                text_tools.print_to_screen('A ' + self.vehicle_type + ' can not move without crew.', self.global_manager)
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -363,7 +363,7 @@ class train(vehicle):
         if result:
             if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
                 if can_print:
-                    text_tools.print_to_screen("Trains can only move along railroads.", self.global_manager)
+                    text_tools.print_to_screen('Trains can only move along railroads.', self.global_manager)
                 return(False)
         return(result)
 
@@ -437,7 +437,7 @@ class ship(vehicle):
         if self.images[0].current_cell.terrain == 'water':
             for current_mob in self.images[0].current_cell.contained_mobs:
                 if current_mob.controllable and not current_mob.can_swim: #should change to check if current mob can swim in current type of water, ocean or river
-                    text_tools.print_to_screen("A " + self.vehicle_type + " can not leave without taking unaccompanied units as passengers.", self.global_manager)
+                    text_tools.print_to_screen('A ' + self.vehicle_type + ' can not leave without taking unaccompanied units as passengers.', self.global_manager)
                     return(False)
         return(True)
 

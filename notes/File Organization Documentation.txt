@@ -243,12 +243,13 @@ SFA folder
             imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
             class global_manager_template
             class input_manager_template
+			class effect_manager_template
             class flavor_text_manager_template
-	      class value_tracker
-		    class public_opinion_tracker
-   	          class money_tracker
-	      class notification_manager_template
-	      class sound_manager_template
+	        class value_tracker
+		      class public_opinion_tracker
+   	            class money_tracker
+	        class notification_manager_template
+	        class sound_manager_template
 
         dice.py
             imports pygame, time, random, buttons, utility
@@ -265,6 +266,10 @@ SFA folder
             def rect_to_surface
             def display_image
             def display_image_angle
+
+		effects.py
+			import utility
+			class effect
 
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility, actor_utility
@@ -490,5 +495,5 @@ SFA folder
 
     Scramble_for_Africa.py
         imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, instructions, mouse_followers,
-		save_load_tools, actor_creation_tools, actor_utility, countries
+		save_load_tools, actor_creation_tools, actor_utility, countries, effects
 As of last count, this program contains 26,958 lines of code across 56 python files

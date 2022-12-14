@@ -204,7 +204,7 @@ class actor_display_label(label):
                 if self.actor.has_crew:
                     name_list = [self.message_start]
                     for current_passenger in self.actor.contained_mobs:
-                        name_list.append("    " + utility.capitalize(current_passenger.name))
+                        name_list.append('    ' + utility.capitalize(current_passenger.name))
                     if len(name_list) == 1:
                         name_list[0] = self.message_start + ' none'
                     self.set_tooltip(name_list)
@@ -237,23 +237,23 @@ class actor_display_label(label):
             elif self.actor_label_type == 'native population':
                 tooltip_text.append('The total population of this village, which grows over time unless attacked or if willing villagers leave to become company workers')
             elif self.actor_label_type == 'native available workers':
-                tooltip_text.append("The portion of this village's population that would be willing to work for your company")
+                tooltip_text.append('The portion of this village\'s population that would be willing to work for your company')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             tooltip_text = [self.message]
             if self.actor_label_type == 'mob inventory capacity':
                 if not self.actor == 'none':
-                    tooltip_text.append("This unit is currently holding " + str(self.actor.get_inventory_used()) + " commodities")
-                    tooltip_text.append("This unit can hold a maximum of " + str(self.actor.inventory_capacity) + " commodities")
+                    tooltip_text.append('This unit is currently holding ' + str(self.actor.get_inventory_used()) + ' commodities')
+                    tooltip_text.append('This unit can hold a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')
             elif self.actor_label_type == 'tile inventory capacity':
                 if not self.actor == 'none':
                     if self.actor.can_hold_infinite_commodities:
-                        tooltip_text.append("This tile can hold infinite commodities.")
+                        tooltip_text.append('This tile can hold infinite commodities.')
                     else:
-                        tooltip_text.append("This tile currently contains " + str(self.actor.get_inventory_used()) + " commodities")
-                        tooltip_text.append("This tile can retain a maximum of " + str(self.actor.inventory_capacity) + " commodities")
-                        tooltip_text.append("If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost")
+                        tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
+                        tooltip_text.append('This tile can retain a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')
+                        tooltip_text.append('If this tile is holding commodities exceeding its capacity before resource production at the end of the turn, extra commodities will be lost')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'minister':
@@ -263,8 +263,8 @@ class actor_display_label(label):
                 if not self.actor.controlling_minister == 'none':
                     tooltip_text = self.actor.controlling_minister.tooltip_text
                 else:
-                    tooltip_text = ["The " + self.actor.controlling_minister_type + " is responsible for controlling this unit",
-                                    "As there is currently no " + self.actor.controlling_minister_type + ", this unit will not be able to complete most actions until one is appointed"]
+                    tooltip_text = ['The ' + self.actor.controlling_minister_type + ' is responsible for controlling this unit',
+                                    'As there is currently no ' + self.actor.controlling_minister_type + ', this unit will not be able to complete most actions until one is appointed']
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'evidence':
@@ -272,59 +272,59 @@ class actor_display_label(label):
             if not self.actor == 'none':
                 if self.global_manager.get('current_game_mode') == 'trial':
                     real_evidence = self.actor.corruption_evidence - self.actor.fabricated_evidence
-                    tooltip_text.append("Your prosecutor has found " + str(real_evidence) + " piece" + utility.generate_plural(real_evidence) + " of evidence of corruption against this minister.")
+                    tooltip_text.append('Your prosecutor has found ' + str(real_evidence) + ' piece' + utility.generate_plural(real_evidence) + ' of evidence of corruption against this minister.')
                     if self.actor.fabricated_evidence > 0:
-                        tooltip_text.append("Additionally, your prosecutor has fabricated " + str(self.actor.fabricated_evidence) + " piece" + utility.generate_plural(self.actor.corruption_evidence) +
-                            " of fake evidence against this minister.")
-                    tooltip_text.append("Each piece of evidence, real or fabricated, increases the chance of a trial's success. After a trial, all fabricated evidence and about half of the real evidence are rendered unusable")
+                        tooltip_text.append('Additionally, your prosecutor has fabricated ' + str(self.actor.fabricated_evidence) + ' piece' + utility.generate_plural(self.actor.corruption_evidence) +
+                            ' of fake evidence against this minister.')
+                    tooltip_text.append('Each piece of evidence, real or fabricated, increases the chance of a trial\'s success. After a trial, all fabricated evidence and about half of the real evidence are rendered unusable')
                 else:
-                    tooltip_text.append("Your prosecutor has found " + str(self.actor.corruption_evidence) + " piece" + utility.generate_plural(self.actor.corruption_evidence) + " of evidence of corruption against this minister")
-                    tooltip_text.append("A corrupt minister may let goods go missing, steal the money given for a task and report a failure, or otherwise benefit themselves at the expense of your company")
-                    tooltip_text.append("When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.")
-                    tooltip_text.append("If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position")
+                    tooltip_text.append('Your prosecutor has found ' + str(self.actor.corruption_evidence) + ' piece' + utility.generate_plural(self.actor.corruption_evidence) + ' of evidence of corruption against this minister')
+                    tooltip_text.append('A corrupt minister may let goods go missing, steal the money given for a task and report a failure, or otherwise benefit themselves at the expense of your company')
+                    tooltip_text.append('When a corrupt act is done, a skilled and loyal prosecutor may find evidence of the crime.')
+                    tooltip_text.append('If you believe a minister is corrupt, evidence against them can be used in a criminal trial to justify appointing a new minister in their position')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'background':
             tooltip_text = [self.message]
-            tooltip_text.append("A minister's personal background determines their social status and may give them additional expertise in certain areas")
+            tooltip_text.append('A minister\'s personal background determines their social status and may give them additional expertise in certain areas')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'social status':
             tooltip_text = [self.message]
-            tooltip_text.append("A minister's social status determines their power independent of your company.")
-            tooltip_text.append("A minister of higher social status has a much greater ability to either help your company when your goals align, or fight back should they ever diverge")
+            tooltip_text.append('A minister\'s social status determines their power independent of your company.')
+            tooltip_text.append('A minister of higher social status has a much greater ability to either help your company when your goals align, or fight back should they ever diverge')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'interests':
             tooltip_text = [self.message]
-            tooltip_text.append("While some interests are derived from a minister's legitimate talent or experience in a particular field, others are mere fancies")
+            tooltip_text.append('While some interests are derived from a minister\'s legitimate talent or experience in a particular field, others are mere fancies')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'building workers':
             tooltip_text = []
-            tooltip_text.append("Increase work crew capacity by upgrading the building's scale with a construction gang")
+            tooltip_text.append('Increase work crew capacity by upgrading the building\'s scale with a construction gang')
             if (not self.attached_building == 'none'):
-                tooltip_text.append("Work crews: " + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
+                tooltip_text.append('Work crews: ' + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
                 for current_work_crew in self.attached_building.contained_work_crews:
-                    tooltip_text.append("    " + utility.capitalize(current_work_crew.name))
+                    tooltip_text.append('    ' + utility.capitalize(current_work_crew.name))
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'building efficiency':
             tooltip_text = [self.message]
-            tooltip_text.append("Each work crew attached to this building can produce up to the building efficiency in commodities each turn")
-            tooltip_text.append("Increase work crew efficiency by upgrading the building's efficiency with a construction gang")
+            tooltip_text.append('Each work crew attached to this building can produce up to the building efficiency in commodities each turn')
+            tooltip_text.append('Increase work crew efficiency by upgrading the building\'s efficiency with a construction gang')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'slums':
             tooltip_text = [self.message]
-            tooltip_text.append("Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work")
-            tooltip_text.append("Slums can form around ports, train stations, and resource production facilities")
+            tooltip_text.append('Villagers exposed to consumer goods through trade, fired workers, and freed slaves will wander and eventually move to slums in search of work')
+            tooltip_text.append('Slums can form around ports, train stations, and resource production facilities')
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'combat_strength':
             tooltip_text = [self.message]
-            tooltip_text.append("Combat strength is an estimation of a unit's likelihood to win combat based on its experience and unit type")
-            tooltip_text.append("When attacked, the defending side will automatically choose its strongest unit to fight")
+            tooltip_text.append('Combat strength is an estimation of a unit\'s likelihood to win combat based on its experience and unit type')
+            tooltip_text.append('When attacked, the defending side will automatically choose its strongest unit to fight')
             if not self.actor == 'none':
                 modifier = self.actor.get_combat_modifier()
                 if modifier >= 0:
@@ -332,12 +332,12 @@ class actor_display_label(label):
                 else:
                     sign = ''
                 if self.actor.get_combat_strength() == 0:
-                    tooltip_text.append("A unit with 0 combat strength will die automatically if forced to fight or if all other defenders are defeated")
+                    tooltip_text.append('A unit with 0 combat strength will die automatically if forced to fight or if all other defenders are defeated')
                 else:
                     if self.actor.veteran:
-                        tooltip_text.append("In combat, this unit would roll 2 dice with a " + sign + str(modifier) + " modiifer, taking the higher of the 2 results")
+                        tooltip_text.append('In combat, this unit would roll 2 dice with a ' + sign + str(modifier) + ' modiifer, taking the higher of the 2 results')
                     else:
-                        tooltip_text.append("In combat, this unit would roll 1 die with a " + sign + str(modifier) + " modiifer")
+                        tooltip_text.append('In combat, this unit would roll 1 die with a ' + sign + str(modifier) + ' modiifer')
             self.set_tooltip(tooltip_text)
             
         else:
@@ -402,35 +402,35 @@ class actor_display_label(label):
                     else: #if ship or riverboat/train without crew
                         if not new_actor.has_infinite_movement:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
-                                self.set_label("No movement")
+                                self.set_label('No movement')
                             #else:
-                            #    self.set_label("Infinite movement until cargo/passenger dropped")
+                            #    self.set_label('Infinite movement until cargo/passenger dropped')
                         else:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
-                                self.set_label("No movement")
+                                self.set_label('No movement')
                             else:
-                                self.set_label("Infinite movement")
+                                self.set_label('Infinite movement')
                 else:
-                    self.set_label(self.message_start + "???")
+                    self.set_label(self.message_start + '???')
 
 
             elif self.actor_label_type == 'attitude':
                 if not self.actor.controllable:
                     if self.actor.hostile:
-                        self.set_label(self.message_start + "hostile")
+                        self.set_label(self.message_start + 'hostile')
                     else:
-                        self.set_label(self.message_start + "neutral")
+                        self.set_label(self.message_start + 'neutral')
 
             elif self.actor_label_type == 'combat_strength':
                 self.set_label(self.message_start + str(self.actor.get_combat_strength()))
 
             elif self.actor_label_type == 'preferred_terrains':
                 if self.actor.is_npmob and self.actor.npmob_type == 'beast':
-                    self.set_label(self.message_start + " " + self.actor.preferred_terrains[0] + ", " + self.actor.preferred_terrains[1] + ", " + self.actor.preferred_terrains[2])
+                    self.set_label(self.message_start + ' ' + self.actor.preferred_terrains[0] + ', ' + self.actor.preferred_terrains[1] + ', ' + self.actor.preferred_terrains[2])
 
             elif self.actor_label_type == 'controllable':
                 if not self.actor.controllable:
-                    self.set_label("You do not control this unit")
+                    self.set_label('You do not control this unit')
                             
             elif self.actor_label_type == 'building work crew':
                 if self.list_type == 'resource building':
@@ -454,9 +454,9 @@ class actor_display_label(label):
                 if self.actor.is_vehicle:
                     if not self.actor.has_crew:
                         if self.actor.can_swim and self.actor.can_swim_ocean:
-                            self.set_label("Requires a European worker crew to function")
+                            self.set_label('Requires a European worker crew to function')
                         elif self.actor.vehicle_type == 'train':
-                            self.set_label("Requires a non-slave worker crew to function")
+                            self.set_label('Requires a non-slave worker crew to function')
                     else:
                         if len(self.actor.contained_mobs) == 0:
                             self.set_label(self.message_start + 'none')
@@ -501,7 +501,7 @@ class actor_display_label(label):
                 if new_actor.fabricated_evidence == 0:
                     self.set_label(self.message_start + str(new_actor.corruption_evidence))
                 else:
-                    self.set_label(self.message_start + str(new_actor.corruption_evidence) + " (" + str(new_actor.fabricated_evidence) + ")")               
+                    self.set_label(self.message_start + str(new_actor.corruption_evidence) + ' (' + str(new_actor.fabricated_evidence) + ')')               
 
             elif self.actor_label_type == 'background':
                 self.set_label(self.message_start + new_actor.background)
@@ -510,7 +510,7 @@ class actor_display_label(label):
                 self.set_label(self.message_start + new_actor.status)
 
             elif self.actor_label_type == 'interests':
-                self.set_label(self.message_start + new_actor.interests[0] + " and " + new_actor.interests[1])
+                self.set_label(self.message_start + new_actor.interests[0] + ' and ' + new_actor.interests[1])
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
@@ -522,7 +522,7 @@ class actor_display_label(label):
                 if self.actor.cell.has_building('slums'):
                     self.set_label(self.message_start + str(self.actor.cell.get_building('slums').available_workers))
             elif self.actor_label_type == 'canoes':
-                self.set_label("Equipped with canoes to move along rivers")
+                self.set_label('Equipped with canoes to move along rivers')
             
         elif self.actor_label_type == 'tooltip':
             nothing = 0 #do not set text for tooltip label
@@ -758,7 +758,7 @@ class building_efficiency_label(actor_display_label):
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
-                self.set_label("Efficiency: " + str(self.attached_building.efficiency))
+                self.set_label('Efficiency: ' + str(self.attached_building.efficiency))
                 self.showing = True
 
     def can_show(self):

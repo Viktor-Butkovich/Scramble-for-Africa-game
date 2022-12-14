@@ -122,21 +122,21 @@ class instructions_page(label):
             None
         '''
         new_message = []
-        next_line = ""
-        next_word = ""
+        next_line = ''
+        next_word = ''
         for index in range(len(self.message)):
             next_word += self.message[index]
-            if self.message[index] == " ":
+            if self.message[index] == ' ':
                 if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
                     new_message.append(next_line)
-                    next_line = ""
+                    next_line = ''
                 next_line += next_word
-                next_word = ""
+                next_word = ''
         next_line += next_word
         new_message.append(next_line)
-        new_message.append("Click to go to the next instructions page.")
-        new_message.append("Press the display instructions button on the right side of the screen again to close the instructions.")
-        new_message.append("Page " + str(self.global_manager.get('current_instructions_page_index') + 1))
+        new_message.append('Click to go to the next instructions page.')
+        new_message.append('Press the display instructions button on the right side of the screen again to close the instructions.')
+        new_message.append('Page ' + str(self.global_manager.get('current_instructions_page_index') + 1))
         
         self.message = new_message
         
@@ -149,7 +149,7 @@ class instructions_page(label):
         Output:
             None
         '''
-        self.set_tooltip(["Click to go to the next instructions page.", "Press the display instructions button on the right side of the screen again to close the instructions."])
+        self.set_tooltip(['Click to go to the next instructions page.', 'Press the display instructions button on the right side of the screen again to close the instructions.'])
 
 
 def display_instructions_page(page_number, global_manager):

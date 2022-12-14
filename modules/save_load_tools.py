@@ -234,7 +234,7 @@ class save_load_manager_template():
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
-            if self.global_manager.get('DEBUG_show_corruption_on_save'):
+            if self.global_manager.get('effect_manager').effect_active('show_corruption_on_save'):
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
@@ -244,7 +244,7 @@ class save_load_manager_template():
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
-        text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
+        text_tools.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
         '''
@@ -257,8 +257,8 @@ class save_load_manager_template():
         '''
         self.global_manager.set('loading_save', True)
         
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Loading " + file_path, self.global_manager)
+        text_tools.print_to_screen('', self.global_manager)
+        text_tools.print_to_screen('Loading ' + file_path, self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:
@@ -269,7 +269,7 @@ class save_load_manager_template():
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
         except:
-            text_tools.print_to_screen("The " + file_path + " file does not exist.", self.global_manager)
+            text_tools.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
 
         #load variables
@@ -283,8 +283,8 @@ class save_load_manager_template():
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
         self.global_manager.get(self.global_manager.get('current_country_name')).select() #selects the country object with the same identifier as the saved country name
 
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn')), self.global_manager)
+        text_tools.print_to_screen('', self.global_manager)
+        text_tools.print_to_screen('Turn ' + str(self.global_manager.get('turn')), self.global_manager)
 
         #load grids
         strategic_grid_height = 300

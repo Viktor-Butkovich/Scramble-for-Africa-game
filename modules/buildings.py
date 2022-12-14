@@ -62,7 +62,7 @@ class building(actor):
         self.is_port = False #used to determine if port is in a tile to move there
 
         self.set_inventory_capacity(self.default_inventory_capacity)
-        if global_manager.get('DEBUG_damaged_buildings'):
+        if self.global_manager.get('effect_manager').effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
 
@@ -135,34 +135,34 @@ class building(actor):
         '''
         tooltip_text = [self.name.capitalize()]
         if self.building_type == 'resource':
-            tooltip_text.append("Work crews: " + str(len(self.contained_work_crews)) + '/' + str(self.scale))
+            tooltip_text.append('Work crews: ' + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             for current_work_crew in self.contained_work_crews:
-                tooltip_text.append("    " + current_work_crew.name)
-            tooltip_text.append("Lets " + str(self.scale) + " attached work crews each attempt to produce " + str(self.efficiency) + " units of " + self.resource_type + " each turn")
+                tooltip_text.append('    ' + current_work_crew.name)
+            tooltip_text.append('Lets ' + str(self.scale) + ' attached work crews each attempt to produce ' + str(self.efficiency) + ' units of ' + self.resource_type + ' each turn')
         elif self.building_type == 'port':
-            tooltip_text.append("Allows ships to enter this tile")
+            tooltip_text.append('Allows ships to enter this tile')
         elif self.building_type == 'infrastructure':
-            tooltip_text.append("Halves movement cost for units going to another tile with a road or railroad")
+            tooltip_text.append('Halves movement cost for units going to another tile with a road or railroad')
             if self.is_railroad:
-                tooltip_text.append("Allows trains to move from this tile to other tiles that have railroads")
+                tooltip_text.append('Allows trains to move from this tile to other tiles that have railroads')
             else:
-                tooltip_text.append("Can be upgraded to a railroad to allow trains to move through this tile")
+                tooltip_text.append('Can be upgraded to a railroad to allow trains to move through this tile')
         elif self.building_type == 'train_station':
-            tooltip_text.append("Allows construction gangs to build trains on this tile")
-            tooltip_text.append("Allows trains to drop off or pick up cargo or passengers in this tile")
+            tooltip_text.append('Allows construction gangs to build trains on this tile')
+            tooltip_text.append('Allows trains to drop off or pick up cargo or passengers in this tile')
         elif self.building_type == 'slums':
-            tooltip_text.append("Contains " + str(self.available_workers) + " African workers in search of employment")
+            tooltip_text.append('Contains ' + str(self.available_workers) + ' African workers in search of employment')
         elif self.building_type == 'trading_post':
-            tooltip_text.append("Increases the success chance of caravans trading with this tile's village")
+            tooltip_text.append('Increases the success chance of caravans trading with this tile\'s village')
         elif self.building_type == 'mission':
-            tooltip_text.append("Increases the success chance of missionaries converting this tile's village")
+            tooltip_text.append('Increases the success chance of missionaries converting this tile\'s village')
         elif self.building_type == 'fort':
-            tooltip_text.append("Grants a +1 combat modifier to your units fighting in this tile")
-        elif self.building_type == "warehouses":
-            tooltip_text.append("Level " + str(self.warehouse_level) + " warehouses allow an inventory capacity of " + str(9 * self.warehouse_level))
+            tooltip_text.append('Grants a +1 combat modifier to your units fighting in this tile')
+        elif self.building_type == 'warehouses':
+            tooltip_text.append('Level ' + str(self.warehouse_level) + ' warehouses allow an inventory capacity of ' + str(9 * self.warehouse_level))
 
         if self.damaged:
-            tooltip_text.append("This building is damaged and is currently not functional.")
+            tooltip_text.append('This building is damaged and is currently not functional.')
             
         self.set_tooltip(tooltip_text)
 
@@ -509,7 +509,7 @@ class warehouses(building):
             while self.warehouse_level < input_dict['warehouse_level']:
                 self.upgrade()
                 
-        if global_manager.get('DEBUG_damaged_buildings'):
+        if global_manager.get('effect_manager').effect_active('damaged_buildings'):
             if self.can_damage():
                 self.set_damaged(True, True)
                 
@@ -682,10 +682,10 @@ class resource_building(building):
         
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')

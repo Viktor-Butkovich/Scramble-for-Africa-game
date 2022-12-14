@@ -47,7 +47,7 @@ class notification(multi_line_label):
             None
         '''
         super().format_message()
-        self.message.append("Click to remove this notification.")
+        self.message.append('Click to remove this notification.')
                     
     def update_tooltip(self):
         '''
@@ -58,7 +58,7 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        self.set_tooltip(["Click to remove this notification"])
+        self.set_tooltip(['Click to remove this notification'])
 
     def on_click(self):
         '''

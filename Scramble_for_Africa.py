@@ -20,6 +20,7 @@ import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
 import modules.actor_utility as actor_utility
 import modules.countries as countries
+import modules.effects as effects
 
 try:
     #fundamental setup
@@ -31,6 +32,7 @@ try:
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('waltz_2')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
+    global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
     global_manager.set('europe_grid', 'none')
     resolution_finder = pygame.display.Info()
     global_manager.set('default_display_width', 1728) #all parts of game made to be at default_display and scaled to display
@@ -211,6 +213,7 @@ try:
         'army officer': 2,
         'naval officer': 2,
         'priest': 2,
+        'preacher': 2,
         'natural scientist': 2, 
         'doctor': 2,
         'industrialist': 3,
@@ -229,6 +232,7 @@ try:
         'army officer': ['military'],
         'naval officer': ['transportation'],
         'priest': ['religion'],
+        'preacher': ['religion'],
         'natural scientist': ['exploration'],
         'doctor': ['random'],
         'industrialist': ['construction', 'production', 'transportation'],
@@ -360,11 +364,11 @@ try:
     global_manager.set('commodity_max_starting_price', 5)
     global_manager.set('consumer_goods_starting_price', 1)
 
-    global_manager.set('action_types', ['exploration', 'convert', 'religious_campaign', 'public_relations_campaign', 'advertising_campaign', 'loan_search', 'trade', 'loan', 'attack', 'capture_slaves', 'trial', 'hunt', 'track_beasts'])
+    global_manager.set('action_types', ['exploration', 'conversion', 'religious_campaign', 'public_relations_campaign', 'advertising_campaign', 'loan_search', 'trade', 'loan', 'attack', 'capture_slaves', 'trial', 'hunt', 'track_beasts'])
     global_manager.set('base_action_prices',
         {
         'exploration': 5,
-        'convert': 5,
+        'conversion': 5,
         'religious_campaign': 5,
         'public_relations_campaign': 5,
         'advertising_campaign': 5,
@@ -436,7 +440,7 @@ try:
     global_manager.set('current_instructions_page_index', 0)
     global_manager.set('instructions_list', [])
     #page 1
-    instructions_message = "Placeholder instructions, use += to add"
+    instructions_message = 'Placeholder instructions, use += to add'
     global_manager.get('instructions_list').append(instructions_message)
 
     global_manager.set('minister_list', [])
@@ -821,6 +825,7 @@ try:
     global_manager.set('country_specific_units', ['major'])
     global_manager.set('current_country', 'none')
     global_manager.set('current_country_name', 'none')
+
     british_weighted_backgrounds = [
         'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
         'banker',
@@ -834,9 +839,10 @@ try:
         'politician', 'politician',
         'army officer',
         'naval officer',
-        'priest'
+        'preacher'
         ]
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, 'locations/europe.png', british_weighted_backgrounds, global_manager))
+    british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
+    global_manager.set('Britain', countries.country('Britain', 'british', False, False, 'locations/europe.png', british_weighted_backgrounds, british_country_effect, global_manager))
 
     french_weighted_backgrounds = [
         'lowborn', 'lowborn', 'lowborn', 'lowborn', 'lowborn',
@@ -852,7 +858,8 @@ try:
         'naval officer',
         'priest'
         ]
-    global_manager.set('France', countries.country('France', 'french', True, True, 'locations/europe.png', french_weighted_backgrounds, global_manager))
+    french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
+    global_manager.set('France', countries.country('France', 'french', True, True, 'locations/europe.png', french_weighted_backgrounds, french_country_effect, global_manager))
 
     #global_manager.get('Britain').select()
     #global_manager.get('France').select()
@@ -1091,51 +1098,54 @@ try:
 
 
     #activating/disabling debugging tools
-    global_manager.set('DEBUG_spawning_allowed', True) #True by default
+    DEBUG_block_native_warrior_spawning = effects.effect('DEBUG_block_native_warrior_spawning', 'block_native_warrior_spawning', global_manager)
     #allows villages to spawn native warriors
     
-    global_manager.set('DEBUG_boost_attrition', False) #False by default
+    DEBUG_boost_attrition = effects.effect('DEBUG_boost_attrition', 'boost_attrition', global_manager)
     #increases chance of any attrition occuring by a factor of 6
     
-    global_manager.set('DEBUG_infinite_village_workers', False) #False by default
+    DEBUG_infinite_village_workers = effects.effect('DEBUG_infinite_village_workers', 'infinite_village_workers', global_manager)
     #converts all villagers to available workers on startup
     
-    global_manager.set('DEBUG_damaged_buildings', False) #False by default
+    DEBUG_damaged_buildings = effects.effect('DEBUG_damaged_buildings', 'damaged_buildings', global_manager)
     #causes all buildings to be damaged on startup
     
-    global_manager.set('DEBUG_show_corruption_on_save', False) #False by default
+    DEBUG_show_corruption_on_save = effects.effect('DEBUG_show_corruption_on_save', 'show_corruption_on_save', global_manager)
     #prints the corruption and skill levels of each minister to the console when saving the game
 
-    global_manager.set('DEBUG_show_minister_stealing', False) #False by default
+    DEBUG_show_minister_stealing = effects.effect('DEBUG_show_minister_stealing', 'show_minister_stealing', global_manager)
     #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
 
-    global_manager.set('DEBUG_show_evil', False) #False by default
-    #prints the players "evil" number at the end of each turn
+    DEBUG_show_evil = effects.effect('DEBUG_show_evil', 'show_evil', global_manager)
+    #prints the players 'evil' number at the end of each turn
 
-    global_manager.set('DEBUG_show_fear', False) #False by default
-    #prints the players "fear" number at the end of each turn and says when fear dissuades a minister from stealing
+    DEBUG_show_fear = effects.effect('DEBUG_show_fear', 'show_fear', global_manager)
+    #prints the players 'fear' number at the end of each turn and says when fear dissuades a minister from stealing
 
-    global_manager.set('DEBUG_remove_fog_of_war', False) #False by default
+    DEBUG_remove_fog_of_war = effects.effect('DEBUG_remove_fog_of_war', 'remove_fog_of_war', global_manager)
     #reveals all cells
 
-    global_manager.set('DEBUG_fast_turn', False) #False by default
+    DEBUG_fast_turn = effects.effect('DEBUG_fast_turn', 'fast_turn', global_manager)
     #removes end turn delays
 
-    global_manager.set('DEBUG_reveal_beasts', False) #False by default
+    DEBUG_reveal_beasts = effects.effect('DEBUG_reveal_beasts', 'reveal_beasts', global_manager)
     #reveals beasts on load
 
-    global_manager.set('DEBUG_infinite_commodities', False) #False by default
+    DEBUG_infinite_commodities = effects.effect('DEBUG_infinite_commodities', 'infinite_commodities', global_manager)
     #gives 10 of each commodity in Europe on new game
 
-    global_manager.set('DEBUG_band_of_thieves', False) #False by default
+    DEBUG_band_of_thieves = effects.effect('DEBUG_band_of_thieves', 'band_of_thieves', global_manager)
     #causes all ministers to be corrupt whenever possible
 
-    global_manager.set('DEBUG_ministry_of_magic', False) #False by default
+    DEBUG_ministry_of_magic = effects.effect('DEBUG_ministry_of_magic', 'ministry_of_magic', global_manager)
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
-    global_manager.set('DEBUG_farm_upstate', False) #False by default
+    DEBUG_farm_upstate = effects.effect('DEBUG_farm_upstate', 'farm_upstate', global_manager)
     #retires all appointed ministers at the end of the turn
-    
+
+    #activate effect with:
+    #DEBUG_effect.apply()
+
     #activating/disabling debugging tools
 
     global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
@@ -1146,10 +1156,10 @@ try:
     pygame.quit()
 
 except Exception as e: #displays error message and records error message in crash log file
-    crash_log_file = open("notes/Crash Log.txt", "w")
-    crash_log_file.write("") #clears crash report file
+    crash_log_file = open('notes/Crash Log.txt', 'w')
+    crash_log_file.write('') #clears crash report file
     console = logging.StreamHandler() #sets logger to go to both console and crash log file
-    logging.basicConfig(filename = "notes/Crash Log.txt")
+    logging.basicConfig(filename = 'notes/Crash Log.txt')
     logging.getLogger('').addHandler(console)
     
     logging.error(e, exc_info = True) #sends error message to console and crash log file

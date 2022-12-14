@@ -96,7 +96,7 @@ class officer(pmob):
         '''
         self.just_promoted = False
         self.veteran = True
-        self.set_name("veteran " + self.name)
+        self.set_name('veteran ' + self.name)
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)

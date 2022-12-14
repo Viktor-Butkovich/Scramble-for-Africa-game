@@ -297,7 +297,7 @@ def main_loop(global_manager):
 
                     if current_enemy.turn_done:
                         global_manager.get('enemy_turn_queue').pop(0)
-            if global_manager.get('DEBUG_fast_turn'):
+            if global_manager.get('effect_manager').effect_active('fast_turn'):
                 global_manager.set('end_turn_wait_time', 0)
             global_manager.set('previous_turn_time', time.time())
     

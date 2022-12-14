@@ -433,23 +433,23 @@ class minister_type_image(tooltip_free_image): #image of minister type icon
             else:
                 self.tooltip_text.append('Whenever you command a ' + keyword + '-oriented unit to do an action, the ' + current_minister_type + ' is responsible for executing the action.')#new_minister.tooltip_text
                 if keyword == 'military':
-                    self.tooltip_text.append("Military-oriented units include military officers and European battalions.")
+                    self.tooltip_text.append('Military-oriented units include military officers and European battalions.')
                 elif keyword == 'religion':
-                    self.tooltip_text.append("Religion-oriented units include evangelists, church volunteers, and missionaries.")
+                    self.tooltip_text.append('Religion-oriented units include evangelists, church volunteers, and missionaries.')
                 elif keyword == 'trade':
-                    self.tooltip_text.append("Trade-oriented units include merchants and caravans.")
-                    self.tooltip_text.append("The " + current_minister_type + " also controls the purchase and sale of goods in Europe.")
+                    self.tooltip_text.append('Trade-oriented units include merchants and caravans.')
+                    self.tooltip_text.append('The ' + current_minister_type + ' also controls the purchase and sale of goods in Europe.')
                 elif keyword == 'exploration':
-                    self.tooltip_text.append("Exploration-oriented units include explorers, expeditions, hunters, and safaris.")
+                    self.tooltip_text.append('Exploration-oriented units include explorers, expeditions, hunters, and safaris.')
                 elif keyword == 'construction':
-                    self.tooltip_text.append("Construction-oriented units include engineers and construction gangs.")
+                    self.tooltip_text.append('Construction-oriented units include engineers and construction gangs.')
                 elif keyword == 'production':
-                    self.tooltip_text.append("Production-oriented units include work crews, foremen, and workers not attached to other units.")
+                    self.tooltip_text.append('Production-oriented units include work crews, foremen, and workers not attached to other units.')
                 elif keyword == 'transportation':
-                    self.tooltip_text.append("Transportation-oriented units include ships, trains, drivers, and porters.")
-                    self.tooltip_text.append("The " + current_minister_type + " also ensures that goods are not lost in transport or storage.")
+                    self.tooltip_text.append('Transportation-oriented units include ships, trains, drivers, and porters.')
+                    self.tooltip_text.append('The ' + current_minister_type + ' also ensures that goods are not lost in transport or storage.')
             if new_minister == 'none':
-                self.tooltip_text.append("There is currently no " + current_minister_type + " appointed, so " + keyword + "-oriented actions are not possible.")
+                self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             self.set_image('ministers/icons/' + keyword + '.png')
 
     def set_y(self, attached_label):
@@ -621,7 +621,7 @@ class actor_image():
         '''
         cell_width = self.grid.get_cell_width()
         cell_height = self.grid.get_cell_height()
-        return((self.x + round(cell_width / 2), display_height -(self.y + round(cell_height / 2))))
+        return((self.x + round(cell_width / 2), self.global_manager.get('display_height') -(self.y + round(cell_height / 2))))
         
     def set_image(self, new_image_description):
         '''

@@ -120,7 +120,52 @@ class input_manager_template():
             if received_input == 'done':
                 self.global_manager.set('crashed', True)
             else:
-                text_tools.print_to_screen("I didn't understand that.")
+                text_tools.print_to_screen('I didn\'t understand that.')
+
+class effect_manager_template():
+    '''
+    Object that controls global effects
+    '''
+    def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.global_manager = global_manager
+        self.possible_effects = []
+        self.active_effects = []
+
+    def __str__(self):
+        '''
+        Description:
+            Returns text for a description of this object when printed
+        Input:
+            None
+        Output:
+            string: Returns text to print
+        '''
+        text = 'Active effects: '
+        for current_effect in self.active_effects:
+            text += '\n    ' + current_effect.__str__()
+        return(text)
+
+    def effect_active(self, effect_type):
+        '''
+        Description:
+            Finds and returns whether any effect of the inputted type is active
+        Input:
+            string effect_type: Type of effect to check for
+        Output:
+            boolean: Returns whether any effect of the inputted type is active
+        '''
+        for current_effect in self.active_effects:
+            if current_effect.effect_type == effect_type:
+                return(True)
+        return(False)
 
 class flavor_text_manager_template():
     '''
@@ -358,8 +403,8 @@ class money_tracker(value_tracker):
         Output:
             string: Formatted financial report text with /n being a new line
         '''
-        notification_text = "Financial report: /n /n"
-        notification_text += "Revenue: /n "
+        notification_text = 'Financial report: /n /n'
+        notification_text += 'Revenue: /n '
         total_revenue = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] > 0:
@@ -371,7 +416,7 @@ class money_tracker(value_tracker):
         if total_revenue == 0:
             notification_text += '  None /n'
         
-        notification_text += "/nExpenses: /n"
+        notification_text += '/nExpenses: /n'
         total_expenses = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] < 0:
@@ -443,32 +488,32 @@ class notification_manager_template():
             int: height in pixels of the inputted text if it were put in a notification
         '''
         new_message = []
-        next_line = ""
-        next_word = ""
+        next_line = ''
+        next_word = ''
         font_size = 25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
-            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n"): #don't add if /n
-                if not (index > 0 and notification_text[index - 1] + notification_text[index] == "/n"): #if on n after /, skip
+            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n'): #don't add if /n
+                if not (index > 0 and notification_text[index - 1] + notification_text[index] == '/n'): #if on n after /, skip
                     next_word += notification_text[index]
-            if notification_text[index] == " ":
+            if notification_text[index] == ' ':
                 if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
                     new_message.append(next_line)
-                    next_line = ""
+                    next_line = ''
                 next_line += next_word
-                next_word = ""
-            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n": #don't check for /n if at last index
+                next_word = ''
+            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n': #don't check for /n if at last index
                 new_message.append(next_line)
-                next_line = ""
+                next_line = ''
                 next_line += next_word
-                next_word = ""
+                next_word = ''
         if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
             new_message.append(next_line)
-            next_line = ""
+            next_line = ''
         next_line += next_word
         new_message.append(next_line)
-        new_message.append("Click to remove this notification.")
+        new_message.append('Click to remove this notification.')
         return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
             
     def notification_to_front(self, message):

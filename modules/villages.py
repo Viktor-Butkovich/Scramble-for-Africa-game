@@ -42,7 +42,7 @@ class village():
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
                 self.global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
-        if self.global_manager.get('DEBUG_infinite_village_workers'):
+        if self.global_manager.get('effect_manager').effect_active('infinite_village_workers'):
             self.available_workers = self.population
         self.cell = input_dict['cell']
         self.x = self.cell.x
@@ -88,7 +88,9 @@ class village():
         Output:
             Returns whether this village can currently spawn a warrior
         '''
-        if self.global_manager.get('DEBUG_spawning_allowed') and self.population > self.available_workers:
+        if self.global_manager.get('effect_manager').effect_active('block_native_warrior_spawning'):
+            return(False)
+        if self.population > self.available_workers:
             return(True)
         return(False)
     
@@ -198,10 +200,10 @@ class village():
             string list: list with each item representing a line of this village's tooltip
         '''
         tooltip_text = []
-        tooltip_text.append("Village name: " + self.name)
-        tooltip_text.append("    Total population: " + str(self.population))
-        tooltip_text.append("    Available workers: " + str(self.available_workers))
-        tooltip_text.append("    Aggressiveness: " + str(self.aggressiveness))
+        tooltip_text.append('Village name: ' + self.name)
+        tooltip_text.append('    Total population: ' + str(self.population))
+        tooltip_text.append('    Available workers: ' + str(self.available_workers))
+        tooltip_text.append('    Aggressiveness: ' + str(self.aggressiveness))
         return(tooltip_text)
 
     def get_aggressiveness_modifier(self): #modifier affects roll difficulty, not roll result

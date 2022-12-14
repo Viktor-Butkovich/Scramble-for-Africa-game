@@ -541,7 +541,7 @@ class mob(actor):
         '''
         tooltip_list = []
         
-        tooltip_list.append("Name: " + self.name[:1].capitalize() + self.name[1:]) #capitalizes first letter while keeping rest the same
+        tooltip_list.append('Name: ' + self.name[:1].capitalize() + self.name[1:]) #capitalizes first letter while keeping rest the same
         
         if self.controllable:
             if self.is_group:
@@ -549,60 +549,60 @@ class mob(actor):
                 tooltip_list.append('    Workers: ' + self.worker.name.capitalize())
             elif self.is_vehicle:
                 if self.has_crew:
-                    tooltip_list.append("    Crew: " + self.crew.name.capitalize())
+                    tooltip_list.append('    Crew: ' + self.crew.name.capitalize())
                 else:
-                    tooltip_list.append("    Crew: None")
-                    tooltip_list.append("    A " + self.name + " can not move or take passengers or cargo without crew")
+                    tooltip_list.append('    Crew: None')
+                    tooltip_list.append('    A ' + self.name + ' can not move or take passengers or cargo without crew')
                     
                 if len(self.contained_mobs) > 0:
-                    tooltip_list.append("    Passengers: ")
+                    tooltip_list.append('    Passengers: ')
                     for current_mob in self.contained_mobs:
                         tooltip_list.append('        ' + current_mob.name.capitalize())
                 else:
-                    tooltip_list.append("    Passengers: None")
+                    tooltip_list.append('    Passengers: None')
             
             if (not self.has_infinite_movement) and not (self.is_vehicle and not self.has_crew):
-                tooltip_list.append("Movement points: " + str(self.movement_points) + "/" + str(self.max_movement_points))
+                tooltip_list.append('Movement points: ' + str(self.movement_points) + '/' + str(self.max_movement_points))
             elif self.temp_movement_disabled or self.is_vehicle and not self.has_crew:
-                tooltip_list.append("No movement")
+                tooltip_list.append('No movement')
             else:
-                tooltip_list.append("Movement points: Infinite")
+                tooltip_list.append('Movement points: Infinite')
 
         else:
-            tooltip_list.append("Movement points: ???")
+            tooltip_list.append('Movement points: ???')
         
-        tooltip_list.append("Combat strength: " + str(self.get_combat_strength()))    
+        tooltip_list.append('Combat strength: ' + str(self.get_combat_strength()))    
         if self.disorganized:
             if self.is_npmob and self.npmob_type == 'beast':
-                tooltip_list.append("This unit is currently injured, giving a combat penalty until its next turn")
+                tooltip_list.append('This unit is currently injured, giving a combat penalty until its next turn')
             else:
-                tooltip_list.append("This unit is currently disorganized, giving a combat penalty until its next turn")
+                tooltip_list.append('This unit is currently disorganized, giving a combat penalty until its next turn')
 
         if not self.end_turn_destination == 'none':
             if self.end_turn_destination.cell.grid == self.global_manager.get('strategic_map_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to (" + str(self.end_turn_destination.cell.x) + ", " + str(self.end_turn_destination.cell.y) + ") in Africa at the end of the turn")
+                tooltip_list.append('This unit has been issued an order to travel to (' + str(self.end_turn_destination.cell.x) + ', ' + str(self.end_turn_destination.cell.y) + ') in Africa at the end of the turn')
             elif self.end_turn_destination.cell.grid == self.global_manager.get('europe_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to Europe at the end of the turn")
+                tooltip_list.append('This unit has been issued an order to travel to Europe at the end of the turn')
             elif self.end_turn_destination.cell.grid == self.global_manager.get('slave_traders_grid'):
-                tooltip_list.append("This unit has been issued an order to travel to the slave traders at the end of the turn")
+                tooltip_list.append('This unit has been issued an order to travel to the slave traders at the end of the turn')
                 
         if self.is_npmob and self.npmob_type == 'beast':
-            tooltip_list.append("This beast tends to live in " + self.preferred_terrains[0] + ", " + self.preferred_terrains[1] + ", and " + self.preferred_terrains[2] + " terrain ")
+            tooltip_list.append('This beast tends to live in ' + self.preferred_terrains[0] + ', ' + self.preferred_terrains[1] + ', and ' + self.preferred_terrains[2] + ' terrain ')
             
         if self.is_npmob:
             if self.hostile:
-                tooltip_list.append("Attitude: Hostile")
+                tooltip_list.append('Attitude: Hostile')
             else:
-                tooltip_list.append("Attitude: Neutral")
-            tooltip_list.append("You do not control this unit")
+                tooltip_list.append('Attitude: Neutral')
+            tooltip_list.append('You do not control this unit')
         elif self.is_pmob and self.sentry_mode:
-            tooltip_list.append("This unit is in sentry mode")
+            tooltip_list.append('This unit is in sentry mode')
 
         if self.is_pmob:
             if len(self.base_automatic_route) > 1:
                 start_coordinates = self.base_automatic_route[0]
                 end_coordinates = self.base_automatic_route[-1]
-                tooltip_list.append("This unit has a designated movement route of length " + str(len(self.base_automatic_route)) + ", picking up commodities at (" + str(start_coordinates[0]) + ", " + str(start_coordinates[1]) + ") and dropping them off at (" + str(end_coordinates[0]) + ", " + str(end_coordinates[1]) + ")") 
+                tooltip_list.append('This unit has a designated movement route of length ' + str(len(self.base_automatic_route)) + ', picking up commodities at (' + str(start_coordinates[0]) + ', ' + str(start_coordinates[1]) + ') and dropping them off at (' + str(end_coordinates[0]) + ', ' + str(end_coordinates[1]) + ')') 
             
         self.set_tooltip(tooltip_list)
         
