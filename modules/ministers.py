@@ -534,15 +534,19 @@ class minister():
             return(5)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             modifier += self.get_skill_modifier()
+            if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if modifier >= 0:
+                    print('Minister gave modifier of +' + str(modifier) + ' to ' + roll_type + ' roll.')
+                else:
+                    print('Minister gave modifier of ' + str(modifier) + ' to ' + roll_type + ' roll.')
         if self.global_manager.get('effect_manager').effect_active(roll_type + '_plus_modifier'):
-            print('plus modifier')
             if random.randrange(1, 3) == 1:
-                print('increased by 1')
                 modifier += 1
+                print('Country gave modifier of +1 to ' + roll_type + ' roll.')
         elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
-            print('minus_modifier')
             if random.randrange(1, 3) == 1:
                 modifier -= 1
+                print('Country gave modifier of -1 to ' + roll_type + ' roll.')
         return(modifier)
 
     def remove(self):

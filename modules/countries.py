@@ -4,7 +4,7 @@ class country:
     '''
     Country with associated flavor text, art, images, and abilities that can be selected to play as
     '''
-    def __init__(self, name, adjective, allow_particles, allow_double_last_names, image_id, background_set, country_effect, global_manager):
+    def __init__(self, name, adjective, allow_particles, aristocratic_particles, allow_double_last_names, image_id, background_set, country_effect, global_manager):
         '''
         Description:
             Initializes this object
@@ -12,6 +12,7 @@ class country:
             string name: Name for this country, like 'France'
             string adjective: Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
             boolean allow_particles: Whether ministers of this country are allowed to have name particles, like de Rouvier
+            boolean aristocratic_particles: Whether name particles for this country are reserved for aristocratic ministers
             boolean allow_double_last_names: Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
             string image_id: File path to the Europe image used by this country
             string list background_set: Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
@@ -27,6 +28,7 @@ class country:
         self.name = name
         self.adjective = adjective
         self.allow_particles = allow_particles
+        self.aristocratic_particles = aristocratic_particles
         self.allow_double_last_names = allow_double_last_names
         self.image_id = image_id
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
@@ -50,6 +52,7 @@ class country:
         self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
         if self.allow_particles:
             self.global_manager.get('flavor_text_manager').set_flavor_text('minister_particles', 'text/flavor_minister_' + self.adjective + '_particles.csv')
+        self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
         self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
         self.global_manager.get('flavor_text_manager').set_flavor_text('minister_last_names', 'text/flavor_minister_' + self.adjective + '_last_names.csv')
         self.global_manager.set('weighted_backgrounds', self.background_set)

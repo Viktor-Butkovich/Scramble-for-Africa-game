@@ -225,8 +225,20 @@ class flavor_text_manager_template():
             string: Returns a random combination of minister first and last names
         '''
         first_name = self.generate_flavor_text('minister_first_names')
-        if not self.global_manager.get('current_country') == self.global_manager.get('France'):
-            titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 'Marquis', 'Infante', 'Dom', 'Fidalgo']
+        titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 
+                    'Count', 'Vicomte', 'Chevalier', 'Écuyer',
+                    'Duque', 'Marquês', 'Infante', 'Visconde', 'Barão', 'Conde', 'Dom', 'Fidalgo',
+                    'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
+                    'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
+                ]
+        if self.global_manager.get('current_country') == self.global_manager.get('Germany'): #Most German nobility had von particle but no inherited title
+            if background == 'royal heir' or (background == 'aristocrat' and random.randrange(1, 7) >= 5):
+                while not first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+            else:
+                while first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+        else:
             if background in ['royal heir', 'aristocrat']:
                 while not first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
@@ -234,9 +246,12 @@ class flavor_text_manager_template():
                 while first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
         name = first_name + ' '
-
-        if self.allow_particles and random.randrange(1, 7) >= 5:
-            name += self.generate_flavor_text('minister_particles')
+        if self.allow_particles:
+            if self.aristocratic_particles:
+                if background in ['royal heir', 'aristocrat'] and self.aristocratic_particles:
+                    name += self.generate_flavor_text('minister_particles')
+            elif random.randrange(1, 7) >= 5:
+                name += self.generate_flavor_text('minister_particles')
         last_name = self.generate_flavor_text('minister_last_names')
 
         name += last_name

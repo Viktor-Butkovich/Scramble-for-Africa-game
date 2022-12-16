@@ -519,34 +519,34 @@ def countries_setup(global_manager):
         'naval officer',
         ]
 
-    #each country adds 18 backgrounds for what is more common in that country
+    #each country adds 18 backgrounds for what is more common in that country - half middle, half upper class
     british_weighted_backgrounds = default_weighted_backgrounds + [
-        'merchant', 'merchant',
+        'merchant',
         'lawyer',
         'natural scientist',
         'doctor',
-        'naval officer', 'naval officer',
+        'naval officer', 'naval officer', 'naval officer',
         'preacher', 'preacher',
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
     british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, 'locations/europe.png', british_weighted_backgrounds, british_country_effect, global_manager))
+    global_manager.set('Britain', countries.country('Britain', 'british', False, False, False, 'locations/europe.png', british_weighted_backgrounds, british_country_effect, global_manager))
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
-        'merchant', 'merchant',
+        'merchant',
         'lawyer',
         'natural scientist',
         'doctor', 'doctor',
         'naval officer',
         'army officer',
         'priest', 'priest',
-        'politician', 'politician', 'politician', 'politician', 'politician',
+        'politician', 'politician', 'politician', 'politician', 'politician', 'politician',
         'industrialist', 'industrialist', 
         'business magnate',
         ]
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
-    global_manager.set('France', countries.country('France', 'french', True, True, 'locations/europe.png', french_weighted_backgrounds, french_country_effect, global_manager))
+    global_manager.set('France', countries.country('France', 'french', True, False, True, 'locations/europe.png', french_weighted_backgrounds, french_country_effect, global_manager))
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -559,8 +559,35 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager)) 
+    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
 
+    german_weighted_backgrounds = default_weighted_backgrounds + [
+        'merchant',
+        'lawyer',
+        'natural scientist',
+        'doctor',
+        'army officer', 'army officer', 'army officer',
+        'preacher', 'preacher',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        ]
+    german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
+    global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, 'locations/europe.png', german_weighted_backgrounds, german_country_effect, global_manager)) 
+
+    italian_weighted_backgrounds = default_weighted_backgrounds + [
+        'merchant',
+        'lawyer', 'lawyer',
+        'natural scientist',
+        'doctor',
+        'army officer',
+        'naval officer',
+        'priest', 'priest',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        ]
+    italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
+    global_manager.set('Italy', countries.country('Italy', 'italian', True, True, False, 'locations/europe.png', italian_weighted_backgrounds, italian_country_effect, global_manager)) 
+    
 def transactions_setup(global_manager):
     '''
     Description:
@@ -657,7 +684,7 @@ def transactions_setup(global_manager):
         'construction': 'construction',
         'conversion': 'religious conversion',
         'inventory attrition': 'missing commodities',
-        'combat': 'combat supplies',
+        'attack': 'combat supplies',
         'hunting': 'hunting supplies',
         'production': 'production',
         'slave capture': 'capturing slaves',
@@ -737,8 +764,12 @@ def buttons_setup(global_manager):
         global_manager), scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', pygame.K_SPACE, ['strategic', 'europe'],
         'buttons/end_turn_button.png', global_manager)
 
-    new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
-        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu', 'new_game_setup'], 'buttons/new_game_button.png',
+    main_menu_new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50, global_manager),
+        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['main_menu'], 'buttons/new_game_button.png',
+        global_manager)
+
+    setup_new_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 50 - 250, global_manager),
+        scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'new game', pygame.K_n, ['new_game_setup'], 'buttons/new_game_button.png',
         global_manager)
 
     load_game_button = buttons.button(scaling.scale_coordinates(round(global_manager.get('default_display_width') * 0.4), global_manager.get('default_display_height') / 2 - 125, global_manager),
@@ -926,8 +957,9 @@ def new_game_setup_screen_setup(global_manager):
     country_image_width = 300
     country_image_height = 200
     country_separation = 50
+    countries_per_row = 3
     for current_country in global_manager.get('country_list'):
-        buttons.country_selection_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (len(global_manager.get('country_list')) * country_image_width / 2) + (country_image_width + country_separation) * current_country_index, global_manager.get('default_display_height') / 2 + 50, global_manager), scaling.scale_width(country_image_width, global_manager), scaling.scale_height(country_image_height, global_manager), ['new_game_setup'], current_country, global_manager)
+        buttons.country_selection_image(scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - (countries_per_row * (country_image_width + country_separation) / 2) + (country_image_width + country_separation) * (current_country_index % countries_per_row) + country_separation / 2, global_manager.get('default_display_height') / 2 + 50 - ((country_image_height + country_separation) * (current_country_index // countries_per_row)), global_manager), scaling.scale_width(country_image_width, global_manager), scaling.scale_height(country_image_height, global_manager), ['new_game_setup'], current_country, global_manager)
         current_country_index += 1
 
 def mob_interface_setup(global_manager):
@@ -1247,6 +1279,10 @@ def debug_tools_setup(global_manager):
 
     DEBUG_farm_upstate = effects.effect('DEBUG_farm_upstate', 'farm_upstate', global_manager)
     #retires all appointed ministers at the end of the turn
+
+    DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
+    #prints how and when a minister or country modifiers affects a roll
+    DEBUG_show_modifiers.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

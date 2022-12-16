@@ -856,7 +856,7 @@ class pmob(mob):
         if self.veteran:
             if combat_type == 'attacking': #minister only involved in attacks
                 if self.is_battalion:
-                    cost_type = 'combat'
+                    cost_type = 'attack'
                 elif self.is_safari:
                     cost_type = 'hunting'
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
@@ -880,7 +880,7 @@ class pmob(mob):
         else:
             if combat_type == 'attacking': #minister only involved in attacks
                 if self.is_battalion:
-                    cost_type = 'combat'
+                    cost_type = 'attack'
                 elif self.is_safari:
                     cost_type = 'hunting'
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
