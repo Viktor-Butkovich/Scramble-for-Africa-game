@@ -101,12 +101,16 @@ class worker(pmob):
             self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1)
             text_tools.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
             market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
-            public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
-            current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-            self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
-            resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-            if not resulting_public_opinion == current_public_opinion:
-                text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+
+            if self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+                text_tools.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
+            else:
+                public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+                current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+                resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                if not resulting_public_opinion == current_public_opinion:
+                    text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
 
         elif self.worker_type == 'religious':
             text_tools.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.', self.global_manager)
@@ -290,14 +294,15 @@ class slave_worker(worker):
         super().__init__(from_save, input_dict, global_manager)
         if not from_save:
             if input_dict['purchased']: #as opposed to captured
-                market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
-                public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
-                current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
-                resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
-                if not resulting_public_opinion == current_public_opinion:
-                    text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-                self.global_manager.get('evil_tracker').change(6)
+                if not self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+                    market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+                    public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
+                    current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                    self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+                    resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
+                    if not resulting_public_opinion == current_public_opinion:
+                        text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                    self.global_manager.get('evil_tracker').change(6)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = self.global_manager.get('public_opinion_tracker').get()

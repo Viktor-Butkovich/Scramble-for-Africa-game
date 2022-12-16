@@ -1769,7 +1769,7 @@ class country_selection_image(button): #image of country - button subclass becau
         Output:
             None
         '''
-        self.default_image_id = 'ministers/empty_portrait.png'
+        self.default_image_id = 'misc/empty.png'
         self.current_country = 'none'
         super().__init__(coordinates, width, height, 'gray', 'country images', 'none', modes, self.default_image_id, global_manager)
         self.global_manager.get('country_selection_image_list').append(self)
@@ -1818,7 +1818,7 @@ class country_selection_image(button): #image of country - button subclass becau
         if not new_country == 'none':
             new_country.update_tooltip()
             self.tooltip_text = new_country.tooltip_text 
-            self.image.set_image(new_country.image_id)
+            self.image.set_image(new_country.flag_image_id)
         else:
             self.image.set_image(self.default_image_id)
         self.current_country = new_country

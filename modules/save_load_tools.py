@@ -110,8 +110,8 @@ class save_load_manager_template():
         #self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
     
 
-        europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
 
         input_dict = {}
         input_dict['origin_coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
@@ -127,7 +127,7 @@ class save_load_manager_template():
         self.global_manager.set('europe_grid', europe_grid)
 
 
-        slave_traders_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
         slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
 
         input_dict = {}
@@ -291,9 +291,9 @@ class save_load_manager_template():
         strategic_grid_width = 320
         mini_grid_height = 600
         mini_grid_width = 640
-        europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
-        slave_traders_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
+        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
         slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120)
         for current_grid_dict in saved_grid_dicts:
             input_dict = current_grid_dict

@@ -136,7 +136,10 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+            if global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+                text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+            else:
+                text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
             text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')

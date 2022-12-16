@@ -13,7 +13,7 @@ class country:
             string adjective: Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
             boolean allow_particles: Whether ministers of this country are allowed to have name particles, like de Rouvier
             boolean allow_double_last_names: Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
-            string image_id: File path to the image used by this country
+            string image_id: File path to the Europe image used by this country
             string list background_set: Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
             effect country_effect: Effect that is applied when this country is selected and vice versa
             global_manager_template global_manager: Object that accesses shared variables
@@ -29,6 +29,7 @@ class country:
         self.allow_particles = allow_particles
         self.allow_double_last_names = allow_double_last_names
         self.image_id = image_id
+        self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
         self.background_set = background_set
         self.country_effect = country_effect
 
@@ -55,6 +56,8 @@ class country:
         for current_recruitment_button in self.global_manager.get('recruitment_button_list'):
             if current_recruitment_button.recruitment_type in self.global_manager.get('country_specific_units'):
                 current_recruitment_button.calibrate(self)
+        for current_flag_icon in self.global_manager.get('flag_icon_list'):
+            current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
 
     def update_tooltip(self):

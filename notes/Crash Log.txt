@@ -1,19 +1,7 @@
-ERROR:root:'str' object has no attribute 'cell'
+ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
-  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 1157, in <module>
-    main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 45, in main_loop
-    current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1033, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 354, in load_game
-    game_transitions.create_strategic_map(self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\game_transitions.py", line 116, in create_strategic_map
-    main_loop_tools.update_display(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop_tools.py", line 60, in update_display
-    current_image.draw()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1063, in draw
-    if self.button.can_show():
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_display_tools\buttons.py", line 2908, in can_show
-    attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
-AttributeError: 'str' object has no attribute 'cell'
+  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 14, in <module>
+    setup.countries_setup(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\setup.py", line 562, in countries_setup
+    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
+NameError: name 'portuguese_weighted_backgrounds' is not defined

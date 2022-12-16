@@ -225,8 +225,8 @@ class flavor_text_manager_template():
             string: Returns a random combination of minister first and last names
         '''
         first_name = self.generate_flavor_text('minister_first_names')
-        if self.global_manager.get('current_country') == self.global_manager.get('Britain'):
-            titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord']
+        if not self.global_manager.get('current_country') == self.global_manager.get('France'):
+            titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 'Marquis', 'Infante', 'Dom', 'Fidalgo']
             if background in ['royal heir', 'aristocrat']:
                 while not first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
