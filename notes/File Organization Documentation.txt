@@ -197,47 +197,49 @@ SFA folder
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools
             class actor
 
-	  buildings.py
-	      imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
-	      class building(actors.actor)
-		    class infrastructure_building
-		    class trading_post
-		    class mission
-		    class fort
-		    class train_station
-		    class port
-		    class warehouses
-		    class resource_building
-		    class slums
+		buildings.py
+			imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
+			class building(actors.actor)
+		    	class infrastructure_building
+		    	class trading_post
+		    	class mission
+		    	class fort
+		    	class train_station
+		    	class port
+		    	class warehouses
+		    	class resource_building
+		    	class slums
+
         buttons.py
             imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
             class button
 		    class end_turn_button
-	          class cycle_same_tile_button
-	          class same_tile_icon
-	          class switch_game_mode_button
-	          class minister_portrait_image
-			  class country_selection_image
-	          class cycle_available_ministers_button
-	          class commodity_button
-	          class show_previous_financial_report_button
+	        	class cycle_same_tile_button
+	        	class same_tile_icon
+	        	class switch_game_mode_button
+	        	class minister_portrait_image
+				class country_selection_image
+	        	class cycle_available_ministers_button
+	        	class commodity_button
+	        	class show_previous_financial_report_button
 
         cells.py
             imports pygame, random, actor_utility
             class cell
 
-	  choice_notifications.py
-	      imports pygame, buttons, notifications, text_tools, scaling, market_tools, utility
-	      class choice_notification(notifications.notification)
-	      class choice_button(buttons.button)
-	          class recruitment_choice_button
+	    choice_notifications.py
+	    	imports pygame, buttons, notifications, text_tools, scaling, market_tools, utility
+	    	class choice_notification(notifications.notification)
+	    	class choice_button(buttons.button)
+	        	class recruitment_choice_button
 
-	  countries.py
-		class country
+	    countries.py
+		    class country
+				class hybrid_country
 
         csv_tools.py
             imports csv
-           def read_csv
+            def read_csv
 
         data_managers.py
             imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
@@ -246,8 +248,8 @@ SFA folder
 			class effect_manager_template
             class flavor_text_manager_template
 	        class value_tracker
-		      class public_opinion_tracker
-   	            class money_tracker
+		    	class public_opinion_tracker
+   	        		class money_tracker
 	        class notification_manager_template
 	        class sound_manager_template
 

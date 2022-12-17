@@ -138,22 +138,29 @@ def misc_setup(global_manager):
     global_manager.set('overlay_tile_list', [])
     global_manager.set('notification_list', [])
     global_manager.set('label_list', [])
+
+    global_manager.set('displayed_mob', 'none')
     global_manager.set('mob_info_display_list', [])
     global_manager.set('mob_ordered_label_list', [])
-    global_manager.set('minister_info_display_list', [])
-    global_manager.set('minister_ordered_label_list', [])
-    global_manager.set('country_info_display_list', [])
-    global_manager.set('country_ordered_label_list', [])
-    global_manager.set('displayed_mob', 'none')
-    global_manager.set('displayed_minister', 'none')
-    global_manager.set('displayed_defense', 'none')
-    global_manager.set('displayed_prosecution', 'none')
-    global_manager.set('displayed_country', 'none')
+
+    global_manager.set('displayed_tile', 'none')
     global_manager.set('tile_info_display_list', [])
     global_manager.set('tile_ordered_label_list', [])
+
+    global_manager.set('displayed_minister', 'none')
+    global_manager.set('minister_info_display_list', [])
+    global_manager.set('minister_ordered_label_list', [])
+
+    global_manager.set('displayed_country', 'none')
+    global_manager.set('country_info_display_list', [])
+    global_manager.set('country_ordered_label_list', [])
+
+    global_manager.set('displayed_defense', 'none')
     global_manager.set('defense_info_display_list', [])
+
+    global_manager.set('displayed_prosecution', 'none')
     global_manager.set('prosecution_info_display_list', [])
-    global_manager.set('displayed_tile', 'none')
+
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
     global_manager.set('combatant_images', [])
@@ -227,6 +234,7 @@ def misc_setup(global_manager):
     global_manager.set('mob_ordered_list_start_y', 0)
     global_manager.set('tile_ordered_list_start_y', 0)
     global_manager.set('minister_ordered_list_start_y', 0)
+    global_manager.set('country_ordered_list_start_y', 0)
 
     global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
     game_transitions.set_game_mode('main_menu', global_manager)
@@ -548,19 +556,6 @@ def countries_setup(global_manager):
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
     global_manager.set('France', countries.country('France', 'french', True, False, True, 'locations/europe.png', french_weighted_backgrounds, french_country_effect, global_manager))
 
-    portuguese_weighted_backgrounds = default_weighted_backgrounds + [
-        'merchant',
-        'lawyer',
-        'natural scientist', 'natural scientist',
-        'doctor',
-        'naval officer', 'naval officer',
-        'priest', 'priest',
-        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
-        'royal heir',
-        ]
-    portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
-
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
         'lawyer',
@@ -573,6 +568,33 @@ def countries_setup(global_manager):
         ]
     german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
     global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, 'locations/europe.png', german_weighted_backgrounds, german_country_effect, global_manager)) 
+
+    belgian_weighted_backgrounds = default_weighted_backgrounds + [
+        'merchant',
+        'lawyer',
+        'natural scientist',
+        'doctor',
+        'army officer', 'army officer',
+        'naval officer',
+        'priest', 'priest',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        ]
+    belgian_country_effect = effects.effect('belgian_country_modifier', 'capture_slaves_plus_modifier', global_manager)
+    global_manager.set('Belgium', countries.hybrid_country('Belgium', 'belgian', 'locations/europe.png', belgian_weighted_backgrounds, belgian_country_effect, global_manager)) 
+
+    portuguese_weighted_backgrounds = default_weighted_backgrounds + [
+        'merchant',
+        'lawyer',
+        'natural scientist', 'natural scientist',
+        'doctor',
+        'naval officer', 'naval officer',
+        'priest', 'priest',
+        'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
+        'royal heir',
+        ]
+    portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
+    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -1220,7 +1242,7 @@ def country_interface_setup(global_manager):
 
 
     #country info labels setup
-    country_info_display_labels = ['country_name']
+    country_info_display_labels = ['country_name', 'country_effect']
     for current_actor_label_type in country_info_display_labels:
         x_displacement = 0
         global_manager.get('country_info_display_list').append(actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, country_display_current_y, global_manager), scaling.scale_width(10, global_manager),
@@ -1282,7 +1304,7 @@ def debug_tools_setup(global_manager):
 
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
-    DEBUG_show_modifiers.apply()
+
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

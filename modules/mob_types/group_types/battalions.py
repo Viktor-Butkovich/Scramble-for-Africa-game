@@ -322,7 +322,7 @@ class battalion(group):
                 else:
                     results = [second_roll, first_roll]
             else:
-                results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
+                results = [self.controlling_minister.no_corruption_roll(6, 'capture_slaves'), self.controlling_minister.no_corruption_roll(6, 'capture_slaves')]
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
@@ -348,7 +348,7 @@ class battalion(group):
             if minister_corrupt:
                 result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
             else:
-                result = self.controlling_minister.no_corruption_roll(6)
+                result = self.controlling_minister.no_corruption_roll(6, 'capture_slaves')
             roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 

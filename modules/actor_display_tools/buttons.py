@@ -1299,7 +1299,7 @@ class convert_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['conversion']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').aggressiveness > 1:
@@ -1315,7 +1315,7 @@ class convert_button(label_button):
                         else:
                             text_tools.print_to_screen('Converting is only possible in a village.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['convert']) + ' money needed to attempt to convert the natives.', self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['conversion']) + ' money needed to attempt to convert the natives.', self.global_manager)
                 else:
                     text_tools.print_to_screen('Converting requires all remaining movement points, at least 1.', self.global_manager)
             else:

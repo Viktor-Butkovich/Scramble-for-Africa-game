@@ -150,6 +150,9 @@ class actor_display_label(label):
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
+        
+        elif self.actor_label_type == 'country_effect':
+            self.message_start = 'Effect: '
 
         elif self.actor_label_type == 'minister_office':
             self.message_start = 'Office: '
@@ -514,6 +517,9 @@ class actor_display_label(label):
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
+
+            elif self.actor_label_type == 'country_effect':
+                self.set_label(self.message_start + new_actor.get_effect_descriptor())
                 
             elif self.actor_label_type == 'minister_office':
                 self.set_label(self.message_start + new_actor.current_position)

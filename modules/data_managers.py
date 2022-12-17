@@ -224,9 +224,22 @@ class flavor_text_manager_template():
         Output:
             string: Returns a random combination of minister first and last names
         '''
+        if self.global_manager.get('current_country') == self.global_manager.get('Belgium'):
+            self.allow_particles = True
+            if random.randrange(1, 7) >= 4:
+                self.set_flavor_text('minister_first_names', 'text/flavor_minister_dutch_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/flavor_minister_dutch_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/flavor_minister_dutch_particles.csv')
+                self.allow_double_last_names = False
+            else:
+                self.set_flavor_text('minister_first_names', 'text/flavor_minister_french_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/flavor_minister_french_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/flavor_minister_french_particles.csv')
+                self.allow_double_last_names = True
+
         first_name = self.generate_flavor_text('minister_first_names')
         titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 
-                    'Count', 'Vicomte', 'Chevalier', 'Écuyer',
+                    'Duc', 'Marquis', 'Count', 'Vicomte', 'Chevalier', 'Écuyer',
                     'Duque', 'Marquês', 'Infante', 'Visconde', 'Barão', 'Conde', 'Dom', 'Fidalgo',
                     'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
                     'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
@@ -250,7 +263,7 @@ class flavor_text_manager_template():
             if self.aristocratic_particles:
                 if background in ['royal heir', 'aristocrat'] and self.aristocratic_particles:
                     name += self.generate_flavor_text('minister_particles')
-            elif random.randrange(1, 7) >= 5:
+            elif random.randrange(1, 7) >= 4:
                 name += self.generate_flavor_text('minister_particles')
         last_name = self.generate_flavor_text('minister_last_names')
 

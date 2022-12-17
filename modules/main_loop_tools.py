@@ -20,6 +20,7 @@ def update_display(global_manager):
     actor_utility.order_actor_info_display(global_manager, global_manager.get('mob_ordered_label_list'), global_manager.get('mob_ordered_list_start_y')) #global manager, list to order, top y of list
     actor_utility.order_actor_info_display(global_manager, global_manager.get('tile_ordered_label_list'), global_manager.get('tile_ordered_list_start_y'))
     actor_utility.order_actor_info_display(global_manager, global_manager.get('minister_ordered_label_list'), global_manager.get('minister_ordered_list_start_y'))
+    actor_utility.order_actor_info_display(global_manager, global_manager.get('country_ordered_label_list'), global_manager.get('country_ordered_list_start_y'))
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
         draw_loading_screen(global_manager)
