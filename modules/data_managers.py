@@ -182,7 +182,8 @@ class flavor_text_manager_template():
         '''
         self.global_manager = global_manager
         self.subject_dict = {}
-        self.set_flavor_text('explorer', 'text/flavor_explorer.csv')
+        self.set_flavor_text('exploration', 'text/explorer.csv')
+        self.set_flavor_text('advertising_campaign', 'text/advertising.csv')
         self.set_flavor_text('minister_first_names', 'text/default.csv')
         self.set_flavor_text('minister_particles', 'text/default.csv')
         self.set_flavor_text('minister_last_names', 'text/default.csv')
@@ -203,6 +204,25 @@ class flavor_text_manager_template():
         for line in current_flavor_text: #each line is a list
             flavor_text_list.append(line[0])
         self.subject_dict[topic] = flavor_text_list
+
+    def generate_substituted_flavor_text(self, subject, replace_char, replace_with):
+        '''
+        Description:
+            Returns a random flavor text statement based on the inputted string, with all instances of replace_char replaced with replace_with
+        Input:
+            string subject: Represents the type of flavor text to return
+        Output:
+            string: Random flavor text statement of the inputted subject
+        '''
+        base_text = random.choice(self.subject_dict[subject])
+        return_text = ''
+        for current_character in base_text:
+            if current_character == replace_char:
+                return_text += replace_with
+            else:
+                return_text += current_character
+        return(return_text)
+
 
     def generate_flavor_text(self, subject):
         '''
@@ -227,14 +247,14 @@ class flavor_text_manager_template():
         if self.global_manager.get('current_country') == self.global_manager.get('Belgium'):
             self.allow_particles = True
             if random.randrange(1, 7) >= 4:
-                self.set_flavor_text('minister_first_names', 'text/flavor_minister_dutch_first_names.csv')
-                self.set_flavor_text('minister_last_names', 'text/flavor_minister_dutch_last_names.csv')
-                self.set_flavor_text('minister_particles', 'text/flavor_minister_dutch_particles.csv')
+                self.set_flavor_text('minister_first_names', 'text/minister_dutch_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/minister_dutch_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/minister_dutch_particles.csv')
                 self.allow_double_last_names = False
             else:
-                self.set_flavor_text('minister_first_names', 'text/flavor_minister_french_first_names.csv')
-                self.set_flavor_text('minister_last_names', 'text/flavor_minister_french_last_names.csv')
-                self.set_flavor_text('minister_particles', 'text/flavor_minister_french_particles.csv')
+                self.set_flavor_text('minister_first_names', 'text/minister_french_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/minister_french_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/minister_french_particles.csv')
                 self.allow_double_last_names = True
 
         first_name = self.generate_flavor_text('minister_first_names')

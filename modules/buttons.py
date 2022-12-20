@@ -532,6 +532,9 @@ class button():
             
         elif self.button_type == 'follow automatic route':
             self.set_tooltip(['Moves this unit along its currently designated movement route'])
+        
+        elif self.button_type == 'generate crash':
+            self.set_tooltip(['Generates a crash to reset the crash log'])
             
         else:
             self.set_tooltip(['placeholder'])
@@ -816,68 +819,72 @@ class button():
 
             elif self.button_type == 'execute movement routes':
                 if main_loop_tools.action_possible(self.global_manager):
-                    if not self.global_manager.get('current_game_mode') == 'strategic':
-                        game_transitions.set_game_mode('strategic', self.global_manager)
+                    if minister_utility.positions_filled(self.global_manager):
+                        if not self.global_manager.get('current_game_mode') == 'strategic':
+                            game_transitions.set_game_mode('strategic', self.global_manager)
                                 
-                    unit_types = ['porters', 'steamboat', 'steamship', 'train']
-                    moved_units = {}
-                    attempted_units = {}
-                    for current_unit_type in unit_types:
-                        moved_units[current_unit_type] = 0
-                        attempted_units[current_unit_type] = 0
+                        unit_types = ['porters', 'steamboat', 'steamship', 'train']
+                        moved_units = {}
+                        attempted_units = {}
+                        for current_unit_type in unit_types:
+                            moved_units[current_unit_type] = 0
+                            attempted_units[current_unit_type] = 0
                         
-                    for current_pmob in self.global_manager.get('pmob_list'):
-                        if len(current_pmob.base_automatic_route) > 0:
-                            if current_pmob.is_vehicle:
-                                if current_pmob.vehicle_type == 'train':
-                                    unit_type = 'train'
-                                elif current_pmob.can_swim_ocean:
-                                    unit_type = 'steamship'
-                                else:
-                                    unit_type = 'steamboat'
-                            else:
-                                unit_type = 'porters'
-                            attempted_units[unit_type] += 1
-                            
-                            progressed = current_pmob.follow_automatic_route()
-                            if progressed:
-                                moved_units[unit_type] += 1
-                            current_pmob.remove_from_turn_queue()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
-
-                    types_moved = 0
-                    text = ''
-                    for current_unit_type in unit_types:
-                        if attempted_units[current_unit_type] > 0:
-                            
-                            if current_unit_type == 'porters':
-                                singular = 'unit of porters'
-                                plural = 'units of porters'
-                            else:
-                                singular = current_unit_type
-                                plural = singular + 's'
-                            types_moved += 1
-                            num_attempted = attempted_units[current_unit_type]
-                            num_progressed = moved_units[current_unit_type]
-                            if num_attempted == num_progressed:
-                                if num_attempted == 1:
-                                    text += 'The ' + singular + ' made progress on its designated movement route. /n /n'
-                                else:
-                                    text += 'All ' + str(num_attempted) + ' of the ' + plural + ' made progress on their designated movement routes. /n /n'
-                            else:
-                                if num_progressed == 0:
-                                    if num_attempted == 1:
-                                        text += 'The ' + singular + ' made no progress on its designated movement route. /n /n' 
+                        for current_pmob in self.global_manager.get('pmob_list'):
+                            if len(current_pmob.base_automatic_route) > 0:
+                                if current_pmob.is_vehicle:
+                                    if current_pmob.vehicle_type == 'train':
+                                        unit_type = 'train'
+                                    elif current_pmob.can_swim_ocean:
+                                        unit_type = 'steamship'
                                     else:
-                                        text += 'None of the ' + plural + ' made progress on their designated movement routes. /n /n'
+                                        unit_type = 'steamboat'
                                 else:
-                                    text += 'Only ' + str(num_progressed) + ' of the ' + str(num_attempted) + ' ' + plural + ' made progress on their designated movement routes. /n /n'
+                                    unit_type = 'porters'
+                                attempted_units[unit_type] += 1
+                            
+                                progressed = current_pmob.follow_automatic_route()
+                                if progressed:
+                                    moved_units[unit_type] += 1
+                                current_pmob.remove_from_turn_queue()
+                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
 
-                    transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-                    if types_moved > 0:
-                        transportation_minister.display_message(text)
+                        types_moved = 0
+                        text = ''
+                        for current_unit_type in unit_types:
+                            if attempted_units[current_unit_type] > 0:
+                            
+                                if current_unit_type == 'porters':
+                                    singular = 'unit of porters'
+                                    plural = 'units of porters'
+                                else:
+                                    singular = current_unit_type
+                                    plural = singular + 's'
+                                types_moved += 1
+                                num_attempted = attempted_units[current_unit_type]
+                                num_progressed = moved_units[current_unit_type]
+                                if num_attempted == num_progressed:
+                                    if num_attempted == 1:
+                                        text += 'The ' + singular + ' made progress on its designated movement route. /n /n'
+                                    else:
+                                        text += 'All ' + str(num_attempted) + ' of the ' + plural + ' made progress on their designated movement routes. /n /n'
+                                else:
+                                    if num_progressed == 0:
+                                        if num_attempted == 1:
+                                            text += 'The ' + singular + ' made no progress on its designated movement route. /n /n' 
+                                        else:
+                                            text += 'None of the ' + plural + ' made progress on their designated movement routes. /n /n'
+                                    else:
+                                        text += 'Only ' + str(num_progressed) + ' of the ' + str(num_attempted) + ' ' + plural + ' made progress on their designated movement routes. /n /n'
+
+                        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+                        if types_moved > 0:
+                            transportation_minister.display_message(text)
+                        else:
+                            transportation_minister.display_message('There were no units with designated movement routes. /n /n')
                     else:
-                        transportation_minister.display_message('There were no units with designated movement routes. /n /n')
+                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
                 else:
                     text_tools.print_to_screen('You are busy and can not move units.', self.global_manager)
                 
@@ -1167,6 +1174,9 @@ class button():
                 public_opinion_penalty = removed_minister.status_number
                 removed_minister.just_removed = True
                 self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+
+            elif self.button_type == 'generate crash':
+                print(1/0)
                 
     def on_rmb_release(self):
         '''

@@ -197,6 +197,7 @@ class merchant(officer):
         
         text = ''
         text += 'The merchant attempts to increase public demand for ' + self.current_advertised_commodity + '. /n /n'
+        text += (self.global_manager.get('flavor_text_manager').generate_substituted_flavor_text('advertising_campaign', '_', self.current_advertised_commodity) + ' /n /n')
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'advertising_campaign', self.global_manager, num_dice)
         else:

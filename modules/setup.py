@@ -814,7 +814,6 @@ def buttons_setup(global_manager):
         scaling.scale_width(round(global_manager.get('default_display_width') * 0.2), global_manager), scaling.scale_height(50, global_manager), 'blue', 'load game', pygame.K_l, ['main_menu'], 'buttons/load_game_button.png',
         global_manager)
 
-
     button_start_x = 750 #x position of leftmost button
     button_separation = 60 #x separation between each button
     current_button_number = 0 #tracks current button to move each one farther right
@@ -850,8 +849,11 @@ def buttons_setup(global_manager):
     wake_up_all_button = buttons.button(scaling.scale_coordinates(165, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'wake up all', 'none', ['strategic', 'europe'], 'buttons/disable_sentry_mode_button.png', global_manager)
 
-    execute_movement_routes = buttons.button(scaling.scale_coordinates(220, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
+    execute_movement_routes_button = buttons.button(scaling.scale_coordinates(220, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'execute movement routes', 'none', ['strategic', 'europe'], 'buttons/execute_movement_routes_button.png', global_manager)
+
+    generate_crash_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, 0, global_manager), scaling.scale_width(50, global_manager), 
+        scaling.scale_height(50, global_manager), 'blue', 'generate crash', 'none', ['main_menu'], 'buttons/exit_european_hq_button.png', global_manager)
 
 def europe_screen_setup(global_manager):
     '''

@@ -542,14 +542,16 @@ class minister():
         if self.global_manager.get('effect_manager').effect_active(roll_type + '_plus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier += 1
-                print('Country gave modifier of +1 to ' + roll_type + ' roll.')
-            else:
+                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                    print('Country gave modifier of +1 to ' + roll_type + ' roll.')
+            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
                 print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
         elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier -= 1
-                print('Country gave modifier of -1 to ' + roll_type + ' roll.')
-            else:
+                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                    print('Country gave modifier of -1 to ' + roll_type + ' roll.')
+            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
                 print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
         return(modifier)
 

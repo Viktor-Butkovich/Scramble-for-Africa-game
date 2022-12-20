@@ -189,7 +189,7 @@ class expedition(group):
         self.just_promoted = False
         text = ''
         text += 'The expedition heads towards the ' + direction + '. /n /n'
-        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('explorer') + ' /n /n')
+        text += (self.global_manager.get('flavor_text_manager').generate_flavor_text('exploration') + ' /n /n')
         
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'exploration', self.global_manager, num_dice)
