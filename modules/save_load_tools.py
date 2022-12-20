@@ -120,7 +120,7 @@ class save_load_manager_template():
         input_dict['internal_line_color'] = 'black'
         input_dict['external_line_color'] = 'black'
         input_dict['modes'] = ['strategic', 'europe']
-        input_dict['tile_image_id'] = 'locations/europe.png' 
+        input_dict['tile_image_id'] = 'locations/europe/' + country.name + '.png' 
         input_dict['grid_line_width'] = 3
         input_dict['name'] = 'Europe'
         europe_grid = grids.abstract_grid(False, input_dict, self.global_manager)
@@ -152,7 +152,16 @@ class save_load_manager_template():
 
         for current_commodity in self.global_manager.get('commodity_types'):
             if not current_commodity == 'consumer goods':
-                market_tools.set_price(current_commodity, random.randrange(self.global_manager.get('commodity_min_starting_price'), self.global_manager.get('commodity_max_starting_price') + 1), self.global_manager) #2-5
+                #min_price = self.global_manager.get('commodity_min_starting_price')
+                #max_price = self.global_manager.get('commodity_max_starting_price')
+                price = round((random.randrange(1, 7) + random.randrange(1, 7))/2)
+                increase = 0
+                if current_commodity == 'gold':
+                    increase = random.randrange(1, 7)
+                elif current_commodity == 'diamond':
+                    increase = random.randrange(1, 7) + random.randrange(1, 7)
+                price += increase    
+                market_tools.set_price(current_commodity, price, self.global_manager) #2-5
             else:
                 market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
@@ -174,6 +183,7 @@ class save_load_manager_template():
         self.global_manager.set('num_european_workers', 0)
         self.global_manager.set('num_slave_workers', 0)
         self.global_manager.set('num_wandering_workers', 0)
+        self.global_manager.set('num_church_volunteers', 0)
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
@@ -321,7 +331,7 @@ class save_load_manager_template():
                 if current_grid_dict['grid_type'] == 'europe_grid':
                     input_dict['modes'] = ['strategic', 'europe']
                     input_dict['origin_coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
-                    input_dict['tile_image_id'] = 'locations/europe.png' 
+                    input_dict['tile_image_id'] = 'locations/europe/' + self.global_manager.get('current_country').name + '.png' 
                     input_dict['name'] = 'Europe'
                     europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('europe_grid', europe_grid)

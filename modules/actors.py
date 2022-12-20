@@ -379,7 +379,7 @@ class actor():
                 #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
                 #    self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
         if stealing and value_stolen > 0:
-            transportation_minister.steal_money(value_stolen, 'inventory attrition')
+            transportation_minister.steal_money(value_stolen, 'inventory_attrition')
     
     def set_name(self, new_name):
         '''

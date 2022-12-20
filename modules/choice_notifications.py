@@ -316,7 +316,7 @@ class recruitment_choice_button(choice_button):
             input_dict = {}
             if self.recruitment_type == 'slave workers':
                 input_dict = {}
-                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
+                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
                 input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
                 attached_cell = input_dict['grids'][0].cell_list[0]
                 input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
@@ -340,7 +340,7 @@ class recruitment_choice_button(choice_button):
                 input_dict['init_type'] = 'workers'
                 input_dict['worker_type'] = 'African'
                 
-                self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit recruitment')
+                self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
                 self.notification.choice_info_dict['village'].change_population(-1)
                 market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
 
@@ -361,7 +361,7 @@ class recruitment_choice_button(choice_button):
                 input_dict['image'] = self.mob_image_id
                 input_dict['modes'] = ['strategic', 'europe']
                 self.showing_outline = True
-                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit recruitment')
+                self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
                 if self.recruitment_type in self.global_manager.get('officer_types'): #'explorer':
                     name = ''
                     for character in self.recruitment_type:

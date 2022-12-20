@@ -432,14 +432,11 @@ class money_tracker(value_tracker):
             string: Formatted financial report text with /n being a new line
         '''
         notification_text = 'Financial report: /n /n'
-        notification_text += 'Revenue: /n '
+        notification_text += 'Revenue: /n'
         total_revenue = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] > 0:
-                if transaction_type == 'misc. revenue':
-                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
-                else:
-                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_revenue += self.transaction_history[transaction_type]
         if total_revenue == 0:
             notification_text += '  None /n'
@@ -448,10 +445,10 @@ class money_tracker(value_tracker):
         total_expenses = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] < 0:
-                if transaction_type == 'misc. expenses':
-                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
-                else:
-                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                #if transaction_type == 'misc. expenses':
+                #    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                #else:
+                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_expenses += self.transaction_history[transaction_type]
         if total_expenses == 0:
             notification_text += '  None /n'

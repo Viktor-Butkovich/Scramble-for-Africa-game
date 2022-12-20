@@ -378,3 +378,17 @@ class church_volunteers(worker):
         input_dict['worker_type'] = 'religious'
         super().__init__(from_save, input_dict, global_manager)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['religion'])
+        self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') + 1)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        super().remove()
+        self.global_manager.set('num_church_volunteers', self.global_manager.get('num_church_volunteers') - 1)
+        self.global_manager.get('money_label').check_for_updates()

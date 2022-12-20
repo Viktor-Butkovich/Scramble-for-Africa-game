@@ -1357,7 +1357,7 @@ class capture_slaves_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['capture_slaves']:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['slave_capture']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
@@ -1370,7 +1370,7 @@ class capture_slaves_button(label_button):
                         else:
                             text_tools.print_to_screen('Capturing slaves is only possible in a village.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['capture_slaves']) + ' money needed to attempt to capture slaves.', self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money needed to attempt to capture slaves.', self.global_manager)
                 else:
                     text_tools.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.', self.global_manager)
             else:

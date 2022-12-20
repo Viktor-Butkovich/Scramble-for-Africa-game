@@ -4,7 +4,7 @@ class country:
     '''
     Country with associated flavor text, art, images, and abilities that can be selected to play as
     '''
-    def __init__(self, name, adjective, allow_particles, aristocratic_particles, allow_double_last_names, image_id, background_set, country_effect, global_manager):
+    def __init__(self, name, adjective, allow_particles, aristocratic_particles, allow_double_last_names, background_set, country_effect, global_manager):
         '''
         Description:
             Initializes this object
@@ -14,7 +14,6 @@ class country:
             boolean allow_particles: Whether ministers of this country are allowed to have name particles, like de Rouvier
             boolean aristocratic_particles: Whether name particles for this country are reserved for aristocratic ministers
             boolean allow_double_last_names: Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
-            string image_id: File path to the Europe image used by this country
             string list background_set: Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
             effect country_effect: Effect that is applied when this country is selected and vice versa
             global_manager_template global_manager: Object that accesses shared variables
@@ -30,7 +29,7 @@ class country:
         self.allow_particles = allow_particles
         self.aristocratic_particles = aristocratic_particles
         self.allow_double_last_names = allow_double_last_names
-        self.image_id = image_id
+        self.image_id = 'locations/europe/' + self.name + '.png'
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
         self.background_set = background_set
         self.country_effect = country_effect
@@ -71,7 +70,7 @@ class country:
             return('Bonus when converting natives')
         elif self.country_effect.effect_type == 'attack_plus_modifier':
             return('Bonus when attacking natives')
-        elif self.country_effect.effect_type == 'capture_slaves_plus_modifier':
+        elif self.country_effect.effect_type == 'slave_capture_plus_modifier':
             return('Bonus when capturing slaves')
         elif self.country_effect.effect_type == 'no_slave_trade_penalty':
             return('No slave trade penalty')
@@ -95,7 +94,7 @@ class hybrid_country(country):
     '''
     Country that uses combination of multiple namesets, like Belgium
     '''
-    def __init__(self, name, adjective, image_id, background_set, country_effect, global_manager):
+    def __init__(self, name, adjective, background_set, country_effect, global_manager):
         '''
         Description:
             Initializes this object
@@ -109,7 +108,7 @@ class hybrid_country(country):
         Output:
             None
         '''
-        super().__init__(name, adjective, False, False, False, image_id, background_set, country_effect, global_manager)
+        super().__init__(name, adjective, False, False, False, background_set, country_effect, global_manager)
 
     def select(self):
         '''

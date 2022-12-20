@@ -122,16 +122,16 @@ def trial(global_manager): #called by choice notification button
         None
     '''
     price = global_manager.get('action_prices')['trial']
-    global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial fees')
+    global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial')
     actor_utility.double_action_price(global_manager, 'trial')
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
     prosecutor_corrupt = prosecution.check_corruption()
     if prosecutor_corrupt:
-        prosecution.steal_money(price, 'trial fees')
-        prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial fees')
+        prosecution.steal_money(price, 'trial')
+        prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial')
         if global_manager.get('prosecution_bribed_judge'):
-            prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial fees')
+            prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial')
 
     defense_info_dict = manage_defense(defense.corruption_evidence, prosecutor_corrupt, global_manager)
     effective_evidence = defense_info_dict['effective_evidence']
@@ -256,7 +256,7 @@ def complete_trial(final_roll, global_manager):
         if confiscated_money > 0:
             text += 'While most of ' + defense.name + '\'s money was spent on the trial or unaccounted for, authorities managed to confiscate ' + str(confiscated_money) + ' money, which has been given to your company as compensation. '
             text += ' /n /n'
-            global_manager.get('money_tracker').change(confiscated_money, 'trial compensation')
+            global_manager.get('money_tracker').change(confiscated_money, 'trial_compensation')
         else:
             text += 'Authorities searched ' + defense.name + '\'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. '
             text += ' /n /n'

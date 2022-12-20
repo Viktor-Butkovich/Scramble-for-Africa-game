@@ -539,7 +539,7 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, False, 'locations/europe.png', british_weighted_backgrounds, british_country_effect, global_manager))
+    global_manager.set('Britain', countries.country('Britain', 'british', False, False, False, british_weighted_backgrounds, british_country_effect, global_manager))
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -554,7 +554,7 @@ def countries_setup(global_manager):
         'business magnate',
         ]
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
-    global_manager.set('France', countries.country('France', 'french', True, False, True, 'locations/europe.png', french_weighted_backgrounds, french_country_effect, global_manager))
+    global_manager.set('France', countries.country('France', 'french', True, False, True, french_weighted_backgrounds, french_country_effect, global_manager))
 
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -567,7 +567,7 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
-    global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, 'locations/europe.png', german_weighted_backgrounds, german_country_effect, global_manager)) 
+    global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, german_weighted_backgrounds, german_country_effect, global_manager)) 
 
     belgian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -580,8 +580,8 @@ def countries_setup(global_manager):
         'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat', 'aristocrat',
         'royal heir',
         ]
-    belgian_country_effect = effects.effect('belgian_country_modifier', 'capture_slaves_plus_modifier', global_manager)
-    global_manager.set('Belgium', countries.hybrid_country('Belgium', 'belgian', 'locations/europe.png', belgian_weighted_backgrounds, belgian_country_effect, global_manager)) 
+    belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier', global_manager)
+    global_manager.set('Belgium', countries.hybrid_country('Belgium', 'belgian', belgian_weighted_backgrounds, belgian_country_effect, global_manager)) 
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -594,7 +594,7 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, 'locations/europe.png', portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
+    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -608,7 +608,7 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
-    global_manager.set('Italy', countries.country('Italy', 'italian', True, True, False, 'locations/europe.png', italian_weighted_backgrounds, italian_country_effect, global_manager)) 
+    global_manager.set('Italy', countries.country('Italy', 'italian', True, True, False, italian_weighted_backgrounds, italian_country_effect, global_manager)) 
     
 def transactions_setup(global_manager):
     '''
@@ -642,6 +642,7 @@ def transactions_setup(global_manager):
     global_manager.set('min_slave_worker_recruitment_cost', 2)
 
     global_manager.set('num_wandering_workers', 0)
+    global_manager.set('num_church_volunteers', 0)
 
     global_manager.set('recruitment_list_descriptions', {})
     global_manager.set('recruitment_string_descriptions', {})
@@ -650,31 +651,9 @@ def transactions_setup(global_manager):
     global_manager.set('worker_upkeep_fluctuation_amount', 0.25)
     global_manager.set('slave_recruitment_cost_fluctuation_amount', 1)
     global_manager.set('base_upgrade_price', 20) #20 for 1st upgrade, 40 for 2nd, 80 for 3rd, etc.
-    global_manager.set('commodity_min_starting_price', 2)
-    global_manager.set('commodity_max_starting_price', 5)
+    #global_manager.set('commodity_min_starting_price', 2)
+    #global_manager.set('commodity_max_starting_price', 5)
     global_manager.set('consumer_goods_starting_price', 1)
-
-    global_manager.set('action_types', ['exploration', 'conversion', 'religious_campaign', 'public_relations_campaign', 'advertising_campaign', 'loan_search', 'trade', 'loan', 'attack', 'capture_slaves', 'trial', 'hunt', 'track_beasts'])
-    global_manager.set('base_action_prices',
-        {
-        'exploration': 5,
-        'conversion': 5,
-        'religious_campaign': 5,
-        'public_relations_campaign': 5,
-        'advertising_campaign': 5,
-        'loan_search': 5,
-        'trade': 0,
-        'loan': 5,
-        'attack': 5,
-        'capture_slaves': 5,
-        'trial': 5,
-        'hunt': 5,
-        'track_beasts': 0
-        }
-    )
-
-    global_manager.set('action_prices', {})
-    actor_utility.reset_action_prices(global_manager)    
 
     global_manager.set('building_prices',
         {
@@ -692,31 +671,68 @@ def transactions_setup(global_manager):
        } 
     )
     
-    #central place in program to change descriptions of actions to use in prosector reports
-    global_manager.set('theft_type_descriptions',
+    global_manager.set('base_action_prices',
         {
-        'trial fees': 'trial fees',
-        'bribery': 'bribery',
-        'loan interest': 'loan interest',
-        'exploration': 'exploration',
-        'religious campaign': 'religious campaigning',
-        'public relations campaign': 'public relations campaigning',
-        'advertising campaign': 'advertising',
-        'trade': 'trading with natives',
-        'construction': 'construction',
-        'conversion': 'religious conversion',
-        'inventory attrition': 'missing commodities',
-        'attack': 'combat supplies',
-        'hunting': 'hunting supplies',
-        'production': 'production',
-        'slave capture': 'capturing slaves',
-        'sold commodities': 'commodity sales',
-        'none': 'miscellaneous company activities'
+        'exploration': 5,
+        'conversion': 5,
+        'religious_campaign': 5,
+        'public_relations_campaign': 5,
+        'advertising_campaign': 5,
+        'loan_search': 5,
+        'trade': 0,
+        'loan': 5,
+        'attack': 5,
+        'slave_capture': 5,
+        'trial': 5,
+        'hunting': 5,
+        'track_beasts': 0
         }
     )
+    action_types = []
+    for current_key in global_manager.get('base_action_prices'):
+        action_types.append(current_key)
+    global_manager.set('action_types', action_types)
+    global_manager.set('action_prices', {})
+    actor_utility.reset_action_prices(global_manager)
 
-    global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodities sold', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-        'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'slave capture'])
+    global_manager.set('transaction_descriptions',
+        {
+        'exploration': 'exploration',
+        'conversion': 'religious conversion',
+        'religious_campaign': 'religious campaigning',
+        'public_relations_campaign': 'public relations campaigning',
+        'advertising_campaign': 'advertising',
+        'loan_search': 'loan searches',
+        'trade': 'trading with natives',
+        'loan': 'loans',
+        'attack': 'combat supplies',
+        'slave_capture': 'capturing slaves',
+        'trial': 'trial fees',
+        'hunting': 'hunting supplies',
+        'construction': 'construction',
+        'production': 'production',
+        'bribery': 'bribery',
+        'loan_interest': 'loan interest',
+        'inventory_attrition': 'missing commodities',
+        'sold_commodities': 'commodity sales',
+        'worker_upkeep': 'worker upkeep',
+        'subsidies': 'subsidies',
+        'trial_compensation': 'trial compensation',
+        'fabricated_evidence': 'fabricated evidence',
+        'consumer_goods': 'consumer goods',
+        'unit_recruitment': 'unit recruitment',
+        'attrition_replacements': 'attrition replacements',
+        'misc_revenue': 'misc',
+        'misc_expenses': 'misc',
+        'none': 'miscellaneous company activities',
+        }
+    )
+    transaction_types = []
+    for current_key in global_manager.get('transaction_descriptions'):
+        transaction_types.append(current_key)
+    global_manager.set('transaction_types', transaction_types)
+    #global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodity sales', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
+    #    'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'capturing slaves'])
 
 def value_trackers_setup(global_manager):
     '''
@@ -728,15 +744,15 @@ def value_trackers_setup(global_manager):
         None
     '''
     global_manager.set('public_opinion_tracker', data_managers.public_opinion_tracker('public_opinion', 0, 0, 100, global_manager))
-    labels.value_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
+    labels.value_label(scaling.scale_coordinates(275 + 25, global_manager.get('default_display_height') - 70, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager), ['strategic', 'europe', 'ministers'],
         'misc/default_label.png', 'public_opinion', global_manager)
     
     global_manager.set('money_tracker', data_managers.money_tracker(100, global_manager))
-    global_manager.set('money_label', labels.money_label(scaling.scale_coordinates(275, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
+    global_manager.set('money_label', labels.money_label(scaling.scale_coordinates(275 + 25, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(10, global_manager), scaling.scale_height(30, global_manager),
         ['strategic', 'europe', 'ministers', 'trial'], 'misc/default_label.png', global_manager))
 
     global_manager.set('previous_financial_report', 'none')
-    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(300, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
+    show_previous_financial_report_button = buttons.show_previous_financial_report_button(scaling.scale_coordinates(270, global_manager.get('default_display_height') - 30, global_manager), scaling.scale_width(30, global_manager),
         scaling.scale_height(30, global_manager), 'none', ['strategic', 'europe', 'ministers', 'trial'], 'buttons/instructions.png', global_manager)
 
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))

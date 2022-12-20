@@ -208,7 +208,7 @@ class battalion(group):
         '''
         defender = self.images[0].current_cell.get_best_combatant('npmob')
         if not defender == 'none':
-            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'combat supplies')
+            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attack')
             self.start_combat('attacking', defender)
 
     def remove_attack_marks(self):
@@ -241,7 +241,7 @@ class battalion(group):
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to capture slaves? If successful, captures 1 of the village\'s population as a unit of slave workers. /n /n'
         message += 'Regardless of success, this may increase the village\'s aggressiveness and/or decrease public opinion. /n /n'
-        message += 'The attack will cost ' + str(self.global_manager.get('action_prices')['capture_slaves']) + ' money. /n /n '
+        message += 'The attack will cost ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money. /n /n '
             
         aggressiveness_modifier = village.get_aggressiveness_modifier()
         if aggressiveness_modifier < 0:
@@ -292,8 +292,8 @@ class battalion(group):
         else:
             num_dice = 1
 
-        if not self.global_manager.get('action_prices')['capture_slaves'] == 0:
-            self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['capture_slaves'] * -1, 'slave capture')
+        if not self.global_manager.get('action_prices')['slave_capture'] == 0:
+            self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['slave_capture'] * -1, 'slave_capture')
         self.global_manager.get('evil_tracker').change(3)
         village = self.images[0].current_cell.get_building('village')
         text = ''
@@ -311,7 +311,7 @@ class battalion(group):
 
         minister_corrupt = self.controlling_minister.check_corruption()
         if minister_corrupt:
-            self.controlling_minister.steal_money(self.global_manager.get('action_prices')['capture_slaves'], 'slave capture')
+            self.controlling_minister.steal_money(self.global_manager.get('action_prices')['slave_capture'], 'slave_capture')
             
         if self.veteran:
             if minister_corrupt:
@@ -322,7 +322,7 @@ class battalion(group):
                 else:
                     results = [second_roll, first_roll]
             else:
-                results = [self.controlling_minister.no_corruption_roll(6, 'capture_slaves'), self.controlling_minister.no_corruption_roll(6, 'capture_slaves')]
+                results = [self.controlling_minister.no_corruption_roll(6, 'slave_capture'), self.controlling_minister.no_corruption_roll(6, 'slave_capture')]
             #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
@@ -348,7 +348,7 @@ class battalion(group):
             if minister_corrupt:
                 result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
             else:
-                result = self.controlling_minister.no_corruption_roll(6, 'capture_slaves')
+                result = self.controlling_minister.no_corruption_roll(6, 'slave_capture')
             roll_list = dice_utility.roll_to_list(6, 'Slave capture roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
@@ -467,7 +467,7 @@ class safari(battalion):
         self.update_canoes()
         
         self.battalion_type = 'none'
-        self.attack_cost = self.global_manager.get('action_prices')['hunt']
+        self.attack_cost = self.global_manager.get('action_prices')['hunting']
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
@@ -482,7 +482,7 @@ class safari(battalion):
         '''
         defender = self.images[0].current_cell.get_best_combatant('npmob', 'beast')
         if not defender == 'none':
-            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting supplies')
+            self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'hunting')
             self.start_combat('attacking', defender)
 
     def track_beasts(self):

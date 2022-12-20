@@ -56,7 +56,7 @@ class officer(pmob):
             None
         '''
         super().replace()
-        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition replacements')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition_replacements')
         if not attached_group == 'none':
             attached_group.set_name(attached_group.default_name)
             attached_group.veteran = False

@@ -13,14 +13,14 @@ def adjust_prices(global_manager):
     Output:
         None
     '''
-    num_increased = 2
-    num_decreased = 1
-    for i in range(4):
+    num_increased = 4
+    num_decreased = 2
+    for i in range(num_increased):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
         while changed_commodity == 'consumer goods':
             changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
         change_price(changed_commodity, 1, global_manager)
-    for i in range(2):
+    for i in range(num_decreased):
         changed_commodity = random.choice(global_manager.get('commodity_types'))
         while changed_commodity == 'consumer goods':
             changed_commodity = random.choice(global_manager.get('commodity_types')) #consumer goods price is changed separately and should not be changed here
@@ -256,7 +256,7 @@ class loan():
         self.total_to_pay = self.interest * self.remaining_duration
         self.global_manager.get('loan_list').append(self)
         if not from_save:
-            self.global_manager.get('money_tracker').change(self.principal, 'loans')
+            self.global_manager.get('money_tracker').change(self.principal, 'loan')
             text_tools.print_to_screen('You have accepted a ' + str(self.principal) + ' money loan with interest payments of ' + str(self.interest) + '/turn for ' + str(self.remaining_duration) + ' turns.', self.global_manager)
             global_manager.get('money_label').check_for_updates()
 
@@ -289,7 +289,7 @@ class loan():
         Output:
             None
         '''
-        self.global_manager.get('money_tracker').change(-1 * self.interest, 'loan interest')
+        self.global_manager.get('money_tracker').change(-1 * self.interest, 'loan_interest')
         self.remaining_duration -= 1
         self.total_to_pay -= self.interest
         if self.total_to_pay <= 0:

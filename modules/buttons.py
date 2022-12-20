@@ -390,7 +390,7 @@ class button():
                               'Costs all remaining movement points, at least 1'])
 
         elif self.button_type == 'capture slaves':
-            self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(self.global_manager.get('action_prices')['capture_slaves']) + ' money',
+            self.set_tooltip(['Attempts to capture villagers as slaves for ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money',
                               'Can only be done in a village',
                               'Regardless the capture\'s success, this may increase the village\'s aggressiveness and/or decrease public opinion',
                               'Has higher success chance and lower risk when aggressiveness is low',
@@ -1127,7 +1127,7 @@ class button():
                 input_dict['interest'] = self.notification.choice_info_dict['interest']
                 input_dict['remaining_duration'] = 10
                 if self.notification.choice_info_dict['corrupt']:
-                    self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan interest')
+                    self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
                     
                 new_loan = market_tools.loan(False, input_dict, self.global_manager)
                 self.global_manager.set('ongoing_loan_search', False)

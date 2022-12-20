@@ -3,11 +3,11 @@
 import random
 
 from . import utility
-from . import actor_utility
 from . import minister_utility
 from . import notification_tools
 from . import images
 from . import scaling
+from . import text_tools
 
 class minister():
     '''
@@ -145,7 +145,7 @@ class minister():
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
         if not prosecutor == 'none':
             if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
-                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('theft_type_descriptions')[theft_type] + '.')
+                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
             result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
             if (not prosecutor == self) and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
@@ -161,7 +161,7 @@ class minister():
                     evidence_message = ''
 
                     evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
-                    evidence_message += self.global_manager.get('theft_type_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
+                    evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
                     prosecutor.display_message(evidence_message)
@@ -543,10 +543,14 @@ class minister():
             if random.randrange(1, 3) == 1:
                 modifier += 1
                 print('Country gave modifier of +1 to ' + roll_type + ' roll.')
+            else:
+                print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
         elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
             if random.randrange(1, 3) == 1:
                 modifier -= 1
                 print('Country gave modifier of -1 to ' + roll_type + ' roll.')
+            else:
+                print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
         return(modifier)
 
     def remove(self):

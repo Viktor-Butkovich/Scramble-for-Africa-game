@@ -220,7 +220,7 @@ def manage_upkeep(global_manager):
     slave_worker_upkeep = round(global_manager.get('num_slave_workers') * global_manager.get('slave_worker_upkeep'), 2)
     num_workers = global_manager.get('num_african_workers') + global_manager.get('num_european_workers') + global_manager.get('num_slave_workers')
     total_upkeep = round(african_worker_upkeep + european_worker_upkeep + slave_worker_upkeep, 2)
-    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 2), 'worker upkeep')
+    global_manager.get('money_tracker').change(round(-1 * total_upkeep, 2), 'worker_upkeep')
 
 def manage_loans(global_manager):
     '''
@@ -560,7 +560,7 @@ def manage_ministers(global_manager):
         if current_minister.fabricated_evidence > 0:
             prosecutor = global_manager.get('current_ministers')['Prosecutor']
             if prosecutor.check_corruption(): #corruption is normally resolved during a trial, but prosecutor can still steal money from unused fabricated evidence if no trial occurs
-                prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated evidence')
+                prosecutor.steal_money(trial_utility.get_fabricated_evidence_cost(current_minister.fabricated_evidence, True), 'fabricated_evidence')
             text_tools.print_to_screen('The ' + str(current_minister.fabricated_evidence) + ' fabricated evidence against ' + current_minister.name + ' is no longer usable.', global_manager)
             current_minister.corruption_evidence -= current_minister.fabricated_evidence
             current_minister.fabricated_evidence = 0
@@ -649,19 +649,19 @@ def manage_commodity_sales(global_manager):
                     individual_sell_price -= 1
                 if individual_sell_price < 1:
                     individual_sell_price = 1
-                reported_revenue += individual_sell_price#global_manager.get('money_tracker').change(individual_sell_price, 'commodities sold')
+                reported_revenue += individual_sell_price#global_manager.get('money_tracker').change(individual_sell_price, 'commodity sales')
                 actual_revenue += individual_sell_price
                 if random.randrange(1, 7) <= 1: #1/6 chance
                     market_tools.change_price(current_commodity, -1, global_manager)
 
             text += str(sold_commodities[current_commodity]) + ' ' + current_commodity + ' sold for ' + str(actual_revenue) + ' money (expected ' + str(expected_revenue) + ') /n /n'
 
-    global_manager.get('money_tracker').change(reported_revenue, 'commodities sold')
+    global_manager.get('money_tracker').change(reported_revenue, 'sold_commodities')
     
     if any_sold:
         trade_minister.display_message(text)
     if money_stolen > 0:
-        trade_minister.steal_money(money_stolen, 'sold commodities')
+        trade_minister.steal_money(money_stolen, 'sold_commodities')
 
     for current_commodity in global_manager.get('commodity_types'):
         global_manager.get('sold_commodities')[current_commodity] = 0

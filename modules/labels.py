@@ -223,24 +223,29 @@ class money_label(value_label):
         slave_worker_upkeep = self.global_manager.get('slave_worker_upkeep')
         total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 2)
         
-        num_workers = num_african_workers + num_european_workers + num_slave_workers
+        num_church_volunteers = self.global_manager.get('num_church_volunteers')
+
+        num_workers = num_african_workers + num_european_workers + num_slave_workers + num_church_volunteers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
 
         tooltip_text.append('')
         tooltip_text.append('At the end of the turn, you will pay a total of ' + str(total_upkeep) + ' money to your ' + str(num_workers) + ' workers.')
         if num_african_workers > 0:
-            tooltip_text.append('    Each of your ' + str(num_african_workers) + ' free African workers will be paid ' + str(african_worker_upkeep) + ' money, totaling to ' + str(total_african_worker_upkeep) + ' money.')
+            tooltip_text.append('    Your ' + str(num_african_workers) + ' free African worker' + utility.generate_plural(num_african_workers) + ' will be paid ' + str(african_worker_upkeep) + ' money, totaling to ' + str(total_african_worker_upkeep) + ' money.')
         else:
             tooltip_text.append('    Any free African workers would each be paid ' + str(african_worker_upkeep) + ' money.')
         if num_european_workers > 0:
-            tooltip_text.append('    Each of your ' + str(num_european_workers) + ' European workers will be paid ' + str(european_worker_upkeep) + ' money, totaling to ' + str(total_european_worker_upkeep) + ' money.')
+            tooltip_text.append('    Your ' + str(num_european_workers) + ' European worker' + utility.generate_plural(num_european_workers) + ' will be paid ' + str(european_worker_upkeep) + ' money, totaling to ' + str(total_european_worker_upkeep) + ' money.')
         else:
             tooltip_text.append('    Any European workers would each be paid ' + str(european_worker_upkeep) + ' money.')
         if num_slave_workers > 0:
-            tooltip_text.append('    Each of your ' + str(num_slave_workers) + ' slave workers will cost ' + str(slave_worker_upkeep) + ' in upkeep, totaling to ' + str(total_slave_worker_upkeep) + ' money.')
+            tooltip_text.append('    Your ' + str(num_slave_workers) + ' slave worker' + utility.generate_plural(num_slave_workers) + ' will cost ' + str(slave_worker_upkeep) + ' in upkeep, totaling to ' + str(total_slave_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append('    Any slave workers would cost ' + str(slave_worker_upkeep) + ' money in upkeep.')
-        tooltip_text.append('    Church volunteers do not need to be paid.')
+            tooltip_text.append('    Any slave workers would each cost ' + str(slave_worker_upkeep) + ' money in upkeep.')
+        if num_church_volunteers > 0:
+            tooltip_text.append('    Your ' + str(num_church_volunteers) + ' church volunteer' + utility.generate_plural(num_church_volunteers) + ' will not need to be paid.')
+        else:
+            tooltip_text.append('    Any church volunteers would not need to be paid.')
 
         tooltip_text.append('')
         num_available_workers = market_tools.count_available_workers(self.global_manager)

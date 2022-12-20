@@ -123,7 +123,7 @@ class missionaries(group):
         else:
             num_dice = 1
         
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['conversion'] * -1, 'religious conversion')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['conversion'] * -1, 'conversion')
         village = self.images[0].current_cell.get_building('village')
         text = ''
         text += 'The missionaries try to convert the natives to reduce their aggressiveness. /n /n'

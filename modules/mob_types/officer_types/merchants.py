@@ -88,7 +88,7 @@ class merchant(officer):
 
         num_dice = 0 #don't show dice roll for loan
 
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan_search')
         actor_utility.double_action_price(self.global_manager, 'loan_search')
         
         principal = 100
@@ -192,7 +192,7 @@ class merchant(officer):
             num_dice = 1
 
         price = self.global_manager.get('action_prices')['advertising_campaign']
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising_campaign')
         actor_utility.double_action_price(self.global_manager, 'advertising_campaign')
         
         text = ''
@@ -208,7 +208,7 @@ class merchant(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising_campaign', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Advertising campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 

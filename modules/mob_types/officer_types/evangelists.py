@@ -96,7 +96,7 @@ class evangelist(officer):
             num_dice = 1
 
         price = self.global_manager.get('action_prices')['religious_campaign']
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious campaigns')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['religious_campaign'] * -1, 'religious_campaign')
         actor_utility.double_action_price(self.global_manager, 'religious_campaign')
         text = ''
         text += 'The evangelist campaigns for the support of church volunteers to join him in converting the African natives. /n /n'
@@ -250,7 +250,7 @@ class evangelist(officer):
             num_dice = 1
 
         price = self.global_manager.get('action_prices')['public_relations_campaign']
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['public_relations_campaign'] * -1, 'public relations campaigns')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['public_relations_campaign'] * -1, 'public_relations_campaign')
         actor_utility.double_action_price(self.global_manager, 'public_relations_campaign')
         text = ''
         text += 'The evangelist campaigns to increase your company\'s public opinion with word of your company\'s benevolent goals and righteous deeds in Africa. /n /n'
