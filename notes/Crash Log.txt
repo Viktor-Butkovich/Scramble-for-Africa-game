@@ -4,6 +4,20 @@ Traceback (most recent call last):
     main_loop.main_loop(global_manager)
   File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 175, in main_loop
     current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1179, in on_click
-    print(1/0)
-ZeroDivisionError: division by zero
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1026, in on_click
+    self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 178, in new_game
+    self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 216, in create_placeholder_ministers
+    self.create_minister(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 227, in create_minister
+    new_minister = ministers.minister(False, {}, global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 73, in __init__
+    self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 250, in generate_minister_name
+    self.set_flavor_text('minister_first_names', 'text/minister_dutch_first_names.csv')
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 203, in set_flavor_text
+    current_flavor_text = csv_tools.read_csv(file)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\csv_tools.py", line 13, in read_csv
+    file = open(file_path, 'r')
+FileNotFoundError: [Errno 2] No such file or directory: 'text/minister_dutch_first_names.csv'

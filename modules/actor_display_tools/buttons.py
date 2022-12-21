@@ -2783,7 +2783,7 @@ class fabricate_evidence_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.get_cost():
                     self.showing_outline = True
-                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
+                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
                     defense = self.global_manager.get('displayed_defense')
                     prosecutor = self.global_manager.get('displayed_prosecution')
                     prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
@@ -2854,7 +2854,7 @@ class bribe_judge_button(label_button):
                 if self.global_manager.get('money') >= self.get_cost():
                     if not self.global_manager.get('prosecution_bribed_judge'):
                         self.showing_outline = True
-                        self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
+                        self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
                         self.global_manager.set('prosecution_bribed_judge', True)
                         prosecutor = self.global_manager.get('displayed_prosecution')
                         prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +

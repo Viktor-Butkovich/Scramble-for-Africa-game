@@ -186,11 +186,17 @@ def manage_production(global_manager):
             if len(current_resource_building.contained_work_crews) == 0:
                 if not current_resource_building.resource_type in global_manager.get('attempted_commodities'):
                     global_manager.get('attempted_commodities').append(current_resource_building.resource_type)
+    manage_production_report(expected_production, global_manager)
 
+    
+def manage_production_report(expected_production, global_manager):
+    '''
+    Description:
+        Displays a production report at the end of the turn, showing expected and actual production for each commodity the company has the capacity to produce
+    '''
     attempted_commodities = global_manager.get('attempted_commodities')
     displayed_commodities = []
     production_minister = global_manager.get('current_ministers')[global_manager.get('type_minister_dict')['production']]
-    
     if not len(global_manager.get('attempted_commodities')) == 0: #if any attempted, do production report
         text = production_minister.current_position + ' ' + production_minister.name + ' reports the following commodity production: /n /n'
         while len(displayed_commodities) < len(attempted_commodities):

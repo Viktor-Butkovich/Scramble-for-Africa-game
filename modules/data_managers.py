@@ -247,14 +247,14 @@ class flavor_text_manager_template():
         if self.global_manager.get('current_country') == self.global_manager.get('Belgium'):
             self.allow_particles = True
             if random.randrange(1, 7) >= 4:
-                self.set_flavor_text('minister_first_names', 'text/minister_dutch_first_names.csv')
-                self.set_flavor_text('minister_last_names', 'text/minister_dutch_last_names.csv')
-                self.set_flavor_text('minister_particles', 'text/minister_dutch_particles.csv')
+                self.set_flavor_text('minister_first_names', 'text/names/dutch_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/names/dutch_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/names/dutch_particles.csv')
                 self.allow_double_last_names = False
             else:
-                self.set_flavor_text('minister_first_names', 'text/minister_french_first_names.csv')
-                self.set_flavor_text('minister_last_names', 'text/minister_french_last_names.csv')
-                self.set_flavor_text('minister_particles', 'text/minister_french_particles.csv')
+                self.set_flavor_text('minister_first_names', 'text/names/french_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/names/french_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/names/french_particles.csv')
                 self.allow_double_last_names = True
 
         first_name = self.generate_flavor_text('minister_first_names')

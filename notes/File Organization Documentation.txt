@@ -456,8 +456,9 @@ SFA folder
 	      def start_player_turn
 	      def reset_mobs
 	      def manage_attrition
-		def remove_excess_inventory
+		  def remove_excess_inventory
 	      def manage_production
+		  def manage_production_report
 	      def manage_upkeep
 	      def manage_loans
 	      def manage_public_opinion
