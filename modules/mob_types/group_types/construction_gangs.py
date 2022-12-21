@@ -66,19 +66,19 @@ class construction_gang(group):
         choice_info_dict = {'constructor': self, 'type': 'start upgrade'}
         self.global_manager.set('ongoing_construction', True)
         if self.building_name == 'warehouses':
-            message = "Are you sure you want to start upgrading this tile's warehouses? /n /n"
+            message = 'Are you sure you want to start upgrading this tile\'s warehouses? /n /n'
         else:
-            message = "Are you sure you want to start upgrading the " + self.building_name + "'s " + self.upgrade_type + "? /n /n"
-        message += "The planning and materials will cost " + str(self.upgraded_building.get_upgrade_cost()) + " money.  Each upgrade to a building increases the cost of all future upgrades for that building. /n /n"
+            message = 'Are you sure you want to start upgrading the ' + self.building_name + '\'s ' + self.upgrade_type + '? /n /n'
+        message += 'The planning and materials will cost ' + str(self.upgraded_building.get_upgrade_cost()) + ' money.  Each upgrade to a building increases the cost of all future upgrades for that building. /n /n'
         if self.upgrade_type == 'efficiency':
-            message += "If successful, each work crew attached to this " + self.building_name + " will be able to make an additional attempt to produce commodities each turn."
+            message += 'If successful, each work crew attached to this ' + self.building_name + ' will be able to make an additional attempt to produce commodities each turn.'
         elif self.upgrade_type == 'scale':
-            message += "If successful, the maximum number of work crews able to be attached to this " + self.building_name + " will increase by 1."
+            message += 'If successful, the maximum number of work crews able to be attached to this ' + self.building_name + ' will increase by 1.'
         elif self.upgrade_type == 'warehouse_level':
-            message += "If successful, the warehouses' level will increase by 1, increasing the tile's inventory capacity by 9."
+            message += 'If successful, the warehouses\' level will increase by 1, increasing the tile\'s inventory capacity by 9.'
         else:
-            message += "Placeholder upgrade description"
-        message += " /n /n"
+            message += 'Placeholder upgrade description'
+        message += ' /n /n'
             
         notification_tools.display_choice_notification(message, ['start upgrade', 'stop upgrade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -102,27 +102,27 @@ class construction_gang(group):
             num_dice = 1
         
         self.global_manager.get('money_tracker').change(self.upgraded_building.get_upgrade_cost() * -1, 'construction')
-        text = ""
+        text = ''
         if self.building_name == 'warehouses':
-            text += "The " + self.name + " attempts to upgrade the warehouses. /n /n"
+            text += 'The ' + self.name + ' attempts to upgrade the warehouses. /n /n'
         else:
-            text += "The " + self.name + " attempts to upgrade the " + self.building_name + "'s " + self.upgrade_type + ". /n /n"
+            text += 'The ' + self.name + ' attempts to upgrade the ' + self.building_name + '\'s ' + self.upgrade_type + '. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'construction', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
-            text += ("The " + self.officer.name + " can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'construction', self.global_manager, num_dice)
+            text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
             results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.upgraded_building.get_upgrade_cost(), 'construction', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            first_roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -130,39 +130,39 @@ class construction_gang(group):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.upgraded_building.get_upgrade_cost(), 'construction')
-            roll_list = dice_utility.roll_to_list(6, "Construction roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            roll_list = dice_utility.roll_to_list(6, 'Construction roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'construction', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for upgrade
             if self.building_name == 'warehouses':
-                text += "The " + self.name + " successfully upgraded the warehouses. /n"
+                text += 'The ' + self.name + ' successfully upgraded the warehouses. /n'
             else: 
-                text += "The " + self.name + " successfully upgraded the " + self.building_name + "'s " + self.upgrade_type + ". /n"
+                text += 'The ' + self.name + ' successfully upgraded the ' + self.building_name + '\'s ' + self.upgrade_type + '. /n'
         else:
-            text += "Little progress was made and the " + self.officer.name + " requests more time and funds to complete the upgrade. /n"
+            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the upgrade. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
-            text += " /nThe " + self.officer.name + " managed the construction well enough to become a veteran. /n"
+            text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
-            notification_tools.display_notification(text + " /nClick to remove this notification.", 'final_construction', self.global_manager)
+            notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('construction_result', [self, roll_result])  

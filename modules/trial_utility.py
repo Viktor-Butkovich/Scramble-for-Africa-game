@@ -18,10 +18,10 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     '''
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
-    message = "Are you sure you want to start a trial against " + defense.name + "? You have " + str(defense.corruption_evidence) + " pieces of evidence to use. /n /n"
-    message += "Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 6 is rolled on any of the evidence dice. /n /n"
-    message += "However, the defense may spend from their personal savings (perhaps stolen from your company) to hire lawyers and negate some of the evidence. /n /n"
-    message += "Along with any money paid for bribery or fabricated evidence, a trial fee of " + str(global_manager.get('action_prices')['trial']) + " money is also required. /n /n"
+    message = 'Are you sure you want to start a trial against ' + defense.name + '? You have ' + str(defense.corruption_evidence) + ' pieces of evidence to use. /n /n'
+    message += 'Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 6 is rolled on any of the evidence dice. /n /n'
+    message += 'However, the defense may spend from their personal savings (perhaps stolen from your company) to hire lawyers and negate some of the evidence. /n /n'
+    message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(global_manager.get('action_prices')['trial']) + ' money is also required. /n /n'
 
     choice_info_dict = {}
     global_manager.set('ongoing_trial', True)
@@ -54,8 +54,8 @@ def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
             defense_cost = max_defense_fund / 2
             prosecutor.steal_money(defense_cost, 'bribery')
             building_defense = False
-            if global_manager.get('DEBUG_show_minister_stealing'):
-                print(defense.current_position + " " + defense.name + " now has " + str(defense.stolen_money - defense_cost) + " money remaining.")
+            if global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                print(defense.current_position + ' ' + defense.name + ' now has ' + str(defense.stolen_money - defense_cost) + ' money remaining.')
         else:
             lawyer_cost = get_lawyer_cost(num_lawyers)
             bribe_judge_cost = get_lawyer_cost(0)
@@ -122,23 +122,23 @@ def trial(global_manager): #called by choice notification button
         None
     '''
     price = global_manager.get('action_prices')['trial']
-    global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial fees')
+    global_manager.get('money_tracker').change(-1 * global_manager.get('action_prices')['trial'], 'trial')
     actor_utility.double_action_price(global_manager, 'trial')
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
     prosecutor_corrupt = prosecution.check_corruption()
     if prosecutor_corrupt:
-        prosecution.steal_money(price, 'trial fees')
-        prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial fees')
+        prosecution.steal_money(price, 'trial')
+        prosecution.steal_money(get_fabricated_evidence_cost(defense.fabricated_evidence, True), 'trial')
         if global_manager.get('prosecution_bribed_judge'):
-            prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial fees')
+            prosecution.steal_money(get_fabricated_evidence_cost(0), 'trial')
 
     defense_info_dict = manage_defense(defense.corruption_evidence, prosecutor_corrupt, global_manager)
     effective_evidence = defense_info_dict['effective_evidence']
 
     defense_bribed_judge = defense_info_dict['defense_bribed_judge']
     prosecution_bribed_judge = global_manager.get('prosecution_bribed_judge')
-    text = ""
+    text = ''
     judge_modifier = 0
     judge_bias = prosecution.no_corruption_roll(6) - defense.get_roll_modifier() #D6 with both skill modifiers competing
     if judge_bias < 1:
@@ -148,44 +148,44 @@ def trial(global_manager): #called by choice notification button
     new_clothing_types = ['jewelry', 'robes', 'wig']
     if not (defense_bribed_judge or prosecution_bribed_judge):
         if judge_bias == 1:
-            text = "Even before evidence is presented, the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls."
+            text = 'Even before evidence is presented, the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls.'
             judge_modifier = -1
         elif judge_bias == 6:
-            text = "Despite not being bribed, the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll."
+            text = 'Despite not being bribed, the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll.'
             judge_modifier = 1
         else:
-            text = "The judge does not seem to favor any particular side."
+            text = 'The judge does not seem to favor any particular side.'
 
     elif defense_bribed_judge and not prosecution_bribed_judge:
         if judge_bias <= 5:
-            text = "Even before evidence is presented, the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls."
+            text = 'Even before evidence is presented, the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls.'
             judge_modifier = -1
         else:
-            text = "The judge does not seem to favor any particular side and does not modify your evidence rolls."
+            text = 'The judge does not seem to favor any particular side and does not modify your evidence rolls.'
     elif prosecution_bribed_judge and not defense_bribed_judge:
         if judge_bias == 1 or prosecutor_corrupt: #judge never received the money
-            text = "You could have sworn you sent your prosecutor to bribe the judge, but the judge gives the prosecution neither knowing glances nor special treatment." 
+            text = 'You could have sworn you sent your prosecutor to bribe the judge, but the judge gives the prosecution neither knowing glances nor special treatment.' 
         else:
-            text = "Smiling and flaunting his fancy new " + random.choice(new_clothing_types) + ", the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll."
+            text = 'Smiling and flaunting his fancy new ' + random.choice(new_clothing_types) + ', the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll.'
             judge_modifier = 1
     else: #if both sides bribed judge
         if judge_bias <= 2:
-            text = "Despite his fancy new " + random.choice(new_clothing_types) +", the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls."
+            text = 'Despite his fancy new ' + random.choice(new_clothing_types) +', the judge has a suspicious bias in favor of the defense, removing 1 of your evidence rolls.'
             judge_modifier = -1
         elif judge_bias <= 4:
-            text = "You could have sworn you sent your prosecutor to bribe the judge, but the judge gives the prosecution neither knowing glances nor special treatment."
+            text = 'You could have sworn you sent your prosecutor to bribe the judge, but the judge gives the prosecution neither knowing glances nor special treatment.'
         else:
-            text = "Smiling and flaunting his fancy new " + random.choice(new_clothing_types) + ", the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll."
+            text = 'Smiling and flaunting his fancy new ' + random.choice(new_clothing_types) + ', the judge has a healthy bias in favor of the prosecution, giving 1 additional evidence roll.'
             judge_modifier = 1
     text += ' /n /n'
     effective_evidence += judge_modifier
   
     if defense_info_dict['num_lawyers'] == 0:
-        text += "As the defense decided not to hire any additional lawyers, each piece of evidence remains usable, allowing " + str(defense_info_dict['effective_evidence']) + " evidence rolls to attempt to win the trial. /n /n"
+        text += 'As the defense decided not to hire any additional lawyers, each piece of evidence remains usable, allowing ' + str(defense_info_dict['effective_evidence']) + ' evidence rolls to attempt to win the trial. /n /n'
     else:
-        text += "The defense hired " + str(defense_info_dict['num_lawyers']) + " additional lawyer" + utility.generate_plural(defense_info_dict['num_lawyers']) + ", cancelling out " + str(defense_info_dict['num_lawyers']) + " piece"
-        text += utility.generate_plural(defense_info_dict['num_lawyers']) + " of evidence. This leaves " + str(effective_evidence) + " evidence roll"
-        text += utility.generate_plural(effective_evidence) + " to attempt to win the trial. /n /n"    
+        text += 'The defense hired ' + str(defense_info_dict['num_lawyers']) + ' additional lawyer' + utility.generate_plural(defense_info_dict['num_lawyers']) + ', cancelling out ' + str(defense_info_dict['num_lawyers']) + ' piece'
+        text += utility.generate_plural(defense_info_dict['num_lawyers']) + ' of evidence. This leaves ' + str(effective_evidence) + ' evidence roll'
+        text += utility.generate_plural(effective_evidence) + ' to attempt to win the trial. /n /n'    
     
     text += str(defense_info_dict['corruption_evidence']) + ' initial evidence - '
     text += str(defense_info_dict['num_lawyers']) + ' defense lawyers '
@@ -209,7 +209,7 @@ def trial(global_manager): #called by choice notification button
         global_manager.get('trial_rolls').append(current_roll)
 
     if len(global_manager.get('trial_rolls')) == 0:
-        notification_tools.display_notification("As you have no evidence rolls remaining, you automatically lose the trial. /n /n", 'default', global_manager)
+        notification_tools.display_notification('As you have no evidence rolls remaining, you automatically lose the trial. /n /n', 'default', global_manager)
         complete_trial(1, global_manager)
     else:
         display_evidence_roll(global_manager)
@@ -231,8 +231,8 @@ def display_evidence_roll(global_manager):
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
     global_manager.get('actor_creation_manager').display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440, global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
-    notification_tools.display_notification(text + "Click to roll. 6+ required on at least 1 die to succeed.", 'default', global_manager, 1)
-    notification_tools.display_notification(text + "Rolling... ", 'roll', global_manager, 1)
+    notification_tools.display_notification(text + 'Click to roll. 6+ required on at least 1 die to succeed.', 'default', global_manager, 1)
+    notification_tools.display_notification(text + 'Rolling... ', 'roll', global_manager, 1)
     results = dice_utility.roll_to_list(6, 'Evidence roll', 6, 6, 0, global_manager, result)
     notification_tools.display_notification(text + results[1], 'trial', global_manager)
 
@@ -252,24 +252,24 @@ def complete_trial(final_roll, global_manager):
     
     if final_roll == 6:
         confiscated_money = defense.stolen_money / 2.0
-        text = "You have won the trial, removing " + defense.name + " as " + defense.current_position + " and putting him in prison. /n /n"
+        text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
         if confiscated_money > 0:
-            text += "While most of " + defense.name + "'s money was spent on the trial or unaccounted for, authorities managed to confiscate " + str(confiscated_money) + " money, which has been given to your company as compensation. "
-            text += " /n /n"
-            global_manager.get('money_tracker').change(confiscated_money, 'trial compensation')
+            text += 'While most of ' + defense.name + '\'s money was spent on the trial or unaccounted for, authorities managed to confiscate ' + str(confiscated_money) + ' money, which has been given to your company as compensation. '
+            text += ' /n /n'
+            global_manager.get('money_tracker').change(confiscated_money, 'trial_compensation')
         else:
-            text += "Authorities searched " + defense.name + "'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. "
-            text += " /n /n"
+            text += 'Authorities searched ' + defense.name + '\'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. '
+            text += ' /n /n'
         notification_tools.display_notification(text, 'default', global_manager)
         
         defense.appoint('none')
         defense.respond('prison')
         defense.remove()
         global_manager.get('fear_tracker').change(1)
-        notification_tools.display_notification("Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n", 'default', global_manager)
+        notification_tools.display_notification('Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n', 'default', global_manager)
 
     else:
-        text = "You have lost the trial and " + defense.name + " goes unpunished, remaining your " + defense.current_position + ". /n /n"
+        text = 'You have lost the trial and ' + defense.name + ' goes unpunished, remaining your ' + defense.current_position + '. /n /n'
         fabricated_evidence = defense.fabricated_evidence
         real_evidence = defense.corruption_evidence - defense.fabricated_evidence
 
@@ -282,19 +282,19 @@ def complete_trial(final_roll, global_manager):
                 lost_evidence += 1
                 
         if fabricated_evidence > 0:
-            text += "Fabricated evidence is temporary, so the " + str(fabricated_evidence) + " piece" + utility.generate_plural(fabricated_evidence) + " of fabricated evidence used in this trial "
-            text += utility.conjugate('be', fabricated_evidence) + " now irrelevant to future trials. /n /n"
+            text += 'Fabricated evidence is temporary, so the ' + str(fabricated_evidence) + ' piece' + utility.generate_plural(fabricated_evidence) + ' of fabricated evidence used in this trial '
+            text += utility.conjugate('be', fabricated_evidence) + ' now irrelevant to future trials. /n /n'
 
         if real_evidence > 0:
             if lost_evidence == 0: #if no evidence lost
-                text += "All of the real evidence used in this trial remains potent enough to be used in future trials against "
-                text += defense.name + ". /n /n"
+                text += 'All of the real evidence used in this trial remains potent enough to be used in future trials against '
+                text += defense.name + '. /n /n'
             elif lost_evidence < real_evidence: #if some evidence lost
-                text += "Of the " + str(real_evidence) + " piece" + utility.generate_plural(real_evidence) + " of real evidence used in this trial, " + str(remaining_evidence)
-                text += " " + utility.conjugate('remain', remaining_evidence) + " potent enough to be relevant to future trials against " + defense.name + ", while " + str(lost_evidence) + " " + utility.conjugate('be', lost_evidence)
-                text += " now irrelevant. /n /n"
+                text += 'Of the ' + str(real_evidence) + ' piece' + utility.generate_plural(real_evidence) + ' of real evidence used in this trial, ' + str(remaining_evidence)
+                text += ' ' + utility.conjugate('remain', remaining_evidence) + ' potent enough to be relevant to future trials against ' + defense.name + ', while ' + str(lost_evidence) + ' ' + utility.conjugate('be', lost_evidence)
+                text += ' now irrelevant. /n /n'
             else: #if all evidence lost
-                text += "Of the " + str(real_evidence) + " piece" + utility.generate_plural(real_evidence) + " of real evidence used in this trial, none remain potent enough to be relevant to future trials against " + defense.name + ". /n /n"
+                text += 'Of the ' + str(real_evidence) + ' piece' + utility.generate_plural(real_evidence) + ' of real evidence used in this trial, none remain potent enough to be relevant to future trials against ' + defense.name + '. /n /n'
 
         defense.fabricated_evidence = 0
         defense.corruption_evidence = remaining_evidence

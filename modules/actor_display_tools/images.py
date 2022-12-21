@@ -87,7 +87,7 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/sentry_icon.png')
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'minister_default':
+            elif self.actor_image_type in ['minister_default', 'country_default']:
                 self.set_image(new_actor.image_id)
             else:
                 self.set_image(new_actor.image_dict['default'])

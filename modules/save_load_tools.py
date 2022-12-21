@@ -59,17 +59,19 @@ class save_load_manager_template():
         self.copied_elements.append('prosecution_bribed_judge')
         self.copied_elements.append('sold_commodities')
         self.copied_elements.append('action_prices')
+        self.copied_elements.append('current_country_name')
         
-    def new_game(self):
+    def new_game(self, country):
         '''
         Description:
             Creates a new game and leaves the main menu
         Input:
-            None
+            country country: Country being played in the new game
         Output:
             None
         '''
         self.global_manager.set('creating_new_game', True)
+        country.select()
         strategic_grid_height = 300
         strategic_grid_width = 320
         mini_grid_height = 600
@@ -105,11 +107,11 @@ class save_load_manager_template():
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
 
-        self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+        #self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
     
 
-        europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
 
         input_dict = {}
         input_dict['origin_coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
@@ -118,14 +120,14 @@ class save_load_manager_template():
         input_dict['internal_line_color'] = 'black'
         input_dict['external_line_color'] = 'black'
         input_dict['modes'] = ['strategic', 'europe']
-        input_dict['tile_image_id'] = 'locations/europe.png' 
+        input_dict['tile_image_id'] = 'locations/europe/' + country.name + '.png' 
         input_dict['grid_line_width'] = 3
         input_dict['name'] = 'Europe'
         europe_grid = grids.abstract_grid(False, input_dict, self.global_manager)
         self.global_manager.set('europe_grid', europe_grid)
 
 
-        slave_traders_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
         slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120) #started at 25, -120 for europe grid y, -25 for space between
 
         input_dict = {}
@@ -150,7 +152,16 @@ class save_load_manager_template():
 
         for current_commodity in self.global_manager.get('commodity_types'):
             if not current_commodity == 'consumer goods':
-                market_tools.set_price(current_commodity, random.randrange(self.global_manager.get('commodity_min_starting_price'), self.global_manager.get('commodity_max_starting_price') + 1), self.global_manager) #2-5
+                #min_price = self.global_manager.get('commodity_min_starting_price')
+                #max_price = self.global_manager.get('commodity_max_starting_price')
+                price = round((random.randrange(1, 7) + random.randrange(1, 7))/2)
+                increase = 0
+                if current_commodity == 'gold':
+                    increase = random.randrange(1, 7)
+                elif current_commodity == 'diamond':
+                    increase = random.randrange(1, 7) + random.randrange(1, 7)
+                price += increase    
+                market_tools.set_price(current_commodity, price, self.global_manager) #2-5
             else:
                 market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
@@ -172,6 +183,7 @@ class save_load_manager_template():
         self.global_manager.set('num_european_workers', 0)
         self.global_manager.set('num_slave_workers', 0)
         self.global_manager.set('num_wandering_workers', 0)
+        self.global_manager.set('num_church_volunteers', 0)
         self.global_manager.set('african_worker_upkeep', self.global_manager.get('initial_african_worker_upkeep'))
         self.global_manager.set('european_worker_upkeep', self.global_manager.get('initial_european_worker_upkeep'))
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
@@ -232,7 +244,7 @@ class save_load_manager_template():
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
-            if self.global_manager.get('DEBUG_show_corruption_on_save'):
+            if self.global_manager.get('effect_manager').effect_active('show_corruption_on_save'):
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
@@ -242,7 +254,7 @@ class save_load_manager_template():
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
-        text_tools.print_to_screen("Game successfully saved to " + file_path, self.global_manager)
+        text_tools.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
         '''
@@ -255,8 +267,8 @@ class save_load_manager_template():
         '''
         self.global_manager.set('loading_save', True)
         
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Loading " + file_path, self.global_manager)
+        text_tools.print_to_screen('', self.global_manager)
+        text_tools.print_to_screen('Loading ' + file_path, self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:
@@ -267,7 +279,7 @@ class save_load_manager_template():
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
         except:
-            text_tools.print_to_screen("The " + file_path + " file does not exist.", self.global_manager)
+            text_tools.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
 
         #load variables
@@ -279,18 +291,19 @@ class save_load_manager_template():
         self.global_manager.get('public_opinion_tracker').set(new_global_manager.get('public_opinion'))
         self.global_manager.get('evil_tracker').set(new_global_manager.get('evil'))
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
+        self.global_manager.get(self.global_manager.get('current_country_name')).select() #selects the country object with the same identifier as the saved country name
 
-        text_tools.print_to_screen("", self.global_manager)
-        text_tools.print_to_screen("Turn " + str(self.global_manager.get('turn')), self.global_manager)
+        text_tools.print_to_screen('', self.global_manager)
+        text_tools.print_to_screen('Turn ' + str(self.global_manager.get('turn')), self.global_manager)
 
         #load grids
         strategic_grid_height = 300
         strategic_grid_width = 320
         mini_grid_height = 600
         mini_grid_width = 640
-        europe_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
-        europe_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
-        slave_traders_grid_x = self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_x = self.global_manager.get('europe_grid_x') #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
+        europe_grid_y = self.global_manager.get('europe_grid_y') #self.global_manager.get('default_display_height') - (strategic_grid_height + 25)
+        slave_traders_grid_x = europe_grid_x #self.global_manager.get('default_display_width') - (strategic_grid_width + 340)
         slave_traders_grid_y = self.global_manager.get('default_display_height') - (strategic_grid_height - 120)
         for current_grid_dict in saved_grid_dicts:
             input_dict = current_grid_dict
@@ -318,7 +331,7 @@ class save_load_manager_template():
                 if current_grid_dict['grid_type'] == 'europe_grid':
                     input_dict['modes'] = ['strategic', 'europe']
                     input_dict['origin_coordinates'] = scaling.scale_coordinates(europe_grid_x, europe_grid_y, self.global_manager)
-                    input_dict['tile_image_id'] = 'locations/europe.png' 
+                    input_dict['tile_image_id'] = 'locations/europe/' + self.global_manager.get('current_country').name + '.png' 
                     input_dict['name'] = 'Europe'
                     europe_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('europe_grid', europe_grid)
@@ -345,7 +358,7 @@ class save_load_manager_template():
         minimap_grid = grids.mini_grid(False, input_dict, self.global_manager)
         self.global_manager.set('minimap_grid', minimap_grid)
         
-        self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
+        #self.global_manager.set('notification_manager', data_managers.notification_manager_template(self.global_manager))
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)

@@ -164,7 +164,7 @@ class grid():
             int tuple: Two values representing x and y pixel coordinates of the center of the requested cell
         '''
         x, y = coordinates
-        return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x + int(self.get_cell_width()/2)), (display_height - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y + int(self.get_cell_height()/2))))
+        return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x + int(self.get_cell_width()/2)), (self.global_manager.get('display_height') - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y + int(self.get_cell_height()/2))))
 
     def convert_coordinates(self, coordinates):
         '''

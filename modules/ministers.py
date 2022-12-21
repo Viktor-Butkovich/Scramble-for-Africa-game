@@ -3,11 +3,11 @@
 import random
 
 from . import utility
-from . import actor_utility
 from . import minister_utility
 from . import notification_tools
 from . import images
 from . import scaling
+from . import text_tools
 
 class minister():
     '''
@@ -106,13 +106,13 @@ class minister():
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
         else:
             self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
-        self.tooltip_text.append("Background: " + self.background)
-        self.tooltip_text.append("Social status: " + self.status)
-        self.tooltip_text.append("Interests: " + self.interests[0] + " and " + self.interests[1])
-        self.tooltip_text.append("Evidence: " + str(self.corruption_evidence))
+        self.tooltip_text.append('Background: ' + self.background)
+        self.tooltip_text.append('Social status: ' + self.status)
+        self.tooltip_text.append('Interests: ' + self.interests[0] + ' and ' + self.interests[1])
+        self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
-            self.tooltip_text.append("This minister was just removed from office and expects to be reappointed to an office by the end of the turn.")
-            self.tooltip_text.append("If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.")
+            self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
+            self.tooltip_text.append('If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.')
 
     def display_message(self, text):
         '''
@@ -144,35 +144,35 @@ class minister():
         '''
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
         if not prosecutor == 'none':
-            if self.global_manager.get('DEBUG_show_minister_stealing'):
-                print(self.current_position + " " + self.name + " stole " + str(value) + " money from " + self.global_manager.get('theft_type_descriptions')[theft_type] + ".")
-            difficulty = self.no_corruption_roll(6)
-            result = prosecutor.no_corruption_roll(6)
+            if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
+            difficulty = self.no_corruption_roll(6, 'minister_stealing')
+            result = prosecutor.no_corruption_roll(6, 'minister_stealing_detection')
             if (not prosecutor == self) and result >= difficulty: #caught by prosecutor if prosecutor succeeds skill contest roll
                 if prosecutor.check_corruption(): #if prosecutor takes bribe, split money
                     prosecutor.stolen_money += (value / 2)
                     self.stolen_money += (value / 2)
-                    if self.global_manager.get('DEBUG_show_minister_stealing'):
-                        print("The theft was caught by the prosecutor, who accepted a bribe to not create evidence.")
-                        print(prosecutor.current_position + " " + prosecutor.name + " has now stolen a total of " + str(prosecutor.stolen_money) + " money.")
+                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                        print('The theft was caught by the prosecutor, who accepted a bribe to not create evidence.')
+                        print(prosecutor.current_position + ' ' + prosecutor.name + ' has now stolen a total of ' + str(prosecutor.stolen_money) + ' money.')
                 else: #if prosecutor refuses bribe, still keep money but create evidence
                     self.stolen_money += value
                     self.corruption_evidence += 1
-                    evidence_message = ""
+                    evidence_message = ''
 
-                    evidence_message += "Prosecutor " + prosecutor.name + " suspects that " + self.current_position + " " + self.name + " just engaged in corrupt activity relating to "
-                    evidence_message += self.global_manager.get('theft_type_descriptions')[theft_type] + " and has filed a piece of evidence against him. /n /n"
-                    evidence_message += "There are now " + str(self.corruption_evidence) + " piece" + utility.generate_plural(self.corruption_evidence) + " of evidence against " + self.name + ". /n /n"
-                    evidence_message += "Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n"
+                    evidence_message += 'Prosecutor ' + prosecutor.name + ' suspects that ' + self.current_position + ' ' + self.name + ' just engaged in corrupt activity relating to '
+                    evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
+                    evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
+                    evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
                     prosecutor.display_message(evidence_message)
-                    if self.global_manager.get('DEBUG_show_minister_stealing'):
-                        print("The theft was caught by the prosecutor, who chose to create evidence.") 
+                    if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+                        print('The theft was caught by the prosecutor, who chose to create evidence.') 
             else: #if not caught, keep money
                 self.stolen_money += value
-                if self.global_manager.get('DEBUG_show_minister_stealing') and not prosecutor == self:
-                    print("The theft was not caught by the prosecutor.")
-        if self.global_manager.get('DEBUG_show_minister_stealing'):
-            print(self.current_position + " " + self.name + " has now stolen a total of " + str(self.stolen_money) + " money.")
+                if self.global_manager.get('effect_manager').effect_active('show_minister_stealing') and not prosecutor == self:
+                    print('The theft was not caught by the prosecutor.')
+        if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
+            print(self.current_position + ' ' + self.name + ' has now stolen a total of ' + str(self.stolen_money) + ' money.')
 
         if value > 0:
             self.global_manager.get('evil_tracker').change(2)
@@ -224,15 +224,16 @@ class minister():
             int min_success: Minimum roll required for a success
             int max_crit_fail: Maximum roll required for a critical failure
             double value: Amount of money being spent by company to make this roll, can be stolen
-            string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught
+            string roll_type: Type of roll being made, used in prosector report description if minister steals money and is caught and to apply action-specific modifiers
             boolean predetermined_corruption = False: Whether the corruption roll has already been made for this situation
         Output:
             int: Returns the roll's modified result
         '''
         min_result = 1
         max_result = num_sides
-        result = random.randrange(1, num_sides + 1)
-        result += self.get_roll_modifier()
+        result = self.no_corruption_roll(num_sides, roll_type)
+        #result = random.randrange(1, num_sides + 1)
+        #result += self.get_roll_modifier()
         
         if (predetermined_corruption or self.check_corruption()):
             if not self.stolen_already: #true if stealing
@@ -249,19 +250,20 @@ class minister():
             result = num_sides
         return(result)
 
-    def no_corruption_roll(self, num_sides):
+    def no_corruption_roll(self, num_sides, roll_type = 'none'):
         '''
         Description:
             Rolls and returns the result of a die with the inputted number of sides, modifying the result based on skill with the assumption that corruption has already failed to occur or otherwise does not allow for corruption
         Input:
             int num_sides: Number of sides on the die rolled
+            string roll_type = 'none': Type of roll being done, used to apply action-specific modifiers
         Output:
             int: Returns the roll's modified result
         '''
         min_result = 1
         max_result = num_sides
         result = random.randrange(1, num_sides + 1)
-        result += self.get_roll_modifier()
+        result += self.get_roll_modifier(roll_type)
         
         if result < min_result:
             result = min_result
@@ -291,12 +293,12 @@ class minister():
             corrupt_index = random.randrange(0, num_dice)
             for i in range(num_dice): #num_sides, min_success, max_crit_fail, value, roll_type, predetermined_corruption = False
                 if i == corrupt_index: #if rolling multiple dice, choose one of the dice randomly and make it the corrupt result, making it a non-critical failure
-                    results.append(self.roll(num_sides, min_success, max_crit_fail, value, roll_type, True))
+                    results.append(self.roll(num_sides, min_success, max_crit_fail, value, 'none', True)) #use roll_type none because roll is fake, does not apply modifiers
                 else: #for dice that are not chosen, can be critical or non-critical failure because higher will be chosen in case of critical failure, no successes allowed
-                    results.append(self.roll(num_sides, min_success, 0, value, roll_type, True)) #0 for max_crit_fail allows critical failure numbers to be chosen
+                    results.append(self.roll(num_sides, min_success, 0, value, 'none', True)) #0 for max_crit_fail allows critical failure numbers to be chosen
         else: #if not corrupt, just roll with minister modifier
             for i in range(num_dice):
-                results.append(self.no_corruption_roll(num_sides))
+                results.append(self.no_corruption_roll(num_sides, roll_type))
         self.stolen_already = False
         return(results)
             
@@ -334,7 +336,7 @@ class minister():
 
         else: #if not corrupt, just roll with minister modifier
             for i in range(num_dice):
-                results.append(self.no_corruption_roll(6))
+                results.append(self.no_corruption_roll(6, roll_type))
             enemy_roll = random.randrange(1, 7)
             results = [enemy_roll] + results
         self.stolen_already = False
@@ -450,17 +452,17 @@ class minister():
         Output:
             boolean: Returns True if this minister will be corrupt for the roll
         '''
-        if self.global_manager.get('DEBUG_band_of_thieves'):
+        if self.global_manager.get('effect_manager').effect_active('band_of_thieves'):
             return(True)
-        elif self.global_manager.get('DEBUG_ministry_of_magic'):
+        elif self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
             return(False)
             
         if random.randrange(1, 7) >= self.corruption_threshold:
             if random.randrange(1, 7) >= self.global_manager.get('fear'): #higher fear reduces chance of exceeding threshold and stealing
                 return(True)
             else:
-                if self.global_manager.get('DEBUG_show_fear'):
-                    print(self.name + " was too afraid to steal money")
+                if self.global_manager.get('effect_manager').effect_active('show_fear'):
+                    print(self.name + ' was too afraid to steal money')
                 return(False)
         else:
             return(False)
@@ -518,21 +520,40 @@ class minister():
         else: #5-6
             return(1)
 
-    def get_roll_modifier(self):
+    def get_roll_modifier(self, roll_type = 'none'):
         '''
         Description:
             Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         Input:
-            None
+            string roll_type = 'none': Type of roll being done, used to apply action-specific modifiers
         Output:
             int: Returns the modifier this minister will apply to a given roll. As skill has only a half chance of applying to a given roll, the returned value may vary
         '''
-        if self.global_manager.get('DEBUG_ministry_of_magic'):
+        modifier = 0
+        if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
             return(5)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
-            return(self.get_skill_modifier())
-        else:
-            return(0)
+            modifier += self.get_skill_modifier()
+            if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                if modifier >= 0:
+                    print('Minister gave modifier of +' + str(modifier) + ' to ' + roll_type + ' roll.')
+                else:
+                    print('Minister gave modifier of ' + str(modifier) + ' to ' + roll_type + ' roll.')
+        if self.global_manager.get('effect_manager').effect_active(roll_type + '_plus_modifier'):
+            if random.randrange(1, 3) == 1:
+                modifier += 1
+                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                    print('Country gave modifier of +1 to ' + roll_type + ' roll.')
+            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                print('Country attempted to give +1 modifier to ' + roll_type + ' roll.')
+        elif self.global_manager.get('effect_manager').effect_active(roll_type + '_minus_modifier'):
+            if random.randrange(1, 3) == 1:
+                modifier -= 1
+                if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                    print('Country gave modifier of -1 to ' + roll_type + ' roll.')
+            elif self.global_manager.get('effect_manager').effect_active('show_modifiers'):
+                print('Country attempted to give -1 modifier to ' + roll_type + ' roll.')
+        return(modifier)
 
     def remove(self):
         '''
@@ -563,13 +584,13 @@ class minister():
         Output:
             None
         '''
-        text = ""
+        text = ''
         public_opinion_change = 0
 
         if self.status_number >= 3:
             if self.background == 'politician':
                 third_party = ['the media', 'the prime minister', 'Parliament']
-            elif self.background == 'industrialist':
+            elif self.background in ['industrialist', 'business magnate']:
                 third_party = ['the business community', 'my investors', 'my friends']
             else: #royal heir or aristocrat
                 third_party = ['my family', 'my cousins', 'the nobility']
@@ -579,90 +600,90 @@ class minister():
                 public_opinion_change = self.status_number + random.randrange(-1, 2)
                 if self.status_number == 4:
                     public_opinion_change += 6
-            text += "From: " + self.name + " /n /n"
-            intro_options = ["You have my greatest thanks for appointing me to your cabinet. ",
-                             "Honored governor, my gratitude knows no limits. ",
-                             "Finally, a chance to bring glory to our empire! "]
+            text += 'From: ' + self.name + ' /n /n'
+            intro_options = ['You have my greatest thanks for appointing me to your cabinet. ',
+                             'Honored governor, my gratitude knows no limits. ',
+                             'Finally, a chance to bring glory to our empire! ']
             text += random.choice(intro_options)
             
-            middle_options = ["I shall ensure my duties are completed with the utmost precision and haste. ",
-                              "I will never betray you, I swear. ",
-                              "Nothing will keep us from completing our divine mission. "]
+            middle_options = ['I shall ensure my duties are completed with the utmost precision and haste. ',
+                              'I will never betray you, I swear. ',
+                              'Nothing will keep us from completing our divine mission. ']
             text += random.choice(middle_options)
 
             if self.status_number >= 3:
-                conclusion_options = ["I'll make sure to put a good word in with " + random.choice(third_party) + " about you.",
-                                      "I'm sure " + random.choice(third_party) + " would enjoy hearing about this wise decision.",
-                                      "Perhaps I could pull some strings with " + random.choice(third_party) + " to help repay you?"]
+                conclusion_options = ['I\'ll make sure to put a good word in with ' + random.choice(third_party) + ' about you.',
+                                      'I\'m sure ' + random.choice(third_party) + ' would enjoy hearing about this wise decision.',
+                                      'Perhaps I could pull some strings with ' + random.choice(third_party) + ' to help repay you?']
                 text += random.choice(conclusion_options)
-                text += " /n /n /nYou have gained " + str(public_opinion_change) + " public opinion. /n /n"
+                text += ' /n /n /nYou have gained ' + str(public_opinion_change) + ' public opinion. /n /n'
                 
             else:
                 heres_to_options = ['victory', 'conquest', 'glory']
-                conclusion_options = ["Please send the other ministers my regards - I look forward to working with them. ",
-                                      "Here's to " + random.choice(heres_to_options) + "!",
-                                      "We're going to make a lot of money together! "]
+                conclusion_options = ['Please send the other ministers my regards - I look forward to working with them. ',
+                                      'Here\'s to ' + random.choice(heres_to_options) + '!',
+                                      'We\'re going to make a lot of money together! ']
                 text += random.choice(conclusion_options) + ' /n /n /n'
             
             if self.status_number == 1:
                 public_opinion_change = -1
-                text += "While lowborn can easily be removed should they prove incompetent or disloyal, it reflects poorly on the company to appoint them as ministers. /n /n"
-                text += "You have lost " + str(-1 * public_opinion_change) + " public opinion. /n /n"
+                text += 'While lowborn can easily be removed should they prove incompetent or disloyal, it reflects poorly on the company to appoint them as ministers. /n /n'
+                text += 'You have lost ' + str(-1 * public_opinion_change) + ' public opinion. /n /n'
             
         elif event == 'fired':
             multiplier = random.randrange(8, 13) / 10.0 #0.8-1.2
             public_opinion_change = -10 * self.status_number * multiplier #4-6 for lowborn, 32-48 for very high
             self.global_manager.get('evil_tracker').change(2)
-            text += "From: " + self.name + " /n /n"
-            intro_options = ["How far our empire has fallen... ",
-                             "You have made a very foolish decision in firing me. ",
-                             "I was just about to retire, and you had to do this? ",
-                             "I was your best minister - you're all doomed without me. "]
+            text += 'From: ' + self.name + ' /n /n'
+            intro_options = ['How far our empire has fallen... ',
+                             'You have made a very foolish decision in firing me. ',
+                             'I was just about to retire, and you had to do this? ',
+                             'I was your best minister - you\'re all doomed without me. ']
             text += random.choice(intro_options)
             
             if self.background == 'royal heir':
                 family_members = ['father', 'mother', 'father', 'mother', 'uncle', 'aunt', 'brother', 'sister']
                 threats = ['killed', 'executed', 'decapitated', 'thrown in jail', 'banished', 'exiled']
-                text += "My " + random.choice(family_members) + " could have you " + random.choice(threats) + " for this. "
+                text += 'My ' + random.choice(family_members) + ' could have you ' + random.choice(threats) + ' for this. '
             elif self.status_number >= 3:
-                warnings = ["You better be careful making enemies in high places, friend. ",
-                            'Parliament will cut your funding before you can even say "bribe". ',
-                            "You have no place in our empire, you greedy upstart. ",
-                            "Learn how to respect your betters - we're not savages. "]
+                warnings = ['You better be careful making enemies in high places, friend. ',
+                            'Parliament will cut your funding before you can even say \'bribe\'. ',
+                            'You have no place in our empire, you greedy upstart. ',
+                            'Learn how to respect your betters - we\'re not savages. ']
                 text += random.choice(warnings)
             else:
-                warnings = ["Think of what will happen to the " + random.choice(self.global_manager.get('commodity_types')) + " prices after the media hears about this! ",
-                            "You think you can kick me down from your palace in the clouds? ",
-                            "I'll make sure to tell all about those judges you bribed. ",
-                            "So many dead... what will be left of this land by the time you're done? ",
-                            "What next? Will you murder me like you did those innocents in the village? ",
-                            "You'll burn in hell for this. ",
-                            "Watch your back, friend. "]
+                warnings = ['Think of what will happen to the ' + random.choice(self.global_manager.get('commodity_types')) + ' prices after the media hears about this! ',
+                            'You think you can kick me down from your palace in the clouds? ',
+                            'I\'ll make sure to tell all about those judges you bribed. ',
+                            'So many dead... what will be left of this land by the time you\'re done? ',
+                            'What next? Will you murder me like you did those innocents in the village? ',
+                            'You\'ll burn in hell for this. ',
+                            'Watch your back, friend. ']
                 text += random.choice(warnings)
-            text += " /n /n /nYou have lost " + str(-1 * public_opinion_change) + " public opinion. /n"
-            text += self.name + " has been fired and removed from the game. /n /n"
+            text += ' /n /n /nYou have lost ' + str(-1 * public_opinion_change) + ' public opinion. /n'
+            text += self.name + ' has been fired and removed from the game. /n /n'
             
         elif event == 'prison':
-            text += "From: " + self.name + " /n /n"
+            text += 'From: ' + self.name + ' /n /n'
             if self.status_number >= 3:
-                intro_options = ["Do you know what we used to do to upstarts like you?",
-                                 "This is nothing, " + random.choice(third_party) + " will get me out within days.",
-                                 "You better be careful making enemies in high places, friend. "]
+                intro_options = ['Do you know what we used to do to upstarts like you?',
+                                 'This is nothing, ' + random.choice(third_party) + ' will get me out within days.',
+                                 'You better be careful making enemies in high places, friend. ']
             else:
-                intro_options = ["I would've gotten away with it, too, if it weren't for that meddling prosecutor.",
-                                 "Get off your high horse - we could have done great things together.",
-                                 "How much money would it take to change your mind?"]
-            intro_options.append("Do you even know how many we killed? We all deserve this.")
-            intro_options.append("I'm innocent, I swear!")
-            intro_options.append("You'll join me here soon: sic semper tyrannis.")
+                intro_options = ['I would\'ve gotten away with it, too, if it weren\'t for that meddling prosecutor.',
+                                 'Get off your high horse - we could have done great things together.',
+                                 'How much money would it take to change your mind?']
+            intro_options.append('Do you even know how many we killed? We all deserve this.')
+            intro_options.append('I\'m innocent, I swear!')
+            intro_options.append('You\'ll join me here soon: sic semper tyrannis.')
             
             text += random.choice(intro_options)
-            text += " /n /n /n"
-            text += self.name + " is now in prison and has been removed from the game. /n /n"
+            text += ' /n /n /n'
+            text += self.name + ' is now in prison and has been removed from the game. /n /n'
 
         elif event == 'retirement':
             if self.current_position == 'none':
-                text = self.name + " no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n"
+                text = self.name + ' no longer desires to be appointed as a minister and has left the pool of available minister appointees. /n /n'
             else:
                 if random.randrange(0, 100) < self.global_manager.get('evil'):
                     tone = 'guilty'
@@ -673,38 +694,38 @@ class minister():
                     tone = 'confession'
                     
                 if tone == 'guilty':
-                    intro_options = ["I can't believe some of the things I saw here. ",
-                                     "What gave us the right to conquer this place? ",
-                                     "I see them every time I close my eyes - I can't keep doing this."]
-                    middle_options = ["I hear God weeping at the crimes we commit in His name.",
-                                      "We sent so many young men to die just to fill our coffers. ",
-                                      "We're no better than the wild beasts we fear. "]
-                    conclusion_options = ["I pray we will be forgiven for the things we've done, and you ought to do the same. ",
-                                          "Was it all worth it? ",
-                                          "I promise to never again set foot on this stolen continent. "]
+                    intro_options = ['I can\'t believe some of the things I saw here. ',
+                                     'What gave us the right to conquer this place? ',
+                                     'I see them every time I close my eyes - I can\'t keep doing this.']
+                    middle_options = ['I hear God weeping at the crimes we commit in His name.',
+                                      'We sent so many young men to die just to fill our coffers. ',
+                                      'We\'re no better than the wild beasts we fear. ']
+                    conclusion_options = ['I pray we will be forgiven for the things we\'ve done, and you ought to do the same. ',
+                                          'Was it all worth it? ',
+                                          'I promise to never again set foot on this stolen continent. ']
                 elif tone == 'content':
-                    intro_options = ["I'm sorry to say it, but I've gotten too old for this. ",
-                                     "This has been a pleasant journey, but life has greater opportunities planned for me. ",
-                                     "Unfortunately, I can no longer work in your cabinet - I am needed back home. "]
-                    middle_options = ["Can you believe it, though? We singlehandedly civilized this place. ",
-                                      "I wish I could stay. The thrill of adventure, the wonders I've seen here. It's like I was made for this. ",
-                                      "Never has the world seen such glory as what we have brought here. "]
-                    conclusion_options = ["I trust you'll continue to champion the cause of our God and our empire. ",
-                                          "I hope to live many more years, but my best were spent here with you. ",
-                                          "Promise me you'll protect what we built here. Never forget our mission, and never grow complacent. "]
+                    intro_options = ['I\'m sorry to say it, but I\'ve gotten too old for this. ',
+                                     'This has been a pleasant journey, but life has greater opportunities planned for me. ',
+                                     'Unfortunately, I can no longer work in your cabinet - I am needed back home. ']
+                    middle_options = ['Can you believe it, though? We singlehandedly civilized this place. ',
+                                      'I wish I could stay. The thrill of adventure, the wonders I\'ve seen here. It\'s like I was made for this. ',
+                                      'Never has the world seen such glory as what we have brought here. ']
+                    conclusion_options = ['I trust you\'ll continue to champion the cause of our God and our empire. ',
+                                          'I hope to live many more years, but my best were spent here with you. ',
+                                          'Promise me you\'ll protect what we built here. Never forget our mission, and never grow complacent. ']
                 elif tone == 'confession':
-                    intro_options = ["You fool! I took " + str(self.stolen_money) + " money from behind your back, and you just looked the other way. ",
-                                     "I'll have an amazing retirement with the " + str(self.stolen_money) + " money you let me steal. ",
-                                     "I could tell you just how much money I stole from you over the years, but I'll spare you the tears. "]
-                    middle_options = ["We represent the empire's best, but so many of the ministers are just thieves behind your back. ",
-                                      "Did you really believe all those setbacks and delays I invented? ",
-                                      "Believe it or not, I was always one of the lesser offenders. "]
-                    conclusion_options = ["We aren't so different, you and I - we're both just here to make money. Who ever cared about the empire? ",
-                                          "You'll never see me again, of course, but I wish I could see the look on your face. ",
-                                          "If I had the chance, I'd do it all again. "]
+                    intro_options = ['You fool! I took ' + str(self.stolen_money) + ' money from behind your back, and you just looked the other way. ',
+                                     'I\'ll have an amazing retirement with the ' + str(self.stolen_money) + ' money you let me steal. ',
+                                     'I could tell you just how much money I stole from you over the years, but I\'ll spare you the tears. ']
+                    middle_options = ['We represent the empire\'s best, but so many of the ministers are just thieves behind your back. ',
+                                      'Did you really believe all those setbacks and delays I invented? ',
+                                      'Believe it or not, I was always one of the lesser offenders. ']
+                    conclusion_options = ['We aren\'t so different, you and I - we\'re both just here to make money. Who ever cared about the empire? ',
+                                          'You\'ll never see me again, of course, but I wish I could see the look on your face. ',
+                                          'If I had the chance, I\'d do it all again. ']
                 text += random.choice(intro_options) + random.choice(middle_options) + random.choice(conclusion_options)
-                text += ' /n /n /n' + self.current_position + " " + self.name + " has chosen to step down and retire. /n /n"
-                text += "Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n"
+                text += ' /n /n /n' + self.current_position + ' ' + self.name + ' has chosen to step down and retire. /n /n'
+                text += 'Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n'
         self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
-        if not text == "":
+        if not text == '':
             self.display_message(text)

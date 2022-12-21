@@ -74,10 +74,10 @@ class group(pmob):
             #else:
             #    self.set_movement_points(self.worker.movement_points)
             #if self.veteran:
-            #    self.set_name("veteran " + self.name)
+            #    self.set_name('veteran ' + self.name)
         #else:
             #if self.veteran:
-                #self.set_name("Veteran " + self.name.lower())
+                #self.set_name('Veteran ' + self.name.lower())
                 #self.name = self.default_name
                 #self.officer.name = self.officer.default_name
                 #self.promote() #creates veteran status icons
@@ -129,10 +129,10 @@ class group(pmob):
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
     
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 self.attrition_death('officer')
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('DEBUG_boost_attrition'):
+            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = self.worker.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')
@@ -151,27 +151,27 @@ class group(pmob):
         if self.in_vehicle:
             zoom_destination = self.vehicle
             destination_type = 'vehicle'
-            destination_message = " from the " + self.name + " aboard the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+            destination_message = ' from the ' + self.name + ' aboard the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         elif self.in_building:
             zoom_destination = self.building.images[0].current_cell.get_intact_building('resource')
             destination_type = 'building'
-            destination_message = " from the " + self.name + " working in the " + zoom_destination.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+            destination_message = ' from the ' + self.name + ' working in the ' + zoom_destination.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
         else:
             zoom_destination = self
             destination_type = 'self'
-            destination_message = " from the " + self.name + " at (" + str(self.x) + ", " + str(self.y) + ") "
+            destination_message = ' from the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
             
 
         if target == 'officer':
-            text = "The " + self.officer.name + destination_message + "has died from attrition. /n /n "
-            text += "The " + self.name + " will remain inactive for the next turn as a replacement is found. /n /n"
-            text += "The replacement has been automatically recruited and cost " + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + " money."
+            text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
+            text += 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
+            text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
             self.officer.replace(self) #self.officer.die()
 
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         elif target == 'worker':
-            text = "The " + self.worker.name + destination_message + "have died from attrition. /n /n "
-            text += "The " + self.name + " will remain inactive for the next turn as replacements are found."
+            text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
+            text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
             self.worker.replace(self)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         
@@ -235,9 +235,9 @@ class group(pmob):
         self.just_promoted = False
         if not self.veteran:
             self.veteran = True
-            self.set_name("veteran " + self.name)
+            self.set_name('veteran ' + self.name)
         if not self.officer.veteran:
-            self.officer.set_name("veteran " + self.officer.name)
+            self.officer.set_name('veteran ' + self.officer.name)
             self.officer.veteran = True
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):

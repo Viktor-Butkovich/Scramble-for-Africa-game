@@ -160,7 +160,7 @@ class actor():
         '''
         self.inventory = {}
         for current_commodity in self.global_manager.get('commodity_types'):
-            if self.global_manager.get('DEBUG_infinite_commodities') and self.name == 'Europe':
+            if self.global_manager.get('effect_manager').effect_active('infinite_commodities') and self.name == 'Europe':
                 self.inventory[current_commodity] = 10
             else:
                 self.inventory[current_commodity] = 0
@@ -275,7 +275,7 @@ class actor():
             None
         '''
         if self.get_inventory_used() > 0:
-            if random.randrange(1, 7) <= 1 or self.global_manager.get('DEBUG_boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
+            if random.randrange(1, 7) <= 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition') or (self.actor_type == 'mob' and (not self.is_vehicle) and random.randrange(1, 7) <= 1): #extra chance of failure when carried by porters/caravan
                 transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
                 if self.actor_type == 'tile':
                     current_cell = self.cell#self.trigger_inventory_attrition()
@@ -301,7 +301,7 @@ class actor():
                 self.set_movement_points(current_movement_points + 2)
                 if self.global_manager.get('strategic_map_grid') in self.grids:
                     self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-                notification_tools.display_notification("By avoiding losses and damage to the carried commodities, the porters' driver is now a veteran and will have more movement points each turn.", 'default', self.global_manager)
+                notification_tools.display_notification('By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.', 'default', self.global_manager)
 
     def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
@@ -349,37 +349,37 @@ class actor():
             else:
                 unit_word = 'units'
             if is_first and is_last:
-                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity
+                lost_commodities_message += str(amount_lost) + ' ' + unit_word + ' of ' + lost_commodity
             elif len(types_lost_list) == 2 and is_first:
-                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity + " "
+                lost_commodities_message += str(amount_lost) + ' ' + unit_word + ' of ' + lost_commodity + ' '
             elif (not is_last):
-                lost_commodities_message += str(amount_lost) + " " + unit_word + " of " + lost_commodity + ", "
+                lost_commodities_message += str(amount_lost) + ' ' + unit_word + ' of ' + lost_commodity + ', '
             else:
-                lost_commodities_message += "and " + str(amount_lost) + " " + unit_word + " of " + lost_commodity
+                lost_commodities_message += 'and ' + str(amount_lost) + ' ' + unit_word + ' of ' + lost_commodity
         if not lost_commodities_message == '':
             if len(types_lost_list) == 1 and amounts_lost_list[0] == 1:
                 was_word = 'was'
             else:
                 was_word = 'were'
             if self.global_manager.get('strategic_map_grid') in self.grids:
-                location_message = "at (" + str(self.x) + ", " + str(self.y) + ")"
+                location_message = 'at (' + str(self.x) + ', ' + str(self.y) + ')'
             elif self.global_manager.get('europe_grid') in self.grids:
                 location_message = 'in Europe'
             elif self.global_manager.get('slave_traders_grid') in self.grids:
                 location_message = 'in the Arab slave markets'
             
             if self.actor_type == 'tile':
-                transportation_minister.display_message("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
-                    was_word + " lost, damaged, or misplaced. /n /n")
-                #notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " " + location_message + " " +
-                #    was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+                transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
+                    was_word + ' lost, damaged, or misplaced. /n /n')
+                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' ' + location_message + ' ' +
+                #    was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
             elif self.actor_type == 'mob':
-                transportation_minister.display_message("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
-                    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n")
-                #notification_tools.display_zoom_notification("Minister of Transportation " + transportation_minister.name + " reports that " + lost_commodities_message + " carried by the " +
-                #    self.name + " " + location_message + " " + was_word + " lost, damaged, or misplaced. /n /n", self, self.global_manager)
+                transportation_minister.display_message('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
+                    self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n')
+                #notification_tools.display_zoom_notification('Minister of Transportation ' + transportation_minister.name + ' reports that ' + lost_commodities_message + ' carried by the ' +
+                #    self.name + ' ' + location_message + ' ' + was_word + ' lost, damaged, or misplaced. /n /n', self, self.global_manager)
         if stealing and value_stolen > 0:
-            transportation_minister.steal_money(value_stolen, 'inventory attrition')
+            transportation_minister.steal_money(value_stolen, 'inventory_attrition')
     
     def set_name(self, new_name):
         '''

@@ -120,7 +120,52 @@ class input_manager_template():
             if received_input == 'done':
                 self.global_manager.set('crashed', True)
             else:
-                text_tools.print_to_screen("I didn't understand that.")
+                text_tools.print_to_screen('I didn\'t understand that.')
+
+class effect_manager_template():
+    '''
+    Object that controls global effects
+    '''
+    def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.global_manager = global_manager
+        self.possible_effects = []
+        self.active_effects = []
+
+    def __str__(self):
+        '''
+        Description:
+            Returns text for a description of this object when printed
+        Input:
+            None
+        Output:
+            string: Returns text to print
+        '''
+        text = 'Active effects: '
+        for current_effect in self.active_effects:
+            text += '\n    ' + current_effect.__str__()
+        return(text)
+
+    def effect_active(self, effect_type):
+        '''
+        Description:
+            Finds and returns whether any effect of the inputted type is active
+        Input:
+            string effect_type: Type of effect to check for
+        Output:
+            boolean: Returns whether any effect of the inputted type is active
+        '''
+        for current_effect in self.active_effects:
+            if current_effect.effect_type == effect_type:
+                return(True)
+        return(False)
 
 class flavor_text_manager_template():
     '''
@@ -137,25 +182,48 @@ class flavor_text_manager_template():
         '''
         self.global_manager = global_manager
         self.subject_dict = {}
-        
-        self.explorer_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_explorer.csv')
-        for line in current_flavor_text: #each line is a list
-            self.explorer_flavor_text_list.append(line[0])
-        self.subject_dict['explorer'] = self.explorer_flavor_text_list
-        
-        self.minister_first_names_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_minister_first_names.csv')
-        for line in current_flavor_text:
-            self.minister_first_names_flavor_text_list.append(line[0])
-        self.subject_dict['minister_first_names'] = self.minister_first_names_flavor_text_list
-
-        self.minister_last_names_flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv('text/flavor_minister_last_names.csv')
-        for line in current_flavor_text:
-            self.minister_last_names_flavor_text_list.append(line[0])
-        self.subject_dict['minister_last_names'] = self.minister_last_names_flavor_text_list
+        self.set_flavor_text('exploration', 'text/explorer.csv')
+        self.set_flavor_text('advertising_campaign', 'text/advertising.csv')
+        self.set_flavor_text('minister_first_names', 'text/default.csv')
+        self.set_flavor_text('minister_particles', 'text/default.csv')
+        self.set_flavor_text('minister_last_names', 'text/default.csv')
+        self.allow_particles = False
                 
+    def set_flavor_text(self, topic, file):
+        '''
+        Description:
+            Sets this flavor text manager's list of flavor text for the inputted topic to the contents of the inputted csv file
+        Input:
+            string topic: Topic for the flavor text to set, like 'minister_first_names'
+            string file: File to set flavor text to, like 'text/flavor_minister_first_names.csv'
+        Output:
+            None
+        '''
+        flavor_text_list = []
+        current_flavor_text = csv_tools.read_csv(file)
+        for line in current_flavor_text: #each line is a list
+            flavor_text_list.append(line[0])
+        self.subject_dict[topic] = flavor_text_list
+
+    def generate_substituted_flavor_text(self, subject, replace_char, replace_with):
+        '''
+        Description:
+            Returns a random flavor text statement based on the inputted string, with all instances of replace_char replaced with replace_with
+        Input:
+            string subject: Represents the type of flavor text to return
+        Output:
+            string: Random flavor text statement of the inputted subject
+        '''
+        base_text = random.choice(self.subject_dict[subject])
+        return_text = ''
+        for current_character in base_text:
+            if current_character == replace_char:
+                return_text += replace_with
+            else:
+                return_text += current_character
+        return(return_text)
+
+
     def generate_flavor_text(self, subject):
         '''
         Description:
@@ -176,15 +244,56 @@ class flavor_text_manager_template():
         Output:
             string: Returns a random combination of minister first and last names
         '''
+        if self.global_manager.get('current_country') == self.global_manager.get('Belgium'):
+            self.allow_particles = True
+            if random.randrange(1, 7) >= 4:
+                self.set_flavor_text('minister_first_names', 'text/names/dutch_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/names/dutch_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/names/dutch_particles.csv')
+                self.allow_double_last_names = False
+            else:
+                self.set_flavor_text('minister_first_names', 'text/names/french_first_names.csv')
+                self.set_flavor_text('minister_last_names', 'text/names/french_last_names.csv')
+                self.set_flavor_text('minister_particles', 'text/names/french_particles.csv')
+                self.allow_double_last_names = True
+
         first_name = self.generate_flavor_text('minister_first_names')
-        titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord']
-        if background in ['royal heir', 'aristocrat']:
-            while not first_name in titles:
-                first_name = self.generate_flavor_text('minister_first_names')
+        titles = ['Duke', 'Marquess', 'Earl', 'Viscount', 'Baron', 'Sir', 'Prince', 'Lord', 
+                    'Duc', 'Marquis', 'Count', 'Vicomte', 'Chevalier', 'Écuyer',
+                    'Duque', 'Marquês', 'Infante', 'Visconde', 'Barão', 'Conde', 'Dom', 'Fidalgo',
+                    'Herzog', 'Markgraf', 'Landgraf', 'Pfalzgraf', 'Reichsgraf', 'Burggraf', 'Reichsfürst', 'Graf', 'Freiherr', 'Herr',
+                    'Principe', 'Duca', 'Marchese', 'Conte', 'Visconte', 'Barone', 'Nobile', 'Cavaliere', 'Patrizio'                  
+                ]
+        if self.global_manager.get('current_country') == self.global_manager.get('Germany'): #Most German nobility had von particle but no inherited title
+            if background == 'royal heir' or (background == 'aristocrat' and random.randrange(1, 7) >= 5):
+                while not first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+            else:
+                while first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
         else:
-            while first_name in titles:
-                first_name = self.generate_flavor_text('minister_first_names')
-        return(first_name + ' ' + self.generate_flavor_text('minister_last_names'))
+            if background in ['royal heir', 'aristocrat']:
+                while not first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+            else:
+                while first_name in titles:
+                    first_name = self.generate_flavor_text('minister_first_names')
+        name = first_name + ' '
+        if self.allow_particles:
+            if self.aristocratic_particles:
+                if background in ['royal heir', 'aristocrat'] and self.aristocratic_particles:
+                    name += self.generate_flavor_text('minister_particles')
+            elif random.randrange(1, 7) >= 4:
+                name += self.generate_flavor_text('minister_particles')
+        last_name = self.generate_flavor_text('minister_last_names')
+
+        name += last_name
+        if self.allow_double_last_names and random.randrange(1, 7) >= 5:
+            second_last_name = self.generate_flavor_text('minister_last_names')
+            while second_last_name == last_name:
+                second_last_name = self.generate_flavor_text('minister_last_names')
+            name += '-' + second_last_name
+        return(name)
 
 class value_tracker():
     '''
@@ -342,27 +451,24 @@ class money_tracker(value_tracker):
         Output:
             string: Formatted financial report text with /n being a new line
         '''
-        notification_text = "Financial report: /n /n"
-        notification_text += "Revenue: /n "
+        notification_text = 'Financial report: /n /n'
+        notification_text += 'Revenue: /n'
         total_revenue = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] > 0:
-                if transaction_type == 'misc. revenue':
-                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
-                else:
-                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_revenue += self.transaction_history[transaction_type]
         if total_revenue == 0:
             notification_text += '  None /n'
         
-        notification_text += "/nExpenses: /n"
+        notification_text += '/nExpenses: /n'
         total_expenses = 0
         for transaction_type in self.transaction_types:
             if self.transaction_history[transaction_type] < 0:
-                if transaction_type == 'misc. expenses':
-                    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
-                else:
-                    notification_text += '  ' + transaction_type.capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
+                #if transaction_type == 'misc. expenses':
+                #    notification_text += '  Misc: ' + str(self.transaction_history[transaction_type]) + ' /n'
+                #else:
+                notification_text += '  ' + self.global_manager.get('transaction_descriptions')[transaction_type].capitalize() + ': ' + str(self.transaction_history[transaction_type]) + ' /n'
                 total_expenses += self.transaction_history[transaction_type]
         if total_expenses == 0:
             notification_text += '  None /n'
@@ -393,7 +499,7 @@ class notification_manager_template():
         self.minister_message_queue = []
         self.global_manager = global_manager
         self.update_notification_layout()
-        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial']
+        self.notification_modes = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
 
     def update_notification_layout(self, notification_height = 0):
         '''
@@ -427,32 +533,32 @@ class notification_manager_template():
             int: height in pixels of the inputted text if it were put in a notification
         '''
         new_message = []
-        next_line = ""
-        next_word = ""
+        next_line = ''
+        next_word = ''
         font_size = 25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
-            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n"): #don't add if /n
-                if not (index > 0 and notification_text[index - 1] + notification_text[index] == "/n"): #if on n after /, skip
+            if not ((not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n'): #don't add if /n
+                if not (index > 0 and notification_text[index - 1] + notification_text[index] == '/n'): #if on n after /, skip
                     next_word += notification_text[index]
-            if notification_text[index] == " ":
+            if notification_text[index] == ' ':
                 if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
                     new_message.append(next_line)
-                    next_line = ""
+                    next_line = ''
                 next_line += next_word
-                next_word = ""
-            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == "/n": #don't check for /n if at last index
+                next_word = ''
+            elif (not (index + 2) > len(notification_text) and notification_text[index] + notification_text[index + 1]) == '/n': #don't check for /n if at last index
                 new_message.append(next_line)
-                next_line = ""
+                next_line = ''
                 next_line += next_word
-                next_word = ""
+                next_word = ''
         if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
             new_message.append(next_line)
-            next_line = ""
+            next_line = ''
         next_line += next_word
         new_message.append(next_line)
-        new_message.append("Click to remove this notification.")
+        new_message.append('Click to remove this notification.')
         return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
             
     def notification_to_front(self, message):

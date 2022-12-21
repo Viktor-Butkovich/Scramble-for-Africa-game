@@ -31,11 +31,18 @@ class recruitment_button(button):
         Output:
             None
         '''
-        if recruitment_type in global_manager.get('recruitment_types'):
+        if recruitment_type in global_manager.get('country_specific_units'):
+            if not global_manager.get('current_country') == 'none':
+                image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/button.png'
+                self.mob_image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
+            else:
+                image_id = 'buttons/default_button.png'
+                self.mob_image_id = 'mobs/default/default.png'
+        elif recruitment_type in global_manager.get('recruitment_types'):
             image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
         else:
-            image_id = 'misc/default_button.png'
+            image_id = 'buttons/default_button.png'
             self.mob_image_id = 'mobs/default/default.png'
         self.recruitment_type = recruitment_type
         self.recruitment_name = ''
@@ -45,6 +52,7 @@ class recruitment_button(button):
             else:
                 self.recruitment_name += ' '
         self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
+        global_manager.get('recruitment_button_list').append(self)
         super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
 
     def on_click(self):
@@ -66,6 +74,21 @@ class recruitment_button(button):
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not recruit a unit', self.global_manager)
+
+    def calibrate(self, country):
+        '''
+        Description:
+            Sets this button's image to the country-specific version for its unit, like a British or French major. Should make sure self.recruitment_type is in the country_specific_units 
+                list
+        Input:
+            country country: Country that this button's unit should match
+        Output:
+            None
+        '''
+        #if self.recruitment_type in self.global_manager.get('country_specific_units'):
+        image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/button.png'
+        self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png'
+        self.image.set_image(image_id)
 
     def update_tooltip(self):
         '''
@@ -105,7 +128,7 @@ class buy_commodity_button(button):
         if commodity_type in possible_commodity_types:
             image_id = 'scenery/resources/buttons/' + commodity_type + '.png'
         else:
-            image_id = 'misc/default_button.png'
+            image_id = 'buttons/default_button.png'
         self.commodity_type = commodity_type
         self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
         global_manager.set(commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
@@ -127,11 +150,11 @@ class buy_commodity_button(button):
                 if self.global_manager.get('money_tracker').get() >= self.cost:
                     if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
                         self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                        self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer goods')
-                        text_tools.print_to_screen("You have lost " + str(self.cost) + " money from buying 1 unit of consumer goods.", self.global_manager)
+                        self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
+                        text_tools.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
                         if random.randrange(1, 7) == 1: #1/6 chance
                             market_tools.change_price('consumer goods', 1, self.global_manager)
-                            text_tools.print_to_screen("The price of consumer goods has increased from " + str(self.cost) + " to " + str(self.cost + 1) + ".", self.global_manager)
+                            text_tools.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.', self.global_manager)
                 else:
                     text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
             else:

@@ -56,7 +56,7 @@ class officer(pmob):
             None
         '''
         super().replace()
-        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition replacements')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')[self.default_name] * -1, 'attrition_replacements')
         if not attached_group == 'none':
             attached_group.set_name(attached_group.default_name)
             attached_group.veteran = False
@@ -96,7 +96,7 @@ class officer(pmob):
         '''
         self.just_promoted = False
         self.veteran = True
-        self.set_name("veteran " + self.name)
+        self.set_name('veteran ' + self.name)
         for current_grid in self.grids:
             if current_grid == self.global_manager.get('minimap_grid'):
                 veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)

@@ -157,11 +157,11 @@ def conjugate(infinitive, amount, tense = 'present'):
     Description:
         Returns a singular or plural conjugated version of the inputted verb
     Input:
-        string infinitive: base word to conjugate, like "be" or "attack"
+        string infinitive: base word to conjugate, like 'be' or 'attack'
         int amount: quantity of subject, determining if singular or plural verb should be used
         string tense = 'present': tense of verb, determining version of verb, like 'was' or 'is', to use
     Output:
-        string: Returns conjugated word with the correct number, like "is" or "attacks"
+        string: Returns conjugated word with the correct number, like 'is' or 'attacks'
     '''
     if infinitive == 'be':
         if tense == 'present':

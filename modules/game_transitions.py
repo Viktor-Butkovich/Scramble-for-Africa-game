@@ -21,12 +21,12 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     turn_queue = global_manager.get('player_turn_queue')
     if len(turn_queue) == 0:
         if not start_of_turn: #print no units message if there are no units in turn queue
-            text_tools.print_to_screen("There are no units left to move this turn.", global_manager)
+            text_tools.print_to_screen('There are no units left to move this turn.', global_manager)
             actor_utility.deselect_all(global_manager)
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
-            text_tools.print_to_screen("There are no other units left to move this turn.", global_manager)
+            text_tools.print_to_screen('There are no other units left to move this turn.', global_manager)
         if global_manager.get('current_game_mode') == 'europe' and not global_manager.get('europe_grid') in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
@@ -68,13 +68,17 @@ def set_game_mode(new_game_mode, global_manager):
         elif new_game_mode == 'europe':
             global_manager.set('current_game_mode', 'europe')
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
-        elif new_game_mode == 'main menu':
+        elif new_game_mode == 'main_menu':
             global_manager.set('current_game_mode', 'main_menu')
+            global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
+            global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
+        elif new_game_mode == 'new_game_setup':
+            global_manager.set('current_game_mode', 'new_game_setup')
         else:
             global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
             global_manager.set('text_box_height', global_manager.get('default_text_box_height'))
@@ -82,9 +86,10 @@ def set_game_mode(new_game_mode, global_manager):
     for current_mob in global_manager.get('mob_list'):
         current_mob.selected = False
         
-    if previous_game_mode in ['strategic', 'europe']:
+    if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display_list'), 'none')
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display_list'), 'none')
 
     if new_game_mode == 'ministers':
         global_manager.set('available_minister_left_index', -2)
@@ -94,7 +99,8 @@ def set_game_mode(new_game_mode, global_manager):
     elif previous_game_mode == 'trial':
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
         minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')
-    if global_manager.get('startup_complete'):
+
+    if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()
     
 def create_strategic_map(global_manager):

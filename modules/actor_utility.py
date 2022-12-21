@@ -84,7 +84,7 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
         recruitment_string_descriptions = global_manager.get('recruitment_string_descriptions')
         text_list = []
         if current_target in global_manager.get('officer_types'):
-            first_line = utility.capitalize(current_target) + "s are controlled by the " + global_manager.get('officer_minister_dict')[current_target]
+            first_line = utility.capitalize(current_target) + 's are controlled by the ' + global_manager.get('officer_minister_dict')[current_target]
             if current_target == 'explorer':
                 first_line += '.'
                 text_list.append(first_line)
@@ -136,7 +136,10 @@ def update_recruitment_descriptions(global_manager, target = 'all'):
             text_list.append('Officers and vehicles require an attached worker unit to perform most actions.')
             text_list.append('Each unit of slave workers purchased or sent as replacements may increase the purchase cost of all slave workers.')
             text_list.append('African workers tend to be less susceptible to attrition but are less accustomed to using modern weaponry.')
-            text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
+            if global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
+                text_list.append('Your country\'s prolonged involvement with the slave trade will prevent any public opinion penalty from this morally reprehensible act.')
+            else:
+                text_list.append('Participating in the slave trade is a morally reprehensible act and will be faced with a public opinion penalty.')
             
         elif current_target == 'slums workers':
             text_list.append('African workers have a varying upkeep that is currently ' + str(global_manager.get('african_worker_upkeep')) + ' money each turn.')
@@ -337,10 +340,13 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     Output:
         None
     '''
-    if info_display_list == global_manager.get('tile_info_display_list'):
+    #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
+    if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
         global_manager.set('displayed_tile', new_actor)
-    elif info_display_list == global_manager.get('mob_info_display_list'):
+    elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
         global_manager.set('displayed_mob', new_actor)
+    elif id(info_display_list) == id(global_manager.get('country_info_display_list')):
+        global_manager.set('displayed_country', new_actor)
     for current_object in info_display_list:
         current_object.calibrate(new_actor)
 

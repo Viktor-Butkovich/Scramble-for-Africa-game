@@ -149,8 +149,8 @@ class value_label(label):
     def update_tooltip(self):
         tooltip_text = [self.message]
         if self.value_name == 'public_opinion':
-            tooltip_text.append("Public opinion represents your company's reputation and expectations for its success and is used to calculate government subsidies")
-            tooltip_text.append("Public opinion tends to approach the netural value of 50 over time")
+            tooltip_text.append('Public opinion represents your company\'s reputation and expectations for its success and is used to calculate government subsidies')
+            tooltip_text.append('Public opinion tends to approach the netural value of 50 over time')
         self.set_tooltip(tooltip_text)
 
 class money_label(value_label):
@@ -223,51 +223,56 @@ class money_label(value_label):
         slave_worker_upkeep = self.global_manager.get('slave_worker_upkeep')
         total_slave_worker_upkeep = round(num_slave_workers * slave_worker_upkeep, 2)
         
-        num_workers = num_african_workers + num_european_workers + num_slave_workers
+        num_church_volunteers = self.global_manager.get('num_church_volunteers')
+
+        num_workers = num_african_workers + num_european_workers + num_slave_workers + num_church_volunteers
         total_upkeep = round(total_african_worker_upkeep + total_european_worker_upkeep + total_slave_worker_upkeep, 2)
 
-        tooltip_text.append("")
-        tooltip_text.append("At the end of the turn, you will pay a total of " + str(total_upkeep) + " money to your " + str(num_workers) + " workers.")
+        tooltip_text.append('')
+        tooltip_text.append('At the end of the turn, you will pay a total of ' + str(total_upkeep) + ' money to your ' + str(num_workers) + ' workers.')
         if num_african_workers > 0:
-            tooltip_text.append("    Each of your " + str(num_african_workers) + " free African workers will be paid " + str(african_worker_upkeep) + " money, totaling to " + str(total_african_worker_upkeep) + " money.")
+            tooltip_text.append('    Your ' + str(num_african_workers) + ' free African worker' + utility.generate_plural(num_african_workers) + ' will be paid ' + str(african_worker_upkeep) + ' money, totaling to ' + str(total_african_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append("    Any free African workers would each be paid " + str(african_worker_upkeep) + " money.")
+            tooltip_text.append('    Any free African workers would each be paid ' + str(african_worker_upkeep) + ' money.')
         if num_european_workers > 0:
-            tooltip_text.append("    Each of your " + str(num_european_workers) + " European workers will be paid " + str(european_worker_upkeep) + " money, totaling to " + str(total_european_worker_upkeep) + " money.")
+            tooltip_text.append('    Your ' + str(num_european_workers) + ' European worker' + utility.generate_plural(num_european_workers) + ' will be paid ' + str(european_worker_upkeep) + ' money, totaling to ' + str(total_european_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append("    Any European workers would each be paid " + str(european_worker_upkeep) + " money.")
+            tooltip_text.append('    Any European workers would each be paid ' + str(european_worker_upkeep) + ' money.')
         if num_slave_workers > 0:
-            tooltip_text.append("    Each of your " + str(num_slave_workers) + " slave workers will cost " + str(slave_worker_upkeep) + " in upkeep, totaling to " + str(total_slave_worker_upkeep) + " money.")
+            tooltip_text.append('    Your ' + str(num_slave_workers) + ' slave worker' + utility.generate_plural(num_slave_workers) + ' will cost ' + str(slave_worker_upkeep) + ' in upkeep, totaling to ' + str(total_slave_worker_upkeep) + ' money.')
         else:
-            tooltip_text.append("    Any slave workers would cost " + str(slave_worker_upkeep) + " money in upkeep.")
-        tooltip_text.append("    Church volunteers do not need to be paid.")
+            tooltip_text.append('    Any slave workers would each cost ' + str(slave_worker_upkeep) + ' money in upkeep.')
+        if num_church_volunteers > 0:
+            tooltip_text.append('    Your ' + str(num_church_volunteers) + ' church volunteer' + utility.generate_plural(num_church_volunteers) + ' will not need to be paid.')
+        else:
+            tooltip_text.append('    Any church volunteers would not need to be paid.')
 
-        tooltip_text.append("")
+        tooltip_text.append('')
         num_available_workers = market_tools.count_available_workers(self.global_manager)
-        tooltip_text.append("Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of " + str(num_available_workers) + " African worker" + utility.generate_plural(num_available_workers) + ".")
+        tooltip_text.append('Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of ' + str(num_available_workers) + ' African worker' + utility.generate_plural(num_available_workers) + '.')
         
         if len(self.global_manager.get('loan_list')) > 0:
-            tooltip_text.append("")
-            tooltip_text.append("Loans: ")
+            tooltip_text.append('')
+            tooltip_text.append('Loans: ')
             for current_loan in self.global_manager.get('loan_list'):
                 tooltip_text.append('    ' + current_loan.get_description())
 
-        tooltip_text.append("")
-        tooltip_text.append("While public opinion and government subsidies are not entirely predictable, your company is estimated to receive " + str(market_tools.calculate_subsidies(self.global_manager, True)) + " money in subsidies this turn")
+        tooltip_text.append('')
+        tooltip_text.append('While public opinion and government subsidies are not entirely predictable, your company is estimated to receive ' + str(market_tools.calculate_subsidies(self.global_manager, True)) + ' money in subsidies this turn')
 
         total_sale_revenue = market_tools.calculate_total_sale_revenue(self.global_manager)
         if total_sale_revenue > 0:
-            tooltip_text.append("")
-            tooltip_text.append("Your " + self.global_manager.get('type_minister_dict')['trade'] + " has been ordered to sell commodities at the end of the turn for an estimated total of " + str(total_sale_revenue) + " money")
+            tooltip_text.append('')
+            tooltip_text.append('Your ' + self.global_manager.get('type_minister_dict')['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
 
-        tooltip_text.append("")
+        tooltip_text.append('')
         estimated_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)
         if estimated_money_change > 0:
-            tooltip_text.append("Between these revenues and expenses, your company is expected to gain about " + str(estimated_money_change) + " money at the end of the turn.")
+            tooltip_text.append('Between these revenues and expenses, your company is expected to gain about ' + str(estimated_money_change) + ' money at the end of the turn.')
         elif estimated_money_change < 0:
-            tooltip_text.append("Between these revenues and expenses, your company is expected to lose about " + str(-1 * estimated_money_change) + " money at the end of the turn.")
+            tooltip_text.append('Between these revenues and expenses, your company is expected to lose about ' + str(-1 * estimated_money_change) + ' money at the end of the turn.')
         else:
-            tooltip_text.append("Between these revenues and expenses, your company is expected to neither gain nor lose money at the end of the turn.")
+            tooltip_text.append('Between these revenues and expenses, your company is expected to neither gain nor lose money at the end of the turn.')
         
         self.set_tooltip(tooltip_text)
 
@@ -294,7 +299,7 @@ class commodity_prices_label(label):
         super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
         #self.font_size = scaling.scale_height(30, global_manager)
         self.font_size = self.global_manager.get('font_size') * 2
-        self.font_name = self.global_manager.get('font_name')#self.font_name = "Times New Roman"
+        self.font_name = self.global_manager.get('font_name')#self.font_name = 'Times New Roman'
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 
@@ -307,7 +312,7 @@ class commodity_prices_label(label):
         Output:
             None
         '''
-        message = ["Prices: "]
+        message = ['Prices: ']
         widest_commodity_width = 0 #text_tools.message_width(message, fontsize, font_name)
         for current_commodity in self.global_manager.get('commodity_types'):
             current_message_width = text_tools.message_width(current_commodity, self.font_size, self.font_name)
@@ -317,7 +322,7 @@ class commodity_prices_label(label):
             current_line = ''
             while text_tools.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
                 current_line += ' '
-            current_line += current_commodity + ": " +  str(self.global_manager.get('commodity_prices')[current_commodity])
+            current_line += current_commodity + ': ' +  str(self.global_manager.get('commodity_prices')[current_commodity])
             message.append(current_line)
         self.set_label(message)
             
@@ -423,26 +428,26 @@ class multi_line_label(label):
             None
         '''
         new_message = []
-        next_line = ""
-        next_word = ""
+        next_line = ''
+        next_word = ''
         for index in range(len(self.message)):
-            if not ((not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == "/n"): #don't add if /n
-                if not (index > 0 and self.message[index - 1] + self.message[index] == "/n"): #if on n after /, skip
+            if not ((not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == '/n'): #don't add if /n
+                if not (index > 0 and self.message[index - 1] + self.message[index] == '/n'): #if on n after /, skip
                     next_word += self.message[index]
-            if self.message[index] == " ":
+            if self.message[index] == ' ':
                 if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
                     new_message.append(next_line)
-                    next_line = ""
+                    next_line = ''
                 next_line += next_word
-                next_word = ""
-            elif (not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == "/n": #don't check for /n if at last index
+                next_word = ''
+            elif (not (index + 2) > len(self.message) and self.message[index] + self.message[index + 1]) == '/n': #don't check for /n if at last index
                 new_message.append(next_line)
-                next_line = ""
+                next_line = ''
                 next_line += next_word
-                next_word = ""
+                next_word = ''
         if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
             new_message.append(next_line)
-            next_line = ""
+            next_line = ''
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message

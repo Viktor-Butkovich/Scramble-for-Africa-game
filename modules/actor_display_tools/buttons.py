@@ -12,7 +12,7 @@ from .. import notification_tools
 
 class label_button(button):
     '''
-    Button that is attached to a label, has have behavior related to the label, will only show when the label is showing
+    Button that is attached to a label, has have behavior related to the label, and only shows when the label is showing
     '''
     def __init__(self, coordinates, width, height, button_type, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -113,16 +113,16 @@ class worker_crew_vehicle_button(label_button):
                             vehicle.set_sentry_mode(False)
                         crew.crew_vehicle(vehicle)
                     else:
-                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
+                        text_tools.print_to_screen('You must select a worker in the same tile as an uncrewed ' + self.vehicle_type + ' to crew the ' + self.vehicle_type + '.', self.global_manager)
                 else:
                     if crew.worker_type == 'slave':
-                        text_tools.print_to_screen("Slave workers can not crew vehicles.", self.global_manager)
+                        text_tools.print_to_screen('Slave workers can not crew vehicles.', self.global_manager)
                     elif crew.worker_type == 'African' and not self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, 'European') == 'none':
-                        text_tools.print_to_screen("Only European workers can crew steamships.", self.global_manager)
+                        text_tools.print_to_screen('Only European workers can crew steamships.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select a worker in the same tile as an uncrewed " + self.vehicle_type + " to crew the " + self.vehicle_type + ".", self.global_manager)
+                        text_tools.print_to_screen('You must select a worker in the same tile as an uncrewed ' + self.vehicle_type + ' to crew the ' + self.vehicle_type + '.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not crew a ' + self.vehicle_type + '.', self.global_manager)
 
     def can_show(self):
         '''
@@ -182,7 +182,7 @@ class embark_all_passengers_button(label_button):
                 can_embark = True
                 if self.vehicle_type == 'train':
                     if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                        text_tools.print_to_screen("A train can only pick up passengers at a train station.", self.global_manager)
+                        text_tools.print_to_screen('A train can only pick up passengers at a train station.', self.global_manager)
                         can_embark = False
                 if can_embark:
                     if vehicle.sentry_mode:
@@ -193,7 +193,7 @@ class embark_all_passengers_button(label_button):
                             passenger.embark_vehicle(vehicle)
                     self.global_manager.get('sound_manager').play_sound('voices/ship 1')
             else:
-                text_tools.print_to_screen("You are busy and can not embark all passengers.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not embark all passengers.', self.global_manager)
 
     def can_show(self):
         '''
@@ -252,7 +252,7 @@ class disembark_all_passengers_button(label_button):
                 can_disembark = True
                 if self.vehicle_type == 'train':
                     if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                        text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
+                        text_tools.print_to_screen('A train can only drop off passengers at a train station.', self.global_manager)
                         can_disembark = False
                 if can_disembark:
                     if vehicle.sentry_mode:
@@ -261,7 +261,7 @@ class disembark_all_passengers_button(label_button):
                         vehicle.contained_mobs[-1].selection_sound()
                     vehicle.eject_passengers()
             else:
-                text_tools.print_to_screen("You are busy and can not disembark all passengers.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not disembark all passengers.', self.global_manager)
 
     def can_show(self):
         '''
@@ -333,16 +333,16 @@ class crew_vehicle_button(label_button):
                         crew.crew_vehicle(vehicle)
                     else:
                         if is_steamship:
-                            text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a European worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                            text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a European worker to crew the ' + self.vehicle_type + '.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a non-slave worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                            text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a non-slave worker to crew the ' + self.vehicle_type + '.', self.global_manager)
                 else:
                     if is_steamship:
-                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a European worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                        text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a European worker to crew the ' + self.vehicle_type + '.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You must select an uncrewed " + self.vehicle_type + " in the same tile as a non-slave worker to crew the " + self.vehicle_type + ".", self.global_manager)
+                        text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a non-slave worker to crew the ' + self.vehicle_type + '.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not crew a " + self.vehicle_type + ".", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not crew a ' + self.vehicle_type + '.', self.global_manager)
 
     def can_show(self):
         '''
@@ -421,9 +421,9 @@ class uncrew_vehicle_button(label_button):
                     crew.uncrew_vehicle(vehicle)
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
                 else:
-                    text_tools.print_to_screen("You can not remove the crew from a " + self.vehicle_type + " with passengers or cargo.", self.global_manager)
+                    text_tools.print_to_screen('You can not remove the crew from a ' + self.vehicle_type + ' with passengers or cargo.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not remove a " + self.vehicle_type + "'s crew.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not remove a ' + self.vehicle_type + '\'s crew.', self.global_manager)
 
 class merge_button(label_button):
     '''
@@ -494,18 +494,18 @@ class merge_button(label_button):
                             self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
                         else:
                             if (not officer == 'none') and officer.officer_type == 'evangelist':
-                                text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create missionaries.", self.global_manager)
+                                text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
                             else:  
-                                text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                                text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
                     else:
                         if (not officer == 'none') and officer.officer_type == 'evangelist':
-                            text_tools.print_to_screen("You must select an evangelist in the same tile as church volunteers to create missionaries.", self.global_manager)
+                            text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
                         else:  
-                            text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                            text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You must select an officer in the same tile as a worker to create a group.", self.global_manager)
+                    text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not form a group.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not form a group.', self.global_manager)
 
 
 class split_button(label_button):
@@ -562,11 +562,11 @@ class split_button(label_button):
                     if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
                         displayed_mob.disband()
                     else:
-                        text_tools.print_to_screen("You can not split a unit that is carrying commodities.", self.global_manager)
+                        text_tools.print_to_screen('You can not split a unit that is carrying commodities.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Only a group can be split it into a worker and an officer.", self.global_manager)
+                    text_tools.print_to_screen('Only a group can be split it into a worker and an officer.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not split a group.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not split a group.', self.global_manager)
 
 class enable_sentry_mode_button(label_button):
     '''
@@ -621,7 +621,7 @@ class enable_sentry_mode_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.actor.set_sentry_mode(True)
             else:
-                text_tools.print_to_screen("You are busy and can not enable sentry mode.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not enable sentry mode.', self.global_manager)
 
 class disable_sentry_mode_button(label_button):
     '''
@@ -677,7 +677,7 @@ class disable_sentry_mode_button(label_button):
                 self.attached_label.actor.set_sentry_mode(False)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
             else:
-                text_tools.print_to_screen("You are busy and can not disable sentry mode.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
 
 class end_unit_turn_button(label_button):
     '''
@@ -734,7 +734,7 @@ class end_unit_turn_button(label_button):
                 game_transitions.cycle_player_turn(self.global_manager)
                 #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
             else:
-                text_tools.print_to_screen("You are busy and can not end this unit's turn.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not end this unit\'s turn.', self.global_manager)
 
 class remove_work_crew_button(label_button):
     '''
@@ -789,7 +789,7 @@ class remove_work_crew_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.attached_list[self.attached_label.list_index].leave_building(self.attached_label.actor.cell.contained_buildings[self.building_type])
             else:
-                text_tools.print_to_screen("You are busy and can not remove a work crew from a building.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not remove a work crew from a building.', self.global_manager)
 
 class disembark_vehicle_button(label_button):
     '''
@@ -849,7 +849,7 @@ class disembark_vehicle_button(label_button):
                     can_disembark = True
                     if self.vehicle_type == 'train':
                         if self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                            text_tools.print_to_screen("A train can only drop off passengers at a train station.", self.global_manager)
+                            text_tools.print_to_screen('A train can only drop off passengers at a train station.', self.global_manager)
                             can_disembark = False
                     if can_disembark:
                         #if self.attached_label.actor.is_vehicle and self.attached_label.actor.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
@@ -860,9 +860,9 @@ class disembark_vehicle_button(label_button):
                         passenger.selection_sound()
                         self.attached_label.attached_list[self.attached_label.list_index].disembark_vehicle(self.attached_label.actor)
                 else:
-                    text_tools.print_to_screen("You must select a " + self.vehicle_type + "with passengers to disembark passengers.", self.global_manager)
+                    text_tools.print_to_screen('You must select a ' + self.vehicle_type + 'with passengers to disembark passengers.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not disembark from a " + self.vehicle_type + ".", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not disembark from a ' + self.vehicle_type + '.', self.global_manager)
 
 class embark_vehicle_button(label_button):
     '''
@@ -932,7 +932,7 @@ class embark_vehicle_button(label_button):
                     can_embark = True
                     if vehicle.vehicle_type == 'train':
                         if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
-                            text_tools.print_to_screen("A train can only pick up passengers at a train station.", self.global_manager)
+                            text_tools.print_to_screen('A train can only pick up passengers at a train station.', self.global_manager)
                             can_embark = False
                     if can_embark:
                         if rider.sentry_mode:
@@ -942,9 +942,9 @@ class embark_vehicle_button(label_button):
                         rider.embark_vehicle(vehicle)
                         self.global_manager.get('sound_manager').play_sound('voices/ship 1')
                 else:
-                    text_tools.print_to_screen("You must select a unit in the same tile as a crewed " + self.vehicle_type + " to embark.", self.global_manager)
+                    text_tools.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not embark a " + self.vehicle_type + ".", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not embark a ' + self.vehicle_type + '.', self.global_manager)
 
 class cycle_passengers_button(label_button):
     '''
@@ -1003,7 +1003,7 @@ class cycle_passengers_button(label_button):
                 self.attached_label.actor.contained_mobs.append(moved_mob)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor) #updates mob info display list to show changed passenger order
             else:
-                text_tools.print_to_screen("You are busy and can not cycle passengers.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not cycle passengers.', self.global_manager)
 
 class cycle_work_crews_button(label_button):
     '''
@@ -1067,7 +1067,7 @@ class cycle_work_crews_button(label_button):
                 self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_label.actor) #updates tile info display list to show changed work crew order
             else:
-                text_tools.print_to_screen("You are busy and can not cycle work crews.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not cycle work crews.', self.global_manager)
 
 class work_crew_to_building_button(label_button):
     '''
@@ -1165,12 +1165,12 @@ class work_crew_to_building_button(label_button):
                             self.attached_work_crew.set_sentry_mode(False)
                         self.attached_work_crew.work_building(self.attached_building)
                     else:
-                        text_tools.print_to_screen("This building is at its work crew capacity.", self.global_manager)
-                        text_tools.print_to_screen("Upgrade the building's scale to increase work crew capacity.", self.global_manager)
+                        text_tools.print_to_screen('This building is at its work crew capacity.', self.global_manager)
+                        text_tools.print_to_screen('Upgrade the building\'s scale to increase work crew capacity.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("This work crew must be in the same tile as a resource production building to work in it", self.global_manager)
+                    text_tools.print_to_screen('This work crew must be in the same tile as a resource production building to work in it', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not attach a work crew to a building.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not attach a work crew to a building.', self.global_manager)
             
 
 class trade_button(label_button):
@@ -1234,19 +1234,19 @@ class trade_button(label_button):
                                             current_mob.set_sentry_mode(False)
                                         current_mob.start_trade()
                                     else:
-                                        text_tools.print_to_screen("You can not do any actions until all ministers have been appointed.", self.global_manager)
+                                        text_tools.print_to_screen('You can not do any actions until all ministers have been appointed.', self.global_manager)
                                 else:
-                                    text_tools.print_to_screen("Trading requires at least 1 unit of consumer goods.", self.global_manager)
+                                    text_tools.print_to_screen('Trading requires at least 1 unit of consumer goods.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("Trading is only possible in a village with population above 0.", self.global_manager)
+                                text_tools.print_to_screen('Trading is only possible in a village with population above 0.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("Trading is only possible in a village.", self.global_manager)
+                            text_tools.print_to_screen('Trading is only possible in a village.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trade']) + " money needed to trade with a village.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trade']) + ' money needed to trade with a village.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Trading requires all remaining movement points, at least 1", self.global_manager)
+                    text_tools.print_to_screen('Trading requires all remaining movement points, at least 1', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not trade.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not trade.', self.global_manager)
 
 class convert_button(label_button):
     '''
@@ -1299,7 +1299,7 @@ class convert_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['convert']:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['conversion']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').aggressiveness > 1:
@@ -1309,17 +1309,17 @@ class convert_button(label_button):
                                             current_mob.set_sentry_mode(False)
                                         current_mob.start_converting()
                                 else:
-                                    text_tools.print_to_screen("This village has no population and can not be converted.", self.global_manager)
+                                    text_tools.print_to_screen('This village has no population and can not be converted.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("This village already has the minimum aggressiveness and can not be converted.", self.global_manager)
+                                text_tools.print_to_screen('This village already has the minimum aggressiveness and can not be converted.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("Converting is only possible in a village.", self.global_manager)
+                            text_tools.print_to_screen('Converting is only possible in a village.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['convert']) + " money needed to attempt to convert the natives.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['conversion']) + ' money needed to attempt to convert the natives.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Converting requires all remaining movement points, at least 1.", self.global_manager)
+                    text_tools.print_to_screen('Converting requires all remaining movement points, at least 1.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not convert.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not convert.', self.global_manager)
 
 class capture_slaves_button(label_button):
     '''
@@ -1357,7 +1357,7 @@ class capture_slaves_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 current_mob = self.attached_label.actor
                 if current_mob.movement_points >= 1:
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['capture_slaves']:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['slave_capture']:
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
@@ -1366,15 +1366,15 @@ class capture_slaves_button(label_button):
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_capture_slaves()
                             else:
-                                text_tools.print_to_screen("This village has no remaining population to be captured.", self.global_manager)
+                                text_tools.print_to_screen('This village has no remaining population to be captured.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("Capturing slaves is only possible in a village.", self.global_manager)
+                            text_tools.print_to_screen('Capturing slaves is only possible in a village.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['capture_slaves']) + " money needed to attempt to capture slaves.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money needed to attempt to capture slaves.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Capturing slaves requires all remaining movement points, at least 1.", self.global_manager)
+                    text_tools.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not capture slaves.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not capture slaves.', self.global_manager)
 
 class evangelist_campaign_button(label_button):
     '''
@@ -1438,7 +1438,7 @@ class evangelist_campaign_button(label_button):
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_religious_campaign()
                             else:
-                                text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['public_relations_campaign']) + " money needed for a public relations campaign.", self.global_manager)
+                                text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money needed for a public relations campaign.', self.global_manager)
                         elif self.button_type == 'public relations campaign':
                             if self.global_manager.get('money') >= self.global_manager.get('action_prices')['public_relations_campaign']:
                                 if current_mob.check_if_minister_appointed():
@@ -1446,13 +1446,13 @@ class evangelist_campaign_button(label_button):
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_public_relations_campaign()
                             else:
-                                text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['religious_campaign']) + " money needed for a public relations campaign.", self.global_manager)
+                                text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money needed for a public relations campaign.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("A religious campaign requires all remaining movement points, at least 1.", self.global_manager)
+                        text_tools.print_to_screen('A religious campaign requires all remaining movement points, at least 1.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Religious campaigns are only possible in Europe", self.global_manager)
+                    text_tools.print_to_screen('Religious campaigns are only possible in Europe', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start a religious campaign.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not start a religious campaign.', self.global_manager)
 
 class take_loan_button(label_button):
     '''
@@ -1512,13 +1512,13 @@ class take_loan_button(label_button):
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_loan_search()
                         else:
-                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['loan_search']) + " money needed to search for a loan offer.", self.global_manager)
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money needed to search for a loan offer.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("Searching for a loan offer requires all remaining movement points, at least 1.", self.global_manager)
+                        text_tools.print_to_screen('Searching for a loan offer requires all remaining movement points, at least 1.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("A merchant can only search for a loan while in Europe", self.global_manager)
+                    text_tools.print_to_screen('A merchant can only search for a loan while in Europe', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not search for a loan offer.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not search for a loan offer.', self.global_manager)
 
 class labor_broker_button(label_button):
     '''
@@ -1582,17 +1582,17 @@ class labor_broker_button(label_button):
                                         'source_type': 'labor broker', 'village': cost_info_list[0]}
                                     self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
                                 else:
-                                    text_tools.print_to_screen("You can not afford the recruitment cost of " + str(cost_info_list[1]) + " for the cheapest available worker. ", self.global_manager)
+                                    text_tools.print_to_screen('You can not afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ', self.global_manager)
                             else:
-                                text_tools.print_to_screen("Using a labor broker requires all remaining movement points, at least 1.", self.global_manager)
+                                text_tools.print_to_screen('Using a labor broker requires all remaining movement points, at least 1.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("There are no eligible villages to recruit workers from.", self.global_manager)
+                            text_tools.print_to_screen('There are no eligible villages to recruit workers from.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("A labor broker can only be used at a port.", self.global_manager)
+                        text_tools.print_to_screen('A labor broker can only be used at a port.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("A labor broker can only be used at a port.", self.global_manager)
+                    text_tools.print_to_screen('A labor broker can only be used at a port.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not use a labor broker.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not use a labor broker.', self.global_manager)
 
     def get_cost(self):
         '''
@@ -1677,17 +1677,17 @@ class advertising_campaign_button(label_button):
                                 if not self.global_manager.get('current_game_mode') == 'europe':
                                     game_transitions.set_game_mode('europe', self.global_manager)
                                     current_mob.select()
-                                text_tools.print_to_screen("Select a commodity to advertise, or click elsewhere to cancel: ", self.global_manager)
+                                text_tools.print_to_screen('Select a commodity to advertise, or click elsewhere to cancel: ', self.global_manager)
                                 self.global_manager.set('choosing_advertised_commodity', True)
                                 #current_mob.start_religious_campaign()
                         else:
-                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money needed for an advertising campaign.", self.global_manager)
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money needed for an advertising campaign.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("An advertising campaign requires all remaining movement points, at least 1.", self.global_manager)
+                        text_tools.print_to_screen('An advertising campaign requires all remaining movement points, at least 1.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("Advertising campaigns are only possible in Europe", self.global_manager)
+                    text_tools.print_to_screen('Advertising campaigns are only possible in Europe', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start an advertising campaign.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not start an advertising campaign.', self.global_manager)
 
 class track_beasts_button(label_button):
     '''
@@ -1747,13 +1747,13 @@ class track_beasts_button(label_button):
                                     current_mob.set_sentry_mode(False)
                                 current_mob.track_beasts()
                         else:
-                            text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['track_beasts']) + " money needed to search for a loan offer.", self.global_manager)
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['track_beasts']) + ' money needed to search for a loan offer.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("Tracking beasts requires 1 movement point.", self.global_manager)
+                        text_tools.print_to_screen('Tracking beasts requires 1 movement point.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("A safari can only track beasts in Africa", self.global_manager)
+                    text_tools.print_to_screen('A safari can only track beasts in Africa', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not track beasts.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not track beasts.', self.global_manager)
 
 class switch_theatre_button(label_button):
     '''
@@ -1804,11 +1804,11 @@ class switch_theatre_button(label_button):
                             self.global_manager.set('choosing_destination', True)
                             self.global_manager.set('choosing_destination_info_dict', {'chooser': current_mob}) #, 'destination_grids': self.destination_grids
                     else:
-                        text_tools.print_to_screen("You are inland and can not cross the ocean.", self.global_manager) 
+                        text_tools.print_to_screen('You are inland and can not cross the ocean.', self.global_manager) 
                 else:
-                    text_tools.print_to_screen("Crossing the ocean requires all remaining movement points, at least 1.", self.global_manager)
+                    text_tools.print_to_screen('Crossing the ocean requires all remaining movement points, at least 1.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not move.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not move.', self.global_manager)
 
     def can_show(self):
         '''
@@ -1887,18 +1887,18 @@ class build_train_button(label_button):
                                             self.attached_label.actor.set_sentry_mode(False)
                                         self.construct()
                                 else:
-                                    text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
+                                    text_tools.print_to_screen('A train can only be assembled on a train station.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
+                                text_tools.print_to_screen('A train can only be assembled on a train station.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("A train can only be assembled on a train station.", self.global_manager)
+                            text_tools.print_to_screen('A train can only be assembled on a train station.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to assemble a train.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to assemble a train.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to assemble a train.", self.global_manager)
-                    text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough movement points to assemble a train.', self.global_manager)
+                    text_tools.print_to_screen('You have ' + str(self.attached_label.actor.movement_points) + ' movement points while 1 is required.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not build a train.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not build a train.', self.global_manager)
 
     def construct(self):
         '''
@@ -1975,20 +1975,20 @@ class build_steamboat_button(label_button):
                                                 self.attached_label.actor.set_sentry_mode(False)
                                             self.construct()
                                     else:
-                                        text_tools.print_to_screen("A steamboat assembled here would not be able to access any rivers.", self.global_manager)
+                                        text_tools.print_to_screen('A steamboat assembled here would not be able to access any rivers.', self.global_manager)
                                 else:
-                                    text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                                    text_tools.print_to_screen('A steamboat can only be assembled on a port.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                                text_tools.print_to_screen('A steamboat can only be assembled on a port.', self.global_manager)
                         else:
-                            text_tools.print_to_screen("A steamboat can only be assembled on a port.", self.global_manager)
+                            text_tools.print_to_screen('A steamboat can only be assembled on a port.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to assemble a steamboat.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to assemble a steamboat.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to assemble a steamboat.", self.global_manager)
-                    text_tools.print_to_screen("You have " + str(self.attached_label.actor.movement_points) + " movement points while 1 is required.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough movement points to assemble a steamboat.', self.global_manager)
+                    text_tools.print_to_screen('You have ' + str(self.attached_label.actor.movement_points) + ' movement points while 1 is required.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not build a train.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not build a train.', self.global_manager)
 
     def construct(self):
         '''
@@ -2150,8 +2150,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             
         elif self.building_type == 'infrastructure':
             if self.building_name == 'railroad':
-                message.append("Upgrades this tile's road into a railroad, allowing trains to move through this tile")
-                message.append("Retains the benefits of a road")
+                message.append('Upgrades this tile\'s road into a railroad, allowing trains to move through this tile')
+                message.append('Retains the benefits of a road')
             elif self.building_name == 'road':
                 message.append('Builds a road, halving the cost to move between this tile and other tiles with roads or railroads')
                 message.append('A road can be upgraded into a railroad that allows trains to move through this tile')
@@ -2174,18 +2174,18 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             message.append('placeholder')
 
         if self.building_type in ['train_station', 'port', 'resource']:
-            message.append("Also upgrades this tile's warehouses by 9 inventory capacity, or creates new warehouses if none are present")
+            message.append('Also upgrades this tile\'s warehouses by 9 inventory capacity, or creates new warehouses if none are present')
         
         base_cost = actor_utility.get_building_cost(self.global_manager, 'none', self.building_type, self.building_name)
         cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
         
         message.append('Attempting to build costs ' + str(cost) + ' money and all remaining movement points, at least 1')
         if self.building_type in ['train', 'steamboat']:
-            message.append("Unlike buildings, the cost of vehicle assembly is not impacted by local terrain")
+            message.append('Unlike buildings, the cost of vehicle assembly is not impacted by local terrain')
             
         if (not self.attached_mob == 'none') and self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
             terrain = self.attached_mob.images[0].current_cell.terrain
-            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + " " + utility.conjugate("cost", self.building_name) + " " + str(base_cost) + " money by default, which is multiplied by " + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + " when built in " + terrain + " terrain")
+            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         self.set_tooltip(message)
         
 
@@ -2216,7 +2216,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
                                             else:
-                                                text_tools.print_to_screen("This building can only be built in tiles with resources.", self.global_manager)
+                                                text_tools.print_to_screen('This building can only be built in tiles with resources.', self.global_manager)
                                         elif self.building_type == 'port':
                                             if self.attached_mob.adjacent_to_water():
                                                 if not self.attached_mob.images[0].current_cell.terrain == 'water':
@@ -2225,7 +2225,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                         self.attached_label.actor.set_sentry_mode(False)
                                                     self.construct()
                                             else:
-                                                text_tools.print_to_screen("This building can only be built in tiles adjacent to discovered water.", self.global_manager)
+                                                text_tools.print_to_screen('This building can only be built in tiles adjacent to discovered water.', self.global_manager)
                                         elif self.building_type == 'train_station':
                                             if self.attached_tile.cell.has_intact_building('railroad'):
                                                 #if self.attached_label.actor.check_if_minister_appointed():
@@ -2233,7 +2233,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
                                             else:
-                                                text_tools.print_to_screen("This building can only be built on railroads.", self.global_manager)
+                                                text_tools.print_to_screen('This building can only be built on railroads.', self.global_manager)
                                         elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                             if self.attached_tile.cell.has_building('village'):
                                                 #if self.attached_label.actor.check_if_minister_appointed():
@@ -2241,28 +2241,28 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
                                             else:
-                                                text_tools.print_to_screen("This building can only be built in villages.", self.global_manager)
+                                                text_tools.print_to_screen('This building can only be built in villages.', self.global_manager)
                                         elif self.building_type in ['infrastructure', 'fort']:
                                             #if self.attached_label.actor.check_if_minister_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)
                                             self.construct()
                                 else:
-                                    text_tools.print_to_screen("This building can not be built in water.", self.global_manager)
+                                    text_tools.print_to_screen('This building can not be built in water.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("This building can only be built in Africa.", self.global_manager)
+                                text_tools.print_to_screen('This building can only be built in Africa.', self.global_manager)
                         else:
                             if self.building_type == 'infrastructure': #if railroad
-                                text_tools.print_to_screen("This tile already contains a railroad.", self.global_manager)
+                                text_tools.print_to_screen('This tile already contains a railroad.', self.global_manager)
                             else:
-                                text_tools.print_to_screen("This tile already contains a " + self.building_type + " building.", self.global_manager)
+                                text_tools.print_to_screen('This tile already contains a ' + self.building_type + ' building.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to build a " + self.building_name + ".", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to build a ' + self.building_name + '.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to construct a building.", self.global_manager)
-                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough movement points to construct a building.', self.global_manager)
+                    text_tools.print_to_screen('You have ' + str(self.attached_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not start construction.', self.global_manager)
             
     def construct(self):
         '''
@@ -2383,10 +2383,10 @@ class repair_button(label_button):
         '''
         message = []
         if self.can_show():
-            message.append("Attempts to repair the " + self.building_name + " in this tile, restoring it to full functionality")
+            message.append('Attempts to repair the ' + self.building_name + ' in this tile, restoring it to full functionality')
             if self.building_type in ['port', 'train_station', 'resource']:
-                message.append("If successful, also automatically repairs this tile's warehouses")
-            message.append("Attempting to repair costs " + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + " money and all remaining movement points, at least 1")
+                message.append('If successful, also automatically repairs this tile\'s warehouses')
+            message.append('Attempting to repair costs ' + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + ' money and all remaining movement points, at least 1')
         self.set_tooltip(message)  
 
     def on_click(self):
@@ -2410,12 +2410,12 @@ class repair_button(label_button):
                         #current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                         self.repair()
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(cost) + " money needed to attempt to repair the " + self.building_name + ".", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to repair the ' + self.building_name + '.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to repair a building.", self.global_manager)
-                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough movement points to repair a building.', self.global_manager)
+                    text_tools.print_to_screen('You have ' + str(self.attached_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start construction.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not start construction.', self.global_manager)
             
     def repair(self):
         '''
@@ -2509,15 +2509,15 @@ class upgrade_button(label_button):
         message = []
         if not self.attached_building == 'none':
             if self.upgrade_type == 'scale':
-                message.append("Increases the maximum number of work crews that can be attached to this " + self.attached_building.name + " from " + str(self.attached_building.scale) + " to " + str(self.attached_building.scale + 1) + ".")
+                message.append('Increases the maximum number of work crews that can be attached to this ' + self.attached_building.name + ' from ' + str(self.attached_building.scale) + ' to ' + str(self.attached_building.scale + 1) + '.')
             elif self.upgrade_type == 'efficiency':
-                message.append("Increases the number of " + self.attached_building.resource_type + " production attempts made by work crews attached to this " + self.attached_building.name + " from " + str(self.attached_building.efficiency) + " to " + str(self.attached_building.efficiency + 1) + " per turn.")
+                message.append('Increases the number of ' + self.attached_building.resource_type + ' production attempts made by work crews attached to this ' + self.attached_building.name + ' from ' + str(self.attached_building.efficiency) + ' to ' + str(self.attached_building.efficiency + 1) + ' per turn.')
             elif self.upgrade_type == 'warehouse_level':
-                message.append("Increases the level of this tile's warehouses from " + str(self.attached_building.warehouse_level) + " to " + str(self.attached_building.warehouse_level + 1) + ", increasing inventory capacity by 9")
+                message.append('Increases the level of this tile\'s warehouses from ' + str(self.attached_building.warehouse_level) + ' to ' + str(self.attached_building.warehouse_level + 1) + ', increasing inventory capacity by 9')
             else:
                 message.append('placeholder')
             message.append('Attempting to upgrade costs ' + str(self.attached_building.get_upgrade_cost()) + ' money and increases with each future upgrade to this building.')
-            message.append("Unlike new buildings, the cost of building upgrades is not impacted by local terrain")
+            message.append('Unlike new buildings, the cost of building upgrades is not impacted by local terrain')
         self.set_tooltip(message)
         
 
@@ -2544,12 +2544,12 @@ class upgrade_button(label_button):
                         building_info_dict['upgraded_building'] = self.attached_building
                         self.attached_mob.start_upgrade(building_info_dict)
                     else:
-                        text_tools.print_to_screen("You do not have the " + str(self.attached_building.get_upgrade_cost()) + " money needed to upgrade this building.", self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(self.attached_building.get_upgrade_cost()) + ' money needed to upgrade this building.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have enough movement points to upgrade a building.", self.global_manager)
-                    text_tools.print_to_screen("You have " + str(self.attached_mob.movement_points) + " movement points while 1 is required.", self.global_manager)
+                    text_tools.print_to_screen('You do not have enough movement points to upgrade a building.', self.global_manager)
+                    text_tools.print_to_screen('You have ' + str(self.attached_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start upgrading.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not start upgrading.', self.global_manager)
 
 class appoint_minister_button(label_button):
     '''
@@ -2564,7 +2564,7 @@ class appoint_minister_button(label_button):
             int width: Pixel width of this button
             int height: Pixel height of this button
             label attached_label: Label that this button is attached to
-            string appoint_type: Office that this button appoints ministers to, like "Minister of Trade"
+            string appoint_type: Office that this button appoints ministers to, like 'Minister of Trade'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2606,7 +2606,7 @@ class appoint_minister_button(label_button):
                 appointed_minister.appoint(self.appoint_type)
                 minister_utility.calibrate_minister_info_display(self.global_manager, appointed_minister)
             else:
-                text_tools.print_to_screen("You are busy and can not appoint a minister.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not appoint a minister.', self.global_manager)
 
 class remove_minister_button(label_button):
     '''
@@ -2658,22 +2658,22 @@ class remove_minister_button(label_button):
                 appointed_minister = self.global_manager.get('displayed_minister')
                 #appointed_minister.appoint('none')
                 public_opinion_penalty = appointed_minister.status_number
-                text = "Are you sure you want to remove " + appointed_minister.name + " from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n."
-                text += "Removing " + appointed_minister.name + " from office would incur a small public opinion penalty of " + str(public_opinion_penalty) + ", even if he were reappointed. /n /n"
-                text += appointed_minister.name + " would expect to be reappointed to a different position by the end of the turn, and would be fired permanently and incur a much larger public opinion penalty if not reappointed. /n /n"
+                text = 'Are you sure you want to remove ' + appointed_minister.name + ' from office? If removed, he will return to the pool of available ministers and be available to reappoint until the end of the turn. /n /n.'
+                text += 'Removing ' + appointed_minister.name + ' from office would incur a small public opinion penalty of ' + str(public_opinion_penalty) + ', even if he were reappointed. /n /n'
+                text += appointed_minister.name + ' would expect to be reappointed to a different position by the end of the turn, and would be fired permanently and incur a much larger public opinion penalty if not reappointed. /n /n'
                 if appointed_minister.status_number >= 3:
                     if appointed_minister.status_number == 4:
-                        text += appointed_minister.name + " is of extremely high social status, and firing him would cause a national outrage. /n /n"
+                        text += appointed_minister.name + ' is of extremely high social status, and firing him would cause a national outrage. /n /n'
                     else:
-                        text += appointed_minister.name + " is of high social status, and firing him would reflect particularly poorly on your company. /n /n"
+                        text += appointed_minister.name + ' is of high social status, and firing him would reflect particularly poorly on your company. /n /n'
                 elif appointed_minister.status_number == 1:
-                    text += appointed_minister.name + " is of low social status, and firing him would have a relatively minimal impact on your company's reputation. /n /n"
+                    text += appointed_minister.name + ' is of low social status, and firing him would have a relatively minimal impact on your company\'s reputation. /n /n'
                 notification_tools.display_choice_notification(text, ['confirm remove minister', 'none'], {}, self.global_manager)
                 #appointed_minister.display_message(text)
                 #appointed_minister.just_removed = True
                 #self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
             else:
-                text_tools.print_to_screen("You are busy and can not remove a minister.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not remove a minister.', self.global_manager)
 
 class to_trial_button(label_button):
     '''
@@ -2730,14 +2730,14 @@ class to_trial_button(label_button):
                             game_transitions.set_game_mode('trial', self.global_manager)
                             minister_utility.trial_setup(defense, prosecution, self.global_manager) #sets up defense and prosecution displays
                         else:
-                            text_tools.print_to_screen("There are currently no available appointees to replace this minister in the event of a successful trial.", self.global_manager)
+                            text_tools.print_to_screen('There are currently no available appointees to replace this minister in the event of a successful trial.', self.global_manager)
                     else:
-                        text_tools.print_to_screen("You have not yet appointed a minister in each office.", self.global_manager)
-                        text_tools.print_to_screen("Press Q to view the minister interface.", self.global_manager)
+                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have the " + str(self.global_manager.get('action_prices')['trial']) + " money needed to start a trial.", self.global_manager)
+                    text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not start a trial.", self.global_manager)   
+                text_tools.print_to_screen('You are busy and can not start a trial.', self.global_manager)   
 
 class fabricate_evidence_button(label_button):
     '''
@@ -2783,18 +2783,18 @@ class fabricate_evidence_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.get_cost():
                     self.showing_outline = True
-                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
+                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
                     defense = self.global_manager.get('displayed_defense')
                     prosecutor = self.global_manager.get('displayed_prosecution')
-                    prosecutor.display_message(prosecutor.current_position + " " + prosecutor.name + " reports that evidence has been successfully fabricated for " + str(self.get_cost()) +
-                        " money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n")
+                    prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
+                        ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                     defense.fabricated_evidence += 1
                     defense.corruption_evidence += 1
                     minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display_list'), defense) #updates trial display with new evidence
                 else:
-                    text_tools.print_to_screen("You do not have the " + str(self.get_cost()) + " money needed to fabricate evidence.", self.global_manager)
+                    text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not fabricate evidence.', self.global_manager)
 
 class bribe_judge_button(label_button):
     '''
@@ -2854,17 +2854,17 @@ class bribe_judge_button(label_button):
                 if self.global_manager.get('money') >= self.get_cost():
                     if not self.global_manager.get('prosecution_bribed_judge'):
                         self.showing_outline = True
-                        self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial fees')
+                        self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
                         self.global_manager.set('prosecution_bribed_judge', True)
                         prosecutor = self.global_manager.get('displayed_prosecution')
-                        prosecutor.display_message(prosecutor.current_position + " " + prosecutor.name + " reports that the judge has been successfully bribed for " + str(self.get_cost()) +
-                            " money. /n /nThis may provide a bonus in the next trial this turn. /n /n")
+                        prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that the judge has been successfully bribed for ' + str(self.get_cost()) +
+                            ' money. /n /nThis may provide a bonus in the next trial this turn. /n /n')
                     else:
-                        text_tools.print_to_screen("The judge has already been bribed for this trial.", self.global_manager)
+                        text_tools.print_to_screen('The judge has already been bribed for this trial.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You do not have the " + str(self.get_cost()) + " money needed to bribe the judge.", self.global_manager)
+                    text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to bribe the judge.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not fabricate evidence.", self.global_manager)  
+                text_tools.print_to_screen('You are busy and can not fabricate evidence.', self.global_manager)  
     
 class hire_african_workers_button(label_button):
     '''
@@ -2904,15 +2904,16 @@ class hire_african_workers_button(label_button):
             boolean: Returns same as superclass if a village/slum with available workers is displayed, otherwise returns False
         '''
         if super().can_show():
-            if self.hire_source_type == 'village':
-                attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
-                if not attached_village == 'none':
-                    if attached_village.can_recruit_worker():
+            if not self.global_manager.get('displayed_tile') == 'none':
+                if self.hire_source_type == 'village':
+                    attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
+                    if not attached_village == 'none':
+                        if attached_village.can_recruit_worker():
+                            return(True)
+                elif self.hire_source_type == 'slums':
+                    attached_slums = self.global_manager.get('displayed_tile').cell.contained_buildings['slums']
+                    if not attached_slums == 'none':
                         return(True)
-            elif self.hire_source_type == 'slums':
-                attached_slums = self.global_manager.get('displayed_tile').cell.contained_buildings['slums']
-                if not attached_slums == 'none':
-                    return(True)
         return(False)
 
     def on_click(self):
@@ -2930,7 +2931,7 @@ class hire_african_workers_button(label_button):
                 choice_info_dict = {'recruitment_type': 'African worker ' + self.hire_source_type, 'cost': 0, 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment', 'source_type': self.hire_source_type}
                 self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not hire a worker.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not hire a worker.', self.global_manager)
 
 class buy_slaves_button(label_button):
     '''
@@ -2988,7 +2989,7 @@ class buy_slaves_button(label_button):
                 else:
                     text_tools.print_to_screen('You do not have enough money to buy slaves.', self.global_manager)
             else:
-                text_tools.print_to_screen("You are busy and can not buy slaves.", self.global_manager)
+                text_tools.print_to_screen('You are busy and can not buy slaves.', self.global_manager)
 
 class automatic_route_button(label_button):
     '''
@@ -3054,7 +3055,7 @@ class automatic_route_button(label_button):
                         
                     elif self.button_type == 'draw automatic route':
                         if attached_mob.is_vehicle and attached_mob.vehicle_type == 'train' and not attached_mob.images[0].current_cell.has_intact_building('train_station'):
-                            text_tools.print_to_screen("A train can only start a movement route from a train station.", self.global_manager)
+                            text_tools.print_to_screen('A train can only start a movement route from a train station.', self.global_manager)
                             return()
                         attached_mob.clear_automatic_route()
                         attached_mob.add_to_automatic_route((attached_mob.x, attached_mob.y))
@@ -3066,11 +3067,11 @@ class automatic_route_button(label_button):
                             attached_mob.remove_from_turn_queue()
                             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), attached_mob) #updates mob info display if automatic route changed anything
                         else:
-                            text_tools.print_to_screen("This unit is currently not able to progress along its designated route.", self.global_manager)
+                            text_tools.print_to_screen('This unit is currently not able to progress along its designated route.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You can only create movement routes in Africa.", self.global_manager)
+                    text_tools.print_to_screen('You can only create movement routes in Africa.', self.global_manager)
             else:
                 if self.button_type == 'follow automatic route':
-                    text_tools.print_to_screen("You are busy and can not move this unit.", self.global_manager)
+                    text_tools.print_to_screen('You are busy and can not move this unit.', self.global_manager)
                 else:
-                    text_tools.print_to_screen("You are busy and can not modify this unit's movement route.", self.global_manager)
+                    text_tools.print_to_screen('You are busy and can not modify this unit\'s movement route.', self.global_manager)

@@ -197,54 +197,61 @@ SFA folder
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools
             class actor
 
-	  buildings.py
-	      imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
-	      class building(actors.actor)
-		    class infrastructure_building
-		    class trading_post
-		    class mission
-		    class fort
-		    class train_station
-		    class port
-		    class warehouses
-		    class resource_building
-		    class slums
+		buildings.py
+			imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
+			class building(actors.actor)
+		    	class infrastructure_building
+		    	class trading_post
+		    	class mission
+		    	class fort
+		    	class train_station
+		    	class port
+		    	class warehouses
+		    	class resource_building
+		    	class slums
+
         buttons.py
             imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
             class button
 		    class end_turn_button
-	          class cycle_same_tile_button
-	          class same_tile_icon
-	          class switch_game_mode_button
-	          class minister_portrait_image
-	          class cycle_available_ministers_button
-	          class commodity_button
-	          class show_previous_financial_report_button
+	        	class cycle_same_tile_button
+	        	class same_tile_icon
+	        	class switch_game_mode_button
+	        	class minister_portrait_image
+				class country_selection_image
+	        	class cycle_available_ministers_button
+	        	class commodity_button
+	        	class show_previous_financial_report_button
 
         cells.py
             imports pygame, random, actor_utility
             class cell
 
-	  choice_notifications.py
-	      imports pygame, buttons, notifications, text_tools, scaling, market_tools, utility
-	      class choice_notification(notifications.notification)
-	      class choice_button(buttons.button)
-	          class recruitment_choice_button
+	    choice_notifications.py
+	    	imports pygame, buttons, notifications, text_tools, scaling, market_tools, utility
+	    	class choice_notification(notifications.notification)
+	    	class choice_button(buttons.button)
+	        	class recruitment_choice_button
+
+	    countries.py
+		    class country
+				class hybrid_country
 
         csv_tools.py
             imports csv
-           def read_csv
+            def read_csv
 
         data_managers.py
             imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
             class global_manager_template
             class input_manager_template
+			class effect_manager_template
             class flavor_text_manager_template
-	      class value_tracker
-		    class public_opinion_tracker
-   	          class money_tracker
-	      class notification_manager_template
-	      class sound_manager_template
+	        class value_tracker
+		    	class public_opinion_tracker
+   	        		class money_tracker
+	        class notification_manager_template
+	        class sound_manager_template
 
         dice.py
             imports pygame, time, random, buttons, utility
@@ -261,6 +268,10 @@ SFA folder
             def rect_to_surface
             def display_image
             def display_image_angle
+
+		effects.py
+			import utility
+			class effect
 
         europe_transactions.py
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility, actor_utility
@@ -326,6 +337,7 @@ SFA folder
             def manage_rmb_down
             def manage_lmb_down
 	      def click_move_minimap
+		def debug_print
 
 	  market_tools.py
 	      imports random, text_tools, utility
@@ -352,7 +364,7 @@ SFA folder
 	      def positions_filled
 
 	  ministers.py
-	      imports random, utility, actor_utility, minister_utility, notification_tools, images, scaling
+	      imports random, utility, minister_utility, notification_tools, images, scaling, text_tools
 	      class minister
 
         mobs.py
@@ -379,11 +391,35 @@ SFA folder
 	      class save_load_manager_template
 
         scaling.py
-            def scale_coordinates
-            def scale_width
-            def scale_height
+          def scale_coordinates
+          def scale_width
+          def scale_height
 	      def unscale_width
-	     def unscale_height
+	      def unscale_height
+
+		setup.py
+		  imports pygame, time, os, logging, scaling, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, 
+		    mouse_followers, save_load_tools, actor_creation_tools, actor_utility, countries, effects
+		  def fundamental_setup
+		  def misc_setup
+		  def terrains_setup
+		  def commodities_setup
+		  def ministers_setup
+		  def countries_setup
+		  def transactions_setup
+		  def value_trackers_setup
+		  def buttons_setup
+		  def europe_screen_setup
+		  def ministers_screen_setup
+		  def trial_screen_setup
+		  def new_game_setup_screen_setup
+		  def mob_interface_setup
+		  def tile_interface_setup
+		  def inventory_interface_setup
+		  def minister_interface_setup
+		  def country_interface_setup
+		  def debug_tools_setup
+		  def manage_crash
 
         text_tools.py
             imports pygame
@@ -420,8 +456,9 @@ SFA folder
 	      def start_player_turn
 	      def reset_mobs
 	      def manage_attrition
-		def remove_excess_inventory
+		  def remove_excess_inventory
 	      def manage_production
+		  def manage_production_report
 	      def manage_upkeep
 	      def manage_loans
 	      def manage_public_opinion
@@ -484,6 +521,5 @@ SFA folder
     README.txt
 
     Scramble_for_Africa.py
-        imports pygame, time, random, os, logging, scaling, main_loop, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, instructions, mouse_followers,
-		save_load_tools, actor_creation_tools, actor_utility
-As of last count, this program contains 26,525 lines of code across 56 python files
+        imports pygame, main_loop, data_managers, setup
+As of last count, this program contains 26,958 lines of code across 56 python files

@@ -8,6 +8,7 @@ def scale_coordinates(x, y, global_manager):
     Input:
         int x: Unscaled pixel x coordinate
         int y: Unscaled pixel y coordinate
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Scaled pixel x coordinate
         int: Scaled pixel y coordinate
@@ -24,6 +25,7 @@ def scale_width(width, global_manager):
         Returns a version of the inputted width scaled to the player's screen resolution. For example, if the inputted width is as wide as the program's default screen, the returned width will be as wide as the player's screen
     Input:
         int width: Unscaled pixel width
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Scaled pixel width
     '''
@@ -37,6 +39,7 @@ def scale_height(height, global_manager):
         Returns a version of the inputted height scaled to the player's screen resolution. For example, if the inputted height is as tall as the program's default screen, the returned height will be as tall as the player's screen
     Input:
         int height: Unscaled pixel height
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Scaled pixel height
     '''
@@ -50,6 +53,7 @@ def unscale_width(width, global_manager):
         Returns a version of the inputted width scaled to the program's default screen resolution. For example, if the inputted width is as wide as the player's screen, the returned width will be as wide as the program's default screen
     Input:
         int width: Scaled pixel width
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Unscaled pixel width
     '''
@@ -64,6 +68,7 @@ def unscale_height(height, global_manager):
             screen
     Input:
         int height: Scaled pixel height
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Unscaled pixel height
     '''

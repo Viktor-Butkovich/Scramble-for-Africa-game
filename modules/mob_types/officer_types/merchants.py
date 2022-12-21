@@ -69,8 +69,8 @@ class merchant(officer):
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
             'portrait', self.global_manager)
         
-        message = "Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant's success will determine the interest rate found. /n /n"
-        message += "The search will cost " + str(self.global_manager.get('action_prices')['loan_search']) + " money. /n /n "
+        message = 'Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant\'s success will determine the interest rate found. /n /n'
+        message += 'The search will cost ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money. /n /n '
         notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def loan_search(self):
@@ -88,7 +88,7 @@ class merchant(officer):
 
         num_dice = 0 #don't show dice roll for loan
 
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan searches')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['loan_search'] * -1, 'loan_search')
         actor_utility.double_action_price(self.global_manager, 'loan_search')
         
         principal = 100
@@ -124,11 +124,11 @@ class merchant(officer):
 
         total_paid = interest * 10 #12 interest -> 120 paid
         interest_percent = (interest - 10) * 10 #12 interest -> 20%
-        message = ""
+        message = ''
         message += 'Loan offer: /n /n'
         message += 'The company will be provided an immediate sum of ' + str(principal) + ' money, which it may spend as it sees fit. /n'
         message += 'In return, the company will be obligated to pay back ' + str(interest) + ' money per turn for 10 turns, for a total of ' + str(total_paid) + ' money. /n /n'
-        message += "Do you accept this exchange? /n"
+        message += 'Do you accept this exchange? /n'
         notification_tools.display_choice_notification(message, ['accept loan offer', 'decline loan offer'], choice_info_dict, self.global_manager)
 
     def start_advertising_campaign(self, target_commodity):
@@ -152,20 +152,20 @@ class merchant(officer):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'merchant': self, 'type': 'start advertising campaign', 'commodity': target_commodity}
         self.global_manager.set('ongoing_advertising_campaign', True)
-        message = "Are you sure you want to start an advertising campaign for " + target_commodity + "? If successful, the price of " + target_commodity + " will increase, decreasing the price of another random commodity. /n /n"
-        message += "The campaign will cost " + str(self.global_manager.get('action_prices')['advertising_campaign']) + " money. /n /n "
+        message = 'Are you sure you want to start an advertising campaign for ' + target_commodity + '? If successful, the price of ' + target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
+        message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money. /n /n '
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
         if self.veteran: #reduce risk if veteran
             risk_value -= 1
 
         if risk_value < 0: #0/6 = no risk
-            message = "RISK: LOW /n /n" + message  
+            message = 'RISK: LOW /n /n' + message  
         elif risk_value == 0: #1/6 death = moderate risk
-            message = "RISK: MODERATE /n /n" + message #puts risk message at beginning
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
         elif risk_value == 1: #2/6 = high risk
-            message = "RISK: HIGH /n /n" + message
+            message = 'RISK: HIGH /n /n' + message
         elif risk_value > 1: #3/6 or higher = extremely high risk
-            message = "RISK: DEADLY /n /n" + message
+            message = 'RISK: DEADLY /n /n' + message
 
         self.current_advertised_commodity = target_commodity
         self.current_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
@@ -192,27 +192,28 @@ class merchant(officer):
             num_dice = 1
 
         price = self.global_manager.get('action_prices')['advertising_campaign']
-        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising')
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['advertising_campaign'] * -1, 'advertising_campaign')
         actor_utility.double_action_price(self.global_manager, 'advertising_campaign')
         
-        text = ""
-        text += "The merchant attempts to increase public demand for " + self.current_advertised_commodity + ". /n /n"
+        text = ''
+        text += 'The merchant attempts to increase public demand for ' + self.current_advertised_commodity + '. /n /n'
+        text += (self.global_manager.get('flavor_text_manager').generate_substituted_flavor_text('advertising_campaign', '_', self.current_advertised_commodity) + ' /n /n')
         if not self.veteran:    
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required to succeed.", 'advertising_campaign', self.global_manager, num_dice)
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'advertising_campaign', self.global_manager, num_dice)
         else:
-            text += ("The veteran merchant can roll twice and pick the higher result. /n /n")
-            notification_tools.display_notification(text + "Click to roll. " + str(self.current_min_success) + "+ required on at least 1 die to succeed.", 'advertising_campaign', self.global_manager, num_dice)
+            text += ('The veteran merchant can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'advertising_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + "Rolling... ", 'roll', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising campaign', 2)
-            first_roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising_campaign', 2)
+            first_roll_list = dice_utility.roll_to_list(6, 'Advertising campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
-            second_roll_list = dice_utility.roll_to_list(6, "second", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
             self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
                                 
             text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
@@ -220,48 +221,48 @@ class merchant(officer):
             result_outcome_dict = {}
             for i in range(1, 7):
                 if i <= self.current_max_crit_fail:
-                    word = "CRITICAL FAILURE"
+                    word = 'CRITICAL FAILURE'
                 elif i >= self.current_min_crit_success:
-                    word = "CRITICAL SUCCESS"
+                    word = 'CRITICAL SUCCESS'
                 elif i >= self.current_min_success:
-                    word = "SUCCESS"
+                    word = 'SUCCESS'
                 else:
-                    word = "FAILURE"
+                    word = 'FAILURE'
                 result_outcome_dict[i] = word
-            text += ("The higher result, " + str(roll_result) + ": " + result_outcome_dict[roll_result] + ", was used. /n")
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising campaign')
-            roll_list = dice_utility.roll_to_list(6, "Advertising campaign roll", self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'advertising_campaign')
+            roll_list = dice_utility.roll_to_list(6, 'Advertising campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + "Click to continue.", 'advertising_campaign', self.global_manager, num_dice)
+        notification_tools.display_notification(text + 'Click to continue.', 'advertising_campaign', self.global_manager, num_dice)
             
-        text += "/n"
+        text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
             increase = 1
             if roll_result >= self.current_min_crit_success:
                 increase += 1
             advertised_original_price = self.global_manager.get('commodity_prices')[self.current_advertised_commodity]
             unadvertised_original_price = self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity]
-            text += "The merchant successfully advertised for " + self.current_advertised_commodity + ", increasing its price from " + str(advertised_original_price) + " to "
+            text += 'The merchant successfully advertised for ' + self.current_advertised_commodity + ', increasing its price from ' + str(advertised_original_price) + ' to '
             unadvertised_final_price = unadvertised_original_price - increase
             if unadvertised_final_price < 1:
                 unadvertised_final_price = 1
-            text += str(advertised_original_price + increase) + ". The price of " + self.current_unadvertised_commodity + " decreased from " + str(unadvertised_original_price) + " to " + str(unadvertised_final_price) + ". /n /n"
+            text += str(advertised_original_price + increase) + '. The price of ' + self.current_unadvertised_commodity + ' decreased from ' + str(unadvertised_original_price) + ' to ' + str(unadvertised_final_price) + '. /n /n'
         else:
-            text += "The merchant failed to increase the popularity of " + self.current_advertised_commodity + ". /n /n"
+            text += 'The merchant failed to increase the popularity of ' + self.current_advertised_commodity + '. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += "Embarassed by this utter failure, the merchant quits your company. /n /n" 
+            text += 'Embarassed by this utter failure, the merchant quits your company. /n /n' 
 
         if roll_result >= self.current_min_crit_success:
             if not self.veteran:
                 self.just_promoted = True
-            text += "The advertising campaign was so popular that the value of " + self.current_advertised_commodity + " increased by 2 instead of 1. /n /n"
+            text += 'The advertising campaign was so popular that the value of ' + self.current_advertised_commodity + ' increased by 2 instead of 1. /n /n'
         if roll_result >= self.current_min_success:
-            notification_tools.display_notification(text + "Click to remove this notification.", 'final_advertising_campaign', self.global_manager)
+            notification_tools.display_notification(text + 'Click to remove this notification.', 'final_advertising_campaign', self.global_manager)
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('advertising_campaign_result', [self, roll_result])
