@@ -246,6 +246,9 @@ def misc_setup(global_manager):
 
     global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
 
+    global_manager.set('current_advertised_commodity', 'none')
+    global_manager.set('current_sound_file_index', 0)
+
 def terrains_setup(global_manager):
     '''
     Description:

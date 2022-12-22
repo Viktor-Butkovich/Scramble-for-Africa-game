@@ -2,22 +2,22 @@ ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
   File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 35, in <module>
     main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 175, in main_loop
-    current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1026, in on_click
-    self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 178, in new_game
-    self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 216, in create_placeholder_ministers
-    self.create_minister(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 227, in create_minister
-    new_minister = ministers.minister(False, {}, global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 73, in __init__
-    self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 250, in generate_minister_name
-    self.set_flavor_text('minister_first_names', 'text/minister_dutch_first_names.csv')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 203, in set_flavor_text
-    current_flavor_text = csv_tools.read_csv(file)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\csv_tools.py", line 13, in read_csv
-    file = open(file_path, 'r')
-FileNotFoundError: [Errno 2] No such file or directory: 'text/minister_dutch_first_names.csv'
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 193, in main_loop
+    main_loop_tools.update_display(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop_tools.py", line 130, in update_display
+    current_button.draw()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\dice.py", line 187, in draw
+    self.roll()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\dice.py", line 154, in roll
+    self.global_manager.get('current_dice_rolling_notification').remove()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 104, in remove
+    super().remove()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 91, in remove
+    notification_manager.notification_to_front(notification_manager.notification_queue[0])
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 653, in notification_to_front
+    new_notification = action_notifications.advertising_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 548, in __init__
+    global_manager.get('sound_manager').queue_sound('voices/advertising/commodities/' + global_manager.get('current_advertised_commodity'), channel)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 756, in queue_sound
+    current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+FileNotFoundError: No file 'sounds/voices/advertising/commodities/exotic wood.wav' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.

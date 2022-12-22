@@ -197,7 +197,10 @@ class merchant(officer):
         
         text = ''
         text += 'The merchant attempts to increase public demand for ' + self.current_advertised_commodity + '. /n /n'
-        text += (self.global_manager.get('flavor_text_manager').generate_substituted_flavor_text('advertising_campaign', '_', self.current_advertised_commodity) + ' /n /n')
+        advertising_message, index = self.global_manager.get('flavor_text_manager').generate_substituted_indexed_flavor_text('advertising_campaign', '_', self.current_advertised_commodity)
+        self.global_manager.set('current_advertised_commodity', self.current_advertised_commodity)
+        self.global_manager.set('current_sound_file_index', index)
+        text += advertising_message + ' /n /n'
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'advertising_campaign', self.global_manager, num_dice)
         else:
@@ -262,10 +265,12 @@ class merchant(officer):
                 self.just_promoted = True
             text += 'The advertising campaign was so popular that the value of ' + self.current_advertised_commodity + ' increased by 2 instead of 1. /n /n'
         if roll_result >= self.current_min_success:
+            success = True
             notification_tools.display_notification(text + 'Click to remove this notification.', 'final_advertising_campaign', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('advertising_campaign_result', [self, roll_result])
+        self.global_manager.set('advertising_campaign_result', [self, roll_result, success])
 
     def complete_advertising_campaign(self):
         '''

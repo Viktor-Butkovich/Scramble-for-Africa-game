@@ -223,6 +223,25 @@ class flavor_text_manager_template():
                 return_text += current_character
         return(return_text)
 
+    def generate_substituted_indexed_flavor_text(self, subject, replace_char, replace_with):
+        '''
+        Description:
+            Returns a random flavor text statement based on the inputted string, with all instances of replace_char replaced with replace_with
+        Input:
+            string subject: Represents the type of flavor text to return
+        Output:
+            string, int tuple: Random flavor text statement of the inputted subject, followed by the index in the flavor text list of the outputted flavor text
+        '''
+        base_text = random.choice(self.subject_dict[subject])
+        index = self.subject_dict[subject].index(base_text)
+        return_text = ''
+        for current_character in base_text:
+            if current_character == replace_char:
+                return_text += replace_with
+            else:
+                return_text += current_character
+        return((return_text, index))
+
 
     def generate_flavor_text(self, subject):
         '''
@@ -718,10 +737,24 @@ class sound_manager_template():
         Input:
             string file_name: Name of .wav file to play sound of
         Output:
-            None
+            Channel: Returns the pygame mixer Channel object that the sound was played on
         '''
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
-        current_sound.play()
+        channel = current_sound.play()
+        return(channel)
+
+    def queue_sound(self, file_name, channel):
+        '''
+        Description:
+            Queues the sound effect from the inputted file to be played once the inputted channel is done with its current sound
+        Input:
+            string file_name: Name of .wav file to play sound of
+            Channel channel: Pygame mixer channel to queue the sound in
+        Output:
+            None
+        '''   
+        current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        channel.queue(current_sound)
 
     def play_music(self, file_name):
         '''
