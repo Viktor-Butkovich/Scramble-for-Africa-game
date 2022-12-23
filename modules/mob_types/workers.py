@@ -98,7 +98,8 @@ class worker(pmob):
                 text_tools.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
                 
         elif self.worker_type == 'slave':
-            self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1)
+            self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
+            print('activated')
             text_tools.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
             market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
 

@@ -62,6 +62,21 @@ class country:
         for current_flag_icon in self.global_manager.get('flag_icon_list'):
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
+        #if self.name == 'France':
+        #    self.global_manager.get('sound_manager').play_music('La Marseillaise 1', 0.08)
+
+    def deselect(self):
+        '''
+        Description:
+            Deselects this country and modifies various game elements to match this not being selected
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.get('current_country').country_effect.remove()
+        self.global_manager.set('current_country', 'none')
+        self.global_manager.set('current_country_name', 'none')
 
     def get_effect_descriptor(self):
         if self.country_effect.effect_type == 'advertising_campaign_plus_modifier':

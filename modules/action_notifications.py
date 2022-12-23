@@ -116,13 +116,21 @@ class dice_rolling_notification(action_notification):
                         current_die.outline_color = current_die.outcome_color_dict['crit_success']
                     elif current_die.special_die_type == 'red':
                         current_die.outline_color = current_die.outcome_color_dict['crit_fail']
+
+                if current_die.final_result >= current_die.result_outcome_dict['min_crit_success']:
+                    if not self.global_manager.get('displayed_mob').veteran:
+                        self.global_manager.get('sound_manager').play_sound('trumpet_1')
+
             for current_die in self.global_manager.get('dice_list'):
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'):
                     if not current_die == max_die:
                         current_die.normal_die = True
             max_die.highlighted = True
         else:
-            self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
+            self.global_manager.get('dice_list')[0].highlighted = True #outline_color = 'white'
+            if self.global_manager.get('dice_list')[0].final_result >= self.global_manager.get('dice_list')[0].result_outcome_dict['min_crit_success']:
+                if not self.global_manager.get('displayed_mob').veteran:
+                    self.global_manager.get('sound_manager').play_sound('trumpet_1')
 
 class exploration_notification(action_notification):
     '''
@@ -544,7 +552,7 @@ class advertising_campaign_notification(action_notification):
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('advertising_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
-                channel = global_manager.get('sound_manager').play_sound('voices/advertising/messages/' + str(global_manager.get('current_sound_file_index')))
+                channel = global_manager.get('sound_manager').play_sound('voices/advertising/messages/' + str(global_manager.get('current_sound_file_index')), 1.0)
                 global_manager.get('sound_manager').queue_sound('voices/advertising/commodities/' + global_manager.get('current_advertised_commodity'), channel)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 

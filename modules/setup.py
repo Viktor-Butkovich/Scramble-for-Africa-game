@@ -32,7 +32,7 @@ def fundamental_setup(global_manager):
     pygame.mixer.init()
     global_manager.set('startup_complete', False)
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    #global_manager.get('sound_manager').play_music('waltz_2')
+    #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
@@ -1325,7 +1325,7 @@ def debug_tools_setup(global_manager):
 
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
-
+    DEBUG_ministry_of_magic.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

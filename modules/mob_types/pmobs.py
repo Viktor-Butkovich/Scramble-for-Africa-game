@@ -852,7 +852,7 @@ class pmob(mob):
         notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
-
+        allow_promotion = False
         if self.veteran:
             if combat_type == 'attacking': #minister only involved in attacks
                 if self.is_battalion:
@@ -867,6 +867,10 @@ class pmob(mob):
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
                 results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
+
+            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+                results = [6, 6]
+
             first_roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, results[0], own_combat_modifier)
             self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
            
@@ -886,12 +890,23 @@ class pmob(mob):
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 result = minister_rolls[0]
+                allow_promotion = True
             elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
                 result = self.controlling_minister.no_corruption_roll(6)
+                allow_promotion = True
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+
+            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+                result = 6
+
             roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
-            self.display_die((die_x, 440), roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
+
+            min_crit_success = 7
+            if allow_promotion:
+                min_crit_success = 6
+                
+            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
             text += roll_list[1]

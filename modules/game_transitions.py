@@ -184,3 +184,5 @@ def to_main_menu(global_manager, override = False):
     if not global_manager.get('current_instructions_page') == 'none':
         global_manager.get('current_instructions_page').remove()
         global_manager.set('current_instructions_page', 'none')
+    if not global_manager.get('current_country') == 'none':
+        global_manager.get('current_country').deselect()

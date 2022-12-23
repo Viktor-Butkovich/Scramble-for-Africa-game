@@ -189,6 +189,8 @@ class save_load_manager_template():
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
         self.global_manager.get('recruitment_costs')['slave workers'] = self.global_manager.get('base_slave_recruitment_cost')
         actor_utility.reset_action_prices(self.global_manager)
+        for current_commodity in self.global_manager.get('commodity_types'):
+            self.global_manager.get('sold_commodities')[current_commodity] = 0
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_tools.manage_villages(self.global_manager)

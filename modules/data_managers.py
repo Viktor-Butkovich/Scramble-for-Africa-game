@@ -439,9 +439,9 @@ class money_tracker(value_tracker):
         '''
         if change_type == 'misc.':
             if value_change > 0:
-                change_type = 'misc. revenue'
+                change_type = 'misc_revenue'
             else:
-                change_type = 'misc. expenses'
+                change_type = 'misc_expenses'
         self.transaction_history[change_type] += value_change
         if not value_change == 0:
             if abs(value_change) < 15:
@@ -730,40 +730,46 @@ class sound_manager_template():
         '''
         self.global_manager = global_manager
 
-    def play_sound(self, file_name):
+    def play_sound(self, file_name, volume = 0.3):
         '''
         Description:
             Plays the sound effect from the inputted file
         Input:
             string file_name: Name of .wav file to play sound of
+            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
         Output:
             Channel: Returns the pygame mixer Channel object that the sound was played on
         '''
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        current_sound.set_volume(volume)
         channel = current_sound.play()
         return(channel)
 
-    def queue_sound(self, file_name, channel):
+    def queue_sound(self, file_name, channel, volume = 0.3):
         '''
         Description:
             Queues the sound effect from the inputted file to be played once the inputted channel is done with its current sound
         Input:
             string file_name: Name of .wav file to play sound of
             Channel channel: Pygame mixer channel to queue the sound in
+            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
         Output:
             None
         '''   
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        current_sound.set_volume(volume)
         channel.queue(current_sound)
 
-    def play_music(self, file_name):
+    def play_music(self, file_name, volume = 0.3):
         '''
         Description:
             Starts repeating the music from the inputted file, replacing any current music
         Input:
             string file_name: Name of .wav file to play music of
+            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
         Output:
             None
         '''
         pygame.mixer.music.load('sounds/' + file_name + '.wav')
+        pygame.mixer.music.set_volume(volume)
         pygame.mixer.music.play(999)

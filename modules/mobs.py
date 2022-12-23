@@ -735,6 +735,25 @@ class mob(actor):
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)
 
+    def can_swim_at(self, current_cell):
+        '''
+        Description: 
+            Calculates and returns whether this unit is able to swim in the inputted cell
+        Input:
+            cell current_cell: Cell where this unit checks its ability to swim
+        Output:
+            boolean: Returns whether this unit is able to swim in the inputted cell
+        '''
+        if current_cell.terrain == 'water':
+            return(True)
+        if not self.can_swim:
+            return(False)
+        if current_cell.y == 0 and self.can_swim_ocean:
+            return(True)
+        if current_cell.y > 0 and self.can_swim_river:
+            return(True)
+        return(False)
+
     def update_canoes(self):
         '''
         Description:

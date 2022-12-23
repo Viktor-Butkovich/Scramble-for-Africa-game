@@ -436,7 +436,7 @@ class ship(vehicle):
         '''
         if self.images[0].current_cell.terrain == 'water':
             for current_mob in self.images[0].current_cell.contained_mobs:
-                if current_mob.controllable and not current_mob.can_swim: #should change to check if current mob can swim in current type of water, ocean or river
+                if current_mob.controllable and not current_mob.can_swim_at(self.images[0].current_cell):
                     text_tools.print_to_screen('A ' + self.vehicle_type + ' can not leave without taking unaccompanied units as passengers.', self.global_manager)
                     return(False)
         return(True)
