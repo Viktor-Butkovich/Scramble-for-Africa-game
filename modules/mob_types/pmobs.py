@@ -1018,7 +1018,7 @@ class pmob(mob):
                     if self.public_opinion_change > 0:
                         killed_by_natives_flavor = ['Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n',
                                                   'Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.',
-                                                  'Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors.']
+                                                  'Sensationalized news stories circulate of ungrateful savages attempting to resist their benevolent saviors.']
                         text += random.choice(killed_by_natives_flavor) + ' Public opinion has increased by ' + str(self.public_opinion_change) + '. /n /n'
                     elif self.public_opinion_change < 0:
                         killed_by_natives_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere savages. /n /n',

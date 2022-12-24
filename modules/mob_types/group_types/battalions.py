@@ -193,9 +193,11 @@ class battalion(group):
                 text_tools.print_to_screen('Safaris can only attack beasts.', self.global_manager)
         else: #if destination empty or attack already confirmed, move in
             initial_movement_points = self.movement_points
-            original_disorganized = self.disorganized
+            if attack_confirmed:
+                original_disorganized = self.disorganized
             super().move(x_change, y_change)
-            self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
+            if attack_confirmed:
+                self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
             if attack_confirmed:
                 self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
             if not self.in_vehicle:
