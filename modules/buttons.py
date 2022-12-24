@@ -124,8 +124,11 @@ class button():
                         passed = True
                     elif (current_mob.can_swim and adjacent_cell.terrain == 'water' and ((current_mob.can_swim_river and adjacent_cell.y > 0) or (current_mob.can_swim_ocean and adjacent_cell.y == 0)) or adjacent_cell.has_vehicle('ship')): #if swimming unit going to correct kind of water or embarking ship
                         passed = True
-                    elif current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking unit in water:
+                    elif (current_mob.can_walk and adjacent_cell.terrain == 'water') and adjacent_cell.y > 0: #if land unit entering river for maximum movement points
                         passed = True
+                        if current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking unit in water:
+                            movement_cost = 1
+
                     if passed:
                         if adjacent_cell.visible:
                             tooltip_text.append('Press to move to the ' + direction)
@@ -168,11 +171,14 @@ class button():
                                             message += 'and no connecting roads'
                                         elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
                                             message += 'and no connecting roads' + local_infrastructure.infrastructure_type
-                                        else: #
+                                        else: 
                                             message += 'and no connecting roads'
 
                                     tooltip_text.append(message)
-                                    tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + ' movement points')
+                                    if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0:
+                                        tooltip_text.append('Moving into a river tile costs an entire turn of movement points for units without canoes')
+                                    else:
+                                        tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + ' movement points')
                             if (not current_mob.is_vehicle) and current_mob.images[0].current_cell.terrain == 'water' and current_mob.images[0].current_cell.has_vehicle('ship'):
                                 if (current_mob.images[0].current_cell.y == 0 and not (current_mob.can_swim and current_mob.can_swim_ocean)) or (current_mob.images[0].current_cell.y > 0 and not (current_mob.can_swim and current_mob.can_swim_river)): #if could not naturally move into current tile, must be from vehicle
                                     tooltip_text.append('Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount')
@@ -191,29 +197,29 @@ class button():
                     tooltip_text.append('Moving in this direction would move off of the map')
                 if current_mob.can_walk and current_mob.can_swim: #1??
                     if current_mob.can_swim_river and current_mob.can_swim_ocean: #111
-                        tooltip_text.append('Can move to land and water')
+                        tooltip_text.append('Can move normally to land and water')
                     elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #110
-                        tooltip_text.append('Can move to land and rivers but not ocean')
+                        tooltip_text.append('Can move normally to land and rivers but not ocean')
                     else: #101
-                        tooltip_text.append('Can move to land and ocean but not rivers')
+                        tooltip_text.append('Can move normally to land and ocean but not rivers')
                         
                 elif current_mob.can_walk and not current_mob.can_swim: #100
-                    tooltip_text.append('Can move to land but not water')
+                    tooltip_text.append('Can move normally to land but not water')
                     
                 elif current_mob.can_swim and not current_mob.can_walk: #0??
                     if current_mob.can_swim_river and current_mob.can_swim_ocean: #011
-                        tooltip_text.append('Can move to water but not land')
+                        tooltip_text.append('Can move normally to water but not land')
                     elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #010
-                        tooltip_text.append('Can move to rivers but not ocean or land')
+                        tooltip_text.append('Can move normally to rivers but not ocean or land')
                     else: #101
-                        tooltip_text.append('Can move to ocean but not rivers or land')
+                        tooltip_text.append('Can move normally to ocean but not rivers or land')
                 #000 is not possible
                     
                 if not current_mob.can_swim:
                     if current_mob.is_battalion:
-                        tooltip_text.append('However, can embark a ship or attack an enemy in water by moving to it')
+                        tooltip_text.append('However, can embark a ship, attack an enemy in a river, or spend its maximum movement and become disorganized to enter a river')
                     else:
-                        tooltip_text.append('However, can embark a ship in the water by moving to it')
+                        tooltip_text.append('However, can embark a ship in the water by moving to it or spend its maximum movement and become disorganized to enter a river')
                     
             self.set_tooltip(tooltip_text)
 

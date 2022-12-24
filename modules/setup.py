@@ -1325,7 +1325,7 @@ def debug_tools_setup(global_manager):
 
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
-    DEBUG_ministry_of_magic.apply()
+
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

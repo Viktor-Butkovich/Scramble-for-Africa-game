@@ -94,6 +94,8 @@ class battalion(group):
                     if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
                         if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
                             cost = cost / 2
+                    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0: #if river
+                        cost = self.max_movement_points
                     if (not adjacent_cell.visible) and self.can_explore:
                         cost = self.movement_cost
         return(cost)
@@ -189,9 +191,11 @@ class battalion(group):
                 text_tools.print_to_screen('Battalions can not attack beasts.', self.global_manager)
             elif self.is_safari:
                 text_tools.print_to_screen('Safaris can only attack beasts.', self.global_manager)
-        else: #if destination empty and
+        else: #if destination empty or attack already confirmed, move in
             initial_movement_points = self.movement_points
+            original_disorganized = self.disorganized
             super().move(x_change, y_change)
+            self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
             if attack_confirmed:
                 self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
             if not self.in_vehicle:

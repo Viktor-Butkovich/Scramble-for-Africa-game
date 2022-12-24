@@ -63,6 +63,8 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
+        self.can_swim_river = False
+        self.can_swim_ocean = False
         self.can_walk = True #if can enter land areas
         self.has_canoes = False
         self.max_movement_points = 1
@@ -295,11 +297,12 @@ class mob(actor):
         adjacent_cell = local_cell.adjacent_cells[direction]
         if not adjacent_cell == 'none':
             cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-        
             if self.is_pmob:
                 if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
                     if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
                         cost = cost / 2
+                if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
+                    cost = self.max_movement_points
                 if (not adjacent_cell.visible) and self.can_explore:
                     cost = self.movement_cost
         return(cost)
@@ -663,8 +666,10 @@ class mob(actor):
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
                             (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
                             if destination_type == 'water':
-                                if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                if future_y == 0 and not self.can_swim_ocean:
                                     return(False)
+                                elif future_y > 0 and (not self.can_swim_river) and self.can_walk:
+                                    return(True) #can walk through river with max movement points while becoming disorganized
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:
@@ -730,6 +735,9 @@ class mob(actor):
                     self.set_movement_points(0)
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
                     self.set_movement_points(0)
+            if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river: #if entering river w/o canoes, spend maximum movement and become disorganized
+                #self.set_movement_points(0)
+                self.set_disorganized(True)
 
         if self.has_canoes:
             self.update_canoes()

@@ -1,36 +1,13 @@
 ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1048, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)#.convert()
-FileNotFoundError: No file 'graphics/misc/dice/0.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
   File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 35, in <module>
     main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 161, in main_loop
-    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 73, in on_click
-    self.remove()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 837, in remove
-    self.global_manager.get('combat_result')[0].complete_combat()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 1103, in complete_combat
-    self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\npmobs.py", line 135, in attempt_local_combat
-    defender.start_combat('defending', self)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 779, in start_combat
-    self.combat() #later call next step when closing combat action notification instead of immediately
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 909, in combat
-    self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 1373, in display_die
-    new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\dice.py", line 51, in __init__
-    super().__init__(coordinates, width, height, 'green', 'label', 'none', modes, image_id, global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 55, in __init__
-    self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1010, in __init__
-    self.set_image(image_id)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1051, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/misc/dice/0.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 193, in main_loop
+    main_loop_tools.update_display(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop_tools.py", line 150, in update_display
+    manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop_tools.py", line 254, in manage_tooltip_drawing
+    possible_tooltip_drawers[0].update_tooltip()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 178, in update_tooltip
+    if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0:
+AttributeError: 'worker' object has no attribute 'can_swim_river'
