@@ -89,12 +89,11 @@ class battalion(group):
                 cost = 1
             else:
                 cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-            
                 if self.is_pmob:
                     if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
                         if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
                             cost = cost / 2
-                    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0: #if river
+                    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
                         cost = self.max_movement_points
                     if (not adjacent_cell.visible) and self.can_explore:
                         cost = self.movement_cost
