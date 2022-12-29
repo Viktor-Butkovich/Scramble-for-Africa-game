@@ -103,7 +103,7 @@ class dice_rolling_notification(action_notification):
         '''
         super().remove()
         self.global_manager.set('current_dice_rolling_notification', 'none')
-        if len(self.global_manager.get('dice_list')) > 1:
+        if len(self.global_manager.get('dice_list')) > 1: #if there are multiple dice, check if any player-controlled dice are critical successes for promotion
             max_roll = 0
             max_die = 0
             for current_die in self.global_manager.get('dice_list'):
@@ -119,18 +119,20 @@ class dice_rolling_notification(action_notification):
 
                 if current_die.final_result >= current_die.result_outcome_dict['min_crit_success']:
                     if not self.global_manager.get('displayed_mob').veteran:
-                        self.global_manager.get('sound_manager').play_sound('trumpet_1')
+                        if not self.global_manager.get('displayed_mob').veteran:
+                            self.global_manager.get('sound_manager').play_sound('trumpet_1')
 
             for current_die in self.global_manager.get('dice_list'):
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'):
                     if not current_die == max_die:
                         current_die.normal_die = True
             max_die.highlighted = True
-        else:
+        else: #if only 1 die, check if it is a crtiical success for promotion
             self.global_manager.get('dice_list')[0].highlighted = True #outline_color = 'white'
             if self.global_manager.get('dice_list')[0].final_result >= self.global_manager.get('dice_list')[0].result_outcome_dict['min_crit_success']:
-                if not self.global_manager.get('displayed_mob').veteran:
-                    self.global_manager.get('sound_manager').play_sound('trumpet_1')
+                if not self.global_manager.get('displayed_mob') == 'none':
+                    if not self.global_manager.get('displayed_mob').veteran:
+                        self.global_manager.get('sound_manager').play_sound('trumpet_1')
 
 class exploration_notification(action_notification):
     '''

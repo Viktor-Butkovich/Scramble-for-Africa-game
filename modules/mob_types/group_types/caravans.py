@@ -279,13 +279,13 @@ class caravan(group):
             text += 'Drawn to the Western lifestyle by consumer goods, some of the villagers are now available to be hired by your company. /n /n'
             gets_worker = True
         if not self.trades_remaining == 0:
-            text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan /n /n'
+            text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan. /n /n'
             text += 'The merchant has ' + str(num_consumer_goods) + ' more consumer goods to sell /n /n'
         notification_tools.display_notification(text, notification_type, self.global_manager)
         text = ''
         if self.trades_remaining > 0 and num_consumer_goods > 0:
             choice_info_dict = {'caravan': self, 'village': village, 'type': 'trade'}
-            text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan /n /n'
+            text += 'The villagers are willing to trade ' + str(self.trades_remaining) + ' more time' + utility.generate_plural(self.trades_remaining) + ' with this caravan. /n /n'
             text += 'Do you want to trade consumer goods for items that may or may not be valuable?'
             notification_tools.display_choice_notification(text, ['trade', 'stop trading'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
         else:

@@ -241,7 +241,7 @@ class expedition(group):
                 if future_cell.resource == 'natives':
                     text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile containing the village of ' + future_cell.village.name + '. /n /n'
                 else:
-                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile with a ' + future_cell.resource.upper() + ' resource. /n /n'
+                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile with a ' + future_cell.resource.upper() + ' resource (currently worth ' + str(self.global_manager.get('commodity_prices')[future_cell.resource]) + ' money). /n /n'
                 public_opinion_increase += 3
             else:
                 text += 'The expedition has  discovered a ' + future_cell.terrain.upper() + ' tile. /n /n'
@@ -326,7 +326,7 @@ class expedition(group):
                         if target_cell.resource == 'natives':
                             text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
                         else:
-                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource to the ' + cardinal_directions[current_direction] + '. /n /n'
+                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource (currently worth ' + str(self.global_manager.get('commodity_prices')[target_cell.resource]) + ' money) to the ' + cardinal_directions[current_direction] + '. /n /n'
                         public_opinion_increase += 3
                     else:
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
