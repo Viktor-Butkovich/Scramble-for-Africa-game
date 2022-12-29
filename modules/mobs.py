@@ -298,11 +298,17 @@ class mob(actor):
         if not adjacent_cell == 'none':
             cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
             if self.is_pmob:
-                if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                local_infrastructure = local_cell.get_intact_building('infrastructure')
+                adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
+                #if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
+                #    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                if local_cell.has_walking_connection(adjacent_cell): 
+                    if not (local_infrastructure == 'none' or adjacent_infrastructure == 'none'): #if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
-                if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
+                    #otherwise, use default cost but not full no canoe penalty cost
+                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #elif river w/o canoes
                     cost = self.max_movement_points
+
                 if (not adjacent_cell.visible) and self.can_explore:
                     cost = self.movement_cost
         return(cost)
@@ -735,7 +741,7 @@ class mob(actor):
                     self.set_movement_points(0)
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
                     self.set_movement_points(0)
-            if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river: #if entering river w/o canoes, spend maximum movement and become disorganized
+            if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river and not previous_cell.has_walking_connection(self.images[0].current_cell): #if entering river w/o canoes, spend maximum movement and become disorganized
                 #self.set_movement_points(0)
                 self.set_disorganized(True)
 

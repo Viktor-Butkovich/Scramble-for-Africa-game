@@ -43,7 +43,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         int: Returns the cost of the inputted unit attempting to construct the inputted building
     '''
     if building_type == 'infrastructure':
-        building_type = building_name #road or railroad
+        building_type = building_name #road, railroad, road_bridge, or railroad_bridge
 
     if building_type == 'warehouses':
         if constructor == 'none':

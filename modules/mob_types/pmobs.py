@@ -1140,22 +1140,28 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
-        message = 'Are you sure you want to start constructing a ' + self.building_name + '? /n /n'
+        message = 'Are you sure you want to start constructing a ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
 
         message += 'The planning and materials will cost ' + str(cost) + ' money. /n /n'
         
-        message += 'If successful, a ' + self.building_name + ' will be built. ' #change to match each building
+        message += 'If successful, a ' + text_tools.remove_underscores(self.building_name) + ' will be built. ' #change to match each building
         if self.building_type == 'resource':
-            message += 'A ' + self.building_name + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
-            message += 'Upgrades to the ' + self.building_name + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
+            message += 'A ' + text_tools.remove_underscores(self.building_name) + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
+            message += 'Upgrades to the ' + text_tools.remove_underscores(self.building_name) + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
                 message += 'A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. '
             elif self.building_name == 'railroad':
                 message += 'A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. '
                 message += 'It is also required for trains to move and for a train station to be built.'
+            elif self.building_name == 'road_bridge':
+                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
+                message += 'A road bridge acts as a road between the tiles it connects and can later be upgraded to a railroad bridge. '
+            elif self.building_name == 'railroad_bridge':
+                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
+                message += 'A railroad bridge acts as a railroad between the tiles it connects. '
         elif self.building_type == 'port':
             message += 'A port allows steamboats and steamships to enter the tile and expands the tile\'s warehouse capacity. '
             if self.y == 1:
@@ -1219,7 +1225,7 @@ class pmob(mob):
         self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
         text = ''
 
-        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
+        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + text_tools.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
@@ -1266,9 +1272,9 @@ class pmob(mob):
             
         text += '/n'
         if roll_result >= self.current_min_success:
-            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + self.building_name + '. /n'
+            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + text_tools.remove_underscores(self.building_name) + '. /n'
         else:
-            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + self.building_name + '. /n'
+            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + text_tools.remove_underscores(self.building_name) + '. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
@@ -1313,6 +1319,8 @@ class pmob(mob):
                     building_image_id = 'buildings/infrastructure/road.png'
                 elif self.building_name == 'railroad':
                     building_image_id = 'buildings/infrastructure/railroad.png'
+                else: #bridge image handled in infrastructure initialization to use correct horizontal/vertical version
+                    building_image_id = 'buildings/infrastructure/road.png'
                 input_dict['image'] = building_image_id
                 input_dict['infrastructure_type'] = self.building_name
             elif self.building_type == 'port':

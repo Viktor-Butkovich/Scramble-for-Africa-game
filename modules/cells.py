@@ -96,6 +96,27 @@ class cell():
                 save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
 
+    def has_walking_connection(self, adjacent_cell):
+        if not (self.terrain == 'water' or adjacent_cell.terrain == 'water'): #if both are land tiles, walking connection exists
+            return(True)
+        if self.terrain == 'water' and adjacent_cell.terrain == 'water': #if both are water, no walking connection exists
+            return(False)
+
+        if self.terrain == 'water':
+            water_cell = self
+            land_cell = adjacent_cell
+        else:
+            water_cell = adjacent_cell
+            land_cell = self
+        
+        water_infrastructure = water_cell.get_intact_building('infrastructure')
+        if water_infrastructure == 'none': #if no bridge in water tile, no walking connection exists
+            return(False)
+        if water_infrastructure.is_bridge:
+            if land_cell in water_infrastructure.connected_cells: #if bridge in water tile connects to the land tile, walking connection exists
+                return(True)
+        return(False)
+
     def local_attrition(self, attrition_type = 'health'):
         '''
         Description:

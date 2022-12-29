@@ -663,6 +663,8 @@ def transactions_setup(global_manager):
         'resource': 10,
         'road': 5,
         'railroad': 15,
+        'road_bridge': 50,
+        'railroad_bridge': 150,
         'port': 15,
         'train_station': 10,
         'trading_post': 5,
@@ -1325,7 +1327,10 @@ def debug_tools_setup(global_manager):
 
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
-
+    DEBUG_reveal_beasts.apply()
+    DEBUG_remove_fog_of_war.apply()
+    DEBUG_block_native_warrior_spawning.apply()
+    DEBUG_ministry_of_magic.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

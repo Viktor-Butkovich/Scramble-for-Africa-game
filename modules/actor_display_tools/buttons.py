@@ -2040,6 +2040,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         elif self.building_type == 'infrastructure':
             self.road_image_id = 'buildings/buttons/road.png'
             self.railroad_image_id = 'buildings/buttons/railroad.png'
+            self.road_bridge_image_id = 'buildings/buttons/road_bridge.png'
+            self.railroad_bridge_image_id = 'buildings/buttons/railroad_bridge.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
             image_id = 'buildings/buttons/train_station.png'
@@ -2088,11 +2090,19 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 elif self.building_type == 'infrastructure':
                     current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
                     if current_infrastructure == 'none':
-                        self.building_name = 'road'
-                        self.image.set_image('buildings/buttons/road.png')
-                    else: #if has road or railroad, show railroad icon
-                        self.building_name = 'railroad'
-                        self.image.set_image('buildings/buttons/railroad.png')
+                        if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0:
+                            self.building_name = 'road_bridge'
+                            self.image.set_image('buildings/buttons/road_bridge.png')
+                        else:
+                            self.building_name = 'road'
+                            self.image.set_image('buildings/buttons/road.png')
+                    else: #if has existing infrastrucutre, show railroad version
+                        if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0:
+                            self.building_name = 'railroad_bridge'
+                            self.image.set_image('buildings/buttons/railroad_bridge.png')
+                        else:
+                            self.building_name = 'railroad'
+                            self.image.set_image('buildings/buttons/railroad.png')
 
     def can_show(self):
         '''
@@ -2152,9 +2162,19 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if self.building_name == 'railroad':
                 message.append('Upgrades this tile\'s road into a railroad, allowing trains to move through this tile')
                 message.append('Retains the benefits of a road')
+                message.append('This button can build a bridge on a river tile, build a road, or upgrade an existing road or road bridge to a railroad version')
             elif self.building_name == 'road':
                 message.append('Builds a road, halving the cost to move between this tile and other tiles with roads or railroads')
                 message.append('A road can be upgraded into a railroad that allows trains to move through this tile')
+                message.append('This button can build a bridge on a river tile or upgrade an existing road or road bridge to a railroad version')
+            elif self.building_name == 'railroad_bridge':
+                message.append('Upgrades this tile\'s road bridge into a railroad bridge, allowing trains to move through this tile')
+                message.append('Retains the benefits of a road bridge')
+                message.append('This button can build a bridge on a river tile, build a road, or upgrade an existing road to a railroad')
+            elif self.building_name == 'road_bridge':
+                message.append('Builds a road bridge, allowing normal movement between the tiles it connects')
+                message.append('A road bridge can be upgraded into a railroad bridge that allows trains to move through this tile')
+                message.append('This button can build a road or upgrade an existing road or road bridge to a railroad version')
             else:
                 self.set_tooltip(message) #can't get building cost without road/railroad type
                 return()
@@ -2205,9 +2225,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
                     if self.global_manager.get('money') >= cost:
                         current_building = self.attached_tile.cell.get_building(self.building_type)
-                        if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
+                        if current_building == 'none' or (self.building_name in ['railroad', 'railroad_bridge'] and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
-                                if not self.attached_tile.cell.terrain == 'water':
+                                if self.building_name in ['road_bridge', 'railroad_bridge'] or not self.attached_tile.cell.terrain == 'water':
                                     if self.attached_label.actor.check_if_minister_appointed():
                                         if self.building_type == 'resource':
                                             if not self.attached_resource == 'none':
@@ -2242,7 +2262,27 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 self.construct()
                                             else:
                                                 text_tools.print_to_screen('This building can only be built in villages.', self.global_manager)
-                                        elif self.building_type in ['infrastructure', 'fort']:
+                                        elif self.building_type == 'infrastructure' and self.building_name in ['road_bridge', 'railroad_bridge']:
+                                            passed = False
+                                            if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0: #if in river tile
+                                                up_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x, self.attached_tile.cell.y + 1)
+                                                down_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x, self.attached_tile.cell.y - 1)
+                                                left_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x - 1, self.attached_tile.cell.y)
+                                                right_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x + 1, self.attached_tile.cell.y)
+                                                if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')): #if vertical bridge
+                                                    if up_cell.visible and down_cell.visible:
+                                                        passed = True
+                                                elif (not (left_cell == 'none' or right_cell == 'none')) and (not (left_cell.terrain == 'water' or right_cell.terrain == 'water')): #if horizontal bridge
+                                                    if left_cell.visible and down_cell.visible:
+                                                        passed = True
+                                            if passed:
+                                                if self.attached_label.actor.sentry_mode:
+                                                    self.attached_label.actor.set_sentry_mode(False)
+                                                self.construct()
+                                            else:
+                                                text_tools.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
+
+                                        else: # self.building_type in ['infrastructure', 'fort']:
                                             #if self.attached_label.actor.check_if_minister_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)

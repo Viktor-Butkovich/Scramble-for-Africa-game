@@ -65,7 +65,7 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/empty.png')
             elif self.actor_image_type == 'infrastructure_connection':
                 contained_infrastructure = new_actor.cell.get_building('infrastructure')
-                if not contained_infrastructure == 'none':
+                if (not contained_infrastructure == 'none') and (not contained_infrastructure.is_bridge):
                     if contained_infrastructure.infrastructure_connection_images[self.direction].can_show():
                         self.set_image(contained_infrastructure.infrastructure_connection_images[self.direction].image_id)
                     else:

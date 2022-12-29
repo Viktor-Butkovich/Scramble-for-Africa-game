@@ -851,19 +851,20 @@ class infrastructure_connection_image(building_image):
         Output:
             None
         '''
-        own_tile_infrastructure_type = self.actor.infrastructure_type
+        #own_tile_infrastructure_type = self.actor.infrastructure_type
+        own_tile_infrastructure = self.actor
         adjacent_cell = 'none'
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
             adjacent_tile_infrastructure = adjacent_cell.get_intact_building('infrastructure')
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
-                adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
-                if own_tile_infrastructure_type == 'railroad' and own_tile_infrastructure_type == adjacent_tile_infrastructure_type: #if both railroads, draw railroad
+                #adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
+                if own_tile_infrastructure.is_railroad and adjacent_tile_infrastructure.is_railroad: #if both railroads, draw railroad
                     self.set_image(self.direction + '_railroad') #up_railroad
                     self.actor.set_image('empty') #if connecting to other railroad, hide railroad cross
                 else: #if both have infrastructure and at least 1 is not a railroad, draw road
                     self.set_image(self.direction + '_road')
-                    if own_tile_infrastructure_type == 'road': #hide center cross if adjacent tiles have same type
+                    if own_tile_infrastructure.is_road: #hide center cross if adjacent tiles have same type
                         self.actor.set_image('empty')
                         #self.actor.set_image('default')
                     else:
