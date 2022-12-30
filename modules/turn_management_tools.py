@@ -87,10 +87,10 @@ def start_player_turn(global_manager, first_turn = False):
     if not first_turn:
         market_tools.adjust_prices(global_manager)#adjust_prices(global_manager)
 
-    if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
-        actor_utility.deselect_all(global_manager)
-        game_transitions.cycle_player_turn(global_manager, True)
-    elif not global_manager.get('displayed_mob').selected:
+    #if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
+    #    actor_utility.deselect_all(global_manager)
+    #    game_transitions.cycle_player_turn(global_manager, True)
+    if (not global_manager.get('displayed_mob') == 'none') and (not global_manager.get('displayed_mob').selected):
         global_manager.get('displayed_mob').select()
 
 def reset_mobs(mob_type, global_manager):

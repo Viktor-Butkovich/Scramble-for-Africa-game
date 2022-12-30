@@ -97,6 +97,14 @@ class cell():
         return(save_dict)
 
     def has_walking_connection(self, adjacent_cell):
+        '''
+        Description:
+            Finds and returns whether a walking-only unit could move between this cell and the inputted cell, based on the terrains of the cells and whether a bridge is built
+        Input:
+            cell adjacent_cell: Cell to check for walking connections
+        Output:
+            boolean: Returns whether a walking-only unit could move between this cell and the inputted cell, based on the terrains of the cells and whether a bridge is built
+        '''
         if not (self.terrain == 'water' or adjacent_cell.terrain == 'water'): #if both are land tiles, walking connection exists
             return(True)
         if self.terrain == 'water' and adjacent_cell.terrain == 'water': #if both are water, no walking connection exists
@@ -337,6 +345,14 @@ class cell():
         return(False)
 
     def get_warehouses_cost(self):
+        '''
+        Description:
+            Calculates and returns the cost of the next warehouses upgrade in this tile, based on the number of past warehouses upgrades
+        Input:
+            None
+        Output:
+            int: Returns the cost of the next warehouses upgrade in this tile, based on the number of past warehouse upgrades
+        '''
         warehouses = self.get_building('warehouses')
         if warehouses == 'none':
             warehouses_built = 0

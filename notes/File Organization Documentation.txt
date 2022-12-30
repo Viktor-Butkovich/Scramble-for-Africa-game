@@ -13,7 +13,7 @@ SFA folder
     modules folder
 	  actor_display_tools folder
 	      labels.py
-		    imports pygame, modules.labels, modules.images, modules.utility, buttons, images
+		    imports pygame, modules.labels, modules.images, modules.utility, modules.scaling, buttons, images
 		    class actor_display_label(modules.labels.label)
 		        class list_item_label
 		        class building_work_crews_label
@@ -153,25 +153,25 @@ SFA folder
 		        class slave_worker
 
         action_notifications.py
-	      imports labels, images, notifications, text_tools, utility, scaling, actor_utility
-	      class action_notification(notifications.notification)
-	      class dice_rolling_notification(action_notification)
-	      class exploration_notification(action_notification)
-	      class off_tile_exploration_notification(action_notification)
-	      class trade_notification_notification(action_notification)
-	      class religious_campaign_notification(action_notification)
-		class public_relations_campaign_notification(action_notification)
-	      class trial_notification(action_notification)
-	      class advertising_campaign_notification(action_notification)
-    	      class conversion_notification(action_notification)
-		class capture_slaves_notification(action_notification)
-	      class construction_notification(action_notification)
+	        imports labels, images, notifications, utility actor_utility
+            class action_notification(notifications.notification)
+            class dice_rolling_notification(action_notification)
+            class exploration_notification(action_notification)
+            class off_tile_exploration_notification(action_notification)
+            class trade_notification_notification(action_notification)
+            class religious_campaign_notification(action_notification)
+            class public_relations_campaign_notification(action_notification)
+            class trial_notification(action_notification)
+            class advertising_campaign_notification(action_notification)
+    	        class conversion_notification(action_notification)
+            class capture_slaves_notification(action_notification)
+	        class construction_notification(action_notification)
 
-	  actor_creation_tools.py
-	      imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
+        actor_creation_tools.py
+            imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
 		    mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
 		    notification_tools, utility, actor_utility, market_tools, dice
-	      class actor_creation_manager_template
+            class actor_creation_manager_template
 
         actor_utility.py
             imports random, scaling, utility, text_tools
@@ -381,7 +381,7 @@ SFA folder
             def show_tutorial_notifications
 
         notifications.py
-            imports time, labels, text_tools, utility, scaling, actor_utility, game_transitions
+            imports time, labels, text_tools, utility, scaling, actor_utility, game_transitions, notification_tools
             class notification(labels.multi_line_label)
 		    class minister_notification
 	          class zoom_notification

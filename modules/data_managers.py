@@ -530,31 +530,66 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        self.notification_height = 300#500#600
-        self.notification_y = 336#236#186
-        height_difference = notification_height - self.notification_height
-        if height_difference > 0: #if notification height greater than default notification height
-            self.notification_y -= (height_difference / 2) #lower by half of height change
-            self.notification_height += height_difference #increase height by height change
+        #self.notification_height = 300 #300 #500#600
+        self.notification_y = 500#236#186
+        #height_difference = notification_height - self.notification_height
+        #if height_difference > 0: #if notification height greater than default notification height
+        #    self.notification_y -= (height_difference / 2) #lower by half of height change
+        #    self.notification_height += height_difference #increase height by height change
             #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = self.global_manager.get('minimap_grid_origin_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
             self.notification_x = 610
+        #self.notification_height = 300
+        self.notification_height = notification_height
+        self.notification_y -= self.notification_height / 2
 
+    def format_message(self, message):
+        new_message = []
+        next_line = ''
+        next_word = ''
+        font_size = 25
+        font_name = self.global_manager.get('font_name')
+        for index in range(len(message)):
+            if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
+                if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
+                    next_word += message[index]
+            if message[index] == ' ':
+                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                    new_message.append(next_line)
+                    next_line = ''
+                next_line += next_word
+                next_word = ''
+            elif (not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n': #don't check for /n if at last index
+                new_message.append(next_line)
+                next_line = ''
+                next_line += next_word
+                next_word = ''
+        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+            new_message.append(next_line)
+            next_line = ''
+        next_line += next_word
+        new_message.append(next_line)
+        #new_height = len(new_message) * font_size #scaling.scale_height(25, self.global_manager) #font size
+        #print(len(new_message))
+        return(new_message)
+        #if new_height > self.minimum_height:
+        #    self.height = new_height
+    '''
     def get_notification_height(self, notification_text):
-        '''
+        
         Description:
             Returns the height in pixels of the inputted text if it were put in a notification
         Input:
             string notification_text: Text that will appear on the notification with lines separated by /n
         Output:
             int: height in pixels of the inputted text if it were put in a notification
-        '''
+        
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25
+        font_size = 25 #scaling.scale_height(25, self.global_manager) #self.global_manager.get('font_size') #25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
@@ -578,8 +613,8 @@ class notification_manager_template():
         next_line += next_word
         new_message.append(next_line)
         new_message.append('Click to remove this notification.')
-        return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
-            
+        return(len(new_message) * font_size)#self.message = new_message
+    '''
     def notification_to_front(self, message):
         '''
         Description:
@@ -589,7 +624,11 @@ class notification_manager_template():
         Output:
             None
         '''
-        self.update_notification_layout(self.get_notification_height(message))
+        height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10)
+        #print(height)
+        #self.update_notification_layout(self.get_notification_height(message))
+        self.update_notification_layout(height)
+
         notification_type = self.notification_type_queue.pop(0)
         notification_dice = self.notification_dice_queue.pop(0) #number of dice of selected mob to show when notification is visible
         if notification_type == 'roll':

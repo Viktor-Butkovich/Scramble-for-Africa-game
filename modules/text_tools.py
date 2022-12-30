@@ -42,7 +42,11 @@ def text(message, font, global_manager):
     Output:
         pygame.Surface: Rendered pygame.Surface of the inputted text
     '''
-    return(font.render(message, False, global_manager.get('color_dict')['black']))
+    try:
+        text_surface = font.render(message, False, global_manager.get('color_dict')['black'])
+    except:
+        text_surface = pygame.Surface((1, 1)) #prevents error when trying to render very small text (of width 0) on very low resolutions
+    return(text_surface)
 
 def manage_text_list(text_list, max_length):
     '''

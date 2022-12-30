@@ -45,6 +45,11 @@ def fundamental_setup(global_manager):
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
+    #global_manager.set('display_width', 500)
+    #global_manager.set('display_height', 1000)
+    #global_manager.set('display_width', 1000)
+    #global_manager.set('display_height', 500)
+    #global_manager.set('display_height', 800)
     
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
@@ -52,7 +57,8 @@ def fundamental_setup(global_manager):
     global_manager.set('end_turn_wait_time', 0.8)
 
     global_manager.set('font_name', 'times new roman')
-    global_manager.set('font_size', scaling.scale_width(15, global_manager))
+    global_manager.set('default_font_size', 15)
+    global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
@@ -1327,10 +1333,7 @@ def debug_tools_setup(global_manager):
 
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
-    DEBUG_reveal_beasts.apply()
-    DEBUG_remove_fog_of_war.apply()
-    DEBUG_block_native_warrior_spawning.apply()
-    DEBUG_ministry_of_magic.apply()
+    
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

@@ -5,6 +5,7 @@ from ..groups import group
 from ... import actor_utility
 from ... import utility
 from ... import market_tools
+from ... import notification_tools
 
 class work_crew(group):
     '''
@@ -102,6 +103,9 @@ class work_crew(group):
 
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
+                            message = 'The work crew working in the ' + building.name + ' at (' + str(building.images[0].current_cell.x) + ', ' + str(building.images[0].current_cell.y)
+                            message += ') has become a veteran and will be more successful in future production attempts.'
+                            notification_tools.display_zoom_notification(message, building.images[0].current_cell.tile, self.global_manager)
                     else:
                         value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
             if value_stolen > 0:
