@@ -530,7 +530,7 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        #self.notification_height = 300 #300 #500#600
+        self.notification_height = 300 #300 #500#600
         self.notification_y = 500#236#186
         #height_difference = notification_height - self.notification_height
         #if height_difference > 0: #if notification height greater than default notification height
@@ -542,7 +542,8 @@ class notification_manager_template():
         else: #show notifications in center on europe mode
             self.notification_x = 610
         #self.notification_height = 300
-        self.notification_height = notification_height
+        if notification_height > self.notification_height:
+            self.notification_height = notification_height
         self.notification_y -= self.notification_height / 2
 
     def format_message(self, message):

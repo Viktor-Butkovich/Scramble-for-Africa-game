@@ -451,9 +451,9 @@ class multi_line_label(label):
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message
-        #new_height = len(new_message) * self.global_manager.get('font_size') #scaling.scale_height(25, self.global_manager) #font size
-        #if new_height > self.minimum_height:
-        #    self.height = new_height
+        new_height = len(new_message) * self.global_manager.get('font_size') #scaling.scale_height(25, self.global_manager) #font size
+        if new_height > self.minimum_height:
+            self.height = new_height
 
     def set_label(self, new_message):
         '''
