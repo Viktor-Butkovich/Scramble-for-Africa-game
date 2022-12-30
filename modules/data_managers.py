@@ -167,6 +167,22 @@ class effect_manager_template():
                 return(True)
         return(False)
 
+    def set_effect(self, effect_type, new_status):
+        '''
+        Description:
+            Finds and returns whether any effect of the inputted type is active
+        Input:
+            string effect_type: Type of effect to check for
+        Output:
+            boolean: Returns whether any effect of the inputted type is active
+        '''
+        for current_effect in self.possible_effects:
+            if current_effect.effect_type == effect_type:
+                if new_status == True:
+                    current_effect.apply()
+                else:
+                    current_effect.remove()
+
 class flavor_text_manager_template():
     '''
     Object that reads flavor text from .csv files and distributes it to other parts of the program when requested

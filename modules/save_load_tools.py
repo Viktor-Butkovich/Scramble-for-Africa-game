@@ -82,8 +82,8 @@ class save_load_manager_template():
             self.global_manager)
         input_dict['pixel_width'] = scaling.scale_width(strategic_grid_width, self.global_manager)
         input_dict['pixel_height'] = scaling.scale_height(strategic_grid_height, self.global_manager)
-        input_dict['coordinate_width'] = 16
-        input_dict['coordinate_height'] = 15
+        input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
+        input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
         input_dict['internal_line_color'] = 'black'
         input_dict['external_line_color'] = 'black'
         input_dict['modes'] = ['strategic']
@@ -169,6 +169,7 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
+        self.global_manager.get('money_tracker').change(0) #updates projected income display
         self.global_manager.get('evil_tracker').set(0)
         self.global_manager.get('fear_tracker').set(1)
 
@@ -199,10 +200,16 @@ class save_load_manager_template():
         minister_utility.update_available_minister_display(self.global_manager)
 
         turn_management_tools.start_player_turn(self.global_manager, True)
-
-        self.global_manager.set('minister_appointment_tutorial_completed', False)
-        self.global_manager.set('exit_minister_screen_tutorial_completed', False)
-        notification_tools.show_tutorial_notifications(self.global_manager)
+        if not self.global_manager.get('effect_manager').effect_active('skip_intro'):
+            self.global_manager.set('minister_appointment_tutorial_completed', False)
+            self.global_manager.set('exit_minister_screen_tutorial_completed', False)
+            notification_tools.show_tutorial_notifications(self.global_manager)
+        else:
+            self.global_manager.set('minister_appointment_tutorial_completed', True)
+            self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+            for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
+                self.global_manager.get('minister_list')[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
+            game_transitions.set_game_mode('strategic', self.global_manager)
         self.global_manager.set('creating_new_game', False)
         
     def save_game(self, file_path):
@@ -314,8 +321,8 @@ class save_load_manager_template():
                     self.global_manager)
                 input_dict['pixel_width'] = scaling.scale_width(strategic_grid_width, self.global_manager)
                 input_dict['pixel_height'] = scaling.scale_height(strategic_grid_height, self.global_manager)
-                input_dict['coordinate_width'] = 16
-                input_dict['coordinate_height'] = 15
+                input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
+                input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
                 input_dict['internal_line_color'] = 'black'
                 input_dict['external_line_color'] = 'black'
                 input_dict['modes'] = ['strategic']

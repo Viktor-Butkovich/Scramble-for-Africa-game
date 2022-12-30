@@ -155,8 +155,6 @@ class mob(actor):
                 input_dict['actor'] = self
                 input_dict['status_icon_type'] = 'disorganized'
                 self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
         else:
             remaining_icons = []
             for current_status_icon in self.status_icons:
@@ -165,6 +163,8 @@ class mob(actor):
                 else:
                     remaining_icons.append(current_status_icon)
             self.status_icons = remaining_icons
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
 
     def get_combat_modifier(self):
         '''
@@ -777,12 +777,16 @@ class mob(actor):
         Output:
             None
         '''
-        if self.is_npmob and not self.visible():
-            return()
-        elif self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
+        #if self.is_npmob and not self.visible():
+        #    return()
+        if self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
             return()
         
-        if self.images[0].current_cell.terrain == 'water' and self.y > 0:
+        current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y)
+        if current_cell == 'none':
+            return()
+
+        if current_cell.terrain == 'water' and self.y > 0:
             self.set_image('canoes')
         else:
             self.set_image('no_canoes')

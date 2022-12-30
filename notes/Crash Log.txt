@@ -1,7 +1,20 @@
 ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
-  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 9, in <module>
-    setup.fundamental_setup(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\setup.py", line 59, in fundamental_setup
-    global_manager.set('default_font_size', 15, global_manager)
-TypeError: global_manager_template.set() takes 3 positional arguments but 4 were given
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1049, in set_image
+    self.image = pygame.image.load('graphics/' + self.image_id)#.convert()
+FileNotFoundError: No file 'graphics/buttons/grid_lines_button.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 18, in <module>
+    setup.buttons_setup(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\setup.py", line 862, in buttons_setup
+    toggle_grid_lines_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 55, in __init__
+    self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1011, in __init__
+    self.set_image(image_id)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1052, in set_image
+    self.image = pygame.image.load('graphics/' + self.image_id)
+FileNotFoundError: No file 'graphics/buttons/grid_lines_button.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.

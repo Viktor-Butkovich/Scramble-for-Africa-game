@@ -177,7 +177,7 @@ def misc_setup(global_manager):
     global_manager.set('mmb_down', False)
     global_manager.set('typing', False)
     global_manager.set('message', '')
-    global_manager.set('show_grid_lines', True)
+    #global_manager.set('show_grid_lines', True)
     global_manager.set('show_text_box', True)
     global_manager.set('show_selection_outlines', True)
     global_manager.set('show_minimap_outlines', True)
@@ -254,6 +254,11 @@ def misc_setup(global_manager):
 
     global_manager.set('current_advertised_commodity', 'none')
     global_manager.set('current_sound_file_index', 0)
+
+    width = 15
+    height = 16
+    global_manager.set('strategic_map_width', width)
+    global_manager.set('strategic_map_height', height)
 
 def terrains_setup(global_manager):
     '''
@@ -854,6 +859,9 @@ def buttons_setup(global_manager):
     save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
+    toggle_grid_lines_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', 'none', ['strategic'], 'buttons/grid_line_button.png', global_manager)
+
     cycle_units_button = buttons.button(scaling.scale_coordinates(110, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
 
@@ -1334,6 +1342,16 @@ def debug_tools_setup(global_manager):
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
 
+    DEBUG_hide_grid_lines = effects.effect('DEBUG_hide_grid_lines', 'hide_grid_lines', global_manager)
+    #hides interior grid lines
+
+    DEBUG_enable_oceans = effects.effect('DEBUG_enable_oceans', 'enable_oceans', global_manager)
+    #allows water to generate as a normal terrain and removes default river/ocean generation
+
+    DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
+    #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
+    
+    #DEBUG_show_corruption_on_save.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

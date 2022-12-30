@@ -809,10 +809,14 @@ class button():
                 else:
                     text_tools.print_to_screen('You are busy and can not move.', self.global_manager)
             elif self.button_type == 'toggle grid lines':
-                if self.global_manager.get('show_grid_lines'):
-                    self.global_manager.set('show_grid_lines', False)
+                if self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', False)
                 else:
-                    self.global_manager.set('show_grid_lines', True)
+                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', True)
+                #if self.global_manager.get('show_grid_lines'):
+                #    self.global_manager.set('show_grid_lines', False)
+                #else:
+                #    self.global_manager.set('show_grid_lines', True)
 
             elif self.button_type == 'toggle text box':
                 if self.global_manager.get('show_text_box'):

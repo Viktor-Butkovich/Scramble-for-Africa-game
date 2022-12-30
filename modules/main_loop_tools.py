@@ -71,7 +71,8 @@ def update_display(global_manager):
             if global_manager.get('current_game_mode') in current_overlay_tile.image.modes:
                 current_overlay_tile.image.draw()
                 current_overlay_tile.image.has_drawn = True
-                
+        
+        #if global_manager.get('effect_manager').effect_active('hide_grid_lines'):
         for current_grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in current_grid.modes:
                 current_grid.draw_grid_lines()
