@@ -75,7 +75,8 @@ SFA folder
         mob_types folder
 		group_types folder
 	          battalions.py
-		        imports time, random, mob_types.groups, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.dice_utility
+		        imports time, random, mob_types.groups, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.dice_utility, 
+				    modules.market_tools
 		        class battalion(mob_types.groups.group)
 		            class safari
 

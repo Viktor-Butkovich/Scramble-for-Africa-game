@@ -600,3 +600,4 @@ def debug_print(global_manager):
     '''
     print('')
     print(global_manager.get('effect_manager'))
+    print(global_manager.get('notification_list'))

@@ -751,7 +751,7 @@ class suppress_slave_trade_notification(action_notification):
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
-        if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] == 'none': #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()

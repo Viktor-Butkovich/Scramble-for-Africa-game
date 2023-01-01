@@ -88,7 +88,7 @@ class vehicle(pmob):
         sub_mobs += self.contained_mobs
 
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-        
+        non_replaced_attrition = []
         for current_sub_mob in sub_mobs:
             worker_type = 'none'
             if current_sub_mob.is_worker:
@@ -98,16 +98,34 @@ class vehicle(pmob):
             if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
                 if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
-                        if current_sub_mob == self.crew:
+                        if current_sub_mob == self.crew: #if crew died of attrition
+                            if not current_sub_mob.automatically_replace:
+                                current_sub_mob.uncrew_vehicle(self)
                             self.crew_attrition_death()
-                        elif current_sub_mob.is_group:
-                            current_sub_mob.attrition_death(random.choice(['officer', 'worker']))
-                        else:
+                        elif current_sub_mob.is_group: #if group passenger died of attrition
+                            attrition_unit_type = random.choice(['officer', 'worker'])
+                            #if attrition_unit_type == 'officer':
+                            #    reembarked_unit = current_sub_mob.worker
+                            #elif attrition_unit_type == 'worker':
+                            #    reembarked_unit = current_sub_mob.officer
+                            #if not current_sub_mob.automatically_replace:
+                            #    current_sub_mob.disembark(self)
+                            current_sub_mob.attrition_death(attrition_unit_type)
+                            #if not current_sub_mob.automatically_replace:
+                            #    reembarked_unit.embark(self)
+
+                        else: #if non-group passenger died of attrition
                             text = 'The ' + current_sub_mob.name + ' aboard the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
-                            text += 'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
-                            current_sub_mob.replace()
-                            current_sub_mob.temp_disable_movement()
+                            if current_sub_mob.automatically_replace:
+                                text += 'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
+                                current_sub_mob.replace()
+                                current_sub_mob.temp_disable_movement()
+                            else:
+                                non_replaced_attrition.append(current_sub_mob)
                             notification_tools.display_zoom_notification(text, self, self.global_manager)
+        for current_mob in non_replaced_attrition:
+            current_sub_mob.disembark(self)
+            current_sub_mob.attrition_death(False)
                         
     def crew_attrition_death(self):
         '''

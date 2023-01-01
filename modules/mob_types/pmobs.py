@@ -81,6 +81,7 @@ class pmob(mob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.attached_dice_list = []
+        self.automatically_replace = True
 
     def to_save_dict(self):
         '''
@@ -99,6 +100,7 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - List of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - List of the coordinates and string commands this unit will execute, changes as the route is executed
+                'automatically_replace': boolean value  Whether this unit or any of its components should be replaced automatically in the event of attrition
         '''
         save_dict = super().to_save_dict()
         if self.end_turn_destination == 'none':
@@ -113,6 +115,7 @@ class pmob(mob):
         save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
+        save_dict['automatically_replace'] = self.automatically_replace
         return(save_dict)
 
     def add_to_automatic_route(self, new_coordinates):
@@ -385,26 +388,28 @@ class pmob(mob):
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) <= 2:
                     self.attrition_death()
 
-    def attrition_death(self):
+    def attrition_death(self, show_notification = True):
         '''
         Description:
             Kills this unit, takes away its next turn, and automatically buys a replacement when it fails its rolls for health attrition. If an officer dies, the replacement costs the officer's usual recruitment cost and does not have
                 the previous officer's experience. If a worker dies, the replacement is found and recruited from somewhere else on the map, increasing worker upkeep colony-wide as usual
         Input:
-            None
+            boolean show_notification: Whether a notification should be shown for this death - depending on where this was called, a notification may have already been shown
         Output:
             None
         '''
         self.global_manager.get('evil_tracker').change(3)
-        if self.is_officer or self.is_worker:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
-                self.images[0].current_cell.tile, self.global_manager)
+        if (self.is_officer or self.is_worker) and self.automatically_replace:
+            if show_notification:
+                notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
+                    self.images[0].current_cell.tile, self.global_manager)
             self.temp_disable_movement()
             self.replace()
             #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
             #    self.images[0].current_cell.tile, self.global_manager)
         else:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
+            if show_notification:
+                notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
             self.die()
 
     def remove(self):

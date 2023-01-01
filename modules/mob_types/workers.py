@@ -317,6 +317,8 @@ class slave_worker(worker):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
         self.global_manager.get('money_label').check_for_updates()
+        if self.global_manager.get('slave_traders_strength') <= 0:
+            self.automatically_replace = False
 
     def fire(self):
         '''

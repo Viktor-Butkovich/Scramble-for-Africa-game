@@ -8,6 +8,7 @@ from ... import utility
 from ... import notification_tools
 from ... import text_tools
 from ... import dice_utility
+from ... import market_tools
 
 class battalion(group):
     '''
@@ -610,7 +611,22 @@ class battalion(group):
             self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') - strength_decrease) #do something special on 0 strength
             if self.global_manager.get('slave_traders_strength') <= 0:
                 self.global_manager.set('slave_traders_strength', 0)
-                notification_tools.display_notification('The slave trade has been eradicated. /n /n', 'none', self.global_manager)
+                num_freed_slaves = random.randrange(1, 7) + random.randrange(1, 7)
+                initial_public_opinion_increase = public_opinion_increase
+                for i in range(num_freed_slaves):
+                    public_opinion_increase += 4 + random.randrange(-3, 4) #1-7 each
+                    market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+                    self.global_manager.get('evil_tracker').change(-2)
+                    self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+                text = 'The slave trade has been eradicated. /n /n'
+                text += str(num_freed_slaves) + ' freed slaves have entered the labor pool, increasing public opinion by ' + str(public_opinion_increase - initial_public_opinion_increase) + '. /n /n'
+                text += 'Slaves are no longer able to be purchased, and existing slave units will no longer be automatically replaced. /n /n'
+                for current_pmob in self.global_manager.get('pmob_list'):
+                    if current_pmob.is_group and current_pmob.worker.worker_type == 'slave':
+                        current_pmob.automatically_replace = False
+                    elif current_pmob.is_worker and current_pmob.worker_type == 'slave':
+                        current_pmob.automatically_replace = False
+                notification_tools.display_notification(text, 'none', self.global_manager)
             self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
