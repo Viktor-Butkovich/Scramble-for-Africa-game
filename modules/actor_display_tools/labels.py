@@ -87,6 +87,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
             self.attached_buttons.append(buttons.track_beasts_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/track_beasts_button.png', self, global_manager))
             self.attached_buttons.append(buttons.capture_slaves_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/capture_slaves_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.suppress_slave_trade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/suppress_slave_trade_button.png', self, global_manager))
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '

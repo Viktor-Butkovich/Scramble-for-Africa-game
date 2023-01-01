@@ -1376,6 +1376,61 @@ class capture_slaves_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and can not capture slaves.', self.global_manager)
 
+class suppress_slave_trade_button(label_button):
+    '''
+    Button that commands a battalion to supppress slave trade in the slave traders tile
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'suppress slave trade', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.is_battalion):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a battalion to capture slaves from a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['suppress_slave_trade']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.grid == self.global_manager.get('slave_traders_grid'):
+                            if self.global_manager.get('slave_traders_strength') > 0:
+                                if current_mob.check_if_minister_appointed():
+                                    if current_mob.sentry_mode:
+                                        current_mob.set_sentry_mode(False)
+                                    current_mob.start_suppress_slave_trade()
+                            else:
+                                text_tools.print_to_screen('The slave trade has already been eradicated.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('Supressing the slave trade is only possible in the slave traders tile.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money needed to attempt to suppress the slave trade.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('Suppressing the slave trade requires all remaining movement points, at least 1.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not suppress the slave trade.', self.global_manager)
+
 class evangelist_campaign_button(label_button):
     '''
     Button that commands an evangelist to start a religious campaign in Europe
@@ -3007,7 +3062,8 @@ class buy_slaves_button(label_button):
         if super().can_show():
             if not self.global_manager.get('displayed_tile') == 'none':
                 if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
-                    return(True)
+                    if self.global_manager.get('slave_traders_strength') > 0:
+                        return(True)
         return(False)
 
     def on_click(self):

@@ -435,7 +435,10 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        self.set_tooltip([self.name])
+        if self.name == 'Slave traders':
+            self.set_tooltip([self.name, 'Slave traders strength: ' + str(self.global_manager.get('slave_traders_strength'))])
+        else:
+            self.set_tooltip([self.name])
 
     def can_show_tooltip(self):
         '''

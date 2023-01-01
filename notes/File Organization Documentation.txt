@@ -51,6 +51,7 @@ SFA folder
 		        class trade_button
 		        class convert_button
 			  class capture_slaves_button
+			  class suppress_slave_trade_button
 		        class evangelist_campaign_button
 		        class take_loan_button
 			  class labor_broker_button
@@ -165,6 +166,7 @@ SFA folder
             class advertising_campaign_notification(action_notification)
     	        class conversion_notification(action_notification)
             class capture_slaves_notification(action_notification)
+			class suppress_slave_trade_notification(action_notification)
 	        class construction_notification(action_notification)
 
         actor_creation_tools.py
@@ -461,6 +463,7 @@ SFA folder
 		  def manage_production_report
 	      def manage_upkeep
 	      def manage_loans
+		  def manage_slave_traders
 	      def manage_public_opinion
 	      def manage_subsidies
 	      def manage_financial_report
@@ -469,12 +472,12 @@ SFA folder
 	      def trigger_worker_migration
 	      def create_weighted_migration_destinations
 	      def manage_villages
-		def manage_beasts
+          def manage_beasts
 	      def manage_enemy_movement
 	      def manage_combat
-		def manage_ministers
-		def game_end_check
-		def manage_commodity_sales
+          def manage_ministers
+          def game_end_check
+          def manage_commodity_sales
 
         utility.py
             def find_object_distance

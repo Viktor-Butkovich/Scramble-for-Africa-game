@@ -71,6 +71,7 @@ def start_player_turn(global_manager, first_turn = False):
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
         manage_loans(global_manager)
+        manage_slave_traders(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
         manage_commodity_sales(global_manager)
@@ -239,6 +240,19 @@ def manage_loans(global_manager):
     '''
     for current_loan in global_manager.get('loan_list'):
         current_loan.make_payment()
+
+def manage_slave_traders(global_manager):
+    '''
+    Description:
+        Regenerates the strength of slave traders up to the natural maximum over time
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if global_manager.get('slave_traders_strength') < global_manager.get('slave_traders_natural_max_strength') and global_manager.get('slave_traders_strength') > 0: 
+        #if below natural max but not eradicated
+        global_manager.set('slave_traders_strength', global_manager.get('slave_traders_strength') + 1)
 
 def manage_public_opinion(global_manager):
     '''

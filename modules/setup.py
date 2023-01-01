@@ -203,6 +203,7 @@ def misc_setup(global_manager):
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
     global_manager.set('ongoing_slave_capture', False)
+    global_manager.set('ongoing_slave_trade_suppression', False)
     global_manager.set('game_over', False)
 
     global_manager.set('r_shift', 'up')
@@ -699,6 +700,7 @@ def transactions_setup(global_manager):
         'loan': 5,
         'attack': 5,
         'slave_capture': 5,
+        'suppress_slave_trade': 5,
         'trial': 5,
         'hunting': 5,
         'track_beasts': 0
@@ -723,6 +725,7 @@ def transactions_setup(global_manager):
         'loan': 'loans',
         'attack': 'combat supplies',
         'slave_capture': 'capturing slaves',
+        'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
         'hunting': 'hunting supplies',
         'construction': 'construction',
@@ -747,8 +750,9 @@ def transactions_setup(global_manager):
     for current_key in global_manager.get('transaction_descriptions'):
         transaction_types.append(current_key)
     global_manager.set('transaction_types', transaction_types)
-    #global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodity sales', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-    #    'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'capturing slaves'])
+    global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
+    global_manager.set('slave_traders_strength', 0)
+
 
 def value_trackers_setup(global_manager):
     '''
@@ -1350,8 +1354,7 @@ def debug_tools_setup(global_manager):
 
     DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-    
-    #DEBUG_show_corruption_on_save.apply()
+
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

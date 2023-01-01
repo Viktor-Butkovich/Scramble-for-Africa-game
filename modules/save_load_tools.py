@@ -60,6 +60,8 @@ class save_load_manager_template():
         self.copied_elements.append('sold_commodities')
         self.copied_elements.append('action_prices')
         self.copied_elements.append('current_country_name')
+        self.copied_elements.append('slave_traders_strength')
+        self.copied_elements.append('slave_traders_natural_max_strength')
         
     def new_game(self, country):
         '''
@@ -173,6 +175,8 @@ class save_load_manager_template():
         self.global_manager.get('evil_tracker').set(0)
         self.global_manager.get('fear_tracker').set(1)
 
+        self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
+        self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_natural_max_strength'))
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
 

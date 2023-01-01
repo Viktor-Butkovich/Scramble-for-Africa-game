@@ -141,7 +141,7 @@ class choice_button(button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
             
-        elif button_type in ['start religious campaign', 'start public relations campaign', 'start advertising campaign']:
+        elif button_type in ['start religious campaign', 'start public relations campaign', 'start advertising campaign', 'start suppress slave trade']:
             self.message = 'Start campaign'
             if button_type == 'start advertising campaign':
                 self.commodity = self.notification.choice_info_dict['commodity']
@@ -167,7 +167,7 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves']:
+        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop suppress slave trade']:
             self.message = 'Do nothing'
 
         elif button_type == 'confirm main menu':

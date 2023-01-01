@@ -405,6 +405,13 @@ class button():
                               'Has higher success chance and lower risk when aggressiveness is low',
                               'Costs all remaining movement points, at least 1'])
 
+        elif self.button_type == 'suppress slave trade':
+            self.set_tooltip(['Attempts to suppress the slave trade for ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money',
+                              'Can only be done in the slave traders tile',
+                              'If successful, will decrease the strength of the slave traders and increase public opinion',
+                              'Success chance and risk influenecd by the current strength of the slave traders',
+                              'Costs all remaining movement points, at least 1'])
+
         elif self.button_type == 'religious campaign':
             self.set_tooltip(['Attempts to campaign for church volunteers for ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money',
                               'Can only be done in Europe',
@@ -1070,6 +1077,10 @@ class button():
             elif self.button_type == 'start capture slaves':
                 battalion = self.notification.choice_info_dict['battalion']
                 battalion.capture_slaves()
+            
+            elif self.button_type == 'start suppress slave trade':
+                battalion = self.notification.choice_info_dict['battalion']
+                battalion.suppress_slave_trade()
 
             elif self.button_type == 'start public relations campaign':
                 evangelist = self.notification.choice_info_dict['evangelist']
@@ -1126,6 +1137,9 @@ class button():
 
             elif self.button_type == 'stop capture slaves':
                 self.global_manager.set('ongoing_slave_capture', False)
+            
+            elif self.button_type == 'stop suppress slave trade':
+                self.global_manager.set('ongoing_slave_trade_suppression', False)
 
             elif self.button_type in ['stop loan search', 'decline loan offer']:
                 self.global_manager.set('ongoing_loan_search', False)
