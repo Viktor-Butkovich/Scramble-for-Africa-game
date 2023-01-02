@@ -679,6 +679,148 @@ class disable_sentry_mode_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
 
+class enable_automatic_replacement_button(label_button):
+    '''
+    Button that enables automatic attrition replacement for a unit or one of its components
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, target_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string target_type: Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.target_type = target_type
+        super().__init__(coordinates, width, height, 'enable automatic replacement', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the targeted unit component is present and does not already have automatic replacement, otherwise returns False
+        '''
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.is_pmob:
+                return(False)
+            elif self.attached_label.actor.is_vehicle:
+                return(False)
+            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+                return(False)
+            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+                return(False)
+            elif ((self.target_type == 'unit' and self.attached_label.actor.automatically_replace) or 
+                (self.target_type == 'worker' and self.attached_label.actor.worker.automatically_replace) or 
+                (self.target_type == 'officer' and self.attached_label.actor.officer.automatically_replace)):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button enables automatic replacement for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):         
+                if self.target_type == 'unit':
+                    target = self.attached_label.actor
+                elif self.target_type == 'worker':
+                    target = self.attached_label.actor.worker
+                elif self.target_type == 'officer':
+                    target = self.attached_label.actor.officer         
+                target.set_automatically_replace(True)
+            else:
+                text_tools.print_to_screen('You are busy and can not enable automatic replacement.', self.global_manager)
+
+class disable_automatic_replacement_button(label_button):
+    '''
+    Button that disables automatic attrition replacement for a unit or one of its components
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, target_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string target_type: Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.target_type = target_type
+        super().__init__(coordinates, width, height, 'disable automatic replacement', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the targeted unit component is present and has automatic replacement, otherwise returns False
+        '''
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.is_pmob:
+                return(False)
+            elif self.attached_label.actor.is_vehicle:
+                return(False)
+            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+                return(False)
+            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+                return(False)
+            elif ((self.target_type == 'unit' and not self.attached_label.actor.automatically_replace) or 
+                (self.target_type == 'worker' and not self.attached_label.actor.worker.automatically_replace) or 
+                (self.target_type == 'officer' and not self.attached_label.actor.officer.automatically_replace)):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button disables automatic replacement for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.target_type == 'unit':
+                    target = self.attached_label.actor
+                elif self.target_type == 'worker':
+                    target = self.attached_label.actor.worker
+                elif self.target_type == 'officer':
+                    target = self.attached_label.actor.officer         
+                target.set_automatically_replace(False)
+            else:
+                text_tools.print_to_screen('You are busy and can not disable automatic replacement.', self.global_manager)
+
 class end_unit_turn_button(label_button):
     '''
     Button that ends a unit's turn, removing it from the current turn's turn cycle queue

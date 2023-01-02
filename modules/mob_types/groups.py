@@ -164,7 +164,7 @@ class group(pmob):
         remaining_unit = 'none'
         if target == 'officer':
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
-            if self.automatically_replace:
+            if self.officer.automatically_replace:
                 text += 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
                 text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
                 self.officer.replace(self) #self.officer.die()
@@ -183,7 +183,7 @@ class group(pmob):
 
         elif target == 'worker':
             text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
-            if self.automatically_replace:
+            if self.worker.automatically_replace:
                 text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
                 self.worker.replace(self)
             else:
@@ -314,7 +314,6 @@ class group(pmob):
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points
         self.worker.set_movement_points(math.floor(movement_ratio_remaining * self.worker.max_movement_points))
-        self.worker.automatically_replace = self.automatically_replace
         #missing_movement_points = self.max_movement_points - self.movement_points
         #self.worker.set_movement_points(self.worker.max_movement_points - missing_movement_points)#self.movement_points)
         self.officer.status_icons = self.status_icons
@@ -323,7 +322,6 @@ class group(pmob):
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
         self.officer.set_movement_points(math.floor(movement_ratio_remaining * self.officer.max_movement_points))
-        self.officer.automatically_replace = self.automatically_replace
         #self.officer.set_movement_points(self.officer.max_movement_points - missing_movement_points)#self.movement_points)
 
     def remove(self):

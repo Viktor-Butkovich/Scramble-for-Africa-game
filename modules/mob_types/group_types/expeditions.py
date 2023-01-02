@@ -250,8 +250,8 @@ class expedition(group):
         if roll_result <= self.current_max_crit_fail:
             text += 'Everyone in the expedition has died. /n /n' #actual death occurs when exploration completes
 
-        if public_opinion_increase > 0:
-            text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+        if public_opinion_increase > 0: #Royal/National/Imperial
+            text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             #self.veteran = True
@@ -331,8 +331,8 @@ class expedition(group):
                     else:
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
 
-                    if public_opinion_increase > 0:
-                        text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+                    if public_opinion_increase > 0: #Royal/National/Imperial
+                        text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)

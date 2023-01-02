@@ -554,7 +554,17 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, False, british_weighted_backgrounds, british_country_effect, global_manager))
+    british_input_dict = {
+        'name': 'Britain',
+        'adjective': 'british',
+        'government_type_adjective': 'royal',
+        'allow_particles': False,
+        'aristocratic_particles': False,
+        'allow_double_last_names': False,
+        'background_set': british_weighted_backgrounds,
+        'country_effect': british_country_effect
+    }
+    global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -569,7 +579,17 @@ def countries_setup(global_manager):
         'business magnate',
         ]
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
-    global_manager.set('France', countries.country('France', 'french', True, False, True, french_weighted_backgrounds, french_country_effect, global_manager))
+    french_input_dict = {
+        'name': 'France',
+        'adjective': 'french',
+        'government_type_adjective': 'national',
+        'allow_particles': True,
+        'aristocratic_particles': False,
+        'allow_double_last_names': True,
+        'background_set': french_weighted_backgrounds,
+        'country_effect': french_country_effect
+    }
+    global_manager.set('France', countries.country(french_input_dict, global_manager))
 
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -582,7 +602,17 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
-    global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, german_weighted_backgrounds, german_country_effect, global_manager)) 
+    german_input_dict = {
+        'name': 'Germany',
+        'adjective': 'german',
+        'government_type_adjective': 'imperial',
+        'allow_particles': True,
+        'aristocratic_particles': True,
+        'allow_double_last_names': False,
+        'background_set': german_weighted_backgrounds,
+        'country_effect': german_country_effect
+    }
+    global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
     belgian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -596,7 +626,14 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier', global_manager)
-    global_manager.set('Belgium', countries.hybrid_country('Belgium', 'belgian', belgian_weighted_backgrounds, belgian_country_effect, global_manager)) 
+    belgian_input_dict = {
+        'name': 'Belgium',
+        'adjective': 'belgian',
+        'government_type_adjective': 'royal',
+        'background_set': belgian_weighted_backgrounds,
+        'country_effect': belgian_country_effect
+    }
+    global_manager.set('Belgium', countries.hybrid_country(belgian_input_dict, global_manager)) 
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -609,7 +646,17 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
+    portuguese_input_dict = {
+        'name': 'Portugal',
+        'adjective': 'portuguese',
+        'government_type_adjective': 'royal',
+        'allow_particles': True,
+        'aristocratic_particles': False,
+        'allow_double_last_names': False,
+        'background_set': portuguese_weighted_backgrounds,
+        'country_effect': portuguese_country_effect
+    }
+    global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -623,7 +670,17 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
-    global_manager.set('Italy', countries.country('Italy', 'italian', True, True, False, italian_weighted_backgrounds, italian_country_effect, global_manager)) 
+    italian_input_dict = {
+        'name': 'Italy',
+        'adjective': 'italian',
+        'government_type_adjective': 'royal',
+        'allow_particles': True,
+        'aristocratic_particles': True,
+        'allow_double_last_names': False,
+        'background_set': italian_weighted_backgrounds,
+        'country_effect': italian_country_effect
+    }
+    global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     
 def transactions_setup(global_manager):
     '''
@@ -1356,6 +1413,8 @@ def debug_tools_setup(global_manager):
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
 
     #activate effect with DEBUG_effect.apply()
+    DEBUG_skip_intro.apply()
+    DEBUG_ministry_of_magic.apply()
 
 def manage_crash(exception):
     '''

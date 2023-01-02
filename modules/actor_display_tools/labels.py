@@ -91,6 +91,12 @@ class actor_display_label(label):
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
+            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_officer_button.png', self, 'unit', global_manager))
+            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_officer_button.png', self, 'unit', global_manager))
+            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_worker_button.png', self, 'worker', global_manager))
+            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_worker_button.png', self, 'worker', global_manager))
+            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_officer_button.png', self, 'officer', global_manager))
+            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_officer_button.png', self, 'officer', global_manager))
             self.attached_buttons.append(buttons.enable_sentry_mode_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_sentry_mode_button.png', self, global_manager))
             self.attached_buttons.append(buttons.disable_sentry_mode_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_sentry_mode_button.png', self, global_manager))
             self.attached_buttons.append(buttons.end_unit_turn_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_f, self.modes, 'buttons/end_unit_turn_button.png', self, global_manager))

@@ -529,6 +529,21 @@ class button():
             self.set_tooltip([utility.capitalize(verb) + 's sentry mode for this unit',
                               'A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units'])
 
+        elif self.button_type in ['enable automatic replacement', 'disable automatic replacement']:
+            if self.button_type == 'enable automatic replacement':
+                verb = 'enable'
+                operator = 'not '
+            elif self.button_type == 'disable automatic replacement':
+                verb = 'disable'
+                operator = ''
+            if self.target_type == 'unit':
+                target = 'unit'
+            else:
+                target = 'unit\'s ' + self.target_type #worker or officer
+            self.set_tooltip([utility.capitalize(verb) + 's automatic replacement for this ' + target,
+                              'A unit with automatic replacement will be automatically replaced if it dies from attrition',
+                              'This ' + target + ' is currently set to ' + operator + 'be automatically replaced'])
+
         elif self.button_type == 'wake up all':
             self.set_tooltip(['Disables sentry mode for all units',
                               'A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units'])

@@ -2,12 +2,18 @@ ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
   File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 35, in <module>
     main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 193, in main_loop
-    main_loop_tools.update_display(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop_tools.py", line 61, in update_display
-    current_image.draw()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 1064, in draw
-    if self.button.can_show():
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\dice.py", line 224, in can_show
-    num_notification_dice = self.global_manager.get('notification_list')[0].notification_dice
-IndexError: list index out of range
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 45, in main_loop
+    current_button.on_click()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1075, in on_click
+    self.global_manager.get('save_load_manager').load_game('save1.pickle')
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 383, in load_game
+    self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 59, in create
+    new_actor = workers.worker(from_save, input_dict, global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\workers.py", line 35, in __init__
+    super().__init__(from_save, input_dict, global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 63, in __init__
+    self.set_automatically_replace(input_dict['automatically_replace'])
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 291, in set_automatically_replace
+    elif displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
+AttributeError: 'str' object has no attribute 'is_pmob'

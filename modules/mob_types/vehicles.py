@@ -100,7 +100,9 @@ class vehicle(pmob):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew: #if crew died of attrition
                             if not current_sub_mob.automatically_replace:
-                                current_sub_mob.uncrew_vehicle(self)
+                                self.eject_passengers()
+                                self.eject_crew()
+                                #current_sub_mob.uncrew_vehicle(self)
                             self.crew_attrition_death()
                         elif current_sub_mob.is_group: #if group passenger died of attrition
                             attrition_unit_type = random.choice(['officer', 'worker'])

@@ -60,6 +60,7 @@ class pmob(mob):
             self.default_name = input_dict['default_name']
             self.set_name(self.default_name)
             self.set_sentry_mode(input_dict['sentry_mode'])
+            self.set_automatically_replace(input_dict['automatically_replace'])
             if input_dict['in_turn_queue'] and input_dict['end_turn_destination'] == 'none':
                 self.add_to_turn_queue()
             else:
@@ -70,18 +71,18 @@ class pmob(mob):
             self.default_name = self.name
             self.set_max_movement_points(4)
             actor_utility.deselect_all(self.global_manager)
-            self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
             self.set_sentry_mode(False)
+            self.set_automatically_replace(True)
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
+            self.select()
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.attached_dice_list = []
-        self.automatically_replace = True
 
     def to_save_dict(self):
         '''
@@ -274,6 +275,21 @@ class pmob(mob):
             if self.is_vehicle and self.vehicle_type == 'ship':
                 possible_sounds.append('voices/ship 2')
             self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+
+    def set_automatically_replace(self, new_value):
+        '''
+        Description:
+            Sets this unit's automatically replace status
+        '''
+        if self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
+            text_tools.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
+            return()
+        self.automatically_replace = new_value
+        displayed_mob = self.global_manager.get('displayed_mob')
+        if self == displayed_mob:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
 
     def set_sentry_mode(self, new_value):
         '''
