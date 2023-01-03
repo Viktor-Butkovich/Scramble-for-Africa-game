@@ -329,6 +329,13 @@ def terrains_setup(global_manager):
         'desert': 2
         }
     )
+    global_manager.set('terrain_variant_dict', {})
+    for current_terrain in (global_manager.get('terrain_list') + ['ocean_water', 'river_water']):
+        current_index = 0
+        while os.path.exists('graphics/scenery/terrain/' + current_terrain + '_' + str(current_index) + '.png'):
+            current_index += 1
+        current_index -= 1 #back up from index that didn't work
+        global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
 def commodities_setup(global_manager):
     '''
@@ -1413,8 +1420,10 @@ def debug_tools_setup(global_manager):
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
 
     #activate effect with DEBUG_effect.apply()
-    DEBUG_skip_intro.apply()
-    DEBUG_ministry_of_magic.apply()
+    #DEBUG_skip_intro.apply()
+    DEBUG_reveal_beasts.apply()
+    #DEBUG_remove_fog_of_war.apply()
+    #DEBUG_block_native_warrior_spawning.apply()
 
 def manage_crash(exception):
     '''

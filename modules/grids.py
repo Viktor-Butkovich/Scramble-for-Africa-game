@@ -66,7 +66,8 @@ class grid():
                 if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
                     for cell in self.cell_list:
                         if cell.y == 0:
-                            cell.set_terrain('water')
+                            terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                            cell.set_terrain('water', terrain_variant)
                     num_rivers = random.randrange(2, 4)
                     valid = False
                     while not valid:
@@ -445,7 +446,8 @@ class grid():
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = random.choice(possible_terrains)
-        self.find_cell(current_x, current_y).set_terrain(terrain)
+        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
@@ -459,7 +461,8 @@ class grid():
                     current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
+                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
         '''
@@ -477,7 +480,15 @@ class grid():
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = 'water'
-        self.find_cell(current_x, current_y).set_terrain(terrain)
+        water_type = 'water'
+        if current_y == 0:
+            water_type = 'ocean_water'
+        else:
+            water_type = 'river_water'
+        #self.find_cell(current_x, current_y).set_terrain(terrain)
+        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
+        #self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
@@ -491,7 +502,14 @@ class grid():
                     current_x = current_x + 1
                 elif direction == 4:
                     current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
+                water_type = 'water'
+                if current_y == 0:
+                    water_type = 'ocean_water'
+                else:
+                    water_type = 'river_water'
+                #self.find_cell(current_x, current_y).set_terrain(terrain)
+                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
 
     def touching_mouse(self):
         '''
@@ -592,7 +610,7 @@ class mini_grid(grid):
                     current_cell.contained_buildings = attached_cell.contained_buildings
                     current_cell.village = attached_cell.village
                     current_cell.set_visibility(attached_cell.visible)
-                    current_cell.set_terrain(attached_cell.terrain)
+                    current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant)
                     current_cell.set_resource(attached_cell.resource)
                 else: #if the current cell is beyond the boundaries of the attached grid, show an empty cell
                     current_cell.set_visibility(True)

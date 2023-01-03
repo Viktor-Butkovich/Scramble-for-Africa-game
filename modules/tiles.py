@@ -291,34 +291,22 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if new_terrain == 'clear':
-            self.image_dict['default'] = 'scenery/terrain/clear.png'
-            
-        elif new_terrain == 'hills':
-            self.image_dict['default'] = 'scenery/terrain/hills.png'
-            
-        elif new_terrain == 'jungle':
-            self.image_dict['default'] = 'scenery/terrain/jungle.png'
-            
-        elif new_terrain == 'water':
-            current_y = self.y
-            if self.cell.grid.is_mini_grid:
-                current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
-                
-            if current_y == 0:
-                self.image_dict['default'] = 'scenery/terrain/ocean_water.png'
-            else:
-                self.image_dict['default'] = 'scenery/terrain/river_water.png'
-            
-        elif new_terrain == 'mountain':
-            self.image_dict['default'] = 'scenery/terrain/mountain.png'
-            
-        elif new_terrain == 'swamp':
-            self.image_dict['default'] = 'scenery/terrain/swamp.png'
-            
-        elif new_terrain == 'desert':
-            self.image_dict['default'] = 'scenery/terrain/desert.png'
-
+        if new_terrain in self.global_manager.get('terrain_list') + ['water']:
+            base_word = new_terrain
+            if new_terrain == 'water':
+                current_y = self.y
+                if self.cell.grid.is_mini_grid:
+                    current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
+                if current_y == 0:
+                    #self.image_dict['default'] = 'scenery/terrain/ocean_water.png'
+                    base_word = 'ocean_' + new_terrain
+                else:
+                    #self.image_dict['default'] = 'scenery/terrain/river_water.png'
+                    base_word = 'river_' + new_terrain
+            #print('working')
+            #print(base_word)
+            #print(self.cell.terrain)
+            self.image_dict['default'] = 'scenery/terrain/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
         elif new_terrain == 'none':
             self.image_dict['default'] = 'scenery/hidden.png'
 

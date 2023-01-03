@@ -197,7 +197,7 @@ def spawn_beast(global_manager):
     input_dict['modes'] = ['strategic']
     input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
     input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
-    input_dict['image'] = 'mobs/beasts/default.png'
+    input_dict['image'] = 'mobs/beasts/' + input_dict['animal_type'] + '.png'
     input_dict['init_type'] = 'beast'
     global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
 
