@@ -51,10 +51,16 @@ def fundamental_setup(global_manager):
     #global_manager.set('display_height', 500)
     #global_manager.set('display_height', 800)
     
+    start_time = time.time()
     global_manager.set('loading', True)
-    global_manager.set('loading_start_time', time.time())
-    global_manager.set('previous_turn_time', time.time())
+    global_manager.set('loading_start_time', start_time)
+    global_manager.set('previous_turn_time', start_time)
+    global_manager.set('start_time', start_time)
+    global_manager.set('current_time', start_time)
+    global_manager.set('last_selection_outline_switch', start_time)
+    global_manager.set('mouse_moved_time', start_time)
     global_manager.set('end_turn_wait_time', 0.8)
+    global_manager.set('event_manager', data_managers.event_manager_template(global_manager))
 
     global_manager.set('font_name', 'times new roman')
     global_manager.set('default_font_size', 15)
@@ -212,11 +218,6 @@ def misc_setup(global_manager):
     global_manager.set('r_ctrl', 'up')
     global_manager.set('l_ctrl', 'up')
     global_manager.set('ctrl', 'up')
-    global_manager.set('start_time', time.time())
-    global_manager.set('current_time', time.time())
-    global_manager.set('last_selection_outline_switch', time.time())
-    mouse_moved_time = time.time()
-    global_manager.set('mouse_moved_time', time.time())
     old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)
@@ -1420,10 +1421,6 @@ def debug_tools_setup(global_manager):
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
 
     #activate effect with DEBUG_effect.apply()
-    #DEBUG_skip_intro.apply()
-    DEBUG_reveal_beasts.apply()
-    #DEBUG_remove_fog_of_war.apply()
-    #DEBUG_block_native_warrior_spawning.apply()
 
 def manage_crash(exception):
     '''

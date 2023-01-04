@@ -1,26 +1,17 @@
 ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 640, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/scenery/terrain/ocean_water_1.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
   File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 35, in <module>
     main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 45, in main_loop
-    current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1061, in on_click
-    self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 150, in new_game
-    game_transitions.create_strategic_map(self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\game_transitions.py", line 140, in create_strategic_map
-    new_terrain = tiles.tile(False, input_dict, global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\tiles.py", line 48, in __init__
-    self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\tiles.py", line 313, in set_terrain
-    self.image.set_image('default')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\images.py", line 643, in set_image
-    self.image = pygame.image.load('graphics/' + self.image_id)
-FileNotFoundError: No file 'graphics/scenery/terrain/ocean_water_1.png' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 211, in main_loop
+    turn_management_tools.manage_combat(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 556, in manage_combat
+    start_player_turn(global_manager)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\turn_management_tools.py", line 93, in start_player_turn
+    game_transitions.cycle_player_turn(global_manager, True)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\game_transitions.py", line 33, in cycle_player_turn
+    turn_queue[0].selection_sound()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 277, in selection_sound
+    self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\data_managers.py", line 808, in play_sound
+    current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+FileNotFoundError: No file 'sounds/voices/ship_2.wav' found in working directory 'C:\Users\vikto\Documents\Old computer files\SFA'.

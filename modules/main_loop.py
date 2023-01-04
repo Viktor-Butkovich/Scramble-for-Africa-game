@@ -198,7 +198,7 @@ def main_loop(global_manager):
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
             global_manager.set('last_selection_outline_switch', time.time())
-
+        global_manager.get('event_manager').update(global_manager.get('current_time'))
         if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= time.time(): #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
             for enemy in global_manager.get('npmob_list'):

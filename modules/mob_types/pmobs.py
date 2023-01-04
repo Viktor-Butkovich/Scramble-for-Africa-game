@@ -270,10 +270,10 @@ class pmob(mob):
         '''
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                self.global_manager.get('sound_manager').play_sound('bolt action 2')
-            possible_sounds = ['voices/voice 1', 'voices/voice 2']
+                self.global_manager.get('sound_manager').play_sound('bolt_action_2')
+            possible_sounds = ['voices/voice_1', 'voices/voice_2']
             if self.is_vehicle and self.vehicle_type == 'ship':
-                possible_sounds.append('voices/ship 2')
+                possible_sounds.append('voices/ship_2')
             self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
 
     def set_automatically_replace(self, new_value):
@@ -798,7 +798,7 @@ class pmob(mob):
             num_dice = 2
             
         notification_tools.display_notification(message, 'combat', self.global_manager, num_dice)
-        self.global_manager.get('sound_manager').play_sound('bolt action 1')
+        self.global_manager.get('sound_manager').play_sound('bolt_action_1')
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):

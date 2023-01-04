@@ -245,7 +245,7 @@ SFA folder
             def read_csv
 
         data_managers.py
-            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools
+            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, events
             class global_manager_template
             class input_manager_template
 			class effect_manager_template
@@ -255,6 +255,7 @@ SFA folder
    	        		class money_tracker
 	        class notification_manager_template
 	        class sound_manager_template
+			class event_manager_template
 
         dice.py
             imports pygame, time, random, buttons, utility
@@ -280,6 +281,11 @@ SFA folder
             imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility, actor_utility
             class recruitment_button(buttons.button)
 	      class buy_commodity_button(buttons.button)
+		
+		events.py
+		    imports utility
+		    class event
+				class repeating_event
 
         game_transitions.py
             imports time, main_loop_tools, text_tools, tiles, actor_utility, minister_utility, scaling
