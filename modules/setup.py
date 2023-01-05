@@ -67,6 +67,8 @@ def fundamental_setup(global_manager):
     global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
+    global_manager.set('default_music_volume', 0.3)
+
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
     pygame.display.set_caption('SFA')
@@ -245,6 +247,7 @@ def misc_setup(global_manager):
     global_manager.set('country_ordered_list_start_y', 0)
 
     global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
+    global_manager.set('current_country', 'none') #current country needs to be defined for music to start playing correctly on set game mode
     game_transitions.set_game_mode('main_menu', global_manager)
     global_manager.set('previous_game_mode', 'main_menu') #after set game mode, both previous and current game modes should be main_menu
 
@@ -570,7 +573,8 @@ def countries_setup(global_manager):
         'aristocratic_particles': False,
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
-        'country_effect': british_country_effect
+        'country_effect': british_country_effect,
+        'music_list': []
     }
     global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
@@ -595,7 +599,8 @@ def countries_setup(global_manager):
         'aristocratic_particles': False,
         'allow_double_last_names': True,
         'background_set': french_weighted_backgrounds,
-        'country_effect': french_country_effect
+        'country_effect': french_country_effect,
+        'music_list': ['La Marseillaise 1']
     }
     global_manager.set('France', countries.country(french_input_dict, global_manager))
 
@@ -618,7 +623,8 @@ def countries_setup(global_manager):
         'aristocratic_particles': True,
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
-        'country_effect': german_country_effect
+        'country_effect': german_country_effect,
+        'music_list': []
     }
     global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
@@ -639,7 +645,8 @@ def countries_setup(global_manager):
         'adjective': 'belgian',
         'government_type_adjective': 'royal',
         'background_set': belgian_weighted_backgrounds,
-        'country_effect': belgian_country_effect
+        'country_effect': belgian_country_effect,
+        'music_list': []
     }
     global_manager.set('Belgium', countries.hybrid_country(belgian_input_dict, global_manager)) 
 
@@ -662,7 +669,8 @@ def countries_setup(global_manager):
         'aristocratic_particles': False,
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
-        'country_effect': portuguese_country_effect
+        'country_effect': portuguese_country_effect,
+        'music_list': []
     }
     global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
@@ -686,7 +694,8 @@ def countries_setup(global_manager):
         'aristocratic_particles': True,
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
-        'country_effect': italian_country_effect
+        'country_effect': italian_country_effect,
+        'music_list': []
     }
     global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     

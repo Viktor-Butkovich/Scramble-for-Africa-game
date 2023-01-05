@@ -102,7 +102,11 @@ def set_game_mode(new_game_mode, global_manager):
 
     if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()
-    
+    if previous_game_mode in ['main_menu', 'new_game_setup'] and new_game_mode in ['strategic', 'ministers', 'europe']:
+        global_manager.get('sound_manager').play_random_music('europe')
+    elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
+        global_manager.get('sound_manager').play_random_music('main menu')
+
 def create_strategic_map(global_manager):
     '''
     Description:
@@ -186,4 +190,3 @@ def to_main_menu(global_manager, override = False):
         global_manager.set('current_instructions_page', 'none')
     if not global_manager.get('current_country') == 'none':
         global_manager.get('current_country').deselect()
-    global_manager.get('event_manager').clear()
