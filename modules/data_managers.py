@@ -833,7 +833,7 @@ class sound_manager_template():
     def play_music(self, file_name, volume = 0.3):
         '''
         Description:
-            Starts repeating the music from the inputted file, replacing any current music
+            Starts playing the music from the inputted file, replacing any current music
         Input:
             string file_name: Name of .wav file to play music of
             double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
@@ -842,7 +842,7 @@ class sound_manager_template():
         '''
         pygame.mixer.music.load('sounds/music/' + file_name + '.wav')
         pygame.mixer.music.set_volume(volume)
-        pygame.mixer.music.play(-1) #music loops when loop argument is -1
+        pygame.mixer.music.play(0) #music loops when loop argument is -1
 
     def music_transition(self, file_name):
         '''
@@ -874,12 +874,13 @@ class sound_manager_template():
             self.global_manager.get('event_manager').add_event(pygame.mixer.music.unload, [], time_passed)
             self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume], time_passed)     
 
-    def play_random_music(self, current_state):
+    def play_random_music(self, current_state, previous_song = 'none'):
         '''
         Description:
             Plays random music depending on the current state of the game, like 'main menu', 'europe', or 'village', and the current player country
         Input:
             string current_state: Descriptor for the current state of the game to play music for
+            string previous_song: The previous song that just ended, if any, to avoid playing it again unless it is the only option
         Output:
             None
         '''
@@ -888,15 +889,37 @@ class sound_manager_template():
         #    'main menu': [],
         #    'village': []
         #}
+        self.previous_song = 'none'
+        self.previous_state = current_state
         current_country = self.global_manager.get('current_country')
         if current_state == 'europe' and not current_country == 'none':
             possible_songs = self.default_music_dict[current_state] + self.global_manager.get('current_country').music_list
         else:
             possible_songs = self.default_music_dict[current_state]
-        if len(possible_songs) > 0:
-            self.music_transition(random.choice(possible_songs))
+        if len(possible_songs) == 1:
+            chosen_song = random.choice(possible_songs)
+        elif len(possible_songs) > 0:
+            chosen_song = random.choice(possible_songs)
+            if not previous_song == 'none': #plays different song if multiple choices available
+                while chosen_song == previous_song:
+                    chosen_song = random.choice(possible_songs)
         else:
-            self.music_transition('none')
+            chosen_song = 'none'
+        self.music_transition(chosen_song)
+        self.previous_song = chosen_song
+        #pygame.mixer.music.set_endevent(SONG_END)
+        #print(pygame.mixer.music.get_endevent())
+
+    def song_done(self):
+        '''
+        Description:
+            Called when a song finishes, plays a new random song for the same state, with the new song being different if possible
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.play_random_music(self.previous_state, self.previous_song)
 
 class event_manager_template():
     '''

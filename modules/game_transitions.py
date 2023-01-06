@@ -50,11 +50,15 @@ def set_game_mode(new_game_mode, global_manager):
     Output:
         None
     '''
-    text_list = []
     previous_game_mode = global_manager.get('current_game_mode')
     if new_game_mode == previous_game_mode:
         return()
     else:
+        if previous_game_mode in ['main_menu', 'new_game_setup'] and new_game_mode in ['strategic', 'ministers', 'europe']:
+            global_manager.get('sound_manager').play_random_music('europe')
+        elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
+            global_manager.get('sound_manager').play_random_music('main menu')
+
         if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
             global_manager.set('previous_game_mode', global_manager.get('current_game_mode'))
         start_loading(global_manager)
@@ -102,10 +106,11 @@ def set_game_mode(new_game_mode, global_manager):
 
     if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()
-    if previous_game_mode in ['main_menu', 'new_game_setup'] and new_game_mode in ['strategic', 'ministers', 'europe']:
-        global_manager.get('sound_manager').play_random_music('europe')
-    elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
-        global_manager.get('sound_manager').play_random_music('main menu')
+
+    #if previous_game_mode in ['main_menu', 'new_game_setup'] and new_game_mode in ['strategic', 'ministers', 'europe']:
+    #    global_manager.get('sound_manager').play_random_music('europe')
+    #elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
+    #    global_manager.get('sound_manager').play_random_music('main menu')
 
 def create_strategic_map(global_manager):
     '''

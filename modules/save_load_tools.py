@@ -297,7 +297,8 @@ class save_load_manager_template():
 
         #load variables
         for current_element in self.copied_elements:
-            self.global_manager.set(current_element, new_global_manager.get(current_element))
+            if not current_element == 'current_game_mode':
+                self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))

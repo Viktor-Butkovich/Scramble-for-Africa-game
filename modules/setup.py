@@ -67,7 +67,7 @@ def fundamental_setup(global_manager):
     global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
-    global_manager.set('default_music_volume', 0.3)
+    global_manager.set('default_music_volume', 0.1)
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
@@ -264,6 +264,9 @@ def misc_setup(global_manager):
     height = 16
     global_manager.set('strategic_map_width', width)
     global_manager.set('strategic_map_height', height)
+
+    global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
+    pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
 
 def terrains_setup(global_manager):
     '''
@@ -574,7 +577,7 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-        'music_list': []
+        'music_list': ['Britannia rules the waves']
     }
     global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
@@ -600,7 +603,7 @@ def countries_setup(global_manager):
         'allow_double_last_names': True,
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
-        'music_list': ['La Marseillaise 1']
+        'music_list': ['La Marseillaise']
     }
     global_manager.set('France', countries.country(french_input_dict, global_manager))
 
@@ -624,7 +627,7 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-        'music_list': []
+        'music_list': ['Deutschland uber alles']
     }
     global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
@@ -1428,7 +1431,10 @@ def debug_tools_setup(global_manager):
 
     DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-
+    DEBUG_ministry_of_magic.apply()
+    DEBUG_reveal_beasts.apply()
+    DEBUG_remove_fog_of_war.apply()
+    DEBUG_block_native_warrior_spawning.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):
