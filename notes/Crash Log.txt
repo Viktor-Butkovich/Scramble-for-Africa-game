@@ -4,16 +4,14 @@ Traceback (most recent call last):
     main_loop.main_loop(global_manager)
   File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 165, in main_loop
     current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 72, in on_click
-    self.remove()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 912, in remove
-    self.global_manager.get('combat_result')[0].complete_combat()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 1116, in complete_combat
-    self.die()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\groups.py", line 353, in die
-    self.officer.die('none')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 653, in die
-    self.death_sound(death_type)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 670, in death_sound
-    if len(possible_sounds) > 0:
-UnboundLocalError: local variable 'possible_sounds' referenced before assignment
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\choice_notifications.py", line 200, in on_click
+    super().on_click()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1102, in on_click
+    evangelist.public_relations_campaign()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\officer_types\evangelists.py", line 270, in public_relations_campaign
+    results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign', 2)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 292, in roll_to_list
+    self.steal_money(value, roll_type)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\ministers.py", line 164, in steal_money
+    evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
+KeyError: 'public relations campaign'

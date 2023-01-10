@@ -405,7 +405,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if self.name == 'Slave traders':
                 if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
                     self.global_manager.get('sound_manager').play_random_music('slave traders')
-            elif (not self.cell.village == 'none') and self.cell.visible:
+            elif (not self.cell.village == 'none') and self.cell.visible and self.cell.village.population > 0:
                 new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
                 if not self.global_manager.get('sound_manager').previous_state == new_state: #village_peaceful/neutral/aggressive
                     self.global_manager.get('sound_manager').play_random_music(new_state)
