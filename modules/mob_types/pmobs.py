@@ -271,9 +271,14 @@ class pmob(mob):
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
                 self.global_manager.get('sound_manager').play_sound('bolt_action_2')
-            possible_sounds = ['voices/voice_1', 'voices/voice_2']
-            if self.is_vehicle and self.vehicle_type == 'ship':
-                possible_sounds.append('voices/ship_2')
+            if self.global_manager.get('current_country').name == 'France':
+                possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
+            elif self.global_manager.get('current_country').name == 'Germany':
+                possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
+            else:
+                possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
+                if self.is_vehicle and self.vehicle_type == 'ship':
+                    possible_sounds.append('voices/steady she goes')
             self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
 
     def set_automatically_replace(self, new_value):
@@ -421,6 +426,7 @@ class pmob(mob):
                     self.images[0].current_cell.tile, self.global_manager)
             self.temp_disable_movement()
             self.replace()
+            self.death_sound('violent')
             #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
             #    self.images[0].current_cell.tile, self.global_manager)
         else:
@@ -598,7 +604,7 @@ class pmob(mob):
         Output:
             None
         '''
-        self.die()
+        self.die('fired')
 
     def can_move(self, x_change, y_change, can_print = True):
         '''
@@ -798,7 +804,8 @@ class pmob(mob):
             num_dice = 2
             
         notification_tools.display_notification(message, 'combat', self.global_manager, num_dice)
-        self.global_manager.get('sound_manager').play_sound('bolt_action_1')
+        if self.is_battalion or self.is_safari:
+            self.global_manager.get('sound_manager').play_sound('bolt_action_1')
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):

@@ -192,9 +192,11 @@ class missionaries(group):
             if public_opinion_increase > 0:
                 text += '/nWorking to fulfill your company\'s proclaimed mission of enlightening the heathens of Africa has increased your public opinion by ' + str(public_opinion_increase) + '. /n'
             notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_conversion', self.global_manager)
+            success = True
         else:
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase])
+            success = False
+        self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase, success])
 
     def complete_conversion(self):
         '''

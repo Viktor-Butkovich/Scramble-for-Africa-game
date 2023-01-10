@@ -294,5 +294,5 @@ class merchant(officer):
                 self.promote()
             self.select()
         elif roll_result <= self.current_max_crit_fail:
-            self.die()
+            self.die('quit')
         self.global_manager.set('ongoing_advertising_campaign', False)

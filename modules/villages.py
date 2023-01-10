@@ -222,6 +222,23 @@ class village():
         else: #7 - 9
             return(-1)
 
+    def get_aggressiveness_adjective(self):
+        '''
+        Description:
+            Returns an adjective corresponding to this village's aggressiveness modifier
+        Input:
+            None
+        Output:
+            string: Returns an adjective corresponding to this village's aggressiveness modifier
+        '''
+        aggressiveness_modifier = self.get_aggressiveness_modifier()
+        if aggressiveness_modifier == 1:
+            return('peaceful')
+        elif aggressiveness_modifier == 0:
+            return('neutral')
+        elif aggressiveness_modifier == -1:
+            return('aggressive')
+
     def get_population_modifier(self): #modifier affects roll difficulty, not roll result
         '''
         Description:

@@ -13,6 +13,7 @@ class country:
                 'name': string value - Name for this country, like 'France'
                 'adjective': string value - Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
                 'government_type_adjective': string value - Descriptor for institutions of the country, like 'Royal' or 'National' Geographical Society
+                'religion': string value - Descriptor for the primary religion of this country, like 'protestant' or 'catholic'
                 'allow_particles': boolean value - Whether ministers of this country are allowed to have name particles, like de Rouvier
                 'aristocratic_particles': boolean value - Whether name particles for this country are reserved for aristocratic ministers
                 'allow_double_last_names': boolean value - Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
@@ -30,6 +31,7 @@ class country:
         self.name = input_dict['name']
         self.adjective = input_dict['adjective']
         self.government_type_adjective = input_dict['government_type_adjective']
+        self.religion = input_dict['religion']
         self.allow_particles = input_dict['allow_particles']
         self.aristocratic_particles = input_dict['aristocratic_particles']
         self.allow_double_last_names = input_dict['allow_double_last_names']

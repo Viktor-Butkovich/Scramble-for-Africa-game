@@ -1,5 +1,6 @@
 #Contains functionality for actor display buttons
 
+import random
 from ..buttons import button
 from .. import main_loop_tools
 from .. import utility
@@ -191,7 +192,8 @@ class embark_all_passengers_button(label_button):
                         passenger = contained_mob
                         if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                             passenger.embark_vehicle(vehicle)
-                    self.global_manager.get('sound_manager').play_sound('voices/ship_1')
+                    self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                    #self.global_manager.get('sound_manager').play_sound('voices/ship_1')
             else:
                 text_tools.print_to_screen('You are busy and can not embark all passengers.', self.global_manager)
 
@@ -1082,7 +1084,8 @@ class embark_vehicle_button(label_button):
                         if vehicle.sentry_mode:
                             vehicle.set_sentry_mode(False)
                         rider.embark_vehicle(vehicle)
-                        self.global_manager.get('sound_manager').play_sound('voices/ship_1')
+                        self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                        #self.global_manager.get('sound_manager').play_sound('voices/ship_1')
                 else:
                     text_tools.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.', self.global_manager)
             else:
@@ -1746,11 +1749,13 @@ class labor_broker_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not an officer or a vehicle without crew, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
             if (not ((self.attached_label.actor.is_officer and not self.attached_label.actor.officer_type == 'evangelist') or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
+                return(False)
+            elif self.attached_label.actor.is_vehicle and self.attached_label.actor.can_swim_ocean:
                 return(False)
         return(result)
 

@@ -67,7 +67,7 @@ def fundamental_setup(global_manager):
     global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
-    global_manager.set('default_music_volume', 0.1)
+    global_manager.set('default_music_volume', 1)
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
@@ -572,12 +572,13 @@ def countries_setup(global_manager):
         'name': 'Britain',
         'adjective': 'british',
         'government_type_adjective': 'royal',
+        'religion': 'protestant',
         'allow_particles': False,
         'aristocratic_particles': False,
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-        'music_list': ['Britannia rules the waves']
+        'music_list': ['Rule Britannia']
     }
     global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
@@ -598,6 +599,7 @@ def countries_setup(global_manager):
         'name': 'France',
         'adjective': 'french',
         'government_type_adjective': 'national',
+        'religion': 'catholic',
         'allow_particles': True,
         'aristocratic_particles': False,
         'allow_double_last_names': True,
@@ -622,12 +624,13 @@ def countries_setup(global_manager):
         'name': 'Germany',
         'adjective': 'german',
         'government_type_adjective': 'imperial',
+        'religion': 'protestant',
         'allow_particles': True,
         'aristocratic_particles': True,
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-        'music_list': ['Deutschland uber alles']
+        'music_list': ['Das lied der deutschen']
     }
     global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
@@ -647,6 +650,7 @@ def countries_setup(global_manager):
         'name': 'Belgium',
         'adjective': 'belgian',
         'government_type_adjective': 'royal',
+        'religion': 'catholic',
         'background_set': belgian_weighted_backgrounds,
         'country_effect': belgian_country_effect,
         'music_list': []
@@ -668,12 +672,13 @@ def countries_setup(global_manager):
         'name': 'Portugal',
         'adjective': 'portuguese',
         'government_type_adjective': 'royal',
+        'religion': 'catholic',
         'allow_particles': True,
         'aristocratic_particles': False,
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
         'country_effect': portuguese_country_effect,
-        'music_list': []
+        'music_list': ['Portuguese theme']
     }
     global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
@@ -693,12 +698,13 @@ def countries_setup(global_manager):
         'name': 'Italy',
         'adjective': 'italian',
         'government_type_adjective': 'royal',
+        'religion': 'catholic',
         'allow_particles': True,
         'aristocratic_particles': True,
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
         'country_effect': italian_country_effect,
-        'music_list': []
+        'music_list': ['Prince of Tuscany']
     }
     global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     
@@ -830,6 +836,17 @@ def transactions_setup(global_manager):
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     global_manager.set('slave_traders_strength', 0)
 
+def lore_setup(global_manager):
+    '''
+    Description:
+        Defines the types of lore missions, artifacts within each one, and the current lore mission
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    global_manager.set('lore_types', ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology'])
+    global_manager.set('current_lore_mission', 'none') #lore mission should be an object type with attributes for type, location, leads, etc.
 
 def value_trackers_setup(global_manager):
     '''
@@ -1083,6 +1100,8 @@ def trial_screen_setup(global_manager):
     non_bribed_judge_indicator = images.indicator_image('misc/non_bribed_judge.png', scaling.scale_coordinates((global_manager.get('default_display_width') / 2) - ((button_separation * 2 - 5) / 2), trial_display_default_y + 200, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'not prosecution_bribed_judge', global_manager)
         #image_id, coordinates, width, height, modes, indicator_type, global_manager
+
+    global_manager.set('evidence_just_found', False)
 
 def new_game_setup_screen_setup(global_manager):
     '''
@@ -1431,10 +1450,8 @@ def debug_tools_setup(global_manager):
 
     DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-    DEBUG_ministry_of_magic.apply()
-    DEBUG_reveal_beasts.apply()
-    DEBUG_remove_fog_of_war.apply()
-    DEBUG_block_native_warrior_spawning.apply()
+    #global_manager.set('default_music_volume', 1) #default is 0.1
+
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

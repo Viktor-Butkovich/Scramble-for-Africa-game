@@ -1765,6 +1765,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
                     minister_utility.update_available_minister_display(self.global_manager)
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+                self.current_minister.selection_sound()
         else:
             text_tools.print_to_screen('You are busy and can not select other ministers.', self.global_manager)
 

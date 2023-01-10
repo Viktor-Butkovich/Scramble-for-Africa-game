@@ -13,6 +13,7 @@ try:
     setup.ministers_setup(global_manager)
     setup.countries_setup(global_manager)
     setup.transactions_setup(global_manager)
+    setup.lore_setup(global_manager)
 
     setup.value_trackers_setup(global_manager)
     setup.buttons_setup(global_manager)

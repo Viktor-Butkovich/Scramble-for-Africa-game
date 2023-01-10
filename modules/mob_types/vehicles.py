@@ -144,6 +144,7 @@ class vehicle(pmob):
         self.crew.replace(self)
         notification_tools.display_zoom_notification(text, self, self.global_manager)
         self.temp_disable_movement()
+        self.crew.death_sound('violent')
 
 
     def move(self, x_change, y_change):
@@ -223,16 +224,16 @@ class vehicle(pmob):
             self.ejected_crew = 'none'
             self.ejected_passengers = []
         
-    def die(self):
+    def die(self, death_type = 'violent'):
         '''
         Description:
             Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Also removes all of this vehicle's passengers
         Input:
-            None
+            string death_type == 'violent': Type of death for this unit, determining the type of sound played
         Output:
             None
         '''
-        super().die()
+        super().die(death_type)
         for current_passenger in self.contained_mobs:
             current_passenger.die()
         self.contained_mobs = []

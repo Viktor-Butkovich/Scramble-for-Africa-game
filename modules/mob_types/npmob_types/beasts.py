@@ -43,7 +43,7 @@ class beast(npmob):
         self.hostile = True
         self.preferred_terrains = global_manager.get('animal_terrain_dict')[self.animal_type]
         if from_save:
-            self.set_hidden(input_dict['hidden'])
+            self.set_hidden(input_dict['hidden'], True)
         else:
             self.set_hidden(True, True)
             self.set_max_movement_points(4)

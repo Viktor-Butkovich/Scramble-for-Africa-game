@@ -795,10 +795,15 @@ class sound_manager_template():
         '''
         self.global_manager = global_manager
         self.default_music_dict = {
-            'europe': [],
+            'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme'],
             'main menu': ['main theme'],
-            'village': []
+            'village peaceful': ['village peaceful'],
+            'village neutral': ['village neutral'],
+            'village aggressive': ['village aggressive'],
+            'slave traders': ['slave traders theme']
         }
+        self.previous_state = 'none'
+        self.previous_song = 'none'
 
     def play_sound(self, file_name, volume = 0.3):
         '''
@@ -830,33 +835,36 @@ class sound_manager_template():
         current_sound.set_volume(volume)
         channel.queue(current_sound)
 
-    def play_music(self, file_name, volume = 0.3):
+    def play_music(self, file_name, volume = -0.1):
         '''
         Description:
             Starts playing the music from the inputted file, replacing any current music
         Input:
             string file_name: Name of .wav file to play music of
-            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
+            double volume = -0.1: Volume from 0.0 to 1.0 to play sound at - replaces negative or absent volume input with default
         Output:
             None
         '''
+        if volume < 0: #negative volume value -> use default
+            volume = self.global_manager.get('default_music_volume')
         pygame.mixer.music.load('sounds/music/' + file_name + '.wav')
         pygame.mixer.music.set_volume(volume)
         pygame.mixer.music.play(0) #music loops when loop argument is -1
 
-    def music_transition(self, file_name):
+    def music_transition(self, file_name, time_interval = 0.75):
         '''
         Description:
             Fades out the current song and plays a new song at the previous volume
         Input:
             string file_name: Name of .wav file to play music of, or 'none' if music should fade out but not restart
+            double time_interval = 0.75: Time to wait between each volume change event
         Output:
             None
         '''
         original_volume = self.global_manager.get('default_music_volume') #pygame.mixer.music.get_volume()
         pygame.mixer.music.set_volume(original_volume)
         #pygame.mixer.music.set_volume(original_volume)
-        time_interval = 0.75
+        #time_interval = 0.75
         time_passed = 0
         if pygame.mixer.music.get_busy(): #only delay starting music for fade out if there is any current music to fade out
             for i in range(1, 5):
@@ -874,6 +882,24 @@ class sound_manager_template():
             self.global_manager.get('event_manager').add_event(pygame.mixer.music.unload, [], time_passed)
             self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume], time_passed)     
 
+    def dampen_music(self, time_interval = 0.5):
+        '''
+        Description:
+            Temporarily reduces the volume of the music to allow for other sounds
+        Input:
+            double time_interval = 0.5: Time to wait between each volume change event
+        Output:
+            None
+        '''
+        self.global_manager.get('event_manager').clear()
+        original_volume = self.global_manager.get('default_music_volume')
+        pygame.mixer.music.set_volume(0)
+        time_passed = 0
+        for i in range(-5, 6):
+            time_passed += time_interval
+            if i > 0:
+                self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume * i * 0.1], time_passed)
+
     def play_random_music(self, current_state, previous_song = 'none'):
         '''
         Description:
@@ -889,11 +915,19 @@ class sound_manager_template():
         #    'main menu': [],
         #    'village': []
         #}
+        #print(current_state)
         self.previous_song = 'none'
+        if not (self.previous_state == current_state):
+            state_changed = True
+        else:
+            state_changed = False
         self.previous_state = current_state
         current_country = self.global_manager.get('current_country')
         if current_state == 'europe' and not current_country == 'none':
-            possible_songs = self.default_music_dict[current_state] + self.global_manager.get('current_country').music_list
+            if self.global_manager.get('creating_new_game') and len(self.global_manager.get('current_country').music_list) > 0:
+                possible_songs = self.global_manager.get('current_country').music_list
+            else:
+                possible_songs = self.default_music_dict[current_state] + self.global_manager.get('current_country').music_list
         else:
             possible_songs = self.default_music_dict[current_state]
         if len(possible_songs) == 1:
@@ -905,7 +939,14 @@ class sound_manager_template():
                     chosen_song = random.choice(possible_songs)
         else:
             chosen_song = 'none'
-        self.music_transition(chosen_song)
+        if current_state in ['slave traders', 'village peaceful', 'village neutral', 'village aggressive'] or self.previous_state in ['slave traders', 'village peaceful', 'village neutral', 'village aggressive']:
+            time_interval = 0.4
+        else:
+            time_interval = 0.75
+        if (not state_changed) and (not chosen_song == 'none'):
+            self.play_music(chosen_song)
+        else:
+            self.music_transition(chosen_song, time_interval)
         self.previous_song = chosen_song
         #pygame.mixer.music.set_endevent(SONG_END)
         #print(pygame.mixer.music.get_endevent())

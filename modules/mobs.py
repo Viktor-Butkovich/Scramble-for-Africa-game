@@ -2,6 +2,7 @@
 
 import pygame
 import time
+import random
 from . import images
 from . import utility
 from . import actor_utility
@@ -637,17 +638,38 @@ class mob(actor):
         self.status_icons = []
 
 
-    def die(self):
+    def die(self, death_type = 'violent'):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups/vehicles, whose die and remove have different
                 functionalities
         Input:
-            None
+            string death_type == 'violent': Type of death for this unit, determining the type of sound played
         Output:
             None
         '''
         self.remove()
+        if self.is_pmob:
+            self.death_sound(death_type)
+
+    def death_sound(self, death_type = 'violent'):
+        '''
+        Description:
+            Makes a sound when this unit dies, depending on the type of death
+        Input:
+        string death_type == 'violent': Type of death for this unit, determining the type of sound played
+        Output:
+            None
+        '''
+        possible_sounds = []
+        if death_type == 'fired':
+            possible_sounds = []
+        elif death_type == 'quit':
+            possible_sounds = ['quit 1', 'quit 2', 'quit 3']
+        elif death_type == 'violent':
+            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
+        if len(possible_sounds) > 0:
+            self.global_manager.get('sound_manager').play_sound('voices/' + random.choice(possible_sounds), 0.5)
 
     def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''
@@ -744,6 +766,11 @@ class mob(actor):
             if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river and not previous_cell.has_walking_connection(self.images[0].current_cell): #if entering river w/o canoes, spend maximum movement and become disorganized
                 #self.set_movement_points(0)
                 self.set_disorganized(True)
+            if not (self.images[0].current_cell == 'none' or self.images[0].current_cell.terrain == 'water' or self.is_vehicle):
+                possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
+                if self.global_manager.get('current_country').name == 'Germany':
+                    possible_sounds.append('voices/german forward march 1')
+                self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
 
         if self.has_canoes:
             self.update_canoes()

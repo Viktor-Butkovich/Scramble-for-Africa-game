@@ -1,13 +1,19 @@
 ERROR:root:<class 'Exception'>
 Traceback (most recent call last):
-  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 35, in <module>
+  File "c:\Users\vikto\Documents\Old computer files\SFA\Scramble_for_Africa.py", line 36, in <module>
     main_loop.main_loop(global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 45, in main_loop
-    current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1075, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 301, in load_game
-    game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\game_transitions.py", line 74, in set_game_mode
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
-AttributeError: 'str' object has no attribute 'cell_list'
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 165, in main_loop
+    current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 72, in on_click
+    self.remove()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 912, in remove
+    self.global_manager.get('combat_result')[0].complete_combat()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 1116, in complete_combat
+    self.die()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\groups.py", line 353, in die
+    self.officer.die('none')
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 653, in die
+    self.death_sound(death_type)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 670, in death_sound
+    if len(possible_sounds) > 0:
+UnboundLocalError: local variable 'possible_sounds' referenced before assignment

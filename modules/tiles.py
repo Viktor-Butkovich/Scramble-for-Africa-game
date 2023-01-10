@@ -391,6 +391,29 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             return(False)
 
+    def select(self):
+        '''
+        Description:
+            Selects this tile and switches music based on which type of tile is selected, if the type of tile selected would change the music
+        Input:
+            None
+        Output:
+            None
+        '''
+        #print(self.name)
+        if self.global_manager.get('player_turn') and (not self.global_manager.get('choosing_destination')):
+            if self.name == 'Slave traders':
+                if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('sound_manager').play_random_music('slave traders')
+            elif (not self.cell.village == 'none') and self.cell.visible:
+                new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
+                if not self.global_manager.get('sound_manager').previous_state == new_state: #village_peaceful/neutral/aggressive
+                    self.global_manager.get('sound_manager').play_random_music(new_state)
+            else:
+                if not self.global_manager.get('sound_manager').previous_state == 'europe': #if self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('sound_manager').play_random_music('europe')
+        #super().select()
+
 class abstract_tile(tile):
     '''
     tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image

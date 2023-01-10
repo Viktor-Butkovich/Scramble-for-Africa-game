@@ -68,6 +68,9 @@ class dice_rolling_notification(action_notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
+        if self.global_manager.get('ongoing_combat') or self.global_manager.get('ongoing_slave_capture') or self.global_manager.get('ongoing_slave_trade_suppression'):
+            if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
+                self.global_manager.get('sound_manager').play_sound('gunfire')
 
     def update_tooltip(self):
         '''
@@ -381,6 +384,13 @@ class religious_campaign_notification(action_notification):
             self.notification_images = []
             self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
+            if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -554,6 +564,7 @@ class advertising_campaign_notification(action_notification):
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('advertising_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music(0.75)
                 channel = global_manager.get('sound_manager').play_sound('voices/advertising/messages/' + str(global_manager.get('current_sound_file_index')), 1.0)
                 global_manager.get('sound_manager').queue_sound('voices/advertising/commodities/' + global_manager.get('current_advertised_commodity'), channel)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
@@ -613,6 +624,13 @@ class conversion_notification(action_notification):
         self.is_last = is_last
         if self.is_last: #if last, show result
             self.notification_images = []
+        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
+            if global_manager.get('conversion_result')[4]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):

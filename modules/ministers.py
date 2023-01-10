@@ -164,6 +164,7 @@ class minister():
                     evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
+                    self.global_manager.set('evidence_just_found', True) #causes sound to be made next time prosecutor image appears
                     prosecutor.display_message(evidence_message)
                     if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who chose to create evidence.') 
@@ -729,3 +730,17 @@ class minister():
         self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
         if not text == '':
             self.display_message(text)
+
+    def selection_sound(self):
+        '''
+        Description:
+            Plays a sound when this minister is selected
+        Input:
+            None
+        Output:
+            None
+        '''
+        possible_sounds = []
+        for i in range(1, 8):
+            possible_sounds.append('voices/minister ' + str(i))
+        self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))

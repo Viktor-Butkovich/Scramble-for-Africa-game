@@ -1,5 +1,6 @@
 #Contains functionality for notifications
 
+import random
 import time
 from .labels import multi_line_label
 from . import utility
@@ -110,7 +111,10 @@ class minister_notification(notification):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.attached_minister = attached_minister
         self.notification_type = 'minister'
-        
+        if self.attached_minister.current_position == 'Prosecutor' and global_manager.get('evidence_just_found'):
+            global_manager.get('sound_manager').play_sound(random.choice(['voices/evidence 1', 'voices/evidence 2']))
+            global_manager.set('evidence_just_found', False)
+
     def remove(self):
         '''
         Description:

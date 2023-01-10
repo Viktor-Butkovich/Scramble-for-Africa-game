@@ -343,6 +343,8 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
     if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
         global_manager.set('displayed_tile', new_actor)
+        if not new_actor == 'none':
+            new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
     elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
         global_manager.set('displayed_mob', new_actor)
     elif id(info_display_list) == id(global_manager.get('country_info_display_list')):

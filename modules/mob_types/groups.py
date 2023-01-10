@@ -168,6 +168,7 @@ class group(pmob):
                 text += 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
                 text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
                 self.officer.replace(self) #self.officer.die()
+                self.officer.death_sound()
             else:
                 if self.in_vehicle:
                     self.disembark(zoom_destination)
@@ -186,6 +187,7 @@ class group(pmob):
             if self.worker.automatically_replace:
                 text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
                 self.worker.replace(self)
+                self.worker.death_sound()
             else:
                 if self.in_vehicle:
                     self.disembark(zoom_destination)
@@ -337,16 +339,16 @@ class group(pmob):
         super().remove()
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
 
-    def die(self):
+    def die(self, death_type = 'violent'):
         '''
         Description:
             Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Unlike remove, this is used when the group dies because it
                 also removes its worker and officer
         Input:
-            None
+            string death_type == 'violent': Type of death for this unit, determining the type of sound played
         Output:
             None
         '''
-        super().die()
-        self.officer.die()
-        self.worker.die()
+        super().die(death_type)
+        self.officer.die('none')
+        self.worker.die('none')

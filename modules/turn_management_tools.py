@@ -78,6 +78,7 @@ def start_player_turn(global_manager, first_turn = False):
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
+        manage_lore(global_manager)
         actor_utility.reset_action_prices(global_manager)
         game_end_check(global_manager)
 
@@ -685,3 +686,17 @@ def manage_commodity_sales(global_manager):
 
     for current_commodity in global_manager.get('commodity_types'):
         global_manager.get('sold_commodities')[current_commodity] = 0
+
+def manage_lore(global_manager):
+    '''
+    Description:
+        Controls the spawning of new lore missions
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if global_manager.get('current_lore_mission') == 'none':
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
+            mission_type = random.choice(global_manager.get('lore_types'))
+            notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)

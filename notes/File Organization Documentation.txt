@@ -214,7 +214,7 @@ SFA folder
 		    	class slums
 
         buttons.py
-            imports pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
+            imports random, pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
             class button
 		    class end_turn_button
 	        	class cycle_same_tile_button
@@ -377,7 +377,7 @@ SFA folder
 	      class minister
 
         mobs.py
-            imports pygame, time, images, utility, actor_utility, actors, tiles
+            imports random, pygame, time, images, utility, actor_utility, actors, tiles
             class mob(actors.actor)
 
 	  mouse_followers.py
@@ -390,7 +390,7 @@ SFA folder
             def show_tutorial_notifications
 
         notifications.py
-            imports time, labels, text_tools, utility, scaling, actor_utility, game_transitions, notification_tools
+            imports random, time, labels, text_tools, utility, scaling, actor_utility, game_transitions, notification_tools
             class notification(labels.multi_line_label)
 		    class minister_notification
 	          class zoom_notification
@@ -407,28 +407,29 @@ SFA folder
 	      def unscale_height
 
 		setup.py
-		  imports pygame, time, os, logging, scaling, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, 
-		    mouse_followers, save_load_tools, actor_creation_tools, actor_utility, countries, effects
-		  def fundamental_setup
-		  def misc_setup
-		  def terrains_setup
-		  def commodities_setup
-		  def ministers_setup
-		  def countries_setup
-		  def transactions_setup
-		  def value_trackers_setup
-		  def buttons_setup
-		  def europe_screen_setup
-		  def ministers_screen_setup
-		  def trial_screen_setup
-		  def new_game_setup_screen_setup
-		  def mob_interface_setup
-		  def tile_interface_setup
-		  def inventory_interface_setup
-		  def minister_interface_setup
-		  def country_interface_setup
-		  def debug_tools_setup
-		  def manage_crash
+		    imports pygame, time, os, logging, scaling, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, 
+		        mouse_followers, save_load_tools, actor_creation_tools, actor_utility, countries, effects
+		    def fundamental_setup
+		    def misc_setup
+		    def terrains_setup
+		    def commodities_setup
+		    def ministers_setup
+		    def countries_setup
+		    def transactions_setup
+			def lore_setup
+		    def value_trackers_setup
+		    def buttons_setup
+		    def europe_screen_setup
+		    def ministers_screen_setup
+		    def trial_screen_setup
+		    def new_game_setup_screen_setup
+		    def mob_interface_setup
+		    def tile_interface_setup
+		    def inventory_interface_setup
+		    def minister_interface_setup
+		    def country_interface_setup
+		    def debug_tools_setup
+		    def manage_crash
 
         text_tools.py
             imports pygame
