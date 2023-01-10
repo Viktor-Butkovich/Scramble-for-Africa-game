@@ -915,7 +915,6 @@ class sound_manager_template():
         #    'main menu': [],
         #    'village': []
         #}
-        #print(current_state)
         self.previous_song = 'none'
         if not (self.previous_state == current_state):
             state_changed = True

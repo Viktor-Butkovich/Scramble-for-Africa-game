@@ -54,9 +54,11 @@ def set_game_mode(new_game_mode, global_manager):
     if new_game_mode == previous_game_mode:
         return()
     else:
-        if previous_game_mode in ['main_menu', 'new_game_setup'] and new_game_mode in ['strategic', 'ministers', 'europe']:
+        if previous_game_mode in ['main_menu', 'new_game_setup'] and not new_game_mode in ['main_menu', 'new_game_setup']: #new_game_mode in ['strategic', 'ministers', 'europe']:
+            global_manager.get('event_manager').clear()
             global_manager.get('sound_manager').play_random_music('europe')
         elif (not previous_game_mode in ['main_menu', 'new_game_setup']) and new_game_mode in ['main_menu', 'new_game_setup']: #game starts in 'none' mode so this would work on startup
+            global_manager.get('event_manager').clear()
             global_manager.get('sound_manager').play_random_music('main menu')
 
         if not (new_game_mode == 'trial' or global_manager.get('current_game_mode') == 'trial'): #the trial screen is not considered a full game mode by buttons that switch back to the previous game mode
@@ -79,6 +81,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         elif new_game_mode == 'new_game_setup':
@@ -171,7 +174,7 @@ def to_main_menu(global_manager, override = False):
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), 'none')
     minister_utility.calibrate_minister_info_display(global_manager, 'none')
-    set_game_mode('main_menu', global_manager)
+    #set_game_mode('main_menu', global_manager)
     for current_actor in global_manager.get('actor_list'):
         current_actor.remove()
     for current_grid in global_manager.get('grid_list'):
@@ -195,3 +198,4 @@ def to_main_menu(global_manager, override = False):
         global_manager.set('current_instructions_page', 'none')
     if not global_manager.get('current_country') == 'none':
         global_manager.get('current_country').deselect()
+    set_game_mode('main_menu', global_manager)

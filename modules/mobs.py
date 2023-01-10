@@ -785,14 +785,18 @@ class mob(actor):
         Output:
             boolean: Returns whether this unit is able to swim in the inputted cell
         '''
-        if current_cell.terrain == 'water':
+        #if current_cell.terrain == 'water':
+        #    return(True)
+        if not current_cell.terrain == 'water':
+            return(True)
+        if current_cell.y > 0:
             return(True)
         if not self.can_swim:
             return(False)
         if current_cell.y == 0 and self.can_swim_ocean:
             return(True)
-        if current_cell.y > 0 and self.can_swim_river:
-            return(True)
+        #if current_cell.y > 0 and self.can_swim_river:
+        #    return(True)
         return(False)
 
     def update_canoes(self):

@@ -125,6 +125,8 @@ class group(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        if current_cell == 'none':
+            return()
 
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
     
@@ -165,13 +167,13 @@ class group(pmob):
         if target == 'officer':
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
             if self.officer.automatically_replace:
-                text += 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
-                text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
+                text += self.officer.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
+                #text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
                 self.officer.replace(self) #self.officer.die()
                 self.officer.death_sound()
             else:
                 if self.in_vehicle:
-                    self.disembark(zoom_destination)
+                    self.disembark_vehicle(zoom_destination)
                 if self.in_building:
                     self.leave_building(zoom_destination)
                 officer = self.officer
@@ -179,18 +181,18 @@ class group(pmob):
                 self.disband()
                 officer.attrition_death(False)
                 if self.in_vehicle:
-                    worker.embark(zoom_destination)
+                    worker.embark_vehicle(zoom_destination)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
 
         elif target == 'worker':
             text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
             if self.worker.automatically_replace:
-                text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
+                text += self.worker.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
                 self.worker.replace(self)
                 self.worker.death_sound()
             else:
                 if self.in_vehicle:
-                    self.disembark(zoom_destination)
+                    self.disembark_vehicle(zoom_destination)
                 if self.in_building:
                     self.leave_building(zoom_destination)
                 officer = self.officer
@@ -198,7 +200,7 @@ class group(pmob):
                 self.disband()
                 worker.attrition_death(False)
                 if self.in_vehicle:
-                    officer.embark(zoom_destination)
+                    officer.embark_vehicle(zoom_destination)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         
 

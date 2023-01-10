@@ -805,6 +805,13 @@ class construction_notification(action_notification):
         if self.is_last: #if last, show result
             #current_constructor = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
+        elif len(global_manager.get('notification_manager').notification_queue) == 2:
+            if global_manager.get('construction_result')[2] and global_manager.get('construction_result')[3] == 'mission': #if building mission success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):

@@ -400,6 +400,8 @@ class pmob(mob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        if current_cell == 'none':
+            return()
         if current_cell.local_attrition():
             transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
             if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
@@ -422,8 +424,8 @@ class pmob(mob):
         self.global_manager.get('evil_tracker').change(3)
         if (self.is_officer or self.is_worker) and self.automatically_replace:
             if show_notification:
-                notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
-                    self.images[0].current_cell.tile, self.global_manager)
+                text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
+                notification_tools.display_zoom_notification(text, self.images[0].current_cell.tile, self.global_manager)
             self.temp_disable_movement()
             self.replace()
             self.death_sound('violent')
@@ -433,6 +435,22 @@ class pmob(mob):
             if show_notification:
                 notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
             self.die()
+
+    def generate_attrition_replacement_text(self):
+        '''
+        Description:
+            Generates text to use in attrition replacement notifications when this unit suffers health attrition
+        Input:
+            None
+        Output:
+            Returns text to use in attrition replacement notifications
+        '''
+        text = 'The unit will remain inactive for the next turn as replacements are found. /n /n'
+        if self.is_officer:
+            text += str(self.global_manager.get('recruitment_costs')['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
+        elif self.is_worker and self.worker_type == 'slave':
+            text += str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
+        return(text)
 
     def remove(self):
         '''
@@ -1308,10 +1326,12 @@ class pmob(mob):
             self.just_promoted = True
             text += ' /nThe ' + self.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])
+        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])
         
     def complete_construction(self):
         '''
@@ -1451,9 +1471,9 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start repair'}
         self.global_manager.set('ongoing_construction', True)
-        message = 'Are you sure you want to start repairing the ' + self.building_name + '? /n /n'
+        message = 'Are you sure you want to start repairing the ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
-        message += 'If successful, the ' + self.building_name + ' will be restored to full functionality. /n /n'
+        message += 'If successful, the ' + text_tools.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
             
         notification_tools.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -1478,7 +1498,7 @@ class pmob(mob):
         
         self.global_manager.get('money_tracker').change(self.repaired_building.get_repair_cost() * -1, 'construction')
         text = ''
-        text += 'The ' + self.name + ' attempts to repair the ' + self.building_name + '. /n /n'
+        text += 'The ' + self.name + ' attempts to repair the ' + text_tools.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
@@ -1523,7 +1543,7 @@ class pmob(mob):
             
         text += '/n'
         if roll_result >= self.current_min_success: #3+ required on D6 for repair
-            text += 'The ' + self.name + ' successfully repaired the ' + self.building_name + '. /n'
+            text += 'The ' + self.name + ' successfully repaired the ' + text_tools.remove_underscores(self.building_name) + '. /n'
         else:
             text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the repair. /n'
 
@@ -1531,10 +1551,12 @@ class pmob(mob):
             self.just_promoted = True
             text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])  
+        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
 
     def complete_repair(self):
         '''

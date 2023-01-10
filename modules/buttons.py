@@ -1552,22 +1552,23 @@ class fire_unit_button(button):
         '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                self.showing_outline = True
-                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
-                if self.attached_mob.is_worker:
-                    if self.attached_mob.worker_type in ['European', 'religious']:
-                        if self.attached_mob.worker_type == 'European':
-                            message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                        else:
-                            message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                    elif self.attached_mob.worker_type == 'African':
-                        message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
-                    elif self.attached_mob.worker_type == 'slave':
-                        message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
-                #self.attached_mob.die()
+                if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
+                    self.showing_outline = True
+                    message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
+                    if self.attached_mob.is_worker:
+                        if self.attached_mob.worker_type in ['European', 'religious']:
+                            if self.attached_mob.worker_type == 'European':
+                                message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
+                                message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                            else:
+                                message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
+                                message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                        elif self.attached_mob.worker_type == 'African':
+                            message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
+                        elif self.attached_mob.worker_type == 'slave':
+                            message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
+                    notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+                    #self.attached_mob.die()
             else:
                 text_tools.print_to_screen('You are busy and can not fire a unit', self.global_manager)
 

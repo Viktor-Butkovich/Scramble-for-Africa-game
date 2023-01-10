@@ -519,6 +519,8 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
+        if (not from_save) and not self.images[0].current_cell.village == 'none':
+            self.global_manager.get('sound_manager').play_random_music('europe')
 
 class warehouses(building):
     '''

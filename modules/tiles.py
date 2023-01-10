@@ -7,6 +7,7 @@ from . import images
 from . import utility
 from . import actor_utility
 from . import villages
+from . import main_loop_tools
 from .actors import actor
 
 class tile(actor): #to do: make terrain tiles a subclass
@@ -401,16 +402,19 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         #print(self.name)
-        if self.global_manager.get('player_turn') and (not self.global_manager.get('choosing_destination')):
+        if self.global_manager.get('player_turn') and main_loop_tools.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
             if self.name == 'Slave traders':
                 if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('event_manager').clear()
                     self.global_manager.get('sound_manager').play_random_music('slave traders')
-            elif (not self.cell.village == 'none') and self.cell.visible and self.cell.village.population > 0:
+            elif (not self.cell.village == 'none') and self.cell.visible and self.cell.village.population > 0 and not self.cell.has_intact_building('port'):
                 new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
                 if not self.global_manager.get('sound_manager').previous_state == new_state: #village_peaceful/neutral/aggressive
+                    self.global_manager.get('event_manager').clear()
                     self.global_manager.get('sound_manager').play_random_music(new_state)
             else:
                 if not self.global_manager.get('sound_manager').previous_state == 'europe': #if self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('event_manager').clear()
                     self.global_manager.get('sound_manager').play_random_music('europe')
         #super().select()
 

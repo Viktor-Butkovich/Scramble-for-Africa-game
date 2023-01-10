@@ -2625,7 +2625,7 @@ class repair_button(label_button):
         '''
         message = []
         if self.can_show():
-            message.append('Attempts to repair the ' + self.building_name + ' in this tile, restoring it to full functionality')
+            message.append('Attempts to repair the ' + text_tools.remove_underscores(self.building_name) + ' in this tile, restoring it to full functionality')
             if self.building_type in ['port', 'train_station', 'resource']:
                 message.append('If successful, also automatically repairs this tile\'s warehouses')
             message.append('Attempting to repair costs ' + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + ' money and all remaining movement points, at least 1')
@@ -2652,7 +2652,7 @@ class repair_button(label_button):
                         #current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                         self.repair()
                     else:
-                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to repair the ' + self.building_name + '.', self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to repair the ' + text_tools.remove_underscores(self.building_name) + '.', self.global_manager)
                 else:
                     text_tools.print_to_screen('You do not have enough movement points to repair a building.', self.global_manager)
                     text_tools.print_to_screen('You have ' + str(self.attached_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)

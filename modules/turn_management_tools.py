@@ -525,8 +525,9 @@ def manage_beasts(global_manager):
     for current_beast in beast_list:
         current_beast.check_despawn()
 
-    if random.randrange(1, 7) == 1:
-        actor_utility.spawn_beast(global_manager)
+    #if random.randrange(1, 7) == 1:
+    #    actor_utility.spawn_beast(global_manager)
+    actor_utility.spawn_beast(global_manager)
     
 
 def manage_enemy_movement(global_manager):

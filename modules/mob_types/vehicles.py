@@ -81,6 +81,8 @@ class vehicle(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        if current_cell == 'none':
+            return()
         if self.crew == 'none':
             sub_mobs = []
         else:
@@ -99,11 +101,12 @@ class vehicle(pmob):
                 if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew: #if crew died of attrition
+                            crew = self.crew
                             if not current_sub_mob.automatically_replace:
                                 self.eject_passengers()
                                 self.eject_crew()
                                 #current_sub_mob.uncrew_vehicle(self)
-                            self.crew_attrition_death()
+                            self.crew_attrition_death(crew)
                         elif current_sub_mob.is_group: #if group passenger died of attrition
                             attrition_unit_type = random.choice(['officer', 'worker'])
                             #if attrition_unit_type == 'officer':
@@ -117,19 +120,20 @@ class vehicle(pmob):
                             #    reembarked_unit.embark(self)
 
                         else: #if non-group passenger died of attrition
-                            text = 'The ' + current_sub_mob.name + ' aboard the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
+                            text = 'The ' + current_sub_mob.name + ' aboard the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n'
                             if current_sub_mob.automatically_replace:
-                                text += 'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
+                                text += current_sub_mob.generate_attrition_replacement_text() #'The ' + current_sub_mob.name + ' will remain inactive for the next turn as replacements are found.'
                                 current_sub_mob.replace()
                                 current_sub_mob.temp_disable_movement()
+                                current_sub_mob.death_sound('violent')
                             else:
                                 non_replaced_attrition.append(current_sub_mob)
                             notification_tools.display_zoom_notification(text, self, self.global_manager)
         for current_mob in non_replaced_attrition:
-            current_sub_mob.disembark(self)
+            current_sub_mob.disembark_vehicle(self)
             current_sub_mob.attrition_death(False)
                         
-    def crew_attrition_death(self):
+    def crew_attrition_death(self, crew):
         '''
         Description:
             Resolves the vehicle's crew dying from attrition, preventing the ship from moving in the next turn and automatically recruiting a new worker
@@ -139,12 +143,15 @@ class vehicle(pmob):
             None
         '''
         self.global_manager.get('evil_tracker').change(3)
-        text = 'The ' + self.crew.name + ' crewing the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
-        text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
-        self.crew.replace(self)
+        text = 'The ' + crew.name + ' crewing the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n '
+        if crew.automatically_replace:
+            text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found. /n /n'
+            crew.replace(self)
+            self.temp_disable_movement()
+        else:
+            crew.attrition_death(False)
         notification_tools.display_zoom_notification(text, self, self.global_manager)
-        self.temp_disable_movement()
-        self.crew.death_sound('violent')
+        crew.death_sound('violent')
 
 
     def move(self, x_change, y_change):
@@ -455,11 +462,16 @@ class ship(vehicle):
         Output:
             boolean: Returns False if this ship is in a water tile and there are any mobs in its tile that can not move on water and are not in a ship, otherwise returns True
         '''
-        if self.images[0].current_cell.terrain == 'water':
-            for current_mob in self.images[0].current_cell.contained_mobs:
-                if current_mob.controllable and not current_mob.can_swim_at(self.images[0].current_cell):
-                    text_tools.print_to_screen('A ' + self.vehicle_type + ' can not leave without taking unaccompanied units as passengers.', self.global_manager)
-                    return(False)
+        num_ships = 0
+        for current_mob in self.images[0].current_cell.contained_mobs:
+            if current_mob.is_pmob and current_mob.is_vehicle and current_mob.can_swim_ocean:
+                num_ships += 1
+        if num_ships <= 1: #can leave units behind if another steamship is present to pick them up
+            if self.images[0].current_cell.terrain == 'water':
+                for current_mob in self.images[0].current_cell.contained_mobs:
+                    if current_mob.controllable and not current_mob.can_swim_at(self.images[0].current_cell):
+                        text_tools.print_to_screen('A ' + self.vehicle_type + ' can not leave without taking unaccompanied units as passengers.', self.global_manager)
+                        return(False)
         return(True)
 
     def can_travel(self): 

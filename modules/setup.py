@@ -718,9 +718,9 @@ def transactions_setup(global_manager):
         None
     '''
     global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10})
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10, 'officer': 5})
     for current_officer in global_manager.get('officer_types'):
-        global_manager.get('recruitment_costs')[current_officer] = 5
+        global_manager.get('recruitment_costs')[current_officer] = global_manager.get('recruitment_costs')['officer']
 
     global_manager.set('num_african_workers', 0)
     global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
