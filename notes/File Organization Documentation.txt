@@ -173,7 +173,7 @@ SFA folder
         actor_creation_tools.py
             imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
 		    mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
-		    notification_tools, utility, actor_utility, market_tools, dice
+		    lore_missions, notification_tools, utility, actor_utility, market_tools, dice
             class actor_creation_manager_template
 
         actor_utility.py
@@ -331,6 +331,10 @@ SFA folder
 	      class money_label
 	      class commodity_prices_label
 	      class multi_line_label
+
+		lore_missions.py
+		    imports random, notification_tools
+			class lore_missions
 
         main_loop.py
             imports time, pygame, main_loop_tools, utility, text_tools, turn_management_tools, actor_utility

@@ -525,9 +525,8 @@ def manage_beasts(global_manager):
     for current_beast in beast_list:
         current_beast.check_despawn()
 
-    #if random.randrange(1, 7) == 1:
-    #    actor_utility.spawn_beast(global_manager)
-    actor_utility.spawn_beast(global_manager)
+    if random.randrange(1, 7) == 1:
+        actor_utility.spawn_beast(global_manager)
     
 
 def manage_enemy_movement(global_manager):
@@ -618,7 +617,7 @@ def manage_ministers(global_manager):
 
     if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
-            global_manager.get('actor_creation_manager').create_minister(global_manager)
+            global_manager.get('actor_creation_manager').create_minister(False, {}, global_manager)
         notification_tools.display_notification('Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n', 'default', global_manager)
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
@@ -698,6 +697,7 @@ def manage_lore(global_manager):
         None
     '''
     if global_manager.get('current_lore_mission') == 'none':
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
-            mission_type = random.choice(global_manager.get('lore_types'))
-            notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)
+        if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+            #mission_type = random.choice(global_manager.get('lore_types'))
+            global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
+            #notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)

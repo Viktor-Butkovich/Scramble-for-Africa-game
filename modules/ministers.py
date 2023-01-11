@@ -68,7 +68,6 @@ class minister():
                 self.global_manager.get('available_minister_list').append(self)
                 minister_utility.update_available_minister_display(self.global_manager)
         else:
-            
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
             self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
             self.status_number = global_manager.get('background_status_dict')[self.background]

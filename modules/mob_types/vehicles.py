@@ -276,7 +276,7 @@ class vehicle(pmob):
                 Along with superclass outputs, also saves the following values:
                 'image_dict': string value - dictionary of image type keys and file path values to the images used by this object in various situations, such as 'crewed': 'crewed_ship.png'
                 'crew': string or dictionary value - If no crew, equals 'none'. Otherwise, equals a dictionary of the saved information necessary to recreate the worker to serve as crew
-                'passenger_dicts': dictionary list value - list of dictionaries of saved information necessary to recreate each of this vehicle's passengers
+                'passenger_dicts': dictionary list value - List of dictionaries of saved information necessary to recreate each of this vehicle's passengers
         '''
         save_dict = super().to_save_dict()
         save_dict['image_dict'] = self.image_dict

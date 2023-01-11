@@ -846,7 +846,28 @@ def lore_setup(global_manager):
         None
     '''
     global_manager.set('lore_types', ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology'])
+    global_manager.set('lore_types_artifact_dict',
+        {
+        'zoology': ['monkey', 'serpent', 'beetle', 'hawk', 'panther', 'spider'],
+        'botany': ['orchid', 'vine', 'root', 'bark', 'stalk', 'fruit'],
+        'archaeology': ['tomb', 'stele', 'mask', 'statue', 'city', 'temple'],
+        'anthropology': ['urn', 'skull', 'totem', 'headdress', 'spear', 'idol'],
+        'paleontology': ['saurus fossil', 'tops fossil', 'don fossil', 'raptor fossil', 'nyx fossil', 'mut fossil'],
+        'theology': ['Grail', 'Ark', 'Bone', 'Crown', 'Shroud', 'Blood']
+        }
+    )
+    global_manager.set('lore_types_adjective_dict', 
+        {
+        'zoology': ['albino ', 'devil ', 'royal ', 'vampire ', 'assassin ', 'storm '],
+        'botany': ['blood ', 'midnight ', 'thorny ', 'strangler ', 'carnivorous ', 'ghost '],
+        'archaeology': ['emperor\'s ', 'golden ', 'lost ', 'antediluvian ', 'ancient ', 'forbidden '],
+        'anthropology': ['crystal ', 'golden ', 'Great Chief\'s ', 'sky ', 'moon ', 'volcano '],
+        'paleontology': ['Tyranno', 'Bronto', 'Stego', 'Tricera', 'Pterano', 'Dimetro'],
+        'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
+        }
+    )
     global_manager.set('current_lore_mission', 'none') #lore mission should be an object type with attributes for type, location, leads, etc.
+    global_manager.set('lore_mission_list', [])
 
 def value_trackers_setup(global_manager):
     '''
@@ -1450,7 +1471,9 @@ def debug_tools_setup(global_manager):
 
     DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
     #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-    #global_manager.set('default_music_volume', 1) #default is 0.1
+    
+    DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
+    #prints information about lore missions when first created and on load
 
     #activate effect with DEBUG_effect.apply()
 

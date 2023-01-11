@@ -18,6 +18,7 @@ from .mob_types import officers
 from . import mobs
 from . import buildings
 from . import ministers
+from . import lore_missions
 from . import notification_tools
 from . import utility
 from . import actor_utility
@@ -203,46 +204,43 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['name'] = name
         return(self.create(False, input_dict, global_manager))
 
-    def create_placeholder_ministers(self, global_manager):
+    def create_initial_ministers(self, global_manager):
         '''
         Description:
-            Creates a set number of unappointed ministers at the start of the game
+            Creates a varying number of unappointed ministers at the start of the game
         Input:
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         for i in range(0, global_manager.get('minister_limit') - 2 + random.randrange(-2, 3)):
-            self.create_minister(global_manager)
+            self.create_minister(False, {}, global_manager)
 
-    def create_minister(self, global_manager):
+    def create_minister(self, from_save, input_dict, global_manager):
         '''
         Description:
-            Creates a minister with a randomized face, name, skills, and corruption threshold
+            Creates either a new random minister with a randomized face, name, skills, and corruption threshold or loads a saved minister
         Input:
+            boolean from_save: True if the object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        new_minister = ministers.minister(False, {}, global_manager)
+        new_minister = ministers.minister(from_save, input_dict, global_manager)
 
-    def load_minister(self, input_dict, global_manager):
+    def create_lore_mission(self, from_save, input_dict, global_manager):
         '''
         Description:
-            Initializes a minister based on the inputted values
+            Creates either a new random lore mission or loads a saved lore mission
         Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'name': string value - The minister's name
-                'current_position': string value - Office that the minister is currently occupying, or 'none' if no office occupied
-                'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
-                'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
-                'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
-                'image_id': string value - File path to the image used by the minister
+            boolean from_save: True if the object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        new_minister = ministers.minister(True, input_dict, global_manager)
+        new_lore_mission = lore_missions.lore_mission(from_save, input_dict, global_manager)
 
     def display_die(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
         '''

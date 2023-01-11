@@ -11,7 +11,7 @@ from .tiles import status_icon
 
 class mob(actor):
     '''
-    Actor that can be selected and appear on multiple grids at once, but not necessarily controlled
+    Actor that can be selected and move within and between grids, but can not necessarily controlled
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -822,7 +822,6 @@ class mob(actor):
         else:
             self.set_image('no_canoes')
             
-
     def retreat(self):
         '''
         Description:

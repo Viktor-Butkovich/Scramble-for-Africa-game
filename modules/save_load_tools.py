@@ -180,7 +180,7 @@ class save_load_manager_template():
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
 
-        self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
+        self.global_manager.get('actor_creation_manager').create_initial_ministers(self.global_manager)
 
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
 
@@ -253,7 +253,6 @@ class save_load_manager_template():
         for current_loan in self.global_manager.get('loan_list'):
             saved_actor_dicts.append(current_loan.to_save_dict())
 
-
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
@@ -261,12 +260,16 @@ class save_load_manager_template():
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
+        saved_lore_mission_dicts = []
+        for current_lore_mission in self.global_manager.get('lore_mission_list'):
+            saved_lore_mission_dicts.append(current_lore_mission.to_save_dict())
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
+            pickle.dump(saved_lore_mission_dicts, handle)
         text_tools.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
@@ -291,6 +294,7 @@ class save_load_manager_template():
                 saved_grid_dicts = pickle.load(handle)
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
+                saved_lore_mission_dicts = pickle.load(handle)
         except:
             text_tools.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
@@ -383,7 +387,9 @@ class save_load_manager_template():
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
         for current_minister_dict in saved_minister_dicts:
-            self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').create_minister(True, current_minister_dict, self.global_manager)
+        for current_lore_mission_dict in saved_lore_mission_dicts:
+            self.global_manager.get('actor_creation_manager').create_lore_mission(True, current_lore_mission_dict, self.global_manager)
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()

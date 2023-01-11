@@ -183,6 +183,8 @@ def to_main_menu(global_manager, override = False):
         current_village.remove()
     for current_minister in global_manager.get('minister_list'):
         current_minister.remove()
+    for current_lore_mission in global_manager.get('lore_mission_list'):
+        current_lore_mission.remove()
     for current_notification in global_manager.get('notification_list'):
         current_notification.remove()
     for current_die in global_manager.get('dice_list'):
