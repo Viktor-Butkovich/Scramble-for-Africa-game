@@ -224,20 +224,30 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        current_expedition = global_manager.get('displayed_mob')
+        self.current_expedition = global_manager.get('displayed_mob')
         self.notification_images = []
-        explored_cell = current_expedition.destination_cells.pop(0)
-        public_opinion_increase = current_expedition.public_opinion_increases.pop(0)
+        explored_cell = self.current_expedition.destination_cells.pop(0)
+        public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
-        explored_terrain_image_id = explored_cell.tile.image_dict['default']
+
+        if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
+            explored_terrain_image_id = explored_cell.tile.image_dict['default']
+            new_visibility = True
+        elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
+            explored_terrain_image_id = explored_cell.tile.image.image_id
+            new_visibility = explored_cell.visible
+
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        if not explored_tile.resource_icon == 'none':
+        if new_visibility == True and not explored_tile.resource_icon == 'none':
             explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
             self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        global_manager.set('ongoing_exploration', True)
-        explored_cell.set_visibility(True)
+        if self.current_expedition.current_action_type == 'exploration':
+            global_manager.set('ongoing_exploration', True)
+            explored_cell.set_visibility(True)
+        elif self.current_expedition.current_action_type == 'rumor_search':
+            global_manager.set('ongoing_rumor_search', True)
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
@@ -251,7 +261,10 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('ongoing_exploration', False)
+        if self.current_expedition.current_action_type == 'exploration':
+            self.global_manager.set('ongoing_exploration', False)
+        elif self.current_expedition.current_action_type == 'rumor_search':
+            self.global_manager.set('ongoing_rumor_search', False)
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
@@ -661,6 +674,64 @@ class conversion_notification(action_notification):
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
+            for current_image in self.notification_images:
+                current_image.remove()
+
+class rumor_search_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a rumor search attempt when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            self.notification_images = []
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
+        #if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+            self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
+            
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        if self.is_last: #if is last notification in successful campaign, remove any attached images
             for current_image in self.notification_images:
                 current_image.remove()
 

@@ -192,6 +192,8 @@ def action_possible(global_manager):
         return(False)
     elif global_manager.get('ongoing_conversion'):
         return(False)
+    elif global_manager.get('ongoing_rumor_search'):
+        return(False)
     elif global_manager.get('ongoing_construction'):
         return(False)
     elif global_manager.get('ongoing_combat'):

@@ -451,6 +451,17 @@ class button():
                               'Has higher success chance and lower risk when a mission is present',
                               'Costs all remaining movement points, at least 1'])
 
+        elif self.button_type == 'rumor search':
+            if self.global_manager.get('current_lore_mission') == 'none':
+                intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
+            else:
+                intro = 'Attempts to search this village for rumors of the location of the ' + self.global_manager.get('current_lore_mission').name + ' for '
+            self.set_tooltip([intro + str(self.global_manager.get('action_prices')['rumor_search']) + ' money',
+                              'Can only be done in a village',
+                              'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
+                              'Has higher success chance and lower risk when a mission is present',
+                              'Costs all remaining movement points, at least 1'])
+
         elif self.button_type == 'new game':
             self.set_tooltip(['Starts a new game'])
 
@@ -1115,6 +1126,10 @@ class button():
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.convert()
 
+            elif self.button_type == 'start rumor search':
+                expedition = self.notification.choice_info_dict['expedition']
+                expedition.rumor_search()
+
             elif self.button_type == 'start construction':
                 constructor = self.notification.choice_info_dict['constructor']
                 constructor.construct()
@@ -1163,6 +1178,9 @@ class button():
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
+
+            elif self.button_type == 'stop rumor search':
+                self.global_manager.set('ongoing_rumor_search', False)
 
             elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
                 self.global_manager.set('ongoing_construction', False)

@@ -1395,7 +1395,7 @@ class trade_button(label_button):
 
 class convert_button(label_button):
     '''
-    Button that commands a missionaries to convert a native village
+    Button that commands missionaries to convert a native village
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -1465,6 +1465,85 @@ class convert_button(label_button):
                     text_tools.print_to_screen('Converting requires all remaining movement points, at least 1.', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not convert.', self.global_manager)
+
+class rumor_search_button(label_button):
+    '''
+    Button that commands an expedition to search a village for rumors of the location of a lore mission artifact
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'rumor search', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_explore):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if main_loop_tools.action_possible(self.global_manager):
+                    current_mob = self.attached_label.actor
+                    if current_mob.movement_points >= 1:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['rumor_search']:
+                            current_cell = current_mob.images[0].current_cell
+                            if current_cell.has_building('village'):
+                                if current_cell.get_building('village').population > 0:
+                                    if not self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed:
+                                        if not current_cell.get_building('village').found_rumors:
+                                            if current_mob.check_if_minister_appointed():
+                                                if current_mob.sentry_mode:
+                                                    current_mob.set_sentry_mode(False)
+                                                current_mob.start_rumor_search()
+                                        else:
+                                            text_tools.print_to_screen('This village\'s rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + ' have already been found.', self.global_manager)
+                                    else:
+                                        text_tools.print_to_screen('All possible locations of the ' + self.global_manager.get('current_lore_mission').name + ' have already been revealed.', self.global_manager)
+                                else:
+                                    text_tools.print_to_screen('This village has no population and no rumors can be found.', self.global_manager)
+                            else:
+                                text_tools.print_to_screen('Searching for rumors is only possible in a village.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['rumor_search']) + ' money needed to attempt a rumor search.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('A rumor search requires all remaining movement points, at least 1.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You are busy and can not search for rumors.', self.global_manager)
+            else:
+                text_tools.print_to_screen('There are no ongoing lore missions for which to find rumors.', self.global_manager)
 
 class capture_slaves_button(label_button):
     '''

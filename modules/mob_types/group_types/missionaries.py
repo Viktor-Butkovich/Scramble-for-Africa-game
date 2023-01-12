@@ -56,7 +56,7 @@ class missionaries(group):
         self.current_max_crit_fail = self.default_max_crit_fail
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to convert the natives? If successful, the natives will be less aggressive and easier to cooperate with. /n /n'
-        message += 'The conversion will cost ' + str(self.global_manager.get('action_prices')['conversion']) + ' money. /n /n '
+        message += 'The conversion will cost ' + str(self.global_manager.get('action_prices')['conversion']) + ' money. /n /n'
                             
         if not village.cell.has_intact_building('mission'): #penalty for no mission
             self.current_roll_modifier -= 1
@@ -176,10 +176,9 @@ class missionaries(group):
         else:
             text += 'The missionaries made little progress in converting the natives. /n /n'
         if roll_result <= self.current_max_crit_fail:
-            text += 'Angered by the missionaries\' attempts to destroy their spiritual traditions, the natives attack the missionaries. ' # The entire group of missionaries has died'
+            text += 'Angered by the missionaries\' attempts to destroy their spiritual traditions, the natives attack the missionaries. /n /n' # The entire group of missionaries has died'
             #if village.cell.has_intact_building('mission'):
             #    text += ' and the village's mission has been damaged.'
-            text += '. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True

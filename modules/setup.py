@@ -207,6 +207,7 @@ def misc_setup(global_manager):
     global_manager.set('ongoing_advertising_campaign', False)
     global_manager.set('ongoing_loan_search', False)
     global_manager.set('ongoing_conversion', False)
+    global_manager.set('ongoing_rumor_search', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
@@ -786,6 +787,7 @@ def transactions_setup(global_manager):
         'suppress_slave_trade': 5,
         'trial': 5,
         'hunting': 5,
+        'rumor_search': 5,
         'track_beasts': 0
         }
     )
@@ -811,6 +813,7 @@ def transactions_setup(global_manager):
         'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
         'hunting': 'hunting supplies',
+        'rumor_search': 'artifact rumor searches',
         'construction': 'construction',
         'production': 'production',
         'bribery': 'bribery',
@@ -848,20 +851,20 @@ def lore_setup(global_manager):
     global_manager.set('lore_types', ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology'])
     global_manager.set('lore_types_artifact_dict',
         {
-        'zoology': ['monkey', 'serpent', 'beetle', 'hawk', 'panther', 'spider'],
-        'botany': ['orchid', 'vine', 'root', 'bark', 'stalk', 'fruit'],
-        'archaeology': ['tomb', 'stele', 'mask', 'statue', 'city', 'temple'],
-        'anthropology': ['urn', 'skull', 'totem', 'headdress', 'spear', 'idol'],
-        'paleontology': ['saurus fossil', 'tops fossil', 'don fossil', 'raptor fossil', 'nyx fossil', 'mut fossil'],
+        'zoology': ['Monkey', 'Serpent', 'Beetle', 'Hawk', 'Panther', 'Spider'],
+        'botany': ['Orchid', 'Vine', 'Root', 'Bark', 'Stalk', 'Fruit'],
+        'archaeology': ['Tomb', 'Stele', 'Mask', 'Statue', 'City', 'Temple'],
+        'anthropology': ['Urn', 'Skull', 'Totem', 'Headdress', 'Spear', 'Idol'],
+        'paleontology': ['saurus Fossil', 'tops Fossil', 'don Fossil', 'raptor Fossil', 'nyx Fossil', 'mut Fossil'],
         'theology': ['Grail', 'Ark', 'Bone', 'Crown', 'Shroud', 'Blood']
         }
     )
     global_manager.set('lore_types_adjective_dict', 
         {
-        'zoology': ['albino ', 'devil ', 'royal ', 'vampire ', 'assassin ', 'storm '],
-        'botany': ['blood ', 'midnight ', 'thorny ', 'strangler ', 'carnivorous ', 'ghost '],
-        'archaeology': ['emperor\'s ', 'golden ', 'lost ', 'antediluvian ', 'ancient ', 'forbidden '],
-        'anthropology': ['crystal ', 'golden ', 'Great Chief\'s ', 'sky ', 'moon ', 'volcano '],
+        'zoology': ['Albino ', 'Devil ', 'Royal ', 'Vampire ', 'Assassin ', 'Storm '],
+        'botany': ['Blood ', 'Midnight ', 'Thorny ', 'Strangler ', 'Carnivorous ', 'Ghost '],
+        'archaeology': ['Emperor\'s ', 'Golden ', 'Lost ', 'Antediluvian ', 'Ancient ', 'Forbidden '],
+        'anthropology': ['Crystal ', 'Golden ', 'Great Chief\'s ', 'Sky ', 'Moon ', 'Volcano '],
         'paleontology': ['Tyranno', 'Bronto', 'Stego', 'Tricera', 'Pterano', 'Dimetro'],
         'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
         }
@@ -1474,7 +1477,11 @@ def debug_tools_setup(global_manager):
     
     DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
     #prints information about lore missions when first created and on load
-
+    #DEBUG_show_lore_mission_locations.apply()
+    #DEBUG_skip_intro.apply()
+    #DEBUG_ministry_of_magic.apply()
+    #DEBUG_block_native_warrior_spawning.apply()
+    #DEBUG_remove_fog_of_war.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

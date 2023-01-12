@@ -4,14 +4,6 @@ Traceback (most recent call last):
     main_loop.main_loop(global_manager)
   File "c:\Users\vikto\Documents\Old computer files\SFA\modules\main_loop.py", line 45, in main_loop
     current_button.on_click()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\buttons.py", line 1075, in on_click
-    self.global_manager.get('save_load_manager').load_game('save1.pickle')
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\save_load_tools.py", line 392, in load_game
-    self.global_manager.get('actor_creation_manager').create_lore_mission(True, current_lore_mission_dict, self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_creation_tools.py", line 243, in create_lore_mission
-    new_lore_mission = lore_missions.lore_mission(from_save, input_dict, global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\lore_missions.py", line 36, in __init__
-    new_possible_artifact_location = possible_artifact_location(True, current_save_dict, self.global_manager)
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\lore_missions.py", line 130, in __init__
-    self.lore_mission.possible_artifact_locations.append(self)
-AttributeError: 'lore_mission' object has no attribute 'possible_artifact_locations'
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\actor_display_tools\buttons.py", line 1531, in on_click
+    text_tools.print_to_screen('This village\'s rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + ' have already been found.')
+TypeError: print_to_screen() missing 1 required positional argument: 'global_manager'

@@ -266,6 +266,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                         input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
                         input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
                         input_dict['attached_warriors'] = self.cell.save_dict['village_attached_warriors']
+                        input_dict['found_rumors'] = self.cell.save_dict['village_found_rumors']
                         self.cell.village = villages.village(True, input_dict, self.global_manager)
                         self.cell.village.tiles.append(self)
                     else:
@@ -325,6 +326,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
+            coordinates = self.get_main_grid_coordinates()
+            tooltip_message.append('Coordinates: (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + ')')
             if self.cell.visible:
                 if self.cell.terrain == 'water':
                     current_y = self.y

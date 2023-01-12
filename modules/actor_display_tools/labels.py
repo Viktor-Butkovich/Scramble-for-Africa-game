@@ -81,6 +81,7 @@ class actor_display_label(label):
             self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_u, self.modes, 'mobs/steamboat/button.png', self, global_manager))
             self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
             self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
+            self.attached_buttons.append(buttons.rumor_search_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/rumor_search_button.png', self, global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))
             self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, 'religious campaign', global_manager))
             self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'ministers/icons/trade.png', self, global_manager))
@@ -600,7 +601,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and (self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)
         elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
             return(False)

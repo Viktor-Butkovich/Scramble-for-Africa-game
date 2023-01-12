@@ -187,8 +187,7 @@ class caravan(group):
         else:
             text += '/nThe villagers are not willing to trade with this caravan. /n'
             if roll_result <= self.current_max_crit_fail:
-                text += ' /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n'
-                text += '. /n'
+                text += ' /nBelieving that the merchant seeks to trick them out of their valuables, the villagers attack the caravan. /n /n'
                 notification_tools.display_notification(text + ' /nClick to close this notification. ', 'stop_trade_attacked', self.global_manager)
             else:
                 notification_tools.display_notification(text + ' /nClick to close this notification. ', 'stop_trade', self.global_manager)
