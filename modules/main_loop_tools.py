@@ -63,6 +63,13 @@ def update_display(global_manager):
                     else:
                         mob_image_list.append(current_image)
 
+        for current_lore_mission in global_manager.get('lore_mission_list'):
+            for current_possible_artifact_location in current_lore_mission.possible_artifact_locations:
+                for current_status_icon in current_possible_artifact_location.status_icons:
+                    current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other non-mob images
+                    current_status_icon.image.draw()
+                    current_status_icon.image.has_drawn = True
+
         for current_image in mob_image_list:
             current_image.draw()
             current_image.has_drawn = True
@@ -193,6 +200,8 @@ def action_possible(global_manager):
     elif global_manager.get('ongoing_conversion'):
         return(False)
     elif global_manager.get('ongoing_rumor_search'):
+        return(False)
+    elif global_manager.get('ongoing_artifact_search'):
         return(False)
     elif global_manager.get('ongoing_construction'):
         return(False)

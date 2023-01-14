@@ -730,6 +730,14 @@ class notification_manager_template():
             new_notification = action_notifications.rumor_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
 
+        elif notification_type == 'artifact_search':
+            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
+            
+        elif notification_type == 'final_artifact_search':
+            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
+
         elif notification_type == 'slave_capture':
             new_notification = action_notifications.capture_slaves_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)

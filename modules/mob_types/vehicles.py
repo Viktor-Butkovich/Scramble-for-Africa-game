@@ -98,7 +98,7 @@ class vehicle(pmob):
             elif current_sub_mob.is_group:
                 worker_type = current_sub_mob.worker.worker_type
             if current_cell.local_attrition() and random.randrange(1, 7) >= 4: #vehicle removes 1/2 of attrition, slightly less than forts, ports, etc.
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1: #only 1/6 chance of continuing attrition for African workers, others automatically continue
                         if current_sub_mob == self.crew: #if crew died of attrition
                             crew = self.crew

@@ -167,6 +167,7 @@ SFA folder
             class advertising_campaign_notification(action_notification)
     	    class conversion_notification(action_notification)
 			class rumor_search_notification(action_notification)
+			class artifact_search_notification(action_notification)
             class capture_slaves_notification(action_notification)
 			class suppress_slave_trade_notification(action_notification)
 	        class construction_notification(action_notification)
@@ -334,7 +335,7 @@ SFA folder
 	      class multi_line_label
 
 		lore_missions.py
-		    imports random, notification_tools
+		    imports random, notification_tools, tiles
 			class lore_missions
 
         main_loop.py

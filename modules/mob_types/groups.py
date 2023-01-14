@@ -131,10 +131,10 @@ class group(pmob):
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
     
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 self.attrition_death('officer')
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = self.worker.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')

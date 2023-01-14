@@ -151,6 +151,13 @@ class value_label(label):
         if self.value_name == 'public_opinion':
             tooltip_text.append('Public opinion represents your company\'s reputation and expectations for its success and is used to calculate government subsidies')
             tooltip_text.append('Public opinion tends to approach the netural value of 50 over time')
+        if self.value_name == 'turn':
+            tooltip_text.append('Current lore mission: ')
+            if self.global_manager.get('current_lore_mission') == 'none':
+                text = '    None'
+            else:
+                text = '    Find the ' + self.global_manager.get('current_lore_mission').name + ' (' + self.global_manager.get('current_lore_mission').lore_type + ')'
+            tooltip_text.append(text)
         self.set_tooltip(tooltip_text)
 
 class money_label(value_label):

@@ -62,6 +62,7 @@ class save_load_manager_template():
         self.copied_elements.append('current_country_name')
         self.copied_elements.append('slave_traders_strength')
         self.copied_elements.append('slave_traders_natural_max_strength')
+        self.copied_elements.append('completed_lore_mission_types')
         
     def new_game(self, country):
         '''
@@ -397,6 +398,9 @@ class save_load_manager_template():
         self.global_manager.get('minimap_grid').calibrate(2, 2)
         if not new_global_manager.get('current_game_mode') == 'strategic':
             game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
+
+        for current_completed_lore_type in self.global_manager.get('completed_lore_mission_types'):
+            self.global_manager.get('lore_types_effects_dict')[current_completed_lore_type].apply()
 
         notification_tools.show_tutorial_notifications(self.global_manager)
 

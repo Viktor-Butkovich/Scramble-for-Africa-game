@@ -697,7 +697,8 @@ def manage_lore(global_manager):
         None
     '''
     if global_manager.get('current_lore_mission') == 'none':
-        if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
+        #if 1 == 1:
             #mission_type = random.choice(global_manager.get('lore_types'))
             global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
             #notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)

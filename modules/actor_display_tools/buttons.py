@@ -1545,6 +1545,75 @@ class rumor_search_button(label_button):
             else:
                 text_tools.print_to_screen('There are no ongoing lore missions for which to find rumors.', self.global_manager)
 
+class artifact_search_button(label_button):
+    '''
+    Button that commands an expedition to search a rumored location for a lore mission artifact
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'artifact search', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_explore):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if main_loop_tools.action_possible(self.global_manager):
+                    current_mob = self.attached_label.actor
+                    if current_mob.movement_points >= 1:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['artifact_search']:
+                            if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
+                                if current_mob.check_if_minister_appointed():
+                                    if current_mob.sentry_mode:
+                                        current_mob.set_sentry_mode(False)
+                                    current_mob.start_artifact_search()
+                            else:
+                                text_tools.print_to_screen('You have not found any rumors indicating that the ' + self.global_manager.get('current_lore_mission').name + ' may be at this location.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('An artifact search requires all remaining movement points, at least 1.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You are busy and can not search for artifact.', self.global_manager)
+            else:
+                text_tools.print_to_screen('There are no ongoing lore missions for which to find artifacts.', self.global_manager)
+
 class capture_slaves_button(label_button):
     '''
     Button that commands a battalion to capture slaves from a village

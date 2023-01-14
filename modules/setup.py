@@ -208,6 +208,7 @@ def misc_setup(global_manager):
     global_manager.set('ongoing_loan_search', False)
     global_manager.set('ongoing_conversion', False)
     global_manager.set('ongoing_rumor_search', False)
+    global_manager.set('ongoing_artifact_search', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
@@ -788,6 +789,7 @@ def transactions_setup(global_manager):
         'trial': 5,
         'hunting': 5,
         'rumor_search': 5,
+        'artifact_search': 5,
         'track_beasts': 0
         }
     )
@@ -814,6 +816,7 @@ def transactions_setup(global_manager):
         'trial': 'trial fees',
         'hunting': 'hunting supplies',
         'rumor_search': 'artifact rumor searches',
+        'artifact_search': 'artifact searches',
         'construction': 'construction',
         'production': 'production',
         'bribery': 'bribery',
@@ -869,8 +872,29 @@ def lore_setup(global_manager):
         'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
         }
     )
+    global_manager.set('lore_types_effects_dict',
+        {
+        'zoology': effects.effect('zoology_completion_effect', 'hunting_plus_modifier', global_manager),
+        'botany': effects.effect('botany_completion_effect', 'health_attrition_plus_modifier', global_manager),
+        'archaeology': effects.effect('archaeology_completion_effect', 'attack_plus_modifier', global_manager),
+        'anthropology': effects.effect('anthropology_completion_effect', 'conversion_plus_modifier', global_manager),
+        'paleontology': effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier', global_manager),
+        'theology': effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier', global_manager)
+        }
+    )
+    global_manager.set('lore_types_effect_descriptions_dict',
+        {
+        'zoology': 'chance of a positive modifier for hunting rolls',
+        'botany': 'lower chance of unit attrition death',
+        'archaeology': 'chance of a positive modifier for attacking rolls against native warriors',
+        'anthropology': 'chance of a positive modifier for native conversion rolls',
+        'paleontology': 'chance of a positive modifier for public relations campaign rolls',
+        'theology': 'chance of a positive modifier for religious campaign rolls'
+        }
+    )
     global_manager.set('current_lore_mission', 'none') #lore mission should be an object type with attributes for type, location, leads, etc.
     global_manager.set('lore_mission_list', [])
+    global_manager.set('completed_lore_mission_types', [])
 
 def value_trackers_setup(global_manager):
     '''
@@ -1249,7 +1273,7 @@ def tile_interface_setup(global_manager):
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort']
+    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort', 'possible_artifact_location']
     #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
     for current_actor_image_type in tile_info_display_images:
         if not current_actor_image_type in ['up', 'down', 'right', 'left']:
@@ -1457,6 +1481,9 @@ def debug_tools_setup(global_manager):
     DEBUG_band_of_thieves = effects.effect('DEBUG_band_of_thieves', 'band_of_thieves', global_manager)
     #causes all ministers to be corrupt whenever possible
 
+    DEBUG_nine_mortal_men = effects.effect('DEBUG_nine_mortal_men', 'nine_mortal_men', global_manager)
+    #causes ministers to roll 1 on all rolls
+
     DEBUG_ministry_of_magic = effects.effect('DEBUG_ministry_of_magic', 'ministry_of_magic', global_manager)
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
@@ -1480,8 +1507,10 @@ def debug_tools_setup(global_manager):
     #DEBUG_show_lore_mission_locations.apply()
     #DEBUG_skip_intro.apply()
     #DEBUG_ministry_of_magic.apply()
+    #DEBUG_band_of_thieves.apply()
     #DEBUG_block_native_warrior_spawning.apply()
     #DEBUG_remove_fog_of_war.apply()
+    #DEBUG_nine_mortal_men.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

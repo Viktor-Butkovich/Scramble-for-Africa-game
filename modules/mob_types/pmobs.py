@@ -404,7 +404,7 @@ class pmob(mob):
             return()
         if current_cell.local_attrition():
             transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type

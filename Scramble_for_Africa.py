@@ -23,7 +23,7 @@ try:
     setup.trial_screen_setup(global_manager)
     setup.new_game_setup_screen_setup(global_manager)
 
-    setup.mob_interface_setup(global_manager)
+    setup.mob_interface_setup(global_manager) 
     actor_display_current_y = setup.tile_interface_setup(global_manager)
     setup.inventory_interface_setup(actor_display_current_y, global_manager)
     setup.minister_interface_setup(global_manager)

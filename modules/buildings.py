@@ -726,10 +726,10 @@ class resource_building(building):
         officer_attrition_list = []
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     officer_attrition_list.append(current_work_crew) #current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')

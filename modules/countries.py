@@ -86,6 +86,14 @@ class country:
         self.global_manager.set('current_country_name', 'none')
 
     def get_effect_descriptor(self):
+        '''
+        Description:
+            Returns a descriptor string for the effect of this country's effect
+        Input:
+            None 
+        Output:
+            string: Returns a descriptor string for the effect of this country's effect
+        '''
         if self.country_effect.effect_type == 'advertising_campaign_plus_modifier':
             return('Bonus when advertising')
         elif self.country_effect.effect_type == 'conversion_plus_modifier':

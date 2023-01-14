@@ -330,10 +330,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             tooltip_message.append('Coordinates: (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + ')')
             if self.cell.visible:
                 if self.cell.terrain == 'water':
-                    current_y = self.y
-                    if self.cell.grid.is_mini_grid:
-                        current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
-                    if current_y == 0:
+                    if coordinates[1] == 0: #current_y == 0:
                         tooltip_message.append('This is an ocean water tile')
                     else:
                         tooltip_message.append('This is a river water tile')
@@ -345,6 +342,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
             else:
                 tooltip_message .append('This tile has not been explored')
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
+                    tooltip_message.append('There are rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be found here')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])

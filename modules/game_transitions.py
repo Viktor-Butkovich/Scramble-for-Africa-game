@@ -200,4 +200,6 @@ def to_main_menu(global_manager, override = False):
         global_manager.set('current_instructions_page', 'none')
     if not global_manager.get('current_country') == 'none':
         global_manager.get('current_country').deselect()
+    for current_completed_lore_type in global_manager.get('completed_lore_mission_types'):
+        global_manager.get('lore_types_effects_dict')[current_completed_lore_type].remove()
     set_game_mode('main_menu', global_manager)

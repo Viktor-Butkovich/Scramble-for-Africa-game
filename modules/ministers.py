@@ -532,6 +532,8 @@ class minister():
         modifier = 0
         if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
             return(5)
+        elif self.global_manager.get('effect_manager').effect_active('nine_mortal_men'):
+            return(-10)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             modifier += self.get_skill_modifier()
             if self.global_manager.get('effect_manager').effect_active('show_modifiers'):

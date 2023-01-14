@@ -34,9 +34,25 @@ class effect():
         return(text)
 
     def apply(self):
+        '''
+        Description:
+            Causes this effect to become active
+        Input:
+            None
+        Output:
+            None
+        '''
         if not self in self.effect_manager.active_effects:
             self.effect_manager.active_effects.append(self)
 
     def remove(self):
+        '''
+        Description:
+            Causes this effect to become unactive
+        Input:
+            None
+        Output:
+            None
+        '''
         if self in self.effect_manager.active_effects:
             self.effect_manager.active_effects = utility.remove_from_list(self.effect_manager.active_effects, self)

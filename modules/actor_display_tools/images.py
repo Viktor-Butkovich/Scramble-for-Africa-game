@@ -89,6 +89,11 @@ class actor_display_free_image(free_image):
                     self.set_image('misc/empty.png')
             elif self.actor_image_type in ['minister_default', 'country_default']:
                 self.set_image(new_actor.image_id)
+            elif self.actor_image_type == 'possible_artifact_location':
+                if (not self.global_manager.get('current_lore_mission') == 'none') and self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(new_actor.x, new_actor.y):
+                    self.set_image('misc/possible_artifact_location_icon.png') #only show icon if revealed location in displayed tile
+                else:
+                    self.set_image('misc/empty.png')
             else:
                 self.set_image(new_actor.image_dict['default'])
         else:

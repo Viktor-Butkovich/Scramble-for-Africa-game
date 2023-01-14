@@ -1140,7 +1140,8 @@ class tile_image(actor_image):
 
 class veteran_icon_image(tile_image):
     '''
-    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image
+    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image - also being used 
+        for lore mission locations
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
@@ -1167,7 +1168,15 @@ class veteran_icon_image(tile_image):
         Output:
             None
         '''
-        if self.actor.actor.images[0].can_show() and self.can_show():
+        showing = False
+        if self.actor.actor in self.global_manager.get('actor_list'): #different check depending on actor type
+            if self.actor.actor.images[0].can_show() and self.can_show():
+                showing = True
+        elif (not self.global_manager.get('current_lore_mission') == 'none') and self.actor.actor in self.global_manager.get('current_lore_mission').possible_artifact_locations:
+            if self.actor.actor.can_show() and self.can_show():
+                showing = True
+                
+        if showing:
             if self.grid.is_mini_grid:
                 self.actor.x, self.actor.y = self.grid.get_mini_grid_coordinates(self.actor.actor.x, self.actor.actor.y)
             else:

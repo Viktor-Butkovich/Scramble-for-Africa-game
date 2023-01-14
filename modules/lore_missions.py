@@ -3,6 +3,7 @@
 import random
 from . import utility
 from . import notification_tools
+from .tiles import status_icon
 
 class lore_mission():
     '''
@@ -52,11 +53,12 @@ class lore_mission():
                 input_dict = {
                     'lore_mission': self,
                     'coordinates': self.generate_possible_artifact_coordinates(),
-                    'revealed': False
+                    'revealed': False,
+                    'proven_false': False
                 }
                 new_possible_artifact_location = possible_artifact_location(False, input_dict, self.global_manager)
             for current_village in self.global_manager.get('village_list'):
-                current_village.revealed = False
+                current_village.found_rumors = False
             self.confirmed_all_locations_revealed = False
             self.artifact_location = random.choice(self.possible_artifact_locations)
             text = 'A new ' + self.lore_type + ' mission has been issued by the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society'
@@ -84,7 +86,7 @@ class lore_mission():
                 'artifact_coordinates': int tuple value - Two values representing this mission's artifact's x and y coordinates on the strategic grid
         '''    
         save_dict = {}
-        save_dict['lore_type'] = self.name
+        save_dict['lore_type'] = self.lore_type
         save_dict['artifact_type'] = self.artifact_type
         save_dict['adjective'] = self.adjective
         save_dict['possible_artifact_location_dicts'] = []
@@ -122,6 +124,9 @@ class lore_mission():
         '''
         self.global_manager.set('current_lore_mission', 'none')
         self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
+        for current_possible_artifact_location in self.possible_artifact_locations:
+            current_possible_artifact_location.remove()
+        self.possible_artifact_locations = []
 
     def get_num_revealed_possible_artifact_locations(self):
         '''
@@ -154,6 +159,36 @@ class lore_mission():
             current_possible_artifact_location = random.choice(self.possible_artifact_locations)
         return(current_possible_artifact_location)
 
+    def has_revealed_possible_artifact_location(self, x, y):
+        '''
+        Description:
+            Finds and returns whether the inputted coordinates match one of this lore mission's revealed possible artifact locations
+        Input:
+            int x: x coordinate for the grid location of the requested location
+            int y: y coordinate for the grid location of the requested location
+        Output:
+            boolean: Returns whether the inputted coordinates match one of this lore mission's revealed possible artifact locations
+        '''
+        for current_possible_artifact_location in self.possible_artifact_locations:
+            if current_possible_artifact_location.revealed and (not current_possible_artifact_location.proven_false) and current_possible_artifact_location.x == x and current_possible_artifact_location.y == y:
+                return(True)
+        return(False)
+
+    def get_possible_artifact_location(self, x, y):
+        '''
+        Description:
+            Finds and returns one of this lore mission's possible artifact locations at the inputted coordinates, or 'none' if none are present
+        Input:
+            int x: x coordinate for the grid location of the requested location
+            int y: y coordinate for the grid location of the requested location
+        Output:
+            possible_artifact_location/string: Returns this lore mission's possible artifact location at the inputted coordinates, or 'none' if none are present
+        '''
+        for current_possible_artifact_location in self.possible_artifact_locations:
+            if current_possible_artifact_location.x == x and current_possible_artifact_location.y == y:
+                return(current_possible_artifact_location)
+        return('none')
+
 class possible_artifact_location():
     '''
     Possible location for a lore mission's artifact that can be located from village rumors and investigated
@@ -168,6 +203,7 @@ class possible_artifact_location():
                 'lore_mission': lore_mission value - The lore mission this artifact is attached to
                 'coordinates': int tuple value - Two values representing this location's x and y coordinates on the strategic grid
                 'revealed': boolean value - Whether rumors of this location have been revealed yet
+                'proven_false': boolean value - Whether it has been confirmed that this is not the location of the artifact
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -177,6 +213,28 @@ class possible_artifact_location():
         self.lore_mission.possible_artifact_locations.append(self)
         self.x, self.y = input_dict['coordinates']
         self.revealed = input_dict['revealed']
+        self.proven_false = input_dict['proven_false']
+        self.grids = [self.global_manager.get('strategic_map_grid'), self.global_manager.get('minimap_grid')]
+        self.modes = ['strategic']
+        self.status_icons = []
+        for current_grid in self.grids:
+            if current_grid == self.global_manager.get('minimap_grid'):
+                status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
+            elif current_grid == self.global_manager.get('europe_grid'):
+                status_icon_x, status_icon_y = (0, 0)
+            else:
+                status_icon_x, status_icon_y = (self.x, self.y)
+            input_dict = {}
+            input_dict['coordinates'] = (status_icon_x, status_icon_y)
+            input_dict['grid'] = current_grid
+            input_dict['image'] = 'misc/possible_artifact_location_icon.png'
+            input_dict['name'] = 'possible artifact location'
+            input_dict['modes'] = self.modes
+            input_dict['show_terrain'] = False
+            input_dict['actor'] = self
+            input_dict['status_icon_type'] = 'possible_artifact_location'
+            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+            #self.global_manager.get('overlay_tile_list').append(self.status_icons[-1]) #causes status icon to be drawn in front of terrain/resources but behind mobs
 
     def to_save_dict(self):
         '''
@@ -188,8 +246,38 @@ class possible_artifact_location():
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
                 'coordinates': int tuple value - Two values representing this location's x and y coordinates on the strategic grid
                 'revealed': boolean value - Whether rumors of this location have been revealed yet
+                'proven_false': boolean value - Whether it has been confirmed that this is not the location of the artifact
         '''    
         save_dict = {}
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['revealed'] = self.revealed
+        save_dict['proven_false'] = self.proven_false
         return(save_dict)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this location's image can be shown. It should be visible whenever is is revealed and the the game is in strategic mode
+        Input:
+            None
+        Output:
+            boolean: Returns whether this location's image can be shown
+        '''
+        if self.global_manager.get('current_game_mode') in self.modes:
+            if self.revealed and not self.proven_false:
+                return(True)
+        return(False)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob
+        Input:
+            None
+        Output:
+            None
+        '''
+        for current_status_icon in self.status_icons:
+            current_status_icon.remove()
+            #self.global_manager.set('overlay_tile_list', utility.remove_from_list(self.global_manager.get('overlay_tile_list'), current_status_icon))
+        self.status_icons = []
