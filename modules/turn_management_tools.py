@@ -71,12 +71,14 @@ def start_player_turn(global_manager, first_turn = False):
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
         manage_loans(global_manager)
+        manage_slave_traders(global_manager)
         manage_worker_price_changes(global_manager)
         manage_worker_migration(global_manager)
         manage_commodity_sales(global_manager)
         manage_ministers(global_manager)
         manage_subsidies(global_manager) #subsidies given after public opinion changes
         manage_financial_report(global_manager)
+        manage_lore(global_manager)
         actor_utility.reset_action_prices(global_manager)
         game_end_check(global_manager)
 
@@ -90,7 +92,7 @@ def start_player_turn(global_manager, first_turn = False):
     if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
         actor_utility.deselect_all(global_manager)
         game_transitions.cycle_player_turn(global_manager, True)
-    elif not global_manager.get('displayed_mob').selected:
+    if (not global_manager.get('displayed_mob') == 'none') and (not global_manager.get('displayed_mob').selected):
         global_manager.get('displayed_mob').select()
 
 def reset_mobs(mob_type, global_manager):
@@ -239,6 +241,19 @@ def manage_loans(global_manager):
     '''
     for current_loan in global_manager.get('loan_list'):
         current_loan.make_payment()
+
+def manage_slave_traders(global_manager):
+    '''
+    Description:
+        Regenerates the strength of slave traders up to the natural maximum over time
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if global_manager.get('slave_traders_strength') < global_manager.get('slave_traders_natural_max_strength') and global_manager.get('slave_traders_strength') > 0: 
+        #if below natural max but not eradicated
+        global_manager.set('slave_traders_strength', global_manager.get('slave_traders_strength') + 1)
 
 def manage_public_opinion(global_manager):
     '''
@@ -602,7 +617,7 @@ def manage_ministers(global_manager):
 
     if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
-            global_manager.get('actor_creation_manager').create_minister(global_manager)
+            global_manager.get('actor_creation_manager').create_minister(False, {}, global_manager)
         notification_tools.display_notification('Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n', 'default', global_manager)
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
@@ -671,3 +686,19 @@ def manage_commodity_sales(global_manager):
 
     for current_commodity in global_manager.get('commodity_types'):
         global_manager.get('sold_commodities')[current_commodity] = 0
+
+def manage_lore(global_manager):
+    '''
+    Description:
+        Controls the spawning of new lore missions
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if global_manager.get('current_lore_mission') == 'none':
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
+        #if 1 == 1:
+            #mission_type = random.choice(global_manager.get('lore_types'))
+            global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
+            #notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)

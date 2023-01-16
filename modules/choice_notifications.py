@@ -141,7 +141,7 @@ class choice_button(button):
             self.x_change = self.notification.choice_info_dict['x_change']
             self.y_change = self.notification.choice_info_dict['y_change']
             
-        elif button_type in ['start religious campaign', 'start public relations campaign', 'start advertising campaign']:
+        elif button_type in ['start religious campaign', 'start public relations campaign', 'start advertising campaign', 'start suppress slave trade']:
             self.message = 'Start campaign'
             if button_type == 'start advertising campaign':
                 self.commodity = self.notification.choice_info_dict['commodity']
@@ -151,6 +151,9 @@ class choice_button(button):
 
         elif button_type == 'start converting':
             self.message = 'Convert'
+
+        elif button_type in ['start rumor search', 'start artifact search']:
+            self.message = 'Search'
 
         elif button_type == 'start capture slaves':
             self.message = 'Capture slaves'
@@ -167,7 +170,7 @@ class choice_button(button):
         elif button_type == 'decline loan offer':
             self.message = 'Decline'
             
-        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves']:
+        elif button_type in ['none', 'stop exploration', 'stop attack', 'stop capture slaves', 'stop suppress slave trade', 'stop converting', 'stop rumor search', 'stop artifact search']:
             self.message = 'Do nothing'
 
         elif button_type == 'confirm main menu':
@@ -259,6 +262,12 @@ class choice_button(button):
 
         elif self.button_type == 'start converting':
             self.set_tooltip(['Start converting natives, possibly reducing their aggressiveness'])
+
+        elif self.button_type == 'start rumor search':
+            self.set_tooltip(['Start searching for rumors about the artifact\'s location'])
+
+        elif self.button_type == 'start artifact search':
+            self.set_tooltip(['Start searching for an artifact at a rumored location'])
 
         elif self.button_type == 'start capture slaves':
             self.set_tooltip(['Start attempting to capture native villagers as slaves'])

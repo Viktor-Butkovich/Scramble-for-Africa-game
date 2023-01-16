@@ -111,7 +111,7 @@ class evangelist(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'religious campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'religious_campaign', 2)
             #result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
             first_roll_list = dice_utility.roll_to_list(6, 'Religous campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
@@ -156,10 +156,12 @@ class evangelist(officer):
             self.just_promoted = True
             text += 'With fiery word and true belief in his cause, the evangelist becomes a veteran and will be more successful in future ventures. /n /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + 'Click to remove this notification.', 'final_religious_campaign', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('religious_campaign_result', [self, roll_result])
+        self.global_manager.set('religious_campaign_result', [self, roll_result, success])
 
     def complete_religious_campaign(self):
         '''
@@ -190,7 +192,7 @@ class evangelist(officer):
             #        while not self == current_image.current_cell.contained_mobs[0]:
             #            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         elif roll_result <= self.current_max_crit_fail:
-            self.die()
+            self.die('quit')
         self.global_manager.set('ongoing_religious_campaign', False)
 
     def start_public_relations_campaign(self):
@@ -265,7 +267,7 @@ class evangelist(officer):
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
         if self.veteran:
-            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign', 2)
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, price, 'public_relations_campaign', 2)
             first_roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
             self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
 
@@ -287,7 +289,7 @@ class evangelist(officer):
                 result_outcome_dict[i] = word
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
-            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'public relations campaign')
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, price, 'public_relations_campaign')
             roll_list = dice_utility.roll_to_list(6, 'Public relations campaign roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
             self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
                 
@@ -332,5 +334,5 @@ class evangelist(officer):
                 self.promote()
             self.select()
         elif roll_result <= self.current_max_crit_fail:
-            self.die()
+            self.die('quit')
         self.global_manager.set('ongoing_public_relations_campaign', False)

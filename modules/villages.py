@@ -34,11 +34,13 @@ class village():
             self.available_workers = 0
             self.attempted_trades = 0
             self.name = village_name_generator.create_village_name()
-        else:
+            self.found_rumors = False
+        else: #village recreated through saved dictionary given by tile.set_resource from the cell's save_dict
             self.name = input_dict['name']
             self.population = input_dict['population']
             self.aggressiveness = input_dict['aggressiveness']
             self.available_workers = input_dict['available_workers']
+            self.found_rumors = input_dict['found_rumors']
             for current_save_dict in input_dict['attached_warriors']:
                 current_save_dict['origin_village'] = self
                 self.global_manager.get('actor_creation_manager').create(True, current_save_dict, global_manager)
@@ -221,6 +223,23 @@ class village():
             return(0)
         else: #7 - 9
             return(-1)
+
+    def get_aggressiveness_adjective(self):
+        '''
+        Description:
+            Returns an adjective corresponding to this village's aggressiveness modifier
+        Input:
+            None
+        Output:
+            string: Returns an adjective corresponding to this village's aggressiveness modifier
+        '''
+        aggressiveness_modifier = self.get_aggressiveness_modifier()
+        if aggressiveness_modifier == 1:
+            return('peaceful')
+        elif aggressiveness_modifier == 0:
+            return('neutral')
+        elif aggressiveness_modifier == -1:
+            return('aggressive')
 
     def get_population_modifier(self): #modifier affects roll difficulty, not roll result
         '''

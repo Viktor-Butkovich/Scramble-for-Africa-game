@@ -115,17 +115,21 @@ class button():
                 current_mob = selected_list[0]
                 message = ''
                 movement_cost = current_mob.get_movement_cost(x_change, y_change)
-                local_infrastructure = current_mob.images[0].current_cell.get_intact_building('infrastructure')
-                adjacent_cell = current_mob.images[0].current_cell.adjacent_cells[non_cardinal_direction]
+                local_cell = current_mob.images[0].current_cell
+                adjacent_cell = local_cell.adjacent_cells[non_cardinal_direction]
+                local_infrastructure = local_cell.get_intact_building('infrastructure')
                 
                 if not adjacent_cell == 'none':
                     passed = False
-                    if (current_mob.can_walk and not adjacent_cell.terrain == 'water'): #if walking unit moving onto land
+                    if (current_mob.can_walk and not adjacent_cell.terrain == 'water') or local_cell.has_walking_connection(adjacent_cell): #if walking unit moving onto land or along bridge
                         passed = True
                     elif (current_mob.can_swim and adjacent_cell.terrain == 'water' and ((current_mob.can_swim_river and adjacent_cell.y > 0) or (current_mob.can_swim_ocean and adjacent_cell.y == 0)) or adjacent_cell.has_vehicle('ship')): #if swimming unit going to correct kind of water or embarking ship
                         passed = True
-                    elif current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking unit in water:
+                    elif (current_mob.can_walk and adjacent_cell.terrain == 'water') and adjacent_cell.y > 0: #if land unit entering river for maximum movement points
                         passed = True
+                        if current_mob.is_battalion and not adjacent_cell.get_best_combatant('npmob') == 'none': #if battalion attacking unit in water:
+                            movement_cost = 1
+
                     if passed:
                         if adjacent_cell.visible:
                             tooltip_text.append('Press to move to the ' + direction)
@@ -135,24 +139,25 @@ class button():
                                 final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
                                 message = 'Attacking an enemy unit costs 5 money and requires only 1 movement point, but staying in the enemy\'s tile afterward would require the usual movement'
                                 tooltip_text.append(message)
-                                if current_mob.is_battalion and adjacent_cell.terrain == 'water':
-                                    message = 'This unit would be forced to withdraw to its original tile after the attack, as battalions can not move freely through water'
-                                else:
-                                    message = 'Staying afterward would cost ' + str(final_movement_cost - 1) + ' more movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
-                                    if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
-                                        if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
-                                            connecting_roads = True
-                                            message += 'and connecting roads'
-                                        elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
-                                            message += 'and no connecting roads'
-                                        elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                                            message += 'and no connecting roads' + local_infrastructure.infrastructure_type
-                                        else: 
-                                            message += 'and no connecting roads'
+                                #if current_mob.is_battalion and adjacent_cell.terrain == 'water':
+                                #    message = 'This unit would be forced to withdraw to its original tile after the attack, as battalions can not move freely through water'
+                                #else:
+                                message = 'Staying afterward would cost ' + str(final_movement_cost - 1) + ' more movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
+                                #if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                if local_cell.has_walking_connection(adjacent_cell):
+                                    if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
+                                        connecting_roads = True
+                                        message += 'and connecting roads'
+                                    elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
+                                        message += 'and no connecting roads'
+                                    elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
+                                        message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
+                                    else: 
+                                        message += 'and no connecting roads'
                         
                             else:
                                 if current_mob.is_vehicle and current_mob.vehicle_type == 'train':
-                                    if (not adjacent_infrastructure == 'none') and adjacent_infrastructure.infrastructure_type == 'railroad' and (not local_infrastructure == 'none') and local_infrastructure.infrastructure_type == 'railroad':
+                                    if (not adjacent_infrastructure == 'none') and adjacent_infrastructure.is_railroad and (not local_infrastructure == 'none') and local_infrastructure.is_railroad and local_cell.has_walking_connection(adjacent_cell):
                                         message = 'Costs ' + str(movement_cost) + ' movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has connecting railroads'
                                     else:
                                         message = 'Not possible because the adjacent tile does not have connecting railroads'
@@ -160,19 +165,23 @@ class button():
                                     tooltip_text.append('A train can only move along railroads')
                                 else:
                                     message = 'Costs ' + str(movement_cost) + ' movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
-                                    if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                    #if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
+                                    if local_cell.has_walking_connection(adjacent_cell):
                                         if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
                                             connecting_roads = True
                                             message += 'and connecting roads'
                                         elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
                                             message += 'and no connecting roads'
                                         elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                                            message += 'and no connecting roads' + local_infrastructure.infrastructure_type
-                                        else: #
+                                            message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
+                                        else: 
                                             message += 'and no connecting roads'
 
                                     tooltip_text.append(message)
-                                    tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + ' movement points')
+                                    if (current_mob.can_walk and adjacent_cell.terrain == 'water' and (not current_mob.can_swim_river)) and adjacent_cell.y > 0 and not local_cell.has_walking_connection(adjacent_cell):
+                                        tooltip_text.append('Moving into a river tile costs an entire turn of movement points for units without canoes')
+                                    else:
+                                        tooltip_text.append('Moving into a ' + adjacent_cell.terrain + ' tile costs ' + str(self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]) + ' movement points')
                             if (not current_mob.is_vehicle) and current_mob.images[0].current_cell.terrain == 'water' and current_mob.images[0].current_cell.has_vehicle('ship'):
                                 if (current_mob.images[0].current_cell.y == 0 and not (current_mob.can_swim and current_mob.can_swim_ocean)) or (current_mob.images[0].current_cell.y > 0 and not (current_mob.can_swim and current_mob.can_swim_river)): #if could not naturally move into current tile, must be from vehicle
                                     tooltip_text.append('Moving from a steamship or steamboat in the water after disembarking requires all remaining movement points, at least the usual amount')
@@ -191,29 +200,29 @@ class button():
                     tooltip_text.append('Moving in this direction would move off of the map')
                 if current_mob.can_walk and current_mob.can_swim: #1??
                     if current_mob.can_swim_river and current_mob.can_swim_ocean: #111
-                        tooltip_text.append('Can move to land and water')
+                        tooltip_text.append('Can move normally to land and water')
                     elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #110
-                        tooltip_text.append('Can move to land and rivers but not ocean')
+                        tooltip_text.append('Can move normally to land and rivers but not ocean')
                     else: #101
-                        tooltip_text.append('Can move to land and ocean but not rivers')
+                        tooltip_text.append('Can move normally to land and ocean but not rivers')
                         
                 elif current_mob.can_walk and not current_mob.can_swim: #100
-                    tooltip_text.append('Can move to land but not water')
+                    tooltip_text.append('Can move normally to land but not water')
                     
                 elif current_mob.can_swim and not current_mob.can_walk: #0??
                     if current_mob.can_swim_river and current_mob.can_swim_ocean: #011
-                        tooltip_text.append('Can move to water but not land')
+                        tooltip_text.append('Can move normally to water but not land')
                     elif current_mob.can_swim_river and not current_mob.can_swim_ocean: #010
-                        tooltip_text.append('Can move to rivers but not ocean or land')
+                        tooltip_text.append('Can move normally to rivers but not ocean or land')
                     else: #101
-                        tooltip_text.append('Can move to ocean but not rivers or land')
+                        tooltip_text.append('Can move normally to ocean but not rivers or land')
                 #000 is not possible
                     
                 if not current_mob.can_swim:
                     if current_mob.is_battalion:
-                        tooltip_text.append('However, can embark a ship or attack an enemy in water by moving to it')
+                        tooltip_text.append('However, can embark a ship, attack an enemy in a river, or spend its maximum movement and become disorganized to enter a river')
                     else:
-                        tooltip_text.append('However, can embark a ship in the water by moving to it')
+                        tooltip_text.append('However, can embark a ship in the water by moving to it or spend its maximum movement and become disorganized to enter a river')
                     
             self.set_tooltip(tooltip_text)
 
@@ -396,6 +405,13 @@ class button():
                               'Has higher success chance and lower risk when aggressiveness is low',
                               'Costs all remaining movement points, at least 1'])
 
+        elif self.button_type == 'suppress slave trade':
+            self.set_tooltip(['Attempts to suppress the slave trade for ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money',
+                              'Can only be done in the slave traders tile',
+                              'If successful, will decrease the strength of the slave traders and increase public opinion',
+                              'Success chance and risk influenecd by the current strength of the slave traders',
+                              'Costs all remaining movement points, at least 1'])
+
         elif self.button_type == 'religious campaign':
             self.set_tooltip(['Attempts to campaign for church volunteers for ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money',
                               'Can only be done in Europe',
@@ -433,6 +449,27 @@ class button():
                               'Can only be done in a village',
                               'If successful, reduces the aggressiveness of the village and increases public opinion',
                               'Has higher success chance and lower risk when a mission is present',
+                              'Costs all remaining movement points, at least 1'])
+
+        elif self.button_type == 'rumor search':
+            if self.global_manager.get('current_lore_mission') == 'none':
+                intro = 'Attempts to search this village for rumors of a lore mission artifact\'s location for '
+            else:
+                intro = 'Attempts to search this village for rumors of the location of the ' + self.global_manager.get('current_lore_mission').name + ' for '
+            self.set_tooltip([intro + str(self.global_manager.get('action_prices')['rumor_search']) + ' money',
+                              'Can only be done in a village',
+                              'If successful, reveals the coordinates of a possible location for the current lore mission\'s artifact',
+                              'Has higher success chance and lower risk when a mission is present',
+                              'Costs all remaining movement points, at least 1'])
+
+        elif self.button_type == 'artifact search':
+            if self.global_manager.get('current_lore_mission') == 'none':
+                intro = 'Attempts to search for a lore mission\'s artifact at a location revealed by rumors for '
+            else:
+                intro = 'Attempts to search for the ' + self.global_manager.get('current_lore_mission').name + ' at a location revealed by rumors for '
+            self.set_tooltip([intro + str(self.global_manager.get('action_prices')['rumor_search']) + ' money',
+                              'Can only be done on a revealed possible artifact location',
+                              'If successful, reveals whether this is the artifact\'s actual location, finding it and completing the lore mission if it is present',
                               'Costs all remaining movement points, at least 1'])
 
         elif self.button_type == 'new game':
@@ -512,6 +549,21 @@ class button():
                 verb = 'disable'
             self.set_tooltip([utility.capitalize(verb) + 's sentry mode for this unit',
                               'A unit in sentry mode is removed from the turn order and will be skipped when cycling through unmoved units'])
+
+        elif self.button_type in ['enable automatic replacement', 'disable automatic replacement']:
+            if self.button_type == 'enable automatic replacement':
+                verb = 'enable'
+                operator = 'not '
+            elif self.button_type == 'disable automatic replacement':
+                verb = 'disable'
+                operator = ''
+            if self.target_type == 'unit':
+                target = 'unit'
+            else:
+                target = 'unit\'s ' + self.target_type #worker or officer
+            self.set_tooltip([utility.capitalize(verb) + 's automatic replacement for this ' + target,
+                              'A unit with automatic replacement will be automatically replaced if it dies from attrition',
+                              'This ' + target + ' is currently set to ' + operator + 'be automatically replaced'])
 
         elif self.button_type == 'wake up all':
             self.set_tooltip(['Disables sentry mode for all units',
@@ -800,10 +852,14 @@ class button():
                 else:
                     text_tools.print_to_screen('You are busy and can not move.', self.global_manager)
             elif self.button_type == 'toggle grid lines':
-                if self.global_manager.get('show_grid_lines'):
-                    self.global_manager.set('show_grid_lines', False)
+                if self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', False)
                 else:
-                    self.global_manager.set('show_grid_lines', True)
+                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', True)
+                #if self.global_manager.get('show_grid_lines'):
+                #    self.global_manager.set('show_grid_lines', False)
+                #else:
+                #    self.global_manager.set('show_grid_lines', True)
 
             elif self.button_type == 'toggle text box':
                 if self.global_manager.get('show_text_box'):
@@ -1057,6 +1113,10 @@ class button():
             elif self.button_type == 'start capture slaves':
                 battalion = self.notification.choice_info_dict['battalion']
                 battalion.capture_slaves()
+            
+            elif self.button_type == 'start suppress slave trade':
+                battalion = self.notification.choice_info_dict['battalion']
+                battalion.suppress_slave_trade()
 
             elif self.button_type == 'start public relations campaign':
                 evangelist = self.notification.choice_info_dict['evangelist']
@@ -1075,6 +1135,14 @@ class button():
             elif self.button_type == 'start converting':
                 evangelist = self.notification.choice_info_dict['evangelist']
                 evangelist.convert()
+
+            elif self.button_type == 'start rumor search':
+                expedition = self.notification.choice_info_dict['expedition']
+                expedition.rumor_search()
+
+            elif self.button_type == 'start artifact search':
+                expedition = self.notification.choice_info_dict['expedition']
+                expedition.artifact_search()
 
             elif self.button_type == 'start construction':
                 constructor = self.notification.choice_info_dict['constructor']
@@ -1113,6 +1181,9 @@ class button():
 
             elif self.button_type == 'stop capture slaves':
                 self.global_manager.set('ongoing_slave_capture', False)
+            
+            elif self.button_type == 'stop suppress slave trade':
+                self.global_manager.set('ongoing_slave_trade_suppression', False)
 
             elif self.button_type in ['stop loan search', 'decline loan offer']:
                 self.global_manager.set('ongoing_loan_search', False)
@@ -1121,6 +1192,12 @@ class button():
 
             elif self.button_type == 'stop converting':
                 self.global_manager.set('ongoing_conversion', False)
+
+            elif self.button_type == 'stop rumor search':
+                self.global_manager.set('ongoing_rumor_search', False)
+            
+            elif self.button_type == 'stop artifact search':
+                self.global_manager.set('ongoing_artifact_search', False)
 
             elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
                 self.global_manager.set('ongoing_construction', False)
@@ -1510,22 +1587,23 @@ class fire_unit_button(button):
         '''
         if self.can_show():
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                self.showing_outline = True
-                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
-                if self.attached_mob.is_worker:
-                    if self.attached_mob.worker_type in ['European', 'religious']:
-                        if self.attached_mob.worker_type == 'European':
-                            message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                        else:
-                            message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
-                            message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                    elif self.attached_mob.worker_type == 'African':
-                        message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
-                    elif self.attached_mob.worker_type == 'slave':
-                        message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
-                #self.attached_mob.die()
+                if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
+                    self.showing_outline = True
+                    message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
+                    if self.attached_mob.is_worker:
+                        if self.attached_mob.worker_type in ['European', 'religious']:
+                            if self.attached_mob.worker_type == 'European':
+                                message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
+                                message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                            else:
+                                message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
+                                message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                        elif self.attached_mob.worker_type == 'African':
+                            message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
+                        elif self.attached_mob.worker_type == 'slave':
+                            message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
+                    notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+                    #self.attached_mob.die()
             else:
                 text_tools.print_to_screen('You are busy and can not fire a unit', self.global_manager)
 
@@ -1723,6 +1801,8 @@ class minister_portrait_image(button): #image of minister's portrait - button su
                     minister_utility.update_available_minister_display(self.global_manager)
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
+                if not self.current_minister == 'none':
+                    self.current_minister.selection_sound()
         else:
             text_tools.print_to_screen('You are busy and can not select other ministers.', self.global_manager)
 

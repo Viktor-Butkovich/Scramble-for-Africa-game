@@ -8,6 +8,7 @@ from ... import utility
 from ... import notification_tools
 from ... import text_tools
 from ... import dice_utility
+from ... import market_tools
 
 class battalion(group):
     '''
@@ -89,11 +90,12 @@ class battalion(group):
                 cost = 1
             else:
                 cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-            
                 if self.is_pmob:
                     if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
                         if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
                             cost = cost / 2
+                    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
+                        cost = self.max_movement_points
                     if (not adjacent_cell.visible) and self.can_explore:
                         cost = self.movement_cost
         return(cost)
@@ -189,9 +191,13 @@ class battalion(group):
                 text_tools.print_to_screen('Battalions can not attack beasts.', self.global_manager)
             elif self.is_safari:
                 text_tools.print_to_screen('Safaris can only attack beasts.', self.global_manager)
-        else: #if destination empty and
+        else: #if destination empty or attack already confirmed, move in
             initial_movement_points = self.movement_points
+            if attack_confirmed:
+                original_disorganized = self.disorganized
             super().move(x_change, y_change)
+            if attack_confirmed:
+                self.set_disorganized(original_disorganized) #cancel effect from moving into river until after combat
             if attack_confirmed:
                 self.set_movement_points(initial_movement_points) #gives back movement points for moving, movement points will be consumed anyway for attacking but will allow unit to move onto beach after disembarking ship
             if not self.in_vehicle:
@@ -425,6 +431,208 @@ class battalion(group):
             warrior.show_images()
             warrior.attack_on_spawn()
         self.global_manager.set('ongoing_slave_capture', False)
+
+    def start_suppress_slave_trade(self):
+        '''
+        Description:
+            Used when the player clicks on the start suppress slave trade, displays a choice notification that allows the player to suppress slave trade or not. Choosing to suppress slave trade 
+                starts the slave trade suppression process and consumes the battalion's movement points
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = 2
+        self.current_min_crit_success = self.default_min_crit_success
+        message = 'Are you sure you want to attempt to suppress the slave trade? If successful, public opinion will increase and the strength of the slave traders will decrease, with the slave trade ending once strength is reduced to 0. /n /n'
+        message += 'The suppression will cost ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money. /n /n'
+            
+        strength = self.global_manager.get('slave_traders_strength')
+        strength_modifier = 0
+        if strength >= self.global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
+            strength_modifier = -1
+            message += 'The slave traders are flourishing and will provide strong resistance. /n /n'
+        elif strength >= self.global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
+            strength_modifier = 0
+            message += 'The slave traders are relatively intact and will provide moderate resistance. /n /n'
+        else:
+            strength_modifier += 1
+            message += 'The slave traders are approaching collapse and will provide weak resistance. /n /n'
+
+        self.current_roll_modifier += strength_modifier
+        risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message += 'RISK: LOW /n /n'
+        elif risk_value == 0: #1/6 death = moderate risk
+            message += 'RISK: MODERATE /n /n' #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message += 'RISK: HIGH /n /n'
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message += 'RISK: DEADLY /n /n'
+            
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        choice_info_dict = {'battalion': self,'type': 'start suppress slave trade'}
+        self.current_roll_modifier = 0
+        self.global_manager.set('ongoing_slave_trade_suppression', True)
+        notification_tools.display_choice_notification(message, ['start suppress slave trade', 'stop suppress slave trade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def suppress_slave_trade(self):
+        '''
+        Description:
+            Controls the slave trade suppression process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+
+        if not self.global_manager.get('action_prices')['suppress_slave_trade'] == 0:
+            self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['suppress_slave_trade'] * -1, 'suppress_slave_trade')
+        village = self.images[0].current_cell.get_building('village')
+        text = ''
+        text += 'The battalion tries to suppress the slave trade. /n /n'
+
+        if not self.veteran:    
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'suppress_slave_trade', self.global_manager, num_dice)
+        else:
+            text += ('The veteran major can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'slave_capture', self.global_manager, num_dice)
+
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        minister_corrupt = self.controlling_minister.check_corruption()
+        if minister_corrupt:
+            self.controlling_minister.steal_money(self.global_manager.get('action_prices')['suppress_slave_trade'], 'suppress_slave_trade')
+            
+        if self.veteran:
+            if minister_corrupt:
+                first_roll = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+                second_roll = random.randrange(1, self.current_min_success)
+                if random.randrange(1, 7) >= 4:
+                    results = [first_roll, second_roll]
+                else:
+                    results = [second_roll, first_roll]
+            else:
+                results = [self.controlling_minister.no_corruption_roll(6, 'suppress_slave_trade'), self.controlling_minister.no_corruption_roll(6, 'suppress_slave_trade')]
+            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['convert'], 'slave capture', 2)
+            first_roll_list = dice_utility.roll_to_list(6, 'Slave trade suppression roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+           
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = 'CRITICAL FAILURE'
+                elif i >= self.current_min_crit_success:
+                    word = 'CRITICAL SUCCESS'
+                elif i >= self.current_min_success:
+                    word = 'SUCCESS'
+                else:
+                    word = 'FAILURE'
+                result_outcome_dict[i] = word
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
+        else:
+            if minister_corrupt:
+                result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+            else:
+                result = self.controlling_minister.no_corruption_roll(6, 'suppress_slave_trade')
+            roll_list = dice_utility.roll_to_list(6, 'Slave trade suppression roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + 'Click to continue.', 'suppress_slave_trade', self.global_manager, num_dice)
+            
+        text += '/n'
+        public_opinion_increase = 0
+        strength_decrease = 0
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            text += '/nThe battalion successfully disrupt certain slave trader operations, decreasing the strength of the slave traders. /n '
+            strength_decrease = random.randrange(1, 4)
+            public_opinion_increase = random.randrange(1, 4)
+            text += '/nWord of your company\'s suppression of the slave trade reaches Europe, increasing public opinion by ' + str(public_opinion_increase) + '. /n'
+        else:
+            text += '/nThe battalion failed to significantly disrupt the operations of the slave traders. /n '
+
+        if roll_result <= self.current_max_crit_fail:
+            text += '/nAcross a series of suboptimal engagements, the slave traders manage to destroy the battalion. /n ' # The entire group of missionaries has died'
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += ' /nThe major has gained insights into the optimal strategies to intimidating and suppressing slave traders. /n'
+            text += ' /nThe major is now a veteran and will be more successful in future ventures. /n'
+            
+
+
+        if roll_result >= self.current_min_success:
+            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_suppress_slave_trade', self.global_manager)
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+        self.global_manager.set('suppress_slave_trade_result', [self, roll_result, public_opinion_increase, strength_decrease])
+
+    def complete_suppress_slave_trade(self):
+        '''
+        Description:
+            Used when the player finishes rolling for slave trade suppression, shows the suppression's results and makes any changes caused by the result. If successful, strength of slave 
+                traders decreases, public opinion increases, promotes major to a veteran on critical success, battalion destroyed on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = self.global_manager.get('suppress_slave_trade_result')[1]
+        public_opinion_increase = self.global_manager.get('suppress_slave_trade_result')[2]
+        strength_decrease = self.global_manager.get('suppress_slave_trade_result')[3]
+        
+        if roll_result >= self.current_min_success: #if campaign succeeded
+            self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') - strength_decrease) #do something special on 0 strength
+            if self.global_manager.get('slave_traders_strength') <= 0:
+                self.global_manager.set('slave_traders_strength', 0)
+                num_freed_slaves = random.randrange(1, 7) + random.randrange(1, 7)
+                initial_public_opinion_increase = public_opinion_increase
+                for i in range(num_freed_slaves):
+                    public_opinion_increase += 4 + random.randrange(-3, 4) #1-7 each
+                    market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+                    self.global_manager.get('evil_tracker').change(-2)
+                    self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+                text = 'The slave trade has been eradicated. /n /n'
+                text += str(num_freed_slaves) + ' freed slaves have entered the labor pool, increasing public opinion by ' + str(public_opinion_increase - initial_public_opinion_increase) + '. /n /n'
+                text += 'Slaves are no longer able to be purchased, and existing slave units will no longer be automatically replaced. /n /n'
+                for current_pmob in self.global_manager.get('pmob_list'):
+                    if current_pmob.is_worker and current_pmob.worker_type == 'slave':
+                        current_pmob.set_automatically_replace(False)
+                notification_tools.display_notification(text, 'none', self.global_manager)
+            self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+
+        if roll_result <= self.current_max_crit_fail:
+            self.die()
+
+        self.global_manager.set('ongoing_slave_trade_suppression', False)
 
 class safari(battalion):
     '''

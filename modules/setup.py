@@ -32,7 +32,7 @@ def fundamental_setup(global_manager):
     pygame.mixer.init()
     global_manager.set('startup_complete', False)
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
-    #global_manager.get('sound_manager').play_music('waltz_2')
+    #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
     global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
@@ -45,15 +45,29 @@ def fundamental_setup(global_manager):
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
+    #global_manager.set('display_width', 500)
+    #global_manager.set('display_height', 1000)
+    #global_manager.set('display_width', 1000)
+    #global_manager.set('display_height', 500)
+    #global_manager.set('display_height', 800)
     
+    start_time = time.time()
     global_manager.set('loading', True)
-    global_manager.set('loading_start_time', time.time())
-    global_manager.set('previous_turn_time', time.time())
+    global_manager.set('loading_start_time', start_time)
+    global_manager.set('previous_turn_time', start_time)
+    global_manager.set('start_time', start_time)
+    global_manager.set('current_time', start_time)
+    global_manager.set('last_selection_outline_switch', start_time)
+    global_manager.set('mouse_moved_time', start_time)
     global_manager.set('end_turn_wait_time', 0.8)
+    global_manager.set('event_manager', data_managers.event_manager_template(global_manager))
 
     global_manager.set('font_name', 'times new roman')
-    global_manager.set('font_size', scaling.scale_width(15, global_manager))
+    global_manager.set('default_font_size', 15)
+    global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
+
+    global_manager.set('default_music_volume', 1)
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
@@ -171,7 +185,7 @@ def misc_setup(global_manager):
     global_manager.set('mmb_down', False)
     global_manager.set('typing', False)
     global_manager.set('message', '')
-    global_manager.set('show_grid_lines', True)
+    #global_manager.set('show_grid_lines', True)
     global_manager.set('show_text_box', True)
     global_manager.set('show_selection_outlines', True)
     global_manager.set('show_minimap_outlines', True)
@@ -193,10 +207,13 @@ def misc_setup(global_manager):
     global_manager.set('ongoing_advertising_campaign', False)
     global_manager.set('ongoing_loan_search', False)
     global_manager.set('ongoing_conversion', False)
+    global_manager.set('ongoing_rumor_search', False)
+    global_manager.set('ongoing_artifact_search', False)
     global_manager.set('ongoing_construction', False)
     global_manager.set('ongoing_combat', False)
     global_manager.set('ongoing_trial', False)
     global_manager.set('ongoing_slave_capture', False)
+    global_manager.set('ongoing_slave_trade_suppression', False)
     global_manager.set('game_over', False)
 
     global_manager.set('r_shift', 'up')
@@ -205,11 +222,6 @@ def misc_setup(global_manager):
     global_manager.set('r_ctrl', 'up')
     global_manager.set('l_ctrl', 'up')
     global_manager.set('ctrl', 'up')
-    global_manager.set('start_time', time.time())
-    global_manager.set('current_time', time.time())
-    global_manager.set('last_selection_outline_switch', time.time())
-    mouse_moved_time = time.time()
-    global_manager.set('mouse_moved_time', time.time())
     old_mouse_x, old_mouse_y = pygame.mouse.get_pos()#used in tooltip drawing timing
     global_manager.set('old_mouse_x', old_mouse_x)
     global_manager.set('old_mouse_y', old_mouse_y)
@@ -237,6 +249,7 @@ def misc_setup(global_manager):
     global_manager.set('country_ordered_list_start_y', 0)
 
     global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
+    global_manager.set('current_country', 'none') #current country needs to be defined for music to start playing correctly on set game mode
     game_transitions.set_game_mode('main_menu', global_manager)
     global_manager.set('previous_game_mode', 'main_menu') #after set game mode, both previous and current game modes should be main_menu
 
@@ -245,6 +258,17 @@ def misc_setup(global_manager):
     global_manager.set('building_types', ['resource', 'port', 'infrastructure', 'train_station', 'trading_post', 'mission', 'fort', 'slums', 'warehouses'])
 
     global_manager.set('notification_manager', data_managers.notification_manager_template(global_manager))
+
+    global_manager.set('current_advertised_commodity', 'none')
+    global_manager.set('current_sound_file_index', 0)
+
+    width = 15
+    height = 16
+    global_manager.set('strategic_map_width', width)
+    global_manager.set('strategic_map_height', height)
+
+    global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
+    pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
 
 def terrains_setup(global_manager):
     '''
@@ -314,6 +338,13 @@ def terrains_setup(global_manager):
         'desert': 2
         }
     )
+    global_manager.set('terrain_variant_dict', {})
+    for current_terrain in (global_manager.get('terrain_list') + ['ocean_water', 'river_water']):
+        current_index = 0
+        while os.path.exists('graphics/scenery/terrain/' + current_terrain + '_' + str(current_index) + '.png'):
+            current_index += 1
+        current_index -= 1 #back up from index that didn't work
+        global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
 def commodities_setup(global_manager):
     '''
@@ -539,7 +570,19 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     british_country_effect = effects.effect('british_country_modifier', 'advertising_campaign_plus_modifier', global_manager)
-    global_manager.set('Britain', countries.country('Britain', 'british', False, False, False, british_weighted_backgrounds, british_country_effect, global_manager))
+    british_input_dict = {
+        'name': 'Britain',
+        'adjective': 'british',
+        'government_type_adjective': 'royal',
+        'religion': 'protestant',
+        'allow_particles': False,
+        'aristocratic_particles': False,
+        'allow_double_last_names': False,
+        'background_set': british_weighted_backgrounds,
+        'country_effect': british_country_effect,
+        'music_list': ['Rule Britannia']
+    }
+    global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
     french_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -554,7 +597,19 @@ def countries_setup(global_manager):
         'business magnate',
         ]
     french_country_effect = effects.effect('french_country_modifier', 'conversion_plus_modifier', global_manager)
-    global_manager.set('France', countries.country('France', 'french', True, False, True, french_weighted_backgrounds, french_country_effect, global_manager))
+    french_input_dict = {
+        'name': 'France',
+        'adjective': 'french',
+        'government_type_adjective': 'national',
+        'religion': 'catholic',
+        'allow_particles': True,
+        'aristocratic_particles': False,
+        'allow_double_last_names': True,
+        'background_set': french_weighted_backgrounds,
+        'country_effect': french_country_effect,
+        'music_list': ['La Marseillaise']
+    }
+    global_manager.set('France', countries.country(french_input_dict, global_manager))
 
     german_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -567,7 +622,19 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     german_country_effect = effects.effect('german_country_modifier', 'attack_plus_modifier', global_manager)
-    global_manager.set('Germany', countries.country('Germany', 'german', True, True, False, german_weighted_backgrounds, german_country_effect, global_manager)) 
+    german_input_dict = {
+        'name': 'Germany',
+        'adjective': 'german',
+        'government_type_adjective': 'imperial',
+        'religion': 'protestant',
+        'allow_particles': True,
+        'aristocratic_particles': True,
+        'allow_double_last_names': False,
+        'background_set': german_weighted_backgrounds,
+        'country_effect': german_country_effect,
+        'music_list': ['Das lied der deutschen']
+    }
+    global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
     belgian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -581,7 +648,16 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     belgian_country_effect = effects.effect('belgian_country_modifier', 'slave_capture_plus_modifier', global_manager)
-    global_manager.set('Belgium', countries.hybrid_country('Belgium', 'belgian', belgian_weighted_backgrounds, belgian_country_effect, global_manager)) 
+    belgian_input_dict = {
+        'name': 'Belgium',
+        'adjective': 'belgian',
+        'government_type_adjective': 'royal',
+        'religion': 'catholic',
+        'background_set': belgian_weighted_backgrounds,
+        'country_effect': belgian_country_effect,
+        'music_list': []
+    }
+    global_manager.set('Belgium', countries.hybrid_country(belgian_input_dict, global_manager)) 
 
     portuguese_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -594,7 +670,19 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     portuguese_country_effect = effects.effect('portuguese_country_modifier', 'no_slave_trade_penalty', global_manager)
-    global_manager.set('Portugal', countries.country('Portugal', 'portuguese', True, False, False, portuguese_weighted_backgrounds, portuguese_country_effect, global_manager))
+    portuguese_input_dict = {
+        'name': 'Portugal',
+        'adjective': 'portuguese',
+        'government_type_adjective': 'royal',
+        'religion': 'catholic',
+        'allow_particles': True,
+        'aristocratic_particles': False,
+        'allow_double_last_names': False,
+        'background_set': portuguese_weighted_backgrounds,
+        'country_effect': portuguese_country_effect,
+        'music_list': ['Portuguese theme']
+    }
+    global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
     italian_weighted_backgrounds = default_weighted_backgrounds + [
         'merchant',
@@ -608,7 +696,19 @@ def countries_setup(global_manager):
         'royal heir',
         ]
     italian_country_effect = effects.effect('italian_country_modifier', 'attack_minus_modifier', global_manager)
-    global_manager.set('Italy', countries.country('Italy', 'italian', True, True, False, italian_weighted_backgrounds, italian_country_effect, global_manager)) 
+    italian_input_dict = {
+        'name': 'Italy',
+        'adjective': 'italian',
+        'government_type_adjective': 'royal',
+        'religion': 'catholic',
+        'allow_particles': True,
+        'aristocratic_particles': True,
+        'allow_double_last_names': False,
+        'background_set': italian_weighted_backgrounds,
+        'country_effect': italian_country_effect,
+        'music_list': ['Prince of Tuscany']
+    }
+    global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     
 def transactions_setup(global_manager):
     '''
@@ -620,9 +720,9 @@ def transactions_setup(global_manager):
         None
     '''
     global_manager.set('recruitment_types', global_manager.get('officer_types') + ['European workers', 'steamship'])
-    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10})
+    global_manager.set('recruitment_costs', {'European workers': 0, 'steamship': 10, 'officer': 5})
     for current_officer in global_manager.get('officer_types'):
-        global_manager.get('recruitment_costs')[current_officer] = 5
+        global_manager.get('recruitment_costs')[current_officer] = global_manager.get('recruitment_costs')['officer']
 
     global_manager.set('num_african_workers', 0)
     global_manager.set('african_worker_upkeep', 0) #placeholder for labels, set to initial values on load/new game
@@ -660,6 +760,8 @@ def transactions_setup(global_manager):
         'resource': 10,
         'road': 5,
         'railroad': 15,
+        'road_bridge': 50,
+        'railroad_bridge': 150,
         'port': 15,
         'train_station': 10,
         'trading_post': 5,
@@ -683,8 +785,11 @@ def transactions_setup(global_manager):
         'loan': 5,
         'attack': 5,
         'slave_capture': 5,
+        'suppress_slave_trade': 5,
         'trial': 5,
         'hunting': 5,
+        'rumor_search': 5,
+        'artifact_search': 5,
         'track_beasts': 0
         }
     )
@@ -707,8 +812,11 @@ def transactions_setup(global_manager):
         'loan': 'loans',
         'attack': 'combat supplies',
         'slave_capture': 'capturing slaves',
+        'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
         'hunting': 'hunting supplies',
+        'rumor_search': 'artifact rumor searches',
+        'artifact_search': 'artifact searches',
         'construction': 'construction',
         'production': 'production',
         'bribery': 'bribery',
@@ -731,8 +839,62 @@ def transactions_setup(global_manager):
     for current_key in global_manager.get('transaction_descriptions'):
         transaction_types.append(current_key)
     global_manager.set('transaction_types', transaction_types)
-    #global_manager.set('transaction_types', ['misc. revenue', 'misc. expenses', 'worker upkeep', 'subsidies', 'advertising', 'commodity sales', 'trial compensation', 'consumer goods', 'exploration', 'religious campaigns',
-    #    'public relations campaigns', 'religious conversion', 'unit recruitment', 'loan interest', 'loans', 'loan searches', 'combat supplies', 'hunting supplies', 'construction', 'attrition replacements', 'trial fees', 'capturing slaves'])
+    global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
+    global_manager.set('slave_traders_strength', 0)
+
+def lore_setup(global_manager):
+    '''
+    Description:
+        Defines the types of lore missions, artifacts within each one, and the current lore mission
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    global_manager.set('lore_types', ['zoology', 'botany', 'archaeology', 'anthropology', 'paleontology', 'theology'])
+    global_manager.set('lore_types_artifact_dict',
+        {
+        'zoology': ['Monkey', 'Serpent', 'Beetle', 'Hawk', 'Panther', 'Spider'],
+        'botany': ['Orchid', 'Vine', 'Root', 'Bark', 'Stalk', 'Fruit'],
+        'archaeology': ['Tomb', 'Stele', 'Mask', 'Statue', 'City', 'Temple'],
+        'anthropology': ['Urn', 'Skull', 'Totem', 'Headdress', 'Spear', 'Idol'],
+        'paleontology': ['saurus Fossil', 'tops Fossil', 'don Fossil', 'raptor Fossil', 'nyx Fossil', 'mut Fossil'],
+        'theology': ['Grail', 'Ark', 'Bone', 'Crown', 'Shroud', 'Blood']
+        }
+    )
+    global_manager.set('lore_types_adjective_dict', 
+        {
+        'zoology': ['Albino ', 'Devil ', 'Royal ', 'Vampire ', 'Assassin ', 'Storm '],
+        'botany': ['Blood ', 'Midnight ', 'Thorny ', 'Strangler ', 'Carnivorous ', 'Ghost '],
+        'archaeology': ['Emperor\'s ', 'Golden ', 'Lost ', 'Antediluvian ', 'Ancient ', 'Forbidden '],
+        'anthropology': ['Crystal ', 'Golden ', 'Great Chief\'s ', 'Sky ', 'Moon ', 'Volcano '],
+        'paleontology': ['Tyranno', 'Bronto', 'Stego', 'Tricera', 'Pterano', 'Dimetro'],
+        'theology': ['Lost ', 'Holy ', 'Prester John\'s ', 'Mary\'s ', 'True ', 'Sacred ']
+        }
+    )
+    global_manager.set('lore_types_effects_dict',
+        {
+        'zoology': effects.effect('zoology_completion_effect', 'hunting_plus_modifier', global_manager),
+        'botany': effects.effect('botany_completion_effect', 'health_attrition_plus_modifier', global_manager),
+        'archaeology': effects.effect('archaeology_completion_effect', 'attack_plus_modifier', global_manager),
+        'anthropology': effects.effect('anthropology_completion_effect', 'conversion_plus_modifier', global_manager),
+        'paleontology': effects.effect('paleontology_completion_effect', 'public_relations_campaign_modifier', global_manager),
+        'theology': effects.effect('theology_completion_effect', 'religious_campaign_plus_modifier', global_manager)
+        }
+    )
+    global_manager.set('lore_types_effect_descriptions_dict',
+        {
+        'zoology': 'chance of a positive modifier for hunting rolls',
+        'botany': 'lower chance of unit attrition death',
+        'archaeology': 'chance of a positive modifier for attacking rolls against native warriors',
+        'anthropology': 'chance of a positive modifier for native conversion rolls',
+        'paleontology': 'chance of a positive modifier for public relations campaign rolls',
+        'theology': 'chance of a positive modifier for religious campaign rolls'
+        }
+    )
+    global_manager.set('current_lore_mission', 'none') #lore mission should be an object type with attributes for type, location, leads, etc.
+    global_manager.set('lore_mission_list', [])
+    global_manager.set('completed_lore_mission_types', [])
 
 def value_trackers_setup(global_manager):
     '''
@@ -842,6 +1004,9 @@ def buttons_setup(global_manager):
 
     save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
+
+    toggle_grid_lines_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
+        scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', 'none', ['strategic'], 'buttons/grid_line_button.png', global_manager)
 
     cycle_units_button = buttons.button(scaling.scale_coordinates(110, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
@@ -984,6 +1149,8 @@ def trial_screen_setup(global_manager):
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'not prosecution_bribed_judge', global_manager)
         #image_id, coordinates, width, height, modes, indicator_type, global_manager
 
+    global_manager.set('evidence_just_found', False)
+
 def new_game_setup_screen_setup(global_manager):
     '''
     Description:
@@ -1106,7 +1273,7 @@ def tile_interface_setup(global_manager):
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort']
+    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort', 'possible_artifact_location']
     #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
     for current_actor_image_type in tile_info_display_images:
         if not current_actor_image_type in ['up', 'down', 'right', 'left']:
@@ -1314,6 +1481,9 @@ def debug_tools_setup(global_manager):
     DEBUG_band_of_thieves = effects.effect('DEBUG_band_of_thieves', 'band_of_thieves', global_manager)
     #causes all ministers to be corrupt whenever possible
 
+    DEBUG_nine_mortal_men = effects.effect('DEBUG_nine_mortal_men', 'nine_mortal_men', global_manager)
+    #causes ministers to roll 1 on all rolls
+
     DEBUG_ministry_of_magic = effects.effect('DEBUG_ministry_of_magic', 'ministry_of_magic', global_manager)
     #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
 
@@ -1323,6 +1493,24 @@ def debug_tools_setup(global_manager):
     DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
     #prints how and when a minister or country modifiers affects a roll
 
+    DEBUG_hide_grid_lines = effects.effect('DEBUG_hide_grid_lines', 'hide_grid_lines', global_manager)
+    #hides interior grid lines
+
+    DEBUG_enable_oceans = effects.effect('DEBUG_enable_oceans', 'enable_oceans', global_manager)
+    #allows water to generate as a normal terrain and removes default river/ocean generation
+
+    DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
+    #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
+    
+    DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
+    #prints information about lore missions when first created and on load
+    #DEBUG_show_lore_mission_locations.apply()
+    #DEBUG_skip_intro.apply()
+    #DEBUG_ministry_of_magic.apply()
+    #DEBUG_band_of_thieves.apply()
+    #DEBUG_block_native_warrior_spawning.apply()
+    #DEBUG_remove_fog_of_war.apply()
+    #DEBUG_nine_mortal_men.apply()
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):

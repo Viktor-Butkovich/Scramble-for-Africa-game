@@ -9,6 +9,7 @@ from . import choice_notifications
 from . import action_notifications
 from . import scaling
 from . import text_tools
+from . import events
 
 class global_manager_template():
     '''
@@ -167,6 +168,22 @@ class effect_manager_template():
                 return(True)
         return(False)
 
+    def set_effect(self, effect_type, new_status):
+        '''
+        Description:
+            Finds and returns whether any effect of the inputted type is active
+        Input:
+            string effect_type: Type of effect to check for
+        Output:
+            boolean: Returns whether any effect of the inputted type is active
+        '''
+        for current_effect in self.possible_effects:
+            if current_effect.effect_type == effect_type:
+                if new_status == True:
+                    current_effect.apply()
+                else:
+                    current_effect.remove()
+
 class flavor_text_manager_template():
     '''
     Object that reads flavor text from .csv files and distributes it to other parts of the program when requested
@@ -222,6 +239,25 @@ class flavor_text_manager_template():
             else:
                 return_text += current_character
         return(return_text)
+
+    def generate_substituted_indexed_flavor_text(self, subject, replace_char, replace_with):
+        '''
+        Description:
+            Returns a random flavor text statement based on the inputted string, with all instances of replace_char replaced with replace_with
+        Input:
+            string subject: Represents the type of flavor text to return
+        Output:
+            string, int tuple: Random flavor text statement of the inputted subject, followed by the index in the flavor text list of the outputted flavor text
+        '''
+        base_text = random.choice(self.subject_dict[subject])
+        index = self.subject_dict[subject].index(base_text)
+        return_text = ''
+        for current_character in base_text:
+            if current_character == replace_char:
+                return_text += replace_with
+            else:
+                return_text += current_character
+        return((return_text, index))
 
 
     def generate_flavor_text(self, subject):
@@ -420,15 +456,15 @@ class money_tracker(value_tracker):
         '''
         if change_type == 'misc.':
             if value_change > 0:
-                change_type = 'misc. revenue'
+                change_type = 'misc_revenue'
             else:
-                change_type = 'misc. expenses'
+                change_type = 'misc_expenses'
         self.transaction_history[change_type] += value_change
         if not value_change == 0:
             if abs(value_change) < 15:
-                self.global_manager.get('sound_manager').play_sound('coins 1')
+                self.global_manager.get('sound_manager').play_sound('coins_1')
             else:
-                self.global_manager.get('sound_manager').play_sound('coins 2')
+                self.global_manager.get('sound_manager').play_sound('coins_2')
         super().change(value_change)
 
     def set(self, new_value):
@@ -511,31 +547,67 @@ class notification_manager_template():
             None
         '''
         self.notification_width = 500
-        self.notification_height = 300#500#600
-        self.notification_y = 336#236#186
-        height_difference = notification_height - self.notification_height
-        if height_difference > 0: #if notification height greater than default notification height
-            self.notification_y -= (height_difference / 2) #lower by half of height change
-            self.notification_height += height_difference #increase height by height change
+        self.notification_height = 300 #300 #500#600
+        self.notification_y = 500#236#186
+        #height_difference = notification_height - self.notification_height
+        #if height_difference > 0: #if notification height greater than default notification height
+        #    self.notification_y -= (height_difference / 2) #lower by half of height change
+        #    self.notification_height += height_difference #increase height by height change
             #should change top and bottom locations while keeping same center
         if self.global_manager.get('current_game_mode') in ['strategic', 'none']: #move notifications out of way of minimap on strategic mode or during setup
             self.notification_x = self.global_manager.get('minimap_grid_origin_x') - (self.notification_width + 40)
         else: #show notifications in center on europe mode
             self.notification_x = 610
+        #self.notification_height = 300
+        if notification_height > self.notification_height:
+            self.notification_height = notification_height
+        self.notification_y -= self.notification_height / 2
 
+    def format_message(self, message):
+        new_message = []
+        next_line = ''
+        next_word = ''
+        font_size = 25
+        font_name = self.global_manager.get('font_name')
+        for index in range(len(message)):
+            if not ((not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n'): #don't add if /n
+                if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
+                    next_word += message[index]
+            if message[index] == ' ':
+                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                    new_message.append(next_line)
+                    next_line = ''
+                next_line += next_word
+                next_word = ''
+            elif (not (index + 2) > len(message) and message[index] + message[index + 1]) == '/n': #don't check for /n if at last index
+                new_message.append(next_line)
+                next_line = ''
+                next_line += next_word
+                next_word = ''
+        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+            new_message.append(next_line)
+            next_line = ''
+        next_line += next_word
+        new_message.append(next_line)
+        #new_height = len(new_message) * font_size #scaling.scale_height(25, self.global_manager) #font size
+        #print(len(new_message))
+        return(new_message)
+        #if new_height > self.minimum_height:
+        #    self.height = new_height
+    '''
     def get_notification_height(self, notification_text):
-        '''
+        
         Description:
             Returns the height in pixels of the inputted text if it were put in a notification
         Input:
             string notification_text: Text that will appear on the notification with lines separated by /n
         Output:
             int: height in pixels of the inputted text if it were put in a notification
-        '''
+        
         new_message = []
         next_line = ''
         next_word = ''
-        font_size = 25
+        font_size = 25 #scaling.scale_height(25, self.global_manager) #self.global_manager.get('font_size') #25
         font_name = self.global_manager.get('font_name')
         font = pygame.font.SysFont(font_name, font_size)
         for index in range(len(notification_text)):
@@ -559,8 +631,8 @@ class notification_manager_template():
         next_line += next_word
         new_message.append(next_line)
         new_message.append('Click to remove this notification.')
-        return(scaling.scale_height(len(new_message) * font_size, self.global_manager))#self.message = new_message
-            
+        return(len(new_message) * font_size)#self.message = new_message
+    '''
     def notification_to_front(self, message):
         '''
         Description:
@@ -570,7 +642,11 @@ class notification_manager_template():
         Output:
             None
         '''
-        self.update_notification_layout(self.get_notification_height(message))
+        height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10)
+        #print(height)
+        #self.update_notification_layout(self.get_notification_height(message))
+        self.update_notification_layout(height)
+
         notification_type = self.notification_type_queue.pop(0)
         notification_dice = self.notification_dice_queue.pop(0) #number of dice of selected mob to show when notification is visible
         if notification_type == 'roll':
@@ -646,12 +722,36 @@ class notification_manager_template():
             new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
 
+        elif notification_type == 'rumor_search':
+            new_notification = action_notifications.rumor_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
+            
+        elif notification_type == 'final_rumor_search':
+            new_notification = action_notifications.rumor_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
+
+        elif notification_type == 'artifact_search':
+            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
+            
+        elif notification_type == 'final_artifact_search':
+            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
+
         elif notification_type == 'slave_capture':
             new_notification = action_notifications.capture_slaves_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
             
         elif notification_type == 'final_slave_capture':
             new_notification = action_notifications.capture_slaves_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
+
+        elif notification_type == 'suppress_slave_trade':
+            new_notification = action_notifications.suppress_slave_trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
+                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
+            
+        elif notification_type == 'final_suppress_slave_trade':
+            new_notification = action_notifications.suppress_slave_trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
                 self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
 
         elif notification_type == 'construction':
@@ -710,27 +810,253 @@ class sound_manager_template():
             None
         '''
         self.global_manager = global_manager
+        self.default_music_dict = {
+            'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme'],
+            'main menu': ['main theme'],
+            'village peaceful': ['village peaceful'],
+            'village neutral': ['village neutral'],
+            'village aggressive': ['village aggressive'],
+            'slave traders': ['slave traders theme']
+        }
+        self.previous_state = 'none'
+        self.previous_song = 'none'
 
-    def play_sound(self, file_name):
+    def play_sound(self, file_name, volume = 0.3):
         '''
         Description:
             Plays the sound effect from the inputted file
         Input:
             string file_name: Name of .wav file to play sound of
+            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
         Output:
-            None
+            Channel: Returns the pygame mixer Channel object that the sound was played on
         '''
         current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
-        current_sound.play()
+        current_sound.set_volume(volume)
+        channel = current_sound.play()
+        return(channel)
 
-    def play_music(self, file_name):
+    def queue_sound(self, file_name, channel, volume = 0.3):
         '''
         Description:
-            Starts repeating the music from the inputted file, replacing any current music
+            Queues the sound effect from the inputted file to be played once the inputted channel is done with its current sound
+        Input:
+            string file_name: Name of .wav file to play sound of
+            Channel channel: Pygame mixer channel to queue the sound in
+            double volume = 0.3: Volume from 0.0 to 1.0 to play sound at - mixer usually uses a default of 1.0
+        Output:
+            None
+        '''   
+        current_sound = pygame.mixer.Sound('sounds/' + file_name + '.wav')
+        current_sound.set_volume(volume)
+        channel.queue(current_sound)
+
+    def play_music(self, file_name, volume = -0.1):
+        '''
+        Description:
+            Starts playing the music from the inputted file, replacing any current music
         Input:
             string file_name: Name of .wav file to play music of
+            double volume = -0.1: Volume from 0.0 to 1.0 to play sound at - replaces negative or absent volume input with default
         Output:
             None
         '''
-        pygame.mixer.music.load('sounds/' + file_name + '.wav')
-        pygame.mixer.music.play(999)
+        if volume < 0: #negative volume value -> use default
+            volume = self.global_manager.get('default_music_volume')
+        pygame.mixer.music.load('sounds/music/' + file_name + '.wav')
+        pygame.mixer.music.set_volume(volume)
+        pygame.mixer.music.play(0) #music loops when loop argument is -1
+
+    def music_transition(self, file_name, time_interval = 0.75):
+        '''
+        Description:
+            Fades out the current song and plays a new song at the previous volume
+        Input:
+            string file_name: Name of .wav file to play music of, or 'none' if music should fade out but not restart
+            double time_interval = 0.75: Time to wait between each volume change event
+        Output:
+            None
+        '''
+        original_volume = self.global_manager.get('default_music_volume') #pygame.mixer.music.get_volume()
+        pygame.mixer.music.set_volume(original_volume)
+        #pygame.mixer.music.set_volume(original_volume)
+        #time_interval = 0.75
+        time_passed = 0
+        if pygame.mixer.music.get_busy(): #only delay starting music for fade out if there is any current music to fade out
+            for i in range(1, 5):
+                time_passed += time_interval #with each interval, time_interval time passes and volume decreases by 0.25
+                self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume * (1 - (0.25 * i))], time_passed)
+
+        if not file_name == 'none':
+            time_passed += time_interval
+            self.global_manager.get('event_manager').add_event(self.play_music, [file_name, 0], time_passed)
+            for i in range(1, 5):
+                self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume * (0.25 * i)], time_passed)
+                time_passed += time_interval #with each interval, time_interval time passes and volume increases by 0.25
+        else:
+            self.global_manager.get('event_manager').add_event(pygame.mixer.music.stop, [], time_passed)
+            self.global_manager.get('event_manager').add_event(pygame.mixer.music.unload, [], time_passed)
+            self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume], time_passed)     
+
+    def dampen_music(self, time_interval = 0.5):
+        '''
+        Description:
+            Temporarily reduces the volume of the music to allow for other sounds
+        Input:
+            double time_interval = 0.5: Time to wait between each volume change event
+        Output:
+            None
+        '''
+        self.global_manager.get('event_manager').clear()
+        original_volume = self.global_manager.get('default_music_volume')
+        pygame.mixer.music.set_volume(0)
+        time_passed = 0
+        for i in range(-5, 6):
+            time_passed += time_interval
+            if i > 0:
+                self.global_manager.get('event_manager').add_event(pygame.mixer.music.set_volume, [original_volume * i * 0.1], time_passed)
+
+    def play_random_music(self, current_state, previous_song = 'none'):
+        '''
+        Description:
+            Plays random music depending on the current state of the game, like 'main menu', 'europe', or 'village', and the current player country
+        Input:
+            string current_state: Descriptor for the current state of the game to play music for
+            string previous_song: The previous song that just ended, if any, to avoid playing it again unless it is the only option
+        Output:
+            None
+        '''
+        self.previous_song = 'none'
+        if not (self.previous_state == current_state):
+            state_changed = True
+        else:
+            state_changed = False
+        self.previous_state = current_state
+        current_country = self.global_manager.get('current_country')
+        if current_state == 'europe' and not current_country == 'none':
+            if self.global_manager.get('creating_new_game') and len(self.global_manager.get('current_country').music_list) > 0:
+                possible_songs = self.global_manager.get('current_country').music_list
+            else:
+                possible_songs = self.default_music_dict[current_state] + self.global_manager.get('current_country').music_list
+        else:
+            possible_songs = self.default_music_dict[current_state]
+        if len(possible_songs) == 1:
+            chosen_song = random.choice(possible_songs)
+        elif len(possible_songs) > 0:
+            chosen_song = random.choice(possible_songs)
+            if not previous_song == 'none': #plays different song if multiple choices available
+                while chosen_song == previous_song:
+                    chosen_song = random.choice(possible_songs)
+        else:
+            chosen_song = 'none'
+        if current_state in ['slave traders', 'village peaceful', 'village neutral', 'village aggressive'] or self.previous_state in ['slave traders', 'village peaceful', 'village neutral', 'village aggressive']:
+            time_interval = 0.4
+        else:
+            time_interval = 0.75
+        if (not state_changed) and (not chosen_song == 'none'):
+            self.play_music(chosen_song)
+        else:
+            self.music_transition(chosen_song, time_interval)
+        self.previous_song = chosen_song
+        #pygame.mixer.music.set_endevent(SONG_END)
+        #print(pygame.mixer.music.get_endevent())
+
+    def song_done(self):
+        '''
+        Description:
+            Called when a song finishes, plays a new random song for the same state, with the new song being different if possible
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.play_random_music(self.previous_state, self.previous_song)
+
+class event_manager_template():
+    '''
+    Object that tracks a list of events and calls the relevant functions once an inputted amount of time has passed
+    '''
+    def __init__(self, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.event_list = []
+        self.event_time_list = []
+        self.global_manager = global_manager
+        self.previous_time = self.global_manager.get('current_time')
+        #self.add_event(self.go, (), 5) #calls this object's go function after 5 seconds with no inputs
+
+    def add_event(self, function, inputs, activation_time):
+        '''
+        Description:
+            Creates a new event with the inputted function and time that will call the inputted function with inputs after the inputted time has elapsed
+        Input:
+            function function: Function that will be called after the inputted time has elapsed
+            list inputs: List of inputs the function will be called with, in order
+            double activation_time: Amount of time that will pass before the function is called
+        Output:
+            None
+        '''
+        self.event_list.append(events.event(function, inputs, activation_time, self))
+
+    def add_repeating_event(self, function, inputs, activation_time, num_repeats = -1):
+        '''
+        Description:
+            Creates a new event with the inputted function and time that will call the inputted function with inputs after the inputted time has elapsed
+        Input:
+            function function: Function that will be called each time the inputted time elapses
+            list inputs: List of inputs the function will be called with, in order
+            double activation_time: Amount of time that will pass between each function call
+        Output:
+            None
+        '''
+        self.event_list.append(events.repeating_event(function, inputs, activation_time, self, num_repeats))
+        
+    def update(self, new_time):
+        '''
+        Description:
+            Updates events with the current time, activating any that run out of time
+        Input:
+            double new_time: New time to update this object with
+        Output:
+            None
+        '''
+        time_difference = new_time - self.previous_time
+        activated_events = []
+
+        for current_event in self.event_list:
+            current_event.activation_time -= time_difference #updates event times with new time
+            if current_event.activation_time <= 0: #if any event runs out of time, activate it
+                activated_events.append(current_event)
+
+        if len(activated_events) > 0: #when an event activates, call its stored function 
+            for current_event in activated_events:
+                current_event.activate()
+                current_event.remove()
+
+        self.previous_time = new_time
+
+    def clear(self):
+        '''
+        Description:
+            Removes this object's events, removing them from storage and stopping them before activation
+        Input:
+            None
+        Output:
+            None
+        '''
+        existing_events = []
+        for current_event in self.event_list:
+            existing_events.append(current_event)
+        for current_event in existing_events:
+            current_event.remove()
+
+    def go(self):
+        #function to call for event testing
+        #calls the money tracker's change function with an input of -20 every second, repeats infinitely because no num_repeats is provided
+        self.add_repeating_event(self.global_manager.get('money_tracker').change, [-20], activation_time = 1)

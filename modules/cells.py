@@ -40,21 +40,23 @@ class cell():
         self.resource = 'none'
         self.village = 'none'
         self.terrain = 'none'
+        self.terrain_variant = 0
         self.set_terrain('clear')
         self.contained_mobs = []
         self.reset_buildings()
         self.adjacent_cells = {'up': 'none', 'down': 'none', 'right': 'none', 'left': 'none'}        
-        if not save_dict == 'none':
+        if not save_dict == 'none': #if from save
             self.save_dict = save_dict
             if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
                 save_dict['visible'] = True
             self.set_visibility(save_dict['visible'])
-        else:
+            self.terrain_variant = save_dict['terrain_variant']
+        else: #if creating new map
             if global_manager.get('effect_manager').effect_active('remove_fog_of_war'):
                 self.set_visibility(True)
             else:
                 self.set_visibility(False)
-
+            
     def to_save_dict(self):
         '''
         Description:
@@ -66,6 +68,7 @@ class cell():
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'visible': boolean value - Whether this cell is visible or not
                 'terrain': string value - Terrain type of this cell and its tile, like 'swamp'
+                'terrain_variant': int value - Variant number to use for image file path, like mountain_0
                 'resource': string value - Resource type of this cell and its tile, like 'exotic wood'
                 'inventory': string/string dictionary value - Version of the inventory dictionary of this cell's tile only containing commodity types with 1+ units held
                 'village_name': Only saved if resource is natives, name of this cell's village
@@ -77,6 +80,7 @@ class cell():
         save_dict['coordinates'] = (self.x, self.y)
         save_dict['visible'] = self.visible
         save_dict['terrain'] = self.terrain
+        save_dict['terrain_variant'] = self.terrain_variant
         save_dict['resource'] = self.resource
 
         saved_inventory = {}
@@ -92,9 +96,39 @@ class cell():
             save_dict['village_aggressiveness'] = self.village.aggressiveness
             save_dict['village_available_workers'] = self.village.available_workers
             save_dict['village_attached_warriors'] = []
+            save_dict['village_found_rumors'] = self.village.found_rumors
             for attached_warrior in self.village.attached_warriors:
                 save_dict['village_attached_warriors'].append(attached_warrior.to_save_dict())
         return(save_dict)
+
+    def has_walking_connection(self, adjacent_cell):
+        '''
+        Description:
+            Finds and returns whether a walking-only unit could move between this cell and the inputted cell, based on the terrains of the cells and whether a bridge is built
+        Input:
+            cell adjacent_cell: Cell to check for walking connections
+        Output:
+            boolean: Returns whether a walking-only unit could move between this cell and the inputted cell, based on the terrains of the cells and whether a bridge is built
+        '''
+        if not (self.terrain == 'water' or adjacent_cell.terrain == 'water'): #if both are land tiles, walking connection exists
+            return(True)
+        if self.terrain == 'water' and adjacent_cell.terrain == 'water': #if both are water, no walking connection exists
+            return(False)
+
+        if self.terrain == 'water':
+            water_cell = self
+            land_cell = adjacent_cell
+        else:
+            water_cell = adjacent_cell
+            land_cell = self
+        
+        water_infrastructure = water_cell.get_intact_building('infrastructure')
+        if water_infrastructure == 'none': #if no bridge in water tile, no walking connection exists
+            return(False)
+        if water_infrastructure.is_bridge:
+            if land_cell in water_infrastructure.connected_cells: #if bridge in water tile connects to the land tile, walking connection exists
+                return(True)
+        return(False)
 
     def local_attrition(self, attrition_type = 'health'):
         '''
@@ -316,6 +350,14 @@ class cell():
         return(False)
 
     def get_warehouses_cost(self):
+        '''
+        Description:
+            Calculates and returns the cost of the next warehouses upgrade in this tile, based on the number of past warehouses upgrades
+        Input:
+            None
+        Output:
+            int: Returns the cost of the next warehouses upgrade in this tile, based on the number of past warehouse upgrades
+        '''
         warehouses = self.get_building('warehouses')
         if warehouses == 'none':
             warehouses_built = 0
@@ -572,15 +614,18 @@ class cell():
         self.resource = new_resource
         self.tile.set_resource(new_resource)
 
-    def set_terrain(self, new_terrain):
+    def set_terrain(self, new_terrain, terrain_variant = 'none'):
         '''
         Description:
             Sets the terrain type of this cell and its attached tile to the inputted value
         Input:
             string new_terrain: The new terrain type of this cell and its attached tile, like 'swamp'
+            int/string terrain_variant: terrain variant number to use in image file path, like mountain_2
         Output:
             None
         '''
+        if not terrain_variant == 'none':
+            self.terrain_variant = terrain_variant
         self.terrain = new_terrain
         if (not self.tile == 'none'):
             self.tile.set_terrain(new_terrain)

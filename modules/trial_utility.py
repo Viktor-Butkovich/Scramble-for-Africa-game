@@ -19,7 +19,7 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     defense = global_manager.get('displayed_defense')
     prosecution = global_manager.get('displayed_prosecution')
     message = 'Are you sure you want to start a trial against ' + defense.name + '? You have ' + str(defense.corruption_evidence) + ' pieces of evidence to use. /n /n'
-    message += 'Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 6 is rolled on any of the evidence dice. /n /n'
+    message += 'Your prosecutor may roll 1 die for each piece of evidence, and the trial is successful if a 5+ is rolled on any of the evidence dice. /n /n'
     message += 'However, the defense may spend from their personal savings (perhaps stolen from your company) to hire lawyers and negate some of the evidence. /n /n'
     message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(global_manager.get('action_prices')['trial']) + ' money is also required. /n /n'
 
@@ -201,7 +201,7 @@ def trial(global_manager): #called by choice notification button
     global_manager.set('trial_rolls', [])
 
     if prosecutor_corrupt:
-        max_roll = 5
+        max_roll = 4
     else:
         max_roll = 6
     for i in range(0, effective_evidence):
@@ -227,13 +227,13 @@ def display_evidence_roll(global_manager):
     text += ''
     text = 'Evidence rolls remaining: ' + str(len(global_manager.get('trial_rolls'))) + ' /n /n'
     result = global_manager.get('trial_rolls')[0]
-    result_outcome_dict = {'min_success': 6, 'min_crit_success': 6, 'max_crit_fail': 0}
+    result_outcome_dict = {'min_success': 5, 'min_crit_success': 5, 'max_crit_fail': 0}
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
     global_manager.get('actor_creation_manager').display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440, global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
-    notification_tools.display_notification(text + 'Click to roll. 6+ required on at least 1 die to succeed.', 'default', global_manager, 1)
+    notification_tools.display_notification(text + 'Click to roll. 5+ required on at least 1 die to succeed.', 'default', global_manager, 1)
     notification_tools.display_notification(text + 'Rolling... ', 'roll', global_manager, 1)
-    results = dice_utility.roll_to_list(6, 'Evidence roll', 6, 6, 0, global_manager, result)
+    results = dice_utility.roll_to_list(6, 'Evidence roll', 5, 5, 0, global_manager, result)
     notification_tools.display_notification(text + results[1], 'trial', global_manager)
 
 def complete_trial(final_roll, global_manager):
@@ -250,7 +250,7 @@ def complete_trial(final_roll, global_manager):
     defense = global_manager.get('displayed_defense')
     game_transitions.set_game_mode('ministers', global_manager)
     
-    if final_roll == 6:
+    if final_roll >= 5:
         confiscated_money = defense.stolen_money / 2.0
         text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
         if confiscated_money > 0:

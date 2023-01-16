@@ -68,6 +68,9 @@ class dice_rolling_notification(action_notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
+        if self.global_manager.get('ongoing_combat') or self.global_manager.get('ongoing_slave_capture') or self.global_manager.get('ongoing_slave_trade_suppression'):
+            if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
+                self.global_manager.get('sound_manager').play_sound('gunfire')
 
     def update_tooltip(self):
         '''
@@ -103,7 +106,7 @@ class dice_rolling_notification(action_notification):
         '''
         super().remove()
         self.global_manager.set('current_dice_rolling_notification', 'none')
-        if len(self.global_manager.get('dice_list')) > 1:
+        if len(self.global_manager.get('dice_list')) > 1: #if there are multiple dice, check if any player-controlled dice are critical successes for promotion
             max_roll = 0
             max_die = 0
             for current_die in self.global_manager.get('dice_list'):
@@ -116,13 +119,23 @@ class dice_rolling_notification(action_notification):
                         current_die.outline_color = current_die.outcome_color_dict['crit_success']
                     elif current_die.special_die_type == 'red':
                         current_die.outline_color = current_die.outcome_color_dict['crit_fail']
+
+                if current_die.final_result >= current_die.result_outcome_dict['min_crit_success']:
+                    if not self.global_manager.get('displayed_mob').veteran:
+                        if not self.global_manager.get('displayed_mob').veteran:
+                            self.global_manager.get('sound_manager').play_sound('trumpet_1')
+
             for current_die in self.global_manager.get('dice_list'):
                 if not (not current_die.normal_die and current_die.special_die_type == 'red'):
                     if not current_die == max_die:
                         current_die.normal_die = True
             max_die.highlighted = True
-        else:
-            self.global_manager.get('dice_list')[0].highlighted = True#outline_color = 'white'
+        else: #if only 1 die, check if it is a crtiical success for promotion
+            self.global_manager.get('dice_list')[0].highlighted = True #outline_color = 'white'
+            if self.global_manager.get('dice_list')[0].final_result >= self.global_manager.get('dice_list')[0].result_outcome_dict['min_crit_success']:
+                if not self.global_manager.get('displayed_mob') == 'none':
+                    if not self.global_manager.get('displayed_mob').veteran:
+                        self.global_manager.get('sound_manager').play_sound('trumpet_1')
 
 class exploration_notification(action_notification):
     '''
@@ -157,6 +170,9 @@ class exploration_notification(action_notification):
             if not explored_tile.resource_icon == 'none':
                 explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
                 self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
+                self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                     scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
@@ -211,20 +227,33 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        current_expedition = global_manager.get('displayed_mob')
+        self.current_expedition = global_manager.get('displayed_mob')
         self.notification_images = []
-        explored_cell = current_expedition.destination_cells.pop(0)
-        public_opinion_increase = current_expedition.public_opinion_increases.pop(0)
+        explored_cell = self.current_expedition.destination_cells.pop(0)
+        public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
-        explored_terrain_image_id = explored_cell.tile.image_dict['default']
+
+        if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
+            explored_terrain_image_id = explored_cell.tile.image_dict['default']
+            new_visibility = True
+        elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
+            explored_terrain_image_id = explored_cell.tile.image.image_id
+            new_visibility = explored_cell.visible
+
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        if not explored_tile.resource_icon == 'none':
+        if new_visibility == True and not explored_tile.resource_icon == 'none':
             explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
             self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        global_manager.set('ongoing_exploration', True)
-        explored_cell.set_visibility(True)
+        if self.current_expedition.current_action_type == 'exploration':
+            global_manager.set('ongoing_exploration', True)
+            explored_cell.set_visibility(True)
+        elif self.current_expedition.current_action_type == 'rumor_search':
+            global_manager.set('ongoing_rumor_search', True)
+        if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
+            self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
@@ -238,7 +267,10 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('ongoing_exploration', False)
+        if self.current_expedition.current_action_type == 'exploration':
+            self.global_manager.set('ongoing_exploration', False)
+        elif self.current_expedition.current_action_type == 'rumor_search':
+            self.global_manager.set('ongoing_rumor_search', False)
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
@@ -371,6 +403,13 @@ class religious_campaign_notification(action_notification):
             self.notification_images = []
             self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
+            if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -496,7 +535,7 @@ class trial_notification(action_notification):
         for current_die in self.global_manager.get('dice_list'):
             current_die.remove()
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
-        if previous_roll == 6:
+        if previous_roll >= 5:
             self.global_manager.set('trial_rolls', []) #stop trial after success
         if len(self.global_manager.get('trial_rolls')) > 0:
             trial_utility.display_evidence_roll(self.global_manager)
@@ -542,6 +581,11 @@ class advertising_campaign_notification(action_notification):
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             self.notification_images.append(free_image('scenery/resources/minus.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 125, 400, global_manager),
                 scaling.scale_width(100, global_manager), scaling.scale_height(100, global_manager), modes, global_manager, True))
+        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
+            if global_manager.get('advertising_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music(0.75)
+                channel = global_manager.get('sound_manager').play_sound('voices/advertising/messages/' + str(global_manager.get('current_sound_file_index')), 1.0)
+                global_manager.get('sound_manager').queue_sound('voices/advertising/commodities/' + global_manager.get('current_advertised_commodity'), channel)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -599,6 +643,13 @@ class conversion_notification(action_notification):
         self.is_last = is_last
         if self.is_last: #if last, show result
             self.notification_images = []
+        elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
+            if global_manager.get('conversion_result')[4]: #and if success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -632,6 +683,119 @@ class conversion_notification(action_notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
+class rumor_search_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a rumor search attempt when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            self.notification_images = []
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
+        #if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+            self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
+            
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        if self.is_last: #if is last notification in successful campaign, remove any attached images
+            for current_image in self.notification_images:
+                current_image.remove()
+
+class artifact_search_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of an artifact search attempt when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            self.notification_images = []
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there is one. Executes notification results,
+                such as reducing village aggressiveness, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(notification_manager.notification_type_queue) > 0 and not notification_manager.notification_type_queue[0] == 'roll':
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+        if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
+            self.global_manager.get('artifact_search_result')[0].complete_artifact_search()
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+
 class capture_slaves_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a slave capture attempt when the last notification is removed
@@ -647,7 +811,7 @@ class capture_slaves_notification(action_notification):
             string list modes: Game modes during which this notification can appear
             string image: File path to the image used by this object
             string message: Text that will appear on the notification with lines separated by /n
-            boolean is_last: Whether this is the last religious campaign notification. If it is the last, any side images will be removed when it is removed
+            boolean is_last: Whether this is the last capture slaves notification. If it is the last, any side images will be removed when it is removed
             int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -693,6 +857,61 @@ class capture_slaves_notification(action_notification):
             for current_image in self.notification_images:
                 current_image.remove()
 
+class suppress_slave_trade_notification(action_notification):
+    '''
+    Notification that does not automatically prompt the user to remove it and shows the results of a slave trade suppression attempt when the last notification is removed
+    '''
+    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, is_last, notification_dice, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this notification
+            int ideal_width: Pixel width that this notification will try to retain. Each time a word is added to the notification, if the word extends past the ideal width, the next line will be started
+            int minimum_height: Minimum pixel height of this notification. Its height will increase if the contained text would extend past the bottom of the notification
+            string list modes: Game modes during which this notification can appear
+            string image: File path to the image used by this object
+            string message: Text that will appear on the notification with lines separated by /n
+            boolean is_last: Whether this is the last slave trade suppression notification. If it is the last, any side images will be removed when it is removed
+            int notification_dice: Number of dice allowed to be shown during this notification, allowing the correct set of dice to be shown when multiple notifications are queued
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        ''' 
+        self.is_last = is_last
+        if self.is_last: #if last, show result
+            self.notification_images = []
+            
+        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
+
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program.  When a notification is removed, the next notification is shown, if there
+            is one. Executes notification results, as applicable. Removes dice and other side images as applicable
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
+        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
+        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        notification_manager = self.global_manager.get('notification_manager')
+        if len(notification_manager.notification_queue) >= 1:
+            notification_manager.notification_queue.pop(0)
+        if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] == 'none': #if last notification, remove dice and complete action
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.remove()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+            self.global_manager.get('suppress_slave_trade_result')[0].complete_suppress_slave_trade()
+            
+        elif len(notification_manager.notification_queue) > 0:
+            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+
 class construction_notification(action_notification):
     '''
     Notification that does not automatically prompt the user to remove it and shows the results of a construction attempt when the last notification is removed
@@ -718,6 +937,13 @@ class construction_notification(action_notification):
         if self.is_last: #if last, show result
             #current_constructor = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
+        elif len(global_manager.get('notification_manager').notification_queue) == 2:
+            if global_manager.get('construction_result')[2] and global_manager.get('construction_result')[3] == 'mission': #if building mission success is True, play sound once dice roll finishes
+                global_manager.get('sound_manager').dampen_music()
+                if global_manager.get('current_country').religion == 'protestant':
+                    global_manager.get('sound_manager').play_sound('onward christian soldiers')
+                elif global_manager.get('current_country').religion == 'catholic':
+                    global_manager.get('sound_manager').play_sound('ave maria')
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):

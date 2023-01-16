@@ -1,10 +1,9 @@
 #Contains functionality for notifications
 
+import random
 import time
 from .labels import multi_line_label
-from . import text_tools
 from . import utility
-from . import scaling
 from . import actor_utility
 from . import game_transitions
 
@@ -112,7 +111,10 @@ class minister_notification(notification):
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.attached_minister = attached_minister
         self.notification_type = 'minister'
-        
+        if self.attached_minister.current_position == 'Prosecutor' and global_manager.get('evidence_just_found'):
+            global_manager.get('sound_manager').play_sound(random.choice(['voices/evidence 1', 'voices/evidence 2']))
+            global_manager.set('evidence_just_found', False)
+
     def remove(self):
         '''
         Description:
@@ -153,7 +155,7 @@ class zoom_notification(notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
         self.notification_type = 'default'
-        self.reselect = True
+        #self.reselect = True
         if self.global_manager.get('strategic_map_grid') in target.grids:
             self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
         if target.actor_type == 'tile':
@@ -162,8 +164,8 @@ class zoom_notification(notification):
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
         elif target.actor_type == 'mob':
             if not target.images[0].current_cell == 'none': #if non-hidden mob, move to front of tile and select
-                if self.global_manager.get('displayed_mob') == target:
-                    self.reselect = False
+                #if self.global_manager.get('displayed_mob') == target:
+                #    self.reselect = False
                 target.select()
                 target.move_to_front()
                 #actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), target.images[0].current_cell.tile)
@@ -184,7 +186,7 @@ class zoom_notification(notification):
         Output:
             None
         '''
-        if self.reselect:
-            game_transitions.cycle_player_turn(self.global_manager, True)
+        #if self.reselect:
+        #    game_transitions.cycle_player_turn(self.global_manager, True)
         super().remove()
 

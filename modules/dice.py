@@ -40,7 +40,7 @@ class die(button):
         self.last_roll = 0
         self.highlighted = False
         self.normal_die = True
-        if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0 and result_outcome_dict['min_crit_success'] >= 7:
+        if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0: # and result_outcome_dict['min_crit_success'] >= 7
             #if roll without normal success/failure results, like combat
             image_id = 'misc/dice/4.png'
             self.normal_die = False
@@ -127,11 +127,11 @@ class die(button):
         dice_list = self.global_manager.get('dice_list')
         if self == dice_list[0]: #only 1 die at a time makes noise
             if len(dice_list) == 1:
-                self.global_manager.get('sound_manager').play_sound('dice 1')
+                self.global_manager.get('sound_manager').play_sound('dice_1')
             elif len(dice_list) == 2:
-                self.global_manager.get('sound_manager').play_sound('dice 2')
+                self.global_manager.get('sound_manager').play_sound('dice_2')
             else:
-                self.global_manager.get('sound_manager').play_sound('dice 3')
+                self.global_manager.get('sound_manager').play_sound('dice_3')
                 
         
     def roll(self):

@@ -2,6 +2,7 @@
 
 import pygame
 import time
+import random
 from . import images
 from . import utility
 from . import actor_utility
@@ -10,7 +11,7 @@ from .tiles import status_icon
 
 class mob(actor):
     '''
-    Actor that can be selected and appear on multiple grids at once, but not necessarily controlled
+    Actor that can be selected and move within and between grids, but can not necessarily controlled
     '''
     def __init__(self, from_save, input_dict, global_manager):
         '''
@@ -63,6 +64,8 @@ class mob(actor):
         global_manager.get('mob_list').append(self)
         self.set_name(input_dict['name'])
         self.can_swim = False #if can enter water areas without ships in them
+        self.can_swim_river = False
+        self.can_swim_ocean = False
         self.can_walk = True #if can enter land areas
         self.has_canoes = False
         self.max_movement_points = 1
@@ -153,8 +156,6 @@ class mob(actor):
                 input_dict['actor'] = self
                 input_dict['status_icon_type'] = 'disorganized'
                 self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
         else:
             remaining_icons = []
             for current_status_icon in self.status_icons:
@@ -163,6 +164,8 @@ class mob(actor):
                 else:
                     remaining_icons.append(current_status_icon)
             self.status_icons = remaining_icons
+        if self.global_manager.get('displayed_mob') == self:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
 
     def get_combat_modifier(self):
         '''
@@ -295,11 +298,18 @@ class mob(actor):
         adjacent_cell = local_cell.adjacent_cells[direction]
         if not adjacent_cell == 'none':
             cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-        
             if self.is_pmob:
-                if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                local_infrastructure = local_cell.get_intact_building('infrastructure')
+                adjacent_infrastructure = adjacent_cell.get_intact_building('infrastructure')
+                #if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
+                #    if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                if local_cell.has_walking_connection(adjacent_cell): 
+                    if not (local_infrastructure == 'none' or adjacent_infrastructure == 'none'): #if both have infrastructure and connected by land or bridge, use discount
                         cost = cost / 2
+                    #otherwise, use default cost but not full no canoe penalty cost
+                elif adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #elif river w/o canoes
+                    cost = self.max_movement_points
+
                 if (not adjacent_cell.visible) and self.can_explore:
                     cost = self.movement_cost
         return(cost)
@@ -628,17 +638,38 @@ class mob(actor):
         self.status_icons = []
 
 
-    def die(self):
+    def die(self, death_type = 'violent'):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Used instead of remove to improve consistency with groups/vehicles, whose die and remove have different
                 functionalities
         Input:
-            None
+            string death_type == 'violent': Type of death for this unit, determining the type of sound played
         Output:
             None
         '''
         self.remove()
+        if self.is_pmob:
+            self.death_sound(death_type)
+
+    def death_sound(self, death_type = 'violent'):
+        '''
+        Description:
+            Makes a sound when this unit dies, depending on the type of death
+        Input:
+        string death_type == 'violent': Type of death for this unit, determining the type of sound played
+        Output:
+            None
+        '''
+        possible_sounds = []
+        if death_type == 'fired':
+            possible_sounds = []
+        elif death_type == 'quit':
+            possible_sounds = ['quit 1', 'quit 2', 'quit 3']
+        elif death_type == 'violent':
+            possible_sounds = ['dead 1', 'dead 2', 'dead 3', 'dead 4', 'dead 5']
+        if len(possible_sounds) > 0:
+            self.global_manager.get('sound_manager').play_sound('voices/' + random.choice(possible_sounds), 0.5)
 
     def can_move(self, x_change, y_change): #same logic as pmob without print statements
         '''
@@ -663,8 +694,10 @@ class mob(actor):
                         if ((destination_type == 'land' and (self.can_walk or self.can_explore or (future_cell.has_intact_building('port') and self.images[0].current_cell.terrain == 'water'))) or
                             (destination_type == 'water' and (self.can_swim or (future_cell.has_vehicle('ship') and not self.is_vehicle) or (self.can_explore and not future_cell.visible)))):
                             if destination_type == 'water':
-                                if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                if future_y == 0 and not self.can_swim_ocean:
                                     return(False)
+                                elif future_y > 0 and (not self.can_swim_river) and self.can_walk:
+                                    return(True) #can walk through river with max movement points while becoming disorganized
                             if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
                                 return(True)
                             else:
@@ -730,10 +763,41 @@ class mob(actor):
                     self.set_movement_points(0)
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
                     self.set_movement_points(0)
+            if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river and not previous_cell.has_walking_connection(self.images[0].current_cell): #if entering river w/o canoes, spend maximum movement and become disorganized
+                #self.set_movement_points(0)
+                self.set_disorganized(True)
+            if not (self.images[0].current_cell == 'none' or self.images[0].current_cell.terrain == 'water' or self.is_vehicle):
+                possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
+                if self.global_manager.get('current_country').name == 'Germany':
+                    possible_sounds.append('voices/german forward march 1')
+                self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
 
         if self.has_canoes:
             self.update_canoes()
         self.last_move_direction = (x_change, y_change)
+
+    def can_swim_at(self, current_cell):
+        '''
+        Description: 
+            Calculates and returns whether this unit is able to swim in the inputted cell
+        Input:
+            cell current_cell: Cell where this unit checks its ability to swim
+        Output:
+            boolean: Returns whether this unit is able to swim in the inputted cell
+        '''
+        #if current_cell.terrain == 'water':
+        #    return(True)
+        if not current_cell.terrain == 'water':
+            return(True)
+        if current_cell.y > 0:
+            return(True)
+        if not self.can_swim:
+            return(False)
+        if current_cell.y == 0 and self.can_swim_ocean:
+            return(True)
+        #if current_cell.y > 0 and self.can_swim_river:
+        #    return(True)
+        return(False)
 
     def update_canoes(self):
         '''
@@ -744,17 +808,20 @@ class mob(actor):
         Output:
             None
         '''
-        if self.is_npmob and not self.visible():
-            return()
-        elif self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
+        #if self.is_npmob and not self.visible():
+        #    return()
+        if self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
             return()
         
-        if self.images[0].current_cell.terrain == 'water' and self.y > 0:
+        current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y)
+        if current_cell == 'none':
+            return()
+
+        if current_cell.terrain == 'water' and self.y > 0:
             self.set_image('canoes')
         else:
             self.set_image('no_canoes')
             
-
     def retreat(self):
         '''
         Description:

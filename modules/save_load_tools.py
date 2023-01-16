@@ -60,6 +60,9 @@ class save_load_manager_template():
         self.copied_elements.append('sold_commodities')
         self.copied_elements.append('action_prices')
         self.copied_elements.append('current_country_name')
+        self.copied_elements.append('slave_traders_strength')
+        self.copied_elements.append('slave_traders_natural_max_strength')
+        self.copied_elements.append('completed_lore_mission_types')
         
     def new_game(self, country):
         '''
@@ -82,8 +85,8 @@ class save_load_manager_template():
             self.global_manager)
         input_dict['pixel_width'] = scaling.scale_width(strategic_grid_width, self.global_manager)
         input_dict['pixel_height'] = scaling.scale_height(strategic_grid_height, self.global_manager)
-        input_dict['coordinate_width'] = 16
-        input_dict['coordinate_height'] = 15
+        input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
+        input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
         input_dict['internal_line_color'] = 'black'
         input_dict['external_line_color'] = 'black'
         input_dict['modes'] = ['strategic']
@@ -169,13 +172,16 @@ class save_load_manager_template():
         self.global_manager.get('money_tracker').set(500)
         self.global_manager.get('turn_tracker').set(0)
         self.global_manager.get('public_opinion_tracker').set(50)
+        self.global_manager.get('money_tracker').change(0) #updates projected income display
         self.global_manager.get('evil_tracker').set(0)
         self.global_manager.get('fear_tracker').set(1)
 
+        self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
+        self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_natural_max_strength'))
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
 
-        self.global_manager.get('actor_creation_manager').create_placeholder_ministers(self.global_manager)
+        self.global_manager.get('actor_creation_manager').create_initial_ministers(self.global_manager)
 
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
 
@@ -189,6 +195,8 @@ class save_load_manager_template():
         self.global_manager.set('slave_worker_upkeep', self.global_manager.get('initial_slave_worker_upkeep'))
         self.global_manager.get('recruitment_costs')['slave workers'] = self.global_manager.get('base_slave_recruitment_cost')
         actor_utility.reset_action_prices(self.global_manager)
+        for current_commodity in self.global_manager.get('commodity_types'):
+            self.global_manager.get('sold_commodities')[current_commodity] = 0
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_tools.manage_villages(self.global_manager)
@@ -197,10 +205,16 @@ class save_load_manager_template():
         minister_utility.update_available_minister_display(self.global_manager)
 
         turn_management_tools.start_player_turn(self.global_manager, True)
-
-        self.global_manager.set('minister_appointment_tutorial_completed', False)
-        self.global_manager.set('exit_minister_screen_tutorial_completed', False)
-        notification_tools.show_tutorial_notifications(self.global_manager)
+        if not self.global_manager.get('effect_manager').effect_active('skip_intro'):
+            self.global_manager.set('minister_appointment_tutorial_completed', False)
+            self.global_manager.set('exit_minister_screen_tutorial_completed', False)
+            notification_tools.show_tutorial_notifications(self.global_manager)
+        else:
+            self.global_manager.set('minister_appointment_tutorial_completed', True)
+            self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+            for current_minister_position_index in range(len(self.global_manager.get('minister_types'))):
+                self.global_manager.get('minister_list')[current_minister_position_index].appoint(self.global_manager.get('minister_types')[current_minister_position_index])
+            game_transitions.set_game_mode('strategic', self.global_manager)
         self.global_manager.set('creating_new_game', False)
         
     def save_game(self, file_path):
@@ -240,7 +254,6 @@ class save_load_manager_template():
         for current_loan in self.global_manager.get('loan_list'):
             saved_actor_dicts.append(current_loan.to_save_dict())
 
-
         saved_minister_dicts = []        
         for current_minister in self.global_manager.get('minister_list'):
             saved_minister_dicts.append(current_minister.to_save_dict())
@@ -248,12 +261,16 @@ class save_load_manager_template():
                 print(current_minister.name + ', ' + current_minister.current_position + ', skill modifier: ' + str(current_minister.get_skill_modifier()) + ', corruption threshold: ' + str(current_minister.corruption_threshold) +
                     ', stolen money: ' + str(current_minister.stolen_money) + ', personal savings: ' + str(current_minister.personal_savings))
 
+        saved_lore_mission_dicts = []
+        for current_lore_mission in self.global_manager.get('lore_mission_list'):
+            saved_lore_mission_dicts.append(current_lore_mission.to_save_dict())
 
         with open(file_path, 'wb') as handle: #write wb, read rb
             pickle.dump(saved_global_manager, handle) #saves new global manager with only necessary information to file
             pickle.dump(saved_grid_dicts, handle)
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
+            pickle.dump(saved_lore_mission_dicts, handle)
         text_tools.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
@@ -278,13 +295,15 @@ class save_load_manager_template():
                 saved_grid_dicts = pickle.load(handle)
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
+                saved_lore_mission_dicts = pickle.load(handle)
         except:
             text_tools.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
 
         #load variables
         for current_element in self.copied_elements:
-            self.global_manager.set(current_element, new_global_manager.get(current_element))
+            if not current_element == 'current_game_mode':
+                self.global_manager.set(current_element, new_global_manager.get(current_element))
         self.global_manager.get('money_tracker').set(new_global_manager.get('money'))
         self.global_manager.get('money_tracker').transaction_history = self.global_manager.get('transaction_history')
         self.global_manager.get('turn_tracker').set(new_global_manager.get('turn'))
@@ -312,8 +331,8 @@ class save_load_manager_template():
                     self.global_manager)
                 input_dict['pixel_width'] = scaling.scale_width(strategic_grid_width, self.global_manager)
                 input_dict['pixel_height'] = scaling.scale_height(strategic_grid_height, self.global_manager)
-                input_dict['coordinate_width'] = 16
-                input_dict['coordinate_height'] = 15
+                input_dict['coordinate_width'] = self.global_manager.get('strategic_map_width')
+                input_dict['coordinate_height'] = self.global_manager.get('strategic_map_height')
                 input_dict['internal_line_color'] = 'black'
                 input_dict['external_line_color'] = 'black'
                 input_dict['modes'] = ['strategic']
@@ -369,7 +388,9 @@ class save_load_manager_template():
         for current_actor_dict in saved_actor_dicts:
             self.global_manager.get('actor_creation_manager').create(True, current_actor_dict, self.global_manager)
         for current_minister_dict in saved_minister_dicts:
-            self.global_manager.get('actor_creation_manager').load_minister(current_minister_dict, self.global_manager)
+            self.global_manager.get('actor_creation_manager').create_minister(True, current_minister_dict, self.global_manager)
+        for current_lore_mission_dict in saved_lore_mission_dicts:
+            self.global_manager.get('actor_creation_manager').create_lore_mission(True, current_lore_mission_dict, self.global_manager)
         self.global_manager.set('available_minister_left_index', -2) #so that first index is in middle
         minister_utility.update_available_minister_display(self.global_manager)
         self.global_manager.get('commodity_prices_label').update_label()
@@ -377,6 +398,9 @@ class save_load_manager_template():
         self.global_manager.get('minimap_grid').calibrate(2, 2)
         if not new_global_manager.get('current_game_mode') == 'strategic':
             game_transitions.set_game_mode(new_global_manager.get('current_game_mode'), self.global_manager)
+
+        for current_completed_lore_type in self.global_manager.get('completed_lore_mission_types'):
+            self.global_manager.get('lore_types_effects_dict')[current_completed_lore_type].apply()
 
         notification_tools.show_tutorial_notifications(self.global_manager)
 

@@ -241,7 +241,7 @@ class expedition(group):
                 if future_cell.resource == 'natives':
                     text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile containing the village of ' + future_cell.village.name + '. /n /n'
                 else:
-                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile with a ' + future_cell.resource.upper() + ' resource. /n /n'
+                    text += 'The expedition has discovered a ' + future_cell.terrain.upper() + ' tile with a ' + future_cell.resource.upper() + ' resource (currently worth ' + str(self.global_manager.get('commodity_prices')[future_cell.resource]) + ' money). /n /n'
                 public_opinion_increase += 3
             else:
                 text += 'The expedition has  discovered a ' + future_cell.terrain.upper() + ' tile. /n /n'
@@ -250,8 +250,8 @@ class expedition(group):
         if roll_result <= self.current_max_crit_fail:
             text += 'Everyone in the expedition has died. /n /n' #actual death occurs when exploration completes
 
-        if public_opinion_increase > 0:
-            text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+        if public_opinion_increase > 0: #Royal/National/Imperial
+            text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             #self.veteran = True
@@ -283,7 +283,6 @@ class expedition(group):
         y_change = exploration_result[3]
         self.global_manager.get('public_opinion_tracker').change(exploration_result[4])
         future_cell = self.grid.find_cell(x_change + self.x, y_change + self.y)
-        died = False
         if roll_result >= self.current_min_success:
             future_cell.set_visibility(True)
             if self.movement_points >= self.get_movement_cost(x_change, y_change):
@@ -299,7 +298,6 @@ class expedition(group):
             self.promote()
         elif roll_result <= self.current_max_crit_fail:
             self.die()
-            died = True
         actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
     def resolve_off_tile_exploration(self):
@@ -311,6 +309,7 @@ class expedition(group):
         Output:
             None
         '''
+        self.current_action_type = 'exploration' #used in action notification to tell whether off tile notification should explore tile or not
         cardinal_directions = {'up': 'north', 'down': 'south', 'right': 'east', 'left': 'west'}
         current_cell = self.images[0].current_cell
         for current_direction in ['up', 'down', 'left', 'right']:
@@ -326,14 +325,373 @@ class expedition(group):
                         if target_cell.resource == 'natives':
                             text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + ' that contains the village of ' + target_cell.village.name + '. /n /n'
                         else:
-                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource to the ' + cardinal_directions[current_direction] + '. /n /n'
+                            text += target_cell.terrain.upper() + ' tile with a ' + target_cell.resource.upper() + ' resource (currently worth ' + str(self.global_manager.get('commodity_prices')[target_cell.resource]) + ' money) to the ' + cardinal_directions[current_direction] + '. /n /n'
                         public_opinion_increase += 3
                     else:
                         text += target_cell.terrain.upper() + ' tile to the ' + cardinal_directions[current_direction] + '. /n /n'
 
-                    if public_opinion_increase > 0:
-                        text += 'The Royal Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
+                    if public_opinion_increase > 0: #Royal/National/Imperial
+                        text += 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society is pleased with these findings, increasing your public opinion by ' + str(public_opinion_increase) + '. /n /n'
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)
                     notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
+
+    def start_rumor_search(self):
+        '''
+        Description:
+            Used when the player clicks on the start rumor search button, displays a choice notification that allows the player to search or not. Choosing to search starts the rumor search process and consumes the missionaries'
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
+        village = self.images[0].current_cell.get_building('village')
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        self.current_min_crit_success = self.default_min_crit_success
+        message = 'Are you sure you want to attempt to search for artifact rumors? If successful, the coordinates of a possible location for the ' + self.global_manager.get('current_lore_mission').name + ' will be revealed. /n /n'
+        message += 'The search will cost ' + str(self.global_manager.get('action_prices')['rumor_search']) + ' money. /n /n'
+            
+        aggressiveness_modifier = village.get_aggressiveness_modifier()
+        if aggressiveness_modifier < 0:
+            message += 'The villagers are hostile and unlikely to cooperate. /n /n'
+        elif aggressiveness_modifier > 0:
+            message += 'The villagers are friendly and likely to provide useful information. /n /n'
+        else:
+            message += 'The villagers are wary but may cooperate with sufficient persuasion. /n /n'
+        self.current_roll_modifier += aggressiveness_modifier
+
+        risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = 'RISK: LOW /n /n' + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = 'RISK: HIGH /n /n' + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = 'RISK: DEADLY /n /n' + message
+            
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        
+        choice_info_dict = {'expedition': self,'type': 'start rumor search'}
+        self.current_roll_modifier = 0
+        if self.current_min_success > 6:
+            message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Decrease the village\'s aggressiveness to decrease the roll\'s difficulty. /n /n'
+            notification_tools.display_notification(message, 'default', self.global_manager)
+        else:
+            self.global_manager.set('ongoing_rumor_search', True)
+            notification_tools.display_choice_notification(message, ['start rumor search', 'stop rumor search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def rumor_search(self):
+        '''
+        Description:
+            Controls the rumor search process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.current_action_type = 'rumor_search' #used in action notification to tell whether off tile notification should explore tile or not
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['rumor_search'] * -1, 'rumor_search')
+        village = self.images[0].current_cell.get_building('village')
+        text = ''
+        text += 'The expedition tries to find information regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+
+        if not self.veteran:    
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'rumor_search', self.global_manager, num_dice)
+        else:
+            text += ('The veteran explorer can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'rumor_search', self.global_manager, num_dice)
+
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['rumor_search'], 'rumor_search', 2)
+            first_roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+           
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = 'CRITICAL FAILURE'
+                elif i >= self.current_min_crit_success:
+                    word = 'CRITICAL SUCCESS'
+                elif i >= self.current_min_success:
+                    word = 'SUCCESS'
+                else:
+                    word = 'FAILURE'
+                result_outcome_dict[i] = word
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
+        else:
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['rumor_search'], 'rumor_search')
+            roll_list = dice_utility.roll_to_list(6, 'Rumor search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + 'Click to continue.', 'rumor_search', self.global_manager, num_dice)
+        
+        location = 'none'
+        text += '/n'
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            if self.global_manager.get('current_lore_mission').get_num_revealed_possible_artifact_locations() == len(self.global_manager.get('current_lore_mission').possible_artifact_locations):
+                village.found_rumors = True
+                self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed = True
+                text += 'While the villagers have proven cooperative, the expedition has concluded that all rumors about the ' + self.global_manager.get('current_lore_mission').name + ' have been found. /n /n'
+            else:
+                location = self.global_manager.get('current_lore_mission').get_random_unrevealed_possible_artifact_location() #random.choice(self.global_manager.get('current_lore_mission').possible_artifact_locations)
+                text += 'The villagers have proven cooperative and the expedition found valuable new rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+        else:
+            text += 'The expedition failed to find any useful information from the natives. /n /n'
+        if roll_result <= self.current_max_crit_fail:
+            text += 'Angered by the expedition\'s intrusive attempts to extract information, the natives attack the expedition. /n /n'
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += ' /nThe explorer is now a veteran and will be more successful in future ventures. /n'
+            
+        if roll_result >= self.current_min_success:
+            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_rumor_search', self.global_manager)
+            success = True
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+            success = False
+
+        self.global_manager.set('rumor_search_result', [self, roll_result, village, success, location])
+
+    def complete_rumor_search(self):
+        '''
+        Description:
+            Used when the player finishes rolling for a rumor search, shows the search's results and makes any changes caused by the result. If successful, reveals a possible artifact location, 
+                promotes explorer to a veteran on critical success. Native warriors spawn on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = self.global_manager.get('rumor_search_result')[1]
+        village = self.global_manager.get('rumor_search_result')[2]
+        success = self.global_manager.get('rumor_search_result')[3]
+        location = self.global_manager.get('rumor_search_result')[4]
+        if success: #if campaign succeeded
+            if not location == 'none':
+                coordinates = (location.x, location.y)
+                self.destination_cells = [self.global_manager.get('strategic_map_grid').find_cell(coordinates[0], coordinates[1])]
+                self.public_opinion_increases = [0]
+                location.revealed = True #revealed = True
+                village.found_rumors = True
+
+                text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
+                notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
+
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+        elif roll_result <= self.current_max_crit_fail:
+            warrior = village.spawn_warrior()
+            warrior.show_images()
+            warrior.attack_on_spawn()
+        self.global_manager.set('ongoing_rumor_search', False)
+
+    def start_artifact_search(self):
+        '''
+        Description:
+            Used when the player clicks on the start rumor search button, displays a choice notification that allows the player to search or not. Choosing to search starts the rumor search process and consumes the missionaries'
+                movement points
+        Input:
+            None
+        Output:
+            None
+        '''
+        #village = self.images[0].current_cell.get_building('village')
+        self.current_roll_modifier = 0
+        self.current_min_success = self.default_min_success
+        self.current_max_crit_fail = self.default_max_crit_fail
+        self.current_min_crit_success = self.default_min_crit_success
+        message = 'Are you sure you want to attempt to search for the ' + self.global_manager.get('current_lore_mission').name + '? '
+        message += 'If successful, the ' + self.global_manager.get('current_lore_mission').name + ' will be found if it is at this location. /n /n'
+        message += 'The search will cost ' + str(self.global_manager.get('action_prices')['artifact_search']) + ' money. /n /n'
+
+        risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
+        if self.veteran: #reduce risk if veteran
+            risk_value -= 1
+
+        if risk_value < 0: #0/6 = no risk
+            message = 'RISK: LOW /n /n' + message  
+        elif risk_value == 0: #1/6 death = moderate risk
+            message = 'RISK: MODERATE /n /n' + message #puts risk message at beginning
+        elif risk_value == 1: #2/6 = high risk
+            message = 'RISK: HIGH /n /n' + message
+        elif risk_value > 1: #3/6 or higher = extremely high risk
+            message = 'RISK: DEADLY /n /n' + message
+            
+        self.current_min_success -= self.current_roll_modifier #positive modifier reduces number required for succcess, reduces maximum that can be crit fail
+        self.current_max_crit_fail -= self.current_roll_modifier
+        if self.current_min_success > self.current_min_crit_success:
+            self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
+        
+        choice_info_dict = {'expedition': self,'type': 'start rumor search'}
+        self.current_roll_modifier = 0
+        if self.current_min_success > 6:
+            message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. /n /n'
+            notification_tools.display_notification(message, 'default', self.global_manager)
+        else:
+            self.global_manager.set('ongoing_artifact_search', True)
+            notification_tools.display_choice_notification(message, ['start artifact search', 'stop artifact search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+
+    def artifact_search(self):
+        '''
+        Description:
+            Controls the rumor search process, determining and displaying its result through a series of notifications
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = 0
+        self.just_promoted = False
+        self.set_movement_points(0)
+
+        if self.veteran: #tells notifications how many of the currently selected mob's dice to show while rolling
+            num_dice = 2
+        else:
+            num_dice = 1
+        
+        self.global_manager.get('money_tracker').change(self.global_manager.get('action_prices')['artifact_search'] * -1, 'artifact_search')
+        #village = self.images[0].current_cell.get_building('village')
+        text = ''
+        text += 'The expedition tries to locate the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+
+        if not self.veteran:    
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'artifact_search', self.global_manager, num_dice)
+        else:
+            text += ('The veteran explorer can roll twice and pick the higher result. /n /n')
+            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'artifact_search', self.global_manager, num_dice)
+
+        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+
+        die_x = self.global_manager.get('notification_manager').notification_x - 140
+
+        if self.veteran:
+            results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['artifact_search'], 'artifact_search', 2)
+            first_roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[0])
+            self.display_die((die_x, 500), first_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+           
+            second_roll_list = dice_utility.roll_to_list(6, 'second', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, results[1])
+            self.display_die((die_x, 380), second_roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, False)
+                                
+            text += (first_roll_list[1] + second_roll_list[1]) #add strings from roll result to text
+            roll_result = max(first_roll_list[0], second_roll_list[0])
+            result_outcome_dict = {}
+            for i in range(1, 7):
+                if i <= self.current_max_crit_fail:
+                    word = 'CRITICAL FAILURE'
+                elif i >= self.current_min_crit_success:
+                    word = 'CRITICAL SUCCESS'
+                elif i >= self.current_min_success:
+                    word = 'SUCCESS'
+                else:
+                    word = 'FAILURE'
+                result_outcome_dict[i] = word
+            text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
+        else:
+            result = self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail, self.global_manager.get('action_prices')['artifact_search'], 'artifact_search')
+            roll_list = dice_utility.roll_to_list(6, 'Artifact search roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)
+            self.display_die((die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail)
+                
+            text += roll_list[1]
+            roll_result = roll_list[0]
+
+        notification_tools.display_notification(text + 'Click to continue.', 'artifact_search', self.global_manager, num_dice)
+        
+        location = 'none'
+        text += '/n'
+        if roll_result >= self.current_min_success: #4+ required on D6 for exploration
+            location = self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.x, self.y)
+            if location == self.global_manager.get('current_lore_mission').artifact_location:
+                text += 'The expedition successfully found the ' + self.global_manager.get('current_lore_mission').name + '! /n /n'
+                text += 'These findings will be reported to the ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society as soon as possible. /n /n'
+            else:
+                text += 'The expedition successfully verified that the ' + self.global_manager.get('current_lore_mission').name + ' is not at this location. /n /n'
+
+        else:
+            text += 'The expedition failed to find whether the ' + self.global_manager.get('current_lore_mission').name + ' is at this location. /n /n'
+
+        if roll_result <= self.current_max_crit_fail:
+            text += 'With neither trace nor logical explanation, the entire expedition seems to have vanished. /n /n'
+
+        if (not self.veteran) and roll_result >= self.current_min_crit_success:
+            self.just_promoted = True
+            text += ' /nThe explorer is now a veteran and will be more successful in future ventures. /n'
+            
+        if roll_result >= self.current_min_success:
+            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_artifact_search', self.global_manager)
+            success = True
+        else:
+            notification_tools.display_notification(text, 'default', self.global_manager)
+            success = False
+
+        self.global_manager.set('artifact_search_result', [self, roll_result, success, location])
+
+    def complete_artifact_search(self):
+        '''
+        Description:
+            Used when the player finishes rolling for a rumor search, shows the search's results and makes any changes caused by the result. If successful, reveals a possible artifact location, 
+                promotes explorer to a veteran on critical success. Native warriors spawn on critical failure
+        Input:
+            None
+        Output:
+            None
+        '''
+        roll_result = self.global_manager.get('artifact_search_result')[1]
+        success = self.global_manager.get('artifact_search_result')[2]
+        location = self.global_manager.get('artifact_search_result')[3]
+        if success: #if campaign succeeded
+            if location == self.global_manager.get('current_lore_mission').artifact_location:
+                prize_money = random.randrange(5, 11) * 10
+                public_opinion_increase = random.randrange(20, 31)
+                text = 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
+                text += 'Additionally, public opinion has increased by ' + str(public_opinion_increase) + '. /n /n'
+                lore_type = self.global_manager.get('current_lore_mission').lore_type
+                if not lore_type in self.global_manager.get('completed_lore_mission_types'):
+                    text += 'Completing a mission in the ' + lore_type + ' category has given your company a permanent ' + self.global_manager.get('lore_types_effect_descriptions_dict')[lore_type] + '. /n /n'
+                    self.global_manager.get('completed_lore_mission_types').append(lore_type)
+                    self.global_manager.get('lore_types_effects_dict')[lore_type].apply()
+                notification_tools.display_notification(text, 'default', self.global_manager)
+                self.global_manager.get('money_tracker').change(prize_money)
+                self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
+                self.global_manager.get('current_lore_mission').remove()
+            else:
+                location.proven_false = True
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.global_manager.get('displayed_tile')) #updates tile display without question mark
+            if roll_result >= self.current_min_crit_success and not self.veteran:
+                self.promote()
+        elif roll_result <= self.current_max_crit_fail:
+            self.die()
+
+        self.global_manager.set('ongoing_artifact_search', False)

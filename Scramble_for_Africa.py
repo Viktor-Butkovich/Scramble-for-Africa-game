@@ -13,6 +13,7 @@ try:
     setup.ministers_setup(global_manager)
     setup.countries_setup(global_manager)
     setup.transactions_setup(global_manager)
+    setup.lore_setup(global_manager)
 
     setup.value_trackers_setup(global_manager)
     setup.buttons_setup(global_manager)
@@ -22,7 +23,7 @@ try:
     setup.trial_screen_setup(global_manager)
     setup.new_game_setup_screen_setup(global_manager)
 
-    setup.mob_interface_setup(global_manager)
+    setup.mob_interface_setup(global_manager) 
     actor_display_current_y = setup.tile_interface_setup(global_manager)
     setup.inventory_interface_setup(actor_display_current_y, global_manager)
     setup.minister_interface_setup(global_manager)

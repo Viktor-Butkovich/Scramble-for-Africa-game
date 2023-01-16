@@ -125,14 +125,16 @@ class group(pmob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        if current_cell == 'none':
+            return()
 
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
     
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 self.attrition_death('officer')
         if current_cell.local_attrition():
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = self.worker.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                     self.attrition_death('worker')
@@ -161,18 +163,44 @@ class group(pmob):
             destination_type = 'self'
             destination_message = ' from the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') '
             
-
+        remaining_unit = 'none'
         if target == 'officer':
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
-            text += 'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
-            text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
-            self.officer.replace(self) #self.officer.die()
-
+            if self.officer.automatically_replace:
+                text += self.officer.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
+                #text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
+                self.officer.replace(self) #self.officer.die()
+                self.officer.death_sound()
+            else:
+                if self.in_vehicle:
+                    self.disembark_vehicle(zoom_destination)
+                if self.in_building:
+                    self.leave_building(zoom_destination)
+                officer = self.officer
+                worker = self.worker
+                self.disband()
+                officer.attrition_death(False)
+                if self.in_vehicle:
+                    worker.embark_vehicle(zoom_destination)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
+
         elif target == 'worker':
             text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
-            text += 'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
-            self.worker.replace(self)
+            if self.worker.automatically_replace:
+                text += self.worker.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as replacements are found.'
+                self.worker.replace(self)
+                self.worker.death_sound()
+            else:
+                if self.in_vehicle:
+                    self.disembark_vehicle(zoom_destination)
+                if self.in_building:
+                    self.leave_building(zoom_destination)
+                officer = self.officer
+                worker = self.worker
+                self.disband()
+                worker.attrition_death(False)
+                if self.in_vehicle:
+                    officer.embark_vehicle(zoom_destination)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
         
 
@@ -290,7 +318,6 @@ class group(pmob):
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points
         self.worker.set_movement_points(math.floor(movement_ratio_remaining * self.worker.max_movement_points))
-        
         #missing_movement_points = self.max_movement_points - self.movement_points
         #self.worker.set_movement_points(self.worker.max_movement_points - missing_movement_points)#self.movement_points)
         self.officer.status_icons = self.status_icons
@@ -314,16 +341,16 @@ class group(pmob):
         super().remove()
         self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
 
-    def die(self):
+    def die(self, death_type = 'violent'):
         '''
         Description:
             Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Unlike remove, this is used when the group dies because it
                 also removes its worker and officer
         Input:
-            None
+            string death_type == 'violent': Type of death for this unit, determining the type of sound played
         Output:
             None
         '''
-        super().die()
-        self.officer.die()
-        self.worker.die()
+        super().die(death_type)
+        self.officer.die('none')
+        self.worker.die('none')

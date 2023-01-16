@@ -4,18 +4,22 @@ class country:
     '''
     Country with associated flavor text, art, images, and abilities that can be selected to play as
     '''
-    def __init__(self, name, adjective, allow_particles, aristocratic_particles, allow_double_last_names, background_set, country_effect, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            string name: Name for this country, like 'France'
-            string adjective: Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
-            boolean allow_particles: Whether ministers of this country are allowed to have name particles, like de Rouvier
-            boolean aristocratic_particles: Whether name particles for this country are reserved for aristocratic ministers
-            boolean allow_double_last_names: Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
-            string list background_set: Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
-            effect country_effect: Effect that is applied when this country is selected and vice versa
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'name': string value - Name for this country, like 'France'
+                'adjective': string value - Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
+                'government_type_adjective': string value - Descriptor for institutions of the country, like 'Royal' or 'National' Geographical Society
+                'religion': string value - Descriptor for the primary religion of this country, like 'protestant' or 'catholic'
+                'allow_particles': boolean value - Whether ministers of this country are allowed to have name particles, like de Rouvier
+                'aristocratic_particles': boolean value - Whether name particles for this country are reserved for aristocratic ministers
+                'allow_double_last_names': boolean value - Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
+                'background_set': string list value - Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
+                'country_effect': effect value - Effect that is applied when this country is selected and vice versa
+                'music_list': string/string dictionary value - List of songs to add to the Europe songs for this country
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -24,15 +28,18 @@ class country:
         self.global_manager = global_manager
         self.global_manager.get('country_list').append(self)
         self.tooltip_text = []
-        self.name = name
-        self.adjective = adjective
-        self.allow_particles = allow_particles
-        self.aristocratic_particles = aristocratic_particles
-        self.allow_double_last_names = allow_double_last_names
+        self.name = input_dict['name']
+        self.adjective = input_dict['adjective']
+        self.government_type_adjective = input_dict['government_type_adjective']
+        self.religion = input_dict['religion']
+        self.allow_particles = input_dict['allow_particles']
+        self.aristocratic_particles = input_dict['aristocratic_particles']
+        self.allow_double_last_names = input_dict['allow_double_last_names']
         self.image_id = 'locations/europe/' + self.name + '.png'
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
-        self.background_set = background_set
-        self.country_effect = country_effect
+        self.background_set = input_dict['background_set']
+        self.country_effect = input_dict['country_effect']
+        self.music_list = input_dict['music_list']
 
     def select(self):
         '''
@@ -62,8 +69,31 @@ class country:
         for current_flag_icon in self.global_manager.get('flag_icon_list'):
             current_flag_icon.image.set_image(self.flag_image_id)
         self.country_effect.apply()
+        #if self.name == 'France':
+        #    self.global_manager.get('sound_manager').play_music('La Marseillaise 1', 0.08)
+
+    def deselect(self):
+        '''
+        Description:
+            Deselects this country and modifies various game elements to match this not being selected
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.get('current_country').country_effect.remove()
+        self.global_manager.set('current_country', 'none')
+        self.global_manager.set('current_country_name', 'none')
 
     def get_effect_descriptor(self):
+        '''
+        Description:
+            Returns a descriptor string for the effect of this country's effect
+        Input:
+            None 
+        Output:
+            string: Returns a descriptor string for the effect of this country's effect
+        '''
         if self.country_effect.effect_type == 'advertising_campaign_plus_modifier':
             return('Bonus when advertising')
         elif self.country_effect.effect_type == 'conversion_plus_modifier':
@@ -94,21 +124,21 @@ class hybrid_country(country):
     '''
     Country that uses combination of multiple namesets, like Belgium
     '''
-    def __init__(self, name, adjective, background_set, country_effect, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            string name: Name for this country, like 'France'
-            string adjective: Descriptor for this country used in descriptions and associated art and flavor text files, like 'french'
-            string image_id: File path to the Europe image used by this country
-            string list background_set: Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
-            effect country_effect: Effect that is applied when this country is selected and vice versa
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object, the same keys as superclass except without allow_particles, aristocratic_particles, 
+                or allow_double_last_names
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(name, adjective, False, False, False, background_set, country_effect, global_manager)
+        input_dict['allow_particles'] = False
+        input_dict['aristocratic_particles'] = False
+        input_dict['allow_double_last_names'] = False
+        super().__init__(input_dict, global_manager)
 
     def select(self):
         '''

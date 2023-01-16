@@ -133,7 +133,7 @@ class building(actor):
         Output:
             None
         '''
-        tooltip_text = [self.name.capitalize()]
+        tooltip_text = [text_tools.remove_underscores(self.name.capitalize())]
         if self.building_type == 'resource':
             tooltip_text.append('Work crews: ' + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             for current_work_crew in self.contained_work_crews:
@@ -142,11 +142,19 @@ class building(actor):
         elif self.building_type == 'port':
             tooltip_text.append('Allows ships to enter this tile')
         elif self.building_type == 'infrastructure':
-            tooltip_text.append('Halves movement cost for units going to another tile with a road or railroad')
-            if self.is_railroad:
-                tooltip_text.append('Allows trains to move from this tile to other tiles that have railroads')
+            if self.is_bridge:
+                tooltip_text.append('Allows movement across the bridge')
+                if self.is_railroad:
+                    tooltip_text.append('Acts as a railroad between the tiles it connects')
+                else:
+                    tooltip_text.append('Acts as a road between the tiles it connects')
+                    tooltip_text.append('Can be upgraded to a railroad bridge to allow trains to move through this tile')
             else:
-                tooltip_text.append('Can be upgraded to a railroad to allow trains to move through this tile')
+                tooltip_text.append('Halves movement cost for units going to another tile with a road or railroad')
+                if self.is_railroad:
+                    tooltip_text.append('Allows trains to move from this tile to other tiles that have railroads')
+                else:
+                    tooltip_text.append('Can be upgraded to a railroad to allow trains to move through this tile')
         elif self.building_type == 'train_station':
             tooltip_text.append('Allows construction gangs to build trains on this tile')
             tooltip_text.append('Allows trains to drop off or pick up cargo or passengers in this tile')
@@ -290,7 +298,7 @@ class infrastructure_building(building):
                 'grids': grid list value - grids in which this mob's images can appear
                 'image': string value - File path to the image used by this object
                 'name': string value - Required if from save, this building's name
-                'infrastructure_type': string value - Type of infrastructure, like 'road', or 'railroad'
+                'infrastructure_type': string value - Type of infrastructure, like 'road' or 'railroad'
                 'modes': string list value - Game modes during which this building's images can appear
                 'contained_work_crews': dictionary list value - Required if from save, list of dictionaries of saved information necessary to recreate each work crew working in this building
             global_manager_template global_manager: Object that accesses shared variables
@@ -299,11 +307,22 @@ class infrastructure_building(building):
         '''
         self.infrastructure_type = input_dict['infrastructure_type']
         if self.infrastructure_type == 'railroad':
-            self.is_road = False
             self.is_railroad = True
+            self.is_road = False
+            self.is_bridge = False
         elif self.infrastructure_type == 'road':
             self.is_railroad = False
             self.is_road = True
+            self.is_bridge = False
+        elif self.infrastructure_type == 'railroad_bridge':
+            self.is_railroad = True
+            self.is_road = False
+            self.is_bridge = True
+        elif self.infrastructure_type == 'road_bridge':
+            self.is_railroad = False
+            self.is_road = True
+            self.is_bridge = True
+
         input_dict['building_type'] = 'infrastructure'
         super().__init__(from_save, input_dict, global_manager)
         self.image_dict['left_road'] = 'buildings/infrastructure/left_road.png'
@@ -314,22 +333,44 @@ class infrastructure_building(building):
         self.image_dict['right_railroad'] = 'buildings/infrastructure/right_railroad.png'
         self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
         self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
+        self.image_dict['horizontal_road_bridge'] = 'buildings/infrastructure/horizontal_road_bridge.png'
+        self.image_dict['vertical_road_bridge'] ='buildings/infrastructure/vertical_road_bridge.png'
+        self.image_dict['horizontal_railroad_bridge'] = 'buildings/infrastructure/horizontal_railroad_bridge.png'
+        self.image_dict['vertical_railroad_bridge'] = 'buildings/infrastructure/vertical_railroad_bridge.png'
         self.image_dict['empty'] = 'misc/empty.png'
         self.infrastructure_connection_images = {}
-        for current_grid in self.grids:
-            up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
-            down_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager)
-            right_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager)
-            left_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager)
-            #actor, width, height, grid, image_description, direction, global_manager
-            self.images.append(up_image)
-            self.images.append(down_image)
-            self.images.append(right_image)
-            self.images.append(left_image)
-            self.infrastructure_connection_images['up'] = up_image
-            self.infrastructure_connection_images['down'] = down_image
-            self.infrastructure_connection_images['right'] = right_image
-            self.infrastructure_connection_images['left'] = left_image
+        if not self.is_bridge:
+            for current_grid in self.grids:
+                up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
+                down_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager)
+                right_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager)
+                left_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager)
+                #actor, width, height, grid, image_description, direction, global_manager
+                self.images.append(up_image)
+                self.images.append(down_image)
+                self.images.append(right_image)
+                self.images.append(left_image)
+                self.infrastructure_connection_images['up'] = up_image
+                self.infrastructure_connection_images['down'] = down_image
+                self.infrastructure_connection_images['right'] = right_image
+                self.infrastructure_connection_images['left'] = left_image
+        else:
+            up_cell = self.grids[0].find_cell(self.x, self.y + 1)
+            down_cell = self.grids[0].find_cell(self.x, self.y - 1)
+            left_cell = self.grids[0].find_cell(self.x - 1, self.y)
+            right_cell = self.grids[0].find_cell(self.x + 1, self.y)
+            if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')):
+                self.connected_cells = [up_cell, down_cell]
+                if self.is_road:
+                    self.set_image('vertical_road_bridge')
+                else:
+                    self.set_image('vertical_railroad_bridge')
+            else:
+                self.connected_cells = [left_cell, right_cell]
+                if self.is_road:
+                    self.set_image('horizontal_road_bridge')
+                else:
+                    self.set_image('horizontal_railroad_bridge')
         actor_utility.update_roads(self.global_manager)
 
     def to_save_dict(self):
@@ -478,6 +519,8 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
+        if (not from_save) and not self.images[0].current_cell.village == 'none':
+            self.global_manager.get('sound_manager').play_random_music('europe')
 
 class warehouses(building):
     '''
@@ -679,16 +722,22 @@ class resource_building(building):
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-        
+        worker_attrition_list = []
+        officer_attrition_list = []
         for current_work_crew in self.contained_work_crews:
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
-                    current_work_crew.attrition_death('officer')
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                    officer_attrition_list.append(current_work_crew) #current_work_crew.attrition_death('officer')
             if current_cell.local_attrition():
-                if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+                if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                     worker_type = current_work_crew.worker.worker_type
                     if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) == 1:
                         current_work_crew.attrition_death('worker')
+                        worker_attrition_list.append(current_work_crew)
+        for current_work_crew in worker_attrition_list:
+            current_work_crew.attrition_death('worker')
+        for current_work_crew in officer_attrition_list:
+            current_work_crew.attrition_death('officer')
 
     def can_upgrade(self, upgrade_type):
         '''

@@ -1,5 +1,6 @@
 #Contains functionality for actor display buttons
 
+import random
 from ..buttons import button
 from .. import main_loop_tools
 from .. import utility
@@ -191,7 +192,8 @@ class embark_all_passengers_button(label_button):
                         passenger = contained_mob
                         if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                             passenger.embark_vehicle(vehicle)
-                    self.global_manager.get('sound_manager').play_sound('voices/ship 1')
+                    self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                    #self.global_manager.get('sound_manager').play_sound('voices/ship_1')
             else:
                 text_tools.print_to_screen('You are busy and can not embark all passengers.', self.global_manager)
 
@@ -679,6 +681,148 @@ class disable_sentry_mode_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
 
+class enable_automatic_replacement_button(label_button):
+    '''
+    Button that enables automatic attrition replacement for a unit or one of its components
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, target_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string target_type: Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.target_type = target_type
+        super().__init__(coordinates, width, height, 'enable automatic replacement', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the targeted unit component is present and does not already have automatic replacement, otherwise returns False
+        '''
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.is_pmob:
+                return(False)
+            elif self.attached_label.actor.is_vehicle:
+                return(False)
+            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+                return(False)
+            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+                return(False)
+            elif ((self.target_type == 'unit' and self.attached_label.actor.automatically_replace) or 
+                (self.target_type == 'worker' and self.attached_label.actor.worker.automatically_replace) or 
+                (self.target_type == 'officer' and self.attached_label.actor.officer.automatically_replace)):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button enables automatic replacement for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):         
+                if self.target_type == 'unit':
+                    target = self.attached_label.actor
+                elif self.target_type == 'worker':
+                    target = self.attached_label.actor.worker
+                elif self.target_type == 'officer':
+                    target = self.attached_label.actor.officer         
+                target.set_automatically_replace(True)
+            else:
+                text_tools.print_to_screen('You are busy and can not enable automatic replacement.', self.global_manager)
+
+class disable_automatic_replacement_button(label_button):
+    '''
+    Button that disables automatic attrition replacement for a unit or one of its components
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, target_type, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            string target_type: Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.target_type = target_type
+        super().__init__(coordinates, width, height, 'disable automatic replacement', keybind_id, modes, image_id, attached_label, global_manager)
+        
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns True if the targeted unit component is present and has automatic replacement, otherwise returns False
+        '''
+        result = super().can_show()
+        if result:
+            if not self.attached_label.actor.is_pmob:
+                return(False)
+            elif self.attached_label.actor.is_vehicle:
+                return(False)
+            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+                return(False)
+            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+                return(False)
+            elif ((self.target_type == 'unit' and not self.attached_label.actor.automatically_replace) or 
+                (self.target_type == 'worker' and not self.attached_label.actor.worker.automatically_replace) or 
+                (self.target_type == 'officer' and not self.attached_label.actor.officer.automatically_replace)):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button disables automatic replacement for the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.target_type == 'unit':
+                    target = self.attached_label.actor
+                elif self.target_type == 'worker':
+                    target = self.attached_label.actor.worker
+                elif self.target_type == 'officer':
+                    target = self.attached_label.actor.officer         
+                target.set_automatically_replace(False)
+            else:
+                text_tools.print_to_screen('You are busy and can not disable automatic replacement.', self.global_manager)
+
 class end_unit_turn_button(label_button):
     '''
     Button that ends a unit's turn, removing it from the current turn's turn cycle queue
@@ -940,7 +1084,8 @@ class embark_vehicle_button(label_button):
                         if vehicle.sentry_mode:
                             vehicle.set_sentry_mode(False)
                         rider.embark_vehicle(vehicle)
-                        self.global_manager.get('sound_manager').play_sound('voices/ship 1')
+                        self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
+                        #self.global_manager.get('sound_manager').play_sound('voices/ship_1')
                 else:
                     text_tools.print_to_screen('You must select a unit in the same tile as a crewed ' + self.vehicle_type + ' to embark.', self.global_manager)
             else:
@@ -1250,7 +1395,7 @@ class trade_button(label_button):
 
 class convert_button(label_button):
     '''
-    Button that commands a missionaries to convert a native village
+    Button that commands missionaries to convert a native village
     '''
     def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
         '''
@@ -1321,6 +1466,154 @@ class convert_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and can not convert.', self.global_manager)
 
+class rumor_search_button(label_button):
+    '''
+    Button that commands an expedition to search a village for rumors of the location of a lore mission artifact
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'rumor search', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_explore):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if main_loop_tools.action_possible(self.global_manager):
+                    current_mob = self.attached_label.actor
+                    if current_mob.movement_points >= 1:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['rumor_search']:
+                            current_cell = current_mob.images[0].current_cell
+                            if current_cell.has_building('village'):
+                                if current_cell.get_building('village').population > 0:
+                                    if not self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed:
+                                        if not current_cell.get_building('village').found_rumors:
+                                            if current_mob.check_if_minister_appointed():
+                                                if current_mob.sentry_mode:
+                                                    current_mob.set_sentry_mode(False)
+                                                current_mob.start_rumor_search()
+                                        else:
+                                            text_tools.print_to_screen('This village\'s rumors regarding the location of the ' + self.global_manager.get('current_lore_mission').name + ' have already been found.', self.global_manager)
+                                    else:
+                                        text_tools.print_to_screen('All possible locations of the ' + self.global_manager.get('current_lore_mission').name + ' have already been revealed.', self.global_manager)
+                                else:
+                                    text_tools.print_to_screen('This village has no population and no rumors can be found.', self.global_manager)
+                            else:
+                                text_tools.print_to_screen('Searching for rumors is only possible in a village.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['rumor_search']) + ' money needed to attempt a rumor search.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('A rumor search requires all remaining movement points, at least 1.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You are busy and can not search for rumors.', self.global_manager)
+            else:
+                text_tools.print_to_screen('There are no ongoing lore missions for which to find rumors.', self.global_manager)
+
+class artifact_search_button(label_button):
+    '''
+    Button that commands an expedition to search a rumored location for a lore mission artifact
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string keybind_id: Determines the keybind id that activates this button, like 'pygame.K_n'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            label attached_label: Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        super().__init__(coordinates, width, height, 'artifact search', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.can_explore):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands missionaries to convert a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if main_loop_tools.action_possible(self.global_manager):
+                    current_mob = self.attached_label.actor
+                    if current_mob.movement_points >= 1:
+                        if self.global_manager.get('money') >= self.global_manager.get('action_prices')['artifact_search']:
+                            if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
+                                if current_mob.check_if_minister_appointed():
+                                    if current_mob.sentry_mode:
+                                        current_mob.set_sentry_mode(False)
+                                    current_mob.start_artifact_search()
+                            else:
+                                text_tools.print_to_screen('You have not found any rumors indicating that the ' + self.global_manager.get('current_lore_mission').name + ' may be at this location.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['artifact_search']) + ' money needed to attempt a artifact search.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('An artifact search requires all remaining movement points, at least 1.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You are busy and can not search for artifact.', self.global_manager)
+            else:
+                text_tools.print_to_screen('There are no ongoing lore missions for which to find artifacts.', self.global_manager)
+
 class capture_slaves_button(label_button):
     '''
     Button that commands a battalion to capture slaves from a village
@@ -1375,6 +1668,61 @@ class capture_slaves_button(label_button):
                     text_tools.print_to_screen('Capturing slaves requires all remaining movement points, at least 1.', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not capture slaves.', self.global_manager)
+
+class suppress_slave_trade_button(label_button):
+    '''
+    Button that commands a battalion to supppress slave trade in the slave traders tile
+    '''
+    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager):
+        super().__init__(coordinates, width, height, 'suppress slave trade', keybind_id, modes, image_id, attached_label, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
+        '''
+        result = super().can_show()
+        if result:
+            if (not self.attached_label.actor.is_battalion):
+                return(False)
+        return(result)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a battalion to capture slaves from a native village
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):
+                current_mob = self.attached_label.actor
+                if current_mob.movement_points >= 1:
+                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['suppress_slave_trade']:
+                        current_cell = current_mob.images[0].current_cell
+                        if current_cell.grid == self.global_manager.get('slave_traders_grid'):
+                            if self.global_manager.get('slave_traders_strength') > 0:
+                                if current_mob.check_if_minister_appointed():
+                                    if current_mob.sentry_mode:
+                                        current_mob.set_sentry_mode(False)
+                                    current_mob.start_suppress_slave_trade()
+                            else:
+                                text_tools.print_to_screen('The slave trade has already been eradicated.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('Supressing the slave trade is only possible in the slave traders tile.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['slave_capture']) + ' money needed to attempt to suppress the slave trade.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('Suppressing the slave trade requires all remaining movement points, at least 1.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not suppress the slave trade.', self.global_manager)
 
 class evangelist_campaign_button(label_button):
     '''
@@ -1549,11 +1897,13 @@ class labor_broker_button(label_button):
         Input:
             None
         Output:
-            boolean: Returns False if the selected mob is not an officer or a vehicle without crew, otherwise returns same as superclass
+            boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
         '''
         result = super().can_show()
         if result:
             if (not ((self.attached_label.actor.is_officer and not self.attached_label.actor.officer_type == 'evangelist') or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
+                return(False)
+            elif self.attached_label.actor.is_vehicle and self.attached_label.actor.can_swim_ocean:
                 return(False)
         return(result)
 
@@ -2040,6 +2390,8 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
         elif self.building_type == 'infrastructure':
             self.road_image_id = 'buildings/buttons/road.png'
             self.railroad_image_id = 'buildings/buttons/railroad.png'
+            self.road_bridge_image_id = 'buildings/buttons/road_bridge.png'
+            self.railroad_bridge_image_id = 'buildings/buttons/railroad_bridge.png'
             image_id = self.road_image_id
         elif self.building_type == 'train_station':
             image_id = 'buildings/buttons/train_station.png'
@@ -2088,11 +2440,19 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                 elif self.building_type == 'infrastructure':
                     current_infrastructure = self.attached_tile.cell.contained_buildings['infrastructure']
                     if current_infrastructure == 'none':
-                        self.building_name = 'road'
-                        self.image.set_image('buildings/buttons/road.png')
-                    else: #if has road or railroad, show railroad icon
-                        self.building_name = 'railroad'
-                        self.image.set_image('buildings/buttons/railroad.png')
+                        if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0:
+                            self.building_name = 'road_bridge'
+                            self.image.set_image('buildings/buttons/road_bridge.png')
+                        else:
+                            self.building_name = 'road'
+                            self.image.set_image('buildings/buttons/road.png')
+                    else: #if has existing infrastrucutre, show railroad version
+                        if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0:
+                            self.building_name = 'railroad_bridge'
+                            self.image.set_image('buildings/buttons/railroad_bridge.png')
+                        else:
+                            self.building_name = 'railroad'
+                            self.image.set_image('buildings/buttons/railroad.png')
 
     def can_show(self):
         '''
@@ -2152,9 +2512,19 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             if self.building_name == 'railroad':
                 message.append('Upgrades this tile\'s road into a railroad, allowing trains to move through this tile')
                 message.append('Retains the benefits of a road')
+                message.append('This button can build a bridge on a river tile, build a road, or upgrade an existing road or road bridge to a railroad version')
             elif self.building_name == 'road':
                 message.append('Builds a road, halving the cost to move between this tile and other tiles with roads or railroads')
                 message.append('A road can be upgraded into a railroad that allows trains to move through this tile')
+                message.append('This button can build a bridge on a river tile or upgrade an existing road or road bridge to a railroad version')
+            elif self.building_name == 'railroad_bridge':
+                message.append('Upgrades this tile\'s road bridge into a railroad bridge, allowing trains to move through this tile')
+                message.append('Retains the benefits of a road bridge')
+                message.append('This button can build a bridge on a river tile, build a road, or upgrade an existing road to a railroad')
+            elif self.building_name == 'road_bridge':
+                message.append('Builds a road bridge, allowing normal movement between the tiles it connects')
+                message.append('A road bridge can be upgraded into a railroad bridge that allows trains to move through this tile')
+                message.append('This button can build a road or upgrade an existing road or road bridge to a railroad version')
             else:
                 self.set_tooltip(message) #can't get building cost without road/railroad type
                 return()
@@ -2205,9 +2575,9 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     cost = actor_utility.get_building_cost(self.global_manager, self.attached_mob, self.building_type, self.building_name)
                     if self.global_manager.get('money') >= cost:
                         current_building = self.attached_tile.cell.get_building(self.building_type)
-                        if current_building == 'none' or (self.building_name == 'railroad' and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
+                        if current_building == 'none' or (self.building_name in ['railroad', 'railroad_bridge'] and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
-                                if not self.attached_tile.cell.terrain == 'water':
+                                if self.building_name in ['road_bridge', 'railroad_bridge'] or not self.attached_tile.cell.terrain == 'water':
                                     if self.attached_label.actor.check_if_minister_appointed():
                                         if self.building_type == 'resource':
                                             if not self.attached_resource == 'none':
@@ -2242,7 +2612,27 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 self.construct()
                                             else:
                                                 text_tools.print_to_screen('This building can only be built in villages.', self.global_manager)
-                                        elif self.building_type in ['infrastructure', 'fort']:
+                                        elif self.building_type == 'infrastructure' and self.building_name in ['road_bridge', 'railroad_bridge']:
+                                            passed = False
+                                            if self.attached_tile.cell.terrain == 'water' and self.attached_tile.cell.y > 0: #if in river tile
+                                                up_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x, self.attached_tile.cell.y + 1)
+                                                down_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x, self.attached_tile.cell.y - 1)
+                                                left_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x - 1, self.attached_tile.cell.y)
+                                                right_cell = self.attached_tile.cell.grid.find_cell(self.attached_tile.cell.x + 1, self.attached_tile.cell.y)
+                                                if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')): #if vertical bridge
+                                                    if up_cell.visible and down_cell.visible:
+                                                        passed = True
+                                                elif (not (left_cell == 'none' or right_cell == 'none')) and (not (left_cell.terrain == 'water' or right_cell.terrain == 'water')): #if horizontal bridge
+                                                    if left_cell.visible and down_cell.visible:
+                                                        passed = True
+                                            if passed:
+                                                if self.attached_label.actor.sentry_mode:
+                                                    self.attached_label.actor.set_sentry_mode(False)
+                                                self.construct()
+                                            else:
+                                                text_tools.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
+
+                                        else: # self.building_type in ['infrastructure', 'fort']:
                                             #if self.attached_label.actor.check_if_minister_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)
@@ -2383,7 +2773,7 @@ class repair_button(label_button):
         '''
         message = []
         if self.can_show():
-            message.append('Attempts to repair the ' + self.building_name + ' in this tile, restoring it to full functionality')
+            message.append('Attempts to repair the ' + text_tools.remove_underscores(self.building_name) + ' in this tile, restoring it to full functionality')
             if self.building_type in ['port', 'train_station', 'resource']:
                 message.append('If successful, also automatically repairs this tile\'s warehouses')
             message.append('Attempting to repair costs ' + str(self.attached_tile.cell.get_building(self.building_type).get_repair_cost()) + ' money and all remaining movement points, at least 1')
@@ -2410,7 +2800,7 @@ class repair_button(label_button):
                         #current_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
                         self.repair()
                     else:
-                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to repair the ' + self.building_name + '.', self.global_manager)
+                        text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to attempt to repair the ' + text_tools.remove_underscores(self.building_name) + '.', self.global_manager)
                 else:
                     text_tools.print_to_screen('You do not have enough movement points to repair a building.', self.global_manager)
                     text_tools.print_to_screen('You have ' + str(self.attached_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
@@ -2967,7 +3357,8 @@ class buy_slaves_button(label_button):
         if super().can_show():
             if not self.global_manager.get('displayed_tile') == 'none':
                 if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
-                    return(True)
+                    if self.global_manager.get('slave_traders_strength') > 0:
+                        return(True)
         return(False)
 
     def on_click(self):

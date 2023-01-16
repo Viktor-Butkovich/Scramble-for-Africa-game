@@ -851,19 +851,20 @@ class infrastructure_connection_image(building_image):
         Output:
             None
         '''
-        own_tile_infrastructure_type = self.actor.infrastructure_type
+        #own_tile_infrastructure_type = self.actor.infrastructure_type
+        own_tile_infrastructure = self.actor
         adjacent_cell = 'none'
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
             adjacent_tile_infrastructure = adjacent_cell.get_intact_building('infrastructure')
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
-                adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
-                if own_tile_infrastructure_type == 'railroad' and own_tile_infrastructure_type == adjacent_tile_infrastructure_type: #if both railroads, draw railroad
+                #adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
+                if own_tile_infrastructure.is_railroad and adjacent_tile_infrastructure.is_railroad: #if both railroads, draw railroad
                     self.set_image(self.direction + '_railroad') #up_railroad
                     self.actor.set_image('empty') #if connecting to other railroad, hide railroad cross
                 else: #if both have infrastructure and at least 1 is not a railroad, draw road
                     self.set_image(self.direction + '_road')
-                    if own_tile_infrastructure_type == 'road': #hide center cross if adjacent tiles have same type
+                    if own_tile_infrastructure.is_road: #hide center cross if adjacent tiles have same type
                         self.actor.set_image('empty')
                         #self.actor.set_image('default')
                     else:
@@ -1139,7 +1140,8 @@ class tile_image(actor_image):
 
 class veteran_icon_image(tile_image):
     '''
-    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image
+    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image - also being used 
+        for lore mission locations
     '''
     def __init__(self, actor, width, height, grid, image_description, global_manager):
         '''
@@ -1166,7 +1168,15 @@ class veteran_icon_image(tile_image):
         Output:
             None
         '''
-        if self.actor.actor.images[0].can_show() and self.can_show():
+        showing = False
+        if self.actor.actor in self.global_manager.get('actor_list'): #different check depending on actor type
+            if self.actor.actor.images[0].can_show() and self.can_show():
+                showing = True
+        elif (not self.global_manager.get('current_lore_mission') == 'none') and self.actor.actor in self.global_manager.get('current_lore_mission').possible_artifact_locations:
+            if self.actor.actor.can_show() and self.can_show():
+                showing = True
+                
+        if showing:
             if self.grid.is_mini_grid:
                 self.actor.x, self.actor.y = self.grid.get_mini_grid_coordinates(self.actor.actor.x, self.actor.actor.y)
             else:

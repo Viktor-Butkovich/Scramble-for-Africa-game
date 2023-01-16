@@ -72,7 +72,6 @@ class worker(pmob):
             destination = attached_group
         destination_message = ' for the ' + destination.name + ' at (' + str(destination.x) + ', ' + str(destination.y) + ')'
         if self.worker_type in ['European', 'African']: #increase relevant costs as if recruiting new worker
-            
             if self.worker_type == 'African': #get worker from nearest slum or village
                 new_worker_source = actor_utility.find_closest_available_worker(destination, self.global_manager)
                 if not new_worker_source == 'none':
@@ -98,7 +97,8 @@ class worker(pmob):
                 text_tools.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
                 
         elif self.worker_type == 'slave':
-            self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1)
+            self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
+            self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
             text_tools.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
             market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
 
@@ -303,6 +303,7 @@ class slave_worker(worker):
                     if not resulting_public_opinion == current_public_opinion:
                         text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                     self.global_manager.get('evil_tracker').change(6)
+                    self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
@@ -316,6 +317,8 @@ class slave_worker(worker):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
         self.global_manager.get('money_label').check_for_updates()
+        if self.global_manager.get('slave_traders_strength') <= 0:
+            self.automatically_replace = False
 
     def fire(self):
         '''

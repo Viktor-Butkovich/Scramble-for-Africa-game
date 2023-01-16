@@ -68,7 +68,6 @@ class minister():
                 self.global_manager.get('available_minister_list').append(self)
                 minister_utility.update_available_minister_display(self.global_manager)
         else:
-            
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
             self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
             self.status_number = global_manager.get('background_status_dict')[self.background]
@@ -164,6 +163,7 @@ class minister():
                     evidence_message += self.global_manager.get('transaction_descriptions')[theft_type] + ' and has filed a piece of evidence against him. /n /n'
                     evidence_message += 'There are now ' + str(self.corruption_evidence) + ' piece' + utility.generate_plural(self.corruption_evidence) + ' of evidence against ' + self.name + '. /n /n'
                     evidence_message += 'Each piece of evidence can help in a trial to remove a corrupt minister from office. /n /n'
+                    self.global_manager.set('evidence_just_found', True) #causes sound to be made next time prosecutor image appears
                     prosecutor.display_message(evidence_message)
                     if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
                         print('The theft was caught by the prosecutor, who chose to create evidence.') 
@@ -532,6 +532,8 @@ class minister():
         modifier = 0
         if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
             return(5)
+        elif self.global_manager.get('effect_manager').effect_active('nine_mortal_men'):
+            return(-10)
         if random.randrange(1, 3) == 1: #half chance to apply skill modifier, otherwise return 0
             modifier += self.get_skill_modifier()
             if self.global_manager.get('effect_manager').effect_active('show_modifiers'):
@@ -729,3 +731,17 @@ class minister():
         self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
         if not text == '':
             self.display_message(text)
+
+    def selection_sound(self):
+        '''
+        Description:
+            Plays a sound when this minister is selected
+        Input:
+            None
+        Output:
+            None
+        '''
+        possible_sounds = []
+        for i in range(1, 8):
+            possible_sounds.append('voices/minister ' + str(i))
+        self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))

@@ -7,6 +7,7 @@ from . import images
 from . import utility
 from . import actor_utility
 from . import villages
+from . import main_loop_tools
 from .actors import actor
 
 class tile(actor): #to do: make terrain tiles a subclass
@@ -265,6 +266,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                         input_dict['aggressiveness'] = self.cell.save_dict['village_aggressiveness']
                         input_dict['available_workers'] = self.cell.save_dict['village_available_workers']
                         input_dict['attached_warriors'] = self.cell.save_dict['village_attached_warriors']
+                        input_dict['found_rumors'] = self.cell.save_dict['village_found_rumors']
                         self.cell.village = villages.village(True, input_dict, self.global_manager)
                         self.cell.village.tiles.append(self)
                     else:
@@ -291,34 +293,22 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if new_terrain == 'clear':
-            self.image_dict['default'] = 'scenery/terrain/clear.png'
-            
-        elif new_terrain == 'hills':
-            self.image_dict['default'] = 'scenery/terrain/hills.png'
-            
-        elif new_terrain == 'jungle':
-            self.image_dict['default'] = 'scenery/terrain/jungle.png'
-            
-        elif new_terrain == 'water':
-            current_y = self.y
-            if self.cell.grid.is_mini_grid:
-                current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
-                
-            if current_y == 0:
-                self.image_dict['default'] = 'scenery/terrain/ocean_water.png'
-            else:
-                self.image_dict['default'] = 'scenery/terrain/river_water.png'
-            
-        elif new_terrain == 'mountain':
-            self.image_dict['default'] = 'scenery/terrain/mountain.png'
-            
-        elif new_terrain == 'swamp':
-            self.image_dict['default'] = 'scenery/terrain/swamp.png'
-            
-        elif new_terrain == 'desert':
-            self.image_dict['default'] = 'scenery/terrain/desert.png'
-
+        if new_terrain in self.global_manager.get('terrain_list') + ['water']:
+            base_word = new_terrain
+            if new_terrain == 'water':
+                current_y = self.y
+                if self.cell.grid.is_mini_grid:
+                    current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
+                if current_y == 0:
+                    #self.image_dict['default'] = 'scenery/terrain/ocean_water.png'
+                    base_word = 'ocean_' + new_terrain
+                else:
+                    #self.image_dict['default'] = 'scenery/terrain/river_water.png'
+                    base_word = 'river_' + new_terrain
+            #print('working')
+            #print(base_word)
+            #print(self.cell.terrain)
+            self.image_dict['default'] = 'scenery/terrain/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
         elif new_terrain == 'none':
             self.image_dict['default'] = 'scenery/hidden.png'
 
@@ -336,12 +326,11 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         if self.show_terrain: #if is terrain, show tooltip
             tooltip_message = []
+            coordinates = self.get_main_grid_coordinates()
+            tooltip_message.append('Coordinates: (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + ')')
             if self.cell.visible:
                 if self.cell.terrain == 'water':
-                    current_y = self.y
-                    if self.cell.grid.is_mini_grid:
-                        current_y = self.cell.grid.get_main_grid_coordinates(self.x, self.y)[1]
-                    if current_y == 0:
+                    if coordinates[1] == 0: #current_y == 0:
                         tooltip_message.append('This is an ocean water tile')
                     else:
                         tooltip_message.append('This is a river water tile')
@@ -353,6 +342,9 @@ class tile(actor): #to do: make terrain tiles a subclass
                     tooltip_message.append('This tile has ' + utility.generate_article(self.cell.resource) + ' ' + self.cell.resource + ' resource')
             else:
                 tooltip_message .append('This tile has not been explored')
+            if not self.global_manager.get('current_lore_mission') == 'none':
+                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(coordinates[0], coordinates[1]):
+                    tooltip_message.append('There are rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be found here')
             self.set_tooltip(tooltip_message)
         else:
             self.set_tooltip([])
@@ -403,6 +395,32 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             return(False)
 
+    def select(self):
+        '''
+        Description:
+            Selects this tile and switches music based on which type of tile is selected, if the type of tile selected would change the music
+        Input:
+            None
+        Output:
+            None
+        '''
+        #print(self.name)
+        if self.global_manager.get('player_turn') and main_loop_tools.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
+            if self.name == 'Slave traders':
+                if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('event_manager').clear()
+                    self.global_manager.get('sound_manager').play_random_music('slave traders')
+            elif (not self.cell.village == 'none') and self.cell.visible and self.cell.village.population > 0 and not self.cell.has_intact_building('port'):
+                new_state = 'village ' + self.cell.village.get_aggressiveness_adjective()
+                if not self.global_manager.get('sound_manager').previous_state == new_state: #village_peaceful/neutral/aggressive
+                    self.global_manager.get('event_manager').clear()
+                    self.global_manager.get('sound_manager').play_random_music(new_state)
+            else:
+                if not self.global_manager.get('sound_manager').previous_state == 'europe': #if self.global_manager.get('sound_manager').previous_state == 'slave traders':
+                    self.global_manager.get('event_manager').clear()
+                    self.global_manager.get('sound_manager').play_random_music('europe')
+        #super().select()
+
 class abstract_tile(tile):
     '''
     tile for 1-cell abstract grids like Europe, can have a tooltip but has no terrain, instead having a unique image
@@ -435,7 +453,10 @@ class abstract_tile(tile):
         Output:
             None
         '''
-        self.set_tooltip([self.name])
+        if self.name == 'Slave traders':
+            self.set_tooltip([self.name, 'Slave traders strength: ' + str(self.global_manager.get('slave_traders_strength'))])
+        else:
+            self.set_tooltip([self.name])
 
     def can_show_tooltip(self):
         '''

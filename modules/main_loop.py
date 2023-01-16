@@ -90,7 +90,7 @@ def main_loop(global_manager):
                     if correct_key:
                         break
                         
-            if event.type == pygame.KEYUP:
+            elif event.type == pygame.KEYUP:
                 for current_button in global_manager.get('button_list'):
                     if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
@@ -119,6 +119,10 @@ def main_loop(global_manager):
                         global_manager.set('message', '')
                     else:
                         global_manager.set('typing', True)
+
+            elif event.type == pygame.mixer.music.get_endevent(): #event.type == global_manager.get('SONG_END_EVENT'):
+                global_manager.get('sound_manager').song_done()
+
         global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
         global_manager.set('old_rmb_down', global_manager.get('rmb_down'))
         global_manager.set('old_mmb_down', global_manager.get('mmb_down'))
@@ -198,7 +202,7 @@ def main_loop(global_manager):
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
             global_manager.set('last_selection_outline_switch', time.time())
-
+        global_manager.get('event_manager').update(global_manager.get('current_time'))
         if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= time.time(): #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
             for enemy in global_manager.get('npmob_list'):

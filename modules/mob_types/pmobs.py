@@ -60,6 +60,7 @@ class pmob(mob):
             self.default_name = input_dict['default_name']
             self.set_name(self.default_name)
             self.set_sentry_mode(input_dict['sentry_mode'])
+            self.set_automatically_replace(input_dict['automatically_replace'])
             if input_dict['in_turn_queue'] and input_dict['end_turn_destination'] == 'none':
                 self.add_to_turn_queue()
             else:
@@ -70,12 +71,13 @@ class pmob(mob):
             self.default_name = self.name
             self.set_max_movement_points(4)
             actor_utility.deselect_all(self.global_manager)
-            self.select()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
             self.set_sentry_mode(False)
+            self.set_automatically_replace(True)
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
+            self.select()
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -99,6 +101,7 @@ class pmob(mob):
                 'base_automatic_route': int tuple list value - List of the coordinates in this unit's automatic movement route, with the first coordinates being the start and the last being the end. List empty if
                     no automatic movement route has been designated
                 'in_progress_automatic_route': string/int tuple list value - List of the coordinates and string commands this unit will execute, changes as the route is executed
+                'automatically_replace': boolean value  Whether this unit or any of its components should be replaced automatically in the event of attrition
         '''
         save_dict = super().to_save_dict()
         if self.end_turn_destination == 'none':
@@ -113,6 +116,7 @@ class pmob(mob):
         save_dict['in_turn_queue'] = (self in self.global_manager.get('player_turn_queue'))
         save_dict['base_automatic_route'] = self.base_automatic_route
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
+        save_dict['automatically_replace'] = self.automatically_replace
         return(save_dict)
 
     def add_to_automatic_route(self, new_coordinates):
@@ -266,11 +270,31 @@ class pmob(mob):
         '''
         if self.is_officer or self.is_group or self.is_vehicle:
             if self.is_battalion or self.is_safari or (self.is_officer and self.officer_type in ['hunter', 'major']):
-                self.global_manager.get('sound_manager').play_sound('bolt action 2')
-            possible_sounds = ['voices/voice 1', 'voices/voice 2']
-            if self.is_vehicle and self.vehicle_type == 'ship':
-                possible_sounds.append('voices/ship 2')
+                self.global_manager.get('sound_manager').play_sound('bolt_action_2')
+            if self.global_manager.get('current_country').name == 'France':
+                possible_sounds = ['voices/french sir 1', 'voices/french sir 2', 'voices/french sir 3']
+            elif self.global_manager.get('current_country').name == 'Germany':
+                possible_sounds = ['voices/german sir 1', 'voices/german sir 2', 'voices/german sir 3', 'voices/german sir 4', 'voices/german sir 5']
+            else:
+                possible_sounds = ['voices/sir 1', 'voices/sir 2', 'voices/sir 3']
+                if self.is_vehicle and self.vehicle_type == 'ship':
+                    possible_sounds.append('voices/steady she goes')
             self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+
+    def set_automatically_replace(self, new_value):
+        '''
+        Description:
+            Sets this unit's automatically replace status
+        '''
+        if self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
+            text_tools.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
+            return()
+        self.automatically_replace = new_value
+        displayed_mob = self.global_manager.get('displayed_mob')
+        if self == displayed_mob:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+        elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
 
     def set_sentry_mode(self, new_value):
         '''
@@ -376,36 +400,57 @@ class pmob(mob):
         '''
         if current_cell == 'default':
             current_cell = self.images[0].current_cell
+        if current_cell == 'none':
+            return()
         if current_cell.local_attrition():
             transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-            if transportation_minister.no_corruption_roll(6) == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
+            if transportation_minister.no_corruption_roll(6, 'health_attrition') == 1 or self.global_manager.get('effect_manager').effect_active('boost_attrition'):
                 worker_type = 'none'
                 if self.is_worker:
                     worker_type = self.worker_type
                 if (not worker_type in ['African', 'slave']) or random.randrange(1, 7) <= 2:
                     self.attrition_death()
 
-    def attrition_death(self):
+    def attrition_death(self, show_notification = True):
         '''
         Description:
             Kills this unit, takes away its next turn, and automatically buys a replacement when it fails its rolls for health attrition. If an officer dies, the replacement costs the officer's usual recruitment cost and does not have
                 the previous officer's experience. If a worker dies, the replacement is found and recruited from somewhere else on the map, increasing worker upkeep colony-wide as usual
         Input:
-            None
+            boolean show_notification: Whether a notification should be shown for this death - depending on where this was called, a notification may have already been shown
         Output:
             None
         '''
         self.global_manager.get('evil_tracker').change(3)
-        if self.is_officer or self.is_worker:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
-                self.images[0].current_cell.tile, self.global_manager)
+        if (self.is_officer or self.is_worker) and self.automatically_replace:
+            if show_notification:
+                text = utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n' + self.generate_attrition_replacement_text()
+                notification_tools.display_zoom_notification(text, self.images[0].current_cell.tile, self.global_manager)
             self.temp_disable_movement()
             self.replace()
+            self.death_sound('violent')
             #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
             #    self.images[0].current_cell.tile, self.global_manager)
         else:
-            notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
+            if show_notification:
+                notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
             self.die()
+
+    def generate_attrition_replacement_text(self):
+        '''
+        Description:
+            Generates text to use in attrition replacement notifications when this unit suffers health attrition
+        Input:
+            None
+        Output:
+            Returns text to use in attrition replacement notifications
+        '''
+        text = 'The unit will remain inactive for the next turn as replacements are found. /n /n'
+        if self.is_officer:
+            text += str(self.global_manager.get('recruitment_costs')['officer']) + ' money has automatically been spent to recruit a replacement. /n /n'
+        elif self.is_worker and self.worker_type == 'slave':
+            text += str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money has automatically been spent to purchase replacements. /n /n'
+        return(text)
 
     def remove(self):
         '''
@@ -577,7 +622,7 @@ class pmob(mob):
         Output:
             None
         '''
-        self.die()
+        self.die('fired')
 
     def can_move(self, x_change, y_change, can_print = True):
         '''
@@ -610,12 +655,14 @@ class pmob(mob):
                                 if destination_type == 'water':
                                     if self.can_swim or (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle) or (self.can_explore and not future_cell.visible) or (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')):
                                         passed = True
+                                    elif future_cell.y > 0 and self.can_walk and not self.can_swim_river: #can move through river with maximum movement points while becoming disorganized
+                                        passed = True
 
                             if passed:
                                 if destination_type == 'water':
                                     if not (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
                                         if not (self.is_battalion and (not future_cell.get_best_combatant('npmob') == 'none')): #battalions can attack enemies in water, but must retreat afterward
-                                            if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and not self.can_swim_river):
+                                            if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and (not self.can_swim_river) and (not self.can_walk)):
                                                 if can_print:
                                                     if future_y == 0:
                                                         text_tools.print_to_screen('This unit can not move into the ocean.', self.global_manager)
@@ -643,7 +690,7 @@ class pmob(mob):
                             else: #if trying to swim in water and can't 
                                 #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
-                                    text_tools.print_to_screen('You can not move on water with this unit.', self.global_manager)
+                                    text_tools.print_to_screen('You can not move on ocean with this unit.', self.global_manager)
                                 return(False)
                         else:
                             if can_print:
@@ -775,7 +822,8 @@ class pmob(mob):
             num_dice = 2
             
         notification_tools.display_notification(message, 'combat', self.global_manager, num_dice)
-        self.global_manager.get('sound_manager').play_sound('bolt action 1')
+        if self.is_battalion or self.is_safari:
+            self.global_manager.get('sound_manager').play_sound('bolt_action_1')
         self.combat() #later call next step when closing combat action notification instead of immediately
 
     def combat(self):
@@ -852,7 +900,7 @@ class pmob(mob):
         notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
-
+        allow_promotion = False
         if self.veteran:
             if combat_type == 'attacking': #minister only involved in attacks
                 if self.is_battalion:
@@ -867,6 +915,10 @@ class pmob(mob):
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
                 results = [random.randrange(1, 7), random.randrange(1, 7)] #civilian ministers don't get to roll for combat with their units
+
+            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+                results = [6, 6]
+
             first_roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, results[0], own_combat_modifier)
             self.display_die((die_x, 440), first_roll_list[0], 0, 7, 0, False) #only 1 die needs uses_minister because only 1 minister portrait should be displayed
            
@@ -886,12 +938,23 @@ class pmob(mob):
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 result = minister_rolls[0]
+                allow_promotion = True
             elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
                 result = self.controlling_minister.no_corruption_roll(6)
+                allow_promotion = True
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
+
+            if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
+                result = 6
+
             roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
-            self.display_die((die_x, 440), roll_list[0], 0, 7, 0, uses_minister) #die won't show result, so give inputs that make it green
+
+            min_crit_success = 7
+            if allow_promotion:
+                min_crit_success = 6
+                
+            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green
             #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
                 
             text += roll_list[1]
@@ -1001,7 +1064,7 @@ class pmob(mob):
                     if self.public_opinion_change > 0:
                         killed_by_natives_flavor = ['Onlookers in Europe rally in support of their beleaguered heroes overseas. /n /n',
                                                   'Parliament realizes that your company will require increased subsidies if these savages are to be shown their proper place.',
-                                                  'Sensationalized news stories circulate of uungrateful savages attempting to resist their benevolent saviors.']
+                                                  'Sensationalized news stories circulate of ungrateful savages attempting to resist their benevolent saviors.']
                         text += random.choice(killed_by_natives_flavor) + ' Public opinion has increased by ' + str(self.public_opinion_change) + '. /n /n'
                     elif self.public_opinion_change < 0:
                         killed_by_natives_flavor = ['Onlookers in Europe wonder how the world\'s greatest empire could be bested by mere savages. /n /n',
@@ -1032,14 +1095,15 @@ class pmob(mob):
         combat_type = self.current_combat_type
         enemy = self.current_enemy
         conclusion = self.global_manager.get('combat_result')[1]
+        combat_cell = self.images[0].current_cell
         if conclusion == 'win':
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
-                elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
-                    notification_tools.display_notification('While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n',
-                        'default', self.global_manager)
-                    self.retreat()
+                #elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
+                #    notification_tools.display_notification('While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n',
+                #        'default', self.global_manager)
+                #    self.retreat()
                 elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
                     notification_tools.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                         'default', self.global_manager)
@@ -1079,6 +1143,8 @@ class pmob(mob):
 
         if combat_type == 'attacking':
             self.set_movement_points(0)
+            if combat_cell.terrain == 'water' and combat_cell.y > 0 and not self.can_swim_river: #if attacked river and can't swim, become disorganized after combat
+                self.set_disorganized(True)
         
         if self.just_promoted:
             self.promote()
@@ -1120,22 +1186,28 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
         self.global_manager.set('ongoing_construction', True)
-        message = 'Are you sure you want to start constructing a ' + self.building_name + '? /n /n'
+        message = 'Are you sure you want to start constructing a ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
 
         message += 'The planning and materials will cost ' + str(cost) + ' money. /n /n'
         
-        message += 'If successful, a ' + self.building_name + ' will be built. ' #change to match each building
+        message += 'If successful, a ' + text_tools.remove_underscores(self.building_name) + ' will be built. ' #change to match each building
         if self.building_type == 'resource':
-            message += 'A ' + self.building_name + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
-            message += 'Upgrades to the ' + self.building_name + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
+            message += 'A ' + text_tools.remove_underscores(self.building_name) + ' expands the tile\'s warehouse capacity, and each work crew attached to it can attempt to produce ' + self.attached_resource + ' each turn. /n /n'
+            message += 'Upgrades to the ' + text_tools.remove_underscores(self.building_name) + ' can increase the maximum number of work crews attached and/or how much ' + self.attached_resource + ' each attached work crew can attempt to produce each turn. '
         elif self.building_type == 'infrastructure':
             if self.building_name == 'road':
                 message += 'A road halves movement cost when moving to another tile that has a road or railroad and can later be upgraded to a railroad. '
             elif self.building_name == 'railroad':
                 message += 'A railroad, like a road, halves movement cost when moving to another tile that has a road or railroad. '
                 message += 'It is also required for trains to move and for a train station to be built.'
+            elif self.building_name == 'road_bridge':
+                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
+                message += 'A road bridge acts as a road between the tiles it connects and can later be upgraded to a railroad bridge. '
+            elif self.building_name == 'railroad_bridge':
+                message += 'A bridge built on a river tile between 2 land tiles allows movement across the river. '
+                message += 'A railroad bridge acts as a railroad between the tiles it connects. '
         elif self.building_type == 'port':
             message += 'A port allows steamboats and steamships to enter the tile and expands the tile\'s warehouse capacity. '
             if self.y == 1:
@@ -1199,7 +1271,7 @@ class pmob(mob):
         self.global_manager.get('money_tracker').change(-1 * cost, 'construction')
         text = ''
 
-        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + self.building_name + '. /n /n'
+        text += 'The ' + self.name + ' attempts to ' + verb + ' a ' + text_tools.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
@@ -1246,18 +1318,20 @@ class pmob(mob):
             
         text += '/n'
         if roll_result >= self.current_min_success:
-            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + self.building_name + '. /n'
+            text += 'The ' + self.name + ' successfully ' + preterit_verb + ' the ' + text_tools.remove_underscores(self.building_name) + '. /n'
         else:
-            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + self.building_name + '. /n'
+            text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the ' + noun + ' of the ' + text_tools.remove_underscores(self.building_name) + '. /n'
 
         if (not self.veteran) and roll_result >= self.current_min_crit_success:
             self.just_promoted = True
             text += ' /nThe ' + self.officer.name + ' managed the ' + noun + ' well enough to become a veteran. /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])
+        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])
         
     def complete_construction(self):
         '''
@@ -1293,6 +1367,8 @@ class pmob(mob):
                     building_image_id = 'buildings/infrastructure/road.png'
                 elif self.building_name == 'railroad':
                     building_image_id = 'buildings/infrastructure/railroad.png'
+                else: #bridge image handled in infrastructure initialization to use correct horizontal/vertical version
+                    building_image_id = 'buildings/infrastructure/road.png'
                 input_dict['image'] = building_image_id
                 input_dict['infrastructure_type'] = self.building_name
             elif self.building_type == 'port':
@@ -1395,9 +1471,9 @@ class pmob(mob):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start repair'}
         self.global_manager.set('ongoing_construction', True)
-        message = 'Are you sure you want to start repairing the ' + self.building_name + '? /n /n'
+        message = 'Are you sure you want to start repairing the ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
-        message += 'If successful, the ' + self.building_name + ' will be restored to full functionality. /n /n'
+        message += 'If successful, the ' + text_tools.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
             
         notification_tools.display_choice_notification(message, ['start repair', 'stop repair'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
@@ -1422,7 +1498,7 @@ class pmob(mob):
         
         self.global_manager.get('money_tracker').change(self.repaired_building.get_repair_cost() * -1, 'construction')
         text = ''
-        text += 'The ' + self.name + ' attempts to repair the ' + self.building_name + '. /n /n'
+        text += 'The ' + self.name + ' attempts to repair the ' + text_tools.remove_underscores(self.building_name) + '. /n /n'
         if not self.veteran:    
             notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
@@ -1467,7 +1543,7 @@ class pmob(mob):
             
         text += '/n'
         if roll_result >= self.current_min_success: #3+ required on D6 for repair
-            text += 'The ' + self.name + ' successfully repaired the ' + self.building_name + '. /n'
+            text += 'The ' + self.name + ' successfully repaired the ' + text_tools.remove_underscores(self.building_name) + '. /n'
         else:
             text += 'Little progress was made and the ' + self.officer.name + ' requests more time and funds to complete the repair. /n'
 
@@ -1475,10 +1551,12 @@ class pmob(mob):
             self.just_promoted = True
             text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])  
+        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
 
     def complete_repair(self):
         '''

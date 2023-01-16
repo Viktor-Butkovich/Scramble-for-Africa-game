@@ -43,7 +43,7 @@ def get_building_cost(global_manager, constructor, building_type, building_name 
         int: Returns the cost of the inputted unit attempting to construct the inputted building
     '''
     if building_type == 'infrastructure':
-        building_type = building_name #road or railroad
+        building_type = building_name #road, railroad, road_bridge, or railroad_bridge
 
     if building_type == 'warehouses':
         if constructor == 'none':
@@ -197,7 +197,7 @@ def spawn_beast(global_manager):
     input_dict['modes'] = ['strategic']
     input_dict['animal_type'] = random.choice(global_manager.get('terrain_animal_dict')[terrain_type])
     input_dict['adjective'] = random.choice(global_manager.get('animal_adjectives'))
-    input_dict['image'] = 'mobs/beasts/default.png'
+    input_dict['image'] = 'mobs/beasts/' + input_dict['animal_type'] + '.png'
     input_dict['init_type'] = 'beast'
     global_manager.get('actor_creation_manager').create(False, input_dict, global_manager)  
 
@@ -343,6 +343,8 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
     if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
         global_manager.set('displayed_tile', new_actor)
+        if not new_actor == 'none':
+            new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
     elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
         global_manager.set('displayed_mob', new_actor)
     elif id(info_display_list) == id(global_manager.get('country_info_display_list')):

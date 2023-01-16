@@ -50,31 +50,39 @@ class grid():
         self.external_line_color = input_dict['external_line_color']
         self.cell_list = []
         self.mini_grid = 'none'
+        #self.global_manager.get('terrain_list').append('water') #to generate water normally
         if not from_save:
             self.create_cells()
             if input_dict['strategic_grid']:
                 area = self.coordinate_width * self.coordinate_height
                 num_worms = area // 5
+                if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+                    self.global_manager.get('terrain_list').append('water')
                 for i in range(num_worms):
                     self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
-                for cell in self.cell_list:
-                    if cell.y == 0:
-                        cell.set_terrain('water')
-                num_rivers = random.randrange(2, 4)
-                valid = False
-                while not valid:
-                    valid = True
-                    start_x_list = []
-                    for i in range(num_rivers):
-                        start_x_list.append(random.randrange(0, self.coordinate_width))
-                    for index in range(len(start_x_list)):
-                        for other_index in range(len(start_x_list)):
-                            if not index == other_index:
-                                if abs(start_x_list[index] - start_x_list[other_index]) < 3:
-                                    valid = False
+                #if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+                #    for i in range(num_worms // 6): #range(num_worms / 3):
+                #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
+                if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+                    for cell in self.cell_list:
+                        if cell.y == 0:
+                            terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                            cell.set_terrain('water', terrain_variant)
+                    num_rivers = random.randrange(2, 4)
+                    valid = False
+                    while not valid:
+                        valid = True
+                        start_x_list = []
+                        for i in range(num_rivers):
+                            start_x_list.append(random.randrange(0, self.coordinate_width))
+                        for index in range(len(start_x_list)):
+                            for other_index in range(len(start_x_list)):
+                                if not index == other_index:
+                                    if abs(start_x_list[index] - start_x_list[other_index]) < 3:
+                                        valid = False
                 
-                for start_x in start_x_list:
-                    self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
+                    for start_x in start_x_list:
+                        self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
                     
                 for cell in self.cell_list:
                     if cell.y == 0 or cell.y == 1:
@@ -126,11 +134,13 @@ class grid():
         Output:
             None
         '''
-        if self.global_manager.get('show_grid_lines') and self.global_manager.get('current_game_mode') in self.modes:
-            for x in range(0, self.coordinate_width+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
-            for y in range(0, self.coordinate_height+1):
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
+        #if self.global_manager.get('show_grid_lines') and self.global_manager.get('current_game_mode') in self.modes:
+        if self.global_manager.get('current_game_mode') in self.modes:
+            if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+                for x in range(0, self.coordinate_width+1):
+                    pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
+                for y in range(0, self.coordinate_height+1):
+                    pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
             pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
@@ -436,7 +446,8 @@ class grid():
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = random.choice(possible_terrains)
-        self.find_cell(current_x, current_y).set_terrain(terrain)
+        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
@@ -450,7 +461,8 @@ class grid():
                     current_y = current_y - 1
                 elif direction == 4:
                     current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
+                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[terrain]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
                 
     def make_random_river_worm(self, min_len, max_len, start_x):
         '''
@@ -468,7 +480,15 @@ class grid():
         current_y = start_y
         worm_length = random.randrange(min_len, max_len + 1)
         terrain = 'water'
-        self.find_cell(current_x, current_y).set_terrain(terrain)
+        water_type = 'water'
+        if current_y == 0:
+            water_type = 'ocean_water'
+        else:
+            water_type = 'river_water'
+        #self.find_cell(current_x, current_y).set_terrain(terrain)
+        terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+        self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
+        #self.find_cell(current_x, current_y).set_terrain(terrain)
         counter = 0        
         while not counter == worm_length:           
             counter = counter + 1
@@ -482,7 +502,14 @@ class grid():
                     current_x = current_x + 1
                 elif direction == 4:
                     current_x = current_x - 1
-                self.find_cell(current_x, current_y).set_terrain(terrain)
+                water_type = 'water'
+                if current_y == 0:
+                    water_type = 'ocean_water'
+                else:
+                    water_type = 'river_water'
+                #self.find_cell(current_x, current_y).set_terrain(terrain)
+                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')[water_type]) #randomly choose from number of terrain variants, if 2 variants then pick 0 or 1
+                self.find_cell(current_x, current_y).set_terrain(terrain, terrain_variant)
 
     def touching_mouse(self):
         '''
@@ -583,7 +610,7 @@ class mini_grid(grid):
                     current_cell.contained_buildings = attached_cell.contained_buildings
                     current_cell.village = attached_cell.village
                     current_cell.set_visibility(attached_cell.visible)
-                    current_cell.set_terrain(attached_cell.terrain)
+                    current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant)
                     current_cell.set_resource(attached_cell.resource)
                 else: #if the current cell is beyond the boundaries of the attached grid, show an empty cell
                     current_cell.set_visibility(True)
@@ -655,44 +682,46 @@ class mini_grid(grid):
         Output:
             None
         '''
-        if self.global_manager.get('show_grid_lines'):
-            lower_left_corner = self.get_mini_grid_coordinates(0, 0)
-            upper_right_corner = self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, self.attached_grid.coordinate_height)
-            if lower_left_corner[0] < 0: #left
-                left_x = 0
-            else:
-                left_x = lower_left_corner[0]
-            if lower_left_corner[1] < 0: #down
-                down_y = 0
-            else:
-                down_y = lower_left_corner[1]
-            if upper_right_corner[0] >= self.coordinate_width: #right
-                right_x = self.coordinate_width
-            else:
-                right_x = upper_right_corner[0] + 1
-            if upper_right_corner[1] > self.coordinate_height: #up
-                up_y = self.coordinate_height
-            else:
-                up_y = upper_right_corner[1]
+        lower_left_corner = self.get_mini_grid_coordinates(0, 0)
+        upper_right_corner = self.get_mini_grid_coordinates(self.attached_grid.coordinate_width - 1, self.attached_grid.coordinate_height)
+        if lower_left_corner[0] < 0: #left
+            left_x = 0
+        else:
+            left_x = lower_left_corner[0]
+        if lower_left_corner[1] < 0: #down
+            down_y = 0
+        else:
+            down_y = lower_left_corner[1]
+        if upper_right_corner[0] >= self.coordinate_width: #right
+            right_x = self.coordinate_width
+        else:
+            right_x = upper_right_corner[0] + 1
+        if upper_right_corner[1] > self.coordinate_height: #up
+            up_y = self.coordinate_height
+        else:
+            up_y = upper_right_corner[1]
+        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
                 
             for x in range(0, self.coordinate_width+1):
                 pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)),
-                                 self.grid_line_width)
+                                self.grid_line_width)
 
             for y in range(0, self.coordinate_height+1):
                 pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)),
-                                 self.grid_line_width)                     
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)),
-                                 self.grid_line_width + 1)
+                                self.grid_line_width) 
+        
+        for y in range(0, self.coordinate_height+1):                    
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)),
+                            self.grid_line_width + 1)
 
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)),
-                             self.grid_line_width + 1)
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)),
+                        self.grid_line_width + 1)
 
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)),
-                             self.grid_line_width + 1)
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)),
+                        self.grid_line_width + 1)
 
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)),
-                             self.grid_line_width + 1) 
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)),
+                        self.grid_line_width + 1) 
 
 class abstract_grid(grid):
     '''
