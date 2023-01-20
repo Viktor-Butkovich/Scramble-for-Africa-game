@@ -444,7 +444,7 @@ class battalion(group):
         '''
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
-        self.current_max_crit_fail = 2
+        self.current_max_crit_fail = -1 #no critical failures
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to suppress the slave trade? If successful, public opinion will increase and the strength of the slave traders will decrease, with the slave trade ending once strength is reduced to 0. /n /n'
         message += 'The suppression will cost ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money. /n /n'
