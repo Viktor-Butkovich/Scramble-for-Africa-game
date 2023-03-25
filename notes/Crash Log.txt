@@ -6,8 +6,12 @@ Traceback (most recent call last):
     current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones
   File "c:\Users\vikto\Documents\Old computer files\SFA\modules\notifications.py", line 72, in on_click
     self.remove()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 800, in remove
-    self.global_manager.get('artifact_search_result')[0].complete_artifact_search()
-  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\group_types\expeditions.py", line 675, in complete_artifact_search
-    if location == self.global_manager.get('current_lore_mission').artifact_location:
-AttributeError: 'str' object has no attribute 'artifact_location'
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\action_notifications.py", line 1051, in remove
+    self.global_manager.get('combat_result')[0].complete_combat()
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\pmobs.py", line 1107, in complete_combat
+    elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mob_types\group_types\battalions.py", line 92, in get_movement_cost
+    cost = super().get_movement_cost(x_change, y_change)
+  File "c:\Users\vikto\Documents\Old computer files\SFA\modules\mobs.py", line 298, in get_movement_cost
+    adjacent_cell = local_cell.adjacent_cells[direction]
+KeyError: 'none'
