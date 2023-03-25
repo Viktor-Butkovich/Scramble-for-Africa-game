@@ -89,15 +89,16 @@ class battalion(group):
             elif (not post_attack) and self.is_safari and not adjacent_cell.get_best_combatant('npmob', 'beast') == 'none': #if safari attacking beast
                 cost = 1
             else:
-                cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-                if self.is_pmob:
-                    if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-                            cost = cost / 2
-                    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
-                        cost = self.max_movement_points
-                    if (not adjacent_cell.visible) and self.can_explore:
-                        cost = self.movement_cost
+                cost = super().get_movement_cost(x_change, y_change)
+                #cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
+                #if self.is_pmob:
+                #    if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
+                #        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
+                #            cost = cost / 2
+                #    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
+                #        cost = self.max_movement_points
+                #    if (not adjacent_cell.visible) and self.can_explore:
+                #        cost = self.movement_cost
         return(cost)
 
     def move(self, x_change, y_change, attack_confirmed = False):
@@ -444,7 +445,7 @@ class battalion(group):
         '''
         self.current_roll_modifier = 0
         self.current_min_success = self.default_min_success
-        self.current_max_crit_fail = 2
+        self.current_max_crit_fail = -1 #no critical failures
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to suppress the slave trade? If successful, public opinion will increase and the strength of the slave traders will decrease, with the slave trade ending once strength is reduced to 0. /n /n'
         message += 'The suppression will cost ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money. /n /n'

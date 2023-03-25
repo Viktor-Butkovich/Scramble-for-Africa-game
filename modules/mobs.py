@@ -294,8 +294,12 @@ class mob(actor):
             direction = 'up'
         elif y_change < 0:
             direction = 'down'
+
+        if direction == 'none':
+            adjacent_cell = local_cell
+        else:
+            adjacent_cell = local_cell.adjacent_cells[direction]
             
-        adjacent_cell = local_cell.adjacent_cells[direction]
         if not adjacent_cell == 'none':
             cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
             if self.is_pmob:

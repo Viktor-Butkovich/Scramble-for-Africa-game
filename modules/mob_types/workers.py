@@ -295,15 +295,15 @@ class slave_worker(worker):
         if not from_save:
             if input_dict['purchased']: #as opposed to captured
                 if not self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
-                    market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
                     public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                     current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                     self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
                     resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                     if not resulting_public_opinion == current_public_opinion:
                         text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-                    self.global_manager.get('evil_tracker').change(6)
-                    self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
+                market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+                self.global_manager.get('evil_tracker').change(6)
+                self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = self.global_manager.get('public_opinion_tracker').get()

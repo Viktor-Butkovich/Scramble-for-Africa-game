@@ -162,10 +162,12 @@ class construction_gang(group):
             self.just_promoted = True
             text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
+            success = True
             notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
+            success = False
             notification_tools.display_notification(text, 'default', self.global_manager)
-        self.global_manager.set('construction_result', [self, roll_result])  
+        self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
 
         
     def complete_upgrade(self):

@@ -1504,13 +1504,7 @@ def debug_tools_setup(global_manager):
     
     DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
     #prints information about lore missions when first created and on load
-    #DEBUG_show_lore_mission_locations.apply()
-    #DEBUG_skip_intro.apply()
-    #DEBUG_ministry_of_magic.apply()
-    #DEBUG_band_of_thieves.apply()
-    #DEBUG_block_native_warrior_spawning.apply()
-    #DEBUG_remove_fog_of_war.apply()
-    #DEBUG_nine_mortal_men.apply()
+
     #activate effect with DEBUG_effect.apply()
 
 def manage_crash(exception):
