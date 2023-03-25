@@ -173,6 +173,7 @@ class pmob(mob):
             else:
                 return(False)
         elif next_step == 'start':
+            #ignores consumer goods
             if len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0 or self.get_inventory_used() > 0: #only start round trip if there is something to deliver, either from tile or in inventory already
                 if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')): #can pick up freely unless train without train station
                     return(True)
@@ -657,7 +658,6 @@ class pmob(mob):
                                         passed = True
                                     elif future_cell.y > 0 and self.can_walk and not self.can_swim_river: #can move through river with maximum movement points while becoming disorganized
                                         passed = True
-
                             if passed:
                                 if destination_type == 'water':
                                     if not (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship

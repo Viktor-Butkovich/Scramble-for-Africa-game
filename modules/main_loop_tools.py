@@ -547,7 +547,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                 elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
                                     text_tools.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
                                     return()
-                                elif target_cell.terrain == 'water' and not displayed_mob.can_swim:
+                                elif (target_cell.terrain == 'water' and not displayed_mob.can_swim) and (displayed_mob.is_vehicle and destination_infrastructure == 'none'): 
+                                    #non-train units can still move slowly through water, even w/o canoes or a bridge
+                                    #railroad bridge allows anything to move through
                                     text_tools.print_to_screen('This unit can not create movement routes through water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:

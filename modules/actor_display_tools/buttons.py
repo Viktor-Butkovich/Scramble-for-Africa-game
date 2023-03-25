@@ -2555,7 +2555,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             
         if (not self.attached_mob == 'none') and self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
             terrain = self.attached_mob.images[0].current_cell.terrain
-            message.append(utility.generate_capitalized_article(self.building_name) + self.building_name + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
+            message.append(utility.generate_capitalized_article(self.building_name) + text_tools.remove_underscores(self.building_name) + ' ' + utility.conjugate('cost', self.building_name) + ' ' + str(base_cost) + ' money by default, which is multiplied by ' + str(self.global_manager.get('terrain_build_cost_multiplier_dict')[terrain]) + ' when built in ' + terrain + ' terrain')
         self.set_tooltip(message)
         
 

@@ -263,6 +263,7 @@ def complete_trial(final_roll, global_manager):
         notification_tools.display_notification(text, 'default', global_manager)
         
         defense.appoint('none')
+        minister_utility.calibrate_minister_info_display(global_manager, 'none')
         defense.respond('prison')
         defense.remove()
         global_manager.get('fear_tracker').change(1)
