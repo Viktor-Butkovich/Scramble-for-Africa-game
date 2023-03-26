@@ -69,6 +69,7 @@ class mob(actor):
         self.can_walk = True #if can enter land areas
         self.has_canoes = False
         self.max_movement_points = 1
+        self.movement_points = self.max_movement_points
         self.movement_cost = 1
         self.has_infinite_movement = False
         self.temp_movement_disabled = False
@@ -415,17 +416,22 @@ class mob(actor):
             if self.global_manager.get('displayed_mob') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
-    def set_max_movement_points(self, new_value):
+    def set_max_movement_points(self, new_value, initial_setup = True):
         '''
         Description:
-            Sets this mob's maximum number of movement points and changes its current movement points to the maximum amount
+            Sets this mob's maximum number of movement points and changes its current movement points by the amount increased or to the maximum, based on the input boolean
         Input:
-            None
+            boolean initial_setup: Whether to set this current movement points to the max (on recruitment) or change by the amount increased (when increased after recruitment)
         Output:
             None
         '''
+        if not initial_setup:
+            increase = new_value - self.max_movement_points
         self.max_movement_points = new_value
-        self.set_movement_points(new_value)
+        if initial_setup:
+            self.set_movement_points(new_value)
+        else:
+            self.set_movement_points(self.movement_points + increase)
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''

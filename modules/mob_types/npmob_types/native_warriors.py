@@ -91,6 +91,8 @@ class native_warriors(npmob):
         '''
         super().remove()
         self.origin_village.attached_warriors = utility.remove_from_list(self.origin_village.attached_warriors, self)
+        if self.origin_village.population == 0 and len(self.origin_village.attached_warriors) == 0:
+            self.origin_village.aggressiveness = 0
 
     def check_despawn(self):
         '''

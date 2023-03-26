@@ -1,5 +1,4 @@
 #Contains functionality for porters
-
 from ..groups import group
 from ... import actor_utility
 
@@ -41,5 +40,5 @@ class porters(group):
             self.load_inventory(input_dict['inventory'])
 
     def promote(self):
-        self.set_max_movement_points(6)
+        self.set_max_movement_points(6, False)
         super().promote()

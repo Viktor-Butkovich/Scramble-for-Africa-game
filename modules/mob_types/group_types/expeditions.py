@@ -673,8 +673,8 @@ class expedition(group):
         location = self.global_manager.get('artifact_search_result')[3]
         if success: #if campaign succeeded
             if location == self.global_manager.get('current_lore_mission').artifact_location:
-                prize_money = random.randrange(5, 11) * 10
-                public_opinion_increase = random.randrange(20, 31)
+                prize_money = random.randrange(25, 51) * 10
+                public_opinion_increase = random.randrange(30, 61)
                 text = 'The ' + self.global_manager.get('current_country').government_type_adjective.capitalize() + ' Geographical Society awarded ' + str(prize_money) + ' money for finding the ' + self.global_manager.get('current_lore_mission').name + '. /n /n'
                 text += 'Additionally, public opinion has increased by ' + str(public_opinion_increase) + '. /n /n'
                 lore_type = self.global_manager.get('current_lore_mission').lore_type
