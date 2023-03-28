@@ -957,7 +957,7 @@ class button():
 
             elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
                         displayed_mob = self.global_manager.get('displayed_mob')
                         displayed_tile = self.global_manager.get('displayed_tile')
                         commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
@@ -989,7 +989,7 @@ class button():
                 
             elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
-                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
                         displayed_mob = self.global_manager.get('displayed_mob')
                         displayed_tile = self.global_manager.get('displayed_tile')
                         commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
@@ -1059,7 +1059,7 @@ class button():
                 turn_management_tools.end_turn(self.global_manager)
 
             elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-                if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
                     commodity_list = self.attached_label.actor.get_held_commodities()
                     commodity = commodity_list[self.attached_label.commodity_index]
                     num_present = self.attached_label.actor.get_inventory(commodity)
@@ -1163,47 +1163,16 @@ class button():
             elif self.button_type == 'start trial':
                 trial_utility.trial(self.global_manager)
 
-            elif self.button_type == 'stop attack':
-                self.global_manager.set('ongoing_combat', False)
-                self.notification.choice_info_dict['battalion'].remove_attack_marks()
-
-            elif self.button_type == 'stop trading':
-                self.global_manager.set('ongoing_trade', False)
-                
-            elif self.button_type == 'stop religious campaign':
-                self.global_manager.set('ongoing_religious_campaign', False)
-
-            elif self.button_type == 'stop public relations campaign':
-                self.global_manager.set('ongoing_public_relations_campaign', False)
-
-            elif self.button_type == 'stop advertising campaign':
-                self.global_manager.set('ongoing_advertising_campaign', False)
-
-            elif self.button_type == 'stop capture slaves':
-                self.global_manager.set('ongoing_slave_capture', False)
-            
-            elif self.button_type == 'stop suppress slave trade':
-                self.global_manager.set('ongoing_slave_trade_suppression', False)
-
-            elif self.button_type in ['stop loan search', 'decline loan offer']:
-                self.global_manager.set('ongoing_loan_search', False)
-                for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                    current_minister_image.remove()
-
-            elif self.button_type == 'stop converting':
-                self.global_manager.set('ongoing_conversion', False)
-
-            elif self.button_type == 'stop rumor search':
-                self.global_manager.set('ongoing_rumor_search', False)
-            
-            elif self.button_type == 'stop artifact search':
-                self.global_manager.set('ongoing_artifact_search', False)
-
-            elif self.button_type in ['stop construction', 'stop upgrade', 'stop repair']:
-                self.global_manager.set('ongoing_construction', False)
-
-            elif self.button_type == 'stop trial':
-                self.global_manager.set('ongoing_trial', False)
+            elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop public relations campaign', 'stop advertising campaign', 
+                                      'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
+                                      'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
+                self.global_manager.set('ongoing_action', False)
+                self.global_manager.set('ongoing_action_type', 'none')
+                if self.button_type == 'stop attack':
+                    self.notification.choice_info_dict['battalion'].remove_attack_marks()
+                elif self.button_type in ['stop loan search', 'decline loan offer']:
+                    for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                        current_minister_image.remove()
 
             elif self.button_type == 'accept loan offer':
                 input_dict = {}
@@ -1214,7 +1183,8 @@ class button():
                     self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
                     
                 new_loan = market_tools.loan(False, input_dict, self.global_manager)
-                self.global_manager.set('ongoing_loan_search', False)
+                self.global_manager.set('ongoing_action', False)
+                self.global_manager.set('ongoing_action_type', 'none')
 
             elif self.button_type == 'launch trial':
                 if main_loop_tools.action_possible(self.global_manager):

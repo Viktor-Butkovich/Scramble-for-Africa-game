@@ -254,7 +254,8 @@ def stop_exploration(global_manager):
         if current_mob.can_explore:
             current_mob.exploration_mark_list = []
     exploration_mark_list = []
-    global_manager.set('ongoing_exploration', False)
+    global_manager.set('ongoing_action', False)
+    global_manager.set('ongoing_action_type', 'none')
 
 def create_image_dict(stem):
     '''

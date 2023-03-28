@@ -218,7 +218,7 @@ class die(button):
             boolean: Returns whether this die should be shown
         '''
         if super().can_show():
-            if self.global_manager.get('ongoing_trial'): #rolls during a trial are not done through a mob, so always show them
+            if self.global_manager.get('ongoing_action_type') == 'trial': #rolls during a trial are not done through a mob, so always show them
                 return(True)
             displayed_mob_dice_list = self.global_manager.get('displayed_mob').attached_dice_list
             num_notification_dice = self.global_manager.get('notification_list')[0].notification_dice

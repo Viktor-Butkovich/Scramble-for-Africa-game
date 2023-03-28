@@ -127,10 +127,9 @@ class village():
         input_dict['name'] = 'native warriors'
         input_dict['init_type'] = 'native_warriors'
         input_dict['origin_village'] = self
-        #if self.available_workers > self.population: #if available worker leaves to be warrior, reduce number of available workers
-        #    self.set_available_workers(self.population)
-        return(self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager))
+        new_warrior = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         self.change_population(-1)
+        return(new_warrior)
 
     def recruit_worker(self):
         '''

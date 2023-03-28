@@ -158,7 +158,7 @@ def update_display(global_manager):
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
 
-def check_if_minister_appointed(minister_type, global_manager):
+def minister_appointed(minister_type, global_manager):
     '''
     Description:
         Checks if there is a minister appointed in the inputted office and prints a warning if there is not one, used to explain why the player can't do an action
@@ -185,33 +185,7 @@ def action_possible(global_manager):
     Output:
         boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
-    if global_manager.get('ongoing_exploration'):
-        return(False)
-    elif global_manager.get('ongoing_trade'):
-        return(False)
-    elif global_manager.get('ongoing_religious_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_public_relations_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_advertising_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_loan_search'):
-        return(False)
-    elif global_manager.get('ongoing_conversion'):
-        return(False)
-    elif global_manager.get('ongoing_rumor_search'):
-        return(False)
-    elif global_manager.get('ongoing_artifact_search'):
-        return(False)
-    elif global_manager.get('ongoing_construction'):
-        return(False)
-    elif global_manager.get('ongoing_combat'):
-        return(False)
-    elif global_manager.get('ongoing_trial'):
-        return(False)
-    elif global_manager.get('ongoing_slave_capture'):
-        return(False)
-    elif global_manager.get('ongoing_slave_trade_suppression'):
+    if global_manager.get('ongoing_action'):
         return(False)
     elif global_manager.get('game_over'):
         return(False)
@@ -613,4 +587,4 @@ def debug_print(global_manager):
     '''
     print('')
     print(global_manager.get('effect_manager'))
-    print(pygame.mixer.music.get_volume())
+    

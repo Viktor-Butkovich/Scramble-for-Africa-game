@@ -345,6 +345,7 @@ SFA folder
         main_loop_tools.py
             imports pygame, time, scaling, text_tools, actor_utility, minister_utility, utility
             def update_display
+		def minister_appointed
             def action_possible
             def draw_loading_screen
             def manage_tooltip_drawing

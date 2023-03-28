@@ -59,7 +59,8 @@ class caravan(group):
         '''
         village = self.images[0].current_cell.get_building('village')
         choice_info_dict = {'caravan': self, 'village': village, 'type': 'start trading'}
-        self.global_manager.set('ongoing_trade', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'trade')
         message = 'Are you sure you want to attempt to trade with the village of ' + village.name + '? /n /n'
 
         self.current_roll_modifier = 0

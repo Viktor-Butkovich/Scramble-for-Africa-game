@@ -68,7 +68,8 @@ class dice_rolling_notification(action_notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
-        if self.global_manager.get('ongoing_combat') or self.global_manager.get('ongoing_slave_capture') or self.global_manager.get('ongoing_slave_trade_suppression'):
+        #if self.global_manager.get('ongoing_combat') or self.global_manager.get('ongoing_slave_capture') or self.global_manager.get('ongoing_slave_trade_suppression'):
+        if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture', 'slave_trade_suppression']:
             if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
                 self.global_manager.get('sound_manager').play_sound('gunfire')
 
@@ -246,11 +247,11 @@ class off_tile_exploration_notification(action_notification):
             explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
             self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        #although global manager sets to busy here, calling object should also set to busy so that you can't click off before notification appears if another notification is opened when this one is queued
+        global_manager.set('ongoing_action', True)
+        global_manager.set('ongoing_action_type', self.current_expedition.current_action_type)
         if self.current_expedition.current_action_type == 'exploration':
-            global_manager.set('ongoing_exploration', True)
             explored_cell.set_visibility(True)
-        elif self.current_expedition.current_action_type == 'rumor_search':
-            global_manager.set('ongoing_rumor_search', True)
         if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
             self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -267,10 +268,8 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
-        if self.current_expedition.current_action_type == 'exploration':
-            self.global_manager.set('ongoing_exploration', False)
-        elif self.current_expedition.current_action_type == 'rumor_search':
-            self.global_manager.set('ongoing_rumor_search', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
@@ -375,7 +374,8 @@ class trade_notification(action_notification):
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                 current_minister_image.remove()
         if self.stops_trade:
-            self.global_manager.set('ongoing_trade', False)
+            self.global_manager.set('ongoing_action', False)
+            self.global_manager.set('ongoing_action_type', 'none')
 
 class religious_campaign_notification(action_notification):
     '''

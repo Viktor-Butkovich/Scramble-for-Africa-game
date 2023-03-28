@@ -87,7 +87,7 @@ class expedition(group):
         future_cell = self.grid.find_cell(future_x, future_y)
         if future_cell.visible == False: #if moving to unexplored area, try to explore it
             if self.global_manager.get('money_tracker').get() >= self.exploration_cost:
-                if self.check_if_minister_appointed():
+                if self.ministers_appointed():
                     choice_info_dict = {'expedition': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.exploration_cost, 'type': 'exploration'}
                     
                     self.current_roll_modifier = 0
@@ -116,7 +116,8 @@ class expedition(group):
                     
                     notification_tools.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attempt an exploration to the ' + direction + '?', ['exploration', 'stop exploration'],
                         choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-                    self.global_manager.set('ongoing_exploration', True)
+                    self.global_manager.set('ongoing_action', True)
+                    self.global_manager.set('ongoing_action_type', 'exploration')
                     for current_grid in self.grids:
                         coordinates = (0, 0)
                         if current_grid.is_mini_grid:
@@ -335,6 +336,8 @@ class expedition(group):
                     
                     self.destination_cells.append(target_cell)
                     self.public_opinion_increases.append(public_opinion_increase)
+                    self.global_manager.set('ongoing_action', True)
+                    self.global_manager.set('ongoing_action_type', 'exploration')
                     notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
 
     def start_rumor_search(self):
@@ -388,7 +391,8 @@ class expedition(group):
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Decrease the village\'s aggressiveness to decrease the roll\'s difficulty. /n /n'
             notification_tools.display_notification(message, 'default', self.global_manager)
         else:
-            self.global_manager.set('ongoing_rumor_search', True)
+            self.global_manager.set('ongoing_action', True)
+            self.global_manager.set('ongoing_action_type', 'rumor_search')
             notification_tools.display_choice_notification(message, ['start rumor search', 'stop rumor search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def rumor_search(self):
@@ -508,6 +512,8 @@ class expedition(group):
                 village.found_rumors = True
 
                 text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
+                self.global_manager.set('ongoing_action', True)
+                self.global_manager.set('ongoing_action_type', 'rumor_search')
                 notification_tools.display_notification(text, 'off_tile_exploration', self.global_manager)
 
             if roll_result >= self.current_min_crit_success and not self.veteran:
@@ -516,7 +522,9 @@ class expedition(group):
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        self.global_manager.set('ongoing_rumor_search', False)
+        else:
+            self.global_manager.set('ongoing_action', False)
+            self.global_manager.set('ongoing_action_type', 'none')
 
     def start_artifact_search(self):
         '''
@@ -561,7 +569,8 @@ class expedition(group):
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. /n /n'
             notification_tools.display_notification(message, 'default', self.global_manager)
         else:
-            self.global_manager.set('ongoing_artifact_search', True)
+            self.global_manager.set('ongoing_action', True)
+            self.global_manager.set('ongoing_action_type', 'artifact_search')
             notification_tools.display_choice_notification(message, ['start artifact search', 'stop artifact search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def artifact_search(self):
@@ -693,5 +702,5 @@ class expedition(group):
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:
             self.die()
-
-        self.global_manager.set('ongoing_artifact_search', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

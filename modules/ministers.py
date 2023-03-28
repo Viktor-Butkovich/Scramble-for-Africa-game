@@ -7,7 +7,6 @@ from . import minister_utility
 from . import notification_tools
 from . import images
 from . import scaling
-from . import text_tools
 
 class minister():
     '''

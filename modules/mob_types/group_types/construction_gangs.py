@@ -64,7 +64,8 @@ class construction_gang(group):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start upgrade'}
-        self.global_manager.set('ongoing_construction', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'construction')
         if self.building_name == 'warehouses':
             message = 'Are you sure you want to start upgrading this tile\'s warehouses? /n /n'
         else:
@@ -187,4 +188,5 @@ class construction_gang(group):
             self.set_movement_points(0)
             self.upgraded_building.upgrade(self.upgrade_type)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show building upgrade
-        self.global_manager.set('ongoing_construction', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

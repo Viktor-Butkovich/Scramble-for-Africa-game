@@ -1374,7 +1374,7 @@ class trade_button(label_button):
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
                                 if current_mob.get_inventory('consumer goods') > 0:
-                                    if minister_utility.positions_filled(self.global_manager): #current_mob.check_if_minister_appointed():
+                                    if minister_utility.positions_filled(self.global_manager): #current_mob.ministers_appointed():
                                         if current_mob.sentry_mode:
                                             current_mob.set_sentry_mode(False)
                                         current_mob.start_trade()
@@ -1449,7 +1449,7 @@ class convert_button(label_button):
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').aggressiveness > 1:
                                 if current_cell.get_building('village').population > 0:
-                                    if current_mob.check_if_minister_appointed():
+                                    if current_mob.ministers_appointed():
                                         if current_mob.sentry_mode:
                                             current_mob.set_sentry_mode(False)
                                         current_mob.start_converting()
@@ -1524,7 +1524,7 @@ class rumor_search_button(label_button):
                                 if current_cell.get_building('village').population > 0:
                                     if not self.global_manager.get('current_lore_mission').confirmed_all_locations_revealed:
                                         if not current_cell.get_building('village').found_rumors:
-                                            if current_mob.check_if_minister_appointed():
+                                            if current_mob.ministers_appointed():
                                                 if current_mob.sentry_mode:
                                                     current_mob.set_sentry_mode(False)
                                                 current_mob.start_rumor_search()
@@ -1599,7 +1599,7 @@ class artifact_search_button(label_button):
                     if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['artifact_search']:
                             if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
-                                if current_mob.check_if_minister_appointed():
+                                if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_artifact_search()
@@ -1654,7 +1654,7 @@ class capture_slaves_button(label_button):
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
-                                if current_mob.check_if_minister_appointed():
+                                if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_capture_slaves()
@@ -1709,7 +1709,7 @@ class suppress_slave_trade_button(label_button):
                         current_cell = current_mob.images[0].current_cell
                         if current_cell.grid == self.global_manager.get('slave_traders_grid'):
                             if self.global_manager.get('slave_traders_strength') > 0:
-                                if current_mob.check_if_minister_appointed():
+                                if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_suppress_slave_trade()
@@ -1781,7 +1781,7 @@ class evangelist_campaign_button(label_button):
                     if current_mob.movement_points >= 1:
                         if self.button_type == 'religious campaign':
                             if self.global_manager.get('money') >= self.global_manager.get('action_prices')['religious_campaign']:
-                                if current_mob.check_if_minister_appointed():
+                                if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_religious_campaign()
@@ -1789,7 +1789,7 @@ class evangelist_campaign_button(label_button):
                                 text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money needed for a public relations campaign.', self.global_manager)
                         elif self.button_type == 'public relations campaign':
                             if self.global_manager.get('money') >= self.global_manager.get('action_prices')['public_relations_campaign']:
-                                if current_mob.check_if_minister_appointed():
+                                if current_mob.ministers_appointed():
                                     if current_mob.sentry_mode:
                                         current_mob.set_sentry_mode(False)
                                     current_mob.start_public_relations_campaign()
@@ -1855,7 +1855,7 @@ class take_loan_button(label_button):
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
-                            if current_mob.check_if_minister_appointed():
+                            if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 current_mob.start_loan_search()
@@ -1926,11 +1926,12 @@ class labor_broker_button(label_button):
                         if not cost_info_list == 'none':
                             if current_mob.movement_points >= 1:
                                 if self.global_manager.get('money_tracker').get() >= cost_info_list[1]:
-                                    if current_mob.sentry_mode:
-                                        current_mob.set_sentry_mode(False)
-                                    choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
-                                        'source_type': 'labor broker', 'village': cost_info_list[0]}
-                                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
+                                    if current_mob.ministers_appointed():
+                                        if current_mob.sentry_mode:
+                                            current_mob.set_sentry_mode(False)
+                                        choice_info_dict = {'recruitment_type': 'African worker labor broker', 'cost': cost_info_list[1], 'mob_image_id': 'mobs/African worker/default.png', 'type': 'recruitment',
+                                            'source_type': 'labor broker', 'village': cost_info_list[0]}
+                                        self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, 'African workers', self.global_manager)
                                 else:
                                     text_tools.print_to_screen('You can not afford the recruitment cost of ' + str(cost_info_list[1]) + ' for the cheapest available worker. ', self.global_manager)
                             else:
@@ -2021,7 +2022,7 @@ class advertising_campaign_button(label_button):
                 if self.global_manager.get('europe_grid') in current_mob.grids:
                     if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['advertising_campaign']:
-                            if current_mob.check_if_minister_appointed():
+                            if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 if not self.global_manager.get('current_game_mode') == 'europe':
@@ -2092,7 +2093,7 @@ class track_beasts_button(label_button):
                 if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                     if current_mob.movement_points >= 1:
                         if self.global_manager.get('money') >= self.global_manager.get('action_prices')['track_beasts']:
-                            if current_mob.check_if_minister_appointed():
+                            if current_mob.ministers_appointed():
                                 if current_mob.sentry_mode:
                                     current_mob.set_sentry_mode(False)
                                 current_mob.track_beasts()
@@ -2232,7 +2233,7 @@ class build_train_button(label_button):
                         if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if self.attached_label.actor.images[0].current_cell.has_intact_building('train_station'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                    if self.attached_label.actor.check_if_minister_appointed():
+                                    if self.attached_label.actor.ministers_appointed():
                                         if self.attached_label.actor.sentry_mode:
                                             self.attached_label.actor.set_sentry_mode(False)
                                         self.construct()
@@ -2320,7 +2321,7 @@ class build_steamboat_button(label_button):
                             if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
                                 if self.attached_label.actor.images[0].current_cell.has_intact_building('port'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
                                     if self.attached_label.actor.adjacent_to_river():
-                                        if self.attached_label.actor.check_if_minister_appointed():
+                                        if self.attached_label.actor.ministers_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)
                                             self.construct()
@@ -2578,10 +2579,10 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                         if current_building == 'none' or (self.building_name in ['railroad', 'railroad_bridge'] and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                             if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
                                 if self.building_name in ['road_bridge', 'railroad_bridge'] or not self.attached_tile.cell.terrain == 'water':
-                                    if self.attached_label.actor.check_if_minister_appointed():
+                                    if self.attached_label.actor.ministers_appointed():
                                         if self.building_type == 'resource':
                                             if not self.attached_resource == 'none':
-                                                #if self.attached_label.actor.check_if_minister_appointed():
+                                                #if self.attached_label.actor.ministers_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
@@ -2590,7 +2591,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                         elif self.building_type == 'port':
                                             if self.attached_mob.adjacent_to_water():
                                                 if not self.attached_mob.images[0].current_cell.terrain == 'water':
-                                                    #if self.attached_label.actor.check_if_minister_appointed():
+                                                    #if self.attached_label.actor.ministers_appointed():
                                                     if self.attached_label.actor.sentry_mode:
                                                         self.attached_label.actor.set_sentry_mode(False)
                                                     self.construct()
@@ -2598,7 +2599,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 text_tools.print_to_screen('This building can only be built in tiles adjacent to discovered water.', self.global_manager)
                                         elif self.building_type == 'train_station':
                                             if self.attached_tile.cell.has_intact_building('railroad'):
-                                                #if self.attached_label.actor.check_if_minister_appointed():
+                                                #if self.attached_label.actor.ministers_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
@@ -2606,7 +2607,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 text_tools.print_to_screen('This building can only be built on railroads.', self.global_manager)
                                         elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                             if self.attached_tile.cell.has_building('village'):
-                                                #if self.attached_label.actor.check_if_minister_appointed():
+                                                #if self.attached_label.actor.ministers_appointed():
                                                 if self.attached_label.actor.sentry_mode:
                                                     self.attached_label.actor.set_sentry_mode(False)
                                                 self.construct()
@@ -2633,7 +2634,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                                                 text_tools.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
 
                                         else: # self.building_type in ['infrastructure', 'fort']:
-                                            #if self.attached_label.actor.check_if_minister_appointed():
+                                            #if self.attached_label.actor.ministers_appointed():
                                             if self.attached_label.actor.sentry_mode:
                                                 self.attached_label.actor.set_sentry_mode(False)
                                             self.construct()
@@ -2925,14 +2926,15 @@ class upgrade_button(label_button):
                 self.showing_outline = True
                 if self.attached_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.attached_building.get_upgrade_cost():
-                        if self.attached_mob.sentry_mode:
-                            self.attached_mob.set_sentry_mode(False)
+                        if self.attached_label.actor.ministers_appointed():
+                            if self.attached_mob.sentry_mode:
+                                self.attached_mob.set_sentry_mode(False)
                                                     
-                        building_info_dict = {}
-                        building_info_dict['upgrade_type'] = self.upgrade_type
-                        building_info_dict['building_name'] = self.attached_building.name
-                        building_info_dict['upgraded_building'] = self.attached_building
-                        self.attached_mob.start_upgrade(building_info_dict)
+                            building_info_dict = {}
+                            building_info_dict['upgrade_type'] = self.upgrade_type
+                            building_info_dict['building_name'] = self.attached_building.name
+                            building_info_dict['upgraded_building'] = self.attached_building
+                            self.attached_mob.start_upgrade(building_info_dict)
                     else:
                         text_tools.print_to_screen('You do not have the ' + str(self.attached_building.get_upgrade_cost()) + ' money needed to upgrade this building.', self.global_manager)
                 else:

@@ -505,17 +505,15 @@ class pmob(mob):
                 equivalent_tile = self.end_turn_destination.get_equivalent_tile()
                 if not equivalent_tile == 'none':
                     equivalent_tile.draw_destination_outline()
-                        
-                    
 
-    def check_if_minister_appointed(self):
+    def ministers_appointed(self):
         '''
         Description:
-            Returns whether there is currently an appointed minister to control this unit
+            Returns whether all ministers are appointed to do an action, otherwise prints an error message
         Input:
             None
         Output:
-            boolean: Returns whether there is currently an appointed minister to control this unit
+            boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
         if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
             return(True)
@@ -808,7 +806,8 @@ class pmob(mob):
                 self.select()
                 self.move_to_front()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
-        self.global_manager.set('ongoing_combat', True)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'combat')
         if combat_type == 'defending':
             message = utility.capitalize(enemy.name) + ' ' + utility.conjugate('be', enemy.number) + ' attacking your ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
         elif combat_type == 'attacking':
@@ -1149,7 +1148,8 @@ class pmob(mob):
         if self.just_promoted:
             self.promote()
             
-        self.global_manager.set('ongoing_combat', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
         elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
@@ -1185,7 +1185,8 @@ class pmob(mob):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
-        self.global_manager.set('ongoing_construction', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'construction')
         message = 'Are you sure you want to start constructing a ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
@@ -1412,7 +1413,8 @@ class pmob(mob):
                 new_building.select()
             else:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
-        self.global_manager.set('ongoing_construction', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail, uses_minister = True):
         '''
@@ -1435,7 +1437,7 @@ class pmob(mob):
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
         self.attached_dice_list.append(new_die)
         if uses_minister:
-            if self.global_manager.get('ongoing_combat'): #combat has a different dice layout
+            if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
@@ -1470,7 +1472,8 @@ class pmob(mob):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start repair'}
-        self.global_manager.set('ongoing_construction', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'construction')
         message = 'Are you sure you want to start repairing the ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
         message += 'If successful, the ' + text_tools.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
@@ -1576,4 +1579,5 @@ class pmob(mob):
             self.repaired_building.set_damaged(False)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show repaired building
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob info display to hide repair button
-        self.global_manager.set('ongoing_construction', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
