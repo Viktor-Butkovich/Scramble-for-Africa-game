@@ -806,7 +806,7 @@ class pmob(mob):
                 self.select()
                 self.move_to_front()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
-        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', 'combat')
         if combat_type == 'defending':
             message = utility.capitalize(enemy.name) + ' ' + utility.conjugate('be', enemy.number) + ' attacking your ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'

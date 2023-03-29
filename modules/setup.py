@@ -2,6 +2,7 @@ import pygame
 import time
 import os
 import logging
+import json
 
 import modules.scaling as scaling
 import modules.images as images
@@ -1430,70 +1431,18 @@ def debug_tools_setup(global_manager):
     Output:
         None
     '''
-    DEBUG_block_native_warrior_spawning = effects.effect('DEBUG_block_native_warrior_spawning', 'block_native_warrior_spawning', global_manager)
-    #allows villages to spawn native warriors
-    
-    DEBUG_boost_attrition = effects.effect('DEBUG_boost_attrition', 'boost_attrition', global_manager)
-    #increases chance of any attrition occuring by a factor of 6
-    
-    DEBUG_infinite_village_workers = effects.effect('DEBUG_infinite_village_workers', 'infinite_village_workers', global_manager)
-    #converts all villagers to available workers on startup
-    
-    DEBUG_damaged_buildings = effects.effect('DEBUG_damaged_buildings', 'damaged_buildings', global_manager)
-    #causes all buildings to be damaged on startup
-    
-    DEBUG_show_corruption_on_save = effects.effect('DEBUG_show_corruption_on_save', 'show_corruption_on_save', global_manager)
-    #prints the corruption and skill levels of each minister to the console when saving the game
+    file = open('configuration/debug_config.json')
 
-    DEBUG_show_minister_stealing = effects.effect('DEBUG_show_minister_stealing', 'show_minister_stealing', global_manager)
-    #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
-
-    DEBUG_show_evil = effects.effect('DEBUG_show_evil', 'show_evil', global_manager)
-    #prints the players 'evil' number at the end of each turn
-
-    DEBUG_show_fear = effects.effect('DEBUG_show_fear', 'show_fear', global_manager)
-    #prints the players 'fear' number at the end of each turn and says when fear dissuades a minister from stealing
-
-    DEBUG_remove_fog_of_war = effects.effect('DEBUG_remove_fog_of_war', 'remove_fog_of_war', global_manager)
-    #reveals all cells
-
-    DEBUG_fast_turn = effects.effect('DEBUG_fast_turn', 'fast_turn', global_manager)
-    #removes end turn delays
-
-    DEBUG_reveal_beasts = effects.effect('DEBUG_reveal_beasts', 'reveal_beasts', global_manager)
-    #reveals beasts on load
-
-    DEBUG_infinite_commodities = effects.effect('DEBUG_infinite_commodities', 'infinite_commodities', global_manager)
-    #gives 10 of each commodity in Europe on new game
-
-    DEBUG_band_of_thieves = effects.effect('DEBUG_band_of_thieves', 'band_of_thieves', global_manager)
-    #causes all ministers to be corrupt whenever possible
-
-    DEBUG_nine_mortal_men = effects.effect('DEBUG_nine_mortal_men', 'nine_mortal_men', global_manager)
-    #causes ministers to roll 1 on all rolls
-
-    DEBUG_ministry_of_magic = effects.effect('DEBUG_ministry_of_magic', 'ministry_of_magic', global_manager)
-    #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
-
-    DEBUG_farm_upstate = effects.effect('DEBUG_farm_upstate', 'farm_upstate', global_manager)
-    #retires all appointed ministers at the end of the turn
-
-    DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
-    #prints how and when a minister or country modifiers affects a roll
-
-    DEBUG_hide_grid_lines = effects.effect('DEBUG_hide_grid_lines', 'hide_grid_lines', global_manager)
-    #hides interior grid lines
-
-    DEBUG_enable_oceans = effects.effect('DEBUG_enable_oceans', 'enable_oceans', global_manager)
-    #allows water to generate as a normal terrain and removes default river/ocean generation
-
-    DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
-    #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-    
-    DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
-    #prints information about lore missions when first created and on load
-
-    #activate effect with DEBUG_effect.apply()
+    # returns JSON object as a dictionary
+    debug_config = json.load(file)
+    # Iterating through the json list
+    for current_effect in debug_config['effects']:
+        effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
+    for current_effect in debug_config['active_effects']:
+        if global_manager.get('effect_manager').effect_exists(current_effect):
+            global_manager.get('effect_manager').set_effect(current_effect, True)
+        else:
+            print('Invalid effect: ' + current_effect)
 
 def manage_crash(exception):
     '''

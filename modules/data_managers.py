@@ -171,11 +171,12 @@ class effect_manager_template():
     def set_effect(self, effect_type, new_status):
         '''
         Description:
-            Finds and returns whether any effect of the inputted type is active
+            Finds activates/deactivates all effects of the inputted type, based on the inputted status
         Input:
             string effect_type: Type of effect to check for
+            string new_status: New activated/deactivated status for effects
         Output:
-            boolean: Returns whether any effect of the inputted type is active
+            None
         '''
         for current_effect in self.possible_effects:
             if current_effect.effect_type == effect_type:
@@ -183,6 +184,20 @@ class effect_manager_template():
                     current_effect.apply()
                 else:
                     current_effect.remove()
+
+    def effect_exists(self, effect_type):
+        '''
+        Description:
+            Checks whether any effects of the inputted type exist
+        Input:
+            string effect_type: Type of effect to check for
+        Output:
+            boolean: Returns whether any effects of the inputted type exist
+        '''
+        for current_effect in self.possible_effects:
+            if current_effect.effect_type == effect_type:
+                return(True)
+        return(False)
 
 class flavor_text_manager_template():
     '''

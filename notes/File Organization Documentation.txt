@@ -436,6 +436,7 @@ SFA folder
 		    def minister_interface_setup
 		    def country_interface_setup
 		    def debug_tools_setup
+			def configure_debug_tools
 		    def manage_crash
 
         text_tools.py
