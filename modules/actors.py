@@ -507,5 +507,3 @@ class actor():
             text_line = tooltip_image.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
-
-

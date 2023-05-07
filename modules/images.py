@@ -1,13 +1,93 @@
 #Contains functionality for images
 
 import pygame
-import time
 from . import utility
 from . import drawing_tools
 from . import text_tools
 from . import scaling
 
-class free_image():
+class image():
+    '''
+    Abstract base image class
+    '''
+    def __init__(self, width, height, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int width: Pixel width of this image
+            int height: Pixel height of this image
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.global_manager = global_manager
+        self.image_type = 'none'
+        self.width = width
+        self.height = height
+        self.Rect = 'none'
+        self.global_manager.get('image_list').append(self)
+    
+    def complete_draw(self):
+        '''
+        Description:
+            Draws this image after the necessary pre-call checks are done
+        Input:
+            None
+        Output:
+            None
+        '''
+        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+
+    def touching_mouse(self):
+        '''
+        Description:
+            Returns whether this image is colliding with the mouse
+        Input:
+            None
+        Output:
+            boolean: Returns True if this image is colliding with the mouse, otherwise returns False
+        '''
+        if self.Rect != 'none' and self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
+            return(True)
+        else:
+            return(False)
+        
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this image can be shown
+        Input:
+            None
+        Output:
+            boolean: Returns True
+        '''
+        return(True)
+
+    def draw(self):
+        '''
+        Description:
+            Draws this image if it should currently be visible
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            self.complete_draw()
+
+class free_image(image):
     '''
     Image unrelated to any actors or grids that appears at certain pixel coordinates
     '''
@@ -26,18 +106,14 @@ class free_image():
         Output:
             None
         '''
-        self.global_manager = global_manager
+        super().__init__(width, height, global_manager)
         self.image_type = 'free'
         self.modes = modes
-        self.width = width
-        self.height = height
         self.set_image(image_id)
         self.x, self.y = coordinates
         self.y = self.global_manager.get('display_height') - self.y
         self.to_front = to_front
-        self.global_manager.get('image_list').append(self)
         self.global_manager.get('free_image_list').append(self)
-        self.Rect = 'none'
 
     def set_y(self, attached_label): #called by actor display labels
         '''
@@ -51,18 +127,6 @@ class free_image():
         self.y = self.global_manager.get('display_height') - attached_label.y + attached_label.image_y_displacement
         if not self.Rect == 'none':
             self.Rect.y = self.y - self.height + attached_label.image_y_displacement
-        
-    def draw(self):
-        '''
-        Description:
-            Draws this image if it should currently be visible
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.can_show():
-            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
     def can_show(self):
         '''
@@ -87,7 +151,7 @@ class free_image():
         Output:
             None
         '''
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
+        super().remove()
         self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
 
     def set_image(self, new_image):
@@ -174,20 +238,6 @@ class tooltip_free_image(free_image):
             None
         '''
         self.tooltip_text = []
-
-    def touching_mouse(self):
-        '''
-        Description:
-            Returns whether this image is colliding with the mouse
-        Input:
-            None
-        Output:
-            boolean: Returns True if this image is colliding with the mouse, otherwise returns False
-        '''
-        if self.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in button
-            return(True)
-        else:
-            return(False)
 
     def can_show_tooltip(self):
         '''
@@ -360,7 +410,6 @@ class dice_roll_minister_image(tooltip_free_image):
         '''
         if super().can_show():
             if self.minister_message_image:
-                #if len(self.global_manager.get('notification_list')) > 0:
                 current_notification = self.global_manager.get('notification_list')[0]
                 if current_notification.notification_type == 'minister' and current_notification.attached_minister == self.attached_minister:
                     return(True)
@@ -555,18 +604,18 @@ class loading_image_template(free_image):
         super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self)) #different from other images, should only be drawn when directly requested
 
-    def draw(self):
+    def can_show(self):
         '''
         Description:
-            Draws this image. Unlike other images, a loading screen image will always be visible when draw() is called
+            Returns whether this image can be shown. Unlike other images, a loading screen image will always be visible when draw() is called
         Input:
             None
         Output:
-            None
+            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
-        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+        return(True)
 
-class actor_image():
+class actor_image(image):
     '''
     Image that is attached to an actor and a grid, representing the actor on a certain grid. An actor will have a different actor_image for each grid on which it appears
     '''
@@ -584,20 +633,16 @@ class actor_image():
         Output:
             None
         '''
+        super().__init__(width, height, global_manager)
         self.global_manager = global_manager
         self.image_type = 'actor'
-        #self.last_image_switch = 0
-        #self.previous_idle_image = 'default'
         self.actor = actor
         self.modes = actor.modes
-        self.width = width
-        self.height = height
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
         self.set_image(image_description)
         self.image_description == image_description
-        self.global_manager.get('image_list').append(self)
         self.grid = grid
-        self.outline_width = self.grid.grid_line_width + 1#3#2
+        self.outline_width = self.grid.grid_line_width + 1
         self.outline = pygame.Rect(self.actor.x, self.global_manager.get('display_height') - (self.actor.y + self.height), self.width, self.height)
         self.x, self.y = self.grid.convert_coordinates((self.actor.x, self.actor.y))
         if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
@@ -631,8 +676,6 @@ class actor_image():
         Output:
             None
         '''
-        #self.last_image_switch = time.time()
-        #self.previous_idle_image = new_image_description
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
@@ -656,10 +699,10 @@ class actor_image():
                 if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
                     grid_x, grid_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
                     self.go_to_cell((grid_x, grid_y))
-                    drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+                    self.complete_draw()
             else:
                 self.go_to_cell((self.actor.x, self.actor.y))
-                drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+                self.complete_draw()
         
     def go_to_cell(self, coordinates):
         '''
@@ -698,20 +741,6 @@ class actor_image():
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
-    def touching_mouse(self):
-        '''
-        Description:
-            Returns whether this image is colliding with the mouse
-        Input:
-            None
-        Output:
-            boolean: Returns True if this image is colliding with the mouse, otherwise returns False
-        '''
-        if self.Rect.collidepoint(pygame.mouse.get_pos()):
-            return(True)
-        else:
-            return(False)
-
     def can_show(self):
         '''
         Description:
@@ -725,17 +754,6 @@ class actor_image():
             return(True)
         else:
             return(False)
-
-    def remove(self):
-        '''
-        Description:
-            Remove generally removes the object from relevant lists and prevents it from further appearing in or affecting the program. However, the removal of actor images is handled by their actors, so no functionality is needed here
-        Input:
-            None
-        Output:
-            None
-        '''
-        nothing = 0
 
 class building_image(actor_image):
     '''
@@ -850,14 +868,12 @@ class infrastructure_connection_image(building_image):
         Output:
             None
         '''
-        #own_tile_infrastructure_type = self.actor.infrastructure_type
         own_tile_infrastructure = self.actor
         adjacent_cell = 'none'
         adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
         if not adjacent_cell == 'none': #check if adjacent cell exists
             adjacent_tile_infrastructure = adjacent_cell.get_intact_building('infrastructure')
             if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
-                #adjacent_tile_infrastructure_type = adjacent_tile_infrastructure.infrastructure_type
                 if own_tile_infrastructure.is_railroad and adjacent_tile_infrastructure.is_railroad: #if both railroads, draw railroad
                     self.set_image(self.direction + '_railroad') #up_railroad
                     self.actor.set_image('empty') #if connecting to other railroad, hide railroad cross
@@ -865,7 +881,6 @@ class infrastructure_connection_image(building_image):
                     self.set_image(self.direction + '_road')
                     if own_tile_infrastructure.is_road: #hide center cross if adjacent tiles have same type
                         self.actor.set_image('empty')
-                        #self.actor.set_image('default')
                     else:
                         self.actor.set_image('default') #if not same, show cross
                 self.showing_connection = True
@@ -884,8 +899,8 @@ class infrastructure_connection_image(building_image):
         Output:
             None
         '''
-        self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
         super().remove()
+        self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
 
     def can_show(self):
         '''
@@ -932,12 +947,6 @@ class mob_image(actor_image):
         Output:
             None
         '''
-        #if self.current_cell == 'none':
-        #    if self.grid.is_mini_grid:
-        #        mini_grid_coordinates = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
-        #        self.current_cell = self.grid.find_cell(mini_grid_coordinates[0], mini_grid_coordinates[1])
-        #    else:
-        #        self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
         if not self.current_cell == 'none':
             self.current_cell.contained_mobs = utility.remove_from_list(self.current_cell.contained_mobs, self.actor)
         self.current_cell = 'none'
@@ -1004,7 +1013,6 @@ class button_image(actor_image):
         self.height = height
         self.x = self.button.x
         self.y = self.global_manager.get('display_height') - (self.button.y + self.height) - self.height
-        #self.last_image_switch = 0
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
@@ -1063,7 +1071,7 @@ class button_image(actor_image):
         if self.button.can_show():
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
-            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            self.complete_draw()
         
     def draw_tooltip(self):
         '''
@@ -1074,7 +1082,7 @@ class button_image(actor_image):
         Output:
             None
         '''
-        nothing = 0
+        return()
         
     def set_tooltip(self, tooltip_text):
         '''
@@ -1085,7 +1093,7 @@ class button_image(actor_image):
         Output:
             None
         '''
-        i = 0
+        return()
 
 class tile_image(actor_image):
     '''
@@ -1135,7 +1143,7 @@ class tile_image(actor_image):
         if self.actor.name == 'resource icon' and not self.actor.cell.visible:
             return() #do not show if resource icon in undiscovered tile
         self.go_to_cell((self.actor.x, self.actor.y))
-        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+        self.complete_draw()
 
 class veteran_icon_image(tile_image):
     '''
@@ -1182,7 +1190,7 @@ class veteran_icon_image(tile_image):
                 self.actor.x = self.actor.actor.x
                 self.actor.y = self.actor.actor.y
             self.go_to_cell((self.actor.x, self.actor.y))
-            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            self.complete_draw()
 
     def can_show(self):
         '''

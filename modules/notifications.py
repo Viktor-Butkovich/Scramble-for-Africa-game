@@ -5,7 +5,6 @@ import time
 from .labels import multi_line_label
 from . import utility
 from . import actor_utility
-from . import game_transitions
 
 class notification(multi_line_label):
     '''

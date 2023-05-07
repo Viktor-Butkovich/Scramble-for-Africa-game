@@ -505,7 +505,6 @@ class mob(actor):
                     input_dict['status_icon_type'] = 'disorganized'
                     self.status_icons.append(status_icon(False, input_dict, self.global_manager))
             
-
     def select(self):
         '''
         Description:
@@ -646,7 +645,6 @@ class mob(actor):
         for current_status_icon in self.status_icons:
             current_status_icon.remove()
         self.status_icons = []
-
 
     def die(self, death_type = 'violent'):
         '''
@@ -886,7 +884,6 @@ class mob(actor):
         for current_image in self.images:
             current_image.remove_from_cell()
         
-
     def show_images(self):
         '''
         Description:
@@ -898,4 +895,3 @@ class mob(actor):
         '''
         for current_image in self.images:
             current_image.add_to_cell()        
-
