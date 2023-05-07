@@ -306,10 +306,10 @@ def main_loop(global_manager):
             global_manager.set('previous_turn_time', time.time())
     
             
-        for actor in global_manager.get('actor_list'):
-            for current_image in actor.images:
-                if not current_image.image_description == current_image.previous_idle_image and time.time() >= current_image.last_image_switch + 0.6:
-                    current_image.set_image(current_image.previous_idle_image)
+        #for actor in global_manager.get('actor_list'):
+        #    for current_image in actor.images:
+        #        if not current_image.image_description == current_image.previous_idle_image and time.time() >= current_image.last_image_switch + 0.6:
+        #            current_image.set_image(current_image.previous_idle_image)
         start_time = time.time()
         global_manager.set('start_time', start_time)
         global_manager.set('current_time', time.time())

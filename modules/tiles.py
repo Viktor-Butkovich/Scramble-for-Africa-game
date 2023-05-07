@@ -227,10 +227,10 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             image_name = 'hidden'
         self.image.set_image(image_name)
-        self.image.previous_idle_image = image_name
+        #self.image.previous_idle_image = image_name
         if not self.resource_icon == 'none':
             self.resource_icon.image.set_image(image_name)
-            self.resource_icon.image.previous_idle_image = image_name
+        #    self.resource_icon.image.previous_idle_image = image_name
             
     def set_resource(self, new_resource):
         '''

@@ -300,10 +300,9 @@ class indicator_image(tooltip_free_image):
         else:
             self.set_tooltip([])
                 
-
-class dice_roll_minister_image(tooltip_free_image): #image that appears during dice rolls showing minister position or portrait
+class dice_roll_minister_image(tooltip_free_image):
     '''
-    Part of a pair of imgaes that shows the controlling minister's position and portrait next to notifications during dice rolls
+    Part of a pair of images that shows the controlling minister's position and portrait next to notifications during dice rolls
     '''
     def __init__(self, coordinates, width, height, modes, attached_minister, minister_image_type, global_manager, minister_message_image = False):
         '''
@@ -381,7 +380,7 @@ class dice_roll_minister_image(tooltip_free_image): #image that appears during d
         super().remove()
         self.global_manager.set('dice_roll_minister_images', utility.remove_from_list(self.global_manager.get('dice_roll_minister_images'), self))
 
-class minister_type_image(tooltip_free_image): #image of minister type icon
+class minister_type_image(tooltip_free_image):
     '''
     Image that displays the icon corresponding to a certain minister office. Can be set to always show the icon for the same office or to show the icon of a certain unit's minister
     '''
@@ -587,8 +586,8 @@ class actor_image():
         '''
         self.global_manager = global_manager
         self.image_type = 'actor'
-        self.last_image_switch = 0
-        self.previous_idle_image = 'default'
+        #self.last_image_switch = 0
+        #self.previous_idle_image = 'default'
         self.actor = actor
         self.modes = actor.modes
         self.width = width
@@ -632,8 +631,8 @@ class actor_image():
         Output:
             None
         '''
-        self.last_image_switch = time.time()
-        self.previous_idle_image = new_image_description
+        #self.last_image_switch = time.time()
+        #self.previous_idle_image = new_image_description
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
@@ -1005,7 +1004,7 @@ class button_image(actor_image):
         self.height = height
         self.x = self.button.x
         self.y = self.global_manager.get('display_height') - (self.button.y + self.height) - self.height
-        self.last_image_switch = 0
+        #self.last_image_switch = 0
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
