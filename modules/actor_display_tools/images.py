@@ -95,7 +95,10 @@ class actor_display_free_image(free_image):
                 else:
                     self.set_image('misc/empty.png')
             else:
-                self.set_image(new_actor.image_dict['default'])
+                if isinstance(new_actor.images[0].image, str):
+                    self.set_image(new_actor.image_dict['default'])
+                else:
+                    self.set_image(new_actor.images[0].image.copy())
         else:
             self.set_image('misc/empty.png')
 

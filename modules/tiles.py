@@ -542,13 +542,13 @@ class resource_icon(tile):
         if not building_present:
             self.image.set_image('large')
             self.image_dict['default'] = self.image_dict['large']
-
+'''
 class status_icon(tile):
-    '''
-    A tile that follows one of the images of a unit, showing special statuses like veteran or disorganized
-    '''
+    
+    #A tile that follows one of the images of a unit, showing special statuses like veteran or disorganized
+    
     def __init__(self, from_save, input_dict, global_manager):
-        '''
+        
         Description:
             Initializes this object
         Input:
@@ -565,10 +565,11 @@ class status_icon(tile):
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
-        '''
+        
         super().__init__(from_save, input_dict, global_manager)
         self.actor = input_dict['actor']
         self.status_icon_type = input_dict['status_icon_type']
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         self.image = images.veteran_icon_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), self.grid, 'default', global_manager)
         self.images = [self.image]
+'''

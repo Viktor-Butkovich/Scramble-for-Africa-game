@@ -45,8 +45,8 @@ class expedition(group):
         self.can_swim_ocean = False
         
         self.has_canoes = True
-        self.image_dict['canoes'] = input_dict['canoes_image']
-        self.image_dict['no_canoes'] = self.image_dict['default']
+        #self.image_dict['canoes'] = input_dict['canoes_image']
+        #self.image_dict['no_canoes'] = self.image_dict['default']
         self.update_canoes()
         
         self.set_group_type('expedition')

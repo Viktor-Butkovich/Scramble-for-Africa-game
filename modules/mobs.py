@@ -7,7 +7,6 @@ from . import images
 from . import utility
 from . import actor_utility
 from .actors import actor
-from .tiles import status_icon
 
 class mob(actor):
     '''
@@ -56,7 +55,9 @@ class mob(actor):
         self.actor_type = 'mob'
         self.end_turn_destination = 'none'
         super().__init__(from_save, input_dict, global_manager)
-        self.image_dict = {'default': input_dict['image']}
+        #self.image_dict = {'default': input_dict['image']}
+        #default_image_bundle = images.image_bundle()
+        self.image_dict = {'default': [input_dict['image']]}
         self.images = []
         self.status_icons = []
         for current_grid in self.grids:
@@ -98,7 +99,7 @@ class mob(actor):
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
                 Along with superclass outputs, also saves the following values:
                 'movement_points': int value - How many movement points this mob currently has
-                'max_movement_points': int value - Maximum number of movemet points this mob can have
+                'max_movement_points': int value - Maximum number of movement points this mob can have
                 'image': string value - File path to the image used by this mob
                 'creation_turn': int value - Turn number on which this mob was created
                 'disorganized': boolean value - Whether this unit is currently disorganized
@@ -107,12 +108,12 @@ class mob(actor):
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
         save_dict['max_movement_points'] = self.max_movement_points
-        save_dict['image'] = self.image_dict['default']
+        save_dict['image'] = self.image_dict['default'][0] #self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
-        if self.has_canoes:
-            save_dict['canoes_image'] = self.image_dict['canoes']
-            save_dict['image'] = self.image_dict['no_canoes']
+        #if self.has_canoes:
+        #    save_dict['canoes_image'] = self.image_dict['canoes'][0]
+        #    save_dict['image'] = self.image_dict['no_canoes'][0]
         return(save_dict)        
 
     def temp_disable_movement(self):
@@ -137,34 +138,14 @@ class mob(actor):
         '''
         self.disorganized = new_value
         if new_value == True:
-            for current_grid in self.grids:
-                if current_grid == self.global_manager.get('minimap_grid'):
-                    disorganized_icon_x, disorganized_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                elif current_grid == self.global_manager.get('europe_grid'):
-                    disorganized_icon_x, disorganized_icon_y = (0, 0)
-                else:
-                    disorganized_icon_x, disorganized_icon_y = (self.x, self.y)
-                input_dict = {}
-                input_dict['coordinates'] = (disorganized_icon_x, disorganized_icon_y)
-                input_dict['grid'] = current_grid
+            for current_image in self.images:
                 if self.is_npmob and self.npmob_type == 'beast':
-                    input_dict['image'] = 'misc/injured_icon.png' #beasts are injured instead of disorganized for flavor, same effect
+                    current_image.image.add_member('misc/injured_icon.png', 'disorganized_icon')
                 else:
-                    input_dict['image'] = 'misc/disorganized_icon.png'
-                input_dict['name'] = 'disorganized icon'
-                input_dict['modes'] = ['strategic', 'europe']
-                input_dict['show_terrain'] = False
-                input_dict['actor'] = self
-                input_dict['status_icon_type'] = 'disorganized'
-                self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+                    current_image.image.add_member('misc/disorganized_icon.png', 'disorganized_icon')
         else:
-            remaining_icons = []
-            for current_status_icon in self.status_icons:
-                if current_status_icon.status_icon_type == 'disorganized':
-                    current_status_icon.remove()
-                else:
-                    remaining_icons.append(current_status_icon)
-            self.status_icons = remaining_icons
+            for current_image in self.images:
+                current_image.image.remove_member('disorganized_icon')
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
 
@@ -444,10 +425,10 @@ class mob(actor):
         Output:
             None
         '''
-        if not self.in_group:
-            for current_status_icon in self.status_icons:
-                current_status_icon.remove()
-            self.status_icons = []
+        #if not self.in_group:
+        #    for current_status_icon in self.status_icons:
+        #        current_status_icon.remove()
+        #    self.status_icons = []
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
@@ -467,6 +448,7 @@ class mob(actor):
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
             self.images[-1].add_to_cell()
+        '''
         if not self.in_group:
             if self.veteran:
                 for current_grid in self.grids:
@@ -504,6 +486,7 @@ class mob(actor):
                     input_dict['actor'] = self
                     input_dict['status_icon_type'] = 'disorganized'
                     self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+        '''
             
     def select(self):
         '''
@@ -826,9 +809,14 @@ class mob(actor):
             return()
 
         if current_cell.terrain == 'water' and self.y > 0:
-            self.set_image('canoes')
+            for current_image in self.images:
+                if not current_image.image.has_member('canoes'):
+                    current_image.image.add_member('misc/canoes.png', 'canoes')
+            #self.set_image('canoes')
         else:
-            self.set_image('no_canoes')
+            for current_image in self.images:
+                current_image.image.remove_member('canoes')
+            #self.set_image('no_canoes')
             
     def retreat(self):
         '''

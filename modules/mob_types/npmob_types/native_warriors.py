@@ -22,7 +22,7 @@ class native_warriors(npmob):
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
-                'canoes_image': string value - File path tothe image used by this object when it is in a river
+                'canoes_image': string value - File path to the image used by this object when it is in a river
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -39,8 +39,8 @@ class native_warriors(npmob):
         self.despawning = False
         
         self.has_canoes = True
-        self.image_dict['canoes'] = input_dict['canoes_image']
-        self.image_dict['no_canoes'] = self.image_dict['default']
+        #self.image_dict['canoes'] = input_dict['canoes_image']
+        #self.image_dict['no_canoes'] = self.image_dict['default']
         self.update_canoes()
         if not from_save:
             self.set_max_movement_points(4)

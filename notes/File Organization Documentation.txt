@@ -126,7 +126,7 @@ SFA folder
 				class merchant(mob_types.officers.officer)	    
 
             groups.py
-	        	imports random, math, pmobs, modules.tiles, modules.actor_utility, modules.dice_utility, modules.utility, modules.notification_tools, modules.images, modules.scaling
+	        	imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
             	class group(modules.mobs.mob)
 
 			npmobs.py
@@ -134,18 +134,16 @@ SFA folder
 				class npmob(modules.mob)
 
 	    	officers.py
-	        	imports random, pmobs, modules.tiles, modules.actor_utility, modules.utility, modules.notification_tools, modules.text_tools, modules.market_tools, modules.dice_utility, modules.scaling, modules.images
+	        	imports pmobs, modules.utility, modules.actor_utility
 	        	class officer(pmobs.pmob)
-		    		class evangelist
-		    		class merchant
 
 	    	pmobs.py
 		    	imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
-		        	modules.turn_management_tools, modules.minister_utility, modules.tiles
+		        	modules.turn_management_tools, modules.minister_utility
 		    	class pmob(modules.mob)
 
 	    	vehicles.py
-	        	imports random, pmobs, modules.text_tools, modules.utility, modules.actor_utility, modules.main_loop_tools, modules.buttons
+	        	imports random, pmobs, modules.text_tools, modules.actor_utility, modules.notification_tools
 	        	class vehicle(pmobs.pmob)
 		    		class train
                 	class ship
@@ -339,7 +337,7 @@ SFA folder
 	    	class multi_line_label
 
 		lore_missions.py
-		    imports random, notification_tools, tiles
+		    imports random, notification_tools, images
 			class lore_missions
 
         main_loop.py
@@ -388,7 +386,7 @@ SFA folder
 	    	class minister
 
         mobs.py
-            imports random, pygame, time, images, utility, actor_utility, actors, tiles
+            imports random, pygame, time, images, utility, actor_utility, actors
             class mob(actors.actor)
 
 		mouse_followers.py

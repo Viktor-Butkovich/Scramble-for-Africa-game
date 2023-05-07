@@ -14,7 +14,6 @@ from .. import images
 from .. import dice_utility
 from .. import turn_management_tools
 from .. import minister_utility
-from ..tiles import status_icon
 
 class pmob(mob):
     '''
@@ -310,39 +309,21 @@ class pmob(mob):
         if not old_value == new_value:
             self.sentry_mode = new_value
             if new_value == True:
-                for current_grid in self.grids:
-                    if current_grid == self.global_manager.get('minimap_grid'):
-                        sentry_icon_x, sentry_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                    elif current_grid == self.global_manager.get('europe_grid'):
-                        sentry_icon_x, sentry_icon_y = (0, 0)
+                for current_image in self.images:
+                    if self.is_npmob and self.npmob_type == 'beast':
+                        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
                     else:
-                        sentry_icon_x, sentry_icon_y = (self.x, self.y)
-                    input_dict = {}
-                    input_dict['coordinates'] = (sentry_icon_x, sentry_icon_y)
-                    input_dict['grid'] = current_grid
-                    input_dict['image'] = 'misc/sentry_icon.png'
-                    input_dict['name'] = 'sentry icon'
-                    input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['show_terrain'] = False
-                    input_dict['actor'] = self
-                    input_dict['status_icon_type'] = 'sentry'
-                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+                        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
                 self.remove_from_turn_queue()
                 if self.global_manager.get('displayed_mob') == self:
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
             else:
-                remaining_icons = []
-                for current_status_icon in self.status_icons:
-                    if current_status_icon.status_icon_type == 'sentry':
-                        current_status_icon.remove()
-                    else:
-                        remaining_icons.append(current_status_icon)
-                self.status_icons = remaining_icons
+                for current_image in self.images:
+                    current_image.image.remove_member('disorganized_icon')
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == self.global_manager.get('displayed_mob'):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-        
 
     def add_to_turn_queue(self):
         '''
@@ -382,13 +363,8 @@ class pmob(mob):
         self.set_name(self.default_name)
         if (self.is_group or self.is_officer) and self.veteran:
             self.veteran = False
-            new_status_icons = []
-            for current_status_icon in self.status_icons:
-                if current_status_icon.status_icon_type == 'veteran':
-                    current_status_icon.remove()
-                else:
-                    new_status_icons.append(current_status_icon)
-            self.status_icons = new_status_icons
+            for current_image in self.images:
+                current_image.image.remove_member('veteran_icon')
 
     def manage_health_attrition(self, current_cell = 'default'): #other versions of manage_health_attrition in group, vehicle, and resource_building
         '''

@@ -22,12 +22,12 @@ class image():
             None
         '''
         self.global_manager = global_manager
-        self.image_type = 'none'
         self.contains_bundle = False
         self.width = width
         self.height = height
         self.Rect = 'none'
-        self.global_manager.get('image_list').append(self)
+        if self.image_type != 'bundle':
+            self.global_manager.get('image_list').append(self)
     
     def complete_draw(self):
         '''
@@ -96,18 +96,14 @@ class image_bundle(image):
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
     A free or actor image can be set to an image bundle rather than a string image path
     '''
-    def __init__(self, parent_image, width, height, global_manager):
-        super().__init__(width, height, global_manager)
+    def __init__(self, parent_image, image_id_list, global_manager):
+        self.image_type = 'bundle'
+        super().__init__(parent_image.width, parent_image.height, global_manager)
         self.parent_image = parent_image
         self.members = []
-
-    def load(self):
-        for member in self.members:
-            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                member.image = pygame.image.load('graphics/' + member.image_id)
-            except:
-                print('graphics/' + self.image_id)
-                member.image = pygame.image.load('graphics/' + member.image_id)
+        for current_image_id in image_id_list:
+            self.add_member(current_image_id)
+        self.scale()
                 
     def scale(self):
         self.width = self.parent_image.width
@@ -115,12 +111,25 @@ class image_bundle(image):
         for member in self.members:
             member.scale()
 
-    def add_member(self, width, height, image_id):
-        self.members.append(bundle_image(self, width, height, image_id))
+    def add_member(self, image_id, member_type = 'default'):
+        self.members.append(bundle_image(self, self.width, self.height, image_id, member_type))
 
     def complete_draw(self):
         for member in self.members:
             drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+
+    def remove_member(self, member_type):
+        new_member_list = []
+        for current_member in self.members:
+            if current_member.member_type != member_type:
+                new_member_list.append(current_member)
+        self.members = new_member_list
+
+    def has_member(self, member_type):
+        for current_member in self.members:
+            if current_member.member_type == member_type:
+                return(True)
+        return(False)
 
     def clear(self):
         self.members = []
@@ -129,18 +138,28 @@ class bundle_image():
     '''
     Not a true image, just a width, height, and id for an image in a bundle
     '''
-    def __init__(self, bundle, width, height, image_id):
+    def __init__(self, bundle, width, height, image_id, member_type):
         self.bundle = bundle
         self.width = width
         self.height = height
         self.image_id = image_id
         self.image = 'none'
+        self.member_type = member_type
+        self.load()
+        self.scale()
 
     def scale(self):
         self.width = self.bundle.width
         self.height = self.bundle.height
         if self.image != 'none':
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+    def load(self):
+        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+            self.image = pygame.image.load('graphics/' + self.image_id)
+        except:
+            print('graphics/' + self.image_id)
+            self.image = pygame.image.load('graphics/' + self.image_id)
 
 class free_image(image):
     '''
@@ -161,8 +180,8 @@ class free_image(image):
         Output:
             None
         '''
-        super().__init__(width, height, global_manager)
         self.image_type = 'free'
+        super().__init__(width, height, global_manager)
         self.modes = modes
         self.set_image(image_id)
         self.x, self.y = coordinates
@@ -227,11 +246,9 @@ class free_image(image):
                 print('graphics/' + self.image_id)
                 self.image = pygame.image.load('graphics/' + self.image_id)
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        else: #if set to image bundle object
+        else: #if set to image path list
             self.contains_bundle = True
-            self.image = self.image_id
-            self.image.load()
-            self.image.scale()
+            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
 
     def can_show_tooltip(self):
@@ -696,9 +713,9 @@ class actor_image(image):
         Output:
             None
         '''
+        self.image_type = 'actor'
         super().__init__(width, height, global_manager)
         self.global_manager = global_manager
-        self.image_type = 'actor'
         self.actor = actor
         self.modes = actor.modes
         self.Rect = pygame.Rect(self.actor.x, self.actor.y - self.height, self.width, self.height) #(left, top, width, height), bottom left on coordinates
@@ -749,11 +766,9 @@ class actor_image(image):
                 print('graphics/' + self.image_id)
                 self.image = pygame.image.load('graphics/' + self.image_id)
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        else: #if set to image bundle object
+        else: #if set to image path list
             self.contains_bundle = True
-            self.image = self.image_id
-            self.image.load()
-            self.image.scale()
+            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
     def draw(self):
         '''
@@ -1133,11 +1148,9 @@ class button_image(actor_image):
                 print('graphics/' + self.image_id)
                 self.image = pygame.image.load('graphics/' + self.image_id)
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        else: #if set to image bundle object
+        else: #if set to image path list
             self.contains_bundle = True
-            self.image = self.image_id
-            self.image.load()
-            self.image.scale()
+            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
     def draw(self):
         '''

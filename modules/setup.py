@@ -46,11 +46,6 @@ def fundamental_setup(global_manager):
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
-    #global_manager.set('display_width', 500)
-    #global_manager.set('display_height', 1000)
-    #global_manager.set('display_width', 1000)
-    #global_manager.set('display_height', 500)
-    #global_manager.set('display_height', 800)
     
     start_time = time.time()
     global_manager.set('loading', True)
@@ -227,7 +222,6 @@ def misc_setup(global_manager):
 
     global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
 
-    #global_manager.set('europe_grid_x', 0)
     global_manager.set('europe_grid_x', global_manager.get('default_display_width') - (strategic_grid_width + 100 + 120 + 25)) 
     #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids
     global_manager.set('europe_grid_y', global_manager.get('default_display_height') - (strategic_grid_height + 25))

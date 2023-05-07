@@ -2,13 +2,9 @@
 import random
 import math
 from .pmobs import pmob
-from ..tiles import status_icon
 from .. import actor_utility
-from .. import dice_utility
 from .. import utility
 from .. import notification_tools
-from .. import images
-from .. import scaling
 
 class group(pmob):
     '''
@@ -241,7 +237,6 @@ class group(pmob):
         Output:
             dictionary: Returns dictionary that can be saved and used as input to recreate it on loading
                 Same pairs as superclass, along with:
-                'image': string value - File path to the image used by this object
                 'worker': dictionary value - dictionary of the saved information necessary to recreate the worker
                 'officer': dictionary value - dictionary of the saved information necessary to recreate the officer
         '''
@@ -267,21 +262,8 @@ class group(pmob):
         if not self.officer.veteran:
             self.officer.set_name('veteran ' + self.officer.name)
             self.officer.veteran = True
-        for current_grid in self.grids:
-            if current_grid == self.global_manager.get('minimap_grid'):
-                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-            else:
-                veteran_icon_x, veteran_icon_y = (self.x, self.y)
-            input_dict = {}
-            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-            input_dict['grid'] = current_grid
-            input_dict['image'] = 'misc/veteran_icon.png'
-            input_dict['name'] = 'veteran icon'
-            input_dict['modes'] = ['strategic', 'europe']
-            input_dict['show_terrain'] = False
-            input_dict['actor'] = self
-            input_dict['status_icon_type'] = 'veteran'
-            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+        for current_image in self.images:
+            current_image.image.add_member('misc/veteran_icon.png', 'veteran_icon')
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 

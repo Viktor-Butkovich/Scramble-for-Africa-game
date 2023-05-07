@@ -4,11 +4,8 @@ import random
 
 from .pmobs import pmob
 from .. import text_tools
-from .. import utility
 from .. import actor_utility
-from .. import main_loop_tools
 from .. import notification_tools
-from ..buttons import button
 
 class vehicle(pmob):
     '''
@@ -40,7 +37,7 @@ class vehicle(pmob):
         self.initializing = True #when pmobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
         self.vehicle_type = 'vehicle'
         self.has_crew = False
-        input_dict['image'] = input_dict['image_dict']['default']
+        input_dict['image'] = input_dict['image_dict']['default'][0]
         self.contained_mobs = []
         self.ejected_crew = 'none'
         self.ejected_passengers = []

@@ -1,8 +1,5 @@
 #Contains functionality for officer units
-import random
-
 from .pmobs import pmob
-from ..tiles import status_icon
 from .. import actor_utility
 from .. import utility
 
@@ -60,13 +57,8 @@ class officer(pmob):
         if not attached_group == 'none':
             attached_group.set_name(attached_group.default_name)
             attached_group.veteran = False
-            new_status_icons = []
-            for current_status_icon in attached_group.status_icons:
-                if current_status_icon.status_icon_type == 'veteran':
-                    current_status_icon.remove()
-                else:
-                    new_status_icons.append(current_status_icon)
-            attached_group.status_icons = new_status_icons
+            for current_image in self.images:
+                current_image.image.remove_member('veteran_icon')
 
     def to_save_dict(self):
         '''
@@ -97,23 +89,8 @@ class officer(pmob):
         self.just_promoted = False
         self.veteran = True
         self.set_name('veteran ' + self.name)
-        for current_grid in self.grids:
-            if current_grid == self.global_manager.get('minimap_grid'):
-                veteran_icon_x, veteran_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-            elif current_grid == self.global_manager.get('europe_grid'):
-                veteran_icon_x, veteran_icon_y = (0, 0)
-            else:
-                veteran_icon_x, veteran_icon_y = (self.x, self.y)
-            input_dict = {}
-            input_dict['coordinates'] = (veteran_icon_x, veteran_icon_y)
-            input_dict['grid'] = current_grid
-            input_dict['image'] = 'misc/veteran_icon.png'
-            input_dict['name'] = 'veteran icon'
-            input_dict['modes'] = ['strategic', 'europe']
-            input_dict['show_terrain'] = False
-            input_dict['actor'] = self
-            input_dict['status_icon_type'] = 'veteran'
-            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
+        for current_image in self.images:
+            current_image.image.add_member('misc/veteran_icon.png', 'veteran_icon')
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
@@ -126,9 +103,7 @@ class officer(pmob):
         Output:
             None
         '''
-        name = self.default_name
         self.promote()
-        #self.set_name(name)
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 

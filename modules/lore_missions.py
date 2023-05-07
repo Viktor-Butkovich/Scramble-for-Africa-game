@@ -3,7 +3,7 @@
 import random
 from . import utility
 from . import notification_tools
-from .tiles import status_icon
+from . import images
 
 class lore_mission():
     '''
@@ -215,26 +215,10 @@ class possible_artifact_location():
         self.revealed = input_dict['revealed']
         self.proven_false = input_dict['proven_false']
         self.grids = [self.global_manager.get('strategic_map_grid'), self.global_manager.get('minimap_grid')]
-        self.modes = ['strategic']
-        self.status_icons = []
+        self.modes = ['strategic'] 
+        self.image_dict = {'default': ['misc/possible_artifact_location_icon.png']}
         for current_grid in self.grids:
-            if current_grid == self.global_manager.get('minimap_grid'):
-                status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-            elif current_grid == self.global_manager.get('europe_grid'):
-                status_icon_x, status_icon_y = (0, 0)
-            else:
-                status_icon_x, status_icon_y = (self.x, self.y)
-            input_dict = {}
-            input_dict['coordinates'] = (status_icon_x, status_icon_y)
-            input_dict['grid'] = current_grid
-            input_dict['image'] = 'misc/possible_artifact_location_icon.png'
-            input_dict['name'] = 'possible artifact location'
-            input_dict['modes'] = self.modes
-            input_dict['show_terrain'] = False
-            input_dict['actor'] = self
-            input_dict['status_icon_type'] = 'possible_artifact_location'
-            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            #self.global_manager.get('overlay_tile_list').append(self.status_icons[-1]) #causes status icon to be drawn in front of terrain/resources but behind mobs
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
 
     def to_save_dict(self):
         '''
@@ -277,7 +261,5 @@ class possible_artifact_location():
         Output:
             None
         '''
-        for current_status_icon in self.status_icons:
-            current_status_icon.remove()
-            #self.global_manager.set('overlay_tile_list', utility.remove_from_list(self.global_manager.get('overlay_tile_list'), current_status_icon))
-        self.status_icons = []
+        for current_image in self.images:
+            self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
