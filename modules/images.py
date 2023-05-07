@@ -23,6 +23,7 @@ class image():
         '''
         self.global_manager = global_manager
         self.image_type = 'none'
+        self.contains_bundle = False
         self.width = width
         self.height = height
         self.Rect = 'none'
@@ -37,7 +38,10 @@ class image():
         Output:
             None
         '''
-        drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+        if self.contains_bundle:
+            self.image.complete_draw()
+        else:
+            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
     def touching_mouse(self):
         '''
@@ -86,6 +90,57 @@ class image():
         '''
         if self.can_show():
             self.complete_draw()
+
+class image_bundle(image):
+    '''
+    Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
+    A free or actor image can be set to an image bundle rather than a string image path
+    '''
+    def __init__(self, parent_image, width, height, global_manager):
+        super().__init__(width, height, global_manager)
+        self.parent_image = parent_image
+        self.members = []
+
+    def load(self):
+        for member in self.members:
+            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                member.image = pygame.image.load('graphics/' + member.image_id)
+            except:
+                print('graphics/' + self.image_id)
+                member.image = pygame.image.load('graphics/' + member.image_id)
+                
+    def scale(self):
+        self.width = self.parent_image.width
+        self.height = self.parent_image.height
+        for member in self.members:
+            member.scale()
+
+    def add_member(self, width, height, image_id):
+        self.members.append(bundle_image(self, width, height, image_id))
+
+    def complete_draw(self):
+        for member in self.members:
+            drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+
+    def clear(self):
+        self.members = []
+
+class bundle_image():
+    '''
+    Not a true image, just a width, height, and id for an image in a bundle
+    '''
+    def __init__(self, bundle, width, height, image_id):
+        self.bundle = bundle
+        self.width = width
+        self.height = height
+        self.image_id = image_id
+        self.image = 'none'
+
+    def scale(self):
+        self.width = self.bundle.width
+        self.height = self.bundle.height
+        if self.image != 'none':
+            self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
 class free_image(image):
     '''
@@ -164,12 +219,20 @@ class free_image(image):
             None
         '''
         self.image_id = new_image
-        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-            self.image = pygame.image.load('graphics/' + self.image_id)
-        except:
-            print('graphics/' + self.image_id)
-            self.image = pygame.image.load('graphics/' + self.image_id)
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        if isinstance(self.image_id, str): #if set to string image path
+            self.contains_bundle = False
+            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            except:
+                print('graphics/' + self.image_id)
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        else: #if set to image bundle object
+            self.contains_bundle = True
+            self.image = self.image_id
+            self.image.load()
+            self.image.scale()
+        
 
     def can_show_tooltip(self):
         '''
@@ -678,12 +741,19 @@ class actor_image(image):
         '''
         self.image_description = new_image_description
         self.image_id = self.actor.image_dict[new_image_description]
-        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-            self.image = pygame.image.load('graphics/' + self.image_id)
-        except:
-            print('graphics/' + self.image_id)
-            self.image = pygame.image.load('graphics/' + self.image_id)
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        if isinstance(self.image_id, str): #if set to string image path
+            self.contains_bundle = False
+            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            except:
+                print('graphics/' + self.image_id)
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        else: #if set to image bundle object
+            self.contains_bundle = True
+            self.image = self.image_id
+            self.image.load()
+            self.image.scale()
         
     def draw(self):
         '''
@@ -718,6 +788,9 @@ class actor_image(image):
         self.Rect.y = self.y - self.height
         self.outline.x = self.x
         self.outline.y = self.y - self.height
+        if self.contains_bundle:
+            self.image.x = self.x
+            self.image.y = self.y
                 
     def set_tooltip(self, tooltip_text):
         '''
@@ -1052,12 +1125,19 @@ class button_image(actor_image):
             None
         '''
         self.image_id = new_image_id
-        try:
-            self.image = pygame.image.load('graphics/' + self.image_id)#.convert()
-        except:
-            print('graphics/' + self.image_id)
-            self.image = pygame.image.load('graphics/' + self.image_id)
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        if isinstance(self.image_id, str): #if set to string image path
+            self.contains_bundle = False
+            try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            except:
+                print('graphics/' + self.image_id)
+                self.image = pygame.image.load('graphics/' + self.image_id)
+            self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        else: #if set to image bundle object
+            self.contains_bundle = True
+            self.image = self.image_id
+            self.image.load()
+            self.image.scale()
         
     def draw(self):
         '''
