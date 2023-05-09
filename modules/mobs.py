@@ -57,7 +57,10 @@ class mob(actor):
         super().__init__(from_save, input_dict, global_manager)
         #self.image_dict = {'default': input_dict['image']}
         #default_image_bundle = images.image_bundle()
-        self.image_dict = {'default': [input_dict['image']]}
+        if isinstance(input_dict['image'], str):
+            self.image_dict = {'default': input_dict['image']}
+        else:
+            self.image_dict = {'default': input_dict['image']['image_id']}
         self.images = []
         self.status_icons = []
         for current_grid in self.grids:
@@ -69,6 +72,7 @@ class mob(actor):
         self.can_swim_ocean = False
         self.can_walk = True #if can enter land areas
         self.has_canoes = False
+        self.in_canoes = False
         self.max_movement_points = 1
         self.movement_points = self.max_movement_points
         self.movement_cost = 1
@@ -108,7 +112,7 @@ class mob(actor):
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
         save_dict['max_movement_points'] = self.max_movement_points
-        save_dict['image'] = self.image_dict['default'][0] #self.image_dict['default']
+        save_dict['image'] = self.image_dict['default'] #self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
         #if self.has_canoes:
@@ -127,6 +131,18 @@ class mob(actor):
         '''
         self.temp_movement_disabled = True
     
+    def get_image_id_list(self):
+        image_id_list = super().get_image_id_list()
+        if self.disorganized:
+            if self.is_npmob and self.npmob_type == 'beast':
+                image_id_list.append('misc/injured_icon.png')
+            else:
+                image_id_list.append('misc/disorganized_icon.png')
+        if self.has_canoes:
+            if self.in_canoes:
+                image_id_list.append('misc/canoes.png')
+        return(image_id_list)
+
     def set_disorganized(self, new_value):
         '''
         Description:
@@ -137,15 +153,16 @@ class mob(actor):
             None
         '''
         self.disorganized = new_value
-        if new_value == True:
-            for current_image in self.images:
-                if self.is_npmob and self.npmob_type == 'beast':
-                    current_image.image.add_member('misc/injured_icon.png', 'disorganized_icon')
-                else:
-                    current_image.image.add_member('misc/disorganized_icon.png', 'disorganized_icon')
-        else:
-            for current_image in self.images:
-                current_image.image.remove_member('disorganized_icon')
+        #if new_value == True:
+        #    for current_image in self.images:
+        #        if self.is_npmob and self.npmob_type == 'beast':
+        #            current_image.image.add_member('misc/injured_icon.png', 'disorganized_icon')
+        #        else:
+        #            current_image.image.add_member('misc/disorganized_icon.png', 'disorganized_icon')
+        #else:
+        #    for current_image in self.images:
+        #        current_image.image.remove_member('disorganized_icon')
+        self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
 
@@ -809,13 +826,17 @@ class mob(actor):
             return()
 
         if current_cell.terrain == 'water' and self.y > 0:
-            for current_image in self.images:
-                if not current_image.image.has_member('canoes'):
-                    current_image.image.add_member('misc/canoes.png', 'canoes')
+            self.in_canoes = True
+            self.update_image_bundle()
+            #for current_image in self.images:
+            #    if not current_image.image.has_member('canoes'):
+            #        current_image.image.add_member('misc/canoes.png', 'canoes')
             #self.set_image('canoes')
         else:
-            for current_image in self.images:
-                current_image.image.remove_member('canoes')
+            self.in_canoes = False
+            self.update_image_bundle()
+            #for current_image in self.images:
+            #    current_image.image.remove_member('canoes')
             #self.set_image('no_canoes')
             
     def retreat(self):

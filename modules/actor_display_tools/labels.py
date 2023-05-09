@@ -602,7 +602,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)
         elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
             return(False)

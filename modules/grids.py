@@ -609,14 +609,15 @@ class mini_grid(grid):
                     current_cell.contained_mobs = attached_cell.contained_mobs
                     current_cell.contained_buildings = attached_cell.contained_buildings
                     current_cell.village = attached_cell.village
-                    current_cell.set_visibility(attached_cell.visible)
-                    current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant)
+                    current_cell.set_visibility(attached_cell.visible, update_image_bundle = False)
+                    current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant, update_image_bundle = False)
                     current_cell.set_resource(attached_cell.resource)
                 else: #if the current cell is beyond the boundaries of the attached grid, show an empty cell
                     current_cell.set_visibility(True)
                     current_cell.set_terrain('none')
                     current_cell.set_resource('none')
                     current_cell.reset_buildings()
+                    current_cell.tile.update_image_bundle()
             self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
             for current_mob in self.global_manager.get('mob_list'):
                 if not (current_mob.images[0].current_cell == 'none'): #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):

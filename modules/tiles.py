@@ -45,45 +45,44 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.cell = self.grid.find_cell(self.x, self.y)
         if self.show_terrain:
             self.cell.tile = self
-            self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
-            self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
+            #self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
-            self.set_visibility(self.cell.visible)
+            self.set_terrain(self.cell.terrain) #terrain is a property of the cell, being stored information rather than appearance, same for resource, set these in cell
+            #self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
             self.inventory_setup()
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
         elif self.name in ['Europe', 'Slave traders']: #abstract grid's tile has the same name as the grid, and Europe should be able to hold commodities despite not being terrain
             self.cell.tile = self
-            self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
-            self.image_dict['hidden'] = 'scenery/paper_hidden.png'
-            self.set_visibility(self.cell.visible)
+            #self.resource_icon = 'none' #the resource icon is appearance, making it a property of the tile rather than the cell
+            #self.set_visibility(self.cell.visible)
             self.can_hold_commodities = True
             self.can_hold_infinite_commodities = True
             self.inventory_setup()
             self.terrain = 'none'
             if self.cell.grid.from_save: #load in saved inventory from cell
                 self.load_inventory(self.cell.save_dict['inventory'])
-        elif self.name == 'resource icon':
-            self.image_dict['hidden'] = 'misc/empty.png'
+        #elif self.name == 'resource icon':
+        #    self.image_dict['hidden'] = 'misc/empty.png'
         else:
             self.terrain = 'none'
         self.update_tooltip()
 
-    def update_resource_icon(self): #changes size of resource icon if building present
-        '''
-        Description:
-            Reduces the size of this tile's resouce icon when a building is present, allowing more icons to be shown on the tile at once
-        Input:
-            None
-        Output:
-            None
-        '''
-        if not self.resource_icon == 'none':
-            self.resource_icon.update_resource_icon()
-            equivalent_tile = self.get_equivalent_tile()
-            if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
-                equivalent_tile.resource_icon.update_resource_icon()
+    #def update_resource_icon(self): #changes size of resource icon if building present
+    #    '''
+    #    Description:
+    #        Reduces the size of this tile's resouce icon when a building is present, allowing more icons to be shown on the tile at once
+    #    Input:
+    #        None
+    #    Output:
+    #        None
+    #    '''
+    #    if not self.resource_icon == 'none':
+    #        self.resource_icon.update_resource_icon()
+    #        equivalent_tile = self.get_equivalent_tile()
+    #        if (not equivalent_tile == 'none') and (not equivalent_tile.resource_icon == 'none'):
+    #            equivalent_tile.resource_icon.update_resource_icon()
 
     def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
@@ -213,37 +212,67 @@ class tile(actor): #to do: make terrain tiles a subclass
                 return('none')
         return('none')
             
-    def set_visibility(self, new_visibility):
-        '''
-        Description:
-            Sets the visibility of this tile to the inputted value. A visible tile's terrain and resource can be seen by the player.
-        Input:
-            boolean new_visibility: This tile's new visibility status
-        Output:
-            None
-        '''
-        if new_visibility == True:
-            image_name = 'default'
+    #maybe make these into general actor functions? override update image bundle for tile to account for resources/buildings, have group version with multiple entities
+    def get_image_id_list(self, force_visibility = False):
+        image_id_list = []
+        if self.cell.grid.is_mini_grid:
+            equivalent_tile = self.get_equivalent_tile()
+            if equivalent_tile != 'none':
+                image_id_list = equivalent_tile.get_image_id_list()
+            else:
+                image_id_list.append(self.image_dict['default'])
         else:
-            image_name = 'hidden'
-        self.image.set_image(image_name)
-        #self.image.previous_idle_image = image_name
-        if not self.resource_icon == 'none':
-            self.resource_icon.image.set_image(image_name)
-        #    self.resource_icon.image.previous_idle_image = image_name
+            if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
+                image_id_list.append(self.image_dict['default'])
+                if self.cell.resource != 'none':
+                    image_id_list.append(actor_utility.generate_resource_icon(self, self.global_manager))
+                for current_building_type in self.global_manager.get('building_types'):
+                    current_building = self.cell.get_building(current_building_type)
+                    if current_building != 'none':
+                        image_id_list += current_building.get_image_id_list()
+            else:
+                image_id_list.append(self.image_dict['hidden'])
+            if self.global_manager.get('current_lore_mission') != 'none':
+                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(self.cell.x, self.cell.y) and self.cell.grid == self.global_manager.get('strategic_map_grid'):
+                    image_id_list += self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.cell.x, self.cell.y).get_image_id_list()
+        return(image_id_list)
+
+    def update_image_bundle(self):
+        self.set_image(self.get_image_id_list())
+        if self.grid == self.global_manager.get('strategic_map_grid'):
+            equivalent_tile = self.get_equivalent_tile()
+            if equivalent_tile != 'none':
+                equivalent_tile.update_image_bundle()
+
+    #def set_visibility(self, new_visibility):
+    #    '''
+    #    Description:
+    #        Sets the visibility of this tile to the inputted value. A visible tile's terrain and resource can be seen by the player.
+    #    Input:
+    #        boolean new_visibility: This tile's new visibility status
+    #    Output:
+    #        None
+    #    '''
+    #    if new_visibility == True:
+    #        image_name = 'default'
+    #    else:
+    #        image_name = 'hidden'
+    #    self.image.set_image(image_name)
+    #    #self.image.previous_idle_image = image_name
+    #    if not self.resource_icon == 'none':
+    #        self.resource_icon.image.set_image(image_name)
+    #    #    self.resource_icon.image.previous_idle_image = image_name
             
-    def set_resource(self, new_resource):
+    def set_resource(self, new_resource, update_image_bundle = True):
         '''
         Description:
             Sets the resource type of this tile to the inputted value, removing or creating resource icons as needed
         Input:
             string new_resource: The new resource type of this tile, like 'exotic wood'
+            boolean update_image_bundle: Whether to update the image bundle - if multiple sets are being used on a tile, optimal to only update after the last one
         Output:
             None
         '''
-        if not self.resource_icon == 'none':
-            self.resource_icon.remove()
-            self.resource_icon = 'none'
         self.resource = new_resource
         if not new_resource == 'none':
             if self.resource == 'natives':
@@ -272,24 +301,16 @@ class tile(actor): #to do: make terrain tiles a subclass
                     else:
                         self.cell.village = villages.village(False, input_dict, self.global_manager)
                         self.cell.village.tiles.append(self)
-                    
-            input_dict = {}
-            input_dict['coordinates'] = (self.x, self.y)
-            input_dict['grid'] = self.grid
-            input_dict['resource'] = self.cell.resource
-            input_dict['name'] = 'resource icon'
-            input_dict['modes'] = ['strategic']
-            input_dict['show_terrain'] = False
-            input_dict['attached_tile'] = self
-            self.resource_icon = resource_icon(False, input_dict, self.global_manager)
-        self.set_visibility(self.cell.visible)
+        if update_image_bundle:
+            self.update_image_bundle()
             
-    def set_terrain(self, new_terrain): #to do, add variations like grass to all terrains
+    def set_terrain(self, new_terrain, update_image_bundle = True): #to do, add variations like grass to all terrains
         '''
         Description:
             Sets the terrain type of this tile to the inputted value, changing its appearance as needed
         Input:
             string new_terrain: The new terrain type of this tile, like 'swamp'
+            boolean update_image_bundle: Whether to update the image bundle - if multiple sets are being used on a tile, optimal to only update after the last one
         Output:
             None
         '''
@@ -311,8 +332,8 @@ class tile(actor): #to do: make terrain tiles a subclass
             self.image_dict['default'] = 'scenery/terrain/' + base_word + '_' + str(self.cell.terrain_variant) + '.png'
         elif new_terrain == 'none':
             self.image_dict['default'] = 'scenery/hidden.png'
-
-        self.image.set_image('default')
+        if update_image_bundle:
+            self.update_image_bundle() #self.image.set_image('default')
 
     def update_tooltip(self):
         '''
@@ -472,76 +493,76 @@ class abstract_tile(tile):
         else:
             return(False)
 
-class resource_icon(tile):
-    '''
-    tile that appears above a terrain tile that has a resource and reflects the terrain tile's resource. Changes in size when buildings are built in its attached tile to allow more icons to be visible
-    '''
-    def __init__(self, from_save, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
-                'grid': grid value - grid in which this tile can appear
-                'image': string value - File path to the image used by this object
-                'name': string value - This tile's name
-                'modes': string list value - Game modes during which this actor's images can appear
-                'show_terrain': boolean value - True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
-                'attached_tile': tile value - Terrain tile whose resource is represented by this tile
-                'resource': string value - Type of resource represented by this tile, like 'exotic wood'
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.attached_tile = input_dict['attached_tile']
-        self.resource = input_dict['resource']
-        default_image_id = 'scenery/resources/' + self.resource + '.png'
-        small_image_id = 'scenery/resources/small/' + self.resource + '.png'
-        input_dict['image'] = default_image_id
-        super().__init__(from_save, input_dict, global_manager)
-        self.image_dict['small'] = small_image_id
-        self.image_dict['large'] = default_image_id
-        self.update_resource_icon()
-
-    def update_resource_icon(self):
-        '''
-        Description:
-            Changes this resource icon's size when buildings are built in its attached tile to allow more icons to be visible. Also reflects the size of the native village if this icon represents a village
-        Input:
-            None
-        '''
-        if self.resource == 'natives':
-            attached_village = self.attached_tile.cell.get_building('village')
-            if attached_village.population == 0: #0
-                key = '0'
-            elif attached_village.population <= 3: #1-3
-                key = '1'
-            elif attached_village.population <= 6: #4-6
-                key = '2'
-            else: #7-10
-                key = '3'
-
-            if attached_village.aggressiveness <= 3: #1-3
-                key += '1'
-            elif attached_village.aggressiveness <= 6: #4-6
-                key += '2'
-            else: #7-10
-                key += '3'
-
-            self.image_dict['small'] = 'scenery/resources/natives/small/' + key + '.png'
-            self.image_dict['large'] = 'scenery/resources/natives/' + key + '.png'
-        building_present = False
-        for building_type in self.global_manager.get('building_types'):
-            if self.attached_tile.cell.has_building(building_type): #if any building present
-                self.image.set_image('small')
-                self.image_dict['default'] = self.image_dict['small']
-                building_present = True
-                break
-        if not building_present:
-            self.image.set_image('large')
-            self.image_dict['default'] = self.image_dict['large']
+#class resource_icon(tile):
+#    '''
+#    tile that appears above a terrain tile that has a resource and reflects the terrain tile's resource. Changes in size when buildings are built in its attached tile to allow more icons to be visible
+#    '''
+#    def __init__(self, from_save, input_dict, global_manager):
+#        '''
+#        Description:
+#            Initializes this object
+#        Input:
+#            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+#            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+#                'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
+#                'grid': grid value - grid in which this tile can appear
+#                'image': string value - File path to the image used by this object
+#                'name': string value - This tile's name
+#                'modes': string list value - Game modes during which this actor's images can appear
+#                'show_terrain': boolean value - True if this tile shows a cell's terrain. False if it does not show terrain, like a veteran icon or resource icon
+#                'attached_tile': tile value - Terrain tile whose resource is represented by this tile
+#                'resource': string value - Type of resource represented by this tile, like 'exotic wood'
+#            global_manager_template global_manager: Object that accesses shared variables
+#        Output:
+#            None
+#        '''
+#        self.attached_tile = input_dict['attached_tile']
+#        self.resource = input_dict['resource']
+#        default_image_id = 'scenery/resources/' + self.resource + '.png'
+#        small_image_id = 'scenery/resources/small/' + self.resource + '.png'
+#        input_dict['image'] = default_image_id
+#        super().__init__(from_save, input_dict, global_manager)
+#        self.image_dict['small'] = small_image_id
+#        self.image_dict['large'] = default_image_id
+#        self.update_resource_icon()
+#
+#    def update_resource_icon(self):
+#        '''
+#        Description:
+#            Changes this resource icon's size when buildings are built in its attached tile to allow more icons to be visible. Also reflects the size of the native village if this icon represents a village
+#        Input:
+#            None
+#        '''
+#        if self.resource == 'natives':
+#            attached_village = self.attached_tile.cell.get_building('village')
+#            if attached_village.population == 0: #0
+#                key = '0'
+#            elif attached_village.population <= 3: #1-3
+#                key = '1'
+#            elif attached_village.population <= 6: #4-6
+#                key = '2'
+#            else: #7-10
+#                key = '3'
+#
+#            if attached_village.aggressiveness <= 3: #1-3
+#                key += '1'
+#            elif attached_village.aggressiveness <= 6: #4-6
+#                key += '2'
+#            else: #7-10
+#                key += '3'
+#
+#            self.image_dict['small'] = 'scenery/resources/natives/small/' + key + '.png'
+#            self.image_dict['large'] = 'scenery/resources/natives/' + key + '.png'
+#        building_present = False
+#        for building_type in self.global_manager.get('building_types'):
+#            if self.attached_tile.cell.has_building(building_type): #if any building present
+#                self.image.set_image('small')
+#                self.image_dict['default'] = self.image_dict['small']
+#                building_present = True
+#                break
+#        if not building_present:
+#            self.image.set_image('large')
+#            self.image_dict['default'] = self.image_dict['large']
 '''
 class status_icon(tile):
     

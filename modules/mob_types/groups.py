@@ -82,6 +82,7 @@ class group(pmob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.set_group_type('none')
+        self.update_image_bundle()
 
     def move(self, x_change, y_change):
         '''
@@ -262,8 +263,7 @@ class group(pmob):
         if not self.officer.veteran:
             self.officer.set_name('veteran ' + self.officer.name)
             self.officer.veteran = True
-        for current_image in self.images:
-            current_image.image.add_member('misc/veteran_icon.png', 'veteran_icon')
+        self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
 
@@ -336,3 +336,29 @@ class group(pmob):
         super().die(death_type)
         self.officer.die('none')
         self.worker.die('none')
+
+    def get_image_id_list(self):
+        image_id_list = super().get_image_id_list()
+        image_id_list.remove(self.image_dict['default']) #group default image is empty
+        left_worker_dict = {
+            'image_id': self.worker.image_dict['default'],
+            'size': 0.8,
+            'x_offset': -0.28,
+            'y_offset': 0.05,
+            'level': -2
+        }
+        image_id_list.append(left_worker_dict)
+
+        right_worker_dict = left_worker_dict.copy()
+        right_worker_dict['x_offset'] *= -1
+        image_id_list.append(right_worker_dict)
+
+        officer_dict = {
+            'image_id': self.officer.image_dict['default'],
+            'size': 0.85,
+            'x_offset': 0,
+            'y_offset': -0.05,
+            'level': -1
+        }
+        image_id_list.append(officer_dict)
+        return(image_id_list)

@@ -44,9 +44,9 @@ class actor_display_free_image(free_image):
                         self.set_image('misc/empty.png')
                 else: #show nothing if cell not visible
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
-                self.set_image(new_actor.image_dict['hidden'])
-            elif self.actor_image_type == 'resource_building':
+            #elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
+            #    self.set_image(new_actor.image_dict['hidden'])
+            elif self.actor_image_type == 'resource_building' and new_actor.cell.visible:
                 if new_actor.cell.has_building('resource'):
                     self.set_image(new_actor.cell.get_building('resource').image_dict['default']) #matches resource building
                 else:
@@ -72,21 +72,21 @@ class actor_display_free_image(free_image):
                         self.set_image('misc/empty.png')
                 else:
                     self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'veteran_icon':
-                if (self.actor.is_officer or self.actor.is_group) and self.actor.veteran:
-                    self.set_image('misc/veteran_icon.png')
-                else:
-                    self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'disorganized_icon':
-                if self.actor.disorganized:
-                    self.set_image('misc/disorganized_icon.png')
-                else:
-                    self.set_image('misc/empty.png')
-            elif self.actor_image_type == 'sentry_icon':
-                if self.actor.is_pmob and self.actor.sentry_mode:
-                    self.set_image('misc/sentry_icon.png')
-                else:
-                    self.set_image('misc/empty.png')
+            #elif self.actor_image_type == 'veteran_icon':
+            #    if (self.actor.is_officer or self.actor.is_group) and self.actor.veteran:
+            #        self.set_image('misc/veteran_icon.png')
+            #    else:
+            #        self.set_image('misc/empty.png')
+            #elif self.actor_image_type == 'disorganized_icon':
+            #    if self.actor.disorganized:
+            #        self.set_image('misc/disorganized_icon.png')
+            #    else:
+            #        self.set_image('misc/empty.png')
+            #elif self.actor_image_type == 'sentry_icon':
+            #    if self.actor.is_pmob and self.actor.sentry_mode:
+            #        self.set_image('misc/sentry_icon.png')
+            #    else:
+            #        self.set_image('misc/empty.png')
             elif self.actor_image_type in ['minister_default', 'country_default']:
                 self.set_image(new_actor.image_id)
             elif self.actor_image_type == 'possible_artifact_location':
@@ -95,10 +95,45 @@ class actor_display_free_image(free_image):
                 else:
                     self.set_image('misc/empty.png')
             else:
-                if isinstance(new_actor.images[0].image, str):
-                    self.set_image(new_actor.image_dict['default'])
+                image_id_list = []
+                default_image_key = 'default'
+
+                if new_actor.actor_type == 'mob':
+                    image_id_list.append({
+                        'image_id': 'misc/mob_background.png',
+                        'size': 1,
+                        'x_offset': 0,
+                        'y_offset': 0,
+                        'level': -10
+                    })
+                elif not new_actor.cell.visible:
+                    default_image_key = 'hidden'
+
+                if isinstance(new_actor.images[0].image_id, str): #if id is string image path
+                    image_id_list.append(new_actor.image_dict[default_image_key])
+                    #self.set_image(new_actor.image_dict['default'])
+                else: #if id is list of strings for image bundle
+                    image_id_list += new_actor.get_image_id_list() #images[0].image.to_list()
+
+                if new_actor.actor_type == 'mob':
+                    if new_actor.is_pmob:
+                        image_id_list.append('misc/pmob_outline.png')
+                    else:
+                        image_id_list.append('misc/npmob_outline.png')
                 else:
-                    self.set_image(new_actor.images[0].image.copy())
+                    image_id_list.append('misc/tile_outline.png')
+                #    if not hidden:
+                #        if new_actor.cell.has_building('resource'):
+                #            image_id_list.append(new_actor.cell.get_building('resource').image_dict['default'])
+                        #elif not new_actor.resource_icon == 'none':
+                        #    image_id_list.append(new_actor.resource_icon.image_dict['default'])
+                    #else:
+                    #    image_id_list.append(new_actor.image_dict['hidden'])
+                    
+                    
+            #elif self.actor_image_type == 'terrain' and not new_actor.cell.visible:
+            #    self.set_image(new_actor.image_dict['hidden'])
+                self.set_image(image_id_list)
         else:
             self.set_image('misc/empty.png')
 

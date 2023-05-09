@@ -301,8 +301,9 @@ class village():
         if self.population == 0 and len(self.attached_warriors) == 0:
             self.aggressiveness = 1
         #if self.cell.visible:
-        for current_tile in self.tiles:
-            current_tile.update_resource_icon()
+        self.tiles[0].update_image_bundle()
+        #for current_tile in self.tiles:
+        #    current_tile.update_resource_icon()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
 
@@ -320,7 +321,8 @@ class village():
             self.aggressiveness = 9
         elif self.aggressiveness < 1:
             self.aggressiveness = 1
-        for current_tile in self.tiles:
-            current_tile.update_resource_icon()
+        #for current_tile in self.tiles:
+        #    current_tile.update_resource_icon()
+        self.tiles[0].update_image_bundle()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed aggressiveness value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)

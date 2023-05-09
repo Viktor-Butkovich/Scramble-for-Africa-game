@@ -1167,14 +1167,14 @@ def mob_interface_setup(global_manager):
 
     #mob info images setup
     #pmob background image
-    pmob_free_image_background = actor_display_images.mob_background_image('misc/pmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
-    global_manager.get('mob_info_display_list').append(pmob_free_image_background)
+    #pmob_free_image_background = actor_display_images.mob_background_image('misc/pmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    #    scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
+    #global_manager.get('mob_info_display_list').append(pmob_free_image_background)
 
     #npmob background image
-    npmob_free_image_background = actor_display_images.mob_background_image('misc/npmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
-    global_manager.get('mob_info_display_list').append(npmob_free_image_background)
+    #npmob_free_image_background = actor_display_images.mob_background_image('misc/npmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    #    scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
+    #global_manager.get('mob_info_display_list').append(npmob_free_image_background)
 
     #mob background image's tooltip
     mob_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
@@ -1187,19 +1187,19 @@ def mob_interface_setup(global_manager):
     global_manager.get('mob_info_display_list').append(mob_free_image)
 
     #veteran icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
+    #mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    #    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
+    #global_manager.get('mob_info_display_list').append(mob_free_image)
 
     #disorganized icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
+    #mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    #    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
+    #global_manager.get('mob_info_display_list').append(mob_free_image)
 
     #sentry mode icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'sentry_icon', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
+    #mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    #    scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'sentry_icon', global_manager) #coordinates, width, height, modes, global_manager
+    #global_manager.get('mob_info_display_list').append(mob_free_image)
     
     fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
         scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
@@ -1239,9 +1239,9 @@ def tile_interface_setup(global_manager):
     #tile background image
     actor_display_current_y = global_manager.get('default_display_height') - (580 + 35 + 35)
     global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
-    tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager) 
-    global_manager.get('tile_info_display_list').append(tile_free_image_background)
+    #tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    #    scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager) 
+    #global_manager.get('tile_info_display_list').append(tile_free_image_background)
 
     cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_display_current_y + 95, global_manager),
             scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/cycle_passengers_down.png', global_manager)
@@ -1255,16 +1255,19 @@ def tile_interface_setup(global_manager):
     tile_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
-
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort', 'possible_artifact_location']
+    
+    global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager))
+    #tile_info_display_images = ['terrain']
+    #tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort', 'possible_artifact_location']
     #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
-    for current_actor_image_type in tile_info_display_images:
-        if not current_actor_image_type in ['up', 'down', 'right', 'left']:
-            global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-                scaling.scale_height(115, global_manager), ['strategic', 'europe'], current_actor_image_type, global_manager))
-        else:
-            global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager),
-                scaling.scale_width(115, global_manager), scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', current_actor_image_type, global_manager))
+    #for current_actor_image_type in tile_info_display_images:
+    #    if not current_actor_image_type in ['up', 'down', 'right', 'left']:
+    #        global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    #            scaling.scale_height(115, global_manager), ['strategic', 'europe'], current_actor_image_type, global_manager))
+    #    else:
+    #        global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager),
+    #            scaling.scale_width(115, global_manager), scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', current_actor_image_type, global_manager))
                 #coordinates, width, height, modes, actor_image_type, direction, global_manager
             
 

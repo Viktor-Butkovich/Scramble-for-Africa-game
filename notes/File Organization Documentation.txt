@@ -204,7 +204,7 @@ SFA folder
             class actor
 
 		buildings.py
-			imports pygame, random, actors, buttons, utility, images, actor_utility, text_tools
+			imports pygame, random, actors, utility, scaling, actor_utility, text_tools
 			class building(actors.actor)
 		    	class infrastructure_building
 		    	class trading_post
@@ -337,7 +337,7 @@ SFA folder
 	    	class multi_line_label
 
 		lore_missions.py
-		    imports random, notification_tools, images
+		    imports random, notification_tools
 			class lore_missions
 
         main_loop.py

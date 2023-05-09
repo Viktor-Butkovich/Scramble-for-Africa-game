@@ -296,6 +296,14 @@ class pmob(mob):
         elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
 
+    def get_image_id_list(self):
+        image_id_list = super().get_image_id_list()
+        if self.is_officer or self.is_group and self.veteran:
+            image_id_list.append('misc/veteran_icon.png')
+        if self.sentry_mode:
+            image_id_list.append('misc/sentry_icon.png')
+        return(image_id_list)
+
     def set_sentry_mode(self, new_value):
         '''
         Description:
@@ -308,18 +316,19 @@ class pmob(mob):
         old_value = self.sentry_mode
         if not old_value == new_value:
             self.sentry_mode = new_value
+            self.update_image_bundle()
             if new_value == True:
-                for current_image in self.images:
-                    if self.is_npmob and self.npmob_type == 'beast':
-                        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
-                    else:
-                        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
+                #for current_image in self.images:
+                #    if self.is_npmob and self.npmob_type == 'beast':
+                #        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
+                #    else:
+                #        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
                 self.remove_from_turn_queue()
                 if self.global_manager.get('displayed_mob') == self:
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
             else:
-                for current_image in self.images:
-                    current_image.image.remove_member('disorganized_icon')
+                #for current_image in self.images:
+                #    current_image.image.remove_member('sentry_icon')
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == self.global_manager.get('displayed_mob'):

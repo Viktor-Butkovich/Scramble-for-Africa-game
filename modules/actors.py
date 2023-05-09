@@ -123,16 +123,19 @@ class actor():
         for current_image in self.images:
             if current_image.change_with_other_images:
                 current_image.set_image(new_image)
-        self.image_dict['default'] = self.image_dict[new_image]
+        #if isinstance(new_image, str):
+        #    self.image_dict['default'] = self.image_dict[new_image]
+        #else:
+        #    self.image_dict['default'] = self.image_dict[new_image]
         if self.actor_type == 'mob':
             if self.global_manager.get('displayed_mob') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
         elif self.actor_type == 'tile':
             if self.global_manager.get('displayed_tile') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
-        elif self.actor_type == 'building':
-            if self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        #elif self.actor_type == 'building':
+        #    if self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
+        #        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def load_inventory(self, inventory_dict):
         '''
@@ -439,8 +442,9 @@ class actor():
             None
         '''
         self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
-        for current_image in self.images:
-            self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
+        if hasattr(self, 'images'):
+            for current_image in self.images:
+                self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
 
     def touching_mouse(self):
         '''
@@ -490,10 +494,14 @@ class actor():
         if beyond_screen:
             mouse_x = self.global_manager.get('display_width') - width
         mouse_y += y_displacement
-        tooltip_image = self.images[0]
-        for current_image in self.images: #only draw tooltip from the image that the mouse is touching
-            if current_image.Rect.collidepoint((mouse_x, mouse_y)):
-                tooltip_image = current_image
+
+        if hasattr(self, 'images'):
+            tooltip_image = self.images[0]
+            for current_image in self.images: #only draw tooltip from the image that the mouse is touching
+                if current_image.Rect.collidepoint((mouse_x, mouse_y)):
+                    tooltip_image = current_image
+        else:
+            tooltip_image = self
 
         if (mouse_x + tooltip_image.tooltip_box.width) > self.global_manager.get('display_width'):
             mouse_x = self.global_manager.get('display_width') - tooltip_image.tooltip_box.width
@@ -507,3 +515,11 @@ class actor():
             text_line = tooltip_image.tooltip_text[text_line_index]
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
+
+    def get_image_id_list(self):
+        image_id_list = []
+        image_id_list.append(self.image_dict['default'])
+        return(image_id_list)
+
+    def update_image_bundle(self):
+        self.set_image(self.get_image_id_list())

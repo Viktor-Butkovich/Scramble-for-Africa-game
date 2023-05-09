@@ -390,7 +390,7 @@ class recruitment_choice_button(choice_button):
                     input_dict['init_type'] = 'workers'
                     input_dict['worker_type'] = 'African'
                 elif self.recruitment_type == 'steamship':
-                    image_dict = {'default': [self.mob_image_id], 'crewed': [self.mob_image_id], 'uncrewed': ['mobs/steamship/uncrewed.png']}
+                    image_dict = {'default': self.mob_image_id, 'uncrewed': 'mobs/steamship/uncrewed.png'}
                     input_dict['image_dict'] = image_dict
                     input_dict['name'] = 'steamship'
                     input_dict['crew'] = 'none'

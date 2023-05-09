@@ -54,6 +54,7 @@ class worker(pmob):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
             self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()
+        self.update_image_bundle()
 
     def replace(self, attached_group = 'none'):
         '''
@@ -179,9 +180,10 @@ class worker(pmob):
         self.in_vehicle = True
         self.selected = False
         self.hide_images()
-        vehicle.crew = self
-        vehicle.has_crew = True
-        vehicle.set_image('crewed')
+        #vehicle.crew = self
+        #vehicle.has_crew = True
+        #vehicle.set_image('crewed')
+        vehicle.set_crew(self)
         moved_mob = vehicle
         for current_image in moved_mob.images: #moves vehicle to front
             if not current_image.current_cell == 'none':
@@ -207,14 +209,17 @@ class worker(pmob):
         self.show_images()
         if self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-        vehicle.crew = 'none'
-        vehicle.has_crew = False
-        vehicle.set_image('uncrewed')
+
+        #vehicle.crew = 'none'
+        #vehicle.has_crew = False
+        vehicle.set_crew('none')
+        #vehicle.set_image('uncrewed')
         vehicle.end_turn_destination = 'none'
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
         vehicle.remove_from_turn_queue()
         self.add_to_turn_queue()
+        self.update_image_bundle()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def join_group(self):
@@ -248,6 +253,7 @@ class worker(pmob):
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
         if self.movement_points > 0:
             self.add_to_turn_queue()
+        self.update_image_bundle()
 
     def remove(self):
         '''
@@ -265,6 +271,23 @@ class worker(pmob):
         elif self.worker_type == 'African':
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
         self.global_manager.get('money_label').check_for_updates()
+
+    def get_image_id_list(self):
+        image_id_list = super().get_image_id_list()
+        image_id_list.remove(self.image_dict['default']) #remove default middle worker
+        left_worker_dict = {
+            'image_id': self.image_dict['default'],
+            'size': 0.85,
+            'x_offset': -0.25,
+            'y_offset': 0,
+            'level': -1
+        }
+        image_id_list.append(left_worker_dict)
+
+        right_worker_dict = left_worker_dict.copy()
+        right_worker_dict['x_offset'] *= -1
+        image_id_list.append(right_worker_dict)
+        return(image_id_list)
 
 class slave_worker(worker):
     '''

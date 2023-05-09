@@ -20,9 +20,11 @@
       "hide_grid_lines", 
       "enable_oceans", 
       "skip_intro", 
-      "show_lore_mission_locations"
+      "show_lore_mission_locations",
+      "instant_lore_mission"
    ],
    "active_effects": [
-      "ministry_of_magic"
+      "ministry_of_magic",
+      "instant_lore_mission"
    ]
 }

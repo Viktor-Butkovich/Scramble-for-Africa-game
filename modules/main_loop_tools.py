@@ -63,12 +63,12 @@ def update_display(global_manager):
                     else:
                         mob_image_list.append(current_image)
 
-        for current_lore_mission in global_manager.get('lore_mission_list'):
-            for current_possible_artifact_location in current_lore_mission.possible_artifact_locations:
-                for current_status_icon in current_possible_artifact_location.status_icons:
-                    current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other non-mob images
-                    current_status_icon.image.draw()
-                    current_status_icon.image.has_drawn = True
+        #for current_lore_mission in global_manager.get('lore_mission_list'):
+        #    for current_possible_artifact_location in current_lore_mission.possible_artifact_locations:
+        #        for current_status_icon in current_possible_artifact_location.status_icons:
+        #            current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other non-mob images
+        #            current_status_icon.image.draw()
+        #            current_status_icon.image.has_drawn = True
 
         for current_image in mob_image_list:
             current_image.draw()
@@ -254,6 +254,7 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
         height = y_displacement
         width = 0
         for possible_tooltip_drawer in possible_tooltip_drawers:
+            possible_tooltip_drawer.update_tooltip()
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
                 height += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:

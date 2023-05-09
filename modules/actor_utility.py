@@ -283,8 +283,11 @@ def update_roads(global_manager):
     Output:
         None
     '''
-    for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
-        current_infrastructure_connection_image.update_roads()
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type == 'infrastructure':
+            current_building.cell.tile.update_image_bundle()
+    #for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
+    #    current_infrastructure_connection_image.update_roads()
     
 def get_selected_list(global_manager):
     '''
@@ -423,3 +426,36 @@ def get_num_available_workers(location_types, global_manager):
         for current_village in global_manager.get('village_list'):
             num_available_workers += current_village.available_workers
     return(num_available_workers)
+
+def generate_resource_icon(tile, global_manager):
+    #precondition: inputted tile.cell.resource != 'none'
+    small = False
+    for building_type in global_manager.get('building_types'):
+        if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
+            small = True
+    if tile.cell.resource == 'natives':
+        attached_village = tile.cell.get_building('village')
+        if attached_village.population == 0: #0
+            key = '0'
+        elif attached_village.population <= 3: #1-3
+            key = '1'
+        elif attached_village.population <= 6: #4-6
+            key = '2'
+        else: #7-10
+            key = '3'
+        if attached_village.aggressiveness <= 3: #1-3
+            key += '1'
+        elif attached_village.aggressiveness <= 6: #4-6
+            key += '2'
+        else: #7-10
+            key += '3'
+        if small:
+            image_id = 'scenery/resources/natives/small/' + key + '.png'
+        else:
+            image_id = 'scenery/resources/natives/' + key + '.png'
+    else:
+        if small:
+            image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'
+        else:
+            image_id = 'scenery/resources/' + tile.cell.resource + '.png'
+    return(image_id)

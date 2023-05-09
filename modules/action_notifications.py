@@ -165,16 +165,16 @@ class exploration_notification(action_notification):
             self.notification_images = []
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
-            explored_terrain_image_id = explored_cell.tile.image_dict['default']
-            self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            image_id_list = ['misc/tile_background.png'] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
+            self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            if not explored_tile.resource_icon == 'none':
-                explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-                self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
-                self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            #if not explored_tile.resource_icon == 'none':
+            #    explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
+            #    self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+            #if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
+            #    self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -230,9 +230,12 @@ class off_tile_exploration_notification(action_notification):
         '''
         self.current_expedition = global_manager.get('displayed_mob')
         self.notification_images = []
+        
         explored_cell = self.current_expedition.destination_cells.pop(0)
         public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
+
+        image_id_list = explored_tile.get_image_id_list(force_visibility = True)
 
         if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
             explored_terrain_image_id = explored_cell.tile.image_dict['default']
@@ -240,21 +243,26 @@ class off_tile_exploration_notification(action_notification):
         elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
             explored_terrain_image_id = explored_cell.tile.image.image_id
             new_visibility = explored_cell.visible
-
+        
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        if new_visibility == True and not explored_tile.resource_icon == 'none':
-            explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-            self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        #image_id_list.append(explored_terrain_image_id)
+        if new_visibility == True and not explored_tile.cell.resource == 'none':
+            image_id_list.append(actor_utility.generate_resource_icon(explored_tile, global_manager))
+            #explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
+            #self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            #    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        image_id_list.append('misc/tile_outline.png')
         #although global manager sets to busy here, calling object should also set to busy so that you can't click off before notification appears if another notification is opened when this one is queued
         global_manager.set('ongoing_action', True)
         global_manager.set('ongoing_action_type', self.current_expedition.current_action_type)
         if self.current_expedition.current_action_type == 'exploration':
             explored_cell.set_visibility(True)
-        if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
-            self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-                scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        #if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
+        #    self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+        #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
+        self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
         global_manager.get('minimap_grid').calibrate(explored_cell.x, explored_cell.y)
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
@@ -1006,18 +1014,12 @@ class combat_notification(action_notification):
             image_x = global_manager.get('notification_manager').notification_x - 165#175
             if notification_dice > 2:
                 image_x -= 60
-            global_manager.get('combatant_images').append(free_image('misc/pmob_background.png', scaling.scale_coordinates(image_x, 280, global_manager),
+            pmob_image_id_list = ['misc/mob_background.png'] + global_manager.get('displayed_mob').get_image_id_list() + ['misc/pmob_outline.png']
+            global_manager.get('combatant_images').append(free_image(pmob_image_id_list, scaling.scale_coordinates(image_x, 280, global_manager),
                 scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
-            if global_manager.get('displayed_mob').veteran:
-                global_manager.get('combatant_images').append(free_image('misc/veteran_icon.png', scaling.scale_coordinates(image_x, 280, global_manager),
-                    scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))             
-            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').images[0].image_id, scaling.scale_coordinates(image_x, 280, global_manager),
-                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
-
-            global_manager.get('combatant_images').append(free_image('misc/npmob_background.png', scaling.scale_coordinates(image_x, 670, global_manager),
-                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))            
-            global_manager.get('combatant_images').append(free_image(global_manager.get('displayed_mob').current_enemy.images[0].image_id, scaling.scale_coordinates(image_x, 670, global_manager),
-                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
+            npmob_image_id_list = ['misc/mob_background.png'] + global_manager.get('displayed_mob').current_enemy.get_image_id_list() + ['misc/pmob_outline.png']
+            global_manager.get('combatant_images').append(free_image(npmob_image_id_list, scaling.scale_coordinates(image_x, 670, global_manager),
+                scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))  
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):

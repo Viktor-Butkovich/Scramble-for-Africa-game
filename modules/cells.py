@@ -589,18 +589,19 @@ class cell():
                     noncombatants.append(current_mob)
         return(noncombatants)
                     
-    def set_visibility(self, new_visibility):
+    def set_visibility(self, new_visibility, update_image_bundle = True):
         '''
         Description:
             Sets the visibility of this cell and its attached tile to the inputted value. A visible cell's terrain and resource can be seen by the player.
         Input:
             boolean new_visibility: This cell's new visibility status
+            boolean update_image_bundle: Whether to update the image bundle - if multiple sets are being used on a tile, optimal to only update after the last one
         Output:
             None
         '''
         self.visible = new_visibility
-        if not self.tile == 'none':
-            self.tile.set_visibility(new_visibility)
+        if update_image_bundle and not self.tile == 'none':
+            self.tile.update_image_bundle() #self.tile.set_visibility(new_visibility)
     
     def set_resource(self, new_resource):
         '''
@@ -614,13 +615,14 @@ class cell():
         self.resource = new_resource
         self.tile.set_resource(new_resource)
 
-    def set_terrain(self, new_terrain, terrain_variant = 'none'):
+    def set_terrain(self, new_terrain, terrain_variant = 'none', update_image_bundle = True):
         '''
         Description:
             Sets the terrain type of this cell and its attached tile to the inputted value
         Input:
             string new_terrain: The new terrain type of this cell and its attached tile, like 'swamp'
             int/string terrain_variant: terrain variant number to use in image file path, like mountain_2
+            boolean update_image_bundle: Whether to update the image bundle - if multiple sets are being used on a tile, optimal to only update after the last one
         Output:
             None
         '''
@@ -628,7 +630,7 @@ class cell():
             self.terrain_variant = terrain_variant
         self.terrain = new_terrain
         if (not self.tile == 'none'):
-            self.tile.set_terrain(new_terrain)
+            self.tile.set_terrain(new_terrain, update_image_bundle)
         self.color = self.global_manager.get('terrain_colors')[new_terrain]
             
     def draw(self):

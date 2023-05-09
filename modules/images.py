@@ -112,12 +112,24 @@ class image_bundle(image):
             member.scale()
 
     def add_member(self, image_id, member_type = 'default'):
-        self.members.append(bundle_image(self, self.width, self.height, image_id, member_type))
+        if isinstance(image_id, str):
+            new_member = bundle_image(self, image_id, member_type)
+        else: #if image id is dictionary with extra information
+            new_member = bundle_image(self, image_id, member_type, is_offset = True)
+        index = 0
+        while index < len(self.members) and self.members[index].level <= new_member.level: #inserts at back of same level
+            index += 1
+        self.members.insert(index, new_member)
 
     def complete_draw(self):
         for member in self.members:
-            drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
-
+            if not member.is_offset:
+                drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+            else:
+                drawing_tools.display_image(member.image, 
+                                            self.parent_image.x + (self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
+                                            (self.parent_image.y - (self.height * member.y_offset) - (member.height / 2) + (self.height / 2)) - self.height, 
+                                            self.global_manager)
     def remove_member(self, member_type):
         new_member_list = []
         for current_member in self.members:
@@ -134,23 +146,44 @@ class image_bundle(image):
     def clear(self):
         self.members = []
 
+    def to_list(self): #returns list of strings for this bundle's images
+        return_list = []
+        for current_member in self.members:
+            if not current_member.is_offset:
+                return_list.append(current_member.image_id)
+            else:
+                return_list.append(current_member.image_id_dict)
+        return(return_list)
+
 class bundle_image():
     '''
     Not a true image, just a width, height, and id for an image in a bundle
     '''
-    def __init__(self, bundle, width, height, image_id, member_type):
+    def __init__(self, bundle, image_id, member_type, is_offset = False):
         self.bundle = bundle
-        self.width = width
-        self.height = height
-        self.image_id = image_id
         self.image = 'none'
         self.member_type = member_type
+        self.is_offset = is_offset
+        if not is_offset:
+            self.image_id = image_id
+            self.level = 0
+        else:
+            self.image_id_dict = image_id
+            self.image_id = image_id['image_id']
+            self.size = image_id['size']
+            self.x_offset = image_id['x_offset']
+            self.y_offset = image_id['y_offset']
+            self.level = image_id['level']
         self.load()
         self.scale()
 
     def scale(self):
-        self.width = self.bundle.width
-        self.height = self.bundle.height
+        if self.is_offset:
+            self.width = self.bundle.width * self.size
+            self.height = self.bundle.height * self.size
+        else:
+            self.width = self.bundle.width
+            self.height = self.bundle.height
         if self.image != 'none':
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
@@ -158,7 +191,10 @@ class bundle_image():
         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
             self.image = pygame.image.load('graphics/' + self.image_id)
         except:
-            print('graphics/' + self.image_id)
+            if isinstance(self.image_id, str):
+                print('graphics/' + self.image_id)
+            else:
+                print(self.image_id)
             self.image = pygame.image.load('graphics/' + self.image_id)
 
 class free_image(image):
@@ -250,7 +286,6 @@ class free_image(image):
             self.contains_bundle = True
             self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
-
     def can_show_tooltip(self):
         '''
         Description:
@@ -753,11 +788,17 @@ class actor_image(image):
             Changes this image to reflect this image's actor's image_dict file path value for the inputted key
         Input:
             string new_image_description: Key in this image's actor's image_dict corresponding to this image's new appearance. For example, 'default' will change this actor_image to show the actor's default appearance
+            or string list new_image_description: List of image file paths corresponding to this image's new appearance
         Output:
             None
         '''
-        self.image_description = new_image_description
-        self.image_id = self.actor.image_dict[new_image_description]
+        if isinstance(new_image_description, str):
+            self.image_description = new_image_description
+            self.image_id = self.actor.image_dict[new_image_description]
+        else:
+            self.image_description = 'default'
+            self.image_id = new_image_description
+        
         if isinstance(self.image_id, str): #if set to string image path
             self.contains_bundle = False
             try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
@@ -842,166 +883,6 @@ class actor_image(image):
             return(True)
         else:
             return(False)
-
-class building_image(actor_image):
-    '''
-    actor image attached to a building rather than an actor, gaining the ability to manage the cells corresponding to this imaeg's building's coordinates
-    '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            actor actor: actor to which this image is attached
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
-            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
-        self.current_cell = 'none'
-        self.image_type = 'building'
-        self.add_to_cell()
-
-    def remove_from_cell(self):
-        '''
-        Description:
-            Removes this image and its building from this image's cell
-        Input:
-            None
-        Output:
-            None
-        '''
-        if not self.current_cell == 'none':
-            self.current_cell.contained_buildings[self.actor.building_type] = 'none'
-        self.current_cell = 'none'
-
-    def add_to_cell(self):
-        '''
-        Description:
-            Moves this image to the cell corresponding to its grid coordinates, causing this image's actor to be considered to be in the cell. Removes this image from its previous cell. Unlike go_to_cell, which handles pixel location,
-                this handles grid location
-        Input:
-            None
-        Output:
-            None
-        '''
-        if self.grid.is_mini_grid: #if on minimap and within its smaller range of coordinates, convert actor's coordinates to minimap coordinates and draw image there
-            mini_x, mini_y = self.grid.get_mini_grid_coordinates(self.actor.x, self.actor.y)
-            if(self.grid.is_on_mini_grid(self.actor.x, self.actor.y)):
-                old_cell = self.current_cell
-                self.current_cell = self.grid.find_cell(mini_x, mini_y)
-                if not old_cell == self.current_cell and not self.actor in self.current_cell.contained_buildings:
-                    self.current_cell.contained_buildings[self.actor.building_type] = self.actor 
-            else:
-                self.current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.actor.x, self.actor.y)
-            self.go_to_cell((mini_x, mini_y))
-        else:
-            self.remove_from_cell()
-            self.current_cell = self.grid.find_cell(self.actor.x, self.actor.y)
-            if not self.actor in self.current_cell.contained_buildings:
-                self.current_cell.contained_buildings[self.actor.building_type] = self.actor
-            self.go_to_cell((self.current_cell.x, self.current_cell.y))
-            
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this image can be shown. By default, it can be shown when its building should be visible
-        Input:
-            None
-        Output:
-            boolean: Returns True if this image can appear during the current game mode, otherwise returns False
-        '''
-        if (not self.current_cell == 'none') and self.global_manager.get('current_game_mode') in self.modes:
-            return(True)
-        else:
-            return(False)
-
-class infrastructure_connection_image(building_image):
-    '''
-    Building image representing a branch of a road or railroad connecting to an adjacent cell. Separate from the other branches and the crossroads. Always exists when a road or railroad is built, but onlt visible when there is a road
-        or railroad in an adjacent cell to connect to
-    '''
-    def __init__(self, actor, width, height, grid, image_description, direction, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            actor actor: actor to which this image is attached
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
-            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            string direction: Direction relative to this image of the cell with a road or railroad that this image connects to, 'up', 'down', 'left', 'right'
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
-        self.showing_connection = False
-        self.direction = direction
-        self.global_manager.get('infrastructure_connection_list').append(self)
-        self.change_with_other_images = False #determines whether set_image function of actor affects this image
-
-    def update_roads(self):
-        '''
-        Description:
-            Updates the visibility and appearance of this image depending on the roads or railroads present in adjacent cells. If the adjacent cell in this image's direction has a road or railroad, this image becomes visible and changes
-                its appearance to reflect whether the connection is a road or railroad
-        Input:
-            None
-        Output:
-            None
-        '''
-        own_tile_infrastructure = self.actor
-        adjacent_cell = 'none'
-        adjacent_cell = self.actor.images[0].current_cell.adjacent_cells[self.direction]
-        if not adjacent_cell == 'none': #check if adjacent cell exists
-            adjacent_tile_infrastructure = adjacent_cell.get_intact_building('infrastructure')
-            if not adjacent_tile_infrastructure == 'none': #if adjacent tile has infrastructure
-                if own_tile_infrastructure.is_railroad and adjacent_tile_infrastructure.is_railroad: #if both railroads, draw railroad
-                    self.set_image(self.direction + '_railroad') #up_railroad
-                    self.actor.set_image('empty') #if connecting to other railroad, hide railroad cross
-                else: #if both have infrastructure and at least 1 is not a railroad, draw road
-                    self.set_image(self.direction + '_road')
-                    if own_tile_infrastructure.is_road: #hide center cross if adjacent tiles have same type
-                        self.actor.set_image('empty')
-                    else:
-                        self.actor.set_image('default') #if not same, show cross
-                self.showing_connection = True
-            else:
-                self.showing_connection = False
-        else:
-            self.showing_connection = False #do not show if adjacent cell does not exist
-            
-            
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('infrastructure_connection_list', utility.remove_from_list(self.global_manager.get('infrastructure_connection_list'), self))
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
-        Input:
-            None
-        Output:
-            boolean: Returns False if there is no road or railroad connection from this image's cell to the adjacent cell in this image's direction, otherwise returns same as superclass
-        '''
-        if self.showing_connection:
-            return(super().can_show())
-        return(False)
             
 class mob_image(actor_image):
     '''
@@ -1237,64 +1118,3 @@ class tile_image(actor_image):
             return() #do not show if resource icon in undiscovered tile
         self.go_to_cell((self.actor.x, self.actor.y))
         self.complete_draw()
-
-class veteran_icon_image(tile_image):
-    '''
-    tile image attached to a veteran icon rather than a tile, allowing it to follow a veteran officer or a group with a veteran officer but otherwise behave as a tile image - also being used 
-        for lore mission locations
-    '''
-    def __init__(self, actor, width, height, grid, image_description, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            actor actor: actor to which this image is attached
-            int width: Pixel width of this image
-            int height: Pixel height of this image
-            grid grid: actor's grid on which this image appears. Each of an actor's images appears on a different grid
-            string image_description: Key in this image's actor's image_dict corresponding to the appearance that this image has. For example, a 'default' actor_image will show the actor's default appearance
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        super().__init__(actor, width, height, grid, image_description, global_manager)
-
-    def draw(self):
-        '''
-        Description:
-            Draws this image if it should currently be visible
-        Input:
-            None
-        Output:
-            None
-        '''
-        showing = False
-        if self.actor.actor in self.global_manager.get('actor_list'): #different check depending on actor type
-            if self.actor.actor.images[0].can_show() and self.can_show():
-                showing = True
-        elif (not self.global_manager.get('current_lore_mission') == 'none') and self.actor.actor in self.global_manager.get('current_lore_mission').possible_artifact_locations:
-            if self.actor.actor.can_show() and self.can_show():
-                showing = True
-                
-        if showing:
-            if self.grid.is_mini_grid:
-                self.actor.x, self.actor.y = self.grid.get_mini_grid_coordinates(self.actor.actor.x, self.actor.actor.y)
-            else:
-                self.actor.x = self.actor.actor.x
-                self.actor.y = self.actor.actor.y
-            self.go_to_cell((self.actor.x, self.actor.y))
-            self.complete_draw()
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this image can be shown. It should be visible whenever its officer or group is visible
-        Input:
-            None
-        Output:
-            boolean: Returns False if this image on the minimap grid but is not currently within its boundaries, otherwise returns same as superclass
-        '''
-        if self.grid == self.global_manager.get('minimap_grid') and not self.grid.is_on_mini_grid(self.actor.actor.x, self.actor.actor.y): #do not show if mob (veteran icon's actor) is off map
-            return(False)
-        else:
-            return(super().can_show())

@@ -3,7 +3,6 @@
 import random
 from . import utility
 from . import notification_tools
-from . import images
 
 class lore_mission():
     '''
@@ -125,6 +124,7 @@ class lore_mission():
         self.global_manager.set('current_lore_mission', 'none')
         self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
         for current_possible_artifact_location in self.possible_artifact_locations:
+            self.global_manager.get('strategic_map_grid').find_cell(current_possible_artifact_location.x, current_possible_artifact_location.y).tile.update_image_bundle()
             current_possible_artifact_location.remove()
         self.possible_artifact_locations = []
 
@@ -217,8 +217,17 @@ class possible_artifact_location():
         self.grids = [self.global_manager.get('strategic_map_grid'), self.global_manager.get('minimap_grid')]
         self.modes = ['strategic'] 
         self.image_dict = {'default': ['misc/possible_artifact_location_icon.png']}
-        for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
+        self.set_proven_false(input_dict['proven_false'])
+        #self.cell = self.grids[0].find_cell(self.x, self.y)
+        #for current_grid in self.grids:
+        #    self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
+
+    def set_proven_false(self, new_proven_false):
+        self.proven_false = new_proven_false
+        self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile.update_image_bundle()
+
+    def get_image_id_list(self):
+        return(self.image_dict['default'])
 
     def to_save_dict(self):
         '''
@@ -261,5 +270,6 @@ class possible_artifact_location():
         Output:
             None
         '''
-        for current_image in self.images:
-            self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
+        return()
+        #for current_image in self.images:
+        #    self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))

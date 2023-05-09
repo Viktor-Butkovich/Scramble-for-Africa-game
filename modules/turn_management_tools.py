@@ -697,7 +697,7 @@ def manage_lore(global_manager):
         None
     '''
     if global_manager.get('current_lore_mission') == 'none':
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or global_manager.get('effect_manager').effect_active('instant_lore_mission'):
         #if 1 == 1:
             #mission_type = random.choice(global_manager.get('lore_types'))
             global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
