@@ -45,7 +45,6 @@ class group(pmob):
         self.is_group = True
         if self.officer.veteran:
             self.promote()
-        #self.veteran = self.officer.veteran
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -64,19 +63,6 @@ class group(pmob):
                 self.set_movement_points(math.floor(self.max_movement_points * officer_movement_ratio_remaining))
             else:
                 self.set_movement_points(math.floor(self.max_movement_points * worker_movement_ratio_remaining))
-                
-            #if self.worker.movement_points > self.officer.movement_points: #a group should keep the lowest movement points out of its members
-            #    self.set_movement_points(self.officer.movement_points)
-            #else:
-            #    self.set_movement_points(self.worker.movement_points)
-            #if self.veteran:
-            #    self.set_name('veteran ' + self.name)
-        #else:
-            #if self.veteran:
-                #self.set_name('Veteran ' + self.name.lower())
-                #self.name = self.default_name
-                #self.officer.name = self.officer.default_name
-                #self.promote() #creates veteran status icons
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -165,7 +151,6 @@ class group(pmob):
             text = 'The ' + self.officer.name + destination_message + 'has died from attrition. /n /n '
             if self.officer.automatically_replace:
                 text += self.officer.generate_attrition_replacement_text() #'The ' + self.name + ' will remain inactive for the next turn as a replacement is found. /n /n'
-                #text += 'The replacement has been automatically recruited and cost ' + str(float(self.global_manager.get('recruitment_costs')[self.officer.default_name])) + ' money.'
                 self.officer.replace(self) #self.officer.die()
                 self.officer.death_sound()
             else:
@@ -199,7 +184,6 @@ class group(pmob):
                 if self.in_vehicle:
                     officer.embark_vehicle(zoom_destination)
             notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
-        
 
     def fire(self):
         '''
@@ -300,15 +284,12 @@ class group(pmob):
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points
         self.worker.set_movement_points(math.floor(movement_ratio_remaining * self.worker.max_movement_points))
-        #missing_movement_points = self.max_movement_points - self.movement_points
-        #self.worker.set_movement_points(self.worker.max_movement_points - missing_movement_points)#self.movement_points)
         self.officer.status_icons = self.status_icons
         for current_status_icon in self.status_icons:
             current_status_icon.actor = self.officer
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
         self.officer.set_movement_points(math.floor(movement_ratio_remaining * self.officer.max_movement_points))
-        #self.officer.set_movement_points(self.officer.max_movement_points - missing_movement_points)#self.movement_points)
 
     def remove(self):
         '''
@@ -338,6 +319,15 @@ class group(pmob):
         self.worker.die('none')
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = super().get_image_id_list()
         image_id_list.remove(self.image_dict['default']) #group default image is empty
         left_worker_dict = {

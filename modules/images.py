@@ -94,9 +94,26 @@ class image():
 class image_bundle(image):
     '''
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
-    A free or actor image can be set to an image bundle rather than a string image path
+    An image can be set to an image bundle rather than a string image path
     '''
     def __init__(self, parent_image, image_id_list, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            image parent_image: Image that this bundle is attached to
+            list image_id_list: List of string image file paths and/or offset image dictionaries
+                offset image dictionary: String keys corresponding to extra information for offset images
+                    'image'_id': string value - File path to image used for this offset image
+                    'size': float value - Scale of offset image, with 1 being the same size as the bundle
+                    'x_offset': float value - x-axis offset of image, with 1 being shifted a full width to the right
+                    'y_offset': float value - y-axis offset of image, with 1 being shifted a full height upward
+                    'level': int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
+            global_manager_template global_manager: Object that accesses shared variables
+            boolean to_front = False: If True, allows this image to appear in front of most other objects instead of being behind them
+        Output:
+            None
+        '''
         self.image_type = 'bundle'
         super().__init__(parent_image.width, parent_image.height, global_manager)
         self.parent_image = parent_image
@@ -106,12 +123,27 @@ class image_bundle(image):
         self.scale()
                 
     def scale(self):
+        '''
+        Description:
+            Sets this bundle to be the size of its attached images and scales each of its member images relative to the bundle size
+        Input:
+            None
+        Output:
+            None
+        '''
         self.width = self.parent_image.width
         self.height = self.parent_image.height
         for member in self.members:
             member.scale()
 
     def add_member(self, image_id, member_type = 'default'):
+        '''
+        Description:
+            Adds a new member image to this bundle
+        Input:
+            string/dictionary image_id: String image file path or offset image dictionary that defines the member added
+            string member_type = 'default': Optional string to designate this member's type, allowing it to be specifically removed or found based on type later
+        '''
         if isinstance(image_id, str):
             new_member = bundle_image(self, image_id, member_type)
         else: #if image id is dictionary with extra information
@@ -122,6 +154,14 @@ class image_bundle(image):
         self.members.insert(index, new_member)
 
     def complete_draw(self):
+        '''
+        Description:
+            Draws each of this bundle's member images in the correct order with each one's respective size and offsets
+        Input:
+            None
+        Output:
+            None
+        '''
         for member in self.members:
             if not member.is_offset:
                 drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
@@ -131,6 +171,14 @@ class image_bundle(image):
                                             (self.parent_image.y - (self.height * member.y_offset) - (member.height / 2) + (self.height / 2)) - self.height, 
                                             self.global_manager)
     def remove_member(self, member_type):
+        '''
+        Description:
+            Removes all members of the inputted member type
+        Input:
+            string member_type: Type of member image to remove
+        Output:
+            None
+        '''
         new_member_list = []
         for current_member in self.members:
             if current_member.member_type != member_type:
@@ -138,15 +186,39 @@ class image_bundle(image):
         self.members = new_member_list
 
     def has_member(self, member_type):
+        '''
+        Description:
+            Returns whether this bundle contains any member images of the inputted type
+        Input:
+            string member_type: Type of member image to search for
+        Output:
+            None
+        '''
         for current_member in self.members:
             if current_member.member_type == member_type:
                 return(True)
         return(False)
 
     def clear(self):
+        '''
+        Description:
+            Removes all of this bundle's member images
+        Input:
+            None
+        Output:
+            None
+        '''
         self.members = []
 
-    def to_list(self): #returns list of strings for this bundle's images
+    def to_list(self):
+        '''
+        Description:
+            Generates and returns a list of string image file paths and/or offset image dictionaries that could be passed to a new image bundle to create an identical copy
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths and/or offset image dictionaries
+        '''
         return_list = []
         for current_member in self.members:
             if not current_member.is_offset:
@@ -160,6 +232,23 @@ class bundle_image():
     Not a true image, just a width, height, and id for an image in a bundle
     '''
     def __init__(self, bundle, image_id, member_type, is_offset = False):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            image_bundle bundle: Image bundle that this bundle image is a member of
+            string/dictionary image_id: String image file path or offset image dictionary to define this image's appearance
+                offset image dictionary: String keys corresponding to extra information for offset images
+                    'image'_id': string value - File path to image used for this offset image
+                    'size': float value - Scale of offset image, with 1 being the same size as the bundle
+                    'x_offset': float value - x-axis offset of image, with 1 being shifted a full width to the right
+                    'y_offset': float value - y-axis offset of image, with 1 being shifted a full height upward
+                    'level': int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
+            string member_type: String to designate this member's type, allowing it to be specifically removed or found based on type later, 'default' by default
+            boolean is_offset = False: Whether this is an offset image that takes a dictionary image id or a normal image that takes a string image id
+        Output:
+            None
+        '''
         self.bundle = bundle
         self.image = 'none'
         self.member_type = member_type
@@ -178,6 +267,14 @@ class bundle_image():
         self.scale()
 
     def scale(self):
+        '''
+        Description:
+            Sets this image's size to one relative to its bundle's size based on its size multiplier
+        Input:
+            None
+        Output:
+            None
+        '''
         if self.is_offset:
             self.width = self.bundle.width * self.size
             self.height = self.bundle.height * self.size
@@ -188,6 +285,14 @@ class bundle_image():
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
     def load(self):
+        '''
+        Description:
+            Loads in this image's image file on initialization
+        Input:
+            None
+        Output:
+            None
+        '''
         try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
             self.image = pygame.image.load('graphics/' + self.image_id)
         except:

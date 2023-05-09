@@ -297,6 +297,15 @@ class pmob(mob):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = super().get_image_id_list()
         if self.is_officer or self.is_group and self.veteran:
             image_id_list.append('misc/veteran_icon.png')
@@ -318,17 +327,10 @@ class pmob(mob):
             self.sentry_mode = new_value
             self.update_image_bundle()
             if new_value == True:
-                #for current_image in self.images:
-                #    if self.is_npmob and self.npmob_type == 'beast':
-                #        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
-                #    else:
-                #        current_image.image.add_member('misc/sentry_icon.png', 'sentry_icon')
                 self.remove_from_turn_queue()
                 if self.global_manager.get('displayed_mob') == self:
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
             else:
-                #for current_image in self.images:
-                #    current_image.image.remove_member('sentry_icon')
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == self.global_manager.get('displayed_mob'):
@@ -415,8 +417,6 @@ class pmob(mob):
             self.temp_disable_movement()
             self.replace()
             self.death_sound('violent')
-            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
-            #    self.images[0].current_cell.tile, self.global_manager)
         else:
             if show_notification:
                 notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
@@ -503,7 +503,6 @@ class pmob(mob):
         if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
             return(True)
         else:
-            #keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
             text_tools.print_to_screen('', self.global_manager)
             text_tools.print_to_screen('You can not do that until all ministers have been appointed', self.global_manager)
             text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
@@ -666,12 +665,10 @@ class pmob(mob):
                                         text_tools.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.', self.global_manager)
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
-                                #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
                                     text_tools.print_to_screen('You can not move on land with this unit unless there is a port.', self.global_manager)
                                 return(False)
                             else: #if trying to swim in water and can't 
-                                #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
                                     text_tools.print_to_screen('You can not move on ocean with this unit.', self.global_manager)
                                 return(False)
@@ -894,7 +891,6 @@ class pmob(mob):
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 results = minister_rolls
-            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
             elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
@@ -928,19 +924,13 @@ class pmob(mob):
                 allow_promotion = True
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-
             if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
                 result = 6
-
             roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
-
             min_crit_success = 7
             if allow_promotion:
-                min_crit_success = 6
-                
-            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green
-            #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
-                
+                min_crit_success = 6  
+            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green     
             text += roll_list[1]
             roll_result = roll_list[0]
 
@@ -1084,10 +1074,6 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
-                #elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
-                #    notification_tools.display_notification('While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n',
-                #        'default', self.global_manager)
-                #    self.retreat()
                 elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
                     notification_tools.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                         'default', self.global_manager)

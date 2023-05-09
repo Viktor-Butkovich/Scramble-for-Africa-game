@@ -68,7 +68,6 @@ class dice_rolling_notification(action_notification):
         '''
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
         global_manager.set('current_dice_rolling_notification', self)
-        #if self.global_manager.get('ongoing_combat') or self.global_manager.get('ongoing_slave_capture') or self.global_manager.get('ongoing_slave_trade_suppression'):
         if self.global_manager.get('ongoing_action_type') in ['combat', 'slave_capture', 'slave_trade_suppression']:
             if self.global_manager.get('displayed_mob').is_pmob and (self.global_manager.get('displayed_mob').is_battalion or self.global_manager.get('displayed_mob').is_safari):
                 self.global_manager.get('sound_manager').play_sound('gunfire')
@@ -93,7 +92,7 @@ class dice_rolling_notification(action_notification):
         Output:
             None
         '''
-        nothing = 0 #does not remove self when clicked
+        return()
 
     def remove(self):
         '''
@@ -168,13 +167,6 @@ class exploration_notification(action_notification):
             image_id_list = ['misc/tile_background.png'] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
             self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            #if not explored_tile.resource_icon == 'none':
-            #    explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-            #    self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-            #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-            #if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
-            #    self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-            #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
 
     def remove(self):
@@ -201,7 +193,6 @@ class exploration_notification(action_notification):
                     current_die.remove()
                 for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                     current_minister_image.remove()
-                #self.global_manager.get('exploration_result')[0].resolve_off_tile_exploration()
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last:
@@ -246,21 +237,14 @@ class off_tile_exploration_notification(action_notification):
         
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
-        #image_id_list.append(explored_terrain_image_id)
         if new_visibility == True and not explored_tile.cell.resource == 'none':
             image_id_list.append(actor_utility.generate_resource_icon(explored_tile, global_manager))
-            #explored_resource_image_id = explored_tile.resource_icon.image_dict['default']
-            #self.notification_images.append(free_image(explored_resource_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-            #    scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         image_id_list.append('misc/tile_outline.png')
         #although global manager sets to busy here, calling object should also set to busy so that you can't click off before notification appears if another notification is opened when this one is queued
         global_manager.set('ongoing_action', True)
         global_manager.set('ongoing_action_type', self.current_expedition.current_action_type)
         if self.current_expedition.current_action_type == 'exploration':
             explored_cell.set_visibility(True)
-        #if (not global_manager.get('current_lore_mission') == 'none') and global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(explored_cell.x, explored_cell.y):
-        #    self.notification_images.append(free_image('misc/possible_artifact_location_icon.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
-        #        scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         global_manager.get('public_opinion_tracker').change(public_opinion_increase)
@@ -735,7 +719,6 @@ class rumor_search_notification(action_notification):
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
         if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
-        #if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
                 current_die.remove()
@@ -827,7 +810,6 @@ class capture_slaves_notification(action_notification):
         ''' 
         self.is_last = is_last
         if self.is_last: #if last, show result
-            #current_major = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
             self.notification_images.append(free_image('mobs/slave workers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -943,7 +925,6 @@ class construction_notification(action_notification):
         '''
         self.is_last = is_last
         if self.is_last: #if last, show result
-            #current_constructor = actor_utility.get_selected_list(global_manager)[0]
             self.notification_images = []
         elif len(global_manager.get('notification_manager').notification_queue) == 2:
             if global_manager.get('construction_result')[2] and global_manager.get('construction_result')[3] == 'mission': #if building mission success is True, play sound once dice roll finishes
@@ -1014,10 +995,17 @@ class combat_notification(action_notification):
             image_x = global_manager.get('notification_manager').notification_x - 165#175
             if notification_dice > 2:
                 image_x -= 60
-            pmob_image_id_list = ['misc/mob_background.png'] + global_manager.get('displayed_mob').get_image_id_list() + ['misc/pmob_outline.png']
+            background_dict = {
+                'image_id': 'misc/mob_background.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            }
+            pmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').get_image_id_list() + ['misc/pmob_outline.png']
             global_manager.get('combatant_images').append(free_image(pmob_image_id_list, scaling.scale_coordinates(image_x, 280, global_manager),
                 scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
-            npmob_image_id_list = ['misc/mob_background.png'] + global_manager.get('displayed_mob').current_enemy.get_image_id_list() + ['misc/pmob_outline.png']
+            npmob_image_id_list = [background_dict] + global_manager.get('displayed_mob').current_enemy.get_image_id_list() + ['misc/pmob_outline.png']
             global_manager.get('combatant_images').append(free_image(npmob_image_id_list, scaling.scale_coordinates(image_x, 670, global_manager),
                 scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))  
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)

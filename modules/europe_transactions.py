@@ -3,9 +3,7 @@ import random
 
 
 from .buttons import button
-from . import game_transitions
 from . import main_loop_tools
-from . import notification_tools
 from . import text_tools
 from . import market_tools
 from . import utility
@@ -97,8 +95,6 @@ class recruitment_button(button):
         Output:
             None
         '''
-        #if self.recruitment_type in self.global_manager.get('country_specific_units'):
-        #'mobs/' + self.recruitment_type + '/' + country.adjective + '/button.png'
         self.mob_image_id = {'image_id': 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
         image_id_list = ['mobs/default/button.png', self.mob_image_id]
         self.image.set_image(image_id_list)

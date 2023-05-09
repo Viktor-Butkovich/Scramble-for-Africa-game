@@ -123,19 +123,12 @@ class actor():
         for current_image in self.images:
             if current_image.change_with_other_images:
                 current_image.set_image(new_image)
-        #if isinstance(new_image, str):
-        #    self.image_dict['default'] = self.image_dict[new_image]
-        #else:
-        #    self.image_dict['default'] = self.image_dict[new_image]
         if self.actor_type == 'mob':
             if self.global_manager.get('displayed_mob') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
         elif self.actor_type == 'tile':
             if self.global_manager.get('displayed_tile') == self:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
-        #elif self.actor_type == 'building':
-        #    if self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
-        #        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
 
     def load_inventory(self, inventory_dict):
         '''
@@ -517,9 +510,26 @@ class actor():
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = []
         image_id_list.append(self.image_dict['default'])
         return(image_id_list)
 
     def update_image_bundle(self):
+        '''
+        Description:
+            Updates this actor's images with its current image id list
+        Input:
+            None
+        Output:
+            None
+        '''
         self.set_image(self.get_image_id_list())

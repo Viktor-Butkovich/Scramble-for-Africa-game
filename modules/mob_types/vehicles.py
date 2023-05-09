@@ -36,7 +36,6 @@ class vehicle(pmob):
         '''
         self.initializing = True #when pmobs embark a vehicle, the vehicle is selected if the vehicle is not initializing
         self.vehicle_type = 'vehicle'
-        #self.has_crew = False
         input_dict['image'] = input_dict['image_dict']['default']
         self.contained_mobs = []
         self.ejected_crew = 'none'
@@ -49,12 +48,9 @@ class vehicle(pmob):
             self.crew = input_dict['crew']
             if self.crew == 'none':
                 self.has_crew = False
-                #self.set_image('uncrewed')
             else:
                 self.has_crew = True
-                #self.set_image('uncrewed')
             self.update_image_bundle()
-            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_vehicle changing
             self.selection_sound()
         else: #create crew and passengers through recruitment_manager and embark them
             if input_dict['crew'] == 'none':
@@ -122,19 +118,10 @@ class vehicle(pmob):
                             if not current_sub_mob.automatically_replace:
                                 self.eject_passengers()
                                 self.eject_crew()
-                                #current_sub_mob.uncrew_vehicle(self)
                             self.crew_attrition_death(crew)
                         elif current_sub_mob.is_group: #if group passenger died of attrition
                             attrition_unit_type = random.choice(['officer', 'worker'])
-                            #if attrition_unit_type == 'officer':
-                            #    reembarked_unit = current_sub_mob.worker
-                            #elif attrition_unit_type == 'worker':
-                            #    reembarked_unit = current_sub_mob.officer
-                            #if not current_sub_mob.automatically_replace:
-                            #    current_sub_mob.disembark(self)
                             current_sub_mob.attrition_death(attrition_unit_type)
-                            #if not current_sub_mob.automatically_replace:
-                            #    reembarked_unit.embark(self)
 
                         else: #if non-group passenger died of attrition
                             text = 'The ' + current_sub_mob.name + ' aboard the ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ') have died from attrition. /n /n'
@@ -461,8 +448,6 @@ class ship(vehicle):
         self.travel_possible = True #if this mob would ever be able to travel
         self.can_hold_commodities = True
         self.inventory_capacity = 27
-        #if self.images[0].image_id in ['mobs/steamboat/default.png', 'mobs/steamboat/crewed.png', 'mobs/steamboat/uncrewed.png']:
-        #    self.can_swim_river = True
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing

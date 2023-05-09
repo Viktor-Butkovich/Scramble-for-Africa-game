@@ -177,13 +177,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['officer'] = officer
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
-        #if officer.officer_type in global_manager.get('country_specific_units'):
-        input_dict['image'] = 'misc/empty.png'#input_dict['image'] = 'mobs/' + officer.officer_type + '/' + global_manager.get('current_country').adjective + '/' + input_dict['init_type'] + '.png' 
-            #mobs/major/british/battalion_European.png
-        #else:
-        #    input_dict['image'] = 'misc/empty.png' #input_dict['image'] = 'mobs/' + officer.officer_type + '/' + input_dict['init_type'] + '_' + worker.worker_type + '.png' #mobs/merchant/caravan_European.png
-        #if input_dict['init_type'] in ['safari', 'expedition']:
-        #    input_dict['canoes_image'] = 'mobs/' + officer.officer_type + '/canoe_' + worker.worker_type + '.png'
+        input_dict['image'] = 'misc/empty.png'
         if not officer.officer_type == 'major':
             name = ''
             for character in input_dict['init_type']:
@@ -222,7 +216,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        new_minister = ministers.minister(from_save, input_dict, global_manager)
+        ministers.minister(from_save, input_dict, global_manager)
 
     def create_lore_mission(self, from_save, input_dict, global_manager):
         '''
@@ -235,7 +229,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        new_lore_mission = lore_missions.lore_mission(from_save, input_dict, global_manager)
+        lore_missions.lore_mission(from_save, input_dict, global_manager)
 
     def display_die(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
         '''

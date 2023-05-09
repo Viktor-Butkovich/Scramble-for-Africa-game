@@ -125,7 +125,6 @@ class lore_mission():
         self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
         for current_possible_artifact_location in self.possible_artifact_locations:
             self.global_manager.get('strategic_map_grid').find_cell(current_possible_artifact_location.x, current_possible_artifact_location.y).tile.update_image_bundle()
-            current_possible_artifact_location.remove()
         self.possible_artifact_locations = []
 
     def get_num_revealed_possible_artifact_locations(self):
@@ -218,15 +217,29 @@ class possible_artifact_location():
         self.modes = ['strategic'] 
         self.image_dict = {'default': ['misc/possible_artifact_location_icon.png']}
         self.set_proven_false(input_dict['proven_false'])
-        #self.cell = self.grids[0].find_cell(self.x, self.y)
-        #for current_grid in self.grids:
-        #    self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
 
     def set_proven_false(self, new_proven_false):
+        '''
+        Description:
+            Sets this location's proven_false value and updates images as needed
+        Input:
+            boolean new_proven_false: New proven_false value
+        Output:
+            None
+        '''
         self.proven_false = new_proven_false
         self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile.update_image_bundle()
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         return(self.image_dict['default'])
 
     def to_save_dict(self):
@@ -246,30 +259,3 @@ class possible_artifact_location():
         save_dict['revealed'] = self.revealed
         save_dict['proven_false'] = self.proven_false
         return(save_dict)
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this location's image can be shown. It should be visible whenever is is revealed and the the game is in strategic mode
-        Input:
-            None
-        Output:
-            boolean: Returns whether this location's image can be shown
-        '''
-        if self.global_manager.get('current_game_mode') in self.modes:
-            if self.revealed and not self.proven_false:
-                return(True)
-        return(False)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob
-        Input:
-            None
-        Output:
-            None
-        '''
-        return()
-        #for current_image in self.images:
-        #    self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))

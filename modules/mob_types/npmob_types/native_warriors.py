@@ -37,15 +37,14 @@ class native_warriors(npmob):
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'
         self.despawning = False
-        
         self.has_canoes = True
-        #self.image_dict['canoes'] = input_dict['canoes_image']
-        #self.image_dict['no_canoes'] = self.image_dict['default']
-        self.update_canoes()
         if not from_save:
             self.set_max_movement_points(4)
             if not global_manager.get('creating_new_game'):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
+            self.second_image_variant = random.randrange(0, len(self.image_variants))
+        self.update_canoes()
+        self.update_image_bundle()
 
     def attack_on_spawn(self):
         '''
@@ -107,3 +106,30 @@ class native_warriors(npmob):
             #self.remove()
             self.despawning = True
             self.origin_village.change_population(1)
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list()
+        image_id_list.remove(self.image_dict['default']) #remove default middle warrior
+        left_warrior_dict = {
+            'image_id': self.image_dict['default'],
+            'size': 0.83,
+            'x_offset': -0.23,
+            'y_offset': 0,
+            'level': -1
+        }
+        image_id_list.append(left_warrior_dict)
+
+        right_warrior_dict = left_warrior_dict.copy()
+        right_warrior_dict['image_id'] = self.image_variants[self.second_image_variant]
+        right_warrior_dict['x_offset'] *= -1
+        image_id_list.append(right_warrior_dict)
+        return(image_id_list)

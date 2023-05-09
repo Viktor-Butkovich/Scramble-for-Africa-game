@@ -53,6 +53,7 @@ class worker(pmob):
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
             self.selection_sound()
+            self.second_image_variant = random.randrange(0, len(self.image_variants))
         self.global_manager.get('money_label').check_for_updates()
         self.update_image_bundle()
 
@@ -180,9 +181,6 @@ class worker(pmob):
         self.in_vehicle = True
         self.selected = False
         self.hide_images()
-        #vehicle.crew = self
-        #vehicle.has_crew = True
-        #vehicle.set_image('crewed')
         vehicle.set_crew(self)
         moved_mob = vehicle
         for current_image in moved_mob.images: #moves vehicle to front
@@ -209,11 +207,7 @@ class worker(pmob):
         self.show_images()
         if self.images[0].current_cell.get_intact_building('port') == 'none':
             self.set_disorganized(True)
-
-        #vehicle.crew = 'none'
-        #vehicle.has_crew = False
         vehicle.set_crew('none')
-        #vehicle.set_image('uncrewed')
         vehicle.end_turn_destination = 'none'
         vehicle.hide_images()
         vehicle.show_images() #bring vehicle to front of tile
@@ -273,6 +267,15 @@ class worker(pmob):
         self.global_manager.get('money_label').check_for_updates()
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = super().get_image_id_list()
         image_id_list.remove(self.image_dict['default']) #remove default middle worker
         left_worker_dict = {
@@ -285,6 +288,7 @@ class worker(pmob):
         image_id_list.append(left_worker_dict)
 
         right_worker_dict = left_worker_dict.copy()
+        right_worker_dict['image_id'] = self.image_variants[self.second_image_variant]
         right_worker_dict['x_offset'] *= -1
         image_id_list.append(right_worker_dict)
         return(image_id_list)

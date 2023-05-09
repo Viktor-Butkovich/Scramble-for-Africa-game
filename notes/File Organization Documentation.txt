@@ -180,7 +180,7 @@ SFA folder
             class actor_creation_manager_template
 
         actor_utility.py
-            imports random, scaling, utility, text_tools
+            imports random, os, scaling, utility
 			def reset_action_prices
 			def double_action_price
 			def get_building_cost
@@ -198,6 +198,8 @@ SFA folder
 			def get_migration_destinations
 			def get_migration_sources
 			def get_num_available_workers
+			def generate_resource_icon
+			def get_image_variants
 
         actors.py
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools
@@ -281,7 +283,7 @@ SFA folder
 			class effect
 
         europe_transactions.py
-            imports buttons, game_transitions, main_loop_tools, notification_tools, text_tools, market_tools, utility, actor_utility
+            imports buttons, main_loop_tools, text_tools, market_tools, utility, actor_utility
             class recruitment_button(buttons.button)
 	    	class buy_commodity_button(buttons.button)
 		
@@ -306,7 +308,9 @@ SFA folder
 
         images.py
             imports pygame, utility, drawing_tools, text_tools, scaling
+			class bundle_image
 			class image
+				class image_bundle
             	class free_image
 	        		class tooltip_free_image
 						class indicator_image
@@ -315,12 +319,9 @@ SFA folder
 	          		class warning_image
 	          		class loading_image_template
 	      		class actor_image
-	        		class building_image
-	            		class infrastructure_connection_image
 	          		class mob_image
 	        		class button_image
 	          		class tile_image
-	            		class veteran_icon_image
 
         instructions.py
         	imports labels, buttons, scaling, text_tools
@@ -456,8 +457,6 @@ SFA folder
             imports pygame, random, images, utility, actor_utility, main_loop_tools, villages, actors
             class tile(actors.actor)
             	class abstract_tile
-	        	class resource_icon
-            	class status_icon
 
         trial_utility.py
 			imports random, utility, notification_tools, scaling, game_transitions, minister_utility, dice_utility

@@ -61,6 +61,18 @@ class mob(actor):
             self.image_dict = {'default': input_dict['image']}
         else:
             self.image_dict = {'default': input_dict['image']['image_id']}
+
+        self.image_variants = actor_utility.get_image_variants(self.image_dict['default'])
+        if self.image_dict['default'].endswith('default.png') and not from_save:
+            if not from_save:
+                self.image_variant = random.randrange(0, len(self.image_variants))
+                self.image_dict['default'] = self.image_variants[self.image_variant]
+        elif from_save and 'image_variant' in input_dict:
+            self.image_variant = input_dict['image_variant']
+            self.image_dict['default'] = self.image_variants[self.image_variant]
+            if 'second_image_variant' in input_dict:
+                self.second_image_variant = input_dict['second_image_variant']
+            
         self.images = []
         self.status_icons = []
         for current_grid in self.grids:
@@ -108,6 +120,7 @@ class mob(actor):
                 'creation_turn': int value - Turn number on which this mob was created
                 'disorganized': boolean value - Whether this unit is currently disorganized
                 'canoes_image': string value - Only saved if this unit has canoes, file path to the image used by this mob when it is in river water
+                'image_variant': int value - Optional variants of default image to use from same file, applied to get_image_id_list but not default image path
         '''
         save_dict = super().to_save_dict()
         save_dict['movement_points'] = self.movement_points
@@ -115,6 +128,11 @@ class mob(actor):
         save_dict['image'] = self.image_dict['default'] #self.image_dict['default']
         save_dict['creation_turn'] = self.creation_turn
         save_dict['disorganized'] = self.disorganized
+        if hasattr(self, 'image_variant'):
+            save_dict['image'] = self.image_variants[0]
+            save_dict['image_variant'] = self.image_variant
+            if hasattr(self, 'second_image_variant'):
+                save_dict['second_image_variant'] = self.second_image_variant
         #if self.has_canoes:
         #    save_dict['canoes_image'] = self.image_dict['canoes'][0]
         #    save_dict['image'] = self.image_dict['no_canoes'][0]
@@ -132,6 +150,15 @@ class mob(actor):
         self.temp_movement_disabled = True
     
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = super().get_image_id_list()
         if self.disorganized:
             if self.is_npmob and self.npmob_type == 'beast':
@@ -153,15 +180,6 @@ class mob(actor):
             None
         '''
         self.disorganized = new_value
-        #if new_value == True:
-        #    for current_image in self.images:
-        #        if self.is_npmob and self.npmob_type == 'beast':
-        #            current_image.image.add_member('misc/injured_icon.png', 'disorganized_icon')
-        #        else:
-        #            current_image.image.add_member('misc/disorganized_icon.png', 'disorganized_icon')
-        #else:
-        #    for current_image in self.images:
-        #        current_image.image.remove_member('disorganized_icon')
         self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
@@ -442,10 +460,6 @@ class mob(actor):
         Output:
             None
         '''
-        #if not self.in_group:
-        #    for current_status_icon in self.status_icons:
-        #        current_status_icon.remove()
-        #    self.status_icons = []
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
@@ -465,45 +479,6 @@ class mob(actor):
         for current_grid in self.grids:
             self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
             self.images[-1].add_to_cell()
-        '''
-        if not self.in_group:
-            if self.veteran:
-                for current_grid in self.grids:
-                    if current_grid == self.global_manager.get('minimap_grid'):
-                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                    elif current_grid == self.global_manager.get('europe_grid'):
-                        status_icon_x, status_icon_y = (0, 0)
-                    else:
-                        status_icon_x, status_icon_y = (self.x, self.y)
-                    input_dict = {}
-                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
-                    input_dict['grid'] = current_grid
-                    input_dict['image'] = 'misc/veteran_icon.png'
-                    input_dict['name'] = 'veteran icon'
-                    input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['show_terrain'] = False
-                    input_dict['actor'] = self
-                    input_dict['status_icon_type'] = 'veteran'
-                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            if self.disorganized:
-                for current_grid in self.grids:
-                    if current_grid == self.global_manager.get('minimap_grid'):
-                        status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                    elif current_grid == self.global_manager.get('europe_grid'):
-                        status_icon_x, status_icon_y = (0, 0)
-                    else:
-                        status_icon_x, status_icon_y = (self.x, self.y)
-                    input_dict = {}
-                    input_dict['coordinates'] = (status_icon_x, status_icon_y)
-                    input_dict['grid'] = current_grid
-                    input_dict['image'] = 'misc/disorganized_icon.png'
-                    input_dict['name'] = 'disorganized icon'
-                    input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['show_terrain'] = False
-                    input_dict['actor'] = self
-                    input_dict['status_icon_type'] = 'disorganized'
-                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-        '''
             
     def select(self):
         '''
@@ -772,7 +747,6 @@ class mob(actor):
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river
                     self.set_movement_points(0)
             if self.can_show() and self.images[0].current_cell.terrain == 'water' and self.images[0].current_cell.y > 0 and not self.can_swim_river and not previous_cell.has_walking_connection(self.images[0].current_cell): #if entering river w/o canoes, spend maximum movement and become disorganized
-                #self.set_movement_points(0)
                 self.set_disorganized(True)
             if not (self.images[0].current_cell == 'none' or self.images[0].current_cell.terrain == 'water' or self.is_vehicle):
                 possible_sounds = ['voices/forward march 1', 'voices/forward march 2']
@@ -793,8 +767,6 @@ class mob(actor):
         Output:
             boolean: Returns whether this unit is able to swim in the inputted cell
         '''
-        #if current_cell.terrain == 'water':
-        #    return(True)
         if not current_cell.terrain == 'water':
             return(True)
         if current_cell.y > 0:
@@ -803,8 +775,6 @@ class mob(actor):
             return(False)
         if current_cell.y == 0 and self.can_swim_ocean:
             return(True)
-        #if current_cell.y > 0 and self.can_swim_river:
-        #    return(True)
         return(False)
 
     def update_canoes(self):
@@ -816,8 +786,6 @@ class mob(actor):
         Output:
             None
         '''
-        #if self.is_npmob and not self.visible():
-        #    return()
         if self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
             return()
         
@@ -828,16 +796,9 @@ class mob(actor):
         if current_cell.terrain == 'water' and self.y > 0:
             self.in_canoes = True
             self.update_image_bundle()
-            #for current_image in self.images:
-            #    if not current_image.image.has_member('canoes'):
-            #        current_image.image.add_member('misc/canoes.png', 'canoes')
-            #self.set_image('canoes')
         else:
             self.in_canoes = False
             self.update_image_bundle()
-            #for current_image in self.images:
-            #    current_image.image.remove_member('canoes')
-            #self.set_image('no_canoes')
             
     def retreat(self):
         '''
