@@ -148,14 +148,40 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'native available workers':
             self.message_start = 'Available workers: '
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, 'mobs/African workers/button.png', self, 'village', global_manager))
+            african_workers_image_id_list = ['mobs/default/button.png']
+            left_worker_dict = {
+                'image_id': 'mobs/African workers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            african_workers_image_id_list.append(left_worker_dict)
+
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            african_workers_image_id_list.append(right_worker_dict)
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, african_workers_image_id_list, self, 'village', global_manager))
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
 
         elif self.actor_label_type == 'terrain':
             self.message_start = 'Terrain: '
-            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y - (l_increment * 0.8)), self.height + l_increment, self.height + l_increment, 'none', self.modes, 'mobs/slave workers/button.png', self, global_manager))
+            buy_slaves_image_id_list = ['mobs/default/button.png']
+            left_worker_dict = {
+                'image_id': 'mobs/slave workers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            buy_slaves_image_id_list.append(left_worker_dict)
+
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            buy_slaves_image_id_list.append(right_worker_dict)
+            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y - (l_increment * 0.8)), self.height + l_increment, self.height + l_increment, 'none', self.modes, buy_slaves_image_id_list, self, global_manager))
 
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
@@ -184,7 +210,20 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, 'mobs/African workers/button.png', self, 'slums', global_manager))
+            african_workers_image_id_list = ['mobs/default/button.png']
+            left_worker_dict = {
+                'image_id': 'mobs/African workers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            african_workers_image_id_list.append(left_worker_dict)
+
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            african_workers_image_id_list.append(right_worker_dict)
+            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, african_workers_image_id_list, self, 'slums', global_manager))
 
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
@@ -602,7 +641,7 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
-        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
+        elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)
         elif self.actor_label_type == 'resource building' and ((not self.actor.cell.visible) or (not self.actor.cell.has_building('resource'))):
             return(False)

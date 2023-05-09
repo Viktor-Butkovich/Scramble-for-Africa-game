@@ -59,7 +59,8 @@ class evangelist(officer):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'evangelist': self,'type': 'start religious campaign'}
-        self.global_manager.set('ongoing_religious_campaign', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'religious_campaign')
         message = 'Are you sure you want to start a religious campaign? /n /nIf successful, a religious campaign will convince church volunteers to join you, allowing the formation of groups of missionaries that can convert native '
         message += 'villages. /n /n The campaign will cost ' + str(self.global_manager.get('action_prices')['religious_campaign']) + ' money. /n /n'
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -193,7 +194,8 @@ class evangelist(officer):
             #            current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
         elif roll_result <= self.current_max_crit_fail:
             self.die('quit')
-        self.global_manager.set('ongoing_religious_campaign', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
 
     def start_public_relations_campaign(self):
         '''
@@ -215,7 +217,8 @@ class evangelist(officer):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'evangelist': self,'type': 'start public relations campaign'}
-        self.global_manager.set('ongoing_public_relations_campaign', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'public_relations_campaign')
         message = 'Are you sure you want to start a public relations campaign? /n /nIf successful, your company\'s public opinion will increase by between 1 and 6 /n /n'
         message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')['public_relations_campaign']) + ' money. /n /n'
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -335,4 +338,5 @@ class evangelist(officer):
             self.select()
         elif roll_result <= self.current_max_crit_fail:
             self.die('quit')
-        self.global_manager.set('ongoing_public_relations_campaign', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

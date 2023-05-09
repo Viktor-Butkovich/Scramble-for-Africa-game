@@ -90,15 +90,6 @@ class battalion(group):
                 cost = 1
             else:
                 cost = super().get_movement_cost(x_change, y_change)
-                #cost = cost * self.global_manager.get('terrain_movement_cost_dict')[adjacent_cell.terrain]
-                #if self.is_pmob:
-                #    if local_cell.has_building('road') or local_cell.has_building('railroad'): #if not local_infrastructure == 'none':
-                #        if adjacent_cell.has_building('road') or adjacent_cell.has_building('railroad'): #if not adjacent_infrastructure == 'none':
-                #            cost = cost / 2
-                #    if adjacent_cell.terrain == 'water' and adjacent_cell.y > 0 and self.can_walk and not self.can_swim_river: #if river w/o canoes
-                #        cost = self.max_movement_points
-                #    if (not adjacent_cell.visible) and self.can_explore:
-                #        cost = self.movement_cost
         return(cost)
 
     def move(self, x_change, y_change, attack_confirmed = False):
@@ -138,7 +129,7 @@ class battalion(group):
         
         if (not attack_confirmed) and (not defender == 'none'): #if enemy in destination tile and attack not confirmed yet
             if self.global_manager.get('money_tracker').get() >= self.attack_cost:
-                if self.check_if_minister_appointed():
+                if self.ministers_appointed():
                     choice_info_dict = {'battalion': self, 'x_change': x_change, 'y_change': y_change, 'cost': self.attack_cost, 'type': 'combat'}
                     
                     message = ''
@@ -167,7 +158,8 @@ class battalion(group):
                     else:
                         notification_tools.display_choice_notification(message + 'Are you sure you want to spend ' + str(choice_info_dict['cost']) + ' money to attack the ' + defender.name + ' to the ' + direction + '? /n /nRegardless of the result, the rest of this unit\'s movement points will be consumed.',
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
-                    self.global_manager.set('ongoing_combat', True)
+                    self.global_manager.set('ongoing_action', True)
+                    self.global_manager.set('ongoing_action_type', 'combat')
                     for current_grid in self.grids:
                         coordinates = (0, 0)
                         if current_grid.is_mini_grid:
@@ -278,7 +270,8 @@ class battalion(group):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'battalion': self,'type': 'start capture slaves'}
         self.current_roll_modifier = 0
-        self.global_manager.set('ongoing_slave_capture', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'slave_capture')
         notification_tools.display_choice_notification(message, ['start capture slaves', 'stop capture slaves'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def capture_slaves(self):
@@ -431,7 +424,8 @@ class battalion(group):
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        self.global_manager.set('ongoing_slave_capture', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
 
     def start_suppress_slave_trade(self):
         '''
@@ -482,7 +476,8 @@ class battalion(group):
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'battalion': self,'type': 'start suppress slave trade'}
         self.current_roll_modifier = 0
-        self.global_manager.set('ongoing_slave_trade_suppression', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'slave_trade_suppression')
         notification_tools.display_choice_notification(message, ['start suppress slave trade', 'stop suppress slave trade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def suppress_slave_trade(self):
@@ -633,7 +628,8 @@ class battalion(group):
         if roll_result <= self.current_max_crit_fail:
             self.die()
 
-        self.global_manager.set('ongoing_slave_trade_suppression', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
 
 class safari(battalion):
     '''
@@ -671,8 +667,8 @@ class safari(battalion):
         self.can_swim_ocean = False
         
         self.has_canoes = True
-        self.image_dict['canoes'] = input_dict['canoes_image']
-        self.image_dict['no_canoes'] = self.image_dict['default']
+        #self.image_dict['canoes'] = input_dict['canoes_image']
+        #self.image_dict['no_canoes'] = self.image_dict['default']
         self.update_canoes()
         
         self.battalion_type = 'none'

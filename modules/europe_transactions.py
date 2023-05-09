@@ -3,9 +3,7 @@ import random
 
 
 from .buttons import button
-from . import game_transitions
 from . import main_loop_tools
-from . import notification_tools
 from . import text_tools
 from . import market_tools
 from . import utility
@@ -33,16 +31,12 @@ class recruitment_button(button):
         '''
         if recruitment_type in global_manager.get('country_specific_units'):
             if not global_manager.get('current_country') == 'none':
-                image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/button.png'
                 self.mob_image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
             else:
-                image_id = 'buttons/default_button.png'
                 self.mob_image_id = 'mobs/default/default.png'
         elif recruitment_type in global_manager.get('recruitment_types'):
-            image_id = 'mobs/' + recruitment_type + '/button.png'
             self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
         else:
-            image_id = 'buttons/default_button.png'
             self.mob_image_id = 'mobs/default/default.png'
         self.recruitment_type = recruitment_type
         self.recruitment_name = ''
@@ -53,7 +47,23 @@ class recruitment_button(button):
                 self.recruitment_name += ' '
         self.cost = global_manager.get('recruitment_costs')[self.recruitment_type]
         global_manager.get('recruitment_button_list').append(self)
-        super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id, global_manager)
+        if self.recruitment_name in ['European workers']:
+            image_id_list = ['mobs/default/button.png']
+            left_worker_dict = {
+                'image_id': self.mob_image_id,
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            image_id_list.append(left_worker_dict)
+
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            image_id_list.append(right_worker_dict)
+        else:
+            image_id_list = ['mobs/default/button.png', {'image_id': self.mob_image_id, 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+        super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id_list, global_manager)
 
     def on_click(self):
         '''
@@ -85,10 +95,9 @@ class recruitment_button(button):
         Output:
             None
         '''
-        #if self.recruitment_type in self.global_manager.get('country_specific_units'):
-        image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/button.png'
-        self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png'
-        self.image.set_image(image_id)
+        self.mob_image_id = {'image_id': 'mobs/' + self.recruitment_type + '/' + country.adjective + '/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}
+        image_id_list = ['mobs/default/button.png', self.mob_image_id]
+        self.image.set_image(image_id_list)
 
     def update_tooltip(self):
         '''
@@ -148,7 +157,7 @@ class buy_commodity_button(button):
             if main_loop_tools.action_possible(self.global_manager):
                 self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
                 if self.global_manager.get('money_tracker').get() >= self.cost:
-                    if main_loop_tools.check_if_minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
+                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
                         self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
                         self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
                         text_tools.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)

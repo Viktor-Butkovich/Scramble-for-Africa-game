@@ -61,7 +61,8 @@ class merchant(officer):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'merchant': self, 'type': 'start loan'}
-        self.global_manager.set('ongoing_loan_search', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'loan_search')
 
         minister_icon_coordinates = (440, self.global_manager.get('notification_manager').notification_x - 140) #show minister in start loan search notification, remove on start/stop loan search
         minister_position_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, self.controlling_minister,
@@ -151,7 +152,8 @@ class merchant(officer):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'merchant': self, 'type': 'start advertising campaign', 'commodity': target_commodity}
-        self.global_manager.set('ongoing_advertising_campaign', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'advertising_campaign')
         message = 'Are you sure you want to start an advertising campaign for ' + target_commodity + '? If successful, the price of ' + target_commodity + ' will increase, decreasing the price of another random commodity. /n /n'
         message += 'The campaign will cost ' + str(self.global_manager.get('action_prices')['advertising_campaign']) + ' money. /n /n '
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -295,4 +297,5 @@ class merchant(officer):
             self.select()
         elif roll_result <= self.current_max_crit_fail:
             self.die('quit')
-        self.global_manager.set('ongoing_advertising_campaign', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

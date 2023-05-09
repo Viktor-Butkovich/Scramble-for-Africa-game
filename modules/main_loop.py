@@ -304,12 +304,6 @@ def main_loop(global_manager):
             if global_manager.get('effect_manager').effect_active('fast_turn'):
                 global_manager.set('end_turn_wait_time', 0)
             global_manager.set('previous_turn_time', time.time())
-    
-            
-        for actor in global_manager.get('actor_list'):
-            for current_image in actor.images:
-                if not current_image.image_description == current_image.previous_idle_image and time.time() >= current_image.last_image_switch + 0.6:
-                    current_image.set_image(current_image.previous_idle_image)
         start_time = time.time()
         global_manager.set('start_time', start_time)
         global_manager.set('current_time', time.time())

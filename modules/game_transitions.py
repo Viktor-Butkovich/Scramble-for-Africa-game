@@ -31,6 +31,8 @@ def cycle_player_turn(global_manager, start_of_turn = False):
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
             turn_queue[0].selection_sound()
+        else: 
+            turn_queue.append(turn_queue.pop(0)) #if unit is already selected, move it to the end and shift to the next one
         turn_queue[0].select()
         turn_queue[0].move_to_front()
         if not turn_queue[0].grids[0].mini_grid == 'none':
@@ -195,6 +197,7 @@ def to_main_menu(global_manager, override = False):
     global_manager.set('end_turn_selected_mob', 'none')
     global_manager.set('message', '')
     global_manager.set('player_turn_queue', [])
+    global_manager.set('current_lore_mission', 'none')
     if not global_manager.get('current_instructions_page') == 'none':
         global_manager.get('current_instructions_page').remove()
         global_manager.set('current_instructions_page', 'none')

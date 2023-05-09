@@ -14,7 +14,6 @@ from .. import images
 from .. import dice_utility
 from .. import turn_management_tools
 from .. import minister_utility
-from ..tiles import status_icon
 
 class pmob(mob):
     '''
@@ -173,6 +172,7 @@ class pmob(mob):
             else:
                 return(False)
         elif next_step == 'start':
+            #ignores consumer goods
             if len(self.images[0].current_cell.tile.get_held_commodities(True)) > 0 or self.get_inventory_used() > 0: #only start round trip if there is something to deliver, either from tile or in inventory already
                 if not (self.is_vehicle and self.vehicle_type == 'train' and not self.images[0].current_cell.has_intact_building('train_station')): #can pick up freely unless train without train station
                     return(True)
@@ -296,6 +296,23 @@ class pmob(mob):
         elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
 
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list()
+        if self.is_officer or self.is_group and self.veteran:
+            image_id_list.append('misc/veteran_icon.png')
+        if self.sentry_mode:
+            image_id_list.append('misc/sentry_icon.png')
+        return(image_id_list)
+
     def set_sentry_mode(self, new_value):
         '''
         Description:
@@ -308,40 +325,16 @@ class pmob(mob):
         old_value = self.sentry_mode
         if not old_value == new_value:
             self.sentry_mode = new_value
+            self.update_image_bundle()
             if new_value == True:
-                for current_grid in self.grids:
-                    if current_grid == self.global_manager.get('minimap_grid'):
-                        sentry_icon_x, sentry_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-                    elif current_grid == self.global_manager.get('europe_grid'):
-                        sentry_icon_x, sentry_icon_y = (0, 0)
-                    else:
-                        sentry_icon_x, sentry_icon_y = (self.x, self.y)
-                    input_dict = {}
-                    input_dict['coordinates'] = (sentry_icon_x, sentry_icon_y)
-                    input_dict['grid'] = current_grid
-                    input_dict['image'] = 'misc/sentry_icon.png'
-                    input_dict['name'] = 'sentry icon'
-                    input_dict['modes'] = ['strategic', 'europe']
-                    input_dict['show_terrain'] = False
-                    input_dict['actor'] = self
-                    input_dict['status_icon_type'] = 'sentry'
-                    self.status_icons.append(status_icon(False, input_dict, self.global_manager))
                 self.remove_from_turn_queue()
                 if self.global_manager.get('displayed_mob') == self:
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
             else:
-                remaining_icons = []
-                for current_status_icon in self.status_icons:
-                    if current_status_icon.status_icon_type == 'sentry':
-                        current_status_icon.remove()
-                    else:
-                        remaining_icons.append(current_status_icon)
-                self.status_icons = remaining_icons
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == self.global_manager.get('displayed_mob'):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
-        
 
     def add_to_turn_queue(self):
         '''
@@ -381,13 +374,8 @@ class pmob(mob):
         self.set_name(self.default_name)
         if (self.is_group or self.is_officer) and self.veteran:
             self.veteran = False
-            new_status_icons = []
-            for current_status_icon in self.status_icons:
-                if current_status_icon.status_icon_type == 'veteran':
-                    current_status_icon.remove()
-                else:
-                    new_status_icons.append(current_status_icon)
-            self.status_icons = new_status_icons
+            for current_image in self.images:
+                current_image.image.remove_member('veteran_icon')
 
     def manage_health_attrition(self, current_cell = 'default'): #other versions of manage_health_attrition in group, vehicle, and resource_building
         '''
@@ -429,8 +417,6 @@ class pmob(mob):
             self.temp_disable_movement()
             self.replace()
             self.death_sound('violent')
-            #notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ') /n /n The unit will remain inactive for the next turn as replacements are found.',
-            #    self.images[0].current_cell.tile, self.global_manager)
         else:
             if show_notification:
                 notification_tools.display_zoom_notification(utility.capitalize(self.name) + ' has died from attrition at (' + str(self.x) + ', ' + str(self.y) + ')', self.images[0].current_cell.tile, self.global_manager)
@@ -504,22 +490,19 @@ class pmob(mob):
                 equivalent_tile = self.end_turn_destination.get_equivalent_tile()
                 if not equivalent_tile == 'none':
                     equivalent_tile.draw_destination_outline()
-                        
-                    
 
-    def check_if_minister_appointed(self):
+    def ministers_appointed(self):
         '''
         Description:
-            Returns whether there is currently an appointed minister to control this unit
+            Returns whether all ministers are appointed to do an action, otherwise prints an error message
         Input:
             None
         Output:
-            boolean: Returns whether there is currently an appointed minister to control this unit
+            boolean: Returns whether all ministers are appointed to do an action, otherwise prints an error message
         '''
         if minister_utility.positions_filled(self.global_manager): #not self.controlling_minister == 'none':
             return(True)
         else:
-            #keyword = self.global_manager.get('minister_type_dict')[self.controlling_minister_type]
             text_tools.print_to_screen('', self.global_manager)
             text_tools.print_to_screen('You can not do that until all ministers have been appointed', self.global_manager)
             text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
@@ -657,7 +640,6 @@ class pmob(mob):
                                         passed = True
                                     elif future_cell.y > 0 and self.can_walk and not self.can_swim_river: #can move through river with maximum movement points while becoming disorganized
                                         passed = True
-
                             if passed:
                                 if destination_type == 'water':
                                     if not (future_cell.has_vehicle('ship', self.is_worker) and not self.is_vehicle): #doesn't matter if can move in ocean or rivers if boarding ship
@@ -683,12 +665,10 @@ class pmob(mob):
                                         text_tools.print_to_screen('You have ' + str(self.movement_points) + ' movement points while ' + str(self.get_movement_cost(x_change, y_change)) + ' are required.', self.global_manager)
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
-                                #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
                                     text_tools.print_to_screen('You can not move on land with this unit unless there is a port.', self.global_manager)
                                 return(False)
                             else: #if trying to swim in water and can't 
-                                #if future_cell.visible or self.can_explore: #already checked earlier
                                 if can_print:
                                     text_tools.print_to_screen('You can not move on ocean with this unit.', self.global_manager)
                                 return(False)
@@ -808,7 +788,8 @@ class pmob(mob):
                 self.select()
                 self.move_to_front()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
-        self.global_manager.set('ongoing_combat', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'combat')
         if combat_type == 'defending':
             message = utility.capitalize(enemy.name) + ' ' + utility.conjugate('be', enemy.number) + ' attacking your ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').'
         elif combat_type == 'attacking':
@@ -910,7 +891,6 @@ class pmob(mob):
                 minister_rolls = self.controlling_minister.attack_roll_to_list(own_combat_modifier, enemy_combat_modifier, self.attack_cost, cost_type, num_dice - 1)
                 enemy_roll = minister_rolls.pop(0) #first minister roll is for enemies
                 results = minister_rolls
-            #results = self.controlling_minister.roll_to_list(6, self.current_min_success, self.current_max_crit_fail, 2)
             elif (self.is_safari and enemy.npmob_type == 'beast') or (self.is_battalion and not enemy.npmob_type == 'beast'):
                 results = [self.controlling_minister.no_corruption_roll(6), self.controlling_minister.no_corruption_roll(6)]
             else:
@@ -944,19 +924,13 @@ class pmob(mob):
                 allow_promotion = True
             else:
                 result = random.randrange(1, 7)#self.controlling_minister.roll(6, self.current_min_success, self.current_max_crit_fail)
-
             if self.global_manager.get('effect_manager').effect_active('ministry_of_magic'):
                 result = 6
-
             roll_list = dice_utility.combat_roll_to_list(6, 'Combat roll', self.global_manager, result, own_combat_modifier)
-
             min_crit_success = 7
             if allow_promotion:
-                min_crit_success = 6
-                
-            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green
-            #(die_x, 440), roll_list[0], self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail
-                
+                min_crit_success = 6  
+            self.display_die((die_x, 440), roll_list[0], 0, min_crit_success, 0, uses_minister) #die won't show result, so give inputs that make it green     
             text += roll_list[1]
             roll_result = roll_list[0]
 
@@ -1100,10 +1074,6 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
-                #elif self.is_battalion and self.images[0].current_cell.terrain == 'water': #if battalion attacks unit in water, it must retreat afterward
-                #    notification_tools.display_notification('While the attack was successful, this unit can not move freely through water and was forced to withdraw. /n /n',
-                #        'default', self.global_manager)
-                #    self.retreat()
                 elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
                     notification_tools.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                         'default', self.global_manager)
@@ -1149,7 +1119,8 @@ class pmob(mob):
         if self.just_promoted:
             self.promote()
             
-        self.global_manager.set('ongoing_combat', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
         if len(self.global_manager.get('attacker_queue')) > 0:
             self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
         elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
@@ -1185,7 +1156,8 @@ class pmob(mob):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start construction'}
-        self.global_manager.set('ongoing_construction', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'construction')
         message = 'Are you sure you want to start constructing a ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         
         cost = actor_utility.get_building_cost(self.global_manager, self, self.building_type, self.building_name)
@@ -1412,7 +1384,8 @@ class pmob(mob):
                 new_building.select()
             else:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
-        self.global_manager.set('ongoing_construction', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
 
     def display_die(self, coordinates, result, min_success, min_crit_success, max_crit_fail, uses_minister = True):
         '''
@@ -1435,7 +1408,7 @@ class pmob(mob):
             result_outcome_dict, outcome_color_dict, result, self.global_manager)
         self.attached_dice_list.append(new_die)
         if uses_minister:
-            if self.global_manager.get('ongoing_combat'): #combat has a different dice layout
+            if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout
                 minister_icon_coordinates = (coordinates[0] - 120, coordinates[1] + 5)
             else:
                 minister_icon_coordinates = (coordinates[0], coordinates[1] + 120)
@@ -1470,7 +1443,8 @@ class pmob(mob):
         if self.current_min_success > self.current_min_crit_success:
             self.current_min_crit_success = self.current_min_success #if 6 is a failure, should not be critical success. However, if 6 is a success, it will always be a critical success
         choice_info_dict = {'constructor': self, 'type': 'start repair'}
-        self.global_manager.set('ongoing_construction', True)
+        self.global_manager.set('ongoing_action', True)
+        self.global_manager.set('ongoing_action_type', 'construction')
         message = 'Are you sure you want to start repairing the ' + text_tools.remove_underscores(self.building_name) + '? /n /n'
         message += 'The planning and materials will cost ' + str(self.repaired_building.get_repair_cost()) + ' money, half the initial cost of the building\'s construction. /n /n'
         message += 'If successful, the ' + text_tools.remove_underscores(self.building_name) + ' will be restored to full functionality. /n /n'
@@ -1576,4 +1550,5 @@ class pmob(mob):
             self.repaired_building.set_damaged(False)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show repaired building
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob info display to hide repair button
-        self.global_manager.set('ongoing_construction', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

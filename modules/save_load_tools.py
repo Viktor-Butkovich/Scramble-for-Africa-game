@@ -382,7 +382,6 @@ class save_load_manager_template():
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
 
-        self.global_manager.get('minimap_grid').calibrate(2, 2)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

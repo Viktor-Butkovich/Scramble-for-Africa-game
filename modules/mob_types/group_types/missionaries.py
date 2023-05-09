@@ -102,7 +102,8 @@ class missionaries(group):
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll\'s difficulty. /n /n'
             notification_tools.display_notification(message, 'default', self.global_manager)
         else:
-            self.global_manager.set('ongoing_conversion', True)
+            self.global_manager.set('ongoing_action', True)
+            self.global_manager.set('ongoing_action_type', 'conversion')
             notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
@@ -219,4 +220,5 @@ class missionaries(group):
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        self.global_manager.set('ongoing_conversion', False)
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')

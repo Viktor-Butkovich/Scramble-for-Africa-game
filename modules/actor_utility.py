@@ -1,10 +1,10 @@
 #Contains miscellaneous functions relating to actor functionality
 
 import random
+import os
 
 from . import scaling
 from . import utility
-from . import text_tools
 
 def reset_action_prices(global_manager):
     '''
@@ -254,7 +254,8 @@ def stop_exploration(global_manager):
         if current_mob.can_explore:
             current_mob.exploration_mark_list = []
     exploration_mark_list = []
-    global_manager.set('ongoing_exploration', False)
+    global_manager.set('ongoing_action', False)
+    global_manager.set('ongoing_action_type', 'none')
 
 def create_image_dict(stem):
     '''
@@ -282,8 +283,9 @@ def update_roads(global_manager):
     Output:
         None
     '''
-    for current_infrastructure_connection_image in global_manager.get('infrastructure_connection_list'):
-        current_infrastructure_connection_image.update_roads()
+    for current_building in global_manager.get('building_list'):
+        if current_building.building_type == 'infrastructure':
+            current_building.cell.tile.update_image_bundle()
     
 def get_selected_list(global_manager):
     '''
@@ -383,9 +385,9 @@ def get_migration_destinations(global_manager):
     return_list = []
     for current_building in global_manager.get('building_list'):
         if current_building.building_type in ['port', 'train_station', 'resource']:
-            if not current_building.images[0].current_cell in return_list:
+            if not current_building.cell in return_list:
                 if not current_building.damaged:
-                    return_list.append(current_building.images[0].current_cell)
+                    return_list.append(current_building.cell)
     return(return_list)
 
 def get_migration_sources(global_manager):
@@ -408,8 +410,8 @@ def get_num_available_workers(location_types, global_manager):
     Description:
         Calculates and returns the number of workers currently available in the inputted location type, like how many workers are in slums
     Input:
-        global_manager_template global_manager: Object that accesses shared variables
         string location_types: Types of locations to count workers from, can be 'village', 'slums', or 'all'
+        global_manager_template global_manager: Object that accesses shared variables
     Output:
         int: Returns number of workers currently available in the inputted location type
     '''
@@ -422,3 +424,67 @@ def get_num_available_workers(location_types, global_manager):
         for current_village in global_manager.get('village_list'):
             num_available_workers += current_village.available_workers
     return(num_available_workers)
+
+def generate_resource_icon(tile, global_manager):
+    '''
+    Description:
+        Generates and returns the correct string image file path based on the resource/village and buildings built in the inputted tile
+    Input:
+        tile tile: Tile to generate a resource icon for
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        string: Returns string image file path for tile's resource icon
+    '''
+    small = False
+    for building_type in global_manager.get('building_types'):
+        if tile.cell.has_building(building_type): #if any building present - villages are buildings but not a building type
+            small = True
+    if tile.cell.resource == 'natives':
+        attached_village = tile.cell.get_building('village')
+        if attached_village.population == 0: #0
+            key = '0'
+        elif attached_village.population <= 3: #1-3
+            key = '1'
+        elif attached_village.population <= 6: #4-6
+            key = '2'
+        else: #7-10
+            key = '3'
+        if attached_village.aggressiveness <= 3: #1-3
+            key += '1'
+        elif attached_village.aggressiveness <= 6: #4-6
+            key += '2'
+        else: #7-10
+            key += '3'
+        if small:
+            image_id = 'scenery/resources/natives/small/' + key + '.png'
+        else:
+            image_id = 'scenery/resources/natives/' + key + '.png'
+    else:
+        if small:
+            image_id = 'scenery/resources/small/' + tile.cell.resource + '.png'
+        else:
+            image_id = 'scenery/resources/' + tile.cell.resource + '.png'
+    return(image_id)
+
+def get_image_variants(base_path, keyword = 'default'):
+    '''
+    Description:
+        Finds and returns a list of all images with the same name format in the same folder, like 'folder/default.png' and 'folder/default1.png'
+    Input:
+        string base_path: File path of base image, like 'folder/default.png'
+        string keyword = 'default': Name format to look for
+    Output:
+        string list: Returns list of all images with the same name format in the same folder
+    '''
+    variants = []
+    if base_path.endswith(keyword + '.png'):
+        folder_path = base_path.removesuffix('default.png')
+        for file_name in os.listdir('graphics/' + folder_path):
+            if file_name.startswith(keyword):
+                variants.append(folder_path + file_name)
+                continue
+            else:
+                continue
+    else:
+        variants.append(base_path)
+    return(variants)

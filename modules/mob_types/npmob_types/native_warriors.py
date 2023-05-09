@@ -22,7 +22,7 @@ class native_warriors(npmob):
                 'modes': string list value - Game modes during which this mob's images can appear
                 'movement_points': int value - Required if from save, how many movement points this actor currently has
                 'max_movement_points': int value - Required if from save, maximum number of movement points this mob can have
-                'canoes_image': string value - File path tothe image used by this object when it is in a river
+                'canoes_image': string value - File path to the image used by this object when it is in a river
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -37,15 +37,14 @@ class native_warriors(npmob):
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'
         self.despawning = False
-        
         self.has_canoes = True
-        self.image_dict['canoes'] = input_dict['canoes_image']
-        self.image_dict['no_canoes'] = self.image_dict['default']
-        self.update_canoes()
         if not from_save:
             self.set_max_movement_points(4)
             if not global_manager.get('creating_new_game'):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
+            self.second_image_variant = random.randrange(0, len(self.image_variants))
+        self.update_canoes()
+        self.update_image_bundle()
 
     def attack_on_spawn(self):
         '''
@@ -91,6 +90,8 @@ class native_warriors(npmob):
         '''
         super().remove()
         self.origin_village.attached_warriors = utility.remove_from_list(self.origin_village.attached_warriors, self)
+        if self.origin_village.population == 0 and len(self.origin_village.attached_warriors) == 0:
+            self.origin_village.aggressiveness = 0
 
     def check_despawn(self):
         '''
@@ -105,3 +106,30 @@ class native_warriors(npmob):
             #self.remove()
             self.despawning = True
             self.origin_village.change_population(1)
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list()
+        image_id_list.remove(self.image_dict['default']) #remove default middle warrior
+        left_warrior_dict = {
+            'image_id': self.image_dict['default'],
+            'size': 0.83,
+            'x_offset': -0.23,
+            'y_offset': 0,
+            'level': -1
+        }
+        image_id_list.append(left_warrior_dict)
+
+        right_warrior_dict = left_warrior_dict.copy()
+        right_warrior_dict['image_id'] = self.image_variants[self.second_image_variant]
+        right_warrior_dict['x_offset'] *= -1
+        image_id_list.append(right_warrior_dict)
+        return(image_id_list)

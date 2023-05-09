@@ -3,7 +3,6 @@
 import random
 from . import utility
 from . import notification_tools
-from .tiles import status_icon
 
 class lore_mission():
     '''
@@ -125,7 +124,7 @@ class lore_mission():
         self.global_manager.set('current_lore_mission', 'none')
         self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
         for current_possible_artifact_location in self.possible_artifact_locations:
-            current_possible_artifact_location.remove()
+            self.global_manager.get('strategic_map_grid').find_cell(current_possible_artifact_location.x, current_possible_artifact_location.y).tile.update_image_bundle()
         self.possible_artifact_locations = []
 
     def get_num_revealed_possible_artifact_locations(self):
@@ -215,26 +214,33 @@ class possible_artifact_location():
         self.revealed = input_dict['revealed']
         self.proven_false = input_dict['proven_false']
         self.grids = [self.global_manager.get('strategic_map_grid'), self.global_manager.get('minimap_grid')]
-        self.modes = ['strategic']
-        self.status_icons = []
-        for current_grid in self.grids:
-            if current_grid == self.global_manager.get('minimap_grid'):
-                status_icon_x, status_icon_y = current_grid.get_mini_grid_coordinates(self.x, self.y)
-            elif current_grid == self.global_manager.get('europe_grid'):
-                status_icon_x, status_icon_y = (0, 0)
-            else:
-                status_icon_x, status_icon_y = (self.x, self.y)
-            input_dict = {}
-            input_dict['coordinates'] = (status_icon_x, status_icon_y)
-            input_dict['grid'] = current_grid
-            input_dict['image'] = 'misc/possible_artifact_location_icon.png'
-            input_dict['name'] = 'possible artifact location'
-            input_dict['modes'] = self.modes
-            input_dict['show_terrain'] = False
-            input_dict['actor'] = self
-            input_dict['status_icon_type'] = 'possible_artifact_location'
-            self.status_icons.append(status_icon(False, input_dict, self.global_manager))
-            #self.global_manager.get('overlay_tile_list').append(self.status_icons[-1]) #causes status icon to be drawn in front of terrain/resources but behind mobs
+        self.modes = ['strategic'] 
+        self.image_dict = {'default': ['misc/possible_artifact_location_icon.png']}
+        self.set_proven_false(input_dict['proven_false'])
+
+    def set_proven_false(self, new_proven_false):
+        '''
+        Description:
+            Sets this location's proven_false value and updates images as needed
+        Input:
+            boolean new_proven_false: New proven_false value
+        Output:
+            None
+        '''
+        self.proven_false = new_proven_false
+        self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile.update_image_bundle()
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        return(self.image_dict['default'])
 
     def to_save_dict(self):
         '''
@@ -253,31 +259,3 @@ class possible_artifact_location():
         save_dict['revealed'] = self.revealed
         save_dict['proven_false'] = self.proven_false
         return(save_dict)
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this location's image can be shown. It should be visible whenever is is revealed and the the game is in strategic mode
-        Input:
-            None
-        Output:
-            boolean: Returns whether this location's image can be shown
-        '''
-        if self.global_manager.get('current_game_mode') in self.modes:
-            if self.revealed and not self.proven_false:
-                return(True)
-        return(False)
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Also deselects this mob
-        Input:
-            None
-        Output:
-            None
-        '''
-        for current_status_icon in self.status_icons:
-            current_status_icon.remove()
-            #self.global_manager.set('overlay_tile_list', utility.remove_from_list(self.global_manager.get('overlay_tile_list'), current_status_icon))
-        self.status_icons = []

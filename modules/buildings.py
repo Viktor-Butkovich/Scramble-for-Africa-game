@@ -4,9 +4,8 @@ import pygame
 import random
 
 from .actors import actor
-from .buttons import button
 from . import utility
-from . import images
+from . import scaling
 from . import actor_utility
 from . import text_tools
 
@@ -42,10 +41,7 @@ class building(actor):
         self.image_dict = {'default': input_dict['image'], 'damaged': no_png_image + '_damaged' + '.png', 'intact': input_dict['image']}
         if input_dict['building_type'] == 'warehouses':
             self.image_dict['damaged'] = self.image_dict['default']
-        self.images = []
-        for current_grid in self.grids:
-            self.images.append(images.building_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default',
-                self.global_manager)) #self, actor, width, height, grid, image_description, global_manager
+        self.cell = self.grids[0].find_cell(self.x, self.y)
         self.global_manager.get('building_list').append(self)
         self.set_name(input_dict['name'])
         self.contained_work_crews = []        
@@ -56,9 +52,8 @@ class building(actor):
                 self.set_damaged(input_dict['damaged'], True)
         elif self.can_damage():
             self.set_damaged(False, True)
-        for current_image in self.images:
-            current_image.current_cell.contained_buildings[self.building_type] = self
-            current_image.current_cell.tile.update_resource_icon()
+        self.cell.contained_buildings[self.building_type] = self
+        self.cell.tile.update_image_bundle()
         self.is_port = False #used to determine if port is in a tile to move there
 
         self.set_inventory_capacity(self.default_inventory_capacity)
@@ -109,20 +104,9 @@ class building(actor):
         Output:
             None
         '''
-        tiles = []
-        for current_image in self.images:
-            if not current_image.current_cell == 'none':
-                current_image.current_cell.contained_buildings[self.building_type] = 'none'
-                tiles.append(current_image.current_cell.tile)
-            current_image.current_cell.contained_buildings[self.building_type] = 'none'
-            current_image.remove_from_cell()
-            current_image.remove()
+        self.cell.contained_buildings[self.building_type] = 'none'
         super().remove()
         self.global_manager.set('building_list', utility.remove_from_list(self.global_manager.get('building_list'), self))
-        for current_tile in tiles:
-            current_tile.update_resource_icon()
-        if self.global_manager.get('displayed_tile') in tiles: #if currently displayed, update tile to show building removal
-            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
 
     def update_tooltip(self): #should be shown below mob tooltips
         '''
@@ -174,6 +158,27 @@ class building(actor):
             
         self.set_tooltip(tooltip_text)
 
+    def set_tooltip(self, tooltip_text):
+        '''
+        Description:
+            Sets this building's tooltip to the inputted list, with each inputted list representing a line of the tooltip. Unlike most actors, buildings have no images and handle their own tooltips
+        Input:
+            string list new_tooltip: Lines for this image's tooltip
+        Output:
+            None
+        '''
+        self.tooltip_text = tooltip_text
+        tooltip_width = 10 #minimum tooltip width
+        font_size = self.global_manager.get('font_size')
+        font_name = self.global_manager.get('font_name')
+        for text_line in tooltip_text:
+            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+        tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
+        self.tooltip_box = pygame.Rect(self.cell.tile.x, self.cell.y, tooltip_width, tooltip_height)
+        self.tooltip_outline_width = 1
+        self.tooltip_outline = pygame.Rect(self.cell.tile.x - self.tooltip_outline_width, self.cell.tile.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
+
     def set_damaged(self, new_value, mid_setup = False):
         '''
         Description:
@@ -188,15 +193,10 @@ class building(actor):
             actor_utility.update_roads(self.global_manager)
         if self.damaged:
             self.set_inventory_capacity(0)
-            self.image_dict['default'] = self.image_dict['damaged']
-            self.set_image('default')
         else:
             self.set_inventory_capacity(self.default_inventory_capacity)
-            self.image_dict['default'] = self.image_dict['intact']
-            self.set_image('default')
-
         if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
-            self.images[0].current_cell.get_building('warehouses').set_damaged(new_value)
+            self.cell.get_building('warehouses').set_damaged(new_value)
 
     def set_default_inventory_capacity(self, new_value):
         '''
@@ -237,28 +237,24 @@ class building(actor):
             None
         '''
         current_index = 0
-        for current_image in self.images:
-            if current_index == 0:
-                current_image.current_cell.tile.inventory_capacity -= previous_value
-                current_image.current_cell.tile.inventory_capacity += new_value
-            else:
-                current_image.current_cell.tile.inventory_capacity = self.images[0].current_cell.tile.inventory_capacity
-            current_index += 1
+        if current_index == 0:
+            self.cell.tile.inventory_capacity -= previous_value
+            self.cell.tile.inventory_capacity += new_value
+        else:
+            self.cell.tile.inventory_capacity = self.cell.tile.inventory_capacity
+        current_index += 1
             
     def touching_mouse(self):
         '''
         Description:
-            Returns whether any of this building's images is colliding with the mouse
+            Returns whether any tile containing this building is colliding with the mouse
         Input:
             None
         Output:
             boolean: Returns True if any of this building's images is colliding with the mouse, otherwise returns False
         '''
-        for current_image in self.images:
-            if current_image.change_with_other_images: #don't show tooltips for road connection images, only the base road building images
-                if current_image.Rect.collidepoint(pygame.mouse.get_pos()): #if mouse is in image
-                    if not (current_image.grid == self.global_manager.get('minimap_grid') and not current_image.grid.is_on_mini_grid(self.x, self.y)): #do not consider as touching mouse if off-map
-                        return(True)
+        if self.cell.tile.touching_mouse() or (self.cell.tile.get_equivalent_tile() != 'none' and self.cell.tile.get_equivalent_tile().touching_mouse()):
+            return(True)
         return(False)
 
     def get_build_cost(self):
@@ -282,6 +278,22 @@ class building(actor):
             double: Returns the cost of repairing this building, not accounting for failed attempts
         '''
         return(self.get_build_cost() / 2)
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation. Infrastructure buildings display connections between themselves and adjacent infrastructure buildings
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list()
+        if self.damaged:
+            image_id_list.remove(self.image_dict['default'])
+            image_id_list.append(self.image_dict['damaged'])
+        return(image_id_list)
 
 class infrastructure_building(building):
     '''
@@ -324,37 +336,22 @@ class infrastructure_building(building):
             self.is_bridge = True
 
         input_dict['building_type'] = 'infrastructure'
+        self.connection_image_dict = {
+            'left_road': 'buildings/infrastructure/left_road.png',
+            'right_road': 'buildings/infrastructure/right_road.png',
+            'down_road': 'buildings/infrastructure/down_road.png',
+            'up_road': 'buildings/infrastructure/up_road.png',
+            'left_railroad': 'buildings/infrastructure/left_railroad.png',
+            'right_railroad': 'buildings/infrastructure/right_railroad.png',
+            'down_railroad': 'buildings/infrastructure/down_railroad.png',
+            'up_railroad': 'buildings/infrastructure/up_railroad.png',
+            'horizontal_road_bridge': 'buildings/infrastructure/horizontal_road_bridge.png',
+            'vertical_road_bridge': 'buildings/infrastructure/vertical_road_bridge.png',
+            'horizontal_railroad_bridge': 'buildings/infrastructure/horizontal_railroad_bridge.png',
+            'vertical_railroad_bridge': 'buildings/infrastructure/vertical_railroad_bridge.png'
+        }
         super().__init__(from_save, input_dict, global_manager)
-        self.image_dict['left_road'] = 'buildings/infrastructure/left_road.png'
-        self.image_dict['right_road'] = 'buildings/infrastructure/right_road.png'
-        self.image_dict['down_road'] = 'buildings/infrastructure/down_road.png'
-        self.image_dict['up_road'] = 'buildings/infrastructure/up_road.png'
-        self.image_dict['left_railroad'] = 'buildings/infrastructure/left_railroad.png'
-        self.image_dict['right_railroad'] = 'buildings/infrastructure/right_railroad.png'
-        self.image_dict['down_railroad'] = 'buildings/infrastructure/down_railroad.png'
-        self.image_dict['up_railroad'] = 'buildings/infrastructure/up_railroad.png'
-        self.image_dict['horizontal_road_bridge'] = 'buildings/infrastructure/horizontal_road_bridge.png'
-        self.image_dict['vertical_road_bridge'] ='buildings/infrastructure/vertical_road_bridge.png'
-        self.image_dict['horizontal_railroad_bridge'] = 'buildings/infrastructure/horizontal_railroad_bridge.png'
-        self.image_dict['vertical_railroad_bridge'] = 'buildings/infrastructure/vertical_railroad_bridge.png'
-        self.image_dict['empty'] = 'misc/empty.png'
-        self.infrastructure_connection_images = {}
-        if not self.is_bridge:
-            for current_grid in self.grids:
-                up_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'up', self.global_manager)
-                down_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'down', self.global_manager)
-                right_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'right', self.global_manager)
-                left_image = images.infrastructure_connection_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', 'left', self.global_manager)
-                #actor, width, height, grid, image_description, direction, global_manager
-                self.images.append(up_image)
-                self.images.append(down_image)
-                self.images.append(right_image)
-                self.images.append(left_image)
-                self.infrastructure_connection_images['up'] = up_image
-                self.infrastructure_connection_images['down'] = down_image
-                self.infrastructure_connection_images['right'] = right_image
-                self.infrastructure_connection_images['left'] = left_image
-        else:
+        if self.is_bridge:
             up_cell = self.grids[0].find_cell(self.x, self.y + 1)
             down_cell = self.grids[0].find_cell(self.x, self.y - 1)
             left_cell = self.grids[0].find_cell(self.x - 1, self.y)
@@ -362,15 +359,15 @@ class infrastructure_building(building):
             if (not (up_cell == 'none' or down_cell == 'none')) and (not (up_cell.terrain == 'water' or down_cell.terrain == 'water')):
                 self.connected_cells = [up_cell, down_cell]
                 if self.is_road:
-                    self.set_image('vertical_road_bridge')
+                    self.image_dict['default'] = self.connection_image_dict['vertical_road_bridge']
                 else:
-                    self.set_image('vertical_railroad_bridge')
+                    self.image_dict['default'] = self.connection_image_dict['vertical_railroad_bridge']
             else:
                 self.connected_cells = [left_cell, right_cell]
                 if self.is_road:
-                    self.set_image('horizontal_road_bridge')
+                    self.image_dict['default'] = self.connection_image_dict['horizontal_road_bridge']
                 else:
-                    self.set_image('horizontal_railroad_bridge')
+                    self.image_dict['default'] = self.connection_image_dict['horizontal_railroad_bridge']
         actor_utility.update_roads(self.global_manager)
 
     def to_save_dict(self):
@@ -398,6 +395,34 @@ class infrastructure_building(building):
             boolean: Returns whether this building is able to be damaged
         '''
         return(False)
+    
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation. Infrastructure buildings display connections between themselves and adjacent infrastructure buildings
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list()
+        if self.cell.terrain != 'water':
+            for direction in ['up', 'down', 'left', 'right']:
+                adjacent_cell = self.cell.adjacent_cells[direction]
+                if adjacent_cell != 'none':
+                    own_tile_infrastructure = self.cell.get_intact_building('infrastructure')
+                    adjacent_cell_infrastructure = adjacent_cell.get_intact_building('infrastructure')
+                    if adjacent_cell_infrastructure != 'none':
+                        if adjacent_cell_infrastructure.is_railroad and own_tile_infrastructure.is_railroad:
+                            image_id_list.append(self.connection_image_dict[direction + '_railroad'])
+                            if self.image_dict['default'] in image_id_list:
+                                image_id_list.remove(self.image_dict['default'])
+                        else:
+                            image_id_list.append(self.connection_image_dict[direction + '_road'])
+                            if own_tile_infrastructure.is_road and self.image_dict['default'] in image_id_list:
+                                image_id_list.remove(self.image_dict['default'])
+        return(image_id_list)
 
 class trading_post(building):
     '''
@@ -519,7 +544,7 @@ class port(building):
         input_dict['building_type'] = 'port'
         super().__init__(from_save, input_dict, global_manager)
         self.is_port = True #used to determine if port is in a tile to move there
-        if (not from_save) and not self.images[0].current_cell.village == 'none':
+        if (not from_save) and not self.cell.village == 'none':
             self.global_manager.get('sound_manager').play_random_music('europe')
 
 class warehouses(building):
@@ -592,11 +617,23 @@ class warehouses(building):
         Output:
             None
         '''
-        return(self.images[0].current_cell.get_warehouses_cost())
+        return(self.cell.get_warehouses_cost())
 
     def upgrade(self, upgrade_type = 'warehouse_level'):
         self.warehouse_level += 1
         self.set_default_inventory_capacity(self.default_inventory_capacity + 9)
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation. Warehouses have no images
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        return([])
 
 class resource_building(building):
     '''
@@ -720,7 +757,7 @@ class resource_building(building):
             None
         '''
         if current_cell == 'default':
-            current_cell = self.images[0].current_cell
+            current_cell = self.cell
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
         worker_attrition_list = []
         officer_attrition_list = []
@@ -748,7 +785,7 @@ class resource_building(building):
         Output:
             boolean: Returns True if this building can be upgraded in the inputted field, otherwise returns False
         '''
-        if upgrade_type == 'scale': #quantitative
+        if upgrade_type == 'scale':
             if self.scale < 6:
                 return(True)
         elif upgrade_type == 'efficiency':
@@ -837,30 +874,35 @@ class slums(building):
         if from_save:
             self.available_workers = input_dict['available_workers']
         input_dict['image'] = 'buildings/slums/default.png'
+        self.size_image_dict = {
+            'small': 'buildings/slums/small.png',
+            'medium': 'buildings/slums/default.png',
+            'large': 'buildings/slums/large.png'
+        }
         super().__init__(from_save, input_dict, global_manager)
-        self.image_dict['default'] = 'buildings/slums/default.png'
-        self.image_dict['small'] = 'buildings/slums/small.png'
-        self.image_dict['medium'] = 'buildings/slums/default.png'
-        self.image_dict['large'] = 'buildings/slums/large.png'
-        if self.images[0].current_cell.tile == self.global_manager.get('displayed_tile'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #show self after creation
-        self.update_slums_image()
-        
-    def update_slums_image(self):
+        if self.cell.tile == self.global_manager.get('displayed_tile'):
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile) #show self after creation
+
+    def get_image_id_list(self):
         '''
         Description:
-            Updates the image of this slum when its population changes to reflect the new size
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
         Input:
             None
         Output:
-            None
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
+        image_id_list = super().get_image_id_list()
+        image_id_list.remove(self.image_dict['default'])
         if self.available_workers <= 2:
-            self.set_image('small')
+            image_id = self.size_image_dict['small']
         elif self.available_workers <= 5:
-            self.set_image('medium')
+            image_id = self.size_image_dict['medium']
         else:
-            self.set_image('large')
+            image_id = self.size_image_dict['large']
+        image_id_list.append({'image_id': image_id, 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -1})
+        return(image_id_list)
 
     def can_damage(self):
         '''
@@ -897,9 +939,9 @@ class slums(building):
         self.available_workers += change
         if self.available_workers < 0:
             self.available_workers = 0
-        self.update_slums_image()
-        if self.images[0].current_cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        self.cell.tile.update_image_bundle()
+        if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
         if self.available_workers == 0:
             self.remove()
             
@@ -913,8 +955,8 @@ class slums(building):
             None
         '''
         input_dict = {}
-        input_dict['coordinates'] = (self.images[0].current_cell.x, self.images[0].current_cell.y)
-        input_dict['grids'] = [self.images[0].current_cell.grid, self.images[0].current_cell.grid.mini_grid]
+        input_dict['coordinates'] = (self.cell.x, self.cell.y)
+        input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African workers/default.png'
         input_dict['modes'] = ['strategic']
         input_dict['name'] = 'African workers'

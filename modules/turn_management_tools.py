@@ -326,19 +326,19 @@ def manage_worker_price_changes(global_manager):
         changed_price = round(current_price + global_manager.get('worker_upkeep_fluctuation_amount'), 2)
         global_manager.set('european_worker_upkeep', changed_price)
         text_tools.print_to_screen('An shortage of workers from Europe has increased the upkeep of European workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
-
-    slave_worker_roll = random.randrange(1, 7)
-    if slave_worker_roll == 6:
-        current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-        if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
+    if global_manager.get('slave_traders_strength') > 0:
+        slave_worker_roll = random.randrange(1, 7)
+        if slave_worker_roll == 6:
+            current_price = global_manager.get('recruitment_costs')['slave workers']
+            changed_price = round(current_price - global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
+            if changed_price >= global_manager.get('min_slave_worker_recruitment_cost'):
+                global_manager.get('recruitment_costs')['slave workers'] = changed_price
+                text_tools.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+        elif slave_worker_roll == 1:
+            current_price = global_manager.get('recruitment_costs')['slave workers']
+            changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
             global_manager.get('recruitment_costs')['slave workers'] = changed_price
-            text_tools.print_to_screen('An influx of captured slaves has decreased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
-    elif slave_worker_roll == 1:
-        current_price = global_manager.get('recruitment_costs')['slave workers']
-        changed_price = round(current_price + global_manager.get('slave_recruitment_cost_fluctuation_amount'), 2)
-        global_manager.get('recruitment_costs')['slave workers'] = changed_price
-        text_tools.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
+            text_tools.print_to_screen('A shortage of captured slaves has increased the purchase cost of slave workers from ' + str(current_price) + ' to ' + str(changed_price) + '.', global_manager)
         
 def manage_worker_migration(global_manager): 
     '''
@@ -697,7 +697,7 @@ def manage_lore(global_manager):
         None
     '''
     if global_manager.get('current_lore_mission') == 'none':
-        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1):
+        if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or global_manager.get('effect_manager').effect_active('instant_lore_mission'):
         #if 1 == 1:
             #mission_type = random.choice(global_manager.get('lore_types'))
             global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)

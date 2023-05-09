@@ -44,15 +44,6 @@ def update_display(global_manager):
                 current_tile.image.draw()
                 current_tile.image.has_drawn = True
 
-        for current_infrastructure_connection in global_manager.get('infrastructure_connection_list'): #draw roads above terrain and below building icons, which are drawn below mobs
-            current_infrastructure_connection.draw()
-            current_infrastructure_connection.has_drawn = True
-
-        for current_slums in global_manager.get('slums_list'): #slums appear under other buildings
-            for current_image in current_slums.images:
-                current_image.draw()
-                current_image.has_drawn = True
-
         mob_image_list = []
         for current_image in global_manager.get('image_list'):
             if not current_image.has_drawn:
@@ -63,13 +54,6 @@ def update_display(global_manager):
                     else:
                         mob_image_list.append(current_image)
 
-        for current_lore_mission in global_manager.get('lore_mission_list'):
-            for current_possible_artifact_location in current_lore_mission.possible_artifact_locations:
-                for current_status_icon in current_possible_artifact_location.status_icons:
-                    current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other non-mob images
-                    current_status_icon.image.draw()
-                    current_status_icon.image.has_drawn = True
-
         for current_image in mob_image_list:
             current_image.draw()
             current_image.has_drawn = True
@@ -79,7 +63,6 @@ def update_display(global_manager):
                 current_overlay_tile.image.draw()
                 current_overlay_tile.image.has_drawn = True
         
-        #if global_manager.get('effect_manager').effect_active('hide_grid_lines'):
         for current_grid in global_manager.get('grid_list'):
             if global_manager.get('current_game_mode') in current_grid.modes:
                 current_grid.draw_grid_lines()
@@ -92,7 +75,6 @@ def update_display(global_manager):
             for current_image in current_mob.images:
                 if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
                     current_mob.draw_outline()
-            #if current_mob.veteran:
             for current_status_icon in current_mob.status_icons:
                 current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other images
                 current_status_icon.image.draw()
@@ -137,7 +119,7 @@ def update_display(global_manager):
             if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
                 current_button.draw()
                 if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                    possible_tooltip_drawers = [current_button]#notifications have priority over buttons and will be shown first
+                    possible_tooltip_drawers = [current_button] #notifications have priority over buttons and will be shown first
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
@@ -148,17 +130,17 @@ def update_display(global_manager):
             instructions_page = global_manager.get('current_instructions_page')
             instructions_page.draw()
             if instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                possible_tooltip_drawers = [instructions_page]#instructions have priority over everything
+                possible_tooltip_drawers = [instructions_page] #instructions have priority over everything
         if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
             global_manager.set('mouse_moved_time', time.time())
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
             global_manager.set('old_mouse_x', old_mouse_x)
             global_manager.set('old_mouse_y', old_mouse_y)
-        if time.time() > global_manager.get('mouse_moved_time') + 0.15:#show tooltip when mouse is still
+        if time.time() > global_manager.get('mouse_moved_time') + 0.15: #show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         pygame.display.update()
 
-def check_if_minister_appointed(minister_type, global_manager):
+def minister_appointed(minister_type, global_manager):
     '''
     Description:
         Checks if there is a minister appointed in the inputted office and prints a warning if there is not one, used to explain why the player can't do an action
@@ -185,33 +167,7 @@ def action_possible(global_manager):
     Output:
         boolean: Returns False if the player is in an ongoing event that prevents other actions from being taken, otherwise returns True
     '''
-    if global_manager.get('ongoing_exploration'):
-        return(False)
-    elif global_manager.get('ongoing_trade'):
-        return(False)
-    elif global_manager.get('ongoing_religious_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_public_relations_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_advertising_campaign'):
-        return(False)
-    elif global_manager.get('ongoing_loan_search'):
-        return(False)
-    elif global_manager.get('ongoing_conversion'):
-        return(False)
-    elif global_manager.get('ongoing_rumor_search'):
-        return(False)
-    elif global_manager.get('ongoing_artifact_search'):
-        return(False)
-    elif global_manager.get('ongoing_construction'):
-        return(False)
-    elif global_manager.get('ongoing_combat'):
-        return(False)
-    elif global_manager.get('ongoing_trial'):
-        return(False)
-    elif global_manager.get('ongoing_slave_capture'):
-        return(False)
-    elif global_manager.get('ongoing_slave_trade_suppression'):
+    if global_manager.get('ongoing_action'):
         return(False)
     elif global_manager.get('game_over'):
         return(False)
@@ -280,6 +236,7 @@ def manage_tooltip_drawing(possible_tooltip_drawers, global_manager):
         height = y_displacement
         width = 0
         for possible_tooltip_drawer in possible_tooltip_drawers:
+            possible_tooltip_drawer.update_tooltip()
             if possible_tooltip_drawer == global_manager.get('current_instructions_page'):
                 height += font_size
                 for current_text_line in possible_tooltip_drawer.tooltip_text:
@@ -355,15 +312,12 @@ def draw_text_box(global_manager):
         if text_tools.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
             greatest_width = text_tools.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10, global_manager)
-    #x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
     x, y = (0, global_manager.get('display_height') - global_manager.get('text_box_height'))
     pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
     if global_manager.get('typing'):
         color = 'red'
     else:
         color = 'black'
-    #x, y = (0, 0)
-    #x, y = scaling.scale_coordinates(0, global_manager.get('default_display_height') - global_manager.get('text_box_height'), global_manager)
     pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')[color], (x, y, text_box_width, global_manager.get('text_box_height')), scaling.scale_height(3, global_manager)) #black text box outline
     pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))), #input line
         (text_box_width, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))))
@@ -484,7 +438,6 @@ def manage_lmb_down(clicked_button, global_manager):
                 
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
             chooser = global_manager.get('choosing_destination_info_dict')['chooser']
-            chose_destination = False
             for current_grid in global_manager.get('grid_list'): #destination_grids:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
@@ -519,8 +472,6 @@ def manage_lmb_down(clicked_button, global_manager):
             global_manager.set('choosing_advertised_commodity_info_dict', {})
             
         elif (not clicked_button) and global_manager.get('drawing_automatic_route'):
-            #chooser = global_manager.get('choosing_destination_info_dict')['chooser']
-            #chose_destination = False
             for current_grid in global_manager.get('grid_list'): #destination_grids:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
@@ -547,7 +498,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                 elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
                                     text_tools.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
                                     return()
-                                elif target_cell.terrain == 'water' and not displayed_mob.can_swim:
+                                elif (target_cell.terrain == 'water' and not displayed_mob.can_swim) and (displayed_mob.is_vehicle and destination_infrastructure == 'none'): 
+                                    #non-train units can still move slowly through water, even w/o canoes or a bridge
+                                    #railroad bridge allows anything to move through
                                     text_tools.print_to_screen('This unit can not create movement routes through water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:
@@ -611,4 +564,4 @@ def debug_print(global_manager):
     '''
     print('')
     print(global_manager.get('effect_manager'))
-    print(pygame.mixer.music.get_volume())
+    

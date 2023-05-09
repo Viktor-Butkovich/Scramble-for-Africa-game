@@ -2,6 +2,7 @@ import pygame
 import time
 import os
 import logging
+import json
 
 import modules.scaling as scaling
 import modules.images as images
@@ -45,11 +46,6 @@ def fundamental_setup(global_manager):
     global_manager.set('default_display_height', 972)
     global_manager.set('display_width', resolution_finder.current_w - round(global_manager.get('default_display_width')/10))
     global_manager.set('display_height', resolution_finder.current_h - round(global_manager.get('default_display_height')/10))
-    #global_manager.set('display_width', 500)
-    #global_manager.set('display_height', 1000)
-    #global_manager.set('display_width', 1000)
-    #global_manager.set('display_height', 500)
-    #global_manager.set('display_height', 800)
     
     start_time = time.time()
     global_manager.set('loading', True)
@@ -139,7 +135,6 @@ def misc_setup(global_manager):
     global_manager.set('building_list', [])
     global_manager.set('slums_list', [])
     global_manager.set('resource_building_list', [])
-    global_manager.set('infrastructure_connection_list', [])
     global_manager.set('officer_list', [])
     global_manager.set('worker_list', [])
     global_manager.set('loan_list', [])
@@ -200,20 +195,8 @@ def misc_setup(global_manager):
     global_manager.set('drawing_automatic_route', False)
     global_manager.set('prosecution_bribed_judge', False)
 
-    global_manager.set('ongoing_exploration', False)
-    global_manager.set('ongoing_trade', False)
-    global_manager.set('ongoing_religious_campaign', False)
-    global_manager.set('ongoing_public_relations_campaign', False)
-    global_manager.set('ongoing_advertising_campaign', False)
-    global_manager.set('ongoing_loan_search', False)
-    global_manager.set('ongoing_conversion', False)
-    global_manager.set('ongoing_rumor_search', False)
-    global_manager.set('ongoing_artifact_search', False)
-    global_manager.set('ongoing_construction', False)
-    global_manager.set('ongoing_combat', False)
-    global_manager.set('ongoing_trial', False)
-    global_manager.set('ongoing_slave_capture', False)
-    global_manager.set('ongoing_slave_trade_suppression', False)
+    global_manager.set('ongoing_action', False)
+    global_manager.set('ongoing_action_type', 'none')
     global_manager.set('game_over', False)
 
     global_manager.set('r_shift', 'up')
@@ -238,7 +221,6 @@ def misc_setup(global_manager):
 
     global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
 
-    #global_manager.set('europe_grid_x', 0)
     global_manager.set('europe_grid_x', global_manager.get('default_display_width') - (strategic_grid_width + 100 + 120 + 25)) 
     #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids
     global_manager.set('europe_grid_y', global_manager.get('default_display_height') - (strategic_grid_height + 25))
@@ -999,9 +981,6 @@ def buttons_setup(global_manager):
     expand_text_box_button = buttons.button(scaling.scale_coordinates(55, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
         'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
 
-    #instructions_button = instructions.instructions_button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
-    #    scaling.scale_height(50, global_manager), 'blue', 'instructions', pygame.K_i, ['strategic', 'europe'], 'buttons/instructions.png', global_manager)
-
     save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
@@ -1182,17 +1161,6 @@ def mob_interface_setup(global_manager):
     actor_display_current_y = actor_display_top_y
     global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
-    #mob info images setup
-    #pmob background image
-    pmob_free_image_background = actor_display_images.mob_background_image('misc/pmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
-    global_manager.get('mob_info_display_list').append(pmob_free_image_background)
-
-    #npmob background image
-    npmob_free_image_background = actor_display_images.mob_background_image('misc/npmob_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'],global_manager)
-    global_manager.get('mob_info_display_list').append(npmob_free_image_background)
-
     #mob background image's tooltip
     mob_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'mob', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
@@ -1201,21 +1169,6 @@ def mob_interface_setup(global_manager):
     #mob image
     mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
-
-    #veteran icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'veteran_icon', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
-
-    #disorganized icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'disorganized_icon', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
-
-    #sentry mode icon image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'sentry_icon', global_manager) #coordinates, width, height, modes, global_manager
     global_manager.get('mob_info_display_list').append(mob_free_image)
     
     fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
@@ -1256,9 +1209,6 @@ def tile_interface_setup(global_manager):
     #tile background image
     actor_display_current_y = global_manager.get('default_display_height') - (580 + 35 + 35)
     global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
-    tile_free_image_background = actor_display_images.mob_background_image('misc/tile_background.png', scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['strategic', 'europe'], global_manager) 
-    global_manager.get('tile_info_display_list').append(tile_free_image_background)
 
     cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_display_current_y + 95, global_manager),
             scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/cycle_passengers_down.png', global_manager)
@@ -1272,18 +1222,9 @@ def tile_interface_setup(global_manager):
     tile_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, global_manager), scaling.scale_height(125, global_manager),
         ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
-
-    tile_info_display_images = ['terrain', 'infrastructure_middle', 'up', 'down', 'right', 'left', 'slums', 'resource', 'resource_building', 'port', 'train_station', 'trading_post', 'mission', 'fort', 'possible_artifact_location']
-    #note: if fog of war seems to be working incorrectly and/or resource icons are not showing, check for typos in above list
-    for current_actor_image_type in tile_info_display_images:
-        if not current_actor_image_type in ['up', 'down', 'right', 'left']:
-            global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-                scaling.scale_height(115, global_manager), ['strategic', 'europe'], current_actor_image_type, global_manager))
-        else:
-            global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_infrastructure_connection_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager),
-                scaling.scale_width(115, global_manager), scaling.scale_height(115, global_manager), ['strategic'], 'infrastructure_connection', current_actor_image_type, global_manager))
-                #coordinates, width, height, modes, actor_image_type, direction, global_manager
-            
+    
+    global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager))
 
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
@@ -1442,70 +1383,18 @@ def debug_tools_setup(global_manager):
     Output:
         None
     '''
-    DEBUG_block_native_warrior_spawning = effects.effect('DEBUG_block_native_warrior_spawning', 'block_native_warrior_spawning', global_manager)
-    #allows villages to spawn native warriors
-    
-    DEBUG_boost_attrition = effects.effect('DEBUG_boost_attrition', 'boost_attrition', global_manager)
-    #increases chance of any attrition occuring by a factor of 6
-    
-    DEBUG_infinite_village_workers = effects.effect('DEBUG_infinite_village_workers', 'infinite_village_workers', global_manager)
-    #converts all villagers to available workers on startup
-    
-    DEBUG_damaged_buildings = effects.effect('DEBUG_damaged_buildings', 'damaged_buildings', global_manager)
-    #causes all buildings to be damaged on startup
-    
-    DEBUG_show_corruption_on_save = effects.effect('DEBUG_show_corruption_on_save', 'show_corruption_on_save', global_manager)
-    #prints the corruption and skill levels of each minister to the console when saving the game
+    file = open('configuration/debug_config.json')
 
-    DEBUG_show_minister_stealing = effects.effect('DEBUG_show_minister_stealing', 'show_minister_stealing', global_manager)
-    #prints information about the value and type of theft and the prosecutor's reaction when minister is corrupt
-
-    DEBUG_show_evil = effects.effect('DEBUG_show_evil', 'show_evil', global_manager)
-    #prints the players 'evil' number at the end of each turn
-
-    DEBUG_show_fear = effects.effect('DEBUG_show_fear', 'show_fear', global_manager)
-    #prints the players 'fear' number at the end of each turn and says when fear dissuades a minister from stealing
-
-    DEBUG_remove_fog_of_war = effects.effect('DEBUG_remove_fog_of_war', 'remove_fog_of_war', global_manager)
-    #reveals all cells
-
-    DEBUG_fast_turn = effects.effect('DEBUG_fast_turn', 'fast_turn', global_manager)
-    #removes end turn delays
-
-    DEBUG_reveal_beasts = effects.effect('DEBUG_reveal_beasts', 'reveal_beasts', global_manager)
-    #reveals beasts on load
-
-    DEBUG_infinite_commodities = effects.effect('DEBUG_infinite_commodities', 'infinite_commodities', global_manager)
-    #gives 10 of each commodity in Europe on new game
-
-    DEBUG_band_of_thieves = effects.effect('DEBUG_band_of_thieves', 'band_of_thieves', global_manager)
-    #causes all ministers to be corrupt whenever possible
-
-    DEBUG_nine_mortal_men = effects.effect('DEBUG_nine_mortal_men', 'nine_mortal_men', global_manager)
-    #causes ministers to roll 1 on all rolls
-
-    DEBUG_ministry_of_magic = effects.effect('DEBUG_ministry_of_magic', 'ministry_of_magic', global_manager)
-    #causes all ministers to never be corrupt and succeed at all rolls, speeds up all dice rolls
-
-    DEBUG_farm_upstate = effects.effect('DEBUG_farm_upstate', 'farm_upstate', global_manager)
-    #retires all appointed ministers at the end of the turn
-
-    DEBUG_show_modifiers = effects.effect('DEBUG_show_modifiers', 'show_modifiers', global_manager)
-    #prints how and when a minister or country modifiers affects a roll
-
-    DEBUG_hide_grid_lines = effects.effect('DEBUG_hide_grid_lines', 'hide_grid_lines', global_manager)
-    #hides interior grid lines
-
-    DEBUG_enable_oceans = effects.effect('DEBUG_enable_oceans', 'enable_oceans', global_manager)
-    #allows water to generate as a normal terrain and removes default river/ocean generation
-
-    DEBUG_skip_intro = effects.effect('DEBUG_skip_intro', 'skip_intro', global_manager)
-    #automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
-    
-    DEBUG_show_lore_mission_locations = effects.effect('DEBUG_show_lore_mission_locations', 'show_lore_mission_locations', global_manager)
-    #prints information about lore missions when first created and on load
-
-    #activate effect with DEBUG_effect.apply()
+    # returns JSON object as a dictionary
+    debug_config = json.load(file)
+    # Iterating through the json list
+    for current_effect in debug_config['effects']:
+        effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
+    for current_effect in debug_config['active_effects']:
+        if global_manager.get('effect_manager').effect_exists(current_effect):
+            global_manager.get('effect_manager').set_effect(current_effect, True)
+        else:
+            print('Invalid effect: ' + current_effect)
 
 def manage_crash(exception):
     '''

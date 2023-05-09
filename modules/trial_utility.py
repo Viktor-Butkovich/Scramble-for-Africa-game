@@ -24,7 +24,8 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     message += 'Along with any money paid for bribery or fabricated evidence, a trial fee of ' + str(global_manager.get('action_prices')['trial']) + ' money is also required. /n /n'
 
     choice_info_dict = {}
-    global_manager.set('ongoing_trial', True)
+    global_manager.set('ongoing_action', True)
+    global_manager.set('ongoing_action_type', 'trial')
     notification_tools.display_choice_notification(message, ['start trial', 'stop trial'], choice_info_dict, global_manager) #creates choice notification to verify starting trial
 
 def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
@@ -263,6 +264,7 @@ def complete_trial(final_roll, global_manager):
         notification_tools.display_notification(text, 'default', global_manager)
         
         defense.appoint('none')
+        minister_utility.calibrate_minister_info_display(global_manager, 'none')
         defense.respond('prison')
         defense.remove()
         global_manager.get('fear_tracker').change(1)
@@ -301,4 +303,5 @@ def complete_trial(final_roll, global_manager):
         notification_tools.display_notification(text, 'default', global_manager)
         minister_utility.calibrate_minister_info_display(global_manager, defense)
     global_manager.set('prosecution_bribed_judge', False)
-    global_manager.set('ongoing_trial', False)
+    global_manager.set('ongoing_action', False)
+    global_manager.set('ongoing_action_type', 'none')
