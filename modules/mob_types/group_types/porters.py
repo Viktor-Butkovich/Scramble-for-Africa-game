@@ -32,12 +32,12 @@ class porters(group):
         self.number = 2 #porters is plural
         self.can_hold_commodities = True
         self.inventory_capacity = 9
-        self.set_group_type('porters')
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
+        self.set_group_type('porters')
 
     def promote(self):
         self.set_max_movement_points(6, False)

@@ -477,7 +477,7 @@ def get_image_variants(base_path, keyword = 'default'):
         string list: Returns list of all images with the same name format in the same folder
     '''
     variants = []
-    if base_path.endswith(keyword + '.png'):
+    if base_path.endswith('default.png'):
         folder_path = base_path.removesuffix('default.png')
         for file_name in os.listdir('graphics/' + folder_path):
             if file_name.startswith(keyword):

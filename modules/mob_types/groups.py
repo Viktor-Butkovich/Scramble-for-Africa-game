@@ -212,6 +212,7 @@ class group(pmob):
             self.set_controlling_minister_type(self.global_manager.get('group_minister_dict')[self.group_type])
         else:
             self.set_controlling_minister_type('none')
+        self.update_image_bundle()
 
     def to_save_dict(self):
         '''
@@ -337,11 +338,10 @@ class group(pmob):
             'y_offset': 0.05,
             'level': -2
         }
-        image_id_list.append(left_worker_dict)
 
         right_worker_dict = left_worker_dict.copy()
+        right_worker_dict['image_id'] = self.worker.image_variants[self.worker.second_image_variant]
         right_worker_dict['x_offset'] *= -1
-        image_id_list.append(right_worker_dict)
 
         officer_dict = {
             'image_id': self.officer.image_dict['default'],
@@ -350,5 +350,21 @@ class group(pmob):
             'y_offset': -0.05,
             'level': -1
         }
+
+        if self.is_battalion:
+            left_worker_dict['image_id'] = self.worker.image_dict['soldier']
+            right_worker_dict['image_id'] = self.worker.image_dict['soldier']
+            left_worker_uniform_dict = left_worker_dict.copy()
+            left_worker_uniform_dict['image_id'] = 'misc/country_uniforms/' + self.global_manager.get('current_country').adjective + '.png'
+            right_worker_uniform_dict = right_worker_dict.copy()
+            right_worker_uniform_dict['image_id'] = 'misc/country_uniforms/' + self.global_manager.get('current_country').adjective + '.png'
+        elif self.can_hold_commodities:
+            left_worker_dict['image_id'] = self.worker.image_dict['porter']
+            right_worker_dict['image_id'] = self.worker.image_dict['porter']
+        image_id_list.append(left_worker_dict)
+        image_id_list.append(right_worker_dict)
+        if self.is_battalion:
+            image_id_list.append(left_worker_uniform_dict)
+            image_id_list.append(right_worker_uniform_dict)
         image_id_list.append(officer_dict)
         return(image_id_list)

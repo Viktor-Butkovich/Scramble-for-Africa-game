@@ -37,7 +37,6 @@ class battalion(group):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.set_group_type('battalion')
         self.is_battalion = True
         if self.worker.worker_type == 'European':
             self.battalion_type = 'imperial'
@@ -45,6 +44,7 @@ class battalion(group):
             self.battalion_type = 'colonial'
         self.attack_cost = self.global_manager.get('action_prices')['attack']
         self.attack_mark_list = []
+        self.set_group_type('battalion')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
@@ -659,7 +659,6 @@ class safari(battalion):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)    
-        self.set_group_type('safari')
         self.is_battalion = False
         self.is_safari = True
         self.can_swim = True
@@ -673,6 +672,7 @@ class safari(battalion):
         
         self.battalion_type = 'none'
         self.attack_cost = self.global_manager.get('action_prices')['hunting']
+        self.set_group_type('safari')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 

@@ -266,6 +266,23 @@ class worker(pmob):
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') - 1)
         self.global_manager.get('money_label').check_for_updates()
 
+    def image_variants_setup(self, from_save, input_dict):
+        '''
+        Description:
+            Sets up this unit's image variants
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+        Output:
+            None
+        '''
+        if not input_dict['worker_type'] == 'religious':
+            for variant_type in ['soldier', 'porter']: #adds image_dict['soldier']: '.../soldier.png' and image_dict['porter']: '.../porter.png' if any are present in folders
+                variants = actor_utility.get_image_variants(self.image_dict['default'], keyword = variant_type)
+                if len(variants) > 0:
+                    self.image_dict[variant_type] = random.choice(variants)
+        super().image_variants_setup(from_save, input_dict)
+
     def get_image_id_list(self):
         '''
         Description:
