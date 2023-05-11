@@ -332,7 +332,25 @@ class trade_notification(action_notification):
             self.notification_images.append(free_image('scenery/resources/trade/sold consumer goods.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             if self.trade_result[3]: #if gets available worker
-                self.notification_images.append(free_image('mobs/African workers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
+                background_dict = {
+                    'image_id': 'mobs/default/button.png',
+                    'size': 1,
+                    'x_offset': 0,
+                    'y_offset': 0,
+                    'level': -10
+                } 
+                left_worker_dict = {
+                    'image_id': 'mobs/African workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+                button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
+            
+                self.notification_images.append(free_image(button_image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
                     scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
         elif self.dies:
             self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
@@ -393,7 +411,24 @@ class religious_campaign_notification(action_notification):
         self.is_last = is_last
         if self.is_last: #if last, show result
             self.notification_images = []
-            self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            background_dict = {
+                'image_id': 'mobs/default/button.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            } 
+            left_worker_dict = {
+                'image_id': 'mobs/church_volunteers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
+            self.notification_images.append(free_image(button_image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes
