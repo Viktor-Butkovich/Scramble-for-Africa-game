@@ -477,6 +477,7 @@ class mob(actor):
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
+        old_image_id = self.images[0].image_id
         for current_image in self.images:
             current_image.remove_from_cell()
             self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
@@ -487,7 +488,7 @@ class mob(actor):
             self.grids.append(new_grid.mini_grid)
         self.images = []
         for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, old_image_id, self.global_manager))
             self.images[-1].add_to_cell()
             
     def select(self):

@@ -307,7 +307,7 @@ class pmob(mob):
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
         image_id_list = super().get_image_id_list()
-        if self.is_officer or self.is_group and self.veteran:
+        if (self.is_officer or self.is_group) and self.veteran:
             image_id_list.append('misc/veteran_icon.png')
         if self.sentry_mode:
             image_id_list.append('misc/sentry_icon.png')
@@ -766,6 +766,7 @@ class pmob(mob):
         self.add_to_turn_queue()
         if self.global_manager.get('minimap_grid') in self.grids:
             self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+        #self.update_image_bundle()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
         self.global_manager.get('sound_manager').play_sound('footsteps')
 
