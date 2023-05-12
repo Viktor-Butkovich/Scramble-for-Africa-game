@@ -383,7 +383,7 @@ SFA folder
 	    	def positions_filled
 
 		ministers.py
-	    	imports random, utility, minister_utility, notification_tools, images, scaling, text_tools
+	    	imports random, utility, actor_utility, minister_utility, notification_tools, images, scaling, text_tools
 	    	class minister
 
         mobs.py

@@ -3,6 +3,7 @@
 import random
 
 from . import utility
+from . import actor_utility
 from . import minister_utility
 from . import notification_tools
 from . import images
@@ -40,6 +41,8 @@ class minister():
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
+        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair']
+        self.portrait_sections = {}
         if from_save:
             self.name = input_dict['name']
             self.current_position = input_dict['current_position']
@@ -55,7 +58,8 @@ class minister():
             self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
-            self.image_id = input_dict['image_id']
+            self.portrait_sections = input_dict['portrait_sections']
+            self.update_image_bundle()
             self.stolen_money = input_dict['stolen_money']
             self.corruption_evidence = input_dict['corruption_evidence']
             self.fabricated_evidence = input_dict['fabricated_evidence']
@@ -65,7 +69,6 @@ class minister():
                 self.appoint(self.current_position)
             else:
                 self.global_manager.get('available_minister_list').append(self)
-                minister_utility.update_available_minister_display(self.global_manager)
         else:
             self.background = random.choice(global_manager.get('weighted_backgrounds'))
             self.name = self.global_manager.get('flavor_text_manager').generate_minister_name(self.background)
@@ -79,13 +82,16 @@ class minister():
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
-            self.image_id = random.choice(self.global_manager.get('minister_portraits'))
+            for image_type in self.portrait_section_types :
+                possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
+                self.portrait_sections[image_type] = random.choice(possible_sections)
+            self.update_image_bundle()
             self.stolen_money = 0
             self.corruption_evidence = 0
             self.fabricated_evidence = 0
             self.just_removed = False
-                
-            minister_utility.update_available_minister_display(self.global_manager)
+            
+        minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
         self.update_tooltip()
 
@@ -192,11 +198,11 @@ class minister():
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
                 'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
-                'image_id': string value - File path to the image used by this minister
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
                 'just_removed': boolean value - Whether this minister was just removed from office and will be fired at the end of the turn
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
+                'portrait_sections': string list value - List of image file paths for each of this minister's portrait sections
         '''    
         save_dict = {}
         save_dict['name'] = self.name
@@ -205,14 +211,32 @@ class minister():
         save_dict['specific_skills'] = self.specific_skills
         save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
-        save_dict['image_id'] = self.image_id
         save_dict['stolen_money'] = self.stolen_money
         save_dict['corruption_evidence'] = self.corruption_evidence
         save_dict['fabricated_evidence'] = self.fabricated_evidence
         save_dict['just_removed'] = self.just_removed
         save_dict['background'] = self.background
         save_dict['personal_savings'] = self.personal_savings
+        save_dict['portrait_sections'] = self.portrait_sections
         return(save_dict)
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = []
+        for portrait_section_type in self.portrait_section_types:
+            image_id_list.append(self.portrait_sections[portrait_section_type])
+        return(image_id_list)
+
+    def update_image_bundle(self):
+        self.image_id = self.get_image_id_list()
 
     def roll(self, num_sides, min_success, max_crit_fail, value, roll_type, predetermined_corruption = False):
         '''
