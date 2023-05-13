@@ -41,7 +41,7 @@ class minister():
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
-        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'portrait']
+        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
         self.portrait_sections = {}
         if from_save:
             self.name = input_dict['name']
@@ -82,8 +82,18 @@ class minister():
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
-            for image_type in self.portrait_section_types :
-                possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
+            hair_color = random.choice(['black', 'brown'])
+            for image_type in self.portrait_section_types:
+                if image_type in ['hair', 'facial_hair']:
+                    possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', hair_color)
+                    if image_type == 'facial_hair':
+                        if random.randrange(0, 5) == 0:
+                            possible_sections = ['misc/empty.png']
+                    elif image_type == 'hair':
+                        if random.randrange(0, 10) == 0:
+                            possible_sections = ['misc/empty.png']
+                else:
+                    possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
                 self.portrait_sections[image_type] = random.choice(possible_sections)
             self.update_image_bundle()
             self.stolen_money = 0
