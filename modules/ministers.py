@@ -41,7 +41,7 @@ class minister():
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
-        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair']
+        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'portrait']
         self.portrait_sections = {}
         if from_save:
             self.name = input_dict['name']
