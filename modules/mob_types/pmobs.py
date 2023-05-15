@@ -1075,7 +1075,7 @@ class pmob(mob):
             if combat_type == 'attacking':
                 if len(enemy.images[0].current_cell.contained_mobs) > 2: #len == 2 if only attacker and defender in tile
                     self.retreat() #attacker retreats in draw or if more defenders remaining
-                elif not self.movement_points + 1 >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
+                elif not self.movement_points >= self.get_movement_cost(0, 0, True): #if can't afford movement points to stay in attacked tile
                     notification_tools.display_notification('While the attack was successful, this unit did not have the ' + str(self.get_movement_cost(0, 0, True)) + ' movement points required to fully move into the attacked tile and was forced to withdraw. /n /n',
                         'default', self.global_manager)
                     self.retreat()

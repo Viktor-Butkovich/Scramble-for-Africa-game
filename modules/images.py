@@ -897,7 +897,7 @@ class actor_image(image):
         Output:
             None
         '''
-        if isinstance(new_image_description, str):
+        if isinstance(new_image_description, str) and new_image_description in self.actor.image_dict:
             self.image_description = new_image_description
             self.image_id = self.actor.image_dict[new_image_description]
         else:

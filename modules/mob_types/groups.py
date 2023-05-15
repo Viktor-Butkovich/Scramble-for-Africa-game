@@ -355,9 +355,9 @@ class group(pmob):
             left_worker_dict['image_id'] = self.worker.image_dict['soldier']
             right_worker_dict['image_id'] = self.worker.image_dict['soldier']
             left_worker_uniform_dict = left_worker_dict.copy()
-            left_worker_uniform_dict['image_id'] = 'misc/country_uniforms/' + self.global_manager.get('current_country').adjective + '.png'
+            left_worker_uniform_dict['image_id'] = 'misc/country_uniforms/soldier/' + self.global_manager.get('current_country').adjective + '.png'
             right_worker_uniform_dict = right_worker_dict.copy()
-            right_worker_uniform_dict['image_id'] = 'misc/country_uniforms/' + self.global_manager.get('current_country').adjective + '.png'
+            right_worker_uniform_dict['image_id'] = 'misc/country_uniforms/soldier/' + self.global_manager.get('current_country').adjective + '.png'
         elif self.can_hold_commodities:
             left_worker_dict['image_id'] = self.worker.image_dict['porter']
             right_worker_dict['image_id'] = self.worker.image_dict['porter']
