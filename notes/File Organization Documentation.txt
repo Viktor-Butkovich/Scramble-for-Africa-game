@@ -224,6 +224,8 @@ SFA folder
 		    class end_turn_button
 	        	class cycle_same_tile_button
 	        	class same_tile_icon
+				class fire_unit_button
+				class free_unit_slaves_button
 	        	class switch_game_mode_button
 	        	class minister_portrait_image
 				class country_selection_image

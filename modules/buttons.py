@@ -513,8 +513,8 @@ class button():
             self.set_tooltip(['Bribes the judge of the next trial this turn for ' + str(self.get_cost()) + ' money',
                               'While having unpredictable results, bribing the judge may swing the trial in your favor or blunt the defense\'s efforts to do the same'])
 
-        elif self.button_type == 'fire':
-            self.set_tooltip(['Removes this unit, any units attached to it, and their associated upkeep'])
+        elif self.button_type == 'free all':
+            self.set_tooltip(['Frees all slaves from your company, converting them to workers'])
 
         elif self.button_type == 'hire village worker':
             actor_utility.update_recruitment_descriptions(self.global_manager, 'village workers')
@@ -1099,6 +1099,33 @@ class button():
                 fired_unit = self.global_manager.get('displayed_mob')
                 fired_unit.fire()
 
+            elif self.button_type == 'free':
+                displayed_mob = self.global_manager.get('displayed_mob')
+                if displayed_mob.is_group:
+                    displayed_mob.replace_worker('African')
+                elif displayed_mob.is_worker:
+                    displayed_mob.free_and_replace()
+
+            elif self.button_type == 'free all':
+                actor_utility.deselect_all(self.global_manager)
+                pmob_list = utility.copy_list(self.global_manager.get('pmob_list')) #alllows iterating through each unit without any issues from removing from list during iteration
+                old_public_opinion = self.global_manager.get('public_opinion')
+                num_freed = 0
+                for current_pmob in pmob_list:
+                    if current_pmob.is_group and current_pmob.worker.worker_type == 'slave':
+                        num_freed += 1
+                        current_pmob.replace_worker('African')
+                    elif current_pmob.is_worker and (not current_pmob.in_group) and current_pmob.worker_type == 'slave':
+                        num_freed += 1
+                        current_pmob.free_and_replace()
+                public_opinion_increase = self.global_manager.get('public_opinion') - old_public_opinion
+                if num_freed > 0:
+                    message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
+                    message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
+                    notification_tools.display_notification(message, 'default', self.global_manager)
+                else:
+                    text_tools.print_to_screen('Your company has no slaves to free.', self.global_manager)
+
             elif self.button_type == 'stop exploration':
                 actor_utility.stop_exploration(self.global_manager)
 
@@ -1378,7 +1405,6 @@ class cycle_same_tile_button(button):
                 if len(displayed_tile.cell.contained_mobs) >= 4:
                     return(True)
         return(False)
-    
 
 class same_tile_icon(button):
     '''
@@ -1403,12 +1429,24 @@ class same_tile_icon(button):
         '''
         self.attached_mob = 'none'
         super().__init__(coordinates, width, height, color, 'same tile', 'none', modes, image_id, global_manager)
-        self.old_contained_mobs = []#selected_list = []
+        self.old_contained_mobs = []
         self.default_image_id = image_id
         self.index = index
         self.is_last = is_last
         if self.is_last:
             self.name_list = []
+        self.global_manager.get('same_tile_icon_list').append(self)
+
+    def reset(self):
+        '''
+        Description:
+            Resets this icon when a new tile is selected, forcing it to re-calibrate with any new units
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.resetting = True
 
     def on_click(self):
         '''
@@ -1472,7 +1510,8 @@ class same_tile_icon(button):
         if self.can_show():
             if not self.global_manager.get('displayed_tile') == 'none':
                 new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
-                if not new_contained_mobs == self.old_contained_mobs:
+                if (not new_contained_mobs == self.old_contained_mobs) or self.resetting:
+                    self.resetting = False
                     self.old_contained_mobs = []
                     for current_item in new_contained_mobs:
                         self.old_contained_mobs.append(current_item)
@@ -1544,7 +1583,6 @@ class fire_unit_button(button):
         '''
         self.attached_mob = 'none'
         super().__init__(coordinates, width, height, color, 'fire unit', 'none', modes, image_id, global_manager)
-        self.old_contained_mobs = []#selected_list = []
 
     def on_click(self):
         '''
@@ -1611,6 +1649,81 @@ class fire_unit_button(button):
                 tooltip_text.append('Once fired, this unit will cost no longer cost upkeep')
             elif self.attached_mob.is_vehicle:
                 tooltip_text.append('Firing this unit will also fire all of its passengers.')
+            self.set_tooltip(tooltip_text)
+
+class free_unit_slaves_button(button):
+    '''
+    Button that frees any slaves in the selected unit and immediately recruits them as African workers
+    '''
+    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
+            int width: Pixel width of this button
+            int height: Pixel height of this button
+            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+            string list modes: Game modes during which this button can appear
+            string image_id: File path to the image used by this object
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.attached_mob = 'none'
+        super().__init__(coordinates, width, height, color, 'free unit slaves', 'none', modes, image_id, global_manager)
+
+    def on_click(self):
+        '''
+        Description:
+            Controls this button's behavior when clicked. This type of button fires the selected unit
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
+                    self.showing_outline = True
+                    message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
+                    notification_tools.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not free slaves', self.global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if there is a selected unit, otherwise returns False
+        '''
+        if super().can_show():
+            if not self.attached_mob == self.global_manager.get('displayed_mob'):
+                self.attached_mob = self.global_manager.get('displayed_mob')
+            if not self.attached_mob == 'none':
+                if self.attached_mob.controllable:
+                    if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
+                        return(True)
+        return(False)
+
+    def update_tooltip(self):
+        '''
+        Description:
+            Sets this button's tooltip to what it should be, depending on its button_type. This type of button describes how firing units works
+        Input:
+            None
+        Output:
+            None
+        '''
+        if not self.can_show():
+            self.set_tooltip([])
+        else:
+            tooltip_text = ['Click to free this unit']
+            if self.attached_mob.is_group or self.attached_mob.is_worker:
+                tooltip_text.append('Once freed, this unit\'s slaves will be converted to free African workers with any associated upkeep')
             self.set_tooltip(tooltip_text)
 
 class switch_game_mode_button(button):

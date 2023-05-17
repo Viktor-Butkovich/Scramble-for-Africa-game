@@ -69,14 +69,15 @@ class pmob(mob):
         else:
             self.default_name = self.name
             self.set_max_movement_points(4)
-            actor_utility.deselect_all(self.global_manager)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
             self.set_sentry_mode(False)
             self.set_automatically_replace(True)
             self.add_to_turn_queue()
             self.base_automatic_route = [] #first item is start of route/pickup, last item is end of route/dropoff
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
-            self.select()
+            actor_utility.deselect_all(self.global_manager)
+            if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+                self.select()
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -285,6 +286,10 @@ class pmob(mob):
         '''
         Description:
             Sets this unit's automatically replace status
+        Input:
+            boolean new_value: New automatically replace value
+        Output:
+            None
         '''
         if self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
             text_tools.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
@@ -702,12 +707,13 @@ class pmob(mob):
         else:
             return(super().can_show_tooltip())
 
-    def embark_vehicle(self, vehicle):
+    def embark_vehicle(self, vehicle, focus = True):
         '''
         Description:
             Hides this mob and embarks it on the inputted vehicle as a passenger. Any commodities held by this mob are put on the vehicle if there is cargo space, or dropped in its tile if there is no cargo space
         Input:
             vehicle vehicle: vehicle that this mob becomes a passenger of
+            boolean focus = False: Whether this action is being "focused on" by the player or done automatically
         Output:
             None
         '''
@@ -727,18 +733,19 @@ class pmob(mob):
         self.inventory_setup() #empty own inventory
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
-        if not vehicle.initializing: #don't select vehicle if loading in at start of game
+        if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
             vehicle.select()
         if not self.global_manager.get('loading_save'):
             self.global_manager.get('sound_manager').play_sound('footsteps')
         self.clear_automatic_route()
 
-    def disembark_vehicle(self, vehicle):
+    def disembark_vehicle(self, vehicle, focus = True):
         '''
         Description:
             Shows this mob and disembarks it from the inputted vehicle after being a passenger
         Input:
             vehicle vehicle: vehicle that this mob disembarks from
+            boolean focus = False: Whether this action is being "focused on" by the player or done automatically
         Output:
             None
         '''
@@ -761,14 +768,15 @@ class pmob(mob):
                 vehicle.change_inventory('consumer goods', -1 * consumer_goods_transferred)
                 self.change_inventory('consumer goods', consumer_goods_transferred)
                 text_tools.print_to_screen(utility.capitalize(self.name) + ' automatically took ' + str(consumer_goods_transferred) + ' consumer goods from ' + vehicle.name + '\'s cargo.', self.global_manager)
-                
-        self.select()
+
         self.add_to_turn_queue()
-        if self.global_manager.get('minimap_grid') in self.grids:
-            self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
-        #self.update_image_bundle()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
-        self.global_manager.get('sound_manager').play_sound('footsteps')
+        if focus:
+            self.select()
+            if self.global_manager.get('minimap_grid') in self.grids:
+                self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
+            #self.update_image_bundle()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
         '''
@@ -1055,7 +1063,6 @@ class pmob(mob):
                 text += ' This safari\'s hunter is now a veteran. /n /n'
         notification_tools.display_notification(text + ' Click to remove this notification.', 'final_combat', self.global_manager)
         self.global_manager.set('combat_result', [self, conclusion])
-
 
     def complete_combat(self):
         '''

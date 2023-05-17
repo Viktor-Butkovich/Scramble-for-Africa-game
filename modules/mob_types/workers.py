@@ -51,9 +51,10 @@ class worker(pmob):
                 
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
-            self.selection_sound()
             self.second_image_variant = random.randrange(0, len(self.image_variants))
+            if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+                self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()
         self.update_image_bundle()
 
@@ -116,7 +117,7 @@ class worker(pmob):
 
         elif self.worker_type == 'religious':
             text_tools.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.', self.global_manager)
-            
+
     def to_save_dict(self):
         '''
         Description:
@@ -132,7 +133,7 @@ class worker(pmob):
         save_dict['worker_type'] = self.worker_type
         return(save_dict)
 
-    def fire(self):
+    def fire(self, wander = True):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Additionally has a chance to decrease the upkeep of other workers of this worker's type by increasing the size of
@@ -145,10 +146,10 @@ class worker(pmob):
         super().fire()
         if self.worker_type in ['African', 'European']: #not religious volunteers
             market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
-        if self.worker_type == 'African':
+        if self.worker_type == 'African' and wander:
             text_tools.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
-        if self.worker_type in ['European', 'religious']:
+        elif self.worker_type in ['European', 'religious']:
             current_public_opinion = self.global_manager.get('public_opinion')
             self.global_manager.get('public_opinion_tracker').change(-1)
             resulting_public_opinion = self.global_manager.get('public_opinion')
@@ -364,7 +365,7 @@ class slave_worker(worker):
         if self.global_manager.get('slave_traders_strength') <= 0:
             self.automatically_replace = False
 
-    def fire(self):
+    def fire(self, wander = True):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. Firing a slave worker unit also frees them, increasing public opinion and adding them to the labor pool
@@ -373,7 +374,15 @@ class slave_worker(worker):
         Output:
             None
         '''
-        super().fire()
+        super().fire(wander)
+        self.free(wander)
+
+    def free(self, wander = True):
+        '''
+        Description:
+            Frees this slave, increasing public opinion and adding them to the labor pool, followed by either re-recruiting them as African workers or allowing them to wander and settle in 
+                slums
+        '''
         market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
         public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
         current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
@@ -381,9 +390,31 @@ class slave_worker(worker):
         resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
         if not resulting_public_opinion == current_public_opinion:
             text_tools.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-        text_tools.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
+        if wander:
+            text_tools.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
+            self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
         self.global_manager.get('evil_tracker').change(-2)
-        self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
+
+    def free_and_replace(self):
+        '''
+        Description:
+            Frees this slave and immediately recruits them as an African worker, only usable when not in a group
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.x, self.y)
+        input_dict['grids'] = self.grids
+        input_dict['modes'] = self.modes
+        input_dict['image'] = 'mobs/African workers/default.png'
+        input_dict['name'] = 'African workers'
+        input_dict['init_type'] = 'workers'
+        input_dict['worker_type'] = 'African'
+        input_dict['select_on_creation'] = self.selected
+        new_worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_worker.set_automatically_replace(self.automatically_replace)
+        if self.in_vehicle:
+            new_worker.embark_vehicle(self.vehicle, focus = False)
+            self.disembark_vehicle(self.vehicle, focus = False)
+        self.fire(wander = False)
         
     def remove(self):
         '''

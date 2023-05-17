@@ -70,6 +70,53 @@ class group(pmob):
         self.set_group_type('none')
         self.update_image_bundle()
 
+    def replace_worker(self, new_worker_type):
+        '''
+        Description:
+            Fires this group's current worker and replaces it with a worker of the inputted type, affecting worker upkeep prices and public opinion as usual
+        Input:
+            string new_worker_type: New type of worker to create
+        Output:
+            None
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (self.x, self.y)
+        input_dict['grids'] = self.grids
+        input_dict['modes'] = self.modes
+        if new_worker_type == 'European':
+            input_dict['image'] = 'mobs/European workers/default.png'
+            input_dict['name'] = 'European workers'
+            input_dict['init_type'] = 'workers'
+            input_dict['worker_type'] = 'European'
+        elif new_worker_type == 'African':
+            input_dict['image'] = 'mobs/African workers/default.png'
+            input_dict['name'] = 'African workers'
+            input_dict['init_type'] = 'workers'
+            input_dict['worker_type'] = 'African'
+        elif new_worker_type == 'slaves':
+            self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
+            input_dict['image'] = 'mobs/slave workers/default.png'
+            input_dict['name'] = 'slave workers'
+            input_dict['init_type'] = 'slaves'
+            input_dict['purchased'] = False
+        previous_selected = self.global_manager.get('displayed_mob')#self.selected
+        new_worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
+        new_worker.set_automatically_replace(self.worker.automatically_replace)
+        self.worker.fire(wander = False)
+        self.worker = new_worker
+        self.worker.update_image_bundle()
+        self.worker.join_group()
+        self.update_image_bundle()
+        if previous_selected == self:
+            self.select()
+        elif previous_selected != 'none':
+            previous_selected.select()
+        else:
+            actor_utility.deselect_all(self.global_manager)
+
+        if self.images[0].current_cell != 'none' and self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+
     def move(self, x_change, y_change):
         '''
         Description:

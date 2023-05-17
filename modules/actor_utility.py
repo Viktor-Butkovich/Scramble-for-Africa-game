@@ -344,6 +344,8 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     '''
     #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
     if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
+        for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+            current_same_tile_icon.reset()
         global_manager.set('displayed_tile', new_actor)
         if not new_actor == 'none':
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
@@ -357,7 +359,7 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
 def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
     '''
     Description:
-        Changes locations of actor display labels to put all visible labels in order
+        Changes locations of actor display labels to put all visible labels in order, used by main_loop_tools in update_display
     Input:
         global_manager_template global_manager: Object that accesses shared variables
         actor_match_label list info_display_list: All actor match labels associated with either mobs or tiles to put in order
