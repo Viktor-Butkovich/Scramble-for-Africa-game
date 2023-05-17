@@ -226,7 +226,7 @@ class off_tile_exploration_notification(action_notification):
         public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
 
-        image_id_list = explored_tile.get_image_id_list(force_visibility = True)
+        #image_id_list = explored_tile.get_image_id_list(force_visibility = True)
 
         if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
             explored_terrain_image_id = explored_cell.tile.image_dict['default']
@@ -234,6 +234,7 @@ class off_tile_exploration_notification(action_notification):
         elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
             explored_terrain_image_id = explored_cell.tile.image.image_id
             new_visibility = explored_cell.visible
+        image_id_list = explored_tile.get_image_id_list(force_visibility = new_visibility)
         
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))

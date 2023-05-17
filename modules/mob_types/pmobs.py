@@ -291,7 +291,7 @@ class pmob(mob):
         Output:
             None
         '''
-        if self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
+        if new_value == True and self.is_worker and self.worker_type == 'slave' and self.global_manager.get('slave_traders_strength') <= 0:
             text_tools.print_to_screen('The slave trade has been eradicated and automatic replacement of slaves is no longer possible', self.global_manager)
             return()
         self.automatically_replace = new_value
