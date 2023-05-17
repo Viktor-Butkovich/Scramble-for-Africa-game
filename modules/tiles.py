@@ -62,6 +62,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         else:
             self.terrain = 'none'
         self.update_tooltip()
+        self.update_image_bundle()
 
     def draw_destination_outline(self, color = 'default'): #called directly by mobs
         '''
@@ -209,6 +210,18 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list = equivalent_tile.get_image_id_list()
             else:
                 image_id_list.append(self.image_dict['default']) #blank void image if outside of matched area
+        elif self.cell.grid.is_abstract_grid and self.cell.tile.name == 'Slave traders':
+            image_id_list.append(self.image_dict['default'])
+            strength_modifier = actor_utility.get_slave_traders_strength_modifier(self.global_manager)
+            if strength_modifier == 'none':
+                adjective = 'no'
+            elif strength_modifier < 0:
+                adjective = 'high'
+            elif strength_modifier > 0:
+                adjective = 'low'
+            else:
+                adjective = 'normal'
+            image_id_list.append('locations/slave_traders/' + adjective + '_strength.png')
         else:
             if self.cell.visible or force_visibility: #force visibility shows full tile even if tile is not yet visible
                 image_id_list.append({'image_id': self.image_dict['default'], 'size': 1, 'x_offset': 0, 'y_offset': 0, 'level': -9})
@@ -398,7 +411,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             None
         '''
         if self.global_manager.get('player_turn') and main_loop_tools.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
-            if self.name == 'Slave traders':
+            if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
                 if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
                     self.global_manager.get('event_manager').clear()
                     self.global_manager.get('sound_manager').play_random_music('slave traders')

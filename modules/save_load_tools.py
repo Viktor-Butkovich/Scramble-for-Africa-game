@@ -140,7 +140,7 @@ class save_load_manager_template():
         input_dict['internal_line_color'] = 'black'
         input_dict['external_line_color'] = 'black'
         input_dict['modes'] = ['strategic']
-        input_dict['tile_image_id'] = 'locations/slave_traders.png' 
+        input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
         input_dict['grid_line_width'] = 3
         input_dict['name'] = 'Slave traders'
         slave_traders_grid = grids.abstract_grid(False, input_dict, self.global_manager)
@@ -177,7 +177,8 @@ class save_load_manager_template():
         self.global_manager.get('fear_tracker').set(1)
 
         self.global_manager.set('slave_traders_natural_max_strength', 10) #regenerates to natural strength, can increase indefinitely when slaves are purchased
-        self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_natural_max_strength'))
+        actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_natural_max_strength'), self.global_manager)
+        #self.global_manager.set('slave_traders_strength', )
         self.global_manager.set('player_turn', True)
         self.global_manager.set('previous_financial_report', 'none')
 
@@ -357,7 +358,7 @@ class save_load_manager_template():
                 else:
                     input_dict['modes'] = ['strategic']
                     input_dict['origin_coordinates'] = scaling.scale_coordinates(slave_traders_grid_x, slave_traders_grid_y, self.global_manager)
-                    input_dict['tile_image_id'] = 'locations/slave_traders.png' 
+                    input_dict['tile_image_id'] = 'locations/slave_traders/default.png' 
                     input_dict['name'] = 'Slave traders'
                     slave_traders_grid = grids.abstract_grid(True, input_dict, self.global_manager)
                     self.global_manager.set('slave_traders_grid', slave_traders_grid)
@@ -381,7 +382,7 @@ class save_load_manager_template():
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
-
+        actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength'), self.global_manager)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

@@ -200,6 +200,8 @@ SFA folder
 			def get_num_available_workers
 			def generate_resource_icon
 			def get_image_variants
+			def get_slave_traders_strength_modifier
+			def set_slave_traders_strength
 
         actors.py
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools

@@ -253,7 +253,8 @@ def manage_slave_traders(global_manager):
     '''
     if global_manager.get('slave_traders_strength') < global_manager.get('slave_traders_natural_max_strength') and global_manager.get('slave_traders_strength') > 0: 
         #if below natural max but not eradicated
-        global_manager.set('slave_traders_strength', global_manager.get('slave_traders_strength') + 1)
+        actor_utility.set_slave_traders_strength(global_manager.get('slave_traders_strength') + 1, global_manager)
+        #global_manager.set('slave_traders_strength', global_manager.get('slave_traders_strength') + 1)
 
 def manage_public_opinion(global_manager):
     '''

@@ -490,3 +490,40 @@ def get_image_variants(base_path, keyword = 'default'):
     else:
         variants.append(base_path)
     return(variants)
+
+def get_slave_traders_strength_modifier(global_manager):
+    '''
+    Description:
+        Calculates and returns the inverse difficulty modifier for actions related to the slave traders, with a positive modifier making rolls easier
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        string/int: Returns slave traders inverse difficulty modifier, or 'none' if the strength is 0
+    '''
+    strength = global_manager.get('slave_traders_strength')
+    if strength == 0:
+        strength_modifier = 'none'
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
+        strength_modifier = -1
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
+        strength_modifier = 0
+    else:
+        strength_modifier = 1
+    return(strength_modifier)
+
+def set_slave_traders_strength(new_strength, global_manager):
+    '''
+    Description:
+        Sets the strength of the slave traders
+    Input:
+        int new_strength: New slave traders strength value
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if new_strength < 0:
+        new_strength = 0
+    global_manager.set('slave_traders_strength', new_strength)
+    if global_manager.has('slave_traders_grid'):
+        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
+        slave_traders_tile.update_image_bundle()

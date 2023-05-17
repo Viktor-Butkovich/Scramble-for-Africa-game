@@ -627,8 +627,9 @@ class mob(actor):
         '''
         if self.selected:
             self.selected = False
+        if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()

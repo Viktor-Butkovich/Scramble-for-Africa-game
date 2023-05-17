@@ -822,7 +822,7 @@ def transactions_setup(global_manager):
         transaction_types.append(current_key)
     global_manager.set('transaction_types', transaction_types)
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
-    global_manager.set('slave_traders_strength', 0)
+    actor_utility.set_slave_traders_strength(0, global_manager)
 
 def lore_setup(global_manager):
     '''
@@ -1236,7 +1236,8 @@ def tile_interface_setup(global_manager):
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
                                 'resource building', 'building efficiency', 'building work crews', 'current building work crew',
-                                'village', 'native population', 'native available workers', 'native aggressiveness']
+                                'village', 'native population', 'native available workers', 'native aggressiveness',
+                                'slave_traders_strength']
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type == 'current building work crew':
             x_displacement = 50

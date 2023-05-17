@@ -322,9 +322,8 @@ class recruitment_choice_button(choice_button):
             None
         '''
         if self.can_show():
-            input_dict = {}
+            input_dict = {'select_on_creation': True}
             if self.recruitment_type == 'slave workers':
-                input_dict = {}
                 self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
                 input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
                 attached_cell = input_dict['grids'][0].cell_list[0]
