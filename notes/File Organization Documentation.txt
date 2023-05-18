@@ -200,6 +200,8 @@ SFA folder
 			def get_num_available_workers
 			def generate_resource_icon
 			def get_image_variants
+			def get_slave_traders_strength_modifier
+			def set_slave_traders_strength
 
         actors.py
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools
@@ -224,6 +226,8 @@ SFA folder
 		    class end_turn_button
 	        	class cycle_same_tile_button
 	        	class same_tile_icon
+				class fire_unit_button
+				class free_unit_slaves_button
 	        	class switch_game_mode_button
 	        	class minister_portrait_image
 				class country_selection_image
@@ -383,7 +387,7 @@ SFA folder
 	    	def positions_filled
 
 		ministers.py
-	    	imports random, utility, minister_utility, notification_tools, images, scaling, text_tools
+	    	imports random, utility, actor_utility, minister_utility, notification_tools, images, scaling, text_tools
 	    	class minister
 
         mobs.py

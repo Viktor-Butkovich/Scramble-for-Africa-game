@@ -49,6 +49,17 @@ class global_manager_template():
         '''
         self.global_dict[name] = value
 
+    def has(self, name):
+        '''
+        Description:
+            Returns whether the inputted value is a key in this object's dictionary
+        Input:
+            string name: Name of a key to search for in this object's dictionary
+        Output:
+            boolean: Returns whether the inputted key is in this object's dictionary 
+        '''
+        return(name in self.global_dict)
+
 class input_manager_template():
     '''
     Object designed to manage the passing of typed input from the text box to different parts of the program

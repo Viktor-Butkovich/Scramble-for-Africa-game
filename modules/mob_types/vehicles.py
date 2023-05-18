@@ -67,6 +67,14 @@ class vehicle(pmob):
             self.remove_from_turn_queue()
 
     def set_crew(self, new_crew): #continue adding set_crew
+        '''
+        Description:
+            Sets this vehicle's crew to the inputted workers
+        Input:
+            worker new_crew: New crew for this vehicle
+        Output:
+            None
+        '''
         self.crew = new_crew
         if new_crew == 'none':
             self.has_crew = False
@@ -77,6 +85,15 @@ class vehicle(pmob):
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
 
     def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
         image_id_list = super().get_image_id_list()
         if not self.has_crew:
             image_id_list.remove(self.image_dict['default'])

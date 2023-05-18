@@ -61,18 +61,7 @@ class mob(actor):
             self.image_dict = {'default': input_dict['image']}
         else:
             self.image_dict = {'default': input_dict['image']['image_id']}
-
-        self.image_variants = actor_utility.get_image_variants(self.image_dict['default'])
-        if self.image_dict['default'].endswith('default.png') and not from_save:
-            if not from_save:
-                self.image_variant = random.randrange(0, len(self.image_variants))
-                self.image_dict['default'] = self.image_variants[self.image_variant]
-        elif from_save and 'image_variant' in input_dict:
-            self.image_variant = input_dict['image_variant']
-            self.image_dict['default'] = self.image_variants[self.image_variant]
-            if 'second_image_variant' in input_dict:
-                self.second_image_variant = input_dict['second_image_variant']
-            
+        self.image_variants_setup(from_save, input_dict)
         self.images = []
         self.status_icons = []
         for current_grid in self.grids:
@@ -104,6 +93,27 @@ class mob(actor):
                 self.creation_turn = 0
             else:
                 self.creation_turn = self.global_manager.get('turn')
+
+    def image_variants_setup(self, from_save, input_dict):
+        '''
+        Description:
+            Sets up this unit's image variants
+        Input:
+            boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+        Output:
+            None
+        '''
+        self.image_variants = actor_utility.get_image_variants(self.image_dict['default'])
+        if self.image_dict['default'].endswith('default.png') and not from_save:
+            if not from_save:
+                self.image_variant = random.randrange(0, len(self.image_variants))
+                self.image_dict['default'] = self.image_variants[self.image_variant]
+        elif from_save and 'image_variant' in input_dict:
+            self.image_variant = input_dict['image_variant']
+            self.image_dict['default'] = self.image_variants[self.image_variant]
+            if 'second_image_variant' in input_dict:
+                self.second_image_variant = input_dict['second_image_variant']
 
     def to_save_dict(self):
         '''
@@ -467,6 +477,12 @@ class mob(actor):
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
+        
+        old_image_id = self.images[0].image_id
+        #if isinstance(self.images[0].image_id, str):
+        #    input_image_id = [self.images[0].image_id]
+        #else:
+        #    input_image_id = self.images[0].image_id
         for current_image in self.images:
             current_image.remove_from_cell()
             self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
@@ -477,7 +493,7 @@ class mob(actor):
             self.grids.append(new_grid.mini_grid)
         self.images = []
         for current_grid in self.grids:
-            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, 'default', self.global_manager))
+            self.images.append(images.mob_image(self, current_grid.get_cell_width(), current_grid.get_cell_height(), current_grid, old_image_id, self.global_manager))
             self.images[-1].add_to_cell()
             
     def select(self):
@@ -611,8 +627,9 @@ class mob(actor):
         '''
         if self.selected:
             self.selected = False
+        if self.global_manager.get('displayed_mob') == self:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
+            #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), 'none')
         for current_image in self.images:
             current_image.remove_from_cell()
         super().remove()

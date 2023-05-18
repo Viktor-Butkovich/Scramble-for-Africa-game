@@ -216,9 +216,9 @@ class missionaries(group):
             self.global_manager.get('public_opinion_tracker').change(public_opinion_increase)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
+        self.global_manager.set('ongoing_action', False)
+        self.global_manager.set('ongoing_action_type', 'none')
         if roll_result <= self.current_max_crit_fail:
             warrior = village.spawn_warrior()
             warrior.show_images()
             warrior.attack_on_spawn()
-        self.global_manager.set('ongoing_action', False)
-        self.global_manager.set('ongoing_action_type', 'none')

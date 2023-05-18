@@ -57,8 +57,6 @@ class officer(pmob):
         if not attached_group == 'none':
             attached_group.set_name(attached_group.default_name)
             attached_group.veteran = False
-            for current_image in self.images:
-                current_image.image.remove_member('veteran_icon')
 
     def to_save_dict(self):
         '''

@@ -61,7 +61,8 @@ def remove_from_list(received_list, item_to_remove):
 def copy_list(received_list): #allows setting to new list by copying data instead of just pointer
     '''
     Description:
-        Returns a copy of the inputted list, allowing passing by value rather than reference
+        Returns a deep copy of the inputted list with shallow copies of each of its elements - the list contents refer to the exact same objects, but adding an item to 1 list will not change 
+            the other
     Input:
         list received_list: list to Copy
     Output:

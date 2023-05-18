@@ -40,12 +40,12 @@ class caravan(group):
         self.can_trade = True
         self.inventory_capacity = 9
         self.trades_remaining = 0
-        self.set_group_type('caravan')
         if not from_save:
             self.inventory_setup()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for inventory capacity changing
         else:
             self.load_inventory(input_dict['inventory'])
+        self.set_group_type('caravan')
 
     def start_trade(self):
         '''

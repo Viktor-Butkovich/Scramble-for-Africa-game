@@ -265,6 +265,7 @@ class merchant(officer):
         if roll_result >= self.current_min_crit_success:
             if not self.veteran:
                 self.just_promoted = True
+            text += 'This merchant is now a veteran. /n /n'
             text += 'The advertising campaign was so popular that the value of ' + self.current_advertised_commodity + ' increased by 2 instead of 1. /n /n'
         if roll_result >= self.current_min_success:
             success = True

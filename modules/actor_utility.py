@@ -344,6 +344,8 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
     '''
     #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
     if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
+        for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+            current_same_tile_icon.reset()
         global_manager.set('displayed_tile', new_actor)
         if not new_actor == 'none':
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
@@ -357,7 +359,7 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
 def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
     '''
     Description:
-        Changes locations of actor display labels to put all visible labels in order
+        Changes locations of actor display labels to put all visible labels in order, used by main_loop_tools in update_display
     Input:
         global_manager_template global_manager: Object that accesses shared variables
         actor_match_label list info_display_list: All actor match labels associated with either mobs or tiles to put in order
@@ -477,7 +479,7 @@ def get_image_variants(base_path, keyword = 'default'):
         string list: Returns list of all images with the same name format in the same folder
     '''
     variants = []
-    if base_path.endswith(keyword + '.png'):
+    if base_path.endswith('default.png'):
         folder_path = base_path.removesuffix('default.png')
         for file_name in os.listdir('graphics/' + folder_path):
             if file_name.startswith(keyword):
@@ -488,3 +490,40 @@ def get_image_variants(base_path, keyword = 'default'):
     else:
         variants.append(base_path)
     return(variants)
+
+def get_slave_traders_strength_modifier(global_manager):
+    '''
+    Description:
+        Calculates and returns the inverse difficulty modifier for actions related to the slave traders, with a positive modifier making rolls easier
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        string/int: Returns slave traders inverse difficulty modifier, or 'none' if the strength is 0
+    '''
+    strength = global_manager.get('slave_traders_strength')
+    if strength == 0:
+        strength_modifier = 'none'
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
+        strength_modifier = -1
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
+        strength_modifier = 0
+    else:
+        strength_modifier = 1
+    return(strength_modifier)
+
+def set_slave_traders_strength(new_strength, global_manager):
+    '''
+    Description:
+        Sets the strength of the slave traders
+    Input:
+        int new_strength: New slave traders strength value
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    if new_strength < 0:
+        new_strength = 0
+    global_manager.set('slave_traders_strength', new_strength)
+    if global_manager.has('slave_traders_grid'):
+        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
+        slave_traders_tile.update_image_bundle()

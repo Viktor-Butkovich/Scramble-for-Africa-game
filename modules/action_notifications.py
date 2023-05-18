@@ -164,7 +164,14 @@ class exploration_notification(action_notification):
             self.notification_images = []
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
-            image_id_list = ['misc/tile_background.png'] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
+            background_dict = {
+                'image_id': 'misc/tile_background.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            }
+            image_id_list = [background_dict] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
             self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
@@ -226,7 +233,7 @@ class off_tile_exploration_notification(action_notification):
         public_opinion_increase = self.current_expedition.public_opinion_increases.pop(0)
         explored_tile = explored_cell.tile
 
-        image_id_list = explored_tile.get_image_id_list(force_visibility = True)
+        #image_id_list = explored_tile.get_image_id_list(force_visibility = True)
 
         if self.current_expedition.current_action_type == 'exploration': #use non-hidden version if exploring
             explored_terrain_image_id = explored_cell.tile.image_dict['default']
@@ -234,6 +241,7 @@ class off_tile_exploration_notification(action_notification):
         elif self.current_expedition.current_action_type == 'rumor_search': #use current tile image if found rumor location
             explored_terrain_image_id = explored_cell.tile.image.image_id
             new_visibility = explored_cell.visible
+        image_id_list = explored_tile.get_image_id_list(force_visibility = new_visibility)
         
         self.notification_images.append(free_image(explored_terrain_image_id, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
             scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
@@ -332,7 +340,25 @@ class trade_notification(action_notification):
             self.notification_images.append(free_image('scenery/resources/trade/sold consumer goods.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 200, consumer_goods_y, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
             if self.trade_result[3]: #if gets available worker
-                self.notification_images.append(free_image('mobs/African workers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
+                background_dict = {
+                    'image_id': 'mobs/default/button.png',
+                    'size': 1,
+                    'x_offset': 0,
+                    'y_offset': 0,
+                    'level': -10
+                } 
+                left_worker_dict = {
+                    'image_id': 'mobs/African workers/default.png',
+                    'size': 0.8,
+                    'x_offset': -0.2,
+                    'y_offset': 0,
+                    'level': 1
+                }
+                right_worker_dict = left_worker_dict.copy()
+                right_worker_dict['x_offset'] *= -1
+                button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
+            
+                self.notification_images.append(free_image(button_image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 175, min_y - 175, global_manager),
                     scaling.scale_width(150, global_manager), scaling.scale_height(150, global_manager), modes, global_manager, True))
         elif self.dies:
             self.trade_result = global_manager.get('trade_result') #allows caravan object to be found so that it can die
@@ -393,7 +419,24 @@ class religious_campaign_notification(action_notification):
         self.is_last = is_last
         if self.is_last: #if last, show result
             self.notification_images = []
-            self.notification_images.append(free_image('mobs/church_volunteers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            background_dict = {
+                'image_id': 'mobs/default/button.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            } 
+            left_worker_dict = {
+                'image_id': 'mobs/church_volunteers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
+            self.notification_images.append(free_image(button_image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         elif len(global_manager.get('notification_manager').notification_queue) == 2: #if 2nd last advertising notification
             if global_manager.get('religious_campaign_result')[2]: #and if success is True, play sound once dice roll finishes

@@ -37,7 +37,6 @@ class battalion(group):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.set_group_type('battalion')
         self.is_battalion = True
         if self.worker.worker_type == 'European':
             self.battalion_type = 'imperial'
@@ -45,6 +44,7 @@ class battalion(group):
             self.battalion_type = 'colonial'
         self.attack_cost = self.global_manager.get('action_prices')['attack']
         self.attack_mark_list = []
+        self.set_group_type('battalion')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 
@@ -443,18 +443,14 @@ class battalion(group):
         self.current_min_crit_success = self.default_min_crit_success
         message = 'Are you sure you want to attempt to suppress the slave trade? If successful, public opinion will increase and the strength of the slave traders will decrease, with the slave trade ending once strength is reduced to 0. /n /n'
         message += 'The suppression will cost ' + str(self.global_manager.get('action_prices')['suppress_slave_trade']) + ' money. /n /n'
-            
-        strength = self.global_manager.get('slave_traders_strength')
-        strength_modifier = 0
-        if strength >= self.global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
-            strength_modifier = -1
+
+        strength_modifier = actor_utility.get_slave_traders_strength_modifier(self.global_manager)
+        if strength_modifier < 0:
             message += 'The slave traders are flourishing and will provide strong resistance. /n /n'
-        elif strength >= self.global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
-            strength_modifier = 0
-            message += 'The slave traders are relatively intact and will provide moderate resistance. /n /n'
-        else:
-            strength_modifier += 1
+        elif strength_modifier > 0:
             message += 'The slave traders are approaching collapse and will provide weak resistance. /n /n'
+        else:
+            message += 'The slave traders are relatively intact and will provide moderate resistance. /n /n'
 
         self.current_roll_modifier += strength_modifier
         risk_value = -1 * self.current_roll_modifier #modifier of -1 means risk value of 1
@@ -604,7 +600,8 @@ class battalion(group):
         strength_decrease = self.global_manager.get('suppress_slave_trade_result')[3]
         
         if roll_result >= self.current_min_success: #if campaign succeeded
-            self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') - strength_decrease) #do something special on 0 strength
+            actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') - strength_decrease, self.global_manager)
+            #self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') - strength_decrease) #do something special on 0 strength
             if self.global_manager.get('slave_traders_strength') <= 0:
                 self.global_manager.set('slave_traders_strength', 0)
                 num_freed_slaves = random.randrange(1, 7) + random.randrange(1, 7)
@@ -630,6 +627,8 @@ class battalion(group):
 
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')
+        if self.global_manager.get('slave_traders_strength') <= 0:
+            self.global_manager.get('displayed_tile').select() #sets music to switch from slave traders music
 
 class safari(battalion):
     '''
@@ -659,7 +658,6 @@ class safari(battalion):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)    
-        self.set_group_type('safari')
         self.is_battalion = False
         self.is_safari = True
         self.can_swim = True
@@ -673,6 +671,7 @@ class safari(battalion):
         
         self.battalion_type = 'none'
         self.attack_cost = self.global_manager.get('action_prices')['hunting']
+        self.set_group_type('safari')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
 

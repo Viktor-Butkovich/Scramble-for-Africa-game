@@ -822,7 +822,7 @@ def transactions_setup(global_manager):
         transaction_types.append(current_key)
     global_manager.set('transaction_types', transaction_types)
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
-    global_manager.set('slave_traders_strength', 0)
+    actor_utility.set_slave_traders_strength(0, global_manager)
 
 def lore_setup(global_manager):
     '''
@@ -977,18 +977,21 @@ def buttons_setup(global_manager):
     right_arrow_button = buttons.button(scaling.scale_coordinates(button_start_x + (current_button_number * button_separation), 20, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'move right', pygame.K_d, ['strategic'], 'buttons/right_button.png', global_manager)
 
-
-    expand_text_box_button = buttons.button(scaling.scale_coordinates(55, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
-        'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 'buttons/text_box_size_button.png', global_manager) #'none' for no keybind
-
     save_game_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 125, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'save game', 'none', ['strategic', 'europe', 'ministers'], 'buttons/save_game_button.png', global_manager)
 
     toggle_grid_lines_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 200, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'toggle grid lines', 'none', ['strategic'], 'buttons/grid_line_button.png', global_manager)
 
+    expand_text_box_button = buttons.button(scaling.scale_coordinates(global_manager.get('default_display_width') - 50, global_manager.get('default_display_height') - 275, global_manager), 
+        scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black', 'expand text box', pygame.K_j, ['strategic', 'europe', 'ministers'], 
+        'buttons/text_box_size_button.png', global_manager) 
+
     cycle_units_button = buttons.button(scaling.scale_coordinates(110, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'blue',
         'cycle units', pygame.K_TAB, ['strategic', 'europe'], 'buttons/cycle_units_button.png', global_manager)
+
+    free_all_slaves_button = buttons.button(scaling.scale_coordinates(55, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager), scaling.scale_height(50, global_manager), 'black',
+        'free all', 'none', ['strategic'], 'buttons/free_slaves_button.png', global_manager) #'none' for no keybind
 
     wake_up_all_button = buttons.button(scaling.scale_coordinates(165, global_manager.get('default_display_height') - 50, global_manager), scaling.scale_width(50, global_manager),
         scaling.scale_height(50, global_manager), 'blue', 'wake up all', 'none', ['strategic', 'europe'], 'buttons/disable_sentry_mode_button.png', global_manager)
@@ -1173,6 +1176,9 @@ def mob_interface_setup(global_manager):
     
     fire_unit_button = buttons.fire_unit_button(scaling.scale_coordinates(130, actor_display_current_y, global_manager),
         scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/remove_minister_button.png', global_manager)
+    
+    free_unit_slaves_button = buttons.free_unit_slaves_button(scaling.scale_coordinates(130, actor_display_current_y + 40, global_manager),
+        scaling.scale_width(35, global_manager), scaling.scale_height(35, global_manager), 'gray', ['strategic', 'europe'], 'buttons/free_slaves_button.png', global_manager)
 
 
     #mob info labels setup
@@ -1212,6 +1218,7 @@ def tile_interface_setup(global_manager):
 
     cycle_same_tile_button = buttons.cycle_same_tile_button(scaling.scale_coordinates(162, actor_display_current_y + 95, global_manager),
             scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/cycle_passengers_down.png', global_manager)
+    global_manager.set('same_tile_icon_list', [])
     for i in range(0, 3): #add button to cycle through
         same_tile_icon = buttons.same_tile_icon(scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * i), global_manager),
             scaling.scale_width(30, global_manager), scaling.scale_height(30, global_manager), 'gray', ['strategic', 'europe'], 'buttons/default_button.png', i, False, global_manager)
@@ -1229,7 +1236,8 @@ def tile_interface_setup(global_manager):
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
                                 'resource building', 'building efficiency', 'building work crews', 'current building work crew',
-                                'village', 'native population', 'native available workers', 'native aggressiveness']
+                                'village', 'native population', 'native available workers', 'native aggressiveness',
+                                'slave_traders_strength']
     for current_actor_label_type in tile_info_display_labels:
         if current_actor_label_type == 'current building work crew':
             x_displacement = 50

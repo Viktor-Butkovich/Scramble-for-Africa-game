@@ -55,7 +55,7 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.cell.tile) #update tile ui with worked building
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
 
     def leave_building(self, building):
@@ -98,14 +98,14 @@ class work_crew(group):
                     
                 if roll_result >= 4: #4+ required on D6 for production
                     if not self.controlling_minister.check_corruption():
-                        building.images[0].current_cell.tile.change_inventory(building.resource_type, 1)
+                        building.cell.tile.change_inventory(building.resource_type, 1)
                         self.global_manager.get('commodities_produced')[building.resource_type] += 1
 
                         if (not self.veteran) and roll_result >= 6:
                             self.promote()
-                            message = 'The work crew working in the ' + building.name + ' at (' + str(building.images[0].current_cell.x) + ', ' + str(building.images[0].current_cell.y)
+                            message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
                             message += ') has become a veteran and will be more successful in future production attempts.'
-                            notification_tools.display_zoom_notification(message, building.images[0].current_cell.tile, self.global_manager)
+                            notification_tools.display_zoom_notification(message, building.cell.tile, self.global_manager)
                     else:
                         value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
             if value_stolen > 0:
