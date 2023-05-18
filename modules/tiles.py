@@ -206,7 +206,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         image_id_list = []
         if self.cell.grid.is_mini_grid:
             equivalent_tile = self.get_equivalent_tile()
-            if equivalent_tile != 'none':
+            if equivalent_tile != 'none' and self.show_terrain:
                 image_id_list = equivalent_tile.get_image_id_list()
             else:
                 image_id_list.append(self.image_dict['default']) #blank void image if outside of matched area
@@ -231,8 +231,10 @@ class tile(actor): #to do: make terrain tiles a subclass
                     current_building = self.cell.get_building(current_building_type)
                     if current_building != 'none':
                         image_id_list += current_building.get_image_id_list()
-            else:
+            elif self.show_terrain:
                 image_id_list.append(self.image_dict['hidden'])
+            else:
+                image_id_list.append(self.image_dict['default'])
             if self.global_manager.get('current_lore_mission') != 'none':
                 if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(self.cell.x, self.cell.y) and self.cell.grid == self.global_manager.get('strategic_map_grid'):
                     image_id_list += self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.cell.x, self.cell.y).get_image_id_list()

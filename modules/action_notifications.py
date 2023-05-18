@@ -164,7 +164,14 @@ class exploration_notification(action_notification):
             self.notification_images = []
             explored_cell = current_expedition.destination_cell
             explored_tile = explored_cell.tile
-            image_id_list = ['misc/tile_background.png'] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
+            background_dict = {
+                'image_id': 'misc/tile_background.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            }
+            image_id_list = [background_dict] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
             self.notification_images.append(free_image(image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), modes, global_manager, True))
         super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, notification_dice, global_manager)
