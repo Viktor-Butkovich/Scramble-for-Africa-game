@@ -2,7 +2,8 @@ SFA folder
 
 	configuration folder
 		debug_config_descriptions.txt
-		debug_config.json
+		dev_config.json
+		release_config.json
 
     graphics folder
 		buildings

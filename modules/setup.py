@@ -1391,7 +1391,10 @@ def debug_tools_setup(global_manager):
     Output:
         None
     '''
-    file = open('configuration/debug_config.json')
+    try: #for testing/development, use local version of config file that is not uploaded to GitHub
+        file = open('configuration/dev_config.json')
+    except: #for release, official version of config file with only intended user settings
+        file = open('configuration/release_config.json')
 
     # returns JSON object as a dictionary
     debug_config = json.load(file)

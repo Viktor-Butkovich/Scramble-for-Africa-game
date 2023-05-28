@@ -40,5 +40,14 @@ class porters(group):
         self.set_group_type('porters')
 
     def promote(self):
+        '''
+        Description:
+            Promotes this group's officer to a veteran after performing various actions particularly well, improving the capabilities of groups the officer is attached to in the future. 
+                Creates a veteran star icon that follows this group and its officer. Also increases the current and maximum movement points of this unit
+        Input:
+            None
+        Output:
+            None
+        '''
         self.set_max_movement_points(6, False)
         super().promote()
