@@ -191,8 +191,6 @@ class mob(actor):
         '''
         self.disorganized = new_value
         self.update_image_bundle()
-        if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with disorganized icon
 
     def get_combat_modifier(self):
         '''
