@@ -482,10 +482,10 @@ class button():
             self.set_tooltip(['Loads a saved game'])
 
         elif self.button_type == 'cycle available ministers':
-            self.set_tooltip(['Cycles through the ministers available to be appointed'])
+            self.set_tooltip(['Cycles through the candidates available to be appointed'])
 
         elif self.button_type == 'appoint minister':
-            self.set_tooltip(['Appoints this minister as ' + self.appoint_type])
+            self.set_tooltip(['Appoints this candidate as ' + self.appoint_type])
 
         elif self.button_type == 'remove minister':
             self.set_tooltip(['Removes this minister from their current office'])
@@ -1043,7 +1043,7 @@ class button():
                             game_transitions.set_game_mode('strategic', self.global_manager)
                         for current_minister in self.global_manager.get('minister_list'):
                             if current_minister.just_removed and current_minister.current_position == 'none':
-                                text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, he will be considered fired, leaving the minister pool and incurring a large public opinion penalty. /n /n'
+                                text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
                                 current_minister.display_message(text)
                         for current_cell in self.global_manager.get('strategic_map_grid').cell_list:
                             if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
@@ -1819,7 +1819,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             int width: Pixel width of this button
             int height: Pixel height of this button
             string list modes: Game modes during which this button can appear
-            string minister_type: Minister office that this button is linked to, causing this button to always be connected to the minister in that office. If this equals 'none', this can be calibrated to an available minister
+            string minister_type: Minister office that this button is linked to, causing this button to always be connected to the minister in that office. If this equals 'none', this can be calibrated to an available minister candidate
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1904,7 +1904,7 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             self.image.set_image(new_minister.image_id)
         else:
             if self.minister_type == 'none': #if available minister portrait
-                self.tooltip_text = ['There is no available minister in this slot.']
+                self.tooltip_text = ['There is no available candidate in this slot.']
             else: #if appointed minister portrait
                 self.tooltip_text = ['No ' + self.minister_type + ' is currently appointed.', 'Without a ' + self.minister_type + ', ' + self.type_keyword + '-oriented actions are not possible']
             self.image.set_image(self.default_image_id)

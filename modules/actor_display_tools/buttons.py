@@ -1378,7 +1378,7 @@ class trade_button(label_button):
                         if current_cell.has_building('village'):
                             if current_cell.get_building('village').population > 0:
                                 if current_mob.get_inventory('consumer goods') > 0:
-                                    if minister_utility.positions_filled(self.global_manager): #current_mob.ministers_appointed():
+                                    if minister_utility.positions_filled(self.global_manager):
                                         if current_mob.sentry_mode:
                                             current_mob.set_sentry_mode(False)
                                         current_mob.start_trade()
