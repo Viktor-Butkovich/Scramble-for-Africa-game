@@ -622,7 +622,9 @@ class enable_sentry_mode_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.actor.set_sentry_mode(True)
-                if self.global_manager.get('effect_manager').effect_active('promote_on_sentry') and not self.attached_label.actor.veteran: #purely for promotion testing, not normal functionality
+                if (self.global_manager.get('effect_manager').effect_active('promote_on_sentry') 
+                and (self.attached_label.actor.is_group or self.attached_label.actor.is_officer) 
+                and not self.attached_label.actor.veteran): #purely for promotion testing, not normal functionality
                     self.attached_label.actor.promote()
             else:
                 text_tools.print_to_screen('You are busy and can not enable sentry mode.', self.global_manager)

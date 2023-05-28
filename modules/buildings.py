@@ -197,6 +197,7 @@ class building(actor):
             self.set_inventory_capacity(self.default_inventory_capacity)
         if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
             self.cell.get_building('warehouses').set_damaged(new_value)
+        self.cell.tile.update_image_bundle()
 
     def set_default_inventory_capacity(self, new_value):
         '''

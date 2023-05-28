@@ -22,7 +22,8 @@
       "skip_intro", 
       "show_lore_mission_locations",
       "instant_lore_mission",
-      "promote_on_sentry"
+      "promote_on_sentry",
+      "debug_print"
    ],
    "active_effects": [
 
