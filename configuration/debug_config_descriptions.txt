@@ -21,3 +21,4 @@ skip_intro: automatically appoints ministers at the start of the game, skips the
 show_lore_mission_locations: prints information about lore missions when first created and on load
 instant_lore_mission: provides a lore mission at the end of the turn if one is not already assigned
 promote_on_sentry: promotes a unit when sentry mode is turned on, for promotion testing
+debug_print: prints a list of active effects whenever p is pressed
