@@ -398,7 +398,7 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'slave_traders_strength':
             tooltip_text = [self.message]
-            tooltip_text.append('Any actions to combat the slave traders will be more difficult when strength is 15 or higher and easier when strength is 5 or lower')
+            tooltip_text.append('Any actions to combat the slave traders will be more difficult when strength is 20 or higher and easier when strength is 9 or lower')
             tooltip_text.append('The slave trade will be permanently eradicated once strength has been decreased to 0')
             tooltip_text.append('Strength will increase by 1 for each slave purchased')
             tooltip_text.append('Additionally, when decreased, strength will increase by 1 each turn until it returns to its original value of ' + str(self.global_manager.get('slave_traders_natural_max_strength')))

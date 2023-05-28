@@ -503,11 +503,11 @@ def get_slave_traders_strength_modifier(global_manager):
     strength = global_manager.get('slave_traders_strength')
     if strength == 0:
         strength_modifier = 'none'
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') * 2: #>= 20
         strength_modifier = -1
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
+    elif strength >= global_manager.get('slave_traders_natural_max_strength'): #>= 10
         strength_modifier = 0
-    else:
+    else: # < 10
         strength_modifier = 1
     return(strength_modifier)
 
