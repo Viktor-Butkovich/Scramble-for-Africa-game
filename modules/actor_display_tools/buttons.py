@@ -559,7 +559,7 @@ class split_button(label_button):
         if self.can_show():
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
-                displayed_mob = self.global_manager.get('displayed_mob')#selected_list = actor_utility.get_selected_list(self.global_manager)
+                displayed_mob = self.global_manager.get('displayed_mob')
                 if (not displayed_mob == 'none') and displayed_mob.is_group:
                     if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
                         displayed_mob.disband()
@@ -622,6 +622,8 @@ class enable_sentry_mode_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.actor.set_sentry_mode(True)
+                if self.global_manager.get('effect_manager').effect_active('promote_on_sentry') and not self.attached_label.actor.veteran: #purely for promotion testing, not normal functionality
+                    self.attached_label.actor.promote()
             else:
                 text_tools.print_to_screen('You are busy and can not enable sentry mode.', self.global_manager)
 
