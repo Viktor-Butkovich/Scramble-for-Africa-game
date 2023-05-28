@@ -493,6 +493,7 @@ SFA folder
 			def manage_worker_migration
 			def trigger_worker_migration
 			def create_weighted_migration_destinations
+			def manage_warriors
 			def manage_villages
 			def manage_beasts
 			def manage_enemy_movement
