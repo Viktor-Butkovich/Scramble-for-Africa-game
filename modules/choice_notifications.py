@@ -351,12 +351,8 @@ class recruitment_choice_button(choice_button):
                 self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
                 self.notification.choice_info_dict['village'].change_population(-1)
                 market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
-
                 worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
                 if recruiter.is_vehicle:
-                    #if recruiter.has_infinite_movement:
-                    #    recruiter.temp_disable_movement()
-                    #else:
                     recruiter.set_movement_points(0)
                     worker.crew_vehicle(recruiter)
                 else:

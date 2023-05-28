@@ -955,7 +955,7 @@ class slums(building):
         Output:
             None
         '''
-        input_dict = {}
+        input_dict = {'select_on_creation': True}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African workers/default.png'
