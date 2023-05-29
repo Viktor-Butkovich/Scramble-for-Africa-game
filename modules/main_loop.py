@@ -108,11 +108,8 @@ def main_loop(global_manager):
                 if event.key == pygame.K_RETURN:
                     if global_manager.get('typing'):
                         if global_manager.get('input_manager').taking_input:
-                            #input_response = message
                             global_manager.get('input_manager').taking_input = False
                             text_tools.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
-                            #input_manager.receive_input(global_manager.get('message'))
-                            #check_pointer_removal('not typing')
                         else:
                             text_tools.print_to_screen(global_manager.get('message'), global_manager)
                         global_manager.set('typing', False)
@@ -120,7 +117,7 @@ def main_loop(global_manager):
                     else:
                         global_manager.set('typing', True)
 
-            elif event.type == pygame.mixer.music.get_endevent(): #event.type == global_manager.get('SONG_END_EVENT'):
+            elif event.type == pygame.mixer.music.get_endevent():
                 global_manager.get('sound_manager').song_done()
 
         global_manager.set('old_lmb_down', global_manager.get('lmb_down'))
@@ -138,7 +135,7 @@ def main_loop(global_manager):
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):
                         if current_button.touching_mouse() and current_button.can_show() and current_button in global_manager.get('notification_list') and not stopping:
-                            current_button.on_rmb_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                            current_button.on_rmb_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
                             current_button.on_rmb_release()
                             clicked_button = True
                             stopping = True
@@ -155,14 +152,14 @@ def main_loop(global_manager):
                             clicked_button = True
                 main_loop_tools.manage_rmb_down(clicked_button, global_manager)
 
-        if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'):#if lmb changes
-            if not global_manager.get('lmb_down'):#if user just released lmb
+        if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'): #if lmb changes
+            if not global_manager.get('lmb_down'): #if user just released lmb
                 clicked_button = False
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
                         if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
-                            current_button.on_click()#prioritize clicking buttons that appear above other buttons and don't press the ones 
+                            current_button.on_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
                             current_button.on_release()
                             clicked_button = True
                             stopping = True
@@ -180,7 +177,7 @@ def main_loop(global_manager):
                             current_button.on_release()
                             clicked_button = True
                             break
-                main_loop_tools.manage_lmb_down(clicked_button, global_manager)#whether button was clicked or not determines whether characters are deselected
+                main_loop_tools.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):

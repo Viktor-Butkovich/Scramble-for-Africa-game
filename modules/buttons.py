@@ -603,94 +603,53 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        if new_keybind == pygame.K_a:
-            self.keybind_name = 'a'
-        if new_keybind == pygame.K_b:
-            self.keybind_name = 'b'
-        if new_keybind == pygame.K_c:
-            self.keybind_name = 'c'
-        if new_keybind == pygame.K_d:
-            self.keybind_name = 'd'
-        if new_keybind == pygame.K_e:
-            self.keybind_name = 'e'
-        if new_keybind == pygame.K_f:
-            self.keybind_name = 'f'
-        if new_keybind == pygame.K_g:
-            self.keybind_name = 'g'
-        if new_keybind == pygame.K_h:
-            self.keybind_name = 'h'
-        if new_keybind == pygame.K_i:
-            self.keybind_name = 'i'
-        if new_keybind == pygame.K_j:
-            self.keybind_name = 'j'
-        if new_keybind == pygame.K_k:
-            self.keybind_name = 'k'
-        if new_keybind == pygame.K_l:
-            self.keybind_name = 'l'
-        if new_keybind == pygame.K_m:
-            self.keybind_name = 'm'
-        if new_keybind == pygame.K_n:
-            self.keybind_name = 'n'
-        if new_keybind == pygame.K_o:
-            self.keybind_name = 'o'
-        if new_keybind == pygame.K_p:
-            self.keybind_name = 'p'
-        if new_keybind == pygame.K_q:
-            self.keybind_name = 'q'
-        if new_keybind == pygame.K_r:
-            self.keybind_name = 'r'
-        if new_keybind == pygame.K_s:
-            self.keybind_name = 's'
-        if new_keybind == pygame.K_t:
-            self.keybind_name = 't'
-        if new_keybind == pygame.K_u:
-            self.keybind_name = 'u'
-        if new_keybind == pygame.K_v:
-            self.keybind_name = 'v'
-        if new_keybind == pygame.K_w:
-            self.keybind_name = 'w'
-        if new_keybind == pygame.K_x:
-            self.keybind_name = 'x'
-        if new_keybind == pygame.K_y:
-            self.keybind_name = 'y'
-        if new_keybind == pygame.K_z:
-            self.keybind_name = 'z'
-        if new_keybind == pygame.K_DOWN:
-            self.keybind_name = 'down arrow'
-        if new_keybind == pygame.K_UP:
-            self.keybind_name = 'up arrow'
-        if new_keybind == pygame.K_LEFT:
-            self.keybind_name = 'left arrow'
-        if new_keybind == pygame.K_RIGHT:
-            self.keybind_name = 'right arrow'
-        if new_keybind == pygame.K_1:
-            self.keybind_name = '1'
-        if new_keybind == pygame.K_2:
-            self.keybind_name = '2'
-        if new_keybind == pygame.K_3:
-            self.keybind_name = '3'
-        if new_keybind == pygame.K_4:
-            self.keybind_name = '4'
-        if new_keybind == pygame.K_5:
-            self.keybind_name = '5'
-        if new_keybind == pygame.K_6:
-            self.keybind_name = '6'
-        if new_keybind == pygame.K_7:
-            self.keybind_name = '7'
-        if new_keybind == pygame.K_8:
-            self.keybind_name = '8'
-        if new_keybind == pygame.K_9:
-            self.keybind_name = '9'
-        if new_keybind == pygame.K_0:
-            self.keybind_name = '0'
-        if new_keybind == pygame.K_SPACE:
-            self.keybind_name = 'space'
-        if new_keybind == pygame.K_RETURN:
-            self.keybind_name = 'enter'
-        if new_keybind == pygame.K_TAB:
-            self.keybind_name = 'tab'
-        if new_keybind == pygame.K_ESCAPE:
-            self.keybind_name = 'escape'
+        keybind_name_dict = {
+            pygame.K_a: 'a',
+            pygame.K_b: 'b',
+            pygame.K_c: 'c',
+            pygame.K_d: 'd',
+            pygame.K_e: 'e',
+            pygame.K_f: 'f',
+            pygame.K_g: 'g',
+            pygame.K_h: 'h',
+            pygame.K_i: 'i',
+            pygame.K_j: 'j',
+            pygame.K_k: 'k',
+            pygame.K_l: 'l',
+            pygame.K_m: 'm',
+            pygame.K_n: 'n',
+            pygame.K_o: 'o',
+            pygame.K_p: 'p',
+            pygame.K_q: 'q',
+            pygame.K_r: 'r',
+            pygame.K_s: 's',
+            pygame.K_t: 't',
+            pygame.K_u: 'u',
+            pygame.K_v: 'v',
+            pygame.K_w: 'w',
+            pygame.K_x: 'x',
+            pygame.K_y: 'y',
+            pygame.K_z: 'z',
+            pygame.K_DOWN: 'down arrow',
+            pygame.K_UP: 'up arrow',
+            pygame.K_LEFT: 'left arrow',
+            pygame.K_RIGHT: 'right arrow',
+            pygame.K_1: '1',
+            pygame.K_2: '2',
+            pygame.K_3: '3',
+            pygame.K_4: '4',
+            pygame.K_5: '5',
+            pygame.K_6: '6',
+            pygame.K_7: '7',
+            pygame.K_8: '8',
+            pygame.K_9: '9',
+            pygame.K_0: '0',
+            pygame.K_SPACE: 'space',
+            pygame.K_RETURN: 'enter',
+            pygame.K_TAB: 'tab',
+            pygame.K_ESCAPE: 'escape'
+        }
+        self.keybind_name = keybind_name_dict[new_keybind]
 
     def set_tooltip(self, tooltip_text):
         '''
