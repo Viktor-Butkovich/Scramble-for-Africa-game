@@ -347,10 +347,13 @@ def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
         for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
             current_same_tile_icon.reset()
         global_manager.set('displayed_tile', new_actor)
-        if not new_actor == 'none':
+        if new_actor != 'none':
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
     elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
         global_manager.set('displayed_mob', new_actor)
+        if new_actor != 'none' and new_actor.images[0].current_cell.tile == global_manager.get('displayed_tile'):
+            for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
+                current_same_tile_icon.reset()
     elif id(info_display_list) == id(global_manager.get('country_info_display_list')):
         global_manager.set('displayed_country', new_actor)
     for current_object in info_display_list:
@@ -503,11 +506,11 @@ def get_slave_traders_strength_modifier(global_manager):
     strength = global_manager.get('slave_traders_strength')
     if strength == 0:
         strength_modifier = 'none'
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') + 5: #>= 15
+    elif strength >= global_manager.get('slave_traders_natural_max_strength') * 2: #>= 20
         strength_modifier = -1
-    elif strength >= global_manager.get('slave_traders_natural_max_strength') / 2: #>= 5
+    elif strength >= global_manager.get('slave_traders_natural_max_strength'): #>= 10
         strength_modifier = 0
-    else:
+    else: # < 10
         strength_modifier = 1
     return(strength_modifier)
 

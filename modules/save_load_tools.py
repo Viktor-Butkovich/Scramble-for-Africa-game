@@ -382,7 +382,10 @@ class save_load_manager_template():
         
         game_transitions.set_game_mode('strategic', self.global_manager)
         game_transitions.create_strategic_map(self.global_manager)
-        actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength'), self.global_manager)
+        if self.global_manager.get('effect_manager').effect_active('eradicate_slave_trade'):
+            actor_utility.set_slave_traders_strength(0, self.global_manager)
+        else:
+            actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength'), self.global_manager)
 
         #load actors
         for current_actor_dict in saved_actor_dicts:

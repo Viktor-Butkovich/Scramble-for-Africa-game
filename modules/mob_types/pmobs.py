@@ -1556,7 +1556,6 @@ class pmob(mob):
                 self.promote()
             self.set_movement_points(0)
             self.repaired_building.set_damaged(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show repaired building
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob info display to hide repair button
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')

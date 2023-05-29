@@ -516,7 +516,7 @@ class battalion(group):
             
         if self.veteran:
             if minister_corrupt:
-                first_roll = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+                first_roll = random.randrange(1, self.current_min_success) #suppress slave trade has no critical failures, corrupt roll can be any failing result
                 second_roll = random.randrange(1, self.current_min_success)
                 if random.randrange(1, 7) >= 4:
                     results = [first_roll, second_roll]
@@ -547,7 +547,7 @@ class battalion(group):
             text += ('The higher result, ' + str(roll_result) + ': ' + result_outcome_dict[roll_result] + ', was used. /n')
         else:
             if minister_corrupt:
-                result = random.randrange(self.current_max_crit_fail + 1, self.current_min_success)
+                result = random.randrange(1, self.current_min_success)
             else:
                 result = self.controlling_minister.no_corruption_roll(6, 'suppress_slave_trade')
             roll_list = dice_utility.roll_to_list(6, 'Slave trade suppression roll', self.current_min_success, self.current_min_crit_success, self.current_max_crit_fail, self.global_manager, result)

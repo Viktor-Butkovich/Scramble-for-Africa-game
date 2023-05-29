@@ -35,7 +35,7 @@ def main_loop(global_manager):
             else:
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p: #use p for debug printing
+                if event.key == pygame.K_p and global_manager.get('effect_manager').effect_active('debug_print'):
                     main_loop_tools.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
                     if current_button.can_show() and not global_manager.get('typing'):

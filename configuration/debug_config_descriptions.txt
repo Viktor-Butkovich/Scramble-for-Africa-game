@@ -19,3 +19,7 @@ hide_grid_lines: hides interior grid lines
 enable_oceans: allows water to generate as a normal terrain and removes default river/ocean generation
 skip_intro: automatically appoints ministers at the start of the game, skips the tutorial, and starts on the strategic screen
 show_lore_mission_locations: prints information about lore missions when first created and on load
+instant_lore_mission: provides a lore mission at the end of the turn if one is not already assigned
+promote_on_sentry: promotes a unit when sentry mode is turned on, for promotion testing
+debug_print: prints a list of active effects whenever p is pressed
+eradicate_slave_trade: sets slave traders strength to 0 on setup

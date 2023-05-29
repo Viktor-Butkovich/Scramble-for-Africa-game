@@ -39,10 +39,9 @@ def start_enemy_turn(global_manager):
     Output:
         None
     '''
-    manage_villages(global_manager)
+    manage_warriors(global_manager)
     manage_beasts(global_manager)
     reset_mobs('npmobs', global_manager)
-    #manage_enemy_movement(global_manager)
     #manage_combat(global_manager) #should probably do reset_mobs, manage_production, etc. after combat completed in a separate function
     #the manage_combat function starts the player turn
     
@@ -67,6 +66,7 @@ def start_player_turn(global_manager, first_turn = False):
                 current_building.reattach_work_crews()
         manage_attrition(global_manager) #have attrition before or after enemy turn? Before upkeep?
         reset_mobs('pmobs', global_manager)
+        manage_villages(global_manager)
         manage_production(global_manager)
         manage_public_opinion(global_manager)
         manage_upkeep(global_manager)
@@ -483,6 +483,18 @@ def create_weighted_migration_destinations(destination_cell_list):
     return(weighted_cell_list)
 
 
+def manage_warriors(global_manager):
+    '''
+    Description:
+        Controls native warrior spawning/despawning
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
+    for current_village in global_manager.get('village_list'):
+        current_village.manage_warriors()
+
 def manage_villages(global_manager):
     '''
     Description:
@@ -492,9 +504,6 @@ def manage_villages(global_manager):
     Output:
         None
     '''
-    for current_village in global_manager.get('village_list'):
-        current_village.manage_warriors()
-    
     for current_village in global_manager.get('village_list'):
         if current_village.population > 0:
             previous_aggressiveness = current_village.aggressiveness

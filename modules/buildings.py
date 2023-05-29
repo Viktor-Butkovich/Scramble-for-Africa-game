@@ -197,6 +197,7 @@ class building(actor):
             self.set_inventory_capacity(self.default_inventory_capacity)
         if (not mid_setup) and self.building_type in ['resource', 'port', 'train_station']:
             self.cell.get_building('warehouses').set_damaged(new_value)
+        self.cell.tile.update_image_bundle()
 
     def set_default_inventory_capacity(self, new_value):
         '''
@@ -954,7 +955,7 @@ class slums(building):
         Output:
             None
         '''
-        input_dict = {}
+        input_dict = {'select_on_creation': True}
         input_dict['coordinates'] = (self.cell.x, self.cell.y)
         input_dict['grids'] = [self.cell.grid, self.cell.grid.mini_grid]
         input_dict['image'] = 'mobs/African workers/default.png'

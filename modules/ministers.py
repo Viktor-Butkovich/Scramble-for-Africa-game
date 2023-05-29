@@ -126,14 +126,14 @@ class minister():
             keyword = self.global_manager.get('minister_type_dict')[self.current_position] #type, like military
             self.tooltip_text.append('This is ' + self.name + ', your ' + self.current_position + '.')
         else:
-            self.tooltip_text.append('This is ' + self.name + ', a recruitable minister.')
+            self.tooltip_text.append('This is ' + self.name + ', an available minister candidate.')
         self.tooltip_text.append('Background: ' + self.background)
         self.tooltip_text.append('Social status: ' + self.status)
         self.tooltip_text.append('Interests: ' + self.interests[0] + ' and ' + self.interests[1])
         self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
-            self.tooltip_text.append('If not reappointed by the end of the turn, he will be permanently fired, incurring a large public opinion penalty.')
+            self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
 
     def display_message(self, text):
         '''

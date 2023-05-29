@@ -2,7 +2,8 @@ SFA folder
 
 	configuration folder
 		debug_config_descriptions.txt
-		debug_config.json
+		dev_config.json
+		release_config.json
 
     graphics folder
 		buildings
@@ -492,6 +493,7 @@ SFA folder
 			def manage_worker_migration
 			def trigger_worker_migration
 			def create_weighted_migration_destinations
+			def manage_warriors
 			def manage_villages
 			def manage_beasts
 			def manage_enemy_movement

@@ -1391,14 +1391,21 @@ def debug_tools_setup(global_manager):
     Output:
         None
     '''
-    file = open('configuration/debug_config.json')
+    #for release, official version of config file with only intended user settings
+    file = open('configuration/release_config.json')
 
     # returns JSON object as a dictionary
     debug_config = json.load(file)
     # Iterating through the json list
     for current_effect in debug_config['effects']:
         effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
-    for current_effect in debug_config['active_effects']:
+
+    try: #for testing/development, use active effects of local version of config file that is not uploaded to GitHub
+        file = open('configuration/dev_config.json')
+        active_effects_config = json.load(file)
+    except:
+        active_effects_config = debug_config
+    for current_effect in active_effects_config['active_effects']:
         if global_manager.get('effect_manager').effect_exists(current_effect):
             global_manager.get('effect_manager').set_effect(current_effect, True)
         else:

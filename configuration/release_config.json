@@ -21,7 +21,10 @@
       "enable_oceans", 
       "skip_intro", 
       "show_lore_mission_locations",
-      "instant_lore_mission"
+      "instant_lore_mission",
+      "promote_on_sentry",
+      "debug_print",
+      "eradicate_slave_trade"
    ],
    "active_effects": [
 
