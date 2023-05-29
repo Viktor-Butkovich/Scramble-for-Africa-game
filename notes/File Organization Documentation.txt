@@ -222,9 +222,10 @@ SFA folder
 		    	class slums
 
         buttons.py
-            imports random, pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
-            class button
-		    class end_turn_button
+            imports random, pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, 
+				game_transition_tools, minister_utility, trial_utility, interface_elements
+            class button(interface_elements.interface_element)
+		    	class end_turn_button
 	        	class cycle_same_tile_button
 	        	class same_tile_icon
 				class fire_unit_button
@@ -333,6 +334,11 @@ SFA folder
 	    	class instructions_button(buttons.button)
 	    	class instructions_page(labels.label)
             def display_instructions_page
+
+		interface_elements.py
+			import pygame
+			class interface_element
+				class interface_collection
 
         labels.py
         	imports pygame, buttons, scaling, text_tools, utility, market_tools

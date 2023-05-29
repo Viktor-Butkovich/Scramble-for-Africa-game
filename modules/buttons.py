@@ -14,8 +14,9 @@ from . import notification_tools
 from . import game_transitions
 from . import minister_utility
 from . import trial_utility
+from . import interface_elements
 
-class button():
+class button(interface_elements.interface_element):
     '''
     An object does something when clicked or when the corresponding key is pressed
     '''
@@ -36,9 +37,10 @@ class button():
         Output:
             None
         '''
-        self.global_manager = global_manager
+        self.outline_width = 2
+        self.outline = pygame.Rect(0, 0, width + (2 * self.outline_width), height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
+        super().__init__(coordinates, width, height, modes, global_manager)
         self.has_released = True
-        self.modes = modes
         self.button_type = button_type
         self.global_manager.get('button_list').append(self)
         if keybind_id == 'none':
@@ -48,22 +50,30 @@ class button():
             self.has_keybind = True
             self.keybind_id = keybind_id
             self.set_keybind(self.keybind_id)
-        self.x, self.y = coordinates
-        self.width = width
-        self.height = height
-        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + self.height), self.width, self.height) #Pygame Rect object to track mouse collision
         self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
         self.color = self.global_manager.get('color_dict')[color]
-        self.outline_width = 2
         self.showing_outline = False
         self.showing_background = True
-        self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
         self.button_type = button_type
         self.tooltip_text = []
         self.update_tooltip()
         self.confirming = False
         self.being_pressed = False
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
+
+    def set_origin(self, new_x, new_y):
+        '''
+        Description:
+            Sets this interface element's location at the inputted coordinates
+        Input:
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
+        Output:
+            None
+        '''
+        super().set_origin(new_x, new_y)
+        self.outline.y = self.Rect.y - self.outline_width
+        self.outline.x = self.Rect.x - self.outline_width
 
     def set_y(self, attached_label): #called by actor display labels to move to their y position
         '''
@@ -74,9 +84,7 @@ class button():
         Output:
             None
         '''
-        self.y = attached_label.y
-        self.Rect.y = self.global_manager.get('display_height') - (attached_label.y + self.height)
-        self.outline.y = self.Rect.y - self.outline_width
+        self.set_origin(self.x, attached_label.y)
 
     def update_tooltip(self):
         '''
@@ -139,11 +147,7 @@ class button():
                                 final_movement_cost = current_mob.get_movement_cost(x_change, y_change, True)
                                 message = 'Attacking an enemy unit costs 5 money and requires only 1 movement point, but staying in the enemy\'s tile afterward would require the usual movement'
                                 tooltip_text.append(message)
-                                #if current_mob.is_battalion and adjacent_cell.terrain == 'water':
-                                #    message = 'This unit would be forced to withdraw to its original tile after the attack, as battalions can not move freely through water'
-                                #else:
                                 message = 'Staying afterward would cost ' + str(final_movement_cost - 1) + ' more movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
-                                #if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
                                 if local_cell.has_walking_connection(adjacent_cell):
                                     if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
                                         connecting_roads = True
@@ -151,7 +155,7 @@ class button():
                                     elif local_infrastructure == 'none' and not adjacent_infrastructure == 'none': #if local has no infrastructure but adjacent does
                                         message += 'and no connecting roads'
                                     elif not local_infrastructure == 'none': #if local has infrastructure but not adjacent
-                                        message += 'and no connecting roads'# + local_infrastructure.infrastructure_type
+                                        message += 'and no connecting roads'
                                     else: 
                                         message += 'and no connecting roads'
                         
@@ -165,7 +169,6 @@ class button():
                                     tooltip_text.append('A train can only move along railroads')
                                 else:
                                     message = 'Costs ' + str(movement_cost) + ' movement point' + utility.generate_plural(movement_cost) + ' because the adjacent tile has ' + adjacent_cell.terrain + ' terrain '
-                                    #if not (adjacent_cell.terrain == 'water' or current_mob.images[0].current_cell.terrain == 'water'):
                                     if local_cell.has_walking_connection(adjacent_cell):
                                         if (not local_infrastructure == 'none') and (not adjacent_infrastructure == 'none'): #if both have infrastructure
                                             connecting_roads = True
@@ -1295,7 +1298,7 @@ class button():
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
+        if super().can_show():
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
