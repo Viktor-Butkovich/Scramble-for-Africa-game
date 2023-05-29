@@ -628,7 +628,7 @@ def manage_ministers(global_manager):
     if (len(global_manager.get('minister_list')) <= global_manager.get('minister_limit') - 2 and random.randrange(1, 7) == 1) or len(global_manager.get('minister_list')) <= 9: #chance if at least 2 missing or guaranteed if not enough to fill cabinet
         while len(global_manager.get('minister_list')) < global_manager.get('minister_limit'):
             global_manager.get('actor_creation_manager').create_minister(False, {}, global_manager)
-        notification_tools.display_notification('Several new ministers candidates are available for appointment and can be found in the available minister pool. /n /n', 'default', global_manager)
+        notification_tools.display_notification('Several new ministers candidates are available for appointment and can be found in the candidate pool. /n /n', 'default', global_manager)
     first_roll = random.randrange(1, 7)
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
