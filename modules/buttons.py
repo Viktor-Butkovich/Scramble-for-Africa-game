@@ -20,41 +20,46 @@ class button(interface_elements.interface_element):
     '''
     An object does something when clicked or when the corresponding key is pressed
     '''
-    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string button_type: Determines the function of this button, like 'end turn'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'button_type': string value - Determines the function of this button, like 'end turn'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.outline_width = 2
-        self.outline = pygame.Rect(0, 0, width + (2 * self.outline_width), height + (self.outline_width * 2)) #Pygame Rect object that appears around a button when pressed
-        super().__init__(coordinates, width, height, modes, global_manager)
+        self.outline = pygame.Rect(0, 0, input_dict['width'] + (2 * self.outline_width), input_dict['height'] + (self.outline_width * 2)) 
+        #outline is Pygame Rect object that appears around a button when pressed
+        super().__init__(input_dict, global_manager)
         self.has_released = True
-        self.button_type = button_type
+        self.button_type = input_dict['button_type']
         self.global_manager.get('button_list').append(self)
-        if keybind_id == 'none':
-            self.has_keybind = False
-            self.keybind_id = 'none'
-        else:
-            self.has_keybind = True
-            self.keybind_id = keybind_id
+        if not 'keybind_id' in input_dict:
+            input_dict['keybind_id'] = 'none'
+        self.keybind_id = input_dict['keybind_id']
+        self.has_keybind = self.has_keybind != 'none'
+        if self.has_keybind:
             self.set_keybind(self.keybind_id)
-        self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
-        self.color = self.global_manager.get('color_dict')[color]
+            self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
+        self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
+        self.color = self.global_manager.get('color_dict')[input_dict['color']]
         self.showing_outline = False
         self.showing_background = True
-        self.button_type = button_type
+        self.button_type = input_dict['button_type']
         self.tooltip_text = []
         self.update_tooltip()
         self.confirming = False
@@ -814,20 +819,10 @@ class button(interface_elements.interface_element):
                 else:
                     text_tools.print_to_screen('You are busy and can not move.', self.global_manager)
             elif self.button_type == 'toggle grid lines':
-                if self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
-                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', False)
-                else:
-                    self.global_manager.get('effect_manager').set_effect('hide_grid_lines', True)
-                #if self.global_manager.get('show_grid_lines'):
-                #    self.global_manager.set('show_grid_lines', False)
-                #else:
-                #    self.global_manager.set('show_grid_lines', True)
+                self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
 
             elif self.button_type == 'toggle text box':
-                if self.global_manager.get('show_text_box'):
-                    self.global_manager.set('show_text_box', False)
-                else:
-                    self.global_manager.set('show_text_box', True)
+                self.global_manager.set('show_text_box', utility.toggle(self.global_manager.get('show_text_box')))
 
             elif self.button_type == 'expand text box':
                 if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
@@ -937,8 +932,6 @@ class button(interface_elements.interface_element):
                                         displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                     displayed_tile.change_inventory(commodity, num_commodity)
-                                    #if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train': #trains can not move after dropping cargo or passenger
-                                    #    displayed_mob.set_movement_points(0)
                                     if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
                                         text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
                                         text_tools.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
@@ -1273,23 +1266,28 @@ class end_turn_button(button):
     '''
     Button that ends the turn when pressed and changes appearance based on the current turn
     '''
-    def __init__(self, coordinates, width, height, color, keybind_id, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, color, 'start end turn', keybind_id, modes, image_id, global_manager)
+        input_dict['button_type'] = 'start end turn'
+        super().__init__(input_dict, global_manager)
         self.warning_image = images.warning_image(self, global_manager, 'button')
         self.warning_image.x += 100
         self.warning_image.set_image('misc/enemy_turn_icon.png')
@@ -1312,22 +1310,28 @@ class cycle_same_tile_button(button):
     '''
     Button that appears near the displayed tile and cycles the order of mobs displayed in a tile
     '''
-    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, color, 'cycle tile mobs', 'none', modes, image_id, global_manager)
+        input_dict['button_type'] = 'cycle tile mobs'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -1372,29 +1376,36 @@ class same_tile_icon(button):
     '''
     Button that appears near the displayed tile and selects mobs that are not currently at the top of the tile
     '''
-    def __init__(self, coordinates, width, height, color, modes, image_id, index, is_last, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int width: Pixel width of this label
-            int height: Pixel height of this label
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            int index: Index to determine which item of the displayed tile's cell's list of contained mobs is selected by this button
-            boolean is_last: Whether this is the last of the displayed tile's selection icons. If it is last, it will show all mobs are not being shown rather than being attached to a specific mob
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'index': int value - Index to determine which item of the displayed tile's cell's list of contained mobs is selected by this button
+                'is_last': boolean value - Whether this is the last of the displayed tile's selection icons. If it is last, it will show all mobs are not being shown rather than being 
+                        attached to a specific mob
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.attached_mob = 'none'
-        super().__init__(coordinates, width, height, color, 'same tile', 'none', modes, image_id, global_manager)
+        input_dict['button_type'] = 'same tile'
+        super().__init__(input_dict, global_manager)
         self.old_contained_mobs = []
-        self.default_image_id = image_id
-        self.index = index
-        self.is_last = is_last
+        self.default_image_id = input_dict['image_id']
+        self.index = input_dict['index']
+        self.is_last = input_dict['is_last']
         if self.is_last:
             self.name_list = []
         self.global_manager.get('same_tile_icon_list').append(self)
@@ -1528,23 +1539,29 @@ class fire_unit_button(button):
     '''
     Button that fires the selected unit, removing it from the game as if it died
     '''
-    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.attached_mob = 'none'
-        super().__init__(coordinates, width, height, color, 'fire unit', 'none', modes, image_id, global_manager)
+        input_dict['button_type'] = 'fire unit'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -1573,7 +1590,6 @@ class fire_unit_button(button):
                         elif self.attached_mob.worker_type == 'slave':
                             message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
                     notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
-                    #self.attached_mob.die()
             else:
                 text_tools.print_to_screen('You are busy and can not fire a unit', self.global_manager)
 
@@ -1617,23 +1633,29 @@ class free_unit_slaves_button(button):
     '''
     Button that frees any slaves in the selected unit and immediately recruits them as African workers
     '''
-    def __init__(self, coordinates, width, height, color, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.attached_mob = 'none'
-        super().__init__(coordinates, width, height, color, 'free unit slaves', 'none', modes, image_id, global_manager)
+        input_dict['button_type'] = 'free unit slaves'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -1692,31 +1714,35 @@ class switch_game_mode_button(button):
     '''
     Button that switches between game modes, like from the strategic map to the minister conference room
     '''
-    def __init__(self, coordinates, width, height, color, keybind_id, to_mode, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string to_mode: game mode that this button switches to. If this equals 'previous', it switches to the previous game mode rather than a preset one
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'to_mode': string value - Game mode that this button switches to. If this equals 'previous', it switches to the previous game mode rather than a preset one
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        button_type = 'switch_game_mode'
-        self.to_mode = to_mode
+        self.to_mode = input_dict['to_mode']
         self.to_mode_tooltip_dict = {}
         self.to_mode_tooltip_dict['main_menu'] = ['Exits to the main menu', 'Does not automatically save the game']
         self.to_mode_tooltip_dict['strategic'] = ['Enters the strategic map screen']
         self.to_mode_tooltip_dict['europe'] = ['Enters the European headquarters screen']
         self.to_mode_tooltip_dict['ministers'] = ['Enters the minister conference room screen']
-        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
+        input_dict['button_type'] = 'switch game mode'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -1768,28 +1794,35 @@ class switch_game_mode_button(button):
         else:
             self.set_tooltip(utility.copy_list(self.to_mode_tooltip_dict[self.to_mode]))
 
-class minister_portrait_image(button): #image of minister's portrait - button subclass because can be clicked to select minister
+class minister_portrait_image(button):
     '''
     Button that can be calibrated to a minister to show that minister's portrait and selects the minister when clicked
     '''
-    def __init__(self, coordinates, width, height, modes, minister_type, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string list modes: Game modes during which this button can appear
-            string minister_type: Minister office that this button is linked to, causing this button to always be connected to the minister in that office. If this equals 'none', this can be calibrated to an available minister candidate
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'minister_type': string value - Minister office that this button is linked to, causing this button to always be connected to the minister in that office. If equals 'none', 
+                    can be calibrated to an available minister candidate
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.default_image_id = 'ministers/empty_portrait.png'
         self.current_minister = 'none'
-        super().__init__(coordinates, width, height, 'gray', 'minister portrait', 'none', modes, self.default_image_id, global_manager)
-        self.minister_type = minister_type #position, like General
+        input_dict['image_id'] = self.default_image_id
+        input_dict['button_type'] = 'minister portrait'
+        super().__init__(input_dict, global_manager)
+        self.minister_type = input_dict['minister_type'] #position, like General
         if self.minister_type == 'none': #if available minister portrait
             if 'ministers' in self.modes:
                 self.global_manager.get('available_minister_portrait_list').append(self)
@@ -1886,30 +1919,36 @@ class minister_portrait_image(button): #image of minister's portrait - button su
             self.tooltip_text = self.current_minister.tooltip_text
         self.set_tooltip(self.tooltip_text)
 
-class country_selection_image(button): #image of country - button subclass because can be clicked to select country
+class country_selection_image(button):
     '''
     Button that can be calibrated to a country to show that country and selects the country when clicked
     '''
-    def __init__(self, coordinates, width, height, modes, country, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string list modes: Game modes during which this button can appear
-            country country: Country to start this button calibrated to, or 'none' if not initially calibrated to any country
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'country': country value - Country to start this button calibrated to, or 'none' if not initially calibrated to any country
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.default_image_id = 'misc/empty.png'
         self.current_country = 'none'
-        super().__init__(coordinates, width, height, 'gray', 'country images', 'none', modes, self.default_image_id, global_manager)
+        input_dict['button_type'] = 'country images'
+        input_dict['image_id'] = self.default_image_id
+        super().__init__(input_dict, global_manager)
         self.global_manager.get('country_selection_image_list').append(self)
-        self.current_country = country
-        self.calibrate(country)
+        self.current_country = input_dict['country']
+        self.calibrate(self.current_country)
 
     def draw(self):
         '''
@@ -1976,24 +2015,31 @@ class cycle_available_ministers_button(button):
     '''
     Button that cycles through the ministers available to be appointed
     '''
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, direction, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
-            string direction: If this equals 'right', this button cycles forward in the list of available ministers. If this equals 'left', this button cycles backwards in the list of available ministers
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'direction': string value - If equals 'right', this button cycles forward in the list of available ministers. If equals 'left', this button cycles backwards in the list of 
+                    available ministers
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.direction = direction
-        super().__init__(coordinates, width, height, 'blue', 'cycle available ministers', keybind_id, modes, image_id, global_manager)
+        self.direction = input_dict['direction']
+        input_dict['button_type'] = 'cycle available ministers'
+        super().__init__(input_dict, global_manager)
 
     def can_show(self):
         '''
@@ -2038,22 +2084,30 @@ class commodity_button(button):
     '''
     Button appearing near commodity prices label that can be clicked as a target for advertising campaigns
     '''
-    def __init__(self, coordinates, width, height, modes, image_id, commodity, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string list modes: Game modes during which this button can appear
-            string commodity: Commodity that this button corresponds to
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'commodity': string value - Commodity that this button corresponds to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.commodity = commodity
-        super().__init__(coordinates, width, height, 'blue', 'commodity selection', 'none', modes, image_id, global_manager)
+        self.commodity = input_dict['commodity']
+        input_dict['button_type'] = 'commodity selection'
+        super().__init__(input_dict, global_manager)
         self.showing_background = False
         self.outline.width = 0
         self.outline.height = 0
@@ -2099,22 +2153,28 @@ class show_previous_financial_report_button(button):
     '''
     Button appearing near money label that can be clicked to display the previous turn's financial report again
     '''
-    def __init__(self, coordinates, width, height, keybind_id, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, width, height, 'blue', 'show previous financial report', keybind_id, modes, image_id, global_manager)
+        input_dict['button_type'] = 'show previous financial report'
+        super().__init__(input_dict, global_manager)
 
     def can_show(self):
         '''

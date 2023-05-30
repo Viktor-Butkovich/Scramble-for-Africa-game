@@ -13,32 +13,37 @@ class recruitment_button(button):
     '''
     Button that creates a new unit with a type depending on recruitment_type and places it in Europe
     '''
-    def __init__(self, coordinates, width, height, color, recruitment_type, keybind_id, modes, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string recruitment_type: Type of unit recruited by this button, like 'explorer'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'recruitment_type': string value - Type of unit recruited by this button, like 'explorer'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        if recruitment_type in global_manager.get('country_specific_units'):
+        self.recruitment_type = input_dict['recruitment_type']
+        if self.recruitment_type in global_manager.get('country_specific_units'):
             if not global_manager.get('current_country') == 'none':
-                self.mob_image_id = 'mobs/' + recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
+                self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
             else:
                 self.mob_image_id = 'mobs/default/default.png'
-        elif recruitment_type in global_manager.get('recruitment_types'):
-            self.mob_image_id = 'mobs/' + recruitment_type + '/default.png'
+        elif self.recruitment_type in global_manager.get('recruitment_types'):
+            self.mob_image_id = 'mobs/' + self.recruitment_type + '/default.png'
         else:
             self.mob_image_id = 'mobs/default/default.png'
-        self.recruitment_type = recruitment_type
         self.recruitment_name = ''
         for character in self.recruitment_type:
             if not character == '_':
@@ -63,7 +68,9 @@ class recruitment_button(button):
             image_id_list.append(right_worker_dict)
         else:
             image_id_list = ['mobs/default/button.png', {'image_id': self.mob_image_id, 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-        super().__init__(coordinates, width, height, color, 'recruitment', keybind_id, modes, image_id_list, global_manager)
+        input_dict['image_id'] = image_id_list
+        input_dict['button_type'] = 'recruitment'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -118,30 +125,38 @@ class buy_commodity_button(button):
     '''
     Button that buys a unit of commodity_type when clicked and has an image matching that of its commodity
     '''
-    def __init__(self, coordinates, width, height, color, commodity_type, modes, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string commodity_type: Type of commmodity that this button buys, like 'consumer goods'
-            string list modes: Game modes during which this button can appear
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'button_type': string value - Determines the function of this button, like 'end turn'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'commodity_type': string value - Type of commodity that this button buys, like 'consumer goods'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         possible_commodity_types = global_manager.get('commodity_types')
-        if commodity_type in possible_commodity_types:
-            image_id = 'scenery/resources/buttons/' + commodity_type + '.png'
+        self.commodity_type = input_dict['commodity_type']
+        if self.commodity_type in possible_commodity_types:
+            image_id = 'scenery/resources/buttons/' + self.commodity_type + '.png'
         else:
             image_id = 'buttons/default_button.png'
-        self.commodity_type = commodity_type
         self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
-        global_manager.set(commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
-        super().__init__(coordinates, width, height, color, 'recruitment', 'none', modes, image_id, global_manager)
+        global_manager.set(self.commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
+        input_dict['button_type'] = 'buy commodity'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''

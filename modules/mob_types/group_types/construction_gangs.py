@@ -18,7 +18,9 @@ class construction_gang(group):
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this group's images can appear
-                'image': string value - File path to the image used by this object
+                'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination

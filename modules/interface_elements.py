@@ -7,18 +7,34 @@ class interface_element():
     Abstract base interface element class
     Object that can be contained in an interface collection and has a location, rect, and image bundle with particular conditions for displaying, along with an optional tooltip when displayed
     '''
-    def __init__(self, coordinates, width, height, modes, global_manager, parent_collection = 'none'):
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.global_manager = global_manager
-        self.width = width
-        self.height = height
+        self.width = input_dict['width']
+        self.height = input_dict['height']
         self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
-        self.parent_collection = parent_collection
+        if not 'parent_collection' in input_dict:
+            input_dict['parent_collection'] = 'none'
+        self.parent_collection = input_dict['parent_collection']
         self.has_parent_collection = self.parent_collection != 'none'
         if self.has_parent_collection:
-            self.parent_collection.add_member(self, coordinates[0], coordinates[1])
+            self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
         else:
-            self.set_origin(coordinates[0], coordinates[1])
-        self.modes = modes
+            self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
+        self.set_modes(input_dict['modes'])
 
     def can_show(self):
         '''
@@ -74,10 +90,23 @@ class interface_collection(interface_element):
     Like an image bundle, members of an interface collection should have independent types and characteristics but be controlled as a unit and created in a list with a dictionary or simple 
         string. Unlike an image bundle, a collection does not necessarily have to be saved, and 
     '''
-    def __init__(self, modes, global_manager):
-        super().__init__(modes, global_manager)
+    def __init__(self, input_dict, global_manager):    
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''    
+        super().__init__(input_dict, global_manager)
         self.members = []
-        return
     
     def add_member(self, new_member, x_offset, y_offset):
         '''
