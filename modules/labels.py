@@ -11,33 +11,37 @@ class label(button):
     '''
     A button that shares most of a button's behaviors but displays a message and does nothing when clicked
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, message, global_manager): #message is initially a string
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string message: Text that will appear on the label by default
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'message': string value - Default text for this label
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.global_manager = global_manager
         self.global_manager.get('label_list').append(self)
-        self.modes = modes
-        self.message = message
-        self.minimum_width = minimum_width
-        self.width = minimum_width
         self.font_size = scaling.scale_width(25, global_manager)
         self.font_name = self.global_manager.get('font_name')
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.current_character = 'none'
-        self.height = height
-        super().__init__(coordinates, self.width, self.height, 'green', 'label', 'none', self.modes, image_id, global_manager)
+        self.message = input_dict['message']
+        self.minimum_width = input_dict['minimum_width']
+        input_dict['width'] = self.minimum_width
+        input_dict['button_type'] = 'label'
+        input_dict['color'] = 'green'
+        super().__init__(input_dict, global_manager)
         self.set_label(self.message)
 
     def set_label(self, new_message):
@@ -50,7 +54,7 @@ class label(button):
             None
         '''
         self.message = new_message
-        if text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width: #self.ideal_width:
+        if text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width:
             self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
         else:
             self.width = self.minimum_width
@@ -58,7 +62,6 @@ class label(button):
         self.Rect.width = self.width
         self.image.set_image(self.image.image_id)
         self.image.Rect = self.Rect
-            
 
     def update_tooltip(self):
         '''
@@ -74,13 +77,13 @@ class label(button):
     def on_click(self):
         '''
         Description:
-            Controls this label's behavior when clicked. By default, labels do nothing when clicked
+            Controls this label's behavior when clicked. By default, labels do nothing when clicked, though label subclasses like notifications may still need on_click functionality
         Input:
             None
         Output:
             None
         '''
-        i = 0
+        return
 
     def remove(self):
         '''
@@ -91,9 +94,8 @@ class label(button):
         Output:
             None
         '''
+        super().remove()
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
     def draw(self):
         '''
@@ -105,7 +107,7 @@ class label(button):
             None
         '''
         if self.can_show():
-            self.image.draw()
+            super().draw()
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 
@@ -113,25 +115,30 @@ class value_label(label):
     '''
     Label that tracks the value of a certain variable and is attached to a value_tracker object. Whenever the value of the value_tracker changes, this label is automatically changed
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, value_name, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string value_name: Type of value tracked by this label, like 'turn' for turn number
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'value_name': string value - Type of value tracked by this label, like 'turn' for turn number label
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.value_name = value_name
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager)
+        self.value_name = input_dict['value_name']
+        input_dict['message'] = 'none'
+        super().__init__(input_dict, global_manager)
         self.display_name = text_tools.remove_underscores(self.value_name) #public_opinion to public opinion
-        self.tracker = self.global_manager.get(value_name + '_tracker')
+        self.tracker = self.global_manager.get(self.value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
 
@@ -147,6 +154,14 @@ class value_label(label):
         self.set_label(utility.capitalize(self.display_name + ': ' + str(new_value)))
 
     def update_tooltip(self):
+        '''
+        Description:
+            Sets this label's tooltip to what it should be. A value label's tooltip label's tooltip shows its text followed by a message related to the type of value represented
+        Input:
+            None
+        Output:
+            None
+        '''
         tooltip_text = [self.message]
         if self.value_name == 'public_opinion':
             tooltip_text.append('Public opinion represents your company\'s reputation and expectations for its success and is used to calculate government subsidies')
@@ -164,26 +179,34 @@ class money_label(value_label):
     '''
     Special type of value label that tracks money
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'button_type': string value - Determines the function of this button, like 'end turn'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'money', global_manager)
+        input_dict['value_name'] = 'money'
+        super().__init__(input_dict, global_manager)
 
     def update_label(self, new_value):
         '''
         Description:
-            Updates the value shown by this label when to match the value of its value_tracker. Money labels additionally show the projected income for the next turn
+            Updates the value shown by this label when to match the value of its value tracker. Money labels additionally show the projected income for the next turn
         Input:
             int new_value: New value of this label's value_tracker
         Output:
@@ -210,7 +233,7 @@ class money_label(value_label):
     def update_tooltip(self):
         '''
         Description:
-            Sets this label's tooltip to what it should be. A money_label's tooltip shows its text followed by the upkeep of the player's units each turn
+            Sets this label's tooltip to what it should be. A money label's tooltip shows its text followed by the upkeep of the player's units each turn
         Input:
             None
         Output:
@@ -287,26 +310,30 @@ class commodity_prices_label(label):
     '''
     Label that shows the price of each commodity. Unlike most labels, its message is a list of strings rather than a string, allowing it to have a line for each commodity
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.ideal_width = minimum_width
-        self.minimum_height = height
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'none', global_manager) #coordinates, minimum_width, height, modes, image_id, message, global_manager
-        #self.font_size = scaling.scale_height(30, global_manager)
+        self.ideal_width = input_dict['minimum_width']
+        self.minimum_height = input_dict['height']
+        input_dict['message'] = 'none'
+        super().__init__(input_dict, global_manager)
         self.font_size = self.global_manager.get('font_size') * 2
-        self.font_name = self.global_manager.get('font_name')#self.font_name = 'Times New Roman'
+        self.font_name = self.global_manager.get('font_name')
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
         self.update_label()
 
@@ -320,7 +347,7 @@ class commodity_prices_label(label):
             None
         '''
         message = ['Prices: ']
-        widest_commodity_width = 0 #text_tools.message_width(message, fontsize, font_name)
+        widest_commodity_width = 0
         for current_commodity in self.global_manager.get('commodity_types'):
             current_message_width = text_tools.message_width(current_commodity, self.font_size, self.font_name)
             if current_message_width > widest_commodity_width:
@@ -380,25 +407,32 @@ class multi_line_label(label):
     '''
     Label that has multiple lines and moves to the next line when a line of text exceeds its width
     '''
-    def __init__(self, coordinates, ideal_width, minimum_height, modes, image, message, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int ideal_width: Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line will be started
-            int minimum_height: Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
-            string list modes: Game modes during which this label can appear
-            string image: File path to the image used by this object
-            string message: Text that will appear on the label with lines separated by /n
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'message': string value - Default text for this label, with lines separated by /n
+                'ideal_width': int value - Pixel width that this label will try to retain. Each time a word is added to the label, if the word extends past the ideal width, the next line 
+                    will be started
+                'minimum_height': int value - Minimum pixel height of this label. Its height will increase if the contained text would extend past the bottom of the label
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.ideal_width = ideal_width
-        self.minimum_height = minimum_height
-        self.original_y = coordinates[1]
-        super().__init__(coordinates, ideal_width, minimum_height, modes, image, message, global_manager)
+        self.ideal_width = input_dict['ideal_width']
+        self.minimum_height = input_dict['minimum_height']
+        self.original_y = input_dict['coordinates'][1]
+        input_dict['minimum_width'] = input_dict['ideal_width']
+        input_dict['height'] = self.minimum_height
+        super().__init__(input_dict, global_manager)
 
     def draw(self):
         '''
@@ -425,7 +459,7 @@ class multi_line_label(label):
         '''
         self.set_tooltip(self.message)
 
-    def format_message(self): #takes a string message and divides it into a list of strings based on length, /n used because there are issues with checking if something is equal to \
+    def format_message(self):
         '''
         Description:
             Converts this label's string message to a list of strings, with each string representing a line of text. Each line of text ends when its width exceeds the ideal_width or when a '/n' is encountered in the text
@@ -458,7 +492,7 @@ class multi_line_label(label):
         next_line += next_word
         new_message.append(next_line)
         self.message = new_message
-        new_height = len(new_message) * self.global_manager.get('font_size') #scaling.scale_height(25, self.global_manager) #font size
+        new_height = len(new_message) * self.global_manager.get('font_size')
         if new_height > self.minimum_height:
             self.height = new_height
 

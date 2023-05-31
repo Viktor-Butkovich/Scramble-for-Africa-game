@@ -38,7 +38,7 @@ class label_button(button):
             None
         '''
         self.attached_label = input_dict['attached_label']
-        super().__init__(input_dict, global_manager)#coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager
+        super().__init__(input_dict, global_manager)
 
     def can_show(self):
         '''

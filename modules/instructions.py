@@ -9,25 +9,6 @@ class instructions_button(button):
     '''
     Button that displays the first page of game instructions when clicked
     '''
-    def __init__(self, coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this button
-            int width: Pixel width of this button
-            int height: Pixel height of this button
-            string color: Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-            string button_type: Determines the function of this button, like 'end turn'
-            pygame key object keybind_id: Determines the keybind id that activates this button, like pygame.K_n
-            string list modes: Game modes during which this button can appear
-            string image_id: File path to the image used by this object
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        super().__init__(coordinates, width, height, color, button_type, keybind_id, modes, image_id, global_manager)
-        
     def on_click(self):
         '''
         Description:
@@ -51,16 +32,27 @@ class instructions_page(label):
     '''
     Label shown when the instructions button is pressed that goes to the next instructions page when clicked, or stops showing instructions if it is the last one. Unlike other labels, can have multiple lines
     '''
-    def __init__(self, instruction_text, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
+        Description:
+            Initializes this object
         Input:
-            string instruction_text: Text contained in the current page of the instructions
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'message': string value - Default text for this label
             global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
         '''
         self.global_manager = global_manager
         self.minimum_height = scaling.scale_height(self.global_manager.get('default_display_height') - 120, self.global_manager)
         self.ideal_width = scaling.scale_width(self.global_manager.get('default_display_width') - 120, self.global_manager)
-        super().__init__(scaling.scale_coordinates(60, 60, self.global_manager), self.ideal_width, self.minimum_height, ['strategic', 'europe'], 'misc/default_instruction.png', instruction_text, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(60, 60, self.global_manager)
+        input_dict['minimum_width'] = self.ideal_width
+        input_dict['height'] = self.minimum_height
+        input_dict['modes'] = ['strategic', 'europe']
+        input_dict['image_id'] = 'misc/default_instructions.png'
+        super().__init__(input_dict, global_manager)
 
     def on_click(self):
         '''
@@ -165,4 +157,3 @@ def display_instructions_page(page_number, global_manager):
     global_manager.set('current_instructions_page_index', page_number)
     global_manager.set('current_instructions_page_text', global_manager.get('instructions_list')[page_number])
     global_manager.set('current_instructions_page', instructions_page(global_manager.get('current_instructions_page_text'), global_manager))
-
