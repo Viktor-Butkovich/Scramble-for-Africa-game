@@ -72,7 +72,7 @@ class choice_notification(notifications.notification):
         Output:
             None
         '''
-        nothing = 0 #does not remove self when clicked
+        return #does not remove self when clicked
 
     def update_tooltip(self):
         '''

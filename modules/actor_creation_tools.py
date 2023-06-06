@@ -24,6 +24,14 @@ from . import utility
 from . import actor_utility
 from . import market_tools
 from . import dice
+from . import buttons
+from . import labels
+from . import notifications
+from . import choice_notifications
+from . import instructions
+from . import action_notifications
+from .actor_display_tools import buttons as actor_display_buttons
+from .actor_display_tools import labels as actor_display_labels
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -38,7 +46,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Output:
             None
         '''
-        nothing = 0
+        return
         
     def create(self, from_save, input_dict, global_manager):
         '''
@@ -120,8 +128,250 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #loans
         elif init_type == 'loan':
             new_actor = market_tools.loan(from_save, input_dict, global_manager)
-            
+
         return(new_actor)
+
+    def create_interface_element(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes an interface element based on inputted values
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
+                'init_type': string value - Always required, determines type of object created
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            actor: Returns the interface element created
+        '''
+        init_type = input_dict['init_type']
+        #interface elements
+        if init_type == 'button':
+            new_element = buttons.button(input_dict, global_manager)
+        if init_type.ends_with('button'):
+            base = init_type.removesuffix('button')
+            #buttons buttons
+            if base == '':
+                new_element = buttons.button(input_dict, global_manager)
+            else:
+                base = base.removesuffix(' ')
+                if base == 'end turn':
+                    new_element = buttons.end_turn_button(input_dict, global_manager)
+                elif base == 'cycle same tile':
+                    new_element = buttons.cycle_same_tile_button(input_dict, global_manager)
+                elif base == 'fire unit':
+                    new_element = buttons.fire_unit_button(input_dict, global_manager)
+                elif base == 'free unit slaves':
+                    new_element = buttons.free_unit_slaves_button(input_dict, global_manager)
+                elif base == 'switch game mode':
+                    new_element = buttons.switch_game_mode_button(input_dict, global_manager)
+                elif base == 'cycle available ministers':
+                    new_element = buttons.cycle_available_ministers_button(input_dict, global_manager)
+                elif base == 'commodity':
+                    new_element = buttons.commodity_button(input_dict, global_manager)
+                elif base == 'show previous financial report':
+                    new_element = buttons.show_previous_financial_report_button(input_dict, global_manager)
+
+                #instructions buttons
+                elif base == 'instructions':
+                    new_element = instructions.instructions_button(input_dict, global_manager)
+
+                #choice_notifications buttons
+                elif base == 'choice':
+                    new_element = choice_notifications.choice_button(input_dict, global_manager)
+                elif base == 'recruitment choice':
+                    new_element = choice_notifications.recruitment_choice_button(input_dict, global_manager)
+                elif base.ends_with(' choice'): #if given init type end turn choice button, base is end turn choice and button type is end turn as a choice button
+                    base = base.removesuffix(' choice')
+                    input_dict['button_type'] = base.removesuffix(' choice')
+                    new_element = choice_notifications.choice_button(input_dict, global_manager)
+
+                #actor_display_buttons buttons
+                elif base == 'label':
+                    new_element = actor_display_buttons.label_button(input_dict, global_manager)
+                elif base == 'worker crew vehicle':
+                    new_element = actor_display_buttons.worker_crew_vehicle_button(input_dict, global_manager)
+                elif base == 'embark all passengers':
+                    new_element = actor_display_buttons.embark_all_passengers_button(input_dict, global_manager)
+                elif base == 'disembark all passengers':
+                    new_element = actor_display_buttons.disembark_all_passengers_button(input_dict, global_manager)
+                elif base == 'crew vehicle':
+                    new_element = actor_display_buttons.crew_vehicle_button(input_dict, global_manager)
+                elif base == 'uncrew vehicle':
+                    new_element = actor_display_buttons.uncrew_vehicle_button(input_dict, global_manager)
+                elif base == 'merge':
+                    new_element = actor_display_buttons.merge_button(input_dict, global_manager)
+                elif base == 'split':
+                    new_element = actor_display_buttons.split_button(input_dict, global_manager)
+                elif base == 'enable sentry mode':
+                    new_element = actor_display_buttons.enable_sentry_mode_button(input_dict, global_manager)
+                elif base == 'disable sentry mode':
+                    new_element = actor_display_buttons.disable_sentry_mode_button(input_dict, global_manager)
+                elif base == 'enable automatic replacement':
+                    new_element = actor_display_buttons.enable_automatic_replacement_button(input_dict, global_manager)
+                elif base == 'disable automatic replacement':
+                    new_element = actor_display_buttons.disable_automatic_replacement_button(input_dict, global_manager)
+                elif base == 'end unit turn':
+                    new_element = actor_display_buttons.end_unit_turn_button(input_dict, global_manager)
+                elif base == 'remove work crew':
+                    new_element = actor_display_buttons.remove_work_crew_button(input_dict, global_manager)
+                elif base == 'disembark vehicle':
+                    new_element = actor_display_buttons.disembark_vehicle_button(input_dict, global_manager)
+                elif base == 'embark vehicle':
+                    new_element = actor_display_buttons.embark_vehicle_button(input_dict, global_manager)
+                elif base == 'cycle passengers':
+                    new_element = actor_display_buttons.cycle_passengers_button(input_dict, global_manager)
+                elif base == 'cycle work crews':
+                    new_element = actor_display_buttons.cycle_work_crews_button(input_dict, global_manager)
+                elif base == 'work crew to building':
+                    new_element = actor_display_buttons.work_crew_to_building_button(input_dict, global_manager)
+                elif base == 'trade':
+                    new_element = actor_display_buttons.trade_button(input_dict, global_manager)
+                elif base == 'convert':
+                    new_element = actor_display_buttons.convert_button(input_dict, global_manager)
+                elif base == 'rumor search':
+                    new_element = actor_display_buttons.rumor_search_button(input_dict, global_manager)
+                elif base == 'artifact search':
+                    new_element = actor_display_buttons.artifact_search_button(input_dict, global_manager)
+                elif base == 'capture slaves':
+                    new_element = actor_display_buttons.capture_slaves_button(input_dict, global_manager)
+                elif base == 'suppress slave trade':
+                    new_element = actor_display_buttons.suppress_slave_trade_button(input_dict, global_manager)
+                elif base == 'evangelist campaign':
+                    new_element = actor_display_buttons.evangelist_campaign_button(input_dict, global_manager)
+                elif base == 'take loan':
+                    new_element = actor_display_buttons.take_loan_button(input_dict, global_manager)
+                elif base == 'labor broker':
+                    new_element = actor_display_buttons.labor_broker_button(input_dict, global_manager)
+                elif base == 'advertising campaign':
+                    new_element = actor_display_buttons.advertising_campaign_button(input_dict, global_manager)
+                elif base == 'track beasts':
+                    new_element = actor_display_buttons.track_beasts_button(input_dict, global_manager)
+                elif base == 'switch theatre':
+                    new_element = actor_display_buttons.switch_theatre_button(input_dict, global_manager)
+                elif base == 'build train':
+                    new_element = actor_display_buttons.build_train_button(input_dict, global_manager)
+                elif base == 'build steamboat':
+                    new_element = actor_display_buttons.build_steamboat_button(input_dict, global_manager)
+                elif base == 'construction':
+                    new_element = actor_display_buttons.construction_button(input_dict, global_manager)
+                elif base == 'repair':
+                    new_element = actor_display_buttons.repair_button(input_dict, global_manager)
+                elif base == 'upgrade':
+                    new_element = actor_display_buttons.upgrade_button(input_dict, global_manager)
+                elif base == 'appoint minister':
+                    new_element = actor_display_buttons.appoint_minister_button(input_dict, global_manager)
+                elif base == 'remove minister':
+                    new_element = actor_display_buttons.remove_minister_button(input_dict, global_manager)
+                elif base == 'to trial':
+                    new_element = actor_display_buttons.to_trial_button(input_dict, global_manager)
+                elif base == 'fabricate evidence':
+                    new_element = actor_display_buttons.fabricate_evidence_button(input_dict, global_manager)
+                elif base == 'bribe judge':
+                    new_element = actor_display_buttons.bribe_judge_button(input_dict, global_manager)
+                elif base == 'hire african workers':
+                    new_element = actor_display_buttons.hire_african_workers_button(input_dict, global_manager)
+                elif base == 'buy slaves':
+                    new_element = actor_display_buttons.buy_slaves_button(input_dict, global_manager)
+                elif base == 'automatic route':
+                    new_element = actor_display_buttons.automatic_route_button(input_dict, global_manager)
+
+                else: #if given init type cycle passengers button, will initialize as base button class with button type cycle passengers
+                    input_dict['button_type'] = base
+                    new_element = buttons.button(input_dict, global_manager)
+        elif init_type == 'same tile icon':
+            new_element = buttons.same_tile_icon(input_dict, global_manager)
+        elif init_type == 'minister portrait image': #actually a button, fix misleading name eventually
+            new_element = buttons.minister_portrait_image(input_dict, global_manager)
+        elif init_type == 'country selection image': #^likewise
+            new_element = buttons.country_selection_image(input_dict, global_manager)
+        elif init_type == 'die':
+            new_element = dice.die(input_dict, global_manager)
+
+        elif init_type.ends_with('label'):
+            base = init_type.removesuffix('label')
+            #labels labels
+            if base == '':
+                new_element = labels.label(input_dict, global_manager)
+            else:
+                base = base.removesuffix(' ')
+                if base == 'value':
+                    new_element = labels.value_label(input_dict, global_manager)
+                elif base == 'money':
+                    new_element = labels.money_label(input_dict, global_manager)
+                elif base == 'commodity prices':
+                    new_element = labels.commodity_prices_label(input_dict, global_manager)
+                elif base == 'multi line':
+                    new_element = labels.multi_line_label(input_dict, global_manager)
+
+                #actor display labels
+                elif base == 'actor display':
+                    new_element = actor_display_labels.actor_display_label(input_dict, global_manager)
+                elif base == 'list item':
+                    new_element = actor_display_labels.list_item_label(input_dict, global_manager)
+                elif base == 'building work crews':
+                    new_element = actor_display_labels.building_work_crews_label(input_dict, global_manager)
+                elif base == 'building efficiency':
+                    new_element = actor_display_labels.building_efficiency_label(input_dict, global_manager)
+                elif base == 'native info':
+                    new_element = actor_display_labels.native_info_label(input_dict, global_manager)
+                elif base == 'commodity display':
+                    new_element = actor_display_labels.commodity_display_label(input_dict, global_manager)
+
+                else: #if given init type name label, will initialize as actor display label class with actor label type name
+                    input_dict['actor_label_type'] = base
+                    new_element = actor_display_labels.actor_display_label(input_dict, global_manager)
+        elif init_type == 'instructions page':
+            new_element = instructions.instructions_page(input_dict, global_manager)
+
+        elif init_type.ends_with('notification'):
+            base = init_type.removesuffix('notification')
+            #notifications notifications
+            if base == '':
+                new_element = notifications.notification(input_dict, global_manager)
+            else:
+                base = base.removesuffix(' ')
+                if base == 'minister':
+                    new_element = notifications.minister_notification(input_dict, global_manager)
+                elif base == 'zoom':
+                    new_element = notifications.zoom_notification(input_dict, global_manager)
+
+                #choice_notifications notifications
+                elif base == 'choice':
+                    new_element = choice_notifications.choice_notification(input_dict, global_manager)
+
+                #action_notifications notifications
+                elif init_type == 'action':
+                    new_element = action_notifications.action_notification(input_dict, global_manager)
+                elif init_type == 'dice rolling':
+                    new_element = action_notifications.dice_rolling_notification(input_dict, global_manager)
+                elif init_type == 'exploration':
+                    new_element = action_notifications.exploration_notification(input_dict, global_manager)
+                elif init_type == 'off tile exploration':
+                    new_element = action_notifications.off_tile_exploration_notification(input_dict, global_manager)
+                elif init_type == 'trade':
+                    new_element = action_notifications.trade_notification(input_dict, global_manager)
+                elif init_type == 'religious campaign':
+                    new_element = action_notifications.religious_campaign_notification(input_dict, global_manager)
+                elif init_type == 'public relations campaign':
+                    new_element = action_notifications.public_relations_campaign_notification(input_dict, global_manager)
+                elif init_type == 'trial':
+                    new_element = action_notifications.trial_notification(input_dict, global_manager)
+                elif init_type == 'advertising campaign':
+                    new_element = action_notifications.advertising_campaign_notification(input_dict, global_manager)
+                elif init_type == 'conversion':
+                    new_element = action_notifications.conversion_notification(input_dict, global_manager)
+                elif init_type == 'rumor search':
+                    new_element = action_notifications.rumor_search_notification(input_dict, global_manager)
+                elif init_type == 'artifact search':
+                    new_element = action_notifications.artifact_search_notification(input_dict, global_manager)
+                elif init_type == 'capture slaves':
+                    new_element = action_notifications.capture_slaves_notification(input_dict, global_manager)
+                elif init_type == 'suppress slave trade':
+                    new_element = action_notifications.suppress_slave_trade_notification(input_dict, global_manager)
+                elif init_type == 'construction':
+                    new_element = action_notifications.construction_notification(input_dict, global_manager)
+                elif init_type == 'combat':
+                    new_element = action_notifications.combat_notification(input_dict, global_manager)
+        return(new_element)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):
         '''

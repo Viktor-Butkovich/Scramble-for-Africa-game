@@ -1,9 +1,7 @@
 #Contains functionality for multi-step notifications
 
-from .labels import label
 from .images import free_image
 from .notifications import notification
-from . import text_tools
 from . import utility
 from . import scaling
 from . import actor_utility

@@ -157,7 +157,7 @@ SFA folder
 		    		class slave_worker
 
         action_notifications.py
-	        imports labels, images, notifications, utility actor_utility
+	        imports images, notifications, utility, scaling, actor_utility, trial_utility
             class action_notification(notifications.notification)
 				class dice_rolling_notification
 				class exploration_notification

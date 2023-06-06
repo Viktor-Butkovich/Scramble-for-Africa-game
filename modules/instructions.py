@@ -102,7 +102,6 @@ class instructions_page(label):
                 text_line = self.message[text_line_index]
                 self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
 
-            
     def format_message(self):
         '''
         Description:

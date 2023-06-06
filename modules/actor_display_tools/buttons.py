@@ -2579,7 +2579,6 @@ class build_steamboat_button(label_button):
         building_info_dict['building_name'] = 'steamboat'
         self.attached_label.actor.start_construction(building_info_dict)
 
-
 class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
     Button that commands a group to construct a certain type of building

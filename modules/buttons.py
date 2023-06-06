@@ -56,6 +56,8 @@ class button(interface_elements.interface_element):
             self.set_keybind(self.keybind_id)
             self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
         self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
+        if not 'color' in input_dict:
+            input_dict['color'] = 'blue'
         self.color = self.global_manager.get('color_dict')[input_dict['color']]
         self.showing_outline = False
         self.showing_background = True
@@ -358,6 +360,7 @@ class button(interface_elements.interface_element):
                 for current_passenger in self.attached_label.actor.contained_mobs:
                     tooltip_text.append('    ' + current_passenger.name)
             self.set_tooltip(tooltip_text)
+            
         elif self.button_type == 'cycle work crews':
             tooltip_text = ['Cycles through this  building\'s work crews']
             tooltip_text.append('Work crews: ' )

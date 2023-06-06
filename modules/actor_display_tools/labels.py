@@ -13,37 +13,40 @@ class actor_display_label(label):
     '''
     Label that changes its text to match the information of selected mobs or tiles
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string actor_label_type: Type of actor information shown by this label
-            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_label_type': string value - Type of actor information shown
+                'actor_type': string value - Type of actor to display the information of, like 'mob', 'tile', or 'minister'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        #height += 5
-        message = ''
         self.attached_buttons = []
         self.attached_images = []
         self.actor = 'none'
-        self.actor_label_type = actor_label_type #name, terrain, resource, etc
-        self.actor_type = actor_type #mob or tile, none if does not scale with shown labels, like tooltip labels
+        self.actor_label_type = input_dict['actor_label_type'] #name, terrain, resource, etc
+        self.actor_type = input_dict['actor_type'] #mob or tile, none if does not scale with shown labels, like tooltip labels
         self.image_y_displacement = 0
-        super().__init__(coordinates, minimum_width, height, modes, image_id, message, global_manager)
+        input_dict['message'] = ''
+        super().__init__(input_dict, global_manager)
         #all labels in a certain ordered label list will be placed in order on the side of the screen when the correct type of actor/minister is selected
         s_increment = scaling.scale_width(6, self.global_manager)
         m_increment = scaling.scale_width(11, self.global_manager)
         l_increment = scaling.scale_width(30, self.global_manager)
         
-        if (not 'trial' in modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
+        if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
             #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
             self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         if self.actor_label_type == 'name':
@@ -442,12 +445,8 @@ class actor_display_label(label):
                 if new_actor.grid.is_abstract_grid:
                     self.set_label(self.message_start + 'n/a')
                 elif new_actor.cell.visible:
-                    #if new_actor.cell.has_building('village') and new_actor.cell.visible:
-                    #    self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
                     if not (new_actor.cell.has_building('resource') or new_actor.cell.has_building('village')): #if no building built, show resource: name
                         self.set_label(self.message_start + new_actor.cell.resource)
-                    #else:
-                    #    self.set_label('Resource building: ' + new_actor.cell.get_building(self.actor_label_type).name) #if resource building built, show it
                 else:
                     self.set_label(self.message_start + 'unknown')
 
@@ -467,8 +466,6 @@ class actor_display_label(label):
                         if not new_actor.has_infinite_movement:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label('No movement')
-                            #else:
-                            #    self.set_label('Infinite movement until cargo/passenger dropped')
                         else:
                             if new_actor.movement_points == 0 or new_actor.temp_movement_disabled or not new_actor.has_crew:
                                 self.set_label('No movement')
@@ -595,7 +592,7 @@ class actor_display_label(label):
                 self.set_label('Strength: ' + str(self.global_manager.get('slave_traders_strength')) + '/' + str(self.global_manager.get('slave_traders_natural_max_strength')))
 
         elif self.actor_label_type == 'tooltip':
-            nothing = 0 #do not set text for tooltip label
+            return #do not set text for tooltip label
         else:
             self.set_label(self.message_start + 'n/a')
 
@@ -629,7 +626,7 @@ class actor_display_label(label):
         '''
         self.y = new_y
         self.image.y = self.y
-        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)#self.y
+        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
         self.image.Rect = self.Rect    
         for current_button in self.attached_buttons:
             current_button.set_y(self)
@@ -683,28 +680,33 @@ class list_item_label(actor_display_label):
     '''
     Label that shows the information of a certain item in a list, like a train passenger among a list of passengers
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, actor_label_type, list_index, list_type, actor_type, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string actor_label_type: Type of actor information shown by this label
-            int list_index: Index to determine which item of a list is reflected by this label
-            string list_type: Type of list reflected by this lagel, such as a 'resource building' for a label type of 'building worker' to show that this label shows the workers attached to resource buildings but not other buildings
-            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_label_type': string value - Type of actor information shown
+                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
+                'list_index': int value - Index to determine item of list reflected
+                'list_type': string value - Type of list associated with, like 'resource building' along with label type of 'building work crew' to show work crews attached to a resource 
+                    building
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        self.list_index = list_index
-        self.list_type = list_type
+        self.list_index = input_dict['list_index']
+        self.list_type = input_dict['list_type']
         self.attached_list = []
-        super().__init__(coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager)
+        super().__init__(input_dict, global_manager)
 
     def calibrate(self, new_actor):
         '''
@@ -735,18 +737,22 @@ class building_work_crews_label(actor_display_label):
     '''
     Label at the top of the list of work crews in a building that shows how many work crews are in it
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string building_type: Type of building this label shows the workers of, like 'resource building'
-            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
+                'building_type': string value - Type of building associated with, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -754,9 +760,9 @@ class building_work_crews_label(actor_display_label):
         self.remove_work_crew_button = 'none'
         self.showing = False
         self.attached_building = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building workers', actor_type, global_manager)
-        self.building_type = building_type
-        #self.showing = False
+        input_dict['actor_label_type'] = 'building workers'
+        super().__init__(input_dict, global_manager)
+        self.building_type = input_dict['building_type']
 
     def calibrate(self, new_actor):
         '''
@@ -793,28 +799,32 @@ class building_efficiency_label(actor_display_label):
     '''
     Label that shows a production building's efficiency, which is the number of attempts work crews at the building have to produce commodities
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, building_type, actor_type, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            string building_type: Type of building this label shows the workers of, like 'resource building'
-            string actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
+                'building_type': string value - Type of building associated with, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.remove_work_crew_button = 'none'
         self.showing = False
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'building efficiency', actor_type, global_manager)
-        self.building_type = building_type
+        input_dict['actor_label_type'] = 'building efficiency'
+        super().__init__(input_dict, global_manager)
+        self.building_type = input_dict['building_type']
         self.attached_building = 'none'
-        #self.showing = False
 
     def calibrate(self, new_actor):
         '''
@@ -871,32 +881,39 @@ class commodity_display_label(actor_display_label):
     '''
     Label that changes its text and attached image and button to match the commodity in a certain part of a currently selected actor's inventory    
     '''
-    def __init__(self, coordinates, minimum_width, height, modes, image_id, commodity_index, matched_actor_type, global_manager):
+    def __init__(self, input_dict, global_manager):
+
         '''
         Description:
-            Initializes this object. Depending on the actor_label_type, various buttons are created to appear next to this label
+            Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this label
-            int minimum_width: Minimum pixel width of this label. As the length of its message increases, this label's width will increase to accomodate it. 
-            int height: Pixel height of this label
-            string list modes: Game modes during which this label can appear
-            string image_id: File path to the image used by this object
-            int commodity_index: Index to determine which item of an actor's inventory is reflected by this label
-            string matched_actor_type: 'mob' or 'tile', depending on the type of actor this label displays the information of
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
+                'actor_label_type': string value - Type of actor information shown
+                'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
+                'commodity_index': int value - Index of actor's inventory reflected
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         self.current_commodity = 'none'
-        super().__init__(coordinates, minimum_width, height, modes, image_id, 'commodity', matched_actor_type, global_manager)
+        input_dict['actor_label_type'] = 'commodity'
+        super().__init__(input_dict, global_manager)
         self.showing_commodity = False
-        self.commodity_index = commodity_index
+        self.commodity_index = input_dict['commodity_index']
         self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
-        if matched_actor_type == 'mob':
+        if self.actor_type == 'mob':
             self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'buttons/commodity_drop_button.png', self, global_manager))
             self.attached_buttons.append(buttons.label_button((self.x + (self.height + 6), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'buttons/commodity_drop_all_button.png', self,
                 global_manager))
-        elif matched_actor_type == 'tile':
+        elif self.actor_type == 'tile':
             self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'pick up commodity', 'none', self.modes, 'buttons/commodity_pick_up_button.png', self, global_manager))
             self.attached_buttons.append(buttons.label_button((self.x + (self.height + 6), self.y), self.height, self.height, 'pick up all commodity', 'none', self.modes, 'buttons/commodity_pick_up_all_button.png',
                 self, global_manager))

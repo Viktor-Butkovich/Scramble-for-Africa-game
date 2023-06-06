@@ -46,13 +46,11 @@ class minister():
         if from_save:
             self.name = input_dict['name']
             self.current_position = input_dict['current_position']
-            
             self.background = input_dict['background']
             self.status_number = global_manager.get('background_status_dict')[self.background]
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = input_dict['personal_savings']
-            
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
             self.interests = input_dict['interests']
@@ -64,7 +62,6 @@ class minister():
             self.corruption_evidence = input_dict['corruption_evidence']
             self.fabricated_evidence = input_dict['fabricated_evidence']
             self.just_removed = input_dict['just_removed']
-            
             if not self.current_position == 'none':
                 self.appoint(self.current_position)
             else:
@@ -76,13 +73,11 @@ class minister():
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
-            
             self.skill_setup()
             self.interests_setup()
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
-            has_outfit_background = False
             hair_color = random.choice(['black', 'brown', 'blonde'])
             for image_type in self.portrait_section_types:
                 if image_type != 'outfit_background':
@@ -107,7 +102,6 @@ class minister():
             self.corruption_evidence = 0
             self.fabricated_evidence = 0
             self.just_removed = False
-            
         minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
         self.update_tooltip()

@@ -139,9 +139,6 @@ class buy_commodity_button(button):
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'button_type': string value - Determines the function of this button, like 'end turn'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'commodity_type': string value - Type of commodity that this button buys, like 'consumer goods'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -150,9 +147,9 @@ class buy_commodity_button(button):
         possible_commodity_types = global_manager.get('commodity_types')
         self.commodity_type = input_dict['commodity_type']
         if self.commodity_type in possible_commodity_types:
-            image_id = 'scenery/resources/buttons/' + self.commodity_type + '.png'
+            input_dict['image_id'] = 'scenery/resources/buttons/' + self.commodity_type + '.png'
         else:
-            image_id = 'buttons/default_button.png'
+            input_dict['image_id'] = 'buttons/default_button.png'
         self.cost = global_manager.get('commodity_prices')[self.commodity_type] #update this when price changes
         global_manager.set(self.commodity_type + ' buy button', self) #consumer goods buy button, used to update prices
         input_dict['button_type'] = 'buy commodity'
