@@ -51,10 +51,9 @@ class button(interface_elements.interface_element):
         if not 'keybind_id' in input_dict:
             input_dict['keybind_id'] = 'none'
         self.keybind_id = input_dict['keybind_id']
-        self.has_keybind = self.has_keybind != 'none'
+        self.has_keybind = self.keybind_id != 'none'
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
-            self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
         self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
         if not 'color' in input_dict:
             input_dict['color'] = 'blue'

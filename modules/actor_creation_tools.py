@@ -30,6 +30,7 @@ from . import notifications
 from . import choice_notifications
 from . import instructions
 from . import action_notifications
+from . import europe_transactions
 from .actor_display_tools import buttons as actor_display_buttons
 from .actor_display_tools import labels as actor_display_labels
 
@@ -146,7 +147,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #interface elements
         if init_type == 'button':
             new_element = buttons.button(input_dict, global_manager)
-        if init_type.ends_with('button'):
+        if init_type.endswith('button'):
             base = init_type.removesuffix('button')
             #buttons buttons
             if base == '':
@@ -179,10 +180,16 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = choice_notifications.choice_button(input_dict, global_manager)
                 elif base == 'recruitment choice':
                     new_element = choice_notifications.recruitment_choice_button(input_dict, global_manager)
-                elif base.ends_with(' choice'): #if given init type end turn choice button, base is end turn choice and button type is end turn as a choice button
+                elif base.endswith(' choice'): #if given init type end turn choice button, base is end turn choice and button type is end turn as a choice button
                     base = base.removesuffix(' choice')
                     input_dict['button_type'] = base.removesuffix(' choice')
                     new_element = choice_notifications.choice_button(input_dict, global_manager)
+
+                #europe_transactions buttons
+                elif base == 'recruitment':
+                    new_element = europe_transactions.recruitment_button(input_dict, global_manager)
+                elif base == 'buy commodity':
+                    new_element = europe_transactions.buy_commodity_button(input_dict, global_manager)
 
                 #actor_display_buttons buttons
                 elif base == 'label':
@@ -286,7 +293,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type == 'die':
             new_element = dice.die(input_dict, global_manager)
 
-        elif init_type.ends_with('label'):
+        elif init_type.endswith('label'):
             base = init_type.removesuffix('label')
             #labels labels
             if base == '':
@@ -322,7 +329,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         elif init_type == 'instructions page':
             new_element = instructions.instructions_page(input_dict, global_manager)
 
-        elif init_type.ends_with('notification'):
+        elif init_type.endswith('notification'):
             base = init_type.removesuffix('notification')
             #notifications notifications
             if base == '':

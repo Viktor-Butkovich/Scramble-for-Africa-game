@@ -896,7 +896,6 @@ class commodity_display_label(actor_display_label):
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'minimum_width': int value - Minimum pixel width of this label. Its width will increase if the contained text would extend past the edge of the label
-                'actor_label_type': string value - Type of actor information shown
                 'actor_type': string value - Type of actor to display the information of, like 'mob' or 'tile'
                 'commodity_index': int value - Index of actor's inventory reflected
             global_manager_template global_manager: Object that accesses shared variables
