@@ -318,13 +318,12 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_labels.building_work_crews_label(input_dict, global_manager)
                 elif base == 'building efficiency':
                     new_element = actor_display_labels.building_efficiency_label(input_dict, global_manager)
-                elif base == 'native info':
+                elif base in ['native info', 'native population', 'native available workers', 'native aggressiveness']:
                     new_element = actor_display_labels.native_info_label(input_dict, global_manager)
                 elif base == 'commodity display':
                     new_element = actor_display_labels.commodity_display_label(input_dict, global_manager)
 
-                else: #if given init type name label, will initialize as actor display label class with actor label type name
-                    input_dict['actor_label_type'] = base
+                else:
                     new_element = actor_display_labels.actor_display_label(input_dict, global_manager)
         elif init_type == 'instructions page':
             new_element = instructions.instructions_page(input_dict, global_manager)

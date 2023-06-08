@@ -17,7 +17,7 @@ SFA folder
     modules folder
 		actor_display_tools folder
 	    	labels.py
-				imports pygame, modules.labels, modules.images, modules.utility, modules.scaling, buttons, images
+				imports pygame, modules.labels, modules.images, modules.utility, modules.scaling, images
 				class actor_display_label(modules.labels.label)
 					class list_item_label
 		    		class building_work_crews_label
@@ -34,7 +34,8 @@ SFA folder
 				class label_image(modules.images.free_image)
 
             buttons.py
-		    imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, modules.game_transitions, modules.notification_tools
+		    	imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, 
+					modules.game_transitions, modules.notification_tools
 	        	class label_button(modules.buttons.button)
 					class worker_crew_vehicle_button
 					class embark_all_passengers_button
@@ -257,7 +258,7 @@ SFA folder
             def read_csv
 
         data_managers.py
-            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, events
+            imports random, pygame, csv_tools, scaling, text_tools, events
             class global_manager_template
             class input_manager_template
 			class effect_manager_template
@@ -429,8 +430,8 @@ SFA folder
 	    	def unscale_height
 
 		setup.py
-		    imports pygame, time, os, logging, scaling, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, 
-		        mouse_followers, save_load_tools, actor_creation_tools, actor_utility, countries, effects
+		    imports pygame, time, os, logging, scaling, images, game_transitions, data_managers,, actor_display_tools.images, mouse_followers, save_load_tools, actor_creation_tools, 
+				actor_utility, countries, effects
 		    def fundamental_setup
 		    def misc_setup
 		    def terrains_setup

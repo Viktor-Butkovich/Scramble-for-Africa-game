@@ -40,7 +40,6 @@ class label(button):
         self.minimum_width = input_dict['minimum_width']
         input_dict['width'] = self.minimum_width
         input_dict['button_type'] = 'label'
-        input_dict['color'] = 'green'
         super().__init__(input_dict, global_manager)
         self.set_label(self.message)
 

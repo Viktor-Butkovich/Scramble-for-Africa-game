@@ -6,7 +6,6 @@ from ..labels import label
 from ..images import minister_type_image
 from .. import utility
 from .. import scaling
-from . import buttons
 from . import images
 
 class actor_display_label(label):
@@ -49,96 +48,321 @@ class actor_display_label(label):
         if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
             #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
             self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
+        s_size = self.height + s_increment
+        m_size = self.height + m_increment
+        l_size = self.height + l_increment
+        input_dict = {
+            'coordinates': (self.x, self.y),
+            'width': s_size,
+            'height': s_size,
+            'modes': self.modes,
+            'attached_label': self
+        }
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            self.attached_buttons.append(buttons.merge_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_m, self.modes, 'buttons/merge_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.split_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_n, self.modes, 'buttons/split_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.labor_broker_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/labor_broker_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_b, self.modes, 'buttons/embark_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(buttons.embark_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_b, self.modes, 'buttons/embark_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, 'ship', global_manager))
-            self.attached_buttons.append(buttons.worker_crew_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_m, self.modes, 'buttons/crew_train_button.png', self, 'train', global_manager))
-            self.attached_buttons.append(buttons.work_crew_to_building_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_g, 'resource', self.modes, 'buttons/work_crew_to_building_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.switch_theatre_button((self.x, self.y), self.height + m_increment, self.height + m_increment, pygame.K_g, self.modes, 'buttons/switch_theatre_button.png', self, global_manager))
+            input_dict['init_type'] = 'merge button'
+            input_dict['image_id'] = 'buttons/merge_button.png'
+            input_dict['keybind_id'] = pygame.K_m
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_g, self.modes, self, 'resource', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_p, self.modes, self, 'port', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, self, 'infrastructure', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, self, 'train_station', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_y, self.modes, self, 'trading_post', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_y, self.modes, self, 'mission', global_manager))
-            self.attached_buttons.append(buttons.construction_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_v, self.modes, self, 'fort', global_manager))
-            
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_g, self.modes, self, 'resource', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_p, self.modes, self, 'port', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, self, 'train_station', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_y, self.modes, self, 'trading_post', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_y, self.modes, self, 'mission', global_manager))
-            self.attached_buttons.append(buttons.repair_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_v, self.modes, self, 'fort', global_manager))
+            input_dict['init_type'] = 'split button'
+            input_dict['image_id'] = 'buttons/split_button.png'
+            input_dict['keybind_id'] = pygame.K_n
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, self, 'resource', 'scale', global_manager))
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, self, 'resource', 'efficiency', global_manager))
-            self.attached_buttons.append(buttons.upgrade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_k, self.modes, self, 'warehouses', 'warehouse_level', global_manager))
+            input_dict['init_type'] = 'labor broker button'
+            input_dict['image_id'] = 'buttons/labor_broker_button.png'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'embark vehicle button'
+            input_dict['image_id'] = 'buttons/embark_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_b
+            input_dict['vehicle_type'] = 'ship'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'embark vehicle button'
+            input_dict['image_id'] = 'buttons/embark_train_button.png'
+            input_dict['keybind_id'] = pygame.K_b
+            input_dict['vehicle_type'] = 'train'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'worker crew vehicle button'
+            input_dict['image_id'] = 'buttons/crew_ship_button.png'
+            input_dict['keybind_id'] = 'buttons/crew_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_m
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'worker crew vehicle button'
+            input_dict['image_id'] = 'buttons/crew_train_button.png'
+            input_dict['keybind_id'] = pygame.K_m
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'work crew to building button'
+            input_dict['image_id'] = 'buttons/work_crew_to_building_button.png'
+            input_dict['keybind_id'] = pygame.K_g
+            input_dict['building_type'] = 'resource'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'switch theatre button'
+            input_dict['image_id'] = 'buttons/switch_theatre_button.png'
+            input_dict['keybind_id'] = pygame.K_g
+            input_dict['width'], input_dict['height'] = (m_size, m_size)
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            del input_dict['image_id']
+            input_dict['init_type'] = 'construction button'
+            input_dict['building_type'] = 'resource'
+            input_dict['keybind_id'] = pygame.K_g
+            input_dict['width'], input_dict['height'] = (s_size, s_size)
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'port'
+            input_dict['keybind_id'] = pygame.K_p
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'infrastructure'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'train_station'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'trading_post'
+            input_dict['keybind_id'] = pygame.K_y
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'mission'
+            input_dict['keybind_id'] = pygame.K_y
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'fort'
+            input_dict['keybind_id'] = pygame.K_v
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
-            self.attached_buttons.append(buttons.build_train_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_y, self.modes, 'mobs/train/button.png', self, global_manager))
-            self.attached_buttons.append(buttons.build_steamboat_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_u, self.modes, 'mobs/steamboat/button.png', self, global_manager))
-            self.attached_buttons.append(buttons.trade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/trade_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.convert_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/convert_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.rumor_search_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/rumor_search_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.artifact_search_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/artifact_search_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/public_relations_campaign_button.png', self, 'public relations campaign', global_manager))
-            self.attached_buttons.append(buttons.evangelist_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/religious_campaign_button.png', self, 'religious campaign', global_manager))
-            self.attached_buttons.append(buttons.advertising_campaign_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'ministers/icons/trade.png', self, global_manager))
-            self.attached_buttons.append(buttons.take_loan_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_l, self.modes, 'buttons/take_loan_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.track_beasts_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/track_beasts_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.capture_slaves_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_t, self.modes, 'buttons/capture_slaves_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.suppress_slave_trade_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_r, self.modes, 'buttons/suppress_slave_trade_button.png', self, global_manager))
+            input_dict['init_type'] = 'repair button'
+            input_dict['building_type'] = 'resource'
+            input_dict['keybind_id'] = pygame.K_g
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'port'
+            input_dict['keybind_id'] = pygame.K_p
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'train_station'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['building_type'] = 'trading_post'
+            input_dict['keybind_id'] = pygame.K_y
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            input_dict['building_type'] = 'mission'
+            input_dict['keybind_id'] = pygame.K_y
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            input_dict['building_type'] = 'fort'
+            input_dict['keybind_id'] = pygame.K_v
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            del input_dict['building_type']
+            del input_dict['keybind_id']
+            
+            input_dict['init_type'] = 'upgrade button'
+            input_dict['base_building_type'] = 'resource'
+            input_dict['upgrade_type'] = 'scale'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['upgrade_type'] = 'efficiency'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['base_building_type'] = 'warehouses'
+            input_dict['upgrade_type'] = 'warehouse_level'
+            input_dict['keybind_id'] = pygame.K_k
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            del input_dict['base_building_type']
+            del input_dict['upgrade_type']
+            
+            input_dict['init_type'] = 'build train button'
+            input_dict['image_id'] = 'mobs/train/button.png'
+            input_dict['keybind_id'] = pygame.K_y
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'build steamboat button'
+            input_dict['image_id'] = 'mobs/steamboat/button.png'
+            input_dict['keybind_id'] = pygame.K_u
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'trade button'
+            input_dict['image_id'] = 'buttons/trade_button.png'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'convert button'
+            input_dict['image_id'] = 'buttons/convert_button.png'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'rumor search button'
+            input_dict['image_id'] = 'buttons/rumor_search_button.png'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'artifact search button'
+            input_dict['image_id'] = 'buttons/artifact_search_button.png'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'evangelist campaign button'
+            input_dict['image_id'] = 'buttons/public_relations_campaign_button.png'
+            input_dict['campaign_type'] = 'public relations campaign'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'evangelist campaign button'
+            input_dict['image_id'] = 'buttons/religious_campaign_button.png'
+            input_dict['campaign_type'] = 'religious campaign'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'advertising campaign button'
+            input_dict['image_id'] = 'ministers/icons/trade.png'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'take loan button'
+            input_dict['image_id'] = 'buttons/take_loan_button.png'
+            input_dict['keybind_id'] = pygame.K_l
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'track beasts button'
+            input_dict['image_id'] = 'buttons/track_beasts_button.png'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'capture slaves button'
+            input_dict['image_id'] = 'buttons/capture_slaves_button.png'
+            input_dict['keybind_id'] = pygame.K_t
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'suppress slave trade button'
+            input_dict['image_id'] = 'buttons/suppress_slave_trade_button.png'
+            input_dict['keybind_id'] = pygame.K_r
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
-            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_officer_button.png', self, 'unit', global_manager))
-            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_officer_button.png', self, 'unit', global_manager))
-            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_worker_button.png', self, 'worker', global_manager))
-            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_worker_button.png', self, 'worker', global_manager))
-            self.attached_buttons.append(buttons.enable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_automatic_replacement_officer_button.png', self, 'officer', global_manager))
-            self.attached_buttons.append(buttons.disable_automatic_replacement_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_automatic_replacement_officer_button.png', self, 'officer', global_manager))
-            self.attached_buttons.append(buttons.enable_sentry_mode_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/enable_sentry_mode_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.disable_sentry_mode_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/disable_sentry_mode_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.end_unit_turn_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_f, self.modes, 'buttons/end_unit_turn_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'clear automatic route', 'none', self.modes, 'buttons/clear_automatic_route_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'draw automatic route', 'none', self.modes, 'buttons/draw_automatic_route_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.automatic_route_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'follow automatic route', 'none', self.modes, 'buttons/follow_automatic_route_button.png', self, global_manager))
+            
+            input_dict['init_type'] = 'enable automatic replacement button'
+            input_dict['target_type'] = 'unit'
+            input_dict['image_id'] = 'buttons/enable_automatic_replacement_officer_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            input_dict['init_type'] = 'disable automatic replacement button'
+            input_dict['image_id'] = 'buttons/disable_automatic_replacement_officer_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'enable automatic replacement button'
+            input_dict['image_id'] = 'buttons/enable_automatic_replacement_worker_button.png'
+            input_dict['target_type'] = 'worker'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'disable automatic replacement button'
+            input_dict['image_id'] = 'buttons/disable_automatic_replacement_worker_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'enable automatic replacement button'
+            input_dict['image_id'] = 'buttons/enable_automatic_replacement_officer_button.png'
+            input_dict['target_type'] = 'officer'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'disable automatic replacement button'
+            input_dict['image_id'] = 'buttons/disable_automatic_replacement_officer_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            del input_dict['target_type']
+            
+            input_dict['init_type'] = 'enable sentry mode button'
+            input_dict['image_id'] = 'buttons/enable_sentry_mode_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'disable sentry mode button'
+            input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'end unit turn button'
+            input_dict['image_id'] = 'buttons/end_unit_turn_button.png'
+            input_dict['keybind_id'] = pygame.K_f
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            del input_dict['keybind_id']
+
+            input_dict['init_type'] = 'automatic route button'
+            input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
+            input_dict['button_type'] = 'clear automatic route'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
+            input_dict['button_type'] = 'draw automatic route'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
+            input_dict['button_type'] = 'follow automatic route'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
-            self.attached_buttons.append(buttons.cycle_work_crews_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
+            input_dict['init_type'] = 'cycle work crews button'
+            input_dict['image_id'] = 'buttons/cycle_passengers_down_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'building work crew':
             self.message_start = ''
             self.attached_building = 'none'
-            self.attached_buttons.append(buttons.remove_work_crew_button((self.x, self.y), self.height + s_increment, self.height + s_increment, 'none', self.modes, 'buttons/remove_work_crew_button.png', self, 'resource', global_manager))
+            input_dict['init_type'] = 'remove work crew button'
+            input_dict['image_id'] = 'buttons/remove_work_crew_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'crew':
             self.message_start = 'Crew: '
-            self.attached_buttons.append(buttons.crew_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_m, self.modes, 'buttons/crew_ship_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.uncrew_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_n, self.modes, 'buttons/uncrew_ship_button.png', self, global_manager))
+            input_dict['init_type'] = 'crew vehicle button'
+            input_dict['image_id'] = 'buttons/crew_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_m
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'uncrew vehicle button'
+            input_dict['image_id'] = 'buttons/uncrew_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_n
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
-            self.attached_buttons.append(buttons.cycle_passengers_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_4, self.modes, 'buttons/cycle_passengers_down.png', self, global_manager))
-            self.attached_buttons.append(buttons.embark_all_passengers_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_z, self.modes, 'buttons/embark_ship_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.disembark_all_passengers_button((self.x, self.y), self.height + s_increment, self.height + s_increment, pygame.K_x, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
+            input_dict['init_type'] = 'cycle passengers button'
+            input_dict['image_id'] = 'buttons/cycle_passengers_down_button.png'
+            input_dict['keybind_id'] = pygame.K_4
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'embark all passengers button'
+            input_dict['image_id'] = 'buttons/embark_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_z
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['init_type'] = 'disembark all passengers button'
+            input_dict['image_id'] = 'buttons/disembark_ship_button.png'
+            input_dict['keybind_id'] = pygame.K_x
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
-            keybind = 'none'
+            input_dict['keybind'] = 'none'
             if self.list_index == 0:
-                keybind = pygame.K_1
+                input_dict['keybind'] = pygame.K_1
             elif self.list_index == 1:
-                keybind = pygame.K_2
+                input_dict['keybind'] = pygame.K_2
             elif self.list_index == 2:
-                keybind = pygame.K_3
-            self.attached_buttons.append(buttons.disembark_vehicle_button((self.x, self.y), self.height + s_increment, self.height + s_increment, keybind, self.modes, 'buttons/disembark_ship_button.png', self, global_manager))
+                input_dict['keybind'] = pygame.K_3
+            input_dict['init_type'] = 'disembark vehicle button'
+            input_dict['image_id'] = 'buttons/disembark_ship_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
@@ -164,7 +388,11 @@ class actor_display_label(label):
             right_worker_dict = left_worker_dict.copy()
             right_worker_dict['x_offset'] *= -1
             african_workers_image_id_list.append(right_worker_dict)
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, african_workers_image_id_list, self, 'village', global_manager))
+            input_dict['init_type'] = 'hire african workers button'
+            input_dict['image_id'] = african_workers_image_id_list
+            input_dict['hire_source_type'] = 'village'
+            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
@@ -184,10 +412,14 @@ class actor_display_label(label):
             right_worker_dict = left_worker_dict.copy()
             right_worker_dict['x_offset'] *= -1
             buy_slaves_image_id_list.append(right_worker_dict)
-            self.attached_buttons.append(buttons.buy_slaves_button((self.x, self.y - (l_increment * 0.8)), self.height + l_increment, self.height + l_increment, 'none', self.modes, buy_slaves_image_id_list, self, global_manager))
+            input_dict['init_type'] = 'buy slaves button'
+            input_dict['image_id'] = buy_slaves_image_id_list
+            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
+            input_dict['width'], input_dict['height'] = (m_size, m_size)
             self.attached_images.append(minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager))
             self.image_y_displacement = 5
 
@@ -199,17 +431,26 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'minister_office':
             self.message_start = 'Office: '
-            self.attached_buttons.append(buttons.remove_minister_button((self.x, self.y), self.height + s_increment, self.height + s_increment, self, global_manager))
+            input_dict['init_type'] = 'remove minister button'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            input_dict['init_type'] = 'appoint minister button'
             for current_position in global_manager.get('minister_types'):
-                self.attached_buttons.append(buttons.appoint_minister_button((self.x, self.y), self.height + s_increment, self.height + s_increment, self, current_position, global_manager))
+                input_dict['appoint_type'] = current_position
+                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'evidence':
             self.message_start = 'Evidence: '
             if 'ministers' in self.modes:
-                self.attached_buttons.append(buttons.to_trial_button((self.x, self.y), self.height + m_increment, self.height + m_increment, self, global_manager))
+                input_dict['init_type'] = 'to trial button'
+                input_dict['width'], input_dict['height'] = (m_size, m_size)
+                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             if 'trial' in self.modes:
-                self.attached_buttons.append(buttons.fabricate_evidence_button((self.x, self.y - (l_increment * 0.8)), self.height + l_increment, self.height + l_increment, self, global_manager))
-                self.attached_buttons.append(buttons.bribe_judge_button((self.x, self.y - (l_increment * 0.8)), self.height + l_increment, self.height + l_increment, self, global_manager))
+                input_dict['init_type'] = 'fabricate evidence button'
+                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                
+                input_dict['init_type'] = 'bribe judge button'
+                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
@@ -226,7 +467,11 @@ class actor_display_label(label):
             right_worker_dict = left_worker_dict.copy()
             right_worker_dict['x_offset'] *= -1
             african_workers_image_id_list.append(right_worker_dict)
-            self.attached_buttons.append(buttons.hire_african_workers_button((self.x, self.y), self.height + l_increment, self.height + l_increment, 'none', self.modes, african_workers_image_id_list, self, 'slums', global_manager))
+            input_dict['init_type'] = 'hire african workers button'
+            input_dict['image_id'] = african_workers_image_id_list
+            input_dict['width'], input_dict['height'] = (l_size, l_size)
+            input_dict['hire_source_type'] = 'slums'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
@@ -908,18 +1153,43 @@ class commodity_display_label(actor_display_label):
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
         self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
+        input_dict = {
+            'coordinates': (self.x, self.y),
+            'width': self.height,
+            'height': self.height,
+            'modes': self.modes,
+            'attached_label': self,
+            'init_type': 'label button'
+        }
         if self.actor_type == 'mob':
-            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'drop commodity', 'none', self.modes, 'buttons/commodity_drop_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 6), self.y), self.height, self.height, 'drop all commodity', 'none', self.modes, 'buttons/commodity_drop_all_button.png', self,
-                global_manager))
+            input_dict['button_type'] = 'drop commodity'
+            input_dict['image_id'] = 'buttons/commodity_drop_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
+            input_dict['button_type'] = 'drop all commodity'
+            input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
         elif self.actor_type == 'tile':
-            self.attached_buttons.append(buttons.label_button((self.x, self.y), self.height, self.height, 'pick up commodity', 'none', self.modes, 'buttons/commodity_pick_up_button.png', self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + (self.height + 6), self.y), self.height, self.height, 'pick up all commodity', 'none', self.modes, 'buttons/commodity_pick_up_all_button.png',
-                self, global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 2), self.y), self.height, self.height, 'sell commodity', 'none', self.modes, 'buttons/commodity_sell_button.png', self,
-                global_manager))
-            self.attached_buttons.append(buttons.label_button((self.x + ((self.height + 6) * 3), self.y), self.height, self.height, 'sell all commodity', 'none', self.modes, 'buttons/commodity_sell_all_button.png', self,
-                global_manager))
+            input_dict['button_type'] = 'pick up commodity'
+            input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
+            input_dict['button_type'] = 'pick up all commodity'
+            input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 2), input_dict['coordinates'][1])
+            input_dict['button_type'] = 'sell commodity'
+            input_dict['image_id'] = 'buttons/commodity_sell_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            
+            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 3), input_dict['coordinates'][1])
+            input_dict['button_type'] = 'sell all commodity'
+            input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
+            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
     def set_label(self, new_message):
         '''

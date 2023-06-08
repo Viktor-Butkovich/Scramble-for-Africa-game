@@ -2600,7 +2600,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'attached_label': label value - Label that this button is attached to
-                'building-type': Type of building built by this button, like 'resource'
+                'building_type': Type of building built by this button, like 'resource'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -3335,7 +3335,7 @@ class to_trial_button(label_button):
         Output:
             None
         '''
-        input_dict['button'] = 'to trial'
+        input_dict['button_type'] = 'to trial'
         input_dict['modes'] = input_dict['attached_label'].modes
         input_dict['image_id'] = 'buttons/to_trial_button.png'
         super().__init__(input_dict, global_manager)

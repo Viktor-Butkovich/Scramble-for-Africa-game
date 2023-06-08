@@ -6,13 +6,9 @@ import json
 
 import modules.scaling as scaling
 import modules.images as images
-import modules.buttons as buttons
 import modules.game_transitions as game_transitions
 import modules.data_managers as data_managers
-import modules.europe_transactions as europe_transactions
-import modules.labels as labels
 import modules.actor_display_tools.images as actor_display_images
-import modules.actor_display_tools.labels as actor_display_labels
 import modules.mouse_followers as mouse_followers
 import modules.save_load_tools as save_load_tools
 import modules.actor_creation_tools as actor_creation_tools
@@ -1164,6 +1160,7 @@ def ministers_screen_setup(global_manager):
         'width': scaling.scale_width(position_icon_width, global_manager),
         'height': scaling.scale_height(position_icon_width, global_manager),
         'modes': ['ministers'],
+        'color': 'gray',
         'init_type': 'minister portrait image'
     }
     for current_index in range(0, 8): #creates an office icon and a portrait at a section of the table for each minister
@@ -1201,6 +1198,7 @@ def ministers_screen_setup(global_manager):
             'height': scaling.scale_height(position_icon_width, global_manager),
             'modes': ['ministers'],
             'init_type': 'minister portrait image',
+            'color': 'gray',
             'minister_type': 'none'
         }
         current_portrait = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1408,7 +1406,7 @@ def mob_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager)),
+            'coordinates': scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'modes': ['strategic', 'europe'],
@@ -1453,6 +1451,7 @@ def tile_interface_setup(global_manager):
     input_dict['init_type'] = 'same tile icon'
     input_dict['image_id'] = 'buttons/default_button.png'
     input_dict['is_last'] = False
+    input_dict['color'] = 'gray'
     for i in range(0, 3): #add button to cycle through
         input_dict['coordinates'] = scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * i), global_manager)
         input_dict['index'] = i
@@ -1476,6 +1475,10 @@ def tile_interface_setup(global_manager):
     tile_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
     
+    #tile_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, #global_manager), scaling.scale_height(125, global_manager),
+    #    ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
+    #global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
+
     global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager))
 
@@ -1492,7 +1495,7 @@ def tile_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': actor_display_labels.actor_display_label(scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager)),
+            'coordinates': scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'modes': ['strategic', 'europe'],
@@ -1518,7 +1521,7 @@ def tile_interface_setup(global_manager):
                 input_dict['list_index'] = i
                 global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
         elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
-            input_dict['init_type'] = 'native info label'
+            input_dict['init_type'] = current_actor_label_type + ' label'
             global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
     return(actor_display_current_y)
 

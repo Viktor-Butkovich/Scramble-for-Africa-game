@@ -40,14 +40,20 @@ class choice_notification(notifications.notification):
         self.choice_info_dict = input_dict['choice_info_dict']
         button_types = input_dict['button_types']
         for current_button_type_index in range(len(button_types)):
-            button_type = button_types[current_button_type_index]
-            if button_type == 'recruitment':
-                new_choice_button = recruitment_choice_button((self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height), round(self.width / len(button_types)), button_height,
-                                              button_type, self.modes, 'misc/paper_label.png', self, global_manager)
+            input_dict = {
+                'coordinates': (self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height),
+                'width': round(self.width / len(button_types)),
+                'height': button_height,
+                'modes': self.modes,
+                'button_type': button_types[current_button_type_index],
+                'image_id': 'misc/paper_label.png',
+                'notification': self
+            }
+            if input_dict['button_type'] == 'recruitment':
+                input_dict['init_type'] = 'recruitment button'
             else:
-                new_choice_button = choice_button((self.x + (current_button_type_index * round(self.width / len(button_types))), self.y - button_height), round(self.width / len(button_types)), button_height,
-                                              button_type, self.modes, 'misc/paper_label.png', self, global_manager)
-            self.choice_buttons.append(new_choice_button)
+                input_dict['init_type'] = 'choice button'
+            self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
         self.global_manager.set('making_choice', True)
 
     def format_message(self):
@@ -225,8 +231,9 @@ class choice_button(buttons.button):
         Output:
             None
         '''
+        super().draw()
         if self.can_show():
-            self.image.draw()
+            #self.image.draw()
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 

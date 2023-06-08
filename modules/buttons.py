@@ -55,9 +55,10 @@ class button(interface_elements.interface_element):
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
         self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
-        if not 'color' in input_dict:
-            input_dict['color'] = 'blue'
-        self.color = self.global_manager.get('color_dict')[input_dict['color']]
+        #if not 'color' in input_dict:
+        #    input_dict['color'] = 'blue'
+        if 'color' in input_dict:
+            self.color = self.global_manager.get('color_dict')[input_dict['color']]
         self.showing_outline = False
         self.showing_background = True
         self.button_type = input_dict['button_type']
@@ -719,9 +720,9 @@ class button(interface_elements.interface_element):
             None
         '''
         if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
-            if self.showing_outline: 
+            if self.showing_outline and not self in self.global_manager.get('label_list'):
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-            if self.showing_background:
+            if self.showing_background and hasattr(self, 'color'):
                 pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)
             self.image.draw()
             if self.has_keybind: #The key to which a button is bound will appear on the button's image

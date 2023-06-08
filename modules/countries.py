@@ -156,7 +156,6 @@ class hybrid_country(country):
         
         #specific text files are managed in flavor_text_manager for the time being, don't try to set to nonexistent belgium nameset
         self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
-        #if self.allow_particles:
         self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
         self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
         self.global_manager.set('weighted_backgrounds', self.background_set)
