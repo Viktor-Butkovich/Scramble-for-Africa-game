@@ -1414,8 +1414,18 @@ class pmob(mob):
         '''
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        input_dict = {
+            'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager),
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': self.modes,
+            'num_sides': 6,
+            'result_outcome_dict': result_outcome_dict,
+            'outcome_color_dict': outcome_color_dict,
+            'final_result': result,
+            'init_type': 'die'
+        }
+        new_die = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         self.attached_dice_list.append(new_die)
         if uses_minister:
             if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout

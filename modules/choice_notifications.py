@@ -50,7 +50,7 @@ class choice_notification(notifications.notification):
                 'notification': self
             }
             if input_dict['button_type'] == 'recruitment':
-                input_dict['init_type'] = 'recruitment button'
+                input_dict['init_type'] = 'recruitment choice button'
             else:
                 input_dict['init_type'] = 'choice button'
             self.choice_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))

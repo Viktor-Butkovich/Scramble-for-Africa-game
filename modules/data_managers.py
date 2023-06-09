@@ -683,7 +683,7 @@ class notification_manager_template():
         }
 
         if notification_type == 'roll':
-            input_dict['init_type'] = ['dice rolling notification']
+            input_dict['init_type'] = 'dice rolling notification'
         elif notification_type in ['stop_trade', 'stop_trade_attacked', 'trade', 'trade_promotion', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
             is_last = False
             commodity_trade = False

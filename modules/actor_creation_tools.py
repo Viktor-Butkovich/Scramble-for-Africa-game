@@ -345,38 +345,40 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = choice_notifications.choice_notification(input_dict, global_manager)
 
                 #action_notifications notifications
-                elif init_type == 'action':
+                elif base == 'action':
                     new_element = action_notifications.action_notification(input_dict, global_manager)
-                elif init_type == 'dice rolling':
+                elif base == 'dice rolling':
                     new_element = action_notifications.dice_rolling_notification(input_dict, global_manager)
-                elif init_type == 'exploration':
+                elif base == 'exploration':
                     new_element = action_notifications.exploration_notification(input_dict, global_manager)
-                elif init_type == 'off tile exploration':
+                elif base == 'off tile exploration':
                     new_element = action_notifications.off_tile_exploration_notification(input_dict, global_manager)
-                elif init_type == 'trade':
+                elif base == 'trade':
                     new_element = action_notifications.trade_notification(input_dict, global_manager)
-                elif init_type == 'religious campaign':
+                elif base == 'religious campaign':
                     new_element = action_notifications.religious_campaign_notification(input_dict, global_manager)
-                elif init_type == 'public relations campaign':
+                elif base == 'public relations campaign':
                     new_element = action_notifications.public_relations_campaign_notification(input_dict, global_manager)
-                elif init_type == 'trial':
+                elif base == 'trial':
                     new_element = action_notifications.trial_notification(input_dict, global_manager)
-                elif init_type == 'advertising campaign':
+                elif base == 'advertising campaign':
                     new_element = action_notifications.advertising_campaign_notification(input_dict, global_manager)
-                elif init_type == 'conversion':
+                elif base == 'conversion':
                     new_element = action_notifications.conversion_notification(input_dict, global_manager)
-                elif init_type == 'rumor search':
+                elif base == 'rumor search':
                     new_element = action_notifications.rumor_search_notification(input_dict, global_manager)
-                elif init_type == 'artifact search':
+                elif base == 'artifact search':
                     new_element = action_notifications.artifact_search_notification(input_dict, global_manager)
-                elif init_type == 'capture slaves':
+                elif base == 'capture slaves':
                     new_element = action_notifications.capture_slaves_notification(input_dict, global_manager)
-                elif init_type == 'suppress slave trade':
+                elif base == 'suppress slave trade':
                     new_element = action_notifications.suppress_slave_trade_notification(input_dict, global_manager)
-                elif init_type == 'construction':
+                elif base == 'construction':
                     new_element = action_notifications.construction_notification(input_dict, global_manager)
-                elif init_type == 'combat':
+                elif base == 'combat':
                     new_element = action_notifications.combat_notification(input_dict, global_manager)
+                else:
+                    new_element = notifications.notification(input_dict, global_manager)
         return(new_element)
 
     def display_recruitment_choice_notification(self, choice_info_dict, recruitment_name, global_manager):
