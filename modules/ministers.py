@@ -41,7 +41,8 @@ class minister():
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
-        self.portrait_section_types = ['base_skin', 'outfit_background', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
+        #self.portrait_section_types = ['base_skin', 'outfit_background', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
+        self.portrait_section_types = ['base_skin', 'outfit_background', 'outfit', 'mouth', 'nose', 'eyes', 'portrait']
         self.portrait_sections = {}
         if from_save:
             self.name = input_dict['name']
@@ -78,12 +79,12 @@ class minister():
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
-            hair_color = random.choice(['black', 'brown', 'blonde'])
+            hair_color = random.choice(['black', 'brown', 'blonde', 'white', 'green', 'purple'])
             for image_type in self.portrait_section_types:
                 if image_type != 'outfit_background':
                     possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
                     if image_type in ['hair', 'facial_hair']:
-                        possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', hair_color)
+                        #possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png')
                         if image_type == 'facial_hair':
                             if random.randrange(0, 5) == 0:
                                 possible_sections = ['misc/empty.png']
@@ -96,7 +97,10 @@ class minister():
                             self.portrait_sections['outfit_background'] = 'misc/country_uniforms/minister/' + self.global_manager.get('current_country').adjective + '.png'
                 else:
                     self.portrait_sections['outfit_background'] = 'misc/empty.png'
-                self.portrait_sections[image_type] = random.choice(possible_sections)
+                if image_type in ['hair', 'facial_hair']:
+                    self.portrait_sections[image_type] = {'image_id': random.choice(possible_sections), 'green_screen': hair_color}
+                else:
+                    self.portrait_sections[image_type] = random.choice(possible_sections)
             self.update_image_bundle()
             self.stolen_money = 0
             self.corruption_evidence = 0

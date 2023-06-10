@@ -31,7 +31,6 @@ def fundamental_setup(global_manager):
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
-    global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
     global_manager.set('flavor_text_manager', data_managers.flavor_text_manager_template(global_manager))
     global_manager.set('input_manager', data_managers.input_manager_template(global_manager))
     global_manager.set('actor_creation_manager', actor_creation_tools.actor_creation_manager_template())
@@ -53,6 +52,11 @@ def fundamental_setup(global_manager):
     global_manager.set('mouse_moved_time', start_time)
     global_manager.set('end_turn_wait_time', 0.8)
     global_manager.set('event_manager', data_managers.event_manager_template(global_manager))
+
+    if global_manager.get('effect_manager').effect_active('track_fps'):
+        global_manager.set('fps', 0)
+        global_manager.set('frames_this_second', 0)
+        global_manager.set('last_fps_update', time.time())
 
     global_manager.set('font_name', 'times new roman')
     global_manager.set('default_font_size', 15)
@@ -83,11 +87,17 @@ def fundamental_setup(global_manager):
         'blue': (0, 0, 200),
         'dark blue': (0, 0, 150),
         'yellow': (255, 255, 0),
-        'brown': (132, 94, 59),
+        'brown': (85, 53, 22),
+        'blonde': (188, 175, 123),
         'purple': (127, 0, 170)
         }
     )
-
+    global_manager.set('green_screen_colors', 
+        [
+        (62, 82, 82),
+        (70, 70, 92)
+        ]
+    )
 def misc_setup(global_manager):
     '''
     Description:
@@ -907,6 +917,13 @@ def value_trackers_setup(global_manager):
     global_manager.set('turn_tracker', data_managers.value_tracker('turn', 0, 'none', 'none', global_manager))
     global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
+    if global_manager.get('effect_manager').effect_active('track_fps'):
+        input_dict['coordinates'] = scaling.scale_coordinates(300, global_manager.get('default_display_height') - 110, global_manager)
+        input_dict['value_name'] = 'fps'
+        input_dict['modes'] = ['strategic', 'europe', 'ministers', 'trial', 'main_menu', 'new_game_setup']
+        global_manager.set('fps_tracker', data_managers.value_tracker('fps', 0, 0, 'none', global_manager))
+        global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
     global_manager.set('previous_financial_report', 'none')
     input_dict = {
         'coordinates': scaling.scale_coordinates(270, global_manager.get('default_display_height') - 30, global_manager),
@@ -1238,7 +1255,8 @@ def trial_screen_setup(global_manager):
         'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
         'modes': ['trial'],
         'init_type': 'minister portrait image',
-        'minister_type': 'none'
+        'minister_type': 'none',
+        'color': 'gray'
     }
     defense_portrait_image = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     global_manager.get('defense_info_display_list').append(defense_portrait_image)
@@ -1263,7 +1281,7 @@ def trial_screen_setup(global_manager):
         defense_current_y -= 35
         input_dict['coordinates'] = scaling.scale_coordinates(defense_x, defense_current_y, global_manager)
         input_dict['actor_label_type'] = current_actor_label_type 
-        global_manager.get('defense_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+        global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     prosecution_current_y = trial_display_default_y
     prosecution_x = (global_manager.get('default_display_width') / 2) - (distance_to_center + button_separation) - distance_to_notification
@@ -1279,7 +1297,8 @@ def trial_screen_setup(global_manager):
         'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
         'modes': ['trial'],
         'init_type': 'minister portrait image',
-        'minister_type': 'none'
+        'minister_type': 'none',
+        'color': 'gray'
     }
     prosecution_portrait_image = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     global_manager.get('prosecution_info_display_list').append(prosecution_portrait_image)
@@ -1301,7 +1320,7 @@ def trial_screen_setup(global_manager):
         prosecution_current_y -= 35
         input_dict['coordinates'] = scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager)
         input_dict['actor_label_type'] = current_actor_label_type 
-        global_manager.get('prosecution_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))   
+        global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     launch_trial_button_width = 150
     input_dict = {
@@ -1724,6 +1743,8 @@ def debug_tools_setup(global_manager):
     Output:
         None
     '''
+    global_manager.set('effect_manager', data_managers.effect_manager_template(global_manager))
+
     #for release, official version of config file with only intended user settings
     file = open('configuration/release_config.json')
 

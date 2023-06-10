@@ -6,6 +6,7 @@ import modules.setup as setup
 
 try:
     global_manager = data_managers.global_manager_template() #manages a dictionary of what would be global variables passed between functions and classes
+    setup.debug_tools_setup(global_manager)
     setup.fundamental_setup(global_manager)
     setup.misc_setup(global_manager)
     setup.terrains_setup(global_manager)
@@ -28,8 +29,6 @@ try:
     setup.inventory_interface_setup(actor_display_current_y, global_manager)
     setup.minister_interface_setup(global_manager)
     setup.country_interface_setup(global_manager)
-
-    setup.debug_tools_setup(global_manager)
 
     global_manager.set('startup_complete', True)
     global_manager.set('creating_new_game', False)

@@ -240,10 +240,12 @@ class bundle_image():
             string/dictionary image_id: String image file path or offset image dictionary to define this image's appearance
                 offset image dictionary: String keys corresponding to extra information for offset images
                     'image'_id': string value - File path to image used for this offset image
-                    'size': float value - Scale of offset image, with 1 being the same size as the bundle
-                    'x_offset': float value - x-axis offset of image, with 1 being shifted a full width to the right
-                    'y_offset': float value - y-axis offset of image, with 1 being shifted a full height upward
-                    'level': int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
+                    'size' = 1: float value - Scale of offset image, with 1 being the same size as the bundle
+                    'x_offset' = 0: float value - x-axis offset of image, with 1 being shifted a full width to the right
+                    'y_offset' = 0: float value - y-axis offset of image, with 1 being shifted a full height upward
+                    'level' = 0: int value - Layer for image to appear on, with 0 being the default layer, positive levels being above it, and negative levels being below it
+                    'green_screen': string list value - List of colors to use to replace particular preset colors in this image - if given ['red'] or 'red', replace each instance of the 1st 
+                        preset green screen color of (62, 82, 82) with color_dict['red']
             string member_type: String to designate this member's type, allowing it to be specifically removed or found based on type later, 'default' by default
             boolean is_offset = False: Whether this is an offset image that takes a dictionary image id or a normal image that takes a string image id
         Output:
@@ -253,17 +255,43 @@ class bundle_image():
         self.image = 'none'
         self.member_type = member_type
         self.is_offset = is_offset
+
         if not is_offset:
             self.image_id = image_id
             self.level = 0
         else:
             self.image_id_dict = image_id
             self.image_id = image_id['image_id']
-            self.size = image_id['size']
-            self.x_offset = image_id['x_offset']
-            self.y_offset = image_id['y_offset']
-            self.level = image_id['level']
-        self.load()
+            if 'size' in image_id:
+                self.size = image_id['size']
+            else:
+                self.size = 1
+            if 'x_offset' in image_id:
+                self.x_offset = image_id['x_offset']
+            else:
+                self.x_offset = 0
+            if 'y_offset' in image_id:
+                self.y_offset = image_id['y_offset']
+            else:
+                self.y_offset = 0
+            if 'level' in image_id:
+                self.level = image_id['level']
+            else:
+                self.level = 0
+            if 'green_screen' in image_id:
+                self.has_green_screen = True
+                self.green_screen_colors = []
+                if type(image_id['green_screen']) == str:
+                    self.green_screen_colors.append(image_id['green_screen'])
+                else:
+                    for index in range(0, len(image_id['green_screen'])):
+                        self.green_screen_colors.append(image_id['green_screen'][index])
+            else:
+                self.has_green_screen = False
+        if type(self.image_id) == pygame.Surface: #if given pygame Surface, avoid having to render it again
+            self.image = self.image_id
+        else:
+            self.load()
         self.scale()
 
     def scale(self):
@@ -301,6 +329,19 @@ class bundle_image():
             else:
                 print(self.image_id)
             self.image = pygame.image.load('graphics/' + self.image_id)
+        if self.is_offset and self.has_green_screen:
+            width, height = self.image.get_size()
+            index = 0
+            for current_green_screen_color in self.bundle.global_manager.get('green_screen_colors'):
+                if index < len(self.green_screen_colors):
+                    replace_with = self.bundle.global_manager.get('color_dict')[self.green_screen_colors[index]]
+                    for x in range(width):
+                        for y in range(height):
+                            current_color = self.image.get_at((x, y))
+                            if current_color[0] == current_green_screen_color[0] and current_color[1] == current_green_screen_color[1] and current_color[2] == current_green_screen_color[2]:
+                                self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
+                index += 1
+            #print('running at ' + str(time.time()))
 
 class free_image(image):
     '''

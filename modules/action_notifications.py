@@ -179,9 +179,6 @@ class exploration_notification(action_notification):
             explored_tile = explored_cell.tile
             background_dict = {
                 'image_id': 'misc/tile_background.png',
-                'size': 1,
-                'x_offset': 0,
-                'y_offset': 0,
                 'level': -10
             }
             image_id_list = [background_dict] + explored_tile.get_image_id_list(force_visibility = True) + ['misc/tile_outline.png']
@@ -890,7 +887,24 @@ class capture_slaves_notification(action_notification):
         self.is_last = input_dict['is_last']
         if self.is_last: #if last, show result
             self.notification_images = []
-            self.notification_images.append(free_image('mobs/slave workers/button.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
+            background_dict = {
+                'image_id': 'mobs/default/button.png',
+                'size': 1,
+                'x_offset': 0,
+                'y_offset': 0,
+                'level': -10
+            } 
+            left_worker_dict = {
+                'image_id': 'mobs/Slave workers/default.png',
+                'size': 0.8,
+                'x_offset': -0.2,
+                'y_offset': 0,
+                'level': 1
+            }
+            right_worker_dict = left_worker_dict.copy()
+            right_worker_dict['x_offset'] *= -1
+            button_image_id_list = [background_dict, left_worker_dict, right_worker_dict]
+            self.notification_images.append(free_image(button_image_id_list, scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 400, global_manager),
                 scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), input_dict['modes'], global_manager, True))
         super().__init__(input_dict, global_manager)
 

@@ -353,13 +353,13 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
-            input_dict['keybind'] = 'none'
+            input_dict['keybind_id'] = 'none'
             if self.list_index == 0:
-                input_dict['keybind'] = pygame.K_1
+                input_dict['keybind_id'] = pygame.K_1
             elif self.list_index == 1:
-                input_dict['keybind'] = pygame.K_2
+                input_dict['keybind_id'] = pygame.K_2
             elif self.list_index == 2:
-                input_dict['keybind'] = pygame.K_3
+                input_dict['keybind_id'] = pygame.K_3
             input_dict['init_type'] = 'disembark vehicle button'
             input_dict['image_id'] = 'buttons/disembark_ship_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))

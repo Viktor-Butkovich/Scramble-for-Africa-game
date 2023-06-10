@@ -24,7 +24,8 @@
       "instant_lore_mission",
       "promote_on_sentry",
       "debug_print",
-      "eradicate_slave_trade"
+      "eradicate_slave_trade",
+      "track_fps"
    ],
    "active_effects": [
 
