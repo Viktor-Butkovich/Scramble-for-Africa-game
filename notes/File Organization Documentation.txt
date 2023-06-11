@@ -183,7 +183,7 @@ SFA folder
             class actor_creation_manager_template
 
         actor_utility.py
-            imports random, os, scaling, utility
+            imports random, os, pygame, scaling, utility
 			def reset_action_prices
 			def double_action_price
 			def get_building_cost
@@ -203,6 +203,7 @@ SFA folder
 			def get_num_available_workers
 			def generate_resource_icon
 			def get_image_variants
+			def extract_folder_colors
 			def get_slave_traders_strength_modifier
 			def set_slave_traders_strength
 
@@ -250,6 +251,7 @@ SFA folder
 	        	class recruitment_choice_button
 
 	    countries.py
+			imports actor_utility
 		    class country
 				class hybrid_country
 

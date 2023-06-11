@@ -1,4 +1,5 @@
 #Contains functionality for different player countries
+from . import actor_utility
 
 class country:
     '''
@@ -40,6 +41,7 @@ class country:
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
         self.music_list = input_dict['music_list']
+        self.colors = actor_utility.extract_folder_colors('locations/country_colors/' + self.adjective + '/')
 
     def select(self):
         '''

@@ -95,7 +95,8 @@ def fundamental_setup(global_manager):
     global_manager.set('green_screen_colors', 
         [
         (62, 82, 82),
-        (70, 70, 92)
+        (70, 70, 92),
+        (110, 107, 3)
         ]
     )
 def misc_setup(global_manager):
@@ -107,6 +108,7 @@ def misc_setup(global_manager):
     Output:
         None
     '''
+    global_manager.set('rendered_images', {})
     global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
     global_manager.set('button_list', [])
     global_manager.set('recruitment_button_list', [])
