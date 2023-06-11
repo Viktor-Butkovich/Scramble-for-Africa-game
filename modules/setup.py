@@ -597,7 +597,8 @@ def countries_setup(global_manager):
         'allow_double_last_names': True,
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
-        'music_list': ['La Marseillaise']
+        'music_list': ['La Marseillaise'],
+        'has_aristocracy': False
     }
     global_manager.set('France', countries.country(french_input_dict, global_manager))
 

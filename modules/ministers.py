@@ -42,7 +42,7 @@ class minister():
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
         #self.portrait_section_types = ['base_skin', 'outfit_background', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
-        self.portrait_section_types = ['base_skin', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
+        self.portrait_section_types = ['base_skin', 'mouth', 'nose', 'eyes', 'hair', 'outfit', 'facial_hair', 'hat', 'portrait']
         self.portrait_sections = {}
         if from_save:
             self.name = input_dict['name']
@@ -79,36 +79,7 @@ class minister():
             self.corruption_setup()
             self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
-            hair_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/hair/colors/')) #same colors folder shared for hair and facial hair
-            #hair_color = random.choice(['white', 'black', 'brown', 'blonde'])
-            skin_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/base_skin/colors/'))
-            #skin_color = random.choice(['black', 'brown', 'blonde', 'white', 'green', 'purple'])
-            for image_type in self.portrait_section_types:
-                if image_type != 'outfit_background':
-                    possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
-                    if image_type in ['hair', 'facial_hair']:
-                        #possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png')
-                        if image_type == 'facial_hair':
-                            if random.randrange(0, 5) == 0:
-                                possible_sections = ['misc/empty.png']
-                        elif image_type == 'hair':
-                            if random.randrange(0, 10) == 0:
-                                possible_sections = ['misc/empty.png']
-                    elif image_type == 'outfit':
-                        if self.background in ['army officer', 'naval officer']:
-                            possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', 'military')
-                            #self.portrait_sections['outfit_background'] = 'misc/country_uniforms/minister/' + self.global_manager.get('current_country').adjective + '.png'
-                else:
-                    self.portrait_sections['outfit_background'] = 'misc/empty.png'
-                if image_type in ['hair', 'facial_hair']:
-                    self.portrait_sections[image_type] = {'image_id': random.choice(possible_sections), 'green_screen': hair_color}
-                elif image_type in ['base_skin']:
-                    self.portrait_sections[image_type] = {'image_id': random.choice(possible_sections), 'green_screen': skin_color}
-                elif image_type in ['outfit'] and self.background in ['army officer', 'naval officer']:
-                    self.portrait_sections[image_type] = {'image_id': random.choice(possible_sections), 'green_screen': self.global_manager.get('current_country').colors}
-                else:
-                    self.portrait_sections[image_type] = random.choice(possible_sections)
-            self.update_image_bundle()
+            self.portrait_sections_setup()
             self.stolen_money = 0
             self.corruption_evidence = 0
             self.fabricated_evidence = 0
@@ -116,6 +87,58 @@ class minister():
         minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
         self.update_tooltip()
+
+    def portrait_sections_setup(self):
+        '''
+        Description:
+            Retrieves appearance variants from graphics folders and creates a random image bundle personalized for this minister's background on first creation
+        Input:
+            None
+        Output:
+            None
+        '''
+        hair_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/hair/colors/')) #same colors folder shared for hair and facial hair
+        skin_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/base_skin/colors/'))
+        outfit_type = 'default'
+        for image_type in self.portrait_section_types:
+            possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
+            if image_type in ['hair', 'facial_hair']:
+                if image_type == 'facial_hair':
+                    if random.randrange(0, 5) == 0:
+                        possible_sections = ['misc/empty.png']
+                elif image_type == 'hair':
+                    if random.randrange(0, 10) == 0:
+                        possible_sections = ['misc/empty.png']
+            elif image_type in ['outfit', 'hat']:
+                if image_type == 'outfit':
+                    if self.background in ['army officer', 'naval officer']:
+                        outfit_type = 'military'
+                    elif self.background in ['aristocrat']:
+                        if random.randrange(0, 2) == 0:
+                            outfit_type = 'armored'
+                    elif self.background == 'royal heir':
+                        outfit_type = 'armored'
+                    elif (self.background != 'lowborn' and not self.global_manager.get('current_country').has_aristocracy):
+                        if random.randrange(0, 5) == 0:
+                            outfit_type = 'armored'
+                if outfit_type != 'default':
+                    possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', outfit_type)
+                if image_type == 'hat':
+                    if random.randrange(0, 3) != 0:
+                        possible_sections = ['misc/empty.png']
+            if len(possible_sections) > 0:
+                image_id = random.choice(possible_sections)
+            else:
+                image_id = 'misc/empty.png'
+            if image_type in ['hair', 'facial_hair']:
+                self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': hair_color}
+            elif image_type in ['base_skin']:
+                self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': skin_color}
+            elif image_type in ['outfit', 'hat']:
+                self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': self.global_manager.get('current_country').colors}
+            else:
+                self.portrait_sections[image_type] = image_id
+        self.update_image_bundle()
 
     def update_tooltip(self):
         '''

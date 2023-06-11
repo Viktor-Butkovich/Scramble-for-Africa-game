@@ -41,6 +41,10 @@ class country:
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
         self.music_list = input_dict['music_list']
+        if 'has_aristocracy' in input_dict:
+            self.has_aristocracy = input_dict['has_aristocracy']
+        else:
+            self.has_aristocracy = True
         self.colors = actor_utility.extract_folder_colors('locations/country_colors/' + self.adjective + '/')
 
     def select(self):
