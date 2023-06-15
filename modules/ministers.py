@@ -109,6 +109,8 @@ class minister():
                 elif image_type == 'hair':
                     if random.randrange(0, 10) == 0:
                         possible_sections = ['misc/empty.png']
+                    else:
+                        possible_sections += actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', 'no_hat')
             elif image_type in ['outfit', 'hat']:
                 if image_type == 'outfit':
                     if self.background in ['army officer', 'naval officer']:
@@ -126,6 +128,9 @@ class minister():
                 if image_type == 'hat':
                     if random.randrange(0, 3) != 0:
                         possible_sections = ['misc/empty.png']
+                    else:
+                        if self.portrait_sections['hair']['image_id'] in actor_utility.get_image_variants('ministers/portraits/hair/default.png', 'no_hat'):
+                            self.portrait_sections['hair']['image_id'] = random.choice(actor_utility.get_image_variants('ministers/portraits/hair/default.png', 'hair'))
             if len(possible_sections) > 0:
                 image_id = random.choice(possible_sections)
             else:
