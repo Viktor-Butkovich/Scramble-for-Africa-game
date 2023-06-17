@@ -99,6 +99,11 @@ class minister():
         '''
         hair_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/hair/colors/')) #same colors folder shared for hair and facial hair
         skin_color = random.choice(actor_utility.extract_folder_colors('ministers/portraits/base_skin/colors/'))
+        possible_suit_colors = actor_utility.extract_folder_colors('ministers/portraits/outfit/suit_colors/')
+        suit_colors = [random.choice(possible_suit_colors), random.choice(possible_suit_colors)]
+        while suit_colors[1] == suit_colors[0]:
+            suit_colors[1] = random.choice(possible_suit_colors)
+        suit_colors.append(random.choice(actor_utility.extract_folder_colors('ministers/portraits/outfit/accessory_colors/')))
         outfit_type = 'default'
         for image_type in self.portrait_section_types:
             possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', image_type)
@@ -126,7 +131,7 @@ class minister():
                 if outfit_type != 'default':
                     possible_sections = actor_utility.get_image_variants('ministers/portraits/' + image_type + '/default.png', outfit_type)
                 if image_type == 'hat':
-                    if random.randrange(0, 3) != 0:
+                    if random.randrange(0, 2) != 0 or (outfit_type == 'armored' and random.randrange(0, 5) != 0):
                         possible_sections = ['misc/empty.png']
                     else:
                         if self.portrait_sections['hair']['image_id'] in actor_utility.get_image_variants('ministers/portraits/hair/default.png', 'no_hat'):
@@ -140,7 +145,10 @@ class minister():
             elif image_type in ['base_skin']:
                 self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': skin_color}
             elif image_type in ['outfit', 'hat']:
-                self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': self.global_manager.get('current_country').colors}
+                if outfit_type in ['military', 'armored']:
+                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': self.global_manager.get('current_country').colors}
+                else:
+                    self.portrait_sections[image_type] = {'image_id': image_id, 'green_screen': suit_colors}
             else:
                 self.portrait_sections[image_type] = image_id
         self.update_image_bundle()
