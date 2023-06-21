@@ -17,7 +17,7 @@ SFA folder
     modules folder
 		actor_display_tools folder
 	    	labels.py
-				imports pygame, modules.labels, modules.images, modules.utility, modules.scaling, buttons, images
+				imports pygame, modules.labels, modules.images, modules.utility, modules.scaling, images
 				class actor_display_label(modules.labels.label)
 					class list_item_label
 		    		class building_work_crews_label
@@ -34,7 +34,8 @@ SFA folder
 				class label_image(modules.images.free_image)
 
             buttons.py
-		    imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, modules.game_transitions, modules.notification_tools
+		    	imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, 
+					modules.game_transitions, modules.notification_tools
 	        	class label_button(modules.buttons.button)
 					class worker_crew_vehicle_button
 					class embark_all_passengers_button
@@ -157,7 +158,7 @@ SFA folder
 		    		class slave_worker
 
         action_notifications.py
-	        imports labels, images, notifications, utility actor_utility
+	        imports images, notifications, utility, scaling, actor_utility, trial_utility
             class action_notification(notifications.notification)
 				class dice_rolling_notification
 				class exploration_notification
@@ -176,12 +177,13 @@ SFA folder
 
         actor_creation_tools.py
             imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
-		    mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
-		    lore_missions, notification_tools, utility, actor_utility, market_tools, dice
+		    	mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
+		    	lore_missions, notification_tools, utility, actor_utility, market_tools, dice, buttons, labels, notifications, choice_notifications, instructions, action_notifications, europe_transactions, 
+				actor_display_tools/buttons, actor_display_tools/labels
             class actor_creation_manager_template
 
         actor_utility.py
-            imports random, os, scaling, utility
+            imports random, os, pygame, scaling, utility
 			def reset_action_prices
 			def double_action_price
 			def get_building_cost
@@ -201,6 +203,7 @@ SFA folder
 			def get_num_available_workers
 			def generate_resource_icon
 			def get_image_variants
+			def extract_folder_colors
 			def get_slave_traders_strength_modifier
 			def set_slave_traders_strength
 
@@ -222,9 +225,10 @@ SFA folder
 		    	class slums
 
         buttons.py
-            imports random, pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, game_transition_tools, minister_utility, trial_utility
-            class button
-		    class end_turn_button
+            imports random, pygame, time, images, text_tools, scaling, main_loop_tools, actor_utility, utility, turn_management_tools, market_tools, notification_tools, 
+				game_transition_tools, minister_utility, trial_utility, interface_elements
+            class button(interface_elements.interface_element)
+		    	class end_turn_button
 	        	class cycle_same_tile_button
 	        	class same_tile_icon
 				class fire_unit_button
@@ -247,6 +251,7 @@ SFA folder
 	        	class recruitment_choice_button
 
 	    countries.py
+			imports actor_utility
 		    class country
 				class hybrid_country
 
@@ -255,7 +260,7 @@ SFA folder
             def read_csv
 
         data_managers.py
-            imports random, pygame, csv_tools, notifications, choice_notifications, action_notifications, scaling, text_tools, events
+            imports random, pygame, csv_tools, scaling, text_tools, events
             class global_manager_template
             class input_manager_template
 			class effect_manager_template
@@ -333,6 +338,11 @@ SFA folder
 	    	class instructions_button(buttons.button)
 	    	class instructions_page(labels.label)
             def display_instructions_page
+
+		interface_elements.py
+			import pygame
+			class interface_element
+				class interface_collection
 
         labels.py
         	imports pygame, buttons, scaling, text_tools, utility, market_tools
@@ -422,8 +432,8 @@ SFA folder
 	    	def unscale_height
 
 		setup.py
-		    imports pygame, time, os, logging, scaling, images, buttons, game_transitions, data_managers, europe_transactions, labels, actor_display_tools.images, actor_display_tools.labels, 
-		        mouse_followers, save_load_tools, actor_creation_tools, actor_utility, countries, effects
+		    imports pygame, time, os, logging, scaling, images, game_transitions, data_managers,, actor_display_tools.images, mouse_followers, save_load_tools, actor_creation_tools, 
+				actor_utility, countries, effects
 		    def fundamental_setup
 		    def misc_setup
 		    def terrains_setup

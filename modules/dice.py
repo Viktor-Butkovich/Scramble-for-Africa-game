@@ -10,27 +10,31 @@ class die(button):
     '''
     A die with a predetermined result that will appear, show random rolling, and end with the predetermined result and an outline with a color based on the result
     '''
-    def __init__(self, coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager):
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
         Input:
-            int tuple coordinates: Two values representing x and y coordinates for the pixel location of this die
-            int width: Pixel width of this die
-            int height: Pixel height of this die
-            string list modes: Game modes during which this button can appear
-            int num_sides: Number of sides for this die
-            string/int dictionary result_outcome_dict: dictionary of string result type keys and int die result values determining which die results are successes/failures or critical successes/failures
-            string/int outcome_color_dict: dictionary of string color name keys and int die result values determining what colors are shown for certain die results
-            int final_result: Predetermined final result of this roll that the die will end on
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'num_sides': Number of sides for this die
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'result_outcome_dict': string/int dictionary value - Dictionary of string result type keys and int die result values determining which die results are successes/failures or 
+                    critical successes/failures
+                'outcome_color_dict': string/int dictionary value - Dictionary of string color name keys and int die result values determining colors shown for certain die results
+                'final_result': int value - Predetermined final result of roll for die to end on
             global_manager_template global_manager: Object that accesses shared variables
-        Ouptut:
+        Output:
             None
         '''
-        self.result_outcome_dict = result_outcome_dict #min_success: 4, min_crit_success: 6, max_crit_fail: 1
-        self.outcome_color_dict = outcome_color_dict #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
+        self.result_outcome_dict = input_dict['result_outcome_dict'] #min_success: 4, min_crit_success: 6, max_crit_fail: 1
+        self.outcome_color_dict = input_dict['outcome_color_dict'] #'success': 'green', 'crit_success': 'bright green', 'fail': 'red', crit_fail: 'black', 'default': 'gray'
         self.rolls_completed = 0
-        self.num_sides = num_sides
+        self.num_sides = input_dict['num_sides']
         if global_manager.get('effect_manager').effect_active('ministry_of_magic'):
             self.num_rolls = 1
         else:
@@ -42,18 +46,19 @@ class die(button):
         self.normal_die = True
         if (self.result_outcome_dict['min_success'] <= 0 or self.result_outcome_dict['min_success'] >= 7) and self.result_outcome_dict['max_crit_fail'] <= 0: # and result_outcome_dict['min_crit_success'] >= 7
             #if roll without normal success/failure results, like combat
-            image_id = 'misc/dice/4.png'
+            input_dict['image_id'] = 'misc/dice/4.png'
             self.normal_die = False
         elif self.result_outcome_dict['min_success'] <= 6:
-            image_id = 'misc/dice/' + str(self.result_outcome_dict['min_success']) + '.png'
+            input_dict['image_id'] = 'misc/dice/' + str(self.result_outcome_dict['min_success']) + '.png'
         else:
-            image_id = 'misc/dice/impossible.png'
-        super().__init__(coordinates, width, height, 'green', 'label', 'none', modes, image_id, global_manager)
+            input_dict['image_id'] = 'misc/dice/impossible.png'
+        input_dict['color'] = 'white'
+        input_dict['button_type'] = 'die'
+        super().__init__(input_dict, global_manager)
         global_manager.get('dice_list').append(self)
-        self.final_result = final_result
-        self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
-        self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + height + 3), width + 6, height + 6)
-        self.color = 'white'
+        self.final_result = input_dict['final_result']
+        #self.Rect = pygame.Rect(self.x, self.global_manager.get('display_height') - (self.y + height), width, height)#create pygame rect with width and height, set color depending on roll result, maybe make a default gray appearance
+        self.highlight_Rect = pygame.Rect(self.x - 3, self.global_manager.get('display_height') - (self.y + self.height + 3), self.width + 6, self.height + 6) #could implement as outline rect instead, with larger outline width passed to superclass
         if self.normal_die:
             self.outline_color = self.outcome_color_dict['default']
         else:
@@ -133,7 +138,6 @@ class die(button):
             else:
                 self.global_manager.get('sound_manager').play_sound('dice_3')
                 
-        
     def roll(self):
         '''
         Description:
@@ -182,15 +186,14 @@ class die(button):
         Output:
             None
         '''
-        if self.can_show(): #if self.global_manager.get('current_game_mode') in self.modes:
+        if self.can_show():
             if self.rolling and time.time() >= self.last_roll + self.roll_interval: #if roll_interval time has passed since last_roll
                 self.roll()
-            pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.color], self.Rect)
+            super().draw()
             if self.highlighted or not self.normal_die:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.outline_color], self.Rect, 6)
             else:
-                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)
-            self.image.draw()        
+                pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['black'], self.Rect, 6)     
 
     def remove(self):
         '''

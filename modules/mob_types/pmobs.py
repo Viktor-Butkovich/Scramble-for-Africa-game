@@ -28,7 +28,9 @@ class pmob(mob):
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this mob's images can appear
-                'image': string value - File path to the image used by this object
+                'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this mob's name
                 'modes': string list value - Game modes during which this mob's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
@@ -1412,8 +1414,18 @@ class pmob(mob):
         '''
         result_outcome_dict = {'min_success': min_success, 'min_crit_success': min_crit_success, 'max_crit_fail': max_crit_fail}
         outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
-        new_die = dice.die(scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager), scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), self.modes, 6,
-            result_outcome_dict, outcome_color_dict, result, self.global_manager)
+        input_dict = {
+            'coordinates': scaling.scale_coordinates(coordinates[0], coordinates[1], self.global_manager),
+            'width': scaling.scale_width(100, self.global_manager),
+            'height': scaling.scale_height(100, self.global_manager),
+            'modes': self.modes,
+            'num_sides': 6,
+            'result_outcome_dict': result_outcome_dict,
+            'outcome_color_dict': outcome_color_dict,
+            'final_result': result,
+            'init_type': 'die'
+        }
+        new_die = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         self.attached_dice_list.append(new_die)
         if uses_minister:
             if self.global_manager.get('ongoing_action_type') == 'combat': #combat has a different dice layout

@@ -4,9 +4,6 @@ import random
 import pygame
 
 from . import csv_tools
-from . import notifications
-from . import choice_notifications
-from . import action_notifications
 from . import scaling
 from . import text_tools
 from . import events
@@ -662,30 +659,34 @@ class notification_manager_template():
     def notification_to_front(self, message):
         '''
         Description:
-            Displays a new notification with text matching the inputted string and a type based on what is in the front of this object's notification type queue
+            Displays and returns new notification with text matching the inputted string and a type based on what is in the front of this object's notification type queue
         Input:
             string message: The text to put in the displayed notification
         Output:
-            None
+            Notification: Returns the created notification
         '''
         height = len(self.format_message(message)) * (self.global_manager.get('default_font_size') + 10)
-        #print(height)
-        #self.update_notification_layout(self.get_notification_height(message))
         self.update_notification_layout(height)
 
         notification_type = self.notification_type_queue.pop(0)
         notification_dice = self.notification_dice_queue.pop(0) #number of dice of selected mob to show when notification is visible
-        if notification_type == 'roll':
-            new_notification = action_notifications.dice_rolling_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, notification_dice, self.global_manager)
-            
-            for current_die in self.global_manager.get('dice_list'):
-                current_die.start_rolling()
 
+        input_dict = {
+            'coordinates': scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
+            'ideal_width': scaling.scale_width(self.notification_width, self.global_manager),
+            'minimum_height': scaling.scale_height(self.notification_height, self.global_manager),
+            'modes': self.notification_modes,
+            'image_id': 'misc/default_notification.png',
+            'message': message,
+            'notification_dice': notification_dice,
+            'init_type': 'action notification'
+        }
+
+        if notification_type == 'roll':
+            input_dict['init_type'] = 'dice rolling notification'
         elif notification_type in ['stop_trade', 'stop_trade_attacked', 'trade', 'trade_promotion', 'final_trade', 'successful_commodity_trade', 'failed_commodity_trade']:
             is_last = False
             commodity_trade = False
-            commodity_trade_type = notification_type #for successful/failed_commodity_trade
             stops_trade = False
             dies = False
             if notification_type == 'stop_trade':
@@ -700,127 +701,99 @@ class notification_manager_template():
             elif notification_type == 'trade_promotion':
                 self.global_manager.get('trade_result')[0].promote() #promotes caravan
             trade_info_dict = {'is_last': is_last, 'commodity_trade': commodity_trade, 'commodity_trade_type': notification_type, 'stops_trade': stops_trade, 'dies': dies}
-            new_notification = action_notifications.trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, trade_info_dict, notification_dice, self.global_manager)
-                
+            input_dict['trade_info_dict'] = trade_info_dict
+            input_dict['init_type'] = 'trade notification'
         elif notification_type == 'exploration':
-            new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'exploration notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_exploration':
-            new_notification = action_notifications.exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'exploration notification'
+            input_dict['is_last'] = True
         elif notification_type == 'off_tile_exploration':
-            new_notification = action_notifications.off_tile_exploration_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
-                scaling.scale_width(self.notification_width, self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message,
-                notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'off tile exploration notification'
         elif notification_type == 'religious_campaign':
-            new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'religious campaign notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_religious_campaign':
-            new_notification = action_notifications.religious_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'religious campaign notification'
+            input_dict['is_last'] = True
         elif notification_type == 'public_relations_campaign':
-            new_notification = action_notifications.public_relations_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'public relations campaign notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_public_relations_campaign':
-            new_notification = action_notifications.public_relations_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'public relations campaign notification'
+            input_dict['is_last'] = True
         elif notification_type == 'advertising_campaign':
-            new_notification = action_notifications.advertising_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'advertising campaign notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_advertising_campaign':
-            new_notification = action_notifications.advertising_campaign_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'advertising campaign notification'
+            input_dict['is_last'] = True
         elif notification_type == 'conversion':
-            new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'conversion notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_conversion':
-            new_notification = action_notifications.conversion_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'conversion notification'
+            input_dict['is_last'] = True
         elif notification_type == 'rumor_search':
-            new_notification = action_notifications.rumor_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'rumor search notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_rumor_search':
-            new_notification = action_notifications.rumor_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'rumor search notification'
+            input_dict['is_last'] = True
         elif notification_type == 'artifact_search':
-            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'artifact search notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_artifact_search':
-            new_notification = action_notifications.artifact_search_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'artifact search notification'
+            input_dict['is_last'] = True
         elif notification_type == 'slave_capture':
-            new_notification = action_notifications.capture_slaves_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'capture slaves notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_slave_capture':
-            new_notification = action_notifications.capture_slaves_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'capture slaves notification'
+            input_dict['is_last'] = True
         elif notification_type == 'suppress_slave_trade':
-            new_notification = action_notifications.suppress_slave_trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'suppress slave trade notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_suppress_slave_trade':
-            new_notification = action_notifications.suppress_slave_trade_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'suppress slave trade notification'
+            input_dict['is_last'] = True
         elif notification_type == 'construction':
-            new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'construction notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_construction':
-            new_notification = action_notifications.construction_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), ['strategic', 'europe'], 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'construction notification'
+            input_dict['is_last'] = True
         elif notification_type == 'combat':
-            new_notification = action_notifications.combat_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, False, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'combat notification'
+            input_dict['is_last'] = False
         elif notification_type == 'final_combat':
-            new_notification = action_notifications.combat_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-
+            input_dict['init_type'] = 'combat notification'
+            input_dict['is_last'] = True
         elif notification_type == 'trial':
-            new_notification = action_notifications.trial_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width,
-                self.global_manager), scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, True, notification_dice, self.global_manager)
-            
+            input_dict['init_type'] = 'combat notification'
+            input_dict['is_last'] = True
         elif notification_type == 'choice':
-            choice_notification_choices = self.choice_notification_choices_queue.pop(0)
-            choice_notification_info_dict = self.choice_notification_info_dict_queue.pop(0)
-            new_notification = choice_notifications.choice_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, choice_notification_choices, choice_notification_info_dict, notification_dice,
-                self.global_manager)
-
+            del input_dict['notification_dice']
+            input_dict['init_type'] = 'choice notification'
+            input_dict['button_types'] = self.choice_notification_choices_queue.pop(0)
+            input_dict['choice_info_dict'] = self.choice_notification_info_dict_queue.pop(0)
         elif notification_type == 'zoom':
-            target = self.choice_notification_choices_queue.pop(0) #repurposing communication method used for choice notifications to tell notification which target
-            self.choice_notification_info_dict_queue.pop(0)
-            new_notification = notifications.zoom_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, target, self.global_manager)     
-            
+            del input_dict['notification_dice']
+            input_dict['init_type'] = 'zoom notification'
+            input_dict['target'] = self.choice_notification_choices_queue.pop(0) #repurposing communication method used for choice notifications to tell notification which target
+            self.choice_notification_info_dict_queue.pop(0)  
         elif notification_type == 'minister':
-            new_notification = notifications.minister_notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager, self.minister_message_queue.pop(0))
+            del input_dict['notification_dice']
+            input_dict['init_type'] = 'minister notification'
+            input_dict['attached_minister'] = self.minister_message_queue.pop(0)
 
-        else:
-            new_notification = notifications.notification(scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager), scaling.scale_width(self.notification_width, self.global_manager),
-                scaling.scale_height(self.notification_height, self.global_manager), self.notification_modes, 'misc/default_notification.png', message, self.global_manager)
-                #coordinates, ideal_width, minimum_height, showing, modes, image, message
+        new_notification = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        if notification_type == 'roll':
+            for current_die in self.global_manager.get('dice_list'):
+                current_die.start_rolling()
+        return(new_notification)
 
 class sound_manager_template():
     '''
@@ -903,10 +876,8 @@ class sound_manager_template():
         Output:
             None
         '''
-        original_volume = self.global_manager.get('default_music_volume') #pygame.mixer.music.get_volume()
+        original_volume = self.global_manager.get('default_music_volume')
         pygame.mixer.music.set_volume(original_volume)
-        #pygame.mixer.music.set_volume(original_volume)
-        #time_interval = 0.75
         time_passed = 0
         if pygame.mixer.music.get_busy(): #only delay starting music for fade out if there is any current music to fade out
             for i in range(1, 5):
@@ -984,8 +955,6 @@ class sound_manager_template():
         else:
             self.music_transition(chosen_song, time_interval)
         self.previous_song = chosen_song
-        #pygame.mixer.music.set_endevent(SONG_END)
-        #print(pygame.mixer.music.get_endevent())
 
     def song_done(self):
         '''
@@ -1015,7 +984,6 @@ class event_manager_template():
         self.event_time_list = []
         self.global_manager = global_manager
         self.previous_time = self.global_manager.get('current_time')
-        #self.add_event(self.go, (), 5) #calls this object's go function after 5 seconds with no inputs
 
     def add_event(self, function, inputs, activation_time):
         '''
@@ -1054,17 +1022,14 @@ class event_manager_template():
         '''
         time_difference = new_time - self.previous_time
         activated_events = []
-
         for current_event in self.event_list:
             current_event.activation_time -= time_difference #updates event times with new time
             if current_event.activation_time <= 0: #if any event runs out of time, activate it
                 activated_events.append(current_event)
-
         if len(activated_events) > 0: #when an event activates, call its stored function 
             for current_event in activated_events:
                 current_event.activate()
                 current_event.remove()
-
         self.previous_time = new_time
 
     def clear(self):
@@ -1083,6 +1048,12 @@ class event_manager_template():
             current_event.remove()
 
     def go(self):
-        #function to call for event testing
-        #calls the money tracker's change function with an input of -20 every second, repeats infinitely because no num_repeats is provided
+        '''
+        Description:   
+            Calls the money tracker's change function with an input of -20 every second, repeating indefinitely because no num_repeats is provided - solely for event testing
+        Input:
+            None
+        Output:
+            None
+        '''
         self.add_repeating_event(self.global_manager.get('money_tracker').change, [-20], activation_time = 1)

@@ -2,6 +2,7 @@
 
 import random
 import os
+import pygame
 
 from . import scaling
 from . import utility
@@ -493,6 +494,22 @@ def get_image_variants(base_path, keyword = 'default'):
     else:
         variants.append(base_path)
     return(variants)
+
+def extract_folder_colors(folder_path):
+    '''
+    Description:
+        Iterates through a folder's files and finds the first color in each image, returning that colors RGB values
+    Input:
+        string folder_path: Folder path to search through, like 'ministers/portraits/hair/colors'
+    Output:
+        int tuple list: Returns list of (red, green, blue) items, with red, green, and blue being the RGB values of the first color in each respective file
+    '''
+    colors = []
+    for file_name in os.listdir('graphics/' + folder_path):
+        current_image = pygame.image.load('graphics/' + folder_path + file_name)
+        red, green, blue, alpha = current_image.get_at((0, 0))
+        colors.append((red, green, blue))
+    return(colors)
 
 def get_slave_traders_strength_modifier(global_manager):
     '''

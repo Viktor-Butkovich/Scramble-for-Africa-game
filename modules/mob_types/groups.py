@@ -19,7 +19,9 @@ class group(pmob):
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
                 'coordinates': int tuple value - Two values representing x and y coordinates on one of the game grids
                 'grids': grid list value - grids in which this group's images can appear
-                'image': string value - File path to the image used by this object
+                'image': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'name': string value - Required if from save, this group's name
                 'modes': string list value - Game modes during which this group's images can appear
                 'end_turn_destination': string or int tuple value - Required if from save, 'none' if no saved destination, destination coordinates if saved destination
@@ -390,6 +392,15 @@ class group(pmob):
         right_worker_dict['image_id'] = self.worker.image_variants[self.worker.second_image_variant]
         right_worker_dict['x_offset'] *= -1
 
+        if self.is_battalion:
+            left_worker_dict['image_id'] = self.worker.image_dict['soldier']
+            left_worker_dict['green_screen'] = self.global_manager.get('current_country').colors
+            right_worker_dict['image_id'] = self.worker.image_dict['soldier']
+            right_worker_dict['green_screen'] = self.global_manager.get('current_country').colors
+        elif self.can_hold_commodities:
+            left_worker_dict['image_id'] = self.worker.image_dict['porter']
+            right_worker_dict['image_id'] = self.worker.image_dict['porter']
+
         officer_dict = {
             'image_id': self.officer.image_dict['default'],
             'size': 0.85,
@@ -398,20 +409,7 @@ class group(pmob):
             'level': -1
         }
 
-        if self.is_battalion:
-            left_worker_dict['image_id'] = self.worker.image_dict['soldier']
-            right_worker_dict['image_id'] = self.worker.image_dict['soldier']
-            left_worker_uniform_dict = left_worker_dict.copy()
-            left_worker_uniform_dict['image_id'] = 'misc/country_uniforms/soldier/' + self.global_manager.get('current_country').adjective + '.png'
-            right_worker_uniform_dict = right_worker_dict.copy()
-            right_worker_uniform_dict['image_id'] = 'misc/country_uniforms/soldier/' + self.global_manager.get('current_country').adjective + '.png'
-        elif self.can_hold_commodities:
-            left_worker_dict['image_id'] = self.worker.image_dict['porter']
-            right_worker_dict['image_id'] = self.worker.image_dict['porter']
         image_id_list.append(left_worker_dict)
         image_id_list.append(right_worker_dict)
-        if self.is_battalion:
-            image_id_list.append(left_worker_uniform_dict)
-            image_id_list.append(right_worker_uniform_dict)
         image_id_list.append(officer_dict)
         return(image_id_list)

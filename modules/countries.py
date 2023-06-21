@@ -1,4 +1,5 @@
 #Contains functionality for different player countries
+from . import actor_utility
 
 class country:
     '''
@@ -40,6 +41,11 @@ class country:
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
         self.music_list = input_dict['music_list']
+        if 'has_aristocracy' in input_dict:
+            self.has_aristocracy = input_dict['has_aristocracy']
+        else:
+            self.has_aristocracy = True
+        self.colors = actor_utility.extract_folder_colors('locations/country_colors/' + self.adjective + '/')
 
     def select(self):
         '''
@@ -156,7 +162,6 @@ class hybrid_country(country):
         
         #specific text files are managed in flavor_text_manager for the time being, don't try to set to nonexistent belgium nameset
         self.global_manager.get('flavor_text_manager').allow_particles = self.allow_particles
-        #if self.allow_particles:
         self.global_manager.get('flavor_text_manager').aristocratic_particles = self.aristocratic_particles
         self.global_manager.get('flavor_text_manager').allow_double_last_names = self.allow_double_last_names
         self.global_manager.set('weighted_backgrounds', self.background_set)
