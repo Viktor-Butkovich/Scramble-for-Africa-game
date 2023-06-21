@@ -173,10 +173,7 @@ def misc_setup(global_manager):
     global_manager.set('country_ordered_label_list', [])
 
     global_manager.set('displayed_defense', 'none')
-    global_manager.set('defense_info_display_list', [])
-
     global_manager.set('displayed_prosecution', 'none')
-    global_manager.set('prosecution_info_display_list', [])
 
     global_manager.set('dice_list', [])
     global_manager.set('dice_roll_minister_images', [])
@@ -1244,35 +1241,44 @@ def trial_screen_setup(global_manager):
     distance_to_center = 300
     distance_to_notification = 100
     
-    defense_current_y = trial_display_default_y
+    defense_y = trial_display_default_y
     defense_x = (global_manager.get('default_display_width') / 2) + (distance_to_center - button_separation) + distance_to_notification
+    defense_current_y = 0
+    input_dict = {
+        'coordinates': (defense_x, defense_y),
+        'width': 10,
+        'height': 10,
+        'modes': ['trial'],
+        'init_type': 'interface collection'
+    }
+    defense_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    global_manager.set('defense_info_display', defense_info_display)
 
-    defense_type_image = images.minister_type_image(scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
+    defense_type_image = images.minister_type_image(scaling.scale_coordinates(0, defense_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
-    global_manager.get('defense_info_display_list').append(defense_type_image)
+    defense_info_display.add_member(defense_type_image, defense_type_image.x, defense_type_image.y)
 
     defense_current_y -= button_separation * 2
     input_dict = {
-        'coordinates': scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
+        'coordinates': scaling.scale_coordinates(0, defense_current_y, global_manager),
         'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
         'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
-        'modes': ['trial'],
         'init_type': 'minister portrait image',
         'minister_type': 'none',
-        'color': 'gray'
+        'color': 'gray',
+        'parent_collection': defense_info_display
     }
     defense_portrait_image = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('defense_info_display_list').append(defense_portrait_image)
 
     defense_current_y -= 35
     input_dict = {
-        'coordinates': scaling.scale_coordinates(defense_x, defense_current_y, global_manager),
+        'coordinates': scaling.scale_coordinates(0, defense_current_y, global_manager),
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'modes': ['trial'],
         'image_id': 'misc/default_label.png',
         'message': 'Defense',
-        'init_type': 'label'
+        'init_type': 'label',
+        'parent_collection': defense_info_display
     }
     defense_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1282,46 +1288,60 @@ def trial_screen_setup(global_manager):
     defense_info_display_labels = ['minister_name', 'minister_office', 'evidence']
     for current_actor_label_type in defense_info_display_labels:
         defense_current_y -= 35
-        input_dict['coordinates'] = scaling.scale_coordinates(defense_x, defense_current_y, global_manager)
-        input_dict['actor_label_type'] = current_actor_label_type 
+        input_dict['coordinates'] = scaling.scale_coordinates(0, defense_current_y, global_manager)
+        input_dict['actor_label_type'] = current_actor_label_type
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    prosecution_current_y = trial_display_default_y
+    prosecution_y = trial_display_default_y
     prosecution_x = (global_manager.get('default_display_width') / 2) - (distance_to_center + button_separation) - distance_to_notification
-    
-    prosecution_type_image = images.minister_type_image(scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager),
+    prosecution_current_y = 0
+
+    input_dict = {
+        'coordinates': (prosecution_x, prosecution_y),
+        'width': 10,
+        'height': 10,
+        'modes': ['trial'],
+        'init_type': 'interface collection'
+    }
+    prosecution_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    global_manager.set('prosecution_info_display', prosecution_info_display)
+
+    prosecution_type_image = images.minister_type_image(scaling.scale_coordinates(0, prosecution_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
-    global_manager.get('prosecution_info_display_list').append(prosecution_type_image)
+    prosecution_info_display.add_member(prosecution_type_image, prosecution_type_image.x, prosecution_type_image.y)
 
     prosecution_current_y -= button_separation * 2
     input_dict = {
-        'coordinates': scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager),
+        'coordinates': scaling.scale_coordinates(0, prosecution_current_y, global_manager),
         'width': scaling.scale_width(button_separation * 2 - 5, global_manager),
         'height': scaling.scale_height(button_separation * 2 - 5, global_manager),
-        'modes': ['trial'],
         'init_type': 'minister portrait image',
         'minister_type': 'none',
-        'color': 'gray'
+        'color': 'gray',
+        'parent_collection': prosecution_info_display
     }
     prosecution_portrait_image = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('prosecution_info_display_list').append(prosecution_portrait_image)
 
     prosecution_current_y -= 35
     input_dict = {
-        'coordinates': scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager),
+        'coordinates': scaling.scale_coordinates(0, prosecution_current_y, global_manager),
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'modes': ['trial'],
         'image_id': 'misc/default_label.png',
         'message': 'Prosecution',
-        'init_type': 'label'
+        'init_type': 'label',
+        'parent_collection': prosecution_info_display
     }
     prosecution_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
+    input_dict['actor_type'] = 'minister'
+    del input_dict['message']
+    input_dict['init_type'] = 'actor display label'
+    input_dict['parent_collection'] = prosecution_info_display
     prosecution_info_display_labels = ['minister_name', 'minister_office']
     for current_actor_label_type in prosecution_info_display_labels:
         prosecution_current_y -= 35
-        input_dict['coordinates'] = scaling.scale_coordinates(prosecution_x, prosecution_current_y, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(0, prosecution_current_y, global_manager)
         input_dict['actor_label_type'] = current_actor_label_type 
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 

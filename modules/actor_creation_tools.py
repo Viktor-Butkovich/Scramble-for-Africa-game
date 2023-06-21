@@ -31,6 +31,7 @@ from . import choice_notifications
 from . import instructions
 from . import action_notifications
 from . import europe_transactions
+from . import interface_elements
 from .actor_display_tools import buttons as actor_display_buttons
 from .actor_display_tools import labels as actor_display_labels
 
@@ -147,6 +148,10 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #interface elements
         if init_type == 'button':
             new_element = buttons.button(input_dict, global_manager)
+        if init_type == 'interface element':
+            new_element = interface_elements.interface_element(input_dict, global_manager)
+        elif init_type == 'interface collection':
+            new_element = interface_elements.interface_collection(input_dict, global_manager)
         if init_type.endswith('button'):
             base = init_type.removesuffix('button')
             #buttons buttons
@@ -506,5 +511,16 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Ouptut:
             None
         '''
-        dice.die(coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager)
+        input_dict = {
+            'coordinates': coordinates,
+            'width': width,
+            'height': height,
+            'modes': modes,
+            'num_sides': num_sides,
+            'result_outcome_dict': result_outcome_dict,
+            'outcome_color_dict': outcome_color_dict,
+            'final_result': final_result,
+            'init_type': 'die'
+        }
+        new_die = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     

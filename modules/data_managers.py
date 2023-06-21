@@ -772,7 +772,7 @@ class notification_manager_template():
             input_dict['init_type'] = 'combat notification'
             input_dict['is_last'] = True
         elif notification_type == 'trial':
-            input_dict['init_type'] = 'combat notification'
+            input_dict['init_type'] = 'trial notification'
             input_dict['is_last'] = True
         elif notification_type == 'choice':
             del input_dict['notification_dice']

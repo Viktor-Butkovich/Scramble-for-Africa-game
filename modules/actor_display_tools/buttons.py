@@ -3443,7 +3443,7 @@ class fabricate_evidence_button(label_button):
                         ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                     defense.fabricated_evidence += 1
                     defense.corruption_evidence += 1
-                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display_list'), defense) #updates trial display with new evidence
+                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display'), defense) #updates trial display with new evidence
                 else:
                     text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
             else:

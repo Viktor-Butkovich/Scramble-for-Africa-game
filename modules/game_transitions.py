@@ -106,8 +106,8 @@ def set_game_mode(new_game_mode, global_manager):
         minister_utility.calibrate_minister_info_display(global_manager, 'none')
         
     elif previous_game_mode == 'trial':
-        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), 'none')
-        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), 'none')
+        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), 'none')
+        minister_utility.calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), 'none')
 
     if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()

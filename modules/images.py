@@ -373,13 +373,43 @@ class free_image(image):
             None
         '''
         self.image_type = 'free'
+        self.has_parent_collection = False
         super().__init__(width, height, global_manager)
         self.modes = modes
         self.set_image(image_id)
-        self.x, self.y = coordinates
-        self.y = self.global_manager.get('display_height') - self.y
+        self.set_origin(coordinates[0], coordinates[1])
         self.to_front = to_front
         self.global_manager.get('free_image_list').append(self)
+
+    def set_origin(self, new_x, new_y):
+        '''
+        Description:
+            Sets this interface element's location at the inputted coordinates. Along with set_modes, allows a free image to behave as an interface element and join interface collections
+        Input:
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
+        Output:
+            None
+        '''
+        self.x = new_x
+        self.y = self.global_manager.get('display_height') - new_y
+        if hasattr(self, 'Rect') and self.Rect != 'none':
+            self.Rect.x = self.x
+            self.Rect.y = self.global_manager.get('display_height') - (new_y - self.height)
+        if self.has_parent_collection:
+            self.x_offset = self.x - self.parent_collection.x
+            self.y_offset = self.y - self.parent_collection.y
+
+    def set_modes(self, new_modes):
+        '''
+        Description:
+            Sets this interface element's active modes to the inputted list. Along with set_origin, allows a free image to behave as an interface element and join interface collections
+        Input:
+            string list new_modes: List of game modes in which this element is active
+        Output:
+            None
+        '''
+        self.modes = new_modes
 
     def set_y(self, attached_label): #called by actor display labels
         '''

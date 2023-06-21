@@ -178,7 +178,7 @@ SFA folder
         actor_creation_tools.py
             imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
 		    	mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
-		    	lore_missions, notification_tools, utility, actor_utility, market_tools, dice, buttons, labels, notifications, choice_notifications, instructions, action_notifications, europe_transactions, 
+		    	lore_missions, notification_tools, utility, actor_utility, market_tools, dice, buttons, labels, notifications, choice_notifications, instructions, action_notifications, europe_transactions, interface_elements
 				actor_display_tools/buttons, actor_display_tools/labels
             class actor_creation_manager_template
 

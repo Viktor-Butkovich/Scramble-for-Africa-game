@@ -16,7 +16,7 @@ class interface_element():
                 'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
                 'width': int value - pixel width of this element
                 'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
+                'modes': string list value - Game modes during which this element can appear, optional for elements with parent collections
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -34,7 +34,10 @@ class interface_element():
             self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
         else:
             self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
-        self.set_modes(input_dict['modes'])
+        if 'modes' in input_dict:
+            self.set_modes(input_dict['modes'])
+        elif 'parent_collection' != 'none':
+            self.set_modes(self.parent_collection.modes)
 
     def can_show(self):
         '''
@@ -79,6 +82,17 @@ class interface_element():
         '''
         self.modes = new_modes
 
+    def calibrate(self, new_actor):
+        '''
+        Description:
+            Allows subclasses to attach to the inputted actor and updates information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
+        return
+
 class interface_collection(interface_element):
     '''
     Object managing an image bundle and collection of interactive interface elements, including buttons, free images, and other interface collections
@@ -104,9 +118,22 @@ class interface_collection(interface_element):
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
-        '''    
-        super().__init__(input_dict, global_manager)
+        '''
         self.members = []
+        super().__init__(input_dict, global_manager)
+
+    def calibrate(self, new_actor):
+        '''
+        Description:
+            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
+        super().calibrate(new_actor)
+        for member in self.members:
+            member.calibrate(new_actor)
     
     def add_member(self, new_member, x_offset, y_offset):
         '''
@@ -127,7 +154,7 @@ class interface_collection(interface_element):
     def set_origin(self, new_x, new_y):
         '''
         Description:
-            Sets this interface element's location at the inputted coordinates
+            Sets this interface element's location and those of its members to the inputted coordinates
         Input:
             int new_x: New x coordinate for this element's origin
             int new_y: New y coordinate for this element's origin
