@@ -82,7 +82,7 @@ class vehicle(pmob):
             self.has_crew = True
         self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def get_image_id_list(self):
         '''
@@ -392,7 +392,7 @@ class train(vehicle):
         self.inventory_capacity = 27#9
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
         else:
             self.load_inventory(input_dict['inventory'])
 
@@ -467,7 +467,7 @@ class ship(vehicle):
         self.inventory_capacity = 27
         if not from_save:
             self.inventory_setup()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for travel_possible changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for travel_possible changing
         else:
             self.load_inventory(input_dict['inventory'])
 

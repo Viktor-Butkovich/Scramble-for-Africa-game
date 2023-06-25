@@ -700,7 +700,7 @@ class expedition(group):
                 self.global_manager.get('current_lore_mission').remove()
             else:
                 location.set_proven_false(True)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.global_manager.get('displayed_tile')) #updates tile display without question mark
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.global_manager.get('displayed_tile')) #updates tile display without question mark
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
         elif roll_result <= self.current_max_crit_fail:

@@ -267,7 +267,7 @@ class village():
         '''
         self.available_workers += change
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)    
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)    
 
     def set_available_workers(self, new_value):
         '''
@@ -280,7 +280,7 @@ class village():
         '''
         self.available_workers = new_value
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed available workers value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
     
     def change_population(self, change):
         '''
@@ -302,7 +302,7 @@ class village():
             self.aggressiveness = 1
         self.tiles[0].update_image_bundle()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
 
     def change_aggressiveness(self, change):
         '''
@@ -320,4 +320,4 @@ class village():
             self.aggressiveness = 1
         self.tiles[0].update_image_bundle()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed aggressiveness value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)

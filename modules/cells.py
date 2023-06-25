@@ -389,7 +389,7 @@ class cell():
         input_dict['init_type'] = 'slums'
         self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
         if self.tile == self.global_manager.get('displayed_tile'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.tile) #update tile display to show new building
 
     def has_vehicle(self, vehicle_type, is_worker = False):
         '''

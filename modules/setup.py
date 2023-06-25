@@ -155,21 +155,18 @@ def misc_setup(global_manager):
     global_manager.set('overlay_tile_list', [])
     global_manager.set('notification_list', [])
     global_manager.set('label_list', [])
+    global_manager.set('info_display_list', [])
 
     global_manager.set('displayed_mob', 'none')
-    global_manager.set('mob_info_display_list', [])
     global_manager.set('mob_ordered_label_list', [])
 
     global_manager.set('displayed_tile', 'none')
-    global_manager.set('tile_info_display_list', [])
     global_manager.set('tile_ordered_label_list', [])
 
     global_manager.set('displayed_minister', 'none')
-    global_manager.set('minister_info_display_list', [])
     global_manager.set('minister_ordered_label_list', [])
 
     global_manager.set('displayed_country', 'none')
-    global_manager.set('country_info_display_list', [])
     global_manager.set('country_ordered_label_list', [])
 
     global_manager.set('displayed_defense', 'none')
@@ -233,7 +230,6 @@ def misc_setup(global_manager):
     global_manager.set('mob_ordered_list_start_y', 0)
     global_manager.set('tile_ordered_list_start_y', 0)
     global_manager.set('minister_ordered_list_start_y', 0)
-    global_manager.set('country_ordered_list_start_y', 0)
 
     global_manager.set('current_game_mode', 'none') #set game mode only works if current game mode is defined and not the same as the new game mode
     global_manager.set('current_country', 'none') #current country needs to be defined for music to start playing correctly on set game mode
@@ -1249,14 +1245,14 @@ def trial_screen_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['trial'],
-        'init_type': 'interface collection'
+        'init_type': 'info display',
+        'actor_type': 'defense'
     }
     defense_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.set('defense_info_display', defense_info_display)
 
     defense_type_image = images.minister_type_image(scaling.scale_coordinates(0, defense_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
-    defense_info_display.add_member(defense_type_image, defense_type_image.x, defense_type_image.y)
+    defense_info_display.add_member(defense_type_image)
 
     defense_current_y -= button_separation * 2
     input_dict = {
@@ -1301,14 +1297,14 @@ def trial_screen_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['trial'],
-        'init_type': 'interface collection'
+        'init_type': 'info display',
+        'actor_type': 'prosecution'
     }
     prosecution_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.set('prosecution_info_display', prosecution_info_display)
 
     prosecution_type_image = images.minister_type_image(scaling.scale_coordinates(0, prosecution_current_y, global_manager),
         scaling.scale_width(button_separation * 2 - 5, global_manager), scaling.scale_height(button_separation * 2 - 5, global_manager), ['trial'], 'none', 'none', global_manager)
-    prosecution_info_display.add_member(prosecution_type_image, prosecution_type_image.x, prosecution_type_image.y)
+    prosecution_info_display.add_member(prosecution_type_image)
 
     prosecution_current_y -= button_separation * 2
     input_dict = {
@@ -1404,23 +1400,32 @@ def mob_interface_setup(global_manager):
     global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, actor_display_current_y, global_manager),
+        'coordinates': (0, actor_display_current_y),
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe'],
+        'init_type': 'info display',
+        'actor_type': 'mob'
+    }
+    mob_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'minimum_width': scaling.scale_width(125, global_manager),
         'height': scaling.scale_height(125, global_manager),
-        'modes': ['strategic', 'europe'],
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': mob_info_display
     }
     #mob background image's tooltip
     mob_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('mob_info_display_list').append(mob_free_image_background_tooltip)
 
     #mob image
-    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display_list').append(mob_free_image)
+    global_manager.get('mob_info_display').add_member(mob_free_image)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(130, actor_display_current_y, global_manager),
@@ -1448,24 +1453,24 @@ def mob_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager),
+            'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'modes': ['strategic', 'europe'],
             'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
+            'parent_collection': mob_info_display
         }
         if not current_actor_label_type == 'current passenger':
             input_dict['init_type'] = 'actor display label'
-            global_manager.get('mob_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         else:
             input_dict['init_type'] = 'list item label'
             input_dict['list_type'] = 'ship'
             for i in range(0, 3): #0, 1, 2
                 #label for each passenger
                 input_dict['list_index'] = i
-                global_manager.get('mob_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
 def tile_interface_setup(global_manager):
     '''
@@ -1488,7 +1493,7 @@ def tile_interface_setup(global_manager):
         'image_id': 'buttons/cycle_passengers_down_button.png',
         'init_type': 'cycle same tile button'
     }
-    cycle_same_tile_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    cycle_same_tile_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager) #not in tile info display list should add to collection but have exception to not sort
     global_manager.set('same_tile_icon_list', [])
     input_dict['init_type'] = 'same tile icon'
     input_dict['image_id'] = 'buttons/default_button.png'
@@ -1504,25 +1509,31 @@ def tile_interface_setup(global_manager):
     same_tile_icon = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, actor_display_current_y, global_manager),
+        'coordinates': (0, global_manager.get('tile_ordered_list_start_y')), #actor_display_current_y
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe'],
+        'init_type': 'info display',
+        'actor_type': 'tile'
+    }
+    tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'minimum_width': scaling.scale_width(125, global_manager),
         'height': scaling.scale_height(125, global_manager),
-        'modes': ['strategic', 'europe'],
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': tile_info_display
     }
     #tile background image's tooltip
     tile_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
-    
-    #tile_free_image_background_tooltip = actor_display_labels.actor_display_label(scaling.scale_coordinates(0, actor_display_current_y, global_manager), scaling.scale_width(125, #global_manager), scaling.scale_height(125, global_manager),
-    #    ['strategic', 'europe'], 'misc/empty.png', 'tooltip', 'tile', global_manager) #coordinates, minimum_width, height, modes, image_id, actor_label_type, actor_type, global_manager
-    #global_manager.get('tile_info_display_list').append(tile_free_image_background_tooltip)
 
-    global_manager.get('tile_info_display_list').append(actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
-        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager))
+    tile_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+        scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager)
+    tile_info_display.add_member(tile_image)
 
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
@@ -1537,34 +1548,34 @@ def tile_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(x_displacement, actor_display_current_y, global_manager),
+            'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'modes': ['strategic', 'europe'],
             'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
+            'parent_collection': tile_info_display
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = 'actor display label'
-            global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type == 'building efficiency':
             input_dict['init_type'] = 'building efficiency label'
             input_dict['building_type'] = 'resource'
-            global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type == 'building work crews':
             input_dict['init_type'] = 'building work crews label'
             input_dict['building_type'] = 'resource'
-            global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type == 'current building work crew':
             input_dict['init_type'] = 'list item label'
             input_dict['list_type'] = 'building'
             for i in range(0, 3):
                 input_dict['list_index'] = i
-                global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type in ['native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = current_actor_label_type + ' label'
-            global_manager.get('tile_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     return(actor_display_current_y)
 
 def inventory_interface_setup(actor_display_current_y, global_manager):
@@ -1607,14 +1618,13 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'coordinates': scaling.scale_coordinates(300, global_manager.get('default_display_height') - 115, global_manager),
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'modes': ['strategic', 'europe'],
         'image_id': 'misc/default_label.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': global_manager.get('mob_info_display')
     }
     mob_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('mob_info_display_list').append(mob_inventory_capacity_label)
     
     del input_dict['actor_label_type']
     for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected mob
@@ -1622,20 +1632,18 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-        global_manager.get('mob_info_display_list').append(new_commodity_display_label)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(300, global_manager.get('default_display_height') - 455, global_manager),
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'modes': ['strategic', 'europe'],
         'image_id': 'misc/default_label.png',
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': global_manager.get('tile_info_display')
     }
     tile_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('tile_info_display_list').append(tile_inventory_capacity_label)
 
     del input_dict['actor_label_type']
     for current_index in range(len(global_manager.get('commodity_types'))): #commodities held in selected tile
@@ -1643,7 +1651,6 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-        global_manager.get('tile_info_display_list').append(new_commodity_display_label)
 
 def minister_interface_setup(global_manager):
     '''
@@ -1656,31 +1663,43 @@ def minister_interface_setup(global_manager):
     '''
     #minister info images setup
     minister_display_top_y = global_manager.get('default_display_height') - 205
-    minister_display_current_y = minister_display_top_y
-    global_manager.set('minister_ordered_list_start_y', minister_display_current_y)
+    global_manager.set('minister_ordered_list_start_y', minister_display_top_y)
+    minister_display_current_y = 0
+
+    input_dict = {
+        'coordinates': (0, minister_display_top_y),
+        'width': 10,
+        'height': 10,
+        'modes': ['ministers'],
+        'init_type': 'info display',
+        'actor_type': 'minister'
+    }
+    minister_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
     #minister background image
     minister_free_image_background = actor_display_images.minister_background_image('misc/mob_background.png', scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager),
         scaling.scale_height(125, global_manager), ['ministers'], global_manager)
-    global_manager.get('minister_info_display_list').append(minister_free_image_background)
+    minister_info_display.add_member(minister_free_image_background, {'order_overlap': True})
+    
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, minister_display_current_y, global_manager),
         'minimum_width': scaling.scale_width(125, global_manager),
         'height': scaling.scale_height(125, global_manager),
-        'modes': ['ministers'],
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'minister',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': minister_info_display,
+        'member_config': {'order_overlap': True}
     }
     #minister background image's tooltip
     minister_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('minister_info_display_list').append(minister_free_image_background_tooltip)
 
     #minister image
     minister_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, minister_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['ministers'], 'minister_default', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('minister_info_display_list').append(minister_free_image)
+    minister_info_display.add_member(minister_free_image, {'order_overlap': True})
 
     minister_display_current_y -= 35
     #minister info images setup
@@ -1688,10 +1707,10 @@ def minister_interface_setup(global_manager):
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'modes':['ministers'],
         'image_id': 'misc/default_label.png',
         'actor_type': 'minister',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': minister_info_display
     }
     #minister info labels setup
     minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'evidence']
@@ -1699,7 +1718,7 @@ def minister_interface_setup(global_manager):
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager)
         input_dict['actor_label_type'] = current_actor_label_type
-        global_manager.get('minister_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)) #coordinates, ideal_width, minimum_height, modes, image_id, mob_label_type, global_manager
+        global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     #minister info labels setup
 
 def country_interface_setup(global_manager):
@@ -1711,35 +1730,42 @@ def country_interface_setup(global_manager):
     Output:
         int actor_display_current_y: Value that tracks the location of interface as it is created, used by other setup functions
     '''
-    #country info images setup
-    country_display_top_y = global_manager.get('default_display_height') - 205
-    country_display_current_y = country_display_top_y
-    global_manager.set('country_ordered_list_start_y', country_display_current_y)
-    #country background image
-    country_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, country_display_current_y, global_manager), scaling.scale_width(125, global_manager),
-        scaling.scale_height(125, global_manager), ['new_game_setup'], global_manager) #mob and country background images would have the same functionality
-    global_manager.get('country_info_display_list').append(country_free_image_background)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, country_display_current_y, global_manager),
+        'coordinates': (0, global_manager.get('mob_ordered_list_start_y')),
+        'width': 10,
+        'height': 10,
+        'modes': ['new_game_setup'],
+        'init_type': 'info display',
+        'actor_type': 'country'
+    }
+    country_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    #country background image
+    country_free_image_background = actor_display_images.mob_background_image('misc/mob_background.png', scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(125, global_manager),
+        scaling.scale_height(125, global_manager), ['new_game_setup'], global_manager) #mob and country background images would have the same functionality
+    country_info_display.add_member(country_free_image_background, {'order_overlap': True})
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'minimum_width': scaling.scale_width(125, global_manager),
         'height': scaling.scale_height(125, global_manager),
-        'modes': ['new_game_setup'],
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'country',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': country_info_display,
+        'member_config': {'order_overlap': True}
     }
     #country background image's tooltip
     country_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    global_manager.get('country_info_display_list').append(country_free_image_background_tooltip)
 
     #country image
-    country_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, country_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    country_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['new_game_setup'], 'country_default', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('country_info_display_list').append(country_free_image)
+    country_info_display.add_member(country_free_image, {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': 5})
 
-    country_display_current_y -= 35
+    #country_display_current_y -= 35
 
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
@@ -1747,15 +1773,16 @@ def country_interface_setup(global_manager):
         'modes':['new_game_setup'],
         'image_id': 'misc/default_label.png',
         'actor_type': 'country',
-        'init_type': 'actor display label'
+        'init_type': 'actor display label',
+        'parent_collection': country_info_display
     }
     #country info labels setup
     country_info_display_labels = ['country_name', 'country_effect']
     for current_actor_label_type in country_info_display_labels:
         x_displacement = 0
-        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, country_display_current_y, global_manager)
+        input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, 0, global_manager)
         input_dict['actor_label_type'] = current_actor_label_type
-        global_manager.get('country_info_display_list').append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+        global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
 def debug_tools_setup(global_manager):
     '''

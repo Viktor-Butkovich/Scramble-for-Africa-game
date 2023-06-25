@@ -860,19 +860,35 @@ class actor_display_label(label):
                 current_button.outline.x = current_button.x - current_button.outline_width
                 x_displacement += (current_button.width + 5)
 
-    def set_y(self, new_y):
+    #def set_y(self, new_y):
+    #    '''
+    #    Description:
+    #        Sets this label's y position and that of its attached buttons
+    #    Input:
+    #        int new_y: New y coordinate to set this label and its buttons to
+    #    Output:
+    #        None
+    #    '''
+    #    self.y = new_y
+    #    self.image.y = self.y
+    #    self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
+    #    self.image.Rect = self.Rect    
+    #    for current_button in self.attached_buttons:
+    #        current_button.set_y(self)
+    #    for current_image in self.attached_images:
+    #        current_image.set_y(self)
+
+    def set_origin(self, new_x, new_y):
         '''
         Description:
-            Sets this label's y position and that of its attached buttons
+            Sets this interface element's location at the inputted coordinates
         Input:
-            int new_y: New y coordinate to set this label and its buttons to
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
         Output:
             None
         '''
-        self.y = new_y
-        self.image.y = self.y
-        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
-        self.image.Rect = self.Rect    
+        super().set_origin(new_x, new_y)
         for current_button in self.attached_buttons:
             current_button.set_y(self)
         for current_image in self.attached_images:

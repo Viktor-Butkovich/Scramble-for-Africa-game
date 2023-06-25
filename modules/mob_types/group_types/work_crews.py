@@ -39,7 +39,7 @@ class work_crew(group):
         self.is_work_crew = True
         self.set_group_type('work_crew')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new button available
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for new button available
 
     def work_building(self, building):
         '''
@@ -57,8 +57,8 @@ class work_crew(group):
         self.hide_images()
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), building.cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), 'none')
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), building.cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none')
 
     def leave_building(self, building):
         '''
@@ -74,7 +74,7 @@ class work_crew(group):
         self.show_images()
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile ui with worked building
         self.select()
 
     def attempt_production(self, building):

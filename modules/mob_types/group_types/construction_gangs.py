@@ -37,7 +37,7 @@ class construction_gang(group):
         self.can_construct = True
         self.set_group_type('construction_gang')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for can_construct changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for can_construct changing
 
     def start_upgrade(self, building_info_dict):
         '''
@@ -189,6 +189,6 @@ class construction_gang(group):
                 self.promote()
             self.set_movement_points(0)
             self.upgraded_building.upgrade(self.upgrade_type)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show building upgrade
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile display to show building upgrade
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')

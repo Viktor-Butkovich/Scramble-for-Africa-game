@@ -78,7 +78,7 @@ class pmob(mob):
             self.in_progress_automatic_route = [] #first item is next step, last item is current location
             actor_utility.deselect_all(self.global_manager)
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
                 self.select()
         self.current_roll_modifier = 0
         self.default_min_success = 4
@@ -133,7 +133,7 @@ class pmob(mob):
         self.base_automatic_route.append(new_coordinates)
         self.calculate_automatic_route()
         if self == self.global_manager.get('displayed_mob'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def calculate_automatic_route(self):
         '''
@@ -260,7 +260,7 @@ class pmob(mob):
         self.base_automatic_route = []
         self.in_progress_automatic_route = []
         if self == self.global_manager.get('displayed_mob'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def selection_sound(self):
         '''
@@ -299,9 +299,9 @@ class pmob(mob):
         self.automatically_replace = new_value
         displayed_mob = self.global_manager.get('displayed_mob')
         if self == displayed_mob:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
         elif (not displayed_mob == 'none') and displayed_mob.is_pmob and displayed_mob.is_group and (displayed_mob.officer == self or displayed_mob.worker == self):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), displayed_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
 
     def get_image_id_list(self):
         '''
@@ -336,12 +336,12 @@ class pmob(mob):
             if new_value == True:
                 self.remove_from_turn_queue()
                 if self.global_manager.get('displayed_mob') == self:
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with sentry icon
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with sentry icon
             else:
                 if self.movement_points > 0 and not (self.is_vehicle and self.crew == 'none'):
                     self.add_to_turn_queue()
             if self == self.global_manager.get('displayed_mob'):
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def add_to_turn_queue(self):
         '''
@@ -586,7 +586,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] += change
             if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -601,7 +601,7 @@ class pmob(mob):
         if self.can_hold_commodities:
             self.inventory[commodity] = new_value
             if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def fire(self):
         '''
@@ -777,7 +777,7 @@ class pmob(mob):
             if self.global_manager.get('minimap_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
             #self.update_image_bundle()
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
             self.global_manager.get('sound_manager').play_sound('footsteps')
 
     def start_combat(self, combat_type, enemy):
@@ -798,7 +798,7 @@ class pmob(mob):
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
                 self.select()
                 self.move_to_front()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #should solve issue with incorrect unit displayed during combat causing issues with combat notifications
         self.global_manager.set('ongoing_action', True)
         self.global_manager.set('ongoing_action_type', 'combat')
         if combat_type == 'defending':
@@ -1388,12 +1388,12 @@ class pmob(mob):
                     input_dict['init_type'] = 'warehouses'
                     self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
                     
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #update tile display to show new building
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile display to show new building
             if self.building_type in ['steamboat', 'train']:
                 new_building.move_to_front()
                 new_building.select()
             else:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob display to show new upgrade possibilities
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #update mob display to show new upgrade possibilities
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')
 
@@ -1568,6 +1568,6 @@ class pmob(mob):
                 self.promote()
             self.set_movement_points(0)
             self.repaired_building.set_damaged(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #update mob info display to hide repair button
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #update mob info display to hide repair button
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')

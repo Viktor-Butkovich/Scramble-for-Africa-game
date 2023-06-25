@@ -863,7 +863,7 @@ class button(interface_elements.interface_element):
                                 if progressed:
                                     moved_units[unit_type] += 1
                                 current_pmob.remove_from_turn_queue()
-                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
+                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
 
                         types_moved = 0
                         text = ''
@@ -1196,7 +1196,7 @@ class button(interface_elements.interface_element):
                     for current_pmob in self.global_manager.get('pmob_list'):
                         if current_pmob.sentry_mode:
                             current_pmob.set_sentry_mode(False)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.global_manager.get('displayed_mob'))
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
                 else:
                     text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
 
@@ -1354,7 +1354,7 @@ class cycle_same_tile_button(button):
                 cycled_tile.cell.contained_mobs[0].select()
                 if cycled_tile.cell.contained_mobs[0].is_pmob:
                     cycled_tile.cell.contained_mobs[0].selection_sound()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), cycled_tile) #updates mob info display list to show changed passenger order
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
             else:
                 text_tools.print_to_screen('You are busy and can not cycle units.', self.global_manager)
 
@@ -1979,7 +1979,7 @@ class country_selection_image(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display_list'), self.current_country)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display'), self.current_country)
         else:
             text_tools.print_to_screen('You are busy and can not select another country.', self.global_manager)
 

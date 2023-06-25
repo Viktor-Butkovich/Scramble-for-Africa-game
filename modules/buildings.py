@@ -900,7 +900,7 @@ class slums(building):
         }
         super().__init__(from_save, input_dict, global_manager)
         if self.cell.tile == self.global_manager.get('displayed_tile'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile) #show self after creation
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile) #show self after creation
 
     def get_image_id_list(self):
         '''
@@ -960,7 +960,7 @@ class slums(building):
             self.available_workers = 0
         self.cell.tile.update_image_bundle()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
         if self.available_workers == 0:
             self.remove()
             

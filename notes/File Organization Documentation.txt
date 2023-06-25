@@ -183,7 +183,7 @@ SFA folder
             class actor_creation_manager_template
 
         actor_utility.py
-            imports random, os, pygame, scaling, utility
+            imports random, os, pygame, utility
 			def reset_action_prices
 			def double_action_price
 			def get_building_cost
@@ -197,7 +197,6 @@ SFA folder
 			def deselect_all
 			def get_random_ocean_coordinates
 			def calibrate_actor_info_display
-			def order_actor_info_display
 			def get_migration_destinations
 			def get_migration_sources
 			def get_num_available_workers
@@ -340,9 +339,10 @@ SFA folder
             def display_instructions_page
 
 		interface_elements.py
-			import pygame
+			import pygame, scaling
 			class interface_element
 				class interface_collection
+					class info_display
 
         labels.py
         	imports pygame, buttons, scaling, text_tools, utility, market_tools

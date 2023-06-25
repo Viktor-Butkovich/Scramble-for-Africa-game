@@ -125,10 +125,10 @@ class actor():
                 current_image.set_image(new_image)
         if self.actor_type == 'mob':
             if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
         elif self.actor_type == 'tile':
             if self.global_manager.get('displayed_tile') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def load_inventory(self, inventory_dict):
         '''

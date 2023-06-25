@@ -1,6 +1,7 @@
 #Contains functionality for interface elements and collections
 
 import pygame
+from . import scaling
 
 class interface_element():
     '''
@@ -18,6 +19,7 @@ class interface_element():
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear, optional for elements with parent collections
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'member_config' = {}: Dictionary of extra configuration values for how to add elements to collections
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -30,10 +32,18 @@ class interface_element():
             input_dict['parent_collection'] = 'none'
         self.parent_collection = input_dict['parent_collection']
         self.has_parent_collection = self.parent_collection != 'none'
+        self.x, self.y = input_dict['coordinates']
         if self.has_parent_collection:
-            self.parent_collection.add_member(self, input_dict['coordinates'][0], input_dict['coordinates'][1])
+            if not 'member_config' in input_dict:
+                input_dict['member_config'] = {}
+            if not 'x_offset' in input_dict['member_config']:
+                input_dict['member_config']['x_offset'] = input_dict['coordinates'][0]
+            if not 'y_offset' in input_dict['member_config']:
+                input_dict['member_config']['y_offset'] = input_dict['coordinates'][1]
+            self.parent_collection.add_member(self, input_dict['member_config'])
         else:
             self.set_origin(input_dict['coordinates'][0], input_dict['coordinates'][1])
+
         if 'modes' in input_dict:
             self.set_modes(input_dict['modes'])
         elif 'parent_collection' != 'none':
@@ -135,7 +145,7 @@ class interface_collection(interface_element):
         for member in self.members:
             member.calibrate(new_actor)
     
-    def add_member(self, new_member, x_offset, y_offset):
+    def add_member(self, new_member, member_config={}):
         '''
         Description:
             Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
@@ -146,10 +156,15 @@ class interface_collection(interface_element):
         Output:
             None
         '''
+        if not 'x_offset' in member_config:
+            member_config['x_offset'] = 0
+        if not 'y_offset' in member_config:
+            member_config['y_offset'] = 0
+
         new_member.parent_collection = self
         new_member.has_parent_collection = True
         self.members.append(new_member)
-        new_member.set_origin(self.x + x_offset, self.y + y_offset)
+        new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
     def set_origin(self, new_x, new_y):
         '''
@@ -177,3 +192,97 @@ class interface_collection(interface_element):
         super().set_modes(new_modes)
         for member in self.members:
             member.set_modes(new_modes)
+
+class info_display(interface_collection):
+    '''
+    Interface collection used to select objects, calibrating their elements to match - also used to find the currently displayed object of a certain type
+    '''
+    def __init__(self, input_dict, global_manager):    
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'actor_type': Type of actor shown by this info display - can be 'mob', 'actor', 'minister', 'country', 'prosecution', or 'defense'
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.actor_type = input_dict['actor_type']
+        super().__init__(input_dict, global_manager)
+        global_manager.set(self.actor_type + '_info_display', self)
+        global_manager.get('info_display_list').append(self)
+        self.separation = scaling.scale_height(5, self.global_manager)
+        self.order_overlap_list = []
+        self.order_exempt_list = []
+
+    def calibrate(self, new_actor):
+        '''
+        Description:
+            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
+        super().calibrate(new_actor)
+        self.global_manager.set('displayed_' + self.actor_type, new_actor)
+
+    def add_member(self, new_member, member_config={}):
+        '''
+        Description:
+            Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
+        Input:
+            interface_element new_member: New element to add as a member
+            int x_offset: Number of pixels to the right the new member's origin should be from the collection's origin
+            int x_offset: Number of pixels upward the new member's origin should be from the collection's origin
+        Output:
+            None
+        '''
+        if not 'order_overlap' in member_config:
+            member_config['order_overlap'] = False
+
+        if not 'order_exempt' in member_config:
+            member_config['order_exempt'] = False
+
+        if not 'order_x_offset' in member_config:
+            member_config['order_x_offset'] = 0
+        new_member.order_x_offset = member_config['order_x_offset']
+
+        if not 'order_y_offset' in member_config:
+            member_config['order_y_offset'] = 0
+        new_member.order_y_offset = member_config['order_y_offset']
+
+        super().add_member(new_member, member_config)
+
+        if member_config['order_overlap']:
+            self.order_overlap_list.append(new_member)
+
+        if member_config['order_exempt']:
+            self.order_exempt_list.append(new_member)
+
+    def order_members(self):
+        '''
+        Description:
+            Changes locations of collection members to put all visible members in order while skipping hidden ones
+        Input:
+            None
+        Output:
+            None
+        '''
+        current_y = self.y
+        for member in self.members:
+            if member.can_show() and not member in self.order_exempt_list:
+                if not member in self.order_overlap_list:
+                    current_y -= member.height
+
+                if member.y != current_y:
+                    member.set_origin(self.x + member.order_x_offset, current_y + member.order_y_offset)
+
+                if not member in self.order_overlap_list:
+                    current_y -= self.separation

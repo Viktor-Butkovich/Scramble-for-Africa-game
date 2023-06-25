@@ -4,7 +4,6 @@ import random
 import os
 import pygame
 
-from . import scaling
 from . import utility
 
 def reset_action_prices(global_manager):
@@ -331,53 +330,33 @@ def get_random_ocean_coordinates(global_manager):
     start_y = 0
     return(start_x, start_y)
 
-def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
+def calibrate_actor_info_display(global_manager, info_display, new_actor):
     '''
     Description:
         Updates all relevant objects to display a certain mob or tile
     Input:
         global_manager_template global_manager: Object that accesses shared variables
-        button/actor list info_display_list: All buttons and actors that are updated when the displayed mob or tile changes. Can be 'tile_info_display_list' if the displayed tile is changing or 'mob_info_display_list' if the displayed
-            mob is changing
+        interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
         string new_actor: The new mob or tile that is displayed
     Output:
         None
     '''
-    #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
-    if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
+    if info_display == global_manager.get('tile_info_display'):
         for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
             current_same_tile_icon.reset()
         global_manager.set('displayed_tile', new_actor)
         if new_actor != 'none':
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
-    elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
+
+    elif info_display == global_manager.get('mob_info_display'):
         global_manager.set('displayed_mob', new_actor)
         if new_actor != 'none' and new_actor.images[0].current_cell.tile == global_manager.get('displayed_tile'):
             for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
                 current_same_tile_icon.reset()
-    elif id(info_display_list) == id(global_manager.get('country_info_display_list')):
-        global_manager.set('displayed_country', new_actor)
-    for current_object in info_display_list:
-        current_object.calibrate(new_actor)
 
-def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
-    '''
-    Description:
-        Changes locations of actor display labels to put all visible labels in order, used by main_loop_tools in update_display
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-        actor_match_label list info_display_list: All actor match labels associated with either mobs or tiles to put in order
-        int default_y: y coordinate that the top label is moved to
-    Output:
-        None
-    '''
-    current_y = default_y
-    for current_label in info_display_list:
-        if current_label.can_show():
-            current_y -= 35
-            scaled_y = scaling.scale_height(current_y, global_manager)
-            if not current_label.y == scaled_y: #if y is not the same as last time, move it
-                current_label.set_y(scaled_y)
+    elif info_display == global_manager.get('country_info_display'):
+        global_manager.set('displayed_country', new_actor)
+    info_display.calibrate(new_actor)
 
 def get_migration_destinations(global_manager):
     '''

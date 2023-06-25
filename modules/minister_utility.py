@@ -33,8 +33,7 @@ def calibrate_minister_info_display(global_manager, new_minister):
         None
     '''
     global_manager.set('displayed_minister', new_minister)
-    for current_object in global_manager.get('minister_info_display_list'):
-        current_object.calibrate(new_minister)
+    global_manager.get('minister_info_display').calibrate(new_minister)
 
 def calibrate_trial_info_display(global_manager, info_display, new_minister):
     '''
@@ -42,9 +41,9 @@ def calibrate_trial_info_display(global_manager, info_display, new_minister):
         Updates all relevant objects to display the inputted minister for a certain side of a trial
     Input:
         global_manager_template global_manager: Object that accesses shared variables
-        button/actor list info_display_list: Interface collection that is updated when the displayed mob or tile changes. Can be 'prosecution_info_display' or 'defense_info_display' depending on the minister's side in
+        button/actor list info_display: Interface collection that is calibrated to the inputted minister
             the trial
-        string new_minister: The new minister that is displayed
+        minister/string new_minister: The new minister that is displayed, or 'none'
     Output:
         None
     '''

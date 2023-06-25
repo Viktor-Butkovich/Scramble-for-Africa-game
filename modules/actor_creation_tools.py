@@ -152,6 +152,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = interface_elements.interface_element(input_dict, global_manager)
         elif init_type == 'interface collection':
             new_element = interface_elements.interface_collection(input_dict, global_manager)
+        elif init_type == 'info display':
+            new_element = interface_elements.info_display(input_dict, global_manager)
         if init_type.endswith('button'):
             base = init_type.removesuffix('button')
             #buttons buttons

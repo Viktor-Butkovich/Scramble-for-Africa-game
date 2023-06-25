@@ -395,10 +395,10 @@ class free_image(image):
         self.y = self.global_manager.get('display_height') - new_y
         if hasattr(self, 'Rect') and self.Rect != 'none':
             self.Rect.x = self.x
-            self.Rect.y = self.global_manager.get('display_height') - (new_y - self.height)
+            self.Rect.y = self.global_manager.get('display_height') - (new_y + self.height)
         if self.has_parent_collection:
-            self.x_offset = self.x - self.parent_collection.x
-            self.y_offset = self.y - self.parent_collection.y
+            self.x_offset = new_x - self.parent_collection.x
+            self.y_offset = new_y - self.parent_collection.y
 
     def set_modes(self, new_modes):
         '''

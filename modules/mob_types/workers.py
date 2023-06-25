@@ -55,7 +55,7 @@ class worker(pmob):
         if not from_save:
             self.second_image_variant = random.randrange(0, len(self.image_variants))
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()
         self.update_image_bundle()
@@ -218,7 +218,7 @@ class worker(pmob):
         vehicle.remove_from_turn_queue()
         self.add_to_turn_queue()
         self.update_image_bundle()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
 
     def join_group(self):
         '''
@@ -365,7 +365,7 @@ class slave_worker(worker):
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_worker changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
         self.global_manager.get('money_label').check_for_updates()
         if self.global_manager.get('slave_traders_strength') <= 0:
             self.automatically_replace = False

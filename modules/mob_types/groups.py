@@ -117,7 +117,7 @@ class group(pmob):
             actor_utility.deselect_all(self.global_manager)
 
         if self.images[0].current_cell != 'none' and self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -299,7 +299,7 @@ class group(pmob):
             self.officer.veteran = True
         self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
