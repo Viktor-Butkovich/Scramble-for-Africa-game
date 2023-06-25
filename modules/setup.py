@@ -1677,7 +1677,7 @@ def minister_interface_setup(global_manager):
     minister_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     #minister background image
-    minister_free_image_background = actor_display_images.minister_background_image('misc/mob_background.png', scaling.scale_coordinates(0, minister_display_current_y, global_manager), scaling.scale_width(125, global_manager),
+    minister_free_image_background = actor_display_images.minister_background_image('misc/mob_background.png', scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(125, global_manager),
         scaling.scale_height(125, global_manager), ['ministers'], global_manager)
     minister_info_display.add_member(minister_free_image_background, {'order_overlap': True})
     
@@ -1697,9 +1697,9 @@ def minister_interface_setup(global_manager):
     minister_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     #minister image
-    minister_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, minister_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
+    minister_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['ministers'], 'minister_default', global_manager) #coordinates, width, height, modes, global_manager
-    minister_info_display.add_member(minister_free_image, {'order_overlap': True})
+    minister_info_display.add_member(minister_free_image, {'order_overlap': True, 'order_x_offset': 5, 'order_y_offset': 5})
 
     minister_display_current_y -= 35
     #minister info images setup
@@ -1732,7 +1732,7 @@ def country_interface_setup(global_manager):
     '''
 
     input_dict = {
-        'coordinates': (0, global_manager.get('mob_ordered_list_start_y')),
+        'coordinates': (0, global_manager.get('tile_ordered_list_start_y')),
         'width': 10,
         'height': 10,
         'modes': ['new_game_setup'],

@@ -515,8 +515,6 @@ class actor():
         '''
         image_id_list = []
         image_id_list.append(self.image_dict['default'])
-        #image_id_list.append(self.images[0].image)
-        #print(self.image[0].image)
         return(image_id_list)
 
     def update_image_bundle(self):

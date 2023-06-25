@@ -1202,9 +1202,9 @@ class button(interface_elements.interface_element):
 
             elif self.button_type == 'confirm remove minister':
                 removed_minister = self.global_manager.get('displayed_minister')
+                removed_minister.just_removed = True
                 removed_minister.appoint('none')
                 public_opinion_penalty = removed_minister.status_number
-                removed_minister.just_removed = True
                 self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
 
             elif self.button_type == 'generate crash':
@@ -1292,9 +1292,24 @@ class end_turn_button(button):
         input_dict['button_type'] = 'start end turn'
         super().__init__(input_dict, global_manager)
         self.warning_image = images.warning_image(self, global_manager, 'button')
-        self.warning_image.x += 100
         self.warning_image.set_image('misc/enemy_turn_icon.png')
         self.warning_image.to_front = True
+        if self.parent_collection != 'none':
+            self.parent_collection.add_member(self.warning_image, {'order_exempt': True, 'order_x_offset': 100})
+
+    def set_origin(self, new_x, new_y):
+        '''
+        Description:
+            Sets this interface element's location and those of its members to the inputted coordinates
+        Input:
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
+        Output:
+            None
+        '''
+        super().set_origin(new_x, new_y)
+        if hasattr(self, 'warning_image'):
+            self.warning_image.set_origin(new_x + self.warning_image.order_x_offset, new_y + self.warning_image.order_y_offset)
 
     def can_show_warning(self): #show warning if enemy movements or combat are still occurring
         '''

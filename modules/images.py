@@ -91,6 +91,34 @@ class image():
         if self.can_show():
             self.complete_draw()
 
+    def update_image_bundle(self):
+        '''
+        Description:
+            Updates this actor's images with its current image id list
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_image(self.get_image_id_list())
+
+    def get_image_id_list(self):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        if type(self.image_id) == str:
+            image_id_list = [self.image_id]
+        else:
+            image_id_list = self.image_id
+        return(image_id_list)
+
+
 class image_bundle(image):
     '''
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
@@ -756,7 +784,7 @@ class minister_type_image(tooltip_free_image):
         '''
         self.current_minister = 'none'
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
-        self.warning_image = warning_image(self, global_manager) #displays warning when no minister present
+        #self.warning_image = warning_image(self, global_manager) #displays warning when no minister present
         self.attached_label = attached_label
         self.minister_type = minister_type #position, like General
         if not self.minister_type == 'none':
@@ -805,6 +833,7 @@ class minister_type_image(tooltip_free_image):
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             self.set_image('ministers/icons/' + keyword + '.png')
+        self.update_image_bundle()
 
     def set_y(self, attached_label):
         '''
@@ -817,20 +846,22 @@ class minister_type_image(tooltip_free_image):
         '''
         super().set_y(attached_label)
         self.warning_image.set_y(attached_label)
-
-    def can_show_warning(self):
+            
+    def get_image_id_list(self):
         '''
         Description:
-            Returns whether this image should display its warning image over itself. It should be shown when this image is visible and there is no minister in the office it is attached to
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
         Input:
             None
         Output:
-            Returns whether this image should display its warning image
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        if self.can_show() and self.current_minister == 'none':
-            return(True)
-        return(False)
-            
+        image_id_list = super().get_image_id_list()
+        if self.current_minister == 'none':
+            image_id_list.append('misc/warning_icon.png')
+        return(image_id_list)
+
     def update_tooltip(self):
         '''
         Description:
