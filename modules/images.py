@@ -784,7 +784,6 @@ class minister_type_image(tooltip_free_image):
         '''
         self.current_minister = 'none'
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
-        #self.warning_image = warning_image(self, global_manager) #displays warning when no minister present
         self.attached_label = attached_label
         self.minister_type = minister_type #position, like General
         if not self.minister_type == 'none':
@@ -801,6 +800,8 @@ class minister_type_image(tooltip_free_image):
         Output:
             None
         '''
+        if new_minister != 'none' and new_minister.actor_type != 'minister': #if calibrating to a mob, calibrate to its minister instead
+            new_minister = new_minister.controlling_minister
         self.current_minister = new_minister
         if not new_minister == 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
@@ -834,18 +835,6 @@ class minister_type_image(tooltip_free_image):
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             self.set_image('ministers/icons/' + keyword + '.png')
         self.update_image_bundle()
-
-    def set_y(self, attached_label):
-        '''
-        Description:
-            Sets this image's y position and that of its warning image to be at the same height as the inputted label
-        Input:
-            actor_display_label attached_label: Label to match this image's y position and that of its warning image with
-        Output:
-            None
-        '''
-        super().set_y(attached_label)
-        self.warning_image.set_y(attached_label)
             
     def get_image_id_list(self):
         '''

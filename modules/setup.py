@@ -1417,7 +1417,8 @@ def mob_interface_setup(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
         'init_type': 'actor display label',
-        'parent_collection': mob_info_display
+        'parent_collection': mob_info_display,
+        'member_config': {'order_overlap': True}
     }
     #mob background image's tooltip
     mob_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1425,7 +1426,7 @@ def mob_interface_setup(global_manager):
     #mob image
     mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    global_manager.get('mob_info_display').add_member(mob_free_image)
+    global_manager.get('mob_info_display').add_member(mob_free_image, {'order_overlap': True})
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(130, actor_display_current_y, global_manager),
@@ -1453,13 +1454,14 @@ def mob_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
+            'coordinates': scaling.scale_coordinates(0, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'image_id': 'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
-            'parent_collection': mob_info_display
+            'parent_collection': mob_info_display,
+            'member_config': {'order_x_offset': x_displacement}
         }
         if not current_actor_label_type == 'current passenger':
             input_dict['init_type'] = 'actor display label'
@@ -1485,13 +1487,24 @@ def tile_interface_setup(global_manager):
     #tile background image
     actor_display_current_y = global_manager.get('default_display_height') - (580 + 35 + 35)
     global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
+
+    input_dict = {
+        'coordinates': (0, global_manager.get('tile_ordered_list_start_y')), #actor_display_current_y
+        'width': 10,
+        'height': 10,
+        'modes': ['strategic', 'europe'],
+        'init_type': 'info display',
+        'actor_type': 'tile'
+    }
+    tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
     input_dict = {
         'coordinates': scaling.scale_coordinates(162, actor_display_current_y + 95, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'modes': ['strategic', 'europe'],
         'image_id': 'buttons/cycle_passengers_down_button.png',
-        'init_type': 'cycle same tile button'
+        'init_type': 'cycle same tile button', #add to collection but exempt from order
     }
     cycle_same_tile_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager) #not in tile info display list should add to collection but have exception to not sort
     global_manager.set('same_tile_icon_list', [])
@@ -1509,16 +1522,6 @@ def tile_interface_setup(global_manager):
     same_tile_icon = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': (0, global_manager.get('tile_ordered_list_start_y')), #actor_display_current_y
-        'width': 10,
-        'height': 10,
-        'modes': ['strategic', 'europe'],
-        'init_type': 'info display',
-        'actor_type': 'tile'
-    }
-    tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    input_dict = {
         'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'minimum_width': scaling.scale_width(125, global_manager),
         'height': scaling.scale_height(125, global_manager),
@@ -1526,14 +1529,15 @@ def tile_interface_setup(global_manager):
         'actor_label_type': 'tooltip',
         'actor_type': 'tile',
         'init_type': 'actor display label',
-        'parent_collection': tile_info_display
+        'parent_collection': tile_info_display,
+        'member_config': {'order_overlap': True}
     }
     #tile background image's tooltip
     tile_free_image_background_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     tile_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(5, actor_display_current_y + 5, global_manager), scaling.scale_width(115, global_manager),
         scaling.scale_height(115, global_manager), ['strategic', 'europe'], 'default', global_manager)
-    tile_info_display.add_member(tile_image)
+    tile_info_display.add_member(tile_image, {'order_overlap': True})
 
     #tile info labels setup
     tile_info_display_labels = ['coordinates', 'terrain', 'resource', 'slums',
@@ -1622,7 +1626,8 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
-        'parent_collection': global_manager.get('mob_info_display')
+        'parent_collection': global_manager.get('mob_info_display'),
+        'member_config': {'order_exempt': True}
     }
     mob_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     
@@ -1641,7 +1646,8 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
         'init_type': 'actor display label',
-        'parent_collection': global_manager.get('tile_info_display')
+        'parent_collection': global_manager.get('tile_info_display'),
+        'member_config': {'order_exempt': True}
     }
     tile_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 

@@ -102,6 +102,54 @@ class interface_element():
             None
         '''
         return
+    
+    def insert_collection_above(self):
+        '''
+        Description:
+            Replaces this element's place in its parent collection with a new interface collection, allowing elements to dynamically form collections after initialization 
+                without interfering with above hierarchies
+        'Input':
+            None, could potentially modify to allow choosing the init type of collection to insert above
+        'Output':
+            None
+        '''
+        input_dict = {
+            'coordinates': (self.x, self.y),
+            'width': self.width,
+            'height': self.height,
+            'modes': self.modes,
+            'parent_collection': self.parent_collection,
+            'init_type': 'interface collection',
+            'member_config': {'index': self.parent_collection.members.index(self)}
+        }
+        if self.parent_collection != 'none':
+            if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:
+                input_dict['member_config']['order_overlap'] = True
+                input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
+
+            if hasattr(self.parent_collection, 'order_exempt_list') and self in self.parent_collection.order_exempt_list:
+                input_dict['member_config']['order_exempt'] = True
+                input_dict['member_config']['order_exempt_index'] = self.parent_collections.order_exempt_list.index(self)
+
+            if hasattr(self, 'x_offset'):
+                input_dict['member_config']['x_offset'] = self.x_offset
+
+            if hasattr(self, 'y_offset'):
+                input_dict['member_config']['y_offset'] = self.y_offset
+
+            if hasattr(self, 'order_x_offset'):
+                input_dict['member_config']['order_x_offset'] = self.order_x_offset
+
+            if hasattr(self, 'order_y_offset'):
+                input_dict['member_config']['order_y_offset'] = self.order_y_offset
+            
+        new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+
+        self.parent_collection.remove_member(self)
+        
+        new_parent_collection.add_member(self)
+
+        return(new_parent_collection)
 
 class interface_collection(interface_element):
     '''
@@ -163,8 +211,26 @@ class interface_collection(interface_element):
 
         new_member.parent_collection = self
         new_member.has_parent_collection = True
-        self.members.append(new_member)
+        if not 'index' in member_config:
+            self.members.append(new_member)
+        else:
+            self.members.insert(member_config['index'], new_member)
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
+
+    def remove_member(self, removed_member):
+        '''
+        Description:
+            Removes a member from this collection
+        Input:
+            interface_element removed_member: Member to remove from this collection
+        Output:
+            None
+        '''
+        if hasattr(self, 'x_offset'):
+            removed_member.x_offset = None
+        if hasattr(self, 'y_offset'):
+            removed_member.y_offset = None
+        self.members.remove(removed_member)
 
     def set_origin(self, new_x, new_y):
         '''
@@ -260,11 +326,36 @@ class info_display(interface_collection):
 
         super().add_member(new_member, member_config)
 
-        if member_config['order_overlap']:
-            self.order_overlap_list.append(new_member)
+        if member_config['order_overlap']: #maybe have a list of lists to iterate through these operations
+            if not 'order_overlap_index' in member_config:
+                self.order_overlap_list.append(new_member)
+            else:
+                self.order_overlap_list.insert(member_config['order_overlap_index'], new_member)
 
         if member_config['order_exempt']:
-            self.order_exempt_list.append(new_member)
+            if not 'order_exempt_index' in member_config:
+                self.order_exempt_list.append(new_member)
+            else:
+                self.order_exempt_list.insert(member_config['order_exempt_index'], new_member)
+
+    def remove_member(self, removed_member):
+        '''
+        Description:
+            Removes a member from this collection
+        Input:
+            interface_element removed_member: Member to remove from this collection
+        Output:
+            None
+        '''
+        if hasattr(removed_member, 'order_x_offset'): #see if there is a way to modify these attributes with a variable instead of manually
+            removed_member.order_x_offset = None
+        if hasattr(removed_member, 'order_y_offset'):
+            removed_member.order_y_offset = None
+        if removed_member in self.order_overlap_list:
+            self.order_overlap_list.remove(removed_member)
+        if removed_member in self.order_exempt_list:
+            self.order_exempt_list.remove(removed_member)
+        super().remove_member(removed_member)
 
     def order_members(self):
         '''

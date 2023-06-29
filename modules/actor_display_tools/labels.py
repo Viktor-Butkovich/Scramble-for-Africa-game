@@ -420,7 +420,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-            self.attached_images.append(minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager))
+            attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
+            self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
             self.image_y_displacement = 5
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
@@ -801,7 +802,6 @@ class actor_display_label(label):
                 if self.actor.controllable:
                     if not self.actor.controlling_minister == 'none':
                         self.set_label(self.message_start + self.actor.controlling_minister.name)
-                    self.attached_images[0].calibrate(self.actor.controlling_minister)
                     
             elif self.actor_label_type == 'evidence':
                 if new_actor.fabricated_evidence == 0:
@@ -890,9 +890,11 @@ class actor_display_label(label):
         '''
         super().set_origin(new_x, new_y)
         for current_button in self.attached_buttons:
-            current_button.set_y(self)
+            #current_button.set_y(self)
+            current_button.set_origin(current_button.x, new_y)
         for current_image in self.attached_images:
-            current_image.set_y(self)
+            #current_image.set_y(self)
+            current_image.set_origin(current_image.x, new_y)
 
     def can_show(self):
         '''
