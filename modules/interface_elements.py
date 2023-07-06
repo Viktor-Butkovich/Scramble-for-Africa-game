@@ -14,7 +14,7 @@ class interface_element():
             Initializes this object
         Input:
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'coordinates' = (0, 0): int tuple value - Two values representing x and y coordinates for the pixel location of this element
                 'width': int value - pixel width of this element
                 'height': int value - pixel height of this element
                 'modes': string list value - Game modes during which this element can appear, optional for elements with parent collections
@@ -24,6 +24,7 @@ class interface_element():
         Output:
             None
         '''
+        old_input_dict = input_dict
         self.global_manager = global_manager
         self.width = input_dict['width']
         self.height = input_dict['height']
@@ -32,6 +33,8 @@ class interface_element():
             input_dict['parent_collection'] = 'none'
         self.parent_collection = input_dict['parent_collection']
         self.has_parent_collection = self.parent_collection != 'none'
+        if not 'coordinates' in input_dict:
+            input_dict['coordinates'] = (0, 0)
         self.x, self.y = input_dict['coordinates']
         if self.has_parent_collection:
             if not 'member_config' in input_dict:
@@ -129,7 +132,7 @@ class interface_element():
 
             if hasattr(self.parent_collection, 'order_exempt_list') and self in self.parent_collection.order_exempt_list:
                 input_dict['member_config']['order_exempt'] = True
-                input_dict['member_config']['order_exempt_index'] = self.parent_collections.order_exempt_list.index(self)
+                input_dict['member_config']['order_exempt_index'] = self.parent_collection.order_exempt_list.index(self)
 
             if hasattr(self, 'x_offset'):
                 input_dict['member_config']['x_offset'] = self.x_offset
@@ -186,7 +189,6 @@ class interface_collection(interface_element):
         super().__init__(input_dict, global_manager)
         if self.is_info_display:
             global_manager.set(self.actor_type + '_info_display', self)
-            global_manager.get('info_display_list').append(self)
 
     def calibrate(self, new_actor):
         '''
@@ -271,10 +273,13 @@ class interface_collection(interface_element):
 
 class ordered_collection(interface_collection): #work on ordered collection documentation, remove info display documentation, add limited length ordered collections
     def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
+        if not 'separation' in input_dict:
+            input_dict['separation'] = scaling.scale_height(5, global_manager)
         super().__init__(input_dict, global_manager)
-        self.separation = scaling.scale_height(5, self.global_manager)
+        self.separation = input_dict['separation']
         self.order_overlap_list = []
         self.order_exempt_list = []
+        self.global_manager.get('ordered_collection_list').append(self)
 
     def add_member(self, new_member, member_config={}):
         '''
@@ -315,7 +320,6 @@ class ordered_collection(interface_collection): #work on ordered collection docu
             else:
                 self.order_exempt_list.insert(member_config['order_exempt_index'], new_member)
 
-
     def remove_member(self, removed_member):
         '''
         Description:
@@ -347,14 +351,15 @@ class ordered_collection(interface_collection): #work on ordered collection docu
         current_y = self.y
         for member in self.members:
             if member.can_show() and not member in self.order_exempt_list:
-                if not member in self.order_overlap_list:
-                    current_y -= member.height
+                #if not member in self.order_overlap_list:
+                current_y -= member.height
 
-                if member.y != current_y:
+                new_x = self.x + member.order_x_offset
+                new_y = current_y + member.order_y_offset
+                if (member.x, member.y) != (new_x, new_y):
                     member.set_origin(self.x + member.order_x_offset, current_y + member.order_y_offset)
 
                 if not member in self.order_overlap_list:
                     current_y -= self.separation
-
-
-
+                else:
+                    current_y += member.height

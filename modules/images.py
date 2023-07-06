@@ -409,6 +409,9 @@ class free_image(image):
         self.to_front = to_front
         self.global_manager.get('free_image_list').append(self)
 
+    def calibrate(self, new_actor):
+        return
+
     def set_origin(self, new_x, new_y):
         '''
         Description:

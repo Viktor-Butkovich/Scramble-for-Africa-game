@@ -45,9 +45,9 @@ class actor_display_label(label):
         m_increment = scaling.scale_width(11, self.global_manager)
         l_increment = scaling.scale_width(30, self.global_manager)
         
-        if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
-            #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
-            self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
+        #if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
+        #    #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
+        #    self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         s_size = self.height + s_increment
         m_size = self.height + m_increment
         l_size = self.height + l_increment
@@ -853,32 +853,7 @@ class actor_display_label(label):
             None
         '''
         super().set_label(new_message)
-        x_displacement = 0
-        for current_button_index in range(len(self.attached_buttons)):
-            current_button = self.attached_buttons[current_button_index]
-            if current_button.can_show():
-                current_button.x = self.x + self.width + 5 + x_displacement
-                current_button.Rect.x = current_button.x
-                current_button.outline.x = current_button.x - current_button.outline_width
-                x_displacement += (current_button.width + 5)
-
-    #def set_y(self, new_y):
-    #    '''
-    #    Description:
-    #        Sets this label's y position and that of its attached buttons
-    #    Input:
-    #        int new_y: New y coordinate to set this label and its buttons to
-    #    Output:
-    #        None
-    #    '''
-    #    self.y = new_y
-    #    self.image.y = self.y
-    #    self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
-    #    self.image.Rect = self.Rect    
-    #    for current_button in self.attached_buttons:
-    #        current_button.set_y(self)
-    #    for current_image in self.attached_images:
-    #        current_image.set_y(self)
+        self.update_label_button_locations()
 
     def set_origin(self, new_x, new_y):
         '''
@@ -891,12 +866,17 @@ class actor_display_label(label):
             None
         '''
         super().set_origin(new_x, new_y)
-        for current_button in self.attached_buttons:
-            #current_button.set_y(self)
-            current_button.set_origin(current_button.x, new_y)
+        self.update_label_button_locations()
         for current_image in self.attached_images:
-            #current_image.set_y(self)
             current_image.set_origin(current_image.x, new_y)
+
+    def update_label_button_locations(self):
+        x_displacement = 0
+        for current_button in self.attached_buttons:
+            if current_button.can_show():
+                current_button.set_origin(self.x + self.width + 5 + x_displacement, self.y - ((current_button.height - self.height) / 2))
+                x_displacement += (current_button.width + 5)
+
 
     def can_show(self):
         '''
@@ -1174,19 +1154,22 @@ class commodity_display_label(actor_display_label):
         self.commodity_index = input_dict['commodity_index']
         self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
         input_dict = {
-            'coordinates': (self.x, self.y),
+            'coordinates': (self.x, self.y + 200),
             'width': self.height,
             'height': self.height,
             'modes': self.modes,
             'attached_label': self,
             'init_type': 'label button'
         }
+
+        self.insert_collection_above()
+        self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
+        input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
             input_dict['button_type'] = 'drop commodity'
             input_dict['image_id'] = 'buttons/commodity_drop_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
+            
             input_dict['button_type'] = 'drop all commodity'
             input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
@@ -1196,17 +1179,14 @@ class commodity_display_label(actor_display_label):
             input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
             input_dict['button_type'] = 'pick up all commodity'
             input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 2), input_dict['coordinates'][1])
             input_dict['button_type'] = 'sell commodity'
             input_dict['image_id'] = 'buttons/commodity_sell_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 3), input_dict['coordinates'][1])
             input_dict['button_type'] = 'sell all commodity'
             input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
