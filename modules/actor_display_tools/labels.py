@@ -91,11 +91,13 @@ class actor_display_label(label):
             input_dict['image_id'] = 'buttons/crew_ship_button.png'
             input_dict['keybind_id'] = 'buttons/crew_ship_button.png'
             input_dict['keybind_id'] = pygame.K_m
+            input_dict['vehicle_type'] = 'ship'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'worker crew vehicle button'
             input_dict['image_id'] = 'buttons/crew_train_button.png'
             input_dict['keybind_id'] = pygame.K_m
+            input_dict['vehicle_type'] = 'train'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'work crew to building button'

@@ -1245,7 +1245,8 @@ def trial_screen_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['trial'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'defense'
     }
     defense_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1297,7 +1298,8 @@ def trial_screen_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['trial'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'prosecution'
     }
     prosecution_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1404,7 +1406,8 @@ def mob_interface_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['strategic', 'europe'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'mob'
     }
     mob_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1493,7 +1496,8 @@ def tile_interface_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['strategic', 'europe'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'tile'
     }
     tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1677,7 +1681,8 @@ def minister_interface_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['ministers'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'minister'
     }
     minister_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1742,7 +1747,8 @@ def country_interface_setup(global_manager):
         'width': 10,
         'height': 10,
         'modes': ['new_game_setup'],
-        'init_type': 'info display',
+        'init_type': 'ordered collection',
+        'is_info_display': True,
         'actor_type': 'country'
     }
     country_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)

@@ -178,7 +178,15 @@ class interface_collection(interface_element):
             None
         '''
         self.members = []
+        if 'is_info_display' in input_dict and input_dict['is_info_display']:
+            self.is_info_display = True
+            self.actor_type = input_dict['actor_type']
+        else:
+            self.is_info_display = False
         super().__init__(input_dict, global_manager)
+        if self.is_info_display:
+            global_manager.set(self.actor_type + '_info_display', self)
+            global_manager.get('info_display_list').append(self)
 
     def calibrate(self, new_actor):
         '''
@@ -192,6 +200,8 @@ class interface_collection(interface_element):
         super().calibrate(new_actor)
         for member in self.members:
             member.calibrate(new_actor)
+        if self.is_info_display:
+            self.global_manager.set('displayed_' + self.actor_type, new_actor)
     
     def add_member(self, new_member, member_config={}):
         '''
@@ -259,45 +269,12 @@ class interface_collection(interface_element):
         for member in self.members:
             member.set_modes(new_modes)
 
-class info_display(interface_collection):
-    '''
-    Interface collection used to select objects, calibrating their elements to match - also used to find the currently displayed object of a certain type
-    '''
-    def __init__(self, input_dict, global_manager):    
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'actor_type': Type of actor shown by this info display - can be 'mob', 'actor', 'minister', 'country', 'prosecution', or 'defense'
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.actor_type = input_dict['actor_type']
+class ordered_collection(interface_collection): #work on ordered collection documentation, remove info display documentation, add limited length ordered collections
+    def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
         super().__init__(input_dict, global_manager)
-        global_manager.set(self.actor_type + '_info_display', self)
-        global_manager.get('info_display_list').append(self)
         self.separation = scaling.scale_height(5, self.global_manager)
         self.order_overlap_list = []
         self.order_exempt_list = []
-
-    def calibrate(self, new_actor):
-        '''
-        Description:
-            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
-        Input:
-            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
-        Output:
-            None
-        '''
-        super().calibrate(new_actor)
-        self.global_manager.set('displayed_' + self.actor_type, new_actor)
 
     def add_member(self, new_member, member_config={}):
         '''
@@ -338,6 +315,7 @@ class info_display(interface_collection):
             else:
                 self.order_exempt_list.insert(member_config['order_exempt_index'], new_member)
 
+
     def remove_member(self, removed_member):
         '''
         Description:
@@ -377,3 +355,6 @@ class info_display(interface_collection):
 
                 if not member in self.order_overlap_list:
                     current_y -= self.separation
+
+
+
