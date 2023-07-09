@@ -1645,7 +1645,9 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('mob_info_display'),
-        'member_config': {'order_exempt': True}
+        'member_config': {'order_exempt': True},
+        'allow_minimize': True,
+        'description': 'unit inventory window'
     }
     mob_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1656,7 +1658,8 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
-        'parent_collection': mob_inventory_collection
+        'parent_collection': mob_inventory_collection,
+        'member_config': {'ignore_minimized': True}
     }
     mob_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     
@@ -1667,12 +1670,14 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(inventory_collection_relative_coordinates[0], inventory_collection_relative_coordinates[1] + 50, global_manager), #remember member element coordinates are relative to parent
+        'coordinates': scaling.scale_coordinates(inventory_collection_relative_coordinates[0], inventory_collection_relative_coordinates[1] + 30, global_manager), #remember member element coordinates are relative to parent
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('tile_info_display'),
-        'member_config': {'order_exempt': True}
+        'member_config': {'order_exempt': True},
+        'allow_minimize': True,
+        'description': 'tile inventory window'
     }
     tile_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1684,6 +1689,7 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         'actor_type': 'tile',
         'init_type': 'actor display label',
         'parent_collection': tile_inventory_collection,
+        'member_config': {'ignore_minimized': True}
     }
     tile_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 

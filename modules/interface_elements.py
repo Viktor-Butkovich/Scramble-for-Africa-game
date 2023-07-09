@@ -61,7 +61,10 @@ class interface_element():
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        if (not self.has_parent_collection) or self.parent_collection.can_show():
+        if not self.has_parent_collection:
+            if self.global_manager.get('current_game_mode') in self.modes:
+                return(True)
+        elif self.parent_collection.can_show(self.ignore_minimized):
             if self.global_manager.get('current_game_mode') in self.modes:
                 return(True)
         return(False)
@@ -181,6 +184,7 @@ class interface_collection(interface_element):
             None
         '''
         self.members = []
+        self.minimized = False
         if 'is_info_display' in input_dict and input_dict['is_info_display']:
             self.is_info_display = True
             self.actor_type = input_dict['actor_type']
@@ -189,6 +193,18 @@ class interface_collection(interface_element):
         super().__init__(input_dict, global_manager)
         if self.is_info_display:
             global_manager.set(self.actor_type + '_info_display', self)
+        self.description = input_dict.get('description', 'window')
+        if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
+            input_dict = {
+                'coordinates': scaling.scale_coordinates(0, 10, global_manager),
+                'width': scaling.scale_width(10, global_manager),
+                'height': scaling.scale_height(10, global_manager),
+                'parent_collection': self,
+                'init_type': 'toggle interface collection button',
+                'image_id': 'buttons/minimize_button.png',
+                'member_config': {'order_exempt': True, 'ignore_minimized': True}
+            }
+            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     def calibrate(self, new_actor):
         '''
@@ -220,6 +236,8 @@ class interface_collection(interface_element):
             member_config['x_offset'] = 0
         if not 'y_offset' in member_config:
             member_config['y_offset'] = 0
+        if not 'ignore_minimized' in member_config:
+            member_config['ignore_minimized'] = False
 
         new_member.parent_collection = self
         new_member.has_parent_collection = True
@@ -227,6 +245,7 @@ class interface_collection(interface_element):
             self.members.append(new_member)
         else:
             self.members.insert(member_config['index'], new_member)
+        new_member.ignore_minimized = member_config['ignore_minimized']
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
     def remove_member(self, removed_member):
@@ -238,10 +257,12 @@ class interface_collection(interface_element):
         Output:
             None
         '''
-        if hasattr(self, 'x_offset'):
+        if hasattr(removed_member, 'x_offset'):
             removed_member.x_offset = None
-        if hasattr(self, 'y_offset'):
+        if hasattr(removed_member, 'y_offset'):
             removed_member.y_offset = None
+        if hasattr(removed_member, 'ignore_minimized'):
+            removed_member.ignore_minimized = None
         self.members.remove(removed_member)
 
     def set_origin(self, new_x, new_y):
@@ -270,6 +291,23 @@ class interface_collection(interface_element):
         super().set_modes(new_modes)
         for member in self.members:
             member.set_modes(new_modes)
+
+    def can_show(self, ignore_minimized = False):
+        '''
+        Description:
+            Returns whether this collection can be shown. A collection can be shown if it is not minimized and could otherwise be shown
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear under current conditions, otherwise returns False
+        '''
+        result = super().can_show()
+        if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
+            return(False)
+        elif ignore_minimized:
+            return(result)
+        else:
+            return(result and not self.minimized)
 
 class ordered_collection(interface_collection): #work on ordered collection documentation, remove info display documentation, add limited length ordered collections
     def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
@@ -308,13 +346,13 @@ class ordered_collection(interface_collection): #work on ordered collection docu
 
         super().add_member(new_member, member_config)
 
-        if member_config['order_overlap']: #maybe have a list of lists to iterate through these operations
+        if member_config['order_overlap'] and hasattr(self, 'order_overlap_list'): #maybe have a list of lists to iterate through these operations
             if not 'order_overlap_index' in member_config:
                 self.order_overlap_list.append(new_member)
             else:
                 self.order_overlap_list.insert(member_config['order_overlap_index'], new_member)
 
-        if member_config['order_exempt']:
+        if member_config['order_exempt'] and hasattr(self, 'order_exempt_list'):
             if not 'order_exempt_index' in member_config:
                 self.order_exempt_list.append(new_member)
             else:

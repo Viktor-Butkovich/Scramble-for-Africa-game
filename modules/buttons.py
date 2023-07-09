@@ -598,6 +598,13 @@ class button(interface_elements.interface_element):
         
         elif self.button_type == 'generate crash':
             self.set_tooltip(['Generates a crash to reset the crash log'])
+
+        elif self.button_type == 'toggle interface collection':
+            if self.parent_collection.minimized:
+                verb = 'Opens'
+            else:
+                verb = 'Minimizes'
+            self.set_tooltip([verb + ' the ' + self.parent_collection.description])
             
         else:
             self.set_tooltip(['placeholder'])
@@ -1209,6 +1216,9 @@ class button(interface_elements.interface_element):
 
             elif self.button_type == 'generate crash':
                 print(1/0)
+
+            elif self.button_type == 'toggle interface collection':
+                self.parent_collection.minimized = utility.toggle(self.parent_collection.minimized)
                 
     def on_rmb_release(self):
         '''
