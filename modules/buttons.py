@@ -599,13 +599,23 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'generate crash':
             self.set_tooltip(['Generates a crash to reset the crash log'])
 
-        elif self.button_type == 'toggle interface collection':
+        elif self.button_type == 'minimize interface collection':
             if self.parent_collection.minimized:
                 verb = 'Opens'
             else:
                 verb = 'Minimizes'
             self.set_tooltip([verb + ' the ' + self.parent_collection.description])
-            
+
+        elif self.button_type == 'move interface collection':
+            if self.parent_collection.move_with_mouse_config['moving']:
+                verb = 'Stops moving'
+            else:
+                verb = 'Moves'
+            self.set_tooltip([verb + ' the ' + self.parent_collection.description])
+
+        elif self.button_type == 'reset interface collection':
+            self.set_tooltip(['Resets the ' + self.parent_collection.description + ' to its original location'])
+
         else:
             self.set_tooltip(['placeholder'])
             
@@ -1217,8 +1227,29 @@ class button(interface_elements.interface_element):
             elif self.button_type == 'generate crash':
                 print(1/0)
 
-            elif self.button_type == 'toggle interface collection':
+            elif self.button_type == 'minimize interface collection':
                 self.parent_collection.minimized = utility.toggle(self.parent_collection.minimized)
+                if not self.parent_collection.minimized:
+                    #If any movement within the collection occurred while minimized, makes sure all newly shown elements are at their correct locations
+                    self.parent_collection.set_origin(self.parent_collection.x, self.parent_collection.y)
+
+            elif self.button_type == 'move interface collection':
+                if self.parent_collection.move_with_mouse_config['moving']:
+                    self.parent_collection.move_with_mouse_config = {'moving': False}
+                else:
+                    x, y = pygame.mouse.get_pos()
+                    y = self.global_manager.get('display_height') - y
+                    self.parent_collection.move_with_mouse_config = {
+                        'moving': True, 
+                        'mouse_x_offset': self.parent_collection.x - x, 
+                        'mouse_y_offset': self.parent_collection.y - y
+                    }
+
+            elif self.button_type == 'reset interface collection':
+                self.parent_collection.set_origin(self.parent_collection.original_coordinates[0], self.parent_collection.original_coordinates[1])
+                for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
+                    if hasattr(member, 'original_coordinates'):
+                        member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
                 
     def on_rmb_release(self):
         '''
@@ -1263,6 +1294,12 @@ class button(interface_elements.interface_element):
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
+        if self.button_type == 'move interface collection' and self.parent_collection.move_with_mouse_config['moving']:
+            x, y = pygame.mouse.get_pos()
+            y = self.global_manager.get('display_height') - y
+            destination_x, destination_y = (x + self.parent_collection.move_with_mouse_config['mouse_x_offset'], y + self.parent_collection.move_with_mouse_config['mouse_y_offset'])
+            self.parent_collection.set_origin(destination_x, destination_y)
+
         if super().can_show():
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
@@ -1272,6 +1309,8 @@ class button(interface_elements.interface_element):
                     return(True)
                 else:
                     return(False)
+
+            
             return(True)
         return(False)
 

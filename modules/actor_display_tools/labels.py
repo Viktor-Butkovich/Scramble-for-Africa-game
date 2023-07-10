@@ -449,7 +449,7 @@ class actor_display_label(label):
                 self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             if 'trial' in self.modes:
                 input_dict['init_type'] = 'fabricate evidence button'
-                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                input_dict['width'], input_dict['height'] = (m_size, m_size)
                 self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
                 
                 input_dict['init_type'] = 'bribe judge button'
@@ -555,7 +555,9 @@ class actor_display_label(label):
                     tooltip_text.append('This unit can hold a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')
             elif self.actor_label_type == 'tile inventory capacity':
                 if not self.actor == 'none':
-                    if self.actor.can_hold_infinite_commodities:
+                    if not self.actor.cell.visible:
+                        tooltip_text.append('This tile has not been discovered')
+                    elif self.actor.can_hold_infinite_commodities:
                         tooltip_text.append('This tile can hold infinite commodities.')
                     else:
                         tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
@@ -794,8 +796,11 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').population))
                     elif self.actor_label_type == 'native available workers':
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').available_workers))
+
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
-                if self.actor.can_hold_infinite_commodities:
+                if self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
+                    self.set_label(self.message_start + 'n/a')
+                elif self.actor.can_hold_infinite_commodities:
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
@@ -891,8 +896,6 @@ class actor_display_label(label):
         if result ==  False:
             return(False)
         elif self.actor == 'none':
-            return(False)
-        elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
         elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)

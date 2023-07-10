@@ -191,20 +191,49 @@ class interface_collection(interface_element):
         else:
             self.is_info_display = False
         super().__init__(input_dict, global_manager)
+        self.original_coordinates = (self.x, self.y)
         if self.is_info_display:
             global_manager.set(self.actor_type + '_info_display', self)
         self.description = input_dict.get('description', 'window')
+        self.move_with_mouse_config = {'moving': False}
+        customize_button_x_offset = 0
+        customize_button_size = 20
         if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
-            input_dict = {
-                'coordinates': scaling.scale_coordinates(0, 10, global_manager),
-                'width': scaling.scale_width(10, global_manager),
-                'height': scaling.scale_height(10, global_manager),
+            member_input_dict = {
+                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                'width': scaling.scale_width(customize_button_size, global_manager),
+                'height': scaling.scale_height(customize_button_size, global_manager),
                 'parent_collection': self,
-                'init_type': 'toggle interface collection button',
+                'init_type': 'minimize interface collection button',
                 'image_id': 'buttons/minimize_button.png',
                 'member_config': {'order_exempt': True, 'ignore_minimized': True}
             }
-            global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+            customize_button_x_offset += customize_button_size + 5
+        if 'allow_move' in input_dict and input_dict['allow_move']:
+            member_input_dict = {
+                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                'width': scaling.scale_width(customize_button_size, global_manager),
+                'height': scaling.scale_height(customize_button_size, global_manager),
+                'parent_collection': self,
+                'init_type': 'move interface collection button',
+                'image_id': 'buttons/reposition_button.png',
+                'member_config': {'order_exempt': True, 'ignore_minimized': True}
+            }
+            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+            customize_button_x_offset += customize_button_size + 5
+            
+            member_input_dict = {
+                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                'width': scaling.scale_width(customize_button_size, global_manager),
+                'height': scaling.scale_height(customize_button_size, global_manager),
+                'parent_collection': self,
+                'init_type': 'reset interface collection button',
+                'image_id': 'buttons/reset_button.png',
+                'member_config': {'order_exempt': True, 'ignore_minimized': True}
+            }
+            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+            customize_button_x_offset += customize_button_size + 5
 
     def calibrate(self, new_actor):
         '''
@@ -313,11 +342,11 @@ class ordered_collection(interface_collection): #work on ordered collection docu
     def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
         if not 'separation' in input_dict:
             input_dict['separation'] = scaling.scale_height(5, global_manager)
-        super().__init__(input_dict, global_manager)
         self.separation = input_dict['separation']
         self.order_overlap_list = []
         self.order_exempt_list = []
-        self.global_manager.get('ordered_collection_list').append(self)
+        global_manager.get('ordered_collection_list').append(self)
+        super().__init__(input_dict, global_manager)
 
     def add_member(self, new_member, member_config={}):
         '''
@@ -389,7 +418,6 @@ class ordered_collection(interface_collection): #work on ordered collection docu
         current_y = self.y
         for member in self.members:
             if member.can_show() and not member in self.order_exempt_list:
-                #if not member in self.order_overlap_list:
                 current_y -= member.height
 
                 new_x = self.x + member.order_x_offset
