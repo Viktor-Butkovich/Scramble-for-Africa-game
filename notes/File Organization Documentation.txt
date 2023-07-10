@@ -238,6 +238,7 @@ SFA folder
 	        	class cycle_available_ministers_button
 	        	class commodity_button
 	        	class show_previous_financial_report_button
+				class tab_button
 
         cells.py
             imports pygame, random, actor_utility

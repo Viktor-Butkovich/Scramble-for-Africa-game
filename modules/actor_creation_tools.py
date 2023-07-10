@@ -154,6 +154,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = interface_elements.interface_collection(input_dict, global_manager)
         elif init_type == 'ordered collection':
             new_element = interface_elements.ordered_collection(input_dict, global_manager)
+        elif init_type == 'tabbed collection':
+            new_element = interface_elements.tabbed_collection(input_dict, global_manager)
         if init_type.endswith('button'):
             base = init_type.removesuffix('button')
             #buttons buttons
@@ -177,6 +179,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.commodity_button(input_dict, global_manager)
                 elif base == 'show previous financial report':
                     new_element = buttons.show_previous_financial_report_button(input_dict, global_manager)
+                elif base == 'tab':
+                    new_element = buttons.tab_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':

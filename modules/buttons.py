@@ -616,6 +616,13 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'reset interface collection':
             self.set_tooltip(['Resets the ' + self.parent_collection.description + ' to its original location'])
 
+        elif self.button_type == 'tab':
+            if hasattr(self.linked_element, 'description'):
+                description = self.linked_element.description
+            else:
+                description = 'attached panel'
+            self.set_tooltip(['Displays the ' + description])
+
         else:
             self.set_tooltip(['placeholder'])
             
@@ -1250,7 +1257,11 @@ class button(interface_elements.interface_element):
                 for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
                     if hasattr(member, 'original_coordinates'):
                         member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
-                
+
+            elif self.button_type == 'tab':
+                tabbed_collection = self.parent_collection.parent_collection
+                tabbed_collection.current_tabbed_member = self.linked_element
+
     def on_rmb_release(self):
         '''
         Description:
@@ -2271,3 +2282,16 @@ class show_previous_financial_report_button(button):
             notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
         else:
             text_tools.print_to_screen('You are busy and can not view the last turn\'s financial report', self.global_manager)
+
+class tab_button(button):
+    def __init__(self, input_dict, global_manager):
+        input_dict['button_type'] = 'tab'
+        self.linked_element = input_dict['linked_element']
+        super().__init__(input_dict, global_manager)
+
+    def can_show(self):
+        if self.linked_element == self.parent_collection.parent_collection.current_tabbed_member:
+            self.showing_outline = True
+        else:
+            self.showing_outline = False
+        return(super().can_show())

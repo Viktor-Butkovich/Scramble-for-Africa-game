@@ -64,7 +64,7 @@ class interface_element():
         if not self.has_parent_collection:
             if self.global_manager.get('current_game_mode') in self.modes:
                 return(True)
-        elif self.parent_collection.can_show(self.ignore_minimized):
+        elif self.parent_collection.allow_show(self, self.ignore_minimized):
             if self.global_manager.get('current_game_mode') in self.modes:
                 return(True)
         return(False)
@@ -321,6 +321,9 @@ class interface_collection(interface_element):
         for member in self.members:
             member.set_modes(new_modes)
 
+    def allow_show(self, member, ignore_minimized):
+        return(self.can_show(ignore_minimized))
+
     def can_show(self, ignore_minimized = False):
         '''
         Description:
@@ -338,11 +341,64 @@ class interface_collection(interface_element):
         else:
             return(result and not self.minimized)
 
+class tabbed_collection(interface_collection):
+    def __init__(self, input_dict, global_manager):
+        self.tabbed_members = []
+        self.current_tabbed_member = None
+        super().__init__(input_dict, global_manager)
+        tabs_collection_input_dict = {
+            'coordinates': scaling.scale_coordinates(0, 5, global_manager),
+            'width': scaling.scale_width(10, global_manager),
+            'height': scaling.scale_height(30, global_manager),
+            'init_type': 'ordered collection',
+            'parent_collection': self,
+            'direction': 'horizontal'
+        }
+        self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element(tabs_collection_input_dict, global_manager)
+
+    def allow_show(self, member, ignore_minimized):
+        if member in self.tabbed_members and member != self.current_tabbed_member:
+            return(False)
+        return(super().allow_show(member, ignore_minimized))
+
+    def add_member(self, new_member, member_config={}):
+        '''
+        Description:
+            Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
+        Input:
+
+        Output:
+            None
+        '''
+        if not 'tabbed' in member_config:
+            member_config['tabbed'] = False
+        elif member_config['tabbed']:
+            if not 'button_image_id' in member_config:
+                member_config['button_image_id'] = 'buttons/default_button.png'
+        super().add_member(new_member, member_config)
+
+        if member_config['tabbed']:
+            tab_button_input_dict = {
+                'width': scaling.scale_width(20, self.global_manager),
+                'height': scaling.scale_height(20, self.global_manager),
+                'init_type': 'tab button',
+                'parent_collection': self.tabs_collection,
+                'image_id': member_config['button_image_id'],
+                'linked_element': new_member
+            }
+            self.global_manager.get('actor_creation_manager').create_interface_element(tab_button_input_dict, self.global_manager)
+            self.tabbed_members.append(new_member)
+            if len(self.tabbed_members) == 1:
+                self.current_tabbed_member = new_member
+
 class ordered_collection(interface_collection): #work on ordered collection documentation, remove info display documentation, add limited length ordered collections
     def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
         if not 'separation' in input_dict:
             input_dict['separation'] = scaling.scale_height(5, global_manager)
+        if not 'direction' in input_dict:
+            input_dict['direction'] = 'vertical'
         self.separation = input_dict['separation']
+        self.direction = input_dict['direction']
         self.order_overlap_list = []
         self.order_exempt_list = []
         global_manager.get('ordered_collection_list').append(self)
@@ -416,16 +472,27 @@ class ordered_collection(interface_collection): #work on ordered collection docu
             None
         '''
         current_y = self.y
+        current_x = self.x
         for member in self.members:
             if member.can_show() and not member in self.order_exempt_list:
-                current_y -= member.height
+                if self.direction == 'vertical':
+                    current_y -= member.height
 
-                new_x = self.x + member.order_x_offset
-                new_y = current_y + member.order_y_offset
-                if (member.x, member.y) != (new_x, new_y):
-                    member.set_origin(self.x + member.order_x_offset, current_y + member.order_y_offset)
+                    new_x = self.x + member.order_x_offset
+                    new_y = current_y + member.order_y_offset
+                    if (member.x, member.y) != (new_x, new_y):
+                        member.set_origin(self.x + member.order_x_offset, current_y + member.order_y_offset)
 
-                if not member in self.order_overlap_list:
-                    current_y -= self.separation
-                else:
-                    current_y += member.height
+                    if not member in self.order_overlap_list:
+                        current_y -= self.separation
+                    else:
+                        current_y += member.height
+
+                elif self.direction == 'horizontal':
+                    new_x = current_x + member.order_x_offset
+                    new_y = self.y + member.order_y_offset
+                    if (member.x, member.y) != (new_x, new_y):
+                        member.set_origin(current_x + member.order_x_offset, self.y + member.order_y_offset)
+
+                    if not member in self.order_overlap_list:
+                        current_x += self.separation + member.width

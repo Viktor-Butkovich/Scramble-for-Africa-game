@@ -1675,20 +1675,31 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
         new_commodity_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    inventory_collection_relative_coordinates = (500, 0)
+    tab_collection_relative_coordinates = (500, 0)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(inventory_collection_relative_coordinates[0], inventory_collection_relative_coordinates[1], global_manager), #remember member element coordinates are relative to parent
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('mob_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'unit information tabs'
+    }
+    mob_tabbed_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
-        'parent_collection': global_manager.get('mob_info_display'),
-        'member_config': {'order_exempt': True},
-        'allow_minimize': True,
-        'allow_move': True,
-        'description': 'unit inventory panel'
+        'parent_collection': mob_tabbed_collection,
+        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
+        'description': 'unit inventory panel',
     }
     mob_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    input_dict['description'] = 'test 2nd tab'
+    input_dict['member_config'] = {'tabbed': True}
+    collection_two = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
@@ -1709,7 +1720,7 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(inventory_collection_relative_coordinates[0], inventory_collection_relative_coordinates[1], global_manager), #remember member element coordinates are relative to parent
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager), #remember member element coordinates are relative to parent
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
