@@ -811,7 +811,7 @@ class sound_manager_template():
         self.global_manager = global_manager
         self.default_music_dict = {
             'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme',
-                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2', 'Johan\'s Waltz'],
+                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2'],
             'main menu': ['main theme'],
             'village peaceful': ['village peaceful'],
             'village neutral': ['village neutral'],

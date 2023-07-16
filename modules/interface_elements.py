@@ -2,6 +2,7 @@
 
 import pygame
 from . import scaling
+from . import images
 
 class interface_element():
     '''
@@ -52,6 +53,12 @@ class interface_element():
         elif 'parent_collection' != 'none':
             self.set_modes(self.parent_collection.modes)
 
+        if 'image_id' in input_dict:
+            self.create_image(input_dict['image_id'])
+
+    def create_image(self, image_id):
+        self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
+
     def can_show(self):
         '''
         Description:
@@ -86,6 +93,12 @@ class interface_element():
         if self.has_parent_collection:
             self.x_offset = self.x - self.parent_collection.x
             self.y_offset = self.y - self.parent_collection.y
+
+    def set_origin_rect(self, new_rect):
+        self.x = new_rect.x
+        self.Rect.x = self.x
+        self.y = new_rect.y - self.height + self.global_manager.get('display_height')
+        self.Rect.y = new_rect.y
 
     def set_modes(self, new_modes):
         '''
@@ -184,14 +197,24 @@ class interface_collection(interface_element):
             None
         '''
         self.members = []
+        global_manager.get('interface_collection_list').append(self)
         self.minimized = False
         if 'is_info_display' in input_dict and input_dict['is_info_display']:
             self.is_info_display = True
             self.actor_type = input_dict['actor_type']
         else:
             self.is_info_display = False
+
+        if not 'resize_with_contents' in input_dict:
+            input_dict['resize_with_contents'] = False
+        self.resize_with_contents = input_dict['resize_with_contents']
+        if self.resize_with_contents:
+            self.member_rects = []
+
         super().__init__(input_dict, global_manager)
         self.original_coordinates = (self.x, self.y)
+        if self.has_parent_collection:
+            self.original_offsets = (self.x_offset, self.y_offset)
         if self.is_info_display:
             global_manager.set(self.actor_type + '_info_display', self)
         self.description = input_dict.get('description', 'window')
@@ -235,6 +258,9 @@ class interface_collection(interface_element):
             global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
             customize_button_x_offset += customize_button_size + 5
 
+    def create_image(self, image_id):
+        self.image = images.collection_image(self, self.width, self.height, image_id, self.global_manager)
+
     def calibrate(self, new_actor):
         '''
         Description:
@@ -274,6 +300,8 @@ class interface_collection(interface_element):
             self.members.append(new_member)
         else:
             self.members.insert(member_config['index'], new_member)
+        if self.resize_with_contents and new_member.Rect != 'none':
+            self.member_rects.append(new_member.Rect)
         new_member.ignore_minimized = member_config['ignore_minimized']
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
@@ -341,6 +369,17 @@ class interface_collection(interface_element):
         else:
             return(result and not self.minimized)
 
+    def update_collection(self):
+        if self.resize_with_contents:
+            if len(self.member_rects) > 0:
+                self.Rect.update(self.member_rects[0].unionall(self.member_rects))#self.Rect = self.member_rects[0].unionall(self.member_rects) #Rect.unionall(self.member_rects)
+                #print(self.member_rects)
+                #print(self.Rect)
+                if hasattr(self, 'image'):
+                    self.x = self.Rect.x
+                    self.image.update_state(self.image.x, self.image.y, self.Rect.width, self.Rect.height)
+                    #origin not updating correctly but width/height are - complicated
+
 class tabbed_collection(interface_collection):
     def __init__(self, input_dict, global_manager):
         self.tabbed_members = []
@@ -401,7 +440,6 @@ class ordered_collection(interface_collection): #work on ordered collection docu
         self.direction = input_dict['direction']
         self.order_overlap_list = []
         self.order_exempt_list = []
-        global_manager.get('ordered_collection_list').append(self)
         super().__init__(input_dict, global_manager)
 
     def add_member(self, new_member, member_config={}):
@@ -462,7 +500,7 @@ class ordered_collection(interface_collection): #work on ordered collection docu
             self.order_exempt_list.remove(removed_member)
         super().remove_member(removed_member)
 
-    def order_members(self):
+    def update_collection(self): #def order_members(self):
         '''
         Description:
             Changes locations of collection members to put all visible members in order while skipping hidden ones
@@ -471,6 +509,7 @@ class ordered_collection(interface_collection): #work on ordered collection docu
         Output:
             None
         '''
+        super().update_collection()
         current_y = self.y
         current_x = self.x
         for member in self.members:
@@ -481,7 +520,10 @@ class ordered_collection(interface_collection): #work on ordered collection docu
                     new_x = self.x + member.order_x_offset
                     new_y = current_y + member.order_y_offset
                     if (member.x, member.y) != (new_x, new_y):
-                        member.set_origin(self.x + member.order_x_offset, current_y + member.order_y_offset)
+                        effective_y = current_y + member.order_y_offset
+                        if hasattr(member, 'order_overlap_list') and member.is_info_display: #ordered collections have coordinates from top left instead of bottom left
+                            effective_y += member.height
+                        member.set_origin(self.x + member.order_x_offset, effective_y)
 
                     if not member in self.order_overlap_list:
                         current_y -= self.separation

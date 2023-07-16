@@ -155,20 +155,12 @@ def misc_setup(global_manager):
     global_manager.set('overlay_tile_list', [])
     global_manager.set('notification_list', [])
     global_manager.set('label_list', [])
-    global_manager.set('ordered_collection_list', [])
+    global_manager.set('interface_collection_list', [])
 
     global_manager.set('displayed_mob', 'none')
-    #global_manager.set('mob_ordered_label_list', [])
-
     global_manager.set('displayed_tile', 'none')
-    #global_manager.set('tile_ordered_label_list', [])
-
     global_manager.set('displayed_minister', 'none')
-    #global_manager.set('minister_ordered_label_list', [])
-
     global_manager.set('displayed_country', 'none')
-    #global_manager.set('country_ordered_label_list', [])
-
     global_manager.set('displayed_defense', 'none')
     global_manager.set('displayed_prosecution', 'none')
 
@@ -182,7 +174,6 @@ def misc_setup(global_manager):
     global_manager.set('mmb_down', False)
     global_manager.set('typing', False)
     global_manager.set('message', '')
-    #global_manager.set('show_grid_lines', True)
     global_manager.set('show_text_box', True)
     global_manager.set('show_selection_outlines', True)
     global_manager.set('show_minimap_outlines', True)
@@ -252,6 +243,29 @@ def misc_setup(global_manager):
 
     global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
     pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
+
+    #actor_display_top_y = global_manager.get('default_display_height') - 205 + 125 + 10
+    #actor_display_current_y = actor_display_top_y
+    #global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(0, global_manager.get('default_display_height') - 205 + 125, global_manager),
+        'width': scaling.scale_width(400, global_manager), #scaling.scale_width(800, global_manager),
+        'height': scaling.scale_height(800, global_manager),
+        'modes': ['strategic', 'europe'],
+        'init_type': 'ordered collection',
+        #'is_info_display': True,
+        #'actor_type': 'mob',
+        'allow_minimize': True,
+        'allow_move': True,
+        'description': 'general information panel',
+        'resize_with_contents': True,
+        'image_id': 'misc/background2.png', #'misc/default_instruction.png'#'misc/default_notification.png'
+    }
+    global_manager.set('info_displays_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+    anchor = global_manager.get('actor_creation_manager').create_interface_element(
+        {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': global_manager.get('info_displays_collection')}, 
+        global_manager) #rect at original location prevents collection from moving unintentionally when resizing
 
 def terrains_setup(global_manager):
     '''
@@ -1432,16 +1446,21 @@ def mob_interface_setup(global_manager):
     global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
 
     input_dict = {
-        'coordinates': (0, actor_display_current_y),
-        'width': 10,
-        'height': 10,
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager), #scaling.scale_coordinates(0, actor_display_current_y, global_manager),
+        'width': scaling.scale_width(400, global_manager), #scaling.scale_width(800, global_manager),
+        'height': scaling.scale_height(430, global_manager),
+        #'width': 5,
+        #'height':
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
         'is_info_display': True,
         'actor_type': 'mob',
-        'allow_minimize': True,
-        'allow_move': True,
-        'description': 'unit information panel'
+        'description': 'unit information panel',
+        'parent_collection': global_manager.get('info_displays_collection'),
+        'resize_with_contents': True,
+        #'resize_with_contents': True, #need to get resize to work with info displays - would prevent invisible things from taking space
+        # - collection with 5 width/height should still take space because of its member rects - the fact that this is not happening means something about resizing is not working
+        'member_config': {'order_x_offset': scaling.scale_width(10, global_manager), 'order_y_offset': scaling.scale_height(-5, global_manager)}
     }
     mob_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1495,7 +1514,7 @@ def mob_interface_setup(global_manager):
             'coordinates': scaling.scale_coordinates(0, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'image_id': 'misc/default_label.png',
+            'image_id': 'misc/underline.png',#'misc/empty.png',#'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
             'parent_collection': mob_info_display,
@@ -1524,56 +1543,54 @@ def tile_interface_setup(global_manager):
     #tile info images setup
     #tile background image
     actor_display_current_y = global_manager.get('default_display_height') - (580 + 35 + 35) + 125
-    global_manager.set('tile_ordered_list_start_y', actor_display_current_y)
-
     input_dict = {
-        'coordinates': (0, global_manager.get('tile_ordered_list_start_y')), #actor_display_current_y
-        'width': 10,
-        'height': 10,
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),#scaling.scale_coordinates(0, actor_display_current_y, global_manager),
+        'width': scaling.scale_width(800, global_manager),
+        'height': scaling.scale_height(410, global_manager),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
         'is_info_display': True,
         'actor_type': 'tile',
-        'allow_minimize': True,
-        'allow_move': True,
-        'description': 'tile information panel'
+        'description': 'tile information panel',
+        'parent_collection': global_manager.get('info_displays_collection'),
+        #'member_config': {'order_x_offset': scaling.scale_width(5, global_manager), 'order_y_offset': scaling.scale_height(-5, global_manager)}
+        'member_config': {'order_x_offset': scaling.scale_width(10, global_manager), 'order_y_offset': scaling.scale_height(-5, global_manager)}
     }
     tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(130, 0, global_manager),
+        'coordinates': scaling.scale_coordinates(120, 0, global_manager),
         'width': 10,
         'height': 10,
         'init_type': 'ordered collection',
         'parent_collection': tile_info_display,
         'member_config': {'order_exempt': True},
-        'separation': 4
+        'separation': scaling.scale_height(3, global_manager)
     }
     same_tile_ordered_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, input_dict['separation'], global_manager),
-        'width': scaling.scale_width(30, global_manager),
-        'height': scaling.scale_height(30, global_manager),
+        'width': scaling.scale_width(25, global_manager),
+        'height': scaling.scale_height(15, global_manager),
         'modes': ['strategic', 'europe'],
         'image_id': 'buttons/cycle_passengers_down_button.png',
-        'init_type': 'cycle same tile button', #add to collection but exempt from order
+        'init_type': 'cycle same tile button',
         'parent_collection': same_tile_ordered_collection,
-        'member_config': {'order_exempt': True}
     }
-    cycle_same_tile_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager) #not in tile info display list should add to collection but have exception to not sort
+    cycle_same_tile_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     del input_dict['member_config']
     input_dict['coordinates'] = (0, 0)
+    input_dict['height'] = scaling.scale_height(25, global_manager)
     global_manager.set('same_tile_icon_list', [])
     input_dict['init_type'] = 'same tile icon'
     input_dict['image_id'] = 'buttons/default_button.png'
     input_dict['is_last'] = False
     input_dict['color'] = 'gray'
     for i in range(0, 3): #add button to cycle through
-        #input_dict['coordinates'] = scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * i), global_manager)
         input_dict['index'] = i
         same_tile_icon = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-    #input_dict['coordinates'] = scaling.scale_coordinates(130, actor_display_current_y + 95 - (32 * (i + 1)), global_manager)
+    input_dict['height'] = scaling.scale_height(15, global_manager)
     input_dict['index'] = i + 1
     input_dict['is_last'] = True
     same_tile_icon = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1612,7 +1629,7 @@ def tile_interface_setup(global_manager):
             'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'image_id': 'misc/default_label.png',
+            'image_id': 'misc/underline.png', #'misc/default_label.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': tile_info_display
@@ -1675,7 +1692,7 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
         new_commodity_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    tab_collection_relative_coordinates = (500, 0)
+    tab_collection_relative_coordinates = (500, -30)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
@@ -1704,7 +1721,7 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'image_id': 'misc/default_label.png',
+        'image_id': 'misc/underline.png', #'misc/default_label.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
@@ -1720,22 +1737,35 @@ def inventory_interface_setup(actor_display_current_y, global_manager):
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager), #remember member element coordinates are relative to parent
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('tile_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'tile information tabs'
+    }
+    tile_tabbed_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
-        'parent_collection': global_manager.get('tile_info_display'),
-        'member_config': {'order_exempt': True},
-        'allow_minimize': True,
-        'allow_move': True,
+        'parent_collection': tile_tabbed_collection, #global_manager.get('tile_info_display'),
+        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
+        #'allow_minimize': True,
+        #'allow_move': True,
         'description': 'tile inventory panel'
     }
     tile_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    input_dict['description'] = 'test 2nd tab'
+    input_dict['member_config'] = {'tabbed': True}
+    collection_two = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'image_id': 'misc/default_label.png',
+        'image_id': 'misc/underline.png', #'misc/default_label.png',
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
         'init_type': 'actor display label',
@@ -1842,7 +1872,7 @@ def country_interface_setup(global_manager):
         'actor_type': 'country',
         'allow_minimize': True,
         'allow_move': True,
-        'description': 'country information panel'
+        'description': 'country information panel',
     }
     country_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 

@@ -17,9 +17,9 @@ def update_display(global_manager):
     Output:
         None
     '''
-    for ordered_collection in global_manager.get('ordered_collection_list'):
-        if ordered_collection.can_show():
-            ordered_collection.order_members()
+    for interface_collection in global_manager.get('interface_collection_list'):
+        if interface_collection.can_show():
+            interface_collection.update_collection()#order_members()
             
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part

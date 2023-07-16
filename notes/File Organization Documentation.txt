@@ -340,10 +340,11 @@ SFA folder
             def display_instructions_page
 
 		interface_elements.py
-			import pygame, scaling
+			import pygame, scaling, images
 			class interface_element
 				class interface_collection
-					class info_display
+					class tabbed_collection
+					class ordered_collection
 
         labels.py
         	imports pygame, buttons, scaling, text_tools, utility, market_tools

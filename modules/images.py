@@ -1306,6 +1306,14 @@ class button_image(actor_image):
         '''
         return()
 
+class collection_image(button_image):
+    def draw(self):
+        if self.button.can_show():
+            self.x = self.button.x
+            self.y = self.global_manager.get('display_height') + self.height - self.button.y# + self.height
+            #self.y = self.global_manager.get('display_height') + self.button.y - (self.height * 3)
+            self.complete_draw()
+
 class tile_image(actor_image):
     '''
     actor_image attached to a tile rather than an actor, causing it to use file paths directly rather than an dictionary of image keys and file path values

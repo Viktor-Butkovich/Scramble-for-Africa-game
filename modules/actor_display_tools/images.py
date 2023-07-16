@@ -47,13 +47,14 @@ class actor_display_free_image(free_image):
                 default_image_key = 'default'
 
                 if new_actor.actor_type == 'mob':
-                    image_id_list.append({
-                        'image_id': 'misc/mob_background.png',
-                        'size': 1,
-                        'x_offset': 0,
-                        'y_offset': 0,
-                        'level': -10
-                    })
+                    #image_id_list.append({
+                    #    'image_id': 'misc/mob_background.png',
+                    #    'size': 1,
+                    #    'x_offset': 0,
+                    #    'y_offset': 0,
+                    #    'level': -10
+                    #})
+                    nothing = 0
                 elif not new_actor.cell.visible:
                     default_image_key = 'hidden'
 

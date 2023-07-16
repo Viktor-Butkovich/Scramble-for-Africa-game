@@ -54,7 +54,7 @@ class button(interface_elements.interface_element):
         self.has_keybind = self.keybind_id != 'none'
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
-        self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
+        #self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
         #if not 'color' in input_dict:
         #    input_dict['color'] = 'blue'
         if 'color' in input_dict:
@@ -1253,10 +1253,16 @@ class button(interface_elements.interface_element):
                     }
 
             elif self.button_type == 'reset interface collection':
-                self.parent_collection.set_origin(self.parent_collection.original_coordinates[0], self.parent_collection.original_coordinates[1])
+                if not self.parent_collection.has_parent_collection:
+                    self.parent_collection.set_origin(self.parent_collection.original_coordinates[0], self.parent_collection.original_coordinates[1])
+                else:
+                    self.parent_collection.set_origin(self.parent_collection.parent_collection.x + self.parent_collection.original_offsets[0], 
+                                                      self.parent_collection.parent_collection.y + self.parent_collection.original_offsets[1])
                 for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
-                    if hasattr(member, 'original_coordinates'):
-                        member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
+                    #if hasattr(member, 'original_coordinates'):
+                    if hasattr(member, 'original_offsets'):
+                        #member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
+                        member.set_origin(member.parent_collection.x + member.original_offsets[0], member.parent_collection.y + member.original_offsets[1])
 
             elif self.button_type == 'tab':
                 tabbed_collection = self.parent_collection.parent_collection
