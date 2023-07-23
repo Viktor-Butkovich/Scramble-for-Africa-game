@@ -453,6 +453,7 @@ SFA folder
 		    def mob_interface_setup
 		    def tile_interface_setup
 		    def inventory_interface_setup
+			def unit_organization_interface_setup
 		    def minister_interface_setup
 		    def country_interface_setup
 		    def debug_tools_setup

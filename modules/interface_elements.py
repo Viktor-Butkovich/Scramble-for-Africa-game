@@ -371,6 +371,9 @@ class interface_collection(interface_element):
 
     def update_collection(self):
         if self.resize_with_contents:
+            for member in self.members:
+                if hasattr(member, 'members'):
+                    member.update_collection()
             if len(self.member_rects) > 0:
                 self.Rect.update(self.member_rects[0].unionall(self.member_rects))#self.Rect = self.member_rects[0].unionall(self.member_rects) #Rect.unionall(self.member_rects)
                 #print(self.member_rects)
