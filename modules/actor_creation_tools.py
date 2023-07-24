@@ -15,6 +15,7 @@ from .mob_types.npmob_types import native_warriors
 from .mob_types.npmob_types import beasts
 from .mob_types import vehicles
 from .mob_types import officers
+from .mob_types import dummy
 from . import mobs
 from . import buildings
 from . import ministers
@@ -133,6 +134,21 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
 
         return(new_actor)
 
+    def create_dummy(self, input_dict, global_manager):
+        '''
+        Description:
+            Creates a special fake version of a unit to display as a hypothetical, with the same images and tooltips as a real unit
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
+                'init_type': string value - Always required, determines type of object created
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            actor: Returns the unit that was created
+        '''
+        #make sure dummies include things like veteran stars, disorganized, etc.
+        new_actor = dummy(input_dict, global_manager)
+        return(new_actor)
+
     def create_interface_element(self, input_dict, global_manager):
         '''
         Description:
@@ -181,6 +197,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.show_previous_financial_report_button(input_dict, global_manager)
                 elif base == 'tab':
                     new_element = buttons.tab_button(input_dict, global_manager)
+                elif base == 'reorganize unit':
+                    new_element = buttons.reorganize_unit_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':

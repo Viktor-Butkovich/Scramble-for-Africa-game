@@ -43,7 +43,6 @@ class button(interface_elements.interface_element):
         '''
         self.outline_width = 2
         self.outline = pygame.Rect(0, 0, input_dict['width'] + (2 * self.outline_width), input_dict['height'] + (self.outline_width * 2)) 
-        #outline is Pygame Rect object that appears around a button when pressed
         super().__init__(input_dict, global_manager)
         self.has_released = True
         self.button_type = input_dict['button_type']
@@ -54,9 +53,6 @@ class button(interface_elements.interface_element):
         self.has_keybind = self.keybind_id != 'none'
         if self.has_keybind:
             self.set_keybind(self.keybind_id)
-        #self.image = images.button_image(self, self.width, self.height, input_dict['image_id'], self.global_manager)
-        #if not 'color' in input_dict:
-        #    input_dict['color'] = 'blue'
         if 'color' in input_dict:
             self.color = self.global_manager.get('color_dict')[input_dict['color']]
         self.showing_outline = False
@@ -2301,3 +2297,118 @@ class tab_button(button):
         else:
             self.showing_outline = False
         return(super().can_show())
+
+class reorganize_unit_button(button):
+    '''
+    Button that reorganizes 1 or more units into 1 or more other units, based on which are present - such as combining a ship and explorer to a ship with explorer as a 
+        passenger, or combining a worker and explorer to an expedition
+    '''
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
+                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
+                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'input_sources': string list value - List of interface elements to use to determine the pmobs to use as formula input
+                'output_destinations': string list value - List of interface elements to send formula results to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        input_dict['button_type'] = 'reorganize unit'
+        self.input_sources = input_dict['input_sources']
+        self.output_destinations = input_dict['output_destinations']
+        super().__init__(input_dict, global_manager)
+
+    def calibrate(self, new_actor):
+        self.current_input = [current_source.actor for current_source in self.input_sources]
+        self.current_output = self.generate_output(self.current_input)
+        for index, item in enumerate(self.current_output):
+            self.output_destinations[index].calibrate(item)
+
+    def generate_output(self, input): #need to now create buttons that upload target units to merge interface while also excluding involved buttons from normal calibration
+        #assuming length of input is 2
+        procedure = 'none'
+        if input[0] == 'none' and input[1] == 'none':
+            procedure = 'invalid'
+        elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
+            procedure = 'merge'
+            if input[0].is_officer:
+                officer = input[0]
+                worker = input[1]
+            else:
+                officer = input[1]
+                worker = input[0]
+        
+        if procedure == 'merge':
+            if officer.officer_type == 'evangelist' and worker.worker_type != 'religious':
+                procedure = 'invalid'
+            else:
+                output = [self.global_manager.get('actor_creation_manager').create_dummy({'init_type': 'testing'})]
+
+        if procedure in ['invalid', 'none']:
+            output = ['none', 'none']
+        output += output #replicate results to also calibrate tooltip objects
+        return(output)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button merges a selected officer with a worker in the same tile to form a group
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.calibrate('none')
+        #self.generate_output()
+        if main_loop_tools.action_possible(self.global_manager):
+            return
+        #self.showing_outline = True #check if this is needed
+        '''
+        if self.can_show():
+            self.showing_outline = True
+            if main_loop_tools.action_possible(self.global_manager):    
+                selected_list = actor_utility.get_selected_list(self.global_manager)
+                if len(selected_list) == 1:
+                    officer = 'none'
+                    worker = 'none'
+                    for current_selected in selected_list:
+                        if current_selected in self.global_manager.get('officer_list'):
+                            officer = current_selected
+                            if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
+                                worker = officer.images[0].current_cell.get_worker(['religious'])
+                            else:
+                                worker = officer.images[0].current_cell.get_worker(['African', 'European', 'slave'])
+                    if not (officer == 'none' or worker == 'none'): #if worker and officer selected
+                        if officer.x == worker.x and officer.y == worker.y:
+                            if worker.sentry_mode:
+                                worker.set_sentry_mode(False)
+                            if officer.sentry_mode:
+                                officer.set_sentry_mode(False)
+                            self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
+                        else:
+                            if (not officer == 'none') and officer.officer_type == 'evangelist':
+                                text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
+                            else:  
+                                text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
+                    else:
+                        if (not officer == 'none') and officer.officer_type == 'evangelist':
+                            text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
+                        else:  
+                            text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not form a group.', self.global_manager)
+            '''

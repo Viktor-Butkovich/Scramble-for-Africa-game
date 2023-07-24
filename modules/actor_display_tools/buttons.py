@@ -548,7 +548,6 @@ class merge_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and can not form a group.', self.global_manager)
 
-
 class split_button(label_button):
     '''
     Button that splits a selected group into its component officer and worker

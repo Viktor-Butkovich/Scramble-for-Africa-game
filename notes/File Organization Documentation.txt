@@ -127,35 +127,38 @@ SFA folder
 				imports random, mob_types.officers, modules.actor_utility, modules.notification_tools, modules.dice_utility, modules.market_tools, modules.scaling, modules.images
 				class merchant(mob_types.officers.officer)	    
 
-            groups.py
-	        	imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
-            	class group(modules.mobs.mob)
+		dummy.py
+			class dummy
 
-			npmobs.py
-				imports random, modules.mobs, modules.utility, modules.turn_management_tools
-				class npmob(modules.mob)
+        groups.py
+	        imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
+            class group(modules.mobs.mob)
 
-	    	officers.py
-	        	imports pmobs, modules.utility, modules.actor_utility
-	        	class officer(pmobs.pmob)
+		npmobs.py
+			imports random, modules.mobs, modules.utility, modules.turn_management_tools
+			class npmob(modules.mob)
 
-	    	pmobs.py
-		    	imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
-		        	modules.turn_management_tools, modules.minister_utility
-		    	class pmob(modules.mob)
+	    officers.py
+	        imports pmobs, modules.utility, modules.actor_utility
+	        class officer(pmobs.pmob)
 
-	    	vehicles.py
-	        	imports random, pmobs, modules.text_tools, modules.actor_utility, modules.notification_tools
-	        	class vehicle(pmobs.pmob)
-		    		class train
-                	class ship
-			    	class boat
+	    pmobs.py
+		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
+		    	modules.turn_management_tools, modules.minister_utility
+		    class pmob(modules.mob)
 
-	    	workers.py
-	        	imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
-	        	class worker(pmobs.pmob)
-		    		class church_volunteers
-		    		class slave_worker
+	    vehicles.py
+	    	imports random, pmobs, modules.text_tools, modules.actor_utility, modules.notification_tools
+        	class vehicle(pmobs.pmob)
+				class train
+            	class ship
+		    	class boat
+
+	    workers.py
+	    	imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
+        	class worker(pmobs.pmob)
+		    	class church_volunteers
+		    	class slave_worker
 
         action_notifications.py
 	        imports images, notifications, utility, scaling, actor_utility, trial_utility
