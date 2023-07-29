@@ -30,6 +30,8 @@ class actor():
         '''
         self.global_manager = global_manager
         self.from_save = from_save
+        if 'init_type' in input_dict:
+            self.init_type = input_dict['init_type']
         global_manager.get('actor_list').append(self)
         self.modes = input_dict['modes']
         if self.from_save:

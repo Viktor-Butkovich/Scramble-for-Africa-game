@@ -378,6 +378,7 @@ class group(pmob):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
+        #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
         image_id_list = super().get_image_id_list()
         image_id_list.remove(self.image_dict['default']) #group default image is empty
         left_worker_dict = {

@@ -111,7 +111,7 @@ class interface_element():
         '''
         self.modes = new_modes
 
-    def calibrate(self, new_actor):
+    def calibrate(self, new_actor, override_exempt=False):
         '''
         Description:
             Allows subclasses to attach to the inputted actor and updates information based on the inputted actor
@@ -211,6 +211,8 @@ class interface_collection(interface_element):
         if self.resize_with_contents:
             self.member_rects = []
 
+        self.calibrate_exempt_list = []
+
         super().__init__(input_dict, global_manager)
         self.original_coordinates = (self.x, self.y)
         if self.has_parent_collection:
@@ -261,7 +263,7 @@ class interface_collection(interface_element):
     def create_image(self, image_id):
         self.image = images.collection_image(self, self.width, self.height, image_id, self.global_manager)
 
-    def calibrate(self, new_actor):
+    def calibrate(self, new_actor, override_exempt=False):
         '''
         Description:
             Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
@@ -270,12 +272,16 @@ class interface_collection(interface_element):
         Output:
             None
         '''
-        super().calibrate(new_actor)
+        super().calibrate(new_actor, override_exempt)
         for member in self.members:
-            member.calibrate(new_actor)
+            if override_exempt or not member in self.calibrate_exempt_list:
+                if hasattr(member, 'members'):
+                    member.calibrate(new_actor, override_exempt)
+                else:
+                    member.calibrate(new_actor)
         if self.is_info_display:
             self.global_manager.set('displayed_' + self.actor_type, new_actor)
-    
+
     def add_member(self, new_member, member_config={}):
         '''
         Description:
@@ -293,6 +299,8 @@ class interface_collection(interface_element):
             member_config['y_offset'] = 0
         if not 'ignore_minimized' in member_config:
             member_config['ignore_minimized'] = False
+        if not 'calibrate_exempt' in member_config:
+            member_config['calibrate_exempt'] = False
 
         new_member.parent_collection = self
         new_member.has_parent_collection = True
@@ -304,6 +312,12 @@ class interface_collection(interface_element):
             self.member_rects.append(new_member.Rect)
         new_member.ignore_minimized = member_config['ignore_minimized']
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
+
+        if member_config['calibrate_exempt'] and hasattr(self, 'calibrate_exempt_list'):
+            if not 'order_overlap_index' in member_config:
+                self.calibrate_exempt_list.append(new_member)
+            else:
+                self.calibrate_exempt_list.insert(member_config['order_overlap_index'], new_member)
 
     def remove_member(self, removed_member):
         '''
@@ -376,12 +390,27 @@ class interface_collection(interface_element):
                     member.update_collection()
             if len(self.member_rects) > 0:
                 self.Rect.update(self.member_rects[0].unionall(self.member_rects))#self.Rect = self.member_rects[0].unionall(self.member_rects) #Rect.unionall(self.member_rects)
-                #print(self.member_rects)
-                #print(self.Rect)
                 if hasattr(self, 'image'):
                     self.x = self.Rect.x
                     self.image.update_state(self.image.x, self.image.y, self.Rect.width, self.Rect.height)
-                    #origin not updating correctly but width/height are - complicated
+
+#class controlled_calibration_collection(interface_collection):
+#    def calibrate(self, new_actor, override_exempt=False):
+#        '''
+#        Description:
+#            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
+#        Input:
+#            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
+#        Output:
+#            None
+#        '''
+#        super().calibrate(new_actor, override_exempt)
+#        #if not override_exempt
+#        for member in self.members:
+#            if override_exempt or not member in self.calibrate_exempt_list:
+#                member.calibrate(new_actor, override_exempt)
+#        if self.is_info_display:
+#            self.global_manager.set('displayed_' + self.actor_type, new_actor)
 
 class tabbed_collection(interface_collection):
     def __init__(self, input_dict, global_manager):

@@ -2341,6 +2341,12 @@ class reorganize_unit_button(button):
         procedure = 'none'
         if input[0] == 'none' and input[1] == 'none':
             procedure = 'invalid'
+        elif input[0] == 'none' or input[1] == 'none':
+            procedure = 'unchanged'
+            if input[0] == 'none':
+                unit = input[1]
+            else:
+                unit = input[0]
         elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
             procedure = 'merge'
             if input[0].is_officer:
@@ -2349,16 +2355,45 @@ class reorganize_unit_button(button):
             else:
                 officer = input[1]
                 worker = input[0]
-        
+
+        required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
+                              'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
+                              'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination']
+
+        dummy_input_dict = {
+            'actor_type': 'mob',
+            'in_vehicle': False,
+            'in_group': False,
+            'in_building': False,
+            'images': [self.global_manager.get('actor_creation_manager').create_dummy({
+                'image_id': None
+            }, self.global_manager)],
+        } #make sure dummy objects don't accumulate over time, make sure they are removed after being deselected
+
         if procedure == 'merge':
             if officer.officer_type == 'evangelist' and worker.worker_type != 'religious':
                 procedure = 'invalid'
             else:
-                output = [self.global_manager.get('actor_creation_manager').create_dummy({'init_type': 'testing'})]
+                for attribute in required_dummy_attributes:
+                    if hasattr(unit, attribute):
+                        dummy_input_dict[attribute] = getattr(unit, attribute)
+                    dummy_input_dict['is_group'] = True #also need to set things like is_batallion for combat strength, anything that shows up in image or tooltip
+                output = [self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none']
+
+        if procedure == 'unchanged':
+            #dummy_input_dict['dummy_type'] = unit.init_type 
+            dummy_input_dict['image_id_list'] = unit.get_image_id_list()
+            for attribute in required_dummy_attributes:
+                if hasattr(unit, attribute):
+                    dummy_input_dict[attribute] = getattr(unit, attribute)
+            if input[0] == unit:
+                output = [self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none']
+            else:
+                output = ['none', self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager)]
 
         if procedure in ['invalid', 'none']:
             output = ['none', 'none']
-        output += output #replicate results to also calibrate tooltip objects
+        output += output #replicates results to also calibrate corresponding tooltip objects
         return(output)
 
     def on_click(self):
@@ -2371,44 +2406,19 @@ class reorganize_unit_button(button):
             None
         '''
         self.calibrate('none')
-        #self.generate_output()
         if main_loop_tools.action_possible(self.global_manager):
             return
-        #self.showing_outline = True #check if this is needed
-        '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):    
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if len(selected_list) == 1:
-                    officer = 'none'
-                    worker = 'none'
-                    for current_selected in selected_list:
-                        if current_selected in self.global_manager.get('officer_list'):
-                            officer = current_selected
-                            if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
-                                worker = officer.images[0].current_cell.get_worker(['religious'])
-                            else:
-                                worker = officer.images[0].current_cell.get_worker(['African', 'European', 'slave'])
-                    if not (officer == 'none' or worker == 'none'): #if worker and officer selected
-                        if officer.x == worker.x and officer.y == worker.y:
-                            if worker.sentry_mode:
-                                worker.set_sentry_mode(False)
-                            if officer.sentry_mode:
-                                officer.set_sentry_mode(False)
-                            self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
-                        else:
-                            if (not officer == 'none') and officer.officer_type == 'evangelist':
-                                text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
-                            else:  
-                                text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
-                    else:
-                        if (not officer == 'none') and officer.officer_type == 'evangelist':
-                            text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
-                        else:  
-                            text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
-                else:
-                    text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
+
+class manually_calibrate_button(button):
+    def __init__(self, input_dict, global_manager):
+        input_dict['button_type'] = 'manually calibrate'
+        self.input_source = input_dict['input_source'] #str
+        self.output_destinations = input_dict['output_destinations'] #list of calibratable objects
+        super().__init__(input_dict, global_manager)
+
+    def on_click(self):
+        for target in self.output_destinations:
+            if self.input_source == 'none':
+                target.calibrate(self.input_source)
             else:
-                text_tools.print_to_screen('You are busy and can not form a group.', self.global_manager)
-            '''
+                target.calibrate(self.global_manager.get(self.input_source))

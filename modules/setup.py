@@ -1799,7 +1799,7 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     lhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(lhs_top_mob_free_image)
+    unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True})
     
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, -1 * (image_height - 5), global_manager),
@@ -1810,6 +1810,7 @@ def unit_organization_interface_setup(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
+        'member_config': {'calibrate_exempt': True},
     }
     #mob background image's tooltip
     lhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1817,7 +1818,7 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     lhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     #right side
     input_dict = {
@@ -1834,13 +1835,14 @@ def unit_organization_interface_setup(global_manager):
     #mob background image's tooltip
     rhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
+    rhs_x_offset = image_height + 80
     #mob image
     rhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(image_height + 40, global_manager)})
+    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(rhs_x_offset, global_manager)})
     
     input_dict = {
-        'coordinates': scaling.scale_coordinates(image_height + 40, -1 * (image_height - 5), global_manager),
+        'coordinates': scaling.scale_coordinates(rhs_x_offset, -1 * (image_height - 5), global_manager),
         'minimum_width': scaling.scale_width(image_height, global_manager),
         'height': scaling.scale_height(image_height, global_manager),
         'image_id': 'misc/empty.png',
@@ -1848,6 +1850,7 @@ def unit_organization_interface_setup(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
+        'member_config': {'calibrate_exempt': True},
     }
     #mob background image's tooltip
     rhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1855,10 +1858,10 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     rhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(image_height + 40, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(image_height + 20, -1 * (image_height - 15), global_manager),
+        'coordinates': scaling.scale_coordinates(image_height + 20, -1 * (image_height - 15) + 40, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'reorganize unit button',
@@ -1866,8 +1869,57 @@ def unit_organization_interface_setup(global_manager):
         'image_id': 'buttons/merge_button.png',
         'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image],
         'output_destinations': [rhs_top_mob_free_image, rhs_bottom_mob_free_image, rhs_top_tooltip, rhs_bottom_tooltip],
+        'member_config': {'calibrate_exempt': False}
     }
     reorganize_unit_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 95, global_manager),
+        'width': scaling.scale_width(30, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'manually calibrate button',
+        'parent_collection': unit_organization_collection,
+        'image_id': 'buttons/merge_button.png',
+        'input_source': 'displayed_mob',
+        'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
+    }
+    manually_calibrate_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 95 - 35, global_manager),
+        'width': scaling.scale_width(30, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'manually calibrate button',
+        'parent_collection': unit_organization_collection,
+        'image_id': 'buttons/remove_minister_button.png',
+        'input_source': 'none',
+        'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
+    }
+    manually_calibrate_none_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 25, global_manager),
+        'width': input_dict['width'],
+        'height': input_dict['height'],
+        'init_type': input_dict['init_type'],
+        'parent_collection': input_dict['parent_collection'],
+        'image_id': 'buttons/merge_button.png',
+        'input_source': 'displayed_mob',
+        'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
+    }
+    manually_calibrate_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 25 - 35, global_manager),
+        'width': input_dict['width'],
+        'height': input_dict['height'],
+        'init_type': input_dict['init_type'],
+        'parent_collection': input_dict['parent_collection'],
+        'image_id': 'buttons/remove_minister_button.png',
+        'input_source': 'none',
+        'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
+    }
+    manually_calibrate_none_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
 def minister_interface_setup(global_manager):
     '''

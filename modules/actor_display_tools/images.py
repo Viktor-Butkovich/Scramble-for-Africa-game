@@ -41,30 +41,23 @@ class actor_display_free_image(free_image):
                 if (not self.global_manager.get('current_lore_mission') == 'none') and self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(new_actor.x, new_actor.y):
                     self.set_image('misc/possible_artifact_location_icon.png') #only show icon if revealed location in displayed tile
                 else:
-                    self.set_image('misc/empty.png')
+                    #self.set_image('misc/empty.png')
+                    self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])
             else:
                 image_id_list = []
                 default_image_key = 'default'
 
                 if new_actor.actor_type == 'mob':
-                    #image_id_list.append({
-                    #    'image_id': 'misc/mob_background.png',
-                    #    'size': 1,
-                    #    'x_offset': 0,
-                    #    'y_offset': 0,
-                    #    'level': -10
-                    #})
                     nothing = 0
                 elif not new_actor.cell.visible:
                     default_image_key = 'hidden'
-
                 if isinstance(new_actor.images[0].image_id, str): #if id is string image path
                     image_id_list.append(new_actor.image_dict[default_image_key])
                 else: #if id is list of strings for image bundle
                     image_id_list += new_actor.get_image_id_list() #images[0].image.to_list()
-
                 if new_actor.actor_type == 'mob':
                     if new_actor.is_pmob:
+                        image_id_list.append({'image_id': 'misc/mob_background.png', 'level': -10})
                         image_id_list.append('misc/pmob_outline.png')
                     else:
                         image_id_list.append('misc/npmob_outline.png')
@@ -72,21 +65,21 @@ class actor_display_free_image(free_image):
                     image_id_list.append('misc/tile_outline.png')
                 self.set_image(image_id_list)
         else:
-            self.set_image('misc/empty.png')
+            self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])#self.set_image('misc/empty.png')
 
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this image should be drawn
-        Input:
-            None
-        Output:
-            boolean: False if there is no actor in the info display, otherwise returns same value as superclass
-        '''
-        if self.actor == 'none':
-            return(False)
-        else:
-            return(super().can_show())
+    #def can_show(self):
+    #    '''
+    #    Description:
+    #        Returns whether this image should be drawn
+    #    Input:
+    #        None
+    #    Output:
+    #        boolean: False if there is no actor in the info display, otherwise returns same value as superclass
+    #    '''
+    #    if self.actor == 'none':
+    #        return(False)
+    #    else:
+    #        return(super().can_show())
 
 class actor_display_infrastructure_connection_image(actor_display_free_image):
     '''

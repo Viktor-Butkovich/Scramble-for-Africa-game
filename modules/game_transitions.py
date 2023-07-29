@@ -23,7 +23,7 @@ def cycle_player_turn(global_manager, start_of_turn = False):
         if not start_of_turn: #print no units message if there are no units in turn queue
             text_tools.print_to_screen('There are no units left to move this turn.', global_manager)
             actor_utility.deselect_all(global_manager)
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none')
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
             text_tools.print_to_screen('There are no other units left to move this turn.', global_manager)
@@ -96,7 +96,7 @@ def set_game_mode(new_game_mode, global_manager):
         current_mob.selected = False
         
     if previous_game_mode in ['strategic', 'europe', 'new_game_setup']:
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none') #deselect actors/ministers and remove any actor info from display when switching screens
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True) #deselect actors/ministers and remove any actor info from display when switching screens
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('minister_info_display'), 'none')
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none')
 
@@ -168,7 +168,7 @@ def to_main_menu(global_manager, override = False):
         None
     '''
     #if main_loop_tools.action_possible(global_manager) or override: #if game over, go to main menu regardless of circumstances
-    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none')
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), 'none')
     minister_utility.calibrate_minister_info_display(global_manager, 'none')
     #set_game_mode('main_menu', global_manager)

@@ -411,11 +411,11 @@ def manage_lmb_down(clicked_button, global_manager):
             if (not global_manager.get('capital')):
                 actor_utility.deselect_all(global_manager)
             if global_manager.get('current_game_mode') == 'ministers':
-                minister_utility.calibrate_minister_info_display(global_manager, 'none')
+                minister_utility.calibrate_minister_info_display(global_manager, 'none', override_exempt=True)
             elif global_manager.get('current_game_mode') == 'new_game_setup':
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none')
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
             else:
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none')
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
@@ -434,7 +434,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
                                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
-                                    else: #elif current_grid == global_manager.get('strategic_map_grid'):
+                                    else:
                                         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_new_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)

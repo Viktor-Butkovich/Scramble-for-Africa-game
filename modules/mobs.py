@@ -607,6 +607,11 @@ class mob(actor):
             tooltip_list.append('This unit is in sentry mode')
 
         if self.is_pmob:
+            held_commodities = self.get_held_commodities()
+            if held_commodities:
+                tooltip_list.append('Inventory:')
+                for commodity in held_commodities:
+                    tooltip_list.append('    ' + commodity + ': ' + str(self.get_inventory(commodity)))
             if len(self.base_automatic_route) > 1:
                 start_coordinates = self.base_automatic_route[0]
                 end_coordinates = self.base_automatic_route[-1]
@@ -626,7 +631,7 @@ class mob(actor):
         if self.selected:
             self.selected = False
         if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none')
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             #actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), 'none')
         for current_image in self.images:
             current_image.remove_from_cell()

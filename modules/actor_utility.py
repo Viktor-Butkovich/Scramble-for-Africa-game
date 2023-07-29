@@ -330,7 +330,7 @@ def get_random_ocean_coordinates(global_manager):
     start_y = 0
     return(start_x, start_y)
 
-def calibrate_actor_info_display(global_manager, info_display, new_actor):
+def calibrate_actor_info_display(global_manager, info_display, new_actor, override_exempt=False):
     '''
     Description:
         Updates all relevant objects to display a certain mob or tile
@@ -356,7 +356,7 @@ def calibrate_actor_info_display(global_manager, info_display, new_actor):
 
     elif info_display == global_manager.get('country_info_display'):
         global_manager.set('displayed_country', new_actor)
-    info_display.calibrate(new_actor)
+    info_display.calibrate(new_actor, override_exempt)
 
 def get_migration_destinations(global_manager):
     '''

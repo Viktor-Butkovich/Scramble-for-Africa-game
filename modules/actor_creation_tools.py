@@ -15,7 +15,7 @@ from .mob_types.npmob_types import native_warriors
 from .mob_types.npmob_types import beasts
 from .mob_types import vehicles
 from .mob_types import officers
-from .mob_types import dummy
+from . import dummy
 from . import mobs
 from . import buildings
 from . import ministers
@@ -146,7 +146,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             actor: Returns the unit that was created
         '''
         #make sure dummies include things like veteran stars, disorganized, etc.
-        new_actor = dummy(input_dict, global_manager)
+        new_actor = dummy.dummy(input_dict, global_manager)
         return(new_actor)
 
     def create_interface_element(self, input_dict, global_manager):
@@ -199,6 +199,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.tab_button(input_dict, global_manager)
                 elif base == 'reorganize unit':
                     new_element = buttons.reorganize_unit_button(input_dict, global_manager)
+                elif base == 'manually calibrate':
+                    new_element = buttons.manually_calibrate_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':
