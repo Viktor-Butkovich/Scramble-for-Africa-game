@@ -411,7 +411,7 @@ def manage_lmb_down(clicked_button, global_manager):
             if (not global_manager.get('capital')):
                 actor_utility.deselect_all(global_manager)
             if global_manager.get('current_game_mode') == 'ministers':
-                minister_utility.calibrate_minister_info_display(global_manager, 'none', override_exempt=True)
+                minister_utility.calibrate_minister_info_display(global_manager, 'none')
             elif global_manager.get('current_game_mode') == 'new_game_setup':
                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
             else:

@@ -1457,7 +1457,6 @@ def mob_interface_setup(global_manager):
         'parent_collection': global_manager.get('info_displays_collection'),
         #'resize_with_contents': True, #need to get resize to work with info displays - would prevent invisible things from taking space
         # - collection with 5 width/height should still take space because of its member rects - the fact that this is not happening means something about resizing is not working
-        'member_config': {'order_x_offset': scaling.scale_width(10, global_manager), 'order_y_offset': scaling.scale_height(-5, global_manager)}
     }
     mob_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1511,7 +1510,7 @@ def mob_interface_setup(global_manager):
             'coordinates': scaling.scale_coordinates(0, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'image_id': 'misc/underline.png',#'misc/empty.png',#'misc/default_label.png',
+            'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'mob',
             'parent_collection': mob_info_display,
@@ -1547,7 +1546,6 @@ def tile_interface_setup(global_manager):
         'actor_type': 'tile',
         'description': 'tile information panel',
         'parent_collection': global_manager.get('info_displays_collection'),
-        'member_config': {'order_x_offset': scaling.scale_width(10, global_manager), 'order_y_offset': scaling.scale_height(-5, global_manager)}
     }
     tile_info_display = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1622,7 +1620,7 @@ def tile_interface_setup(global_manager):
             'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
-            'image_id': 'misc/underline.png', #'misc/default_label.png',
+            'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
             'parent_collection': tile_info_display
@@ -1707,7 +1705,7 @@ def inventory_interface_setup(global_manager):
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'image_id': 'misc/underline.png', #'misc/default_label.png',
+        'image_id': 'misc/default_label.png', #'misc/underline.png',
         'actor_label_type': 'mob inventory capacity',
         'actor_type': 'mob',
         'init_type': 'actor display label',
@@ -1746,7 +1744,7 @@ def inventory_interface_setup(global_manager):
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'image_id': 'misc/underline.png', #'misc/default_label.png',
+        'image_id': 'misc/default_label.png', #'misc/underline.png',
         'actor_label_type': 'tile inventory capacity',
         'actor_type': 'tile',
         'init_type': 'actor display label',
@@ -1771,6 +1769,9 @@ def unit_organization_interface_setup(global_manager):
         None
     '''
     image_height = 75
+    lhs_x_offset = 35
+    rhs_x_offset = image_height + 80
+
     input_dict = {
         'coordinates': scaling.scale_coordinates(-30, -1 * image_height, global_manager),
         'width': scaling.scale_width(10, global_manager),
@@ -1784,14 +1785,15 @@ def unit_organization_interface_setup(global_manager):
     unit_organization_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'minimum_width': scaling.scale_width(image_height, global_manager),
-        'height': scaling.scale_height(image_height, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset, 0, global_manager),
+        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
+        'height': scaling.scale_height(image_height - 10, global_manager),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
+        'member_config': {'calibrate_exempt': True}
     }
     #mob background image's tooltip
     lhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1799,12 +1801,13 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     lhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True})
-    
+    #unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
+    unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
+
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, -1 * (image_height - 5), global_manager),
-        'minimum_width': scaling.scale_width(image_height, global_manager),
-        'height': scaling.scale_height(image_height, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset, -1 * (image_height - 5), global_manager),
+        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
+        'height': scaling.scale_height(image_height - 10, global_manager),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1818,33 +1821,34 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     lhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    #unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     #right side
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, 0, global_manager),
-        'minimum_width': scaling.scale_width(image_height, global_manager),
-        'height': scaling.scale_height(image_height, global_manager),
+        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
+        'height': scaling.scale_height(image_height - 10, global_manager),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
-        'member_config': {'x_offset': scaling.scale_width(image_height + 40, global_manager)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)}
     }
     #mob background image's tooltip
     rhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    rhs_x_offset = image_height + 80
     #mob image
     rhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(rhs_x_offset, global_manager)})
-    
+    #unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
+    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
+
     input_dict = {
-        'coordinates': scaling.scale_coordinates(rhs_x_offset, -1 * (image_height - 5), global_manager),
-        'minimum_width': scaling.scale_width(image_height, global_manager),
-        'height': scaling.scale_height(image_height, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset, -1 * (image_height - 5), global_manager),
+        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
+        'height': scaling.scale_height(image_height - 10, global_manager),
         'image_id': 'misc/empty.png',
         'actor_label_type': 'tooltip',
         'actor_type': 'mob',
@@ -1858,10 +1862,12 @@ def unit_organization_interface_setup(global_manager):
     #mob image
     rhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
         scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    #unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(image_height + 20, -1 * (image_height - 15) + 40, global_manager),
+        #'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60, -1 * (image_height - 15) + 40, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60, -1 * (image_height - 15) + 40, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'reorganize unit button',
@@ -1874,7 +1880,8 @@ def unit_organization_interface_setup(global_manager):
     reorganize_unit_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 95, global_manager),
+        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'manually calibrate button',
@@ -1886,7 +1893,8 @@ def unit_organization_interface_setup(global_manager):
     manually_calibrate_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 95 - 35, global_manager),
+        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'manually calibrate button',
@@ -1898,7 +1906,8 @@ def unit_organization_interface_setup(global_manager):
     manually_calibrate_none_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 25, global_manager),
+        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
         'width': input_dict['width'],
         'height': input_dict['height'],
         'init_type': input_dict['init_type'],
@@ -1910,7 +1919,8 @@ def unit_organization_interface_setup(global_manager):
     manually_calibrate_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-35, -1 * (image_height - 15) + 25 - 35, global_manager),
+        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
         'width': input_dict['width'],
         'height': input_dict['height'],
         'init_type': input_dict['init_type'],

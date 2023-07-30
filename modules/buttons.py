@@ -2328,6 +2328,7 @@ class reorganize_unit_button(button):
         input_dict['button_type'] = 'reorganize unit'
         self.input_sources = input_dict['input_sources']
         self.output_destinations = input_dict['output_destinations']
+        self.procedure_dict = {}
         super().__init__(input_dict, global_manager)
 
     def calibrate(self, new_actor):
@@ -2339,6 +2340,7 @@ class reorganize_unit_button(button):
     def generate_output(self, input): #need to now create buttons that upload target units to merge interface while also excluding involved buttons from normal calibration
         #assuming length of input is 2
         procedure = 'none'
+        self.procedure_dict = {'procedure_type': 'none'}
         if input[0] == 'none' and input[1] == 'none':
             procedure = 'invalid'
         elif input[0] == 'none' or input[1] == 'none':
@@ -2358,7 +2360,7 @@ class reorganize_unit_button(button):
 
         required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
                               'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
-                              'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination']
+                              'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
 
         dummy_input_dict = {
             'actor_type': 'mob',
@@ -2374,11 +2376,7 @@ class reorganize_unit_button(button):
             if officer.officer_type == 'evangelist' and worker.worker_type != 'religious':
                 procedure = 'invalid'
             else:
-                for attribute in required_dummy_attributes:
-                    if hasattr(unit, attribute):
-                        dummy_input_dict[attribute] = getattr(unit, attribute)
-                    dummy_input_dict['is_group'] = True #also need to set things like is_batallion for combat strength, anything that shows up in image or tooltip
-                output = [self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none']
+                output = self.handle_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
 
         if procedure == 'unchanged':
             #dummy_input_dict['dummy_type'] = unit.init_type 
@@ -2396,6 +2394,32 @@ class reorganize_unit_button(button):
         output += output #replicates results to also calibrate corresponding tooltip objects
         return(output)
 
+    def handle_merge(self, officer, worker, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'merge',
+                    'officer': officer,
+                    'worker': worker,
+        }
+        for attribute in required_dummy_attributes:
+                    if hasattr(officer, attribute):
+                        dummy_input_dict[attribute] = getattr(officer, attribute)
+        dummy_input_dict['officer'] = officer
+        dummy_input_dict['worker'] = worker
+        dummy_input_dict['group_type'] = self.global_manager.get('officer_group_type_dict')[officer.officer_type]
+        if dummy_input_dict['group_type'] == 'battalion':
+            if worker.worker_type == 'European':
+                dummy_input_dict['battalion_type'] = 'imperial'
+            else:
+                dummy_input_dict['battalion_type'] = 'colonial'
+        dummy_input_dict['name'] = actor_utility.generate_group_name(worker, officer, self.global_manager, add_veteran=True)
+        dummy_input_dict['movement_points'] = actor_utility.generate_group_movement_points(worker, officer, self.global_manager)
+        dummy_input_dict['max_movement_points'] = actor_utility.generate_group_movement_points(worker, officer, self.global_manager, generate_max=True)
+        dummy_input_dict['is_group'] = True #also need to set things like is_batallion for combat strength, anything that shows up in image or tooltip
+        image_id_list = officer.get_image_id_list()
+        image_id_list.remove(officer.image_dict['default']) #group default image is empty
+        dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer, self.global_manager)
+        return([self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none'])
+
     def on_click(self):
         '''
         Description:
@@ -2405,9 +2429,17 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
-        self.calibrate('none')
+       # self.calibrate('none')
         if main_loop_tools.action_possible(self.global_manager):
-            return
+            procedure_dict = self.procedure_dict
+            if procedure_dict['procedure_type'] != 'none':
+                if procedure_dict['procedure_type'] == 'merge':
+                    if procedure_dict['worker'].sentry_mode:
+                        procedure_dict['worker'].set_sentry_mode(False)
+                    if procedure_dict['officer'].sentry_mode:
+                        procedure_dict['officer'].set_sentry_mode(False)
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                    self.global_manager.get('actor_creation_manager').create_group(procedure_dict['worker'], procedure_dict['officer'], self.global_manager)
 
 class manually_calibrate_button(button):
     def __init__(self, input_dict, global_manager):

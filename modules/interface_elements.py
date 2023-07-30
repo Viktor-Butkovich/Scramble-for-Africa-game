@@ -394,24 +394,6 @@ class interface_collection(interface_element):
                     self.x = self.Rect.x
                     self.image.update_state(self.image.x, self.image.y, self.Rect.width, self.Rect.height)
 
-#class controlled_calibration_collection(interface_collection):
-#    def calibrate(self, new_actor, override_exempt=False):
-#        '''
-#        Description:
-#            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
-#        Input:
-#            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
-#        Output:
-#            None
-#        '''
-#        super().calibrate(new_actor, override_exempt)
-#        #if not override_exempt
-#        for member in self.members:
-#            if override_exempt or not member in self.calibrate_exempt_list:
-#                member.calibrate(new_actor, override_exempt)
-#        if self.is_info_display:
-#            self.global_manager.set('displayed_' + self.actor_type, new_actor)
-
 class tabbed_collection(interface_collection):
     def __init__(self, input_dict, global_manager):
         self.tabbed_members = []

@@ -127,9 +127,6 @@ SFA folder
 				imports random, mob_types.officers, modules.actor_utility, modules.notification_tools, modules.dice_utility, modules.market_tools, modules.scaling, modules.images
 				class merchant(mob_types.officers.officer)	    
 
-		dummy.py
-			class dummy
-
         groups.py
 	        imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
             class group(modules.mobs.mob)
@@ -290,6 +287,10 @@ SFA folder
             def rect_to_surface
             def display_image
             def display_image_angle
+
+		dummy.py
+			imports pygame, text_tools, scaling, mobs
+			class dummy(mob)
 
 		effects.py
 			import utility

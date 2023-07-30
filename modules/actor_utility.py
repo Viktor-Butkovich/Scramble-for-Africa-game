@@ -3,6 +3,7 @@
 import random
 import os
 import pygame
+import math
 
 from . import utility
 
@@ -526,3 +527,67 @@ def set_slave_traders_strength(new_strength, global_manager):
     if global_manager.has('slave_traders_grid'):
         slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
         slave_traders_tile.update_image_bundle()
+
+def generate_group_image_id_list(worker, officer, global_manager):
+    left_worker_dict = {
+        'image_id': worker.image_dict['default'],
+        'size': 0.8,
+        'x_offset': -0.28,
+        'y_offset': 0.05,
+        'level': -2
+    }
+
+    right_worker_dict = left_worker_dict.copy()
+    right_worker_dict['image_id'] = worker.image_variants[worker.second_image_variant]
+    right_worker_dict['x_offset'] *= -1
+
+    if officer.officer_type == 'major': #self.is_battalion:
+        left_worker_dict['image_id'] = worker.image_dict['soldier']
+        left_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        right_worker_dict['image_id'] = worker.image_dict['soldier']
+        right_worker_dict['green_screen'] = global_manager.get('current_country').colors
+    elif officer.officer_type in ['merchant', 'driver']: #self.can_hold_commodities:
+        left_worker_dict['image_id'] = worker.image_dict['porter']
+        right_worker_dict['image_id'] = worker.image_dict['porter']
+
+    officer_dict = {
+        'image_id': officer.image_dict['default'],
+        'size': 0.85,
+        'x_offset': 0,
+        'y_offset': -0.05,
+        'level': -1
+    }
+
+    return([left_worker_dict, right_worker_dict, officer_dict])
+
+def generate_group_name(worker, officer, global_manager, add_veteran=False):
+    if not officer.officer_type == 'major':
+        name = ''
+        for character in global_manager.get('officer_group_type_dict')[officer.officer_type]:
+            if not character == '_':
+                name += character
+            else:
+                name += ' '
+    else: #battalions have special naming convention based on worker type
+        if worker.worker_type == 'European':
+            name = 'imperial battalion'
+        else:
+            name = 'colonial battalion'
+    if add_veteran and officer.veteran:
+        name = 'veteran ' + name
+    return(name)
+
+def generate_group_movement_points(worker, officer, global_manager, generate_max=False):
+    if generate_max:
+        max_movement_points = officer.max_movement_points
+        if officer.officer_type == 'driver' and officer.veteran:
+            max_movement_points = 6
+        return(max_movement_points)
+    else:
+        max_movement_points = generate_group_movement_points(worker, officer, global_manager, generate_max=True)
+        worker_movement_ratio_remaining = worker.movement_points / worker.max_movement_points
+        officer_movement_ratio_remaining = officer.movement_points / officer.max_movement_points
+        if worker_movement_ratio_remaining > officer_movement_ratio_remaining:
+            return(math.floor(max_movement_points * officer_movement_ratio_remaining))
+        else:
+            return(math.floor(max_movement_points * worker_movement_ratio_remaining))
