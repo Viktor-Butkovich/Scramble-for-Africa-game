@@ -2349,6 +2349,14 @@ class reorganize_unit_button(button):
                 unit = input[1]
             else:
                 unit = input[0]
+            if unit.is_group:
+                if not (unit.can_hold_commodities and len(unit.get_held_commodities()) > 0):
+                    procedure = 'split'
+            elif unit.is_vehicle:
+                if unit.contained_mobs:
+                    procedure = 'disembark'
+                else:
+                    procedure = 'uncrew'
         elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
             procedure = 'merge'
             if input[0].is_officer:
@@ -2357,6 +2365,23 @@ class reorganize_unit_button(button):
             else:
                 officer = input[1]
                 worker = input[0]
+        elif (input[0].is_vehicle and (not input[0].has_crew) and input[1].is_worker) or (input[1].is_vehicle and (not input[1].has_crew) and input[0].is_worker):
+            procedure = 'crew'
+            if input[0].is_vehicle:
+                vehicle = input[0]
+                worker = input[1]
+            else:
+                vehicle = input[1]
+                worker = input[0]
+        elif (input[0].is_vehicle and input[0].has_crew and not input[1].is_vehicle) or (input[1].is_vehicle and input[1].has_crew and not input[1].is_vehicle):
+            procedure = 'embark'
+            if input[0].is_vehicle:
+                vehicle = input[0]
+                passenger = input[1]
+            else:
+                vehicle = input[1]
+                passenger = input[0]
+
 
         required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
                               'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
@@ -2372,37 +2397,66 @@ class reorganize_unit_button(button):
             }, self.global_manager)],
         } #make sure dummy objects don't accumulate over time, make sure they are removed after being deselected
 
-        if procedure == 'merge':
+        if procedure == 'unchanged':
+            dummy_unit = self.create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes)
+            if input[0] == unit:
+                output = [dummy_unit, 'none']
+            else:
+                output = ['none', dummy_unit]
+        elif procedure == 'split':
+            output = self.handle_split(unit, required_dummy_attributes, dummy_input_dict)
+        elif procedure == 'disembark':
+            output = self.handle_disembark(unit, required_dummy_attributes, dummy_input_dict)
+        elif procedure == 'uncrew':
+            output = self.handle_uncrew(unit, required_dummy_attributes, dummy_input_dict)
+        elif procedure == 'merge':
             if officer.officer_type == 'evangelist' and worker.worker_type != 'religious':
                 procedure = 'invalid'
             else:
                 output = self.handle_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
-
-        if procedure == 'unchanged':
-            #dummy_input_dict['dummy_type'] = unit.init_type 
-            dummy_input_dict['image_id_list'] = unit.get_image_id_list()
-            for attribute in required_dummy_attributes:
-                if hasattr(unit, attribute):
-                    dummy_input_dict[attribute] = getattr(unit, attribute)
-            if input[0] == unit:
-                output = [self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none']
-            else:
-                output = ['none', self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager)]
-
+        elif procedure == 'crew':
+            output = self.handle_crew(vehicle, worker, required_dummy_attributes, dummy_input_dict)
+        elif procedure == 'embark':
+            output = self.handle_embark(vehicle, passenger, required_dummy_attributes, dummy_input_dict)
         if procedure in ['invalid', 'none']:
             output = ['none', 'none']
         output += output #replicates results to also calibrate corresponding tooltip objects
         return(output)
 
+    def handle_split(self, unit, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'split',
+            'unit': unit,
+        }
+        dummy_worker_dict = dummy_input_dict
+        dummy_officer_dict = dummy_input_dict.copy()
+        dummy_worker = self.create_dummy_copy(unit.worker, dummy_worker_dict, required_dummy_attributes)
+        dummy_officer = self.create_dummy_copy(unit.officer, dummy_officer_dict, required_dummy_attributes)
+        return([dummy_officer, dummy_worker])
+
+    def handle_disembark(self, unit, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'disembark',
+            'unit': unit,
+        }
+        return(['none', 'none'])
+
+    def handle_uncrew(self, unit, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'uncrew',
+            'unit': unit,
+        }
+        return(['none', 'none'])
+
     def handle_merge(self, officer, worker, required_dummy_attributes, dummy_input_dict):
         self.procedure_dict = {
             'procedure_type': 'merge',
-                    'officer': officer,
-                    'worker': worker,
+            'officer': officer,
+            'worker': worker,
         }
         for attribute in required_dummy_attributes:
-                    if hasattr(officer, attribute):
-                        dummy_input_dict[attribute] = getattr(officer, attribute)
+            if hasattr(officer, attribute):
+                dummy_input_dict[attribute] = getattr(officer, attribute)
         dummy_input_dict['officer'] = officer
         dummy_input_dict['worker'] = worker
         dummy_input_dict['group_type'] = self.global_manager.get('officer_group_type_dict')[officer.officer_type]
@@ -2420,6 +2474,22 @@ class reorganize_unit_button(button):
         dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer, self.global_manager)
         return([self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none'])
 
+    def handle_crew(self, vehicle, worker, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'crew',
+            'vehicle': vehicle,
+            'worker': worker,
+        }
+        return(['none', 'none'])
+
+    def handle_embark(self, vehicle, passenger, required_dummy_attributes, dummy_input_dict):
+        self.procedure_dict = {
+            'procedure_type': 'embark',
+            'vehicle': vehicle,
+            'passenger': passenger,
+        }
+        return(['none', 'none'])
+
     def on_click(self):
         '''
         Description:
@@ -2429,17 +2499,34 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
-       # self.calibrate('none')
         if main_loop_tools.action_possible(self.global_manager):
             procedure_dict = self.procedure_dict
-            if procedure_dict['procedure_type'] != 'none':
-                if procedure_dict['procedure_type'] == 'merge':
-                    if procedure_dict['worker'].sentry_mode:
-                        procedure_dict['worker'].set_sentry_mode(False)
-                    if procedure_dict['officer'].sentry_mode:
-                        procedure_dict['officer'].set_sentry_mode(False)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    self.global_manager.get('actor_creation_manager').create_group(procedure_dict['worker'], procedure_dict['officer'], self.global_manager)
+            if procedure_dict['procedure_type'] == 'split':
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                procedure_dict['unit'].disband()
+                return
+            elif procedure_dict['procedure_type'] == 'disembark':
+                return
+            elif procedure_dict['procedure_type'] == 'uncrew':
+                return
+            elif procedure_dict['procedure_type'] == 'merge':
+                if procedure_dict['worker'].sentry_mode:
+                    procedure_dict['worker'].set_sentry_mode(False)
+                if procedure_dict['officer'].sentry_mode:
+                    procedure_dict['officer'].set_sentry_mode(False)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                self.global_manager.get('actor_creation_manager').create_group(procedure_dict['worker'], procedure_dict['officer'], self.global_manager)
+            elif procedure_dict['procedure_type'] == 'crew':
+                return
+            elif procedure_dict['procedure_type'] == 'embark':
+                return
+
+    def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes):
+        dummy_input_dict['image_id_list'] = unit.get_image_id_list()
+        for attribute in required_dummy_attributes:
+            if hasattr(unit, attribute):
+                dummy_input_dict[attribute] = getattr(unit, attribute)
+        return(self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager))
 
 class manually_calibrate_button(button):
     def __init__(self, input_dict, global_manager):
