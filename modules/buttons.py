@@ -2329,6 +2329,7 @@ class reorganize_unit_button(button):
         self.input_sources = input_dict['input_sources']
         self.output_destinations = input_dict['output_destinations']
         self.procedure_dict = {}
+        self.manually_calibrate_buttons = []
         super().__init__(input_dict, global_manager)
 
     def calibrate(self, new_actor):
@@ -2338,7 +2339,7 @@ class reorganize_unit_button(button):
             self.output_destinations[index].calibrate(item)
 
     def generate_output(self, input): #need to now create buttons that upload target units to merge interface while also excluding involved buttons from normal calibration
-        #assuming length of input is 2
+        #assuming first 2 inputs contain relevant units
         procedure = 'none'
         self.procedure_dict = {'procedure_type': 'none'}
         if input[0] == 'none' and input[1] == 'none':
@@ -2355,8 +2356,10 @@ class reorganize_unit_button(button):
             elif unit.is_vehicle:
                 if unit.contained_mobs:
                     procedure = 'disembark'
-                else:
+                elif unit.crew != 'none':
                     procedure = 'uncrew'
+                else:
+                    procedure = 'unchanged'
         elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
             procedure = 'merge'
             if input[0].is_officer:
@@ -2438,15 +2441,26 @@ class reorganize_unit_button(button):
         self.procedure_dict = {
             'procedure_type': 'disembark',
             'unit': unit,
+            'passenger': unit.contained_mobs[0]
         }
-        return(['none', 'none'])
+        disorganized = self.procedure_dict['passenger'].disorganized
+        if unit.vehicle_type == 'ship' and not unit.images[0].current_cell.has_building('port'):
+            disorganized = True
+        dummy_passenger = self.create_dummy_copy(self.procedure_dict['passenger'], dummy_input_dict.copy(), required_dummy_attributes, {'disorganized': disorganized})
+        dummy_vehicle = self.create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes)
+        dummy_vehicle.contained_mobs = utility.remove_from_list(dummy_vehicle.contained_mobs, self.procedure_dict['passenger']) #remove(self.procedure_dict['passenger'])
+        dummy_passenger.disorganized = disorganized
+        return([dummy_vehicle,  dummy_passenger])
 
     def handle_uncrew(self, unit, required_dummy_attributes, dummy_input_dict):
         self.procedure_dict = {
             'procedure_type': 'uncrew',
             'unit': unit,
         }
-        return(['none', 'none'])
+        dummy_worker = self.create_dummy_copy(unit.crew, dummy_input_dict.copy(), required_dummy_attributes)
+        dummy_vehicle = self.create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes, {'has_crew': False})
+        dummy_vehicle.has_crew = False
+        return([dummy_vehicle, dummy_worker])
 
     def handle_merge(self, officer, worker, required_dummy_attributes, dummy_input_dict):
         self.procedure_dict = {
@@ -2480,7 +2494,10 @@ class reorganize_unit_button(button):
             'vehicle': vehicle,
             'worker': worker,
         }
-        return(['none', 'none'])
+        dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes, {'has_crew': True})
+        dummy_vehicle.has_crew = True
+        dummy_vehicle.crew = worker
+        return([dummy_vehicle, 'none'])
 
     def handle_embark(self, vehicle, passenger, required_dummy_attributes, dummy_input_dict):
         self.procedure_dict = {
@@ -2488,7 +2505,9 @@ class reorganize_unit_button(button):
             'vehicle': vehicle,
             'passenger': passenger,
         }
-        return(['none', 'none'])
+        dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes)
+        dummy_vehicle.contained_mobs = dummy_vehicle.contained_mobs + [passenger] #gets around contained mobs being a shallow copy from original
+        return([dummy_vehicle, 'none'])
 
     def on_click(self):
         '''
@@ -2502,13 +2521,34 @@ class reorganize_unit_button(button):
         if main_loop_tools.action_possible(self.global_manager):
             procedure_dict = self.procedure_dict
             if procedure_dict['procedure_type'] == 'split':
+                #verify that sentry mode works correctly here
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                worker, officer = procedure_dict['unit'].worker, procedure_dict['unit'].officer
                 procedure_dict['unit'].disband()
-                return
-            elif procedure_dict['procedure_type'] == 'disembark':
-                return
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
+                self.manually_calibrate_buttons[1].on_click()
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), officer)
+                self.manually_calibrate_buttons[0].on_click()
+
+            elif procedure_dict['procedure_type'] == 'disembark': #need to add train station logic
+                if procedure_dict['passenger'].sentry_mode:
+                    procedure_dict['passenger'].set_sentry_mode(False)
+                procedure_dict['passenger'].selection_sound()
+                procedure_dict['passenger'].disembark_vehicle(procedure_dict['unit'])
+
             elif procedure_dict['procedure_type'] == 'uncrew':
-                return
+                if len(procedure_dict['unit'].get_held_commodities()) == 0:
+                    crew = procedure_dict['unit'].crew
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                    crew.uncrew_vehicle(procedure_dict['unit'])
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), crew)
+                    self.manually_calibrate_buttons[1].on_click()
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['unit'])
+                    self.manually_calibrate_buttons[0].on_click()
+                else:
+                    text_tools.print_to_screen('You can not remove the crew from a ' + procedure_dict['unit'].vehicle_type + ' with passengers or cargo.', self.global_manager)
+                #verify that train station logic is correct
+
             elif procedure_dict['procedure_type'] == 'merge':
                 if procedure_dict['worker'].sentry_mode:
                     procedure_dict['worker'].set_sentry_mode(False)
@@ -2516,13 +2556,23 @@ class reorganize_unit_button(button):
                     procedure_dict['officer'].set_sentry_mode(False)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 self.global_manager.get('actor_creation_manager').create_group(procedure_dict['worker'], procedure_dict['officer'], self.global_manager)
+                self.manually_calibrate_buttons[0].on_click()
+
             elif procedure_dict['procedure_type'] == 'crew':
-                return
+                procedure_dict['worker'].crew_vehicle(procedure_dict['vehicle'])
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['vehicle'])
+                self.manually_calibrate_buttons[0].on_click() #calibrates as if top input button were pressed, allowing immediate reversal of procedure
+
             elif procedure_dict['procedure_type'] == 'embark':
+                procedure_dict['passenger'].embark_vehicle(procedure_dict['vehicle'])
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['vehicle'])
+                self.manually_calibrate_buttons[0].on_click() #calibrates as if top input button were pressed, allowing immediate reversal of procedure
                 return
 
-    def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes):
-        dummy_input_dict['image_id_list'] = unit.get_image_id_list()
+    def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
+        dummy_input_dict['image_id_list'] = unit.get_image_id_list(override_values)
         for attribute in required_dummy_attributes:
             if hasattr(unit, attribute):
                 dummy_input_dict[attribute] = getattr(unit, attribute)
@@ -2533,6 +2583,8 @@ class manually_calibrate_button(button):
         input_dict['button_type'] = 'manually calibrate'
         self.input_source = input_dict['input_source'] #str
         self.output_destinations = input_dict['output_destinations'] #list of calibratable objects
+        if 'reorganize_button' in input_dict and input_dict['reorganize_button']:
+            input_dict['reorganize_button'].manually_calibrate_buttons.append(self)
         super().__init__(input_dict, global_manager)
 
     def on_click(self):

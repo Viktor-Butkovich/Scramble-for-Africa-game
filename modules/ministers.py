@@ -278,7 +278,7 @@ class minister():
         save_dict['portrait_sections'] = self.portrait_sections
         return(save_dict)
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 

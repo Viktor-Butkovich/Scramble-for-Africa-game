@@ -173,7 +173,7 @@ class minister_background_image(mob_background_image):
     '''
     Image that appears behind a minister and changes to match their current office
     '''
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 

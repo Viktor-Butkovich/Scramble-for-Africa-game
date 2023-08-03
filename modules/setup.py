@@ -1873,7 +1873,7 @@ def unit_organization_interface_setup(global_manager):
         'init_type': 'reorganize unit button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/merge_button.png',
-        'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image],
+        'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image, lhs_top_tooltip, lhs_bottom_tooltip],
         'output_destinations': [rhs_top_mob_free_image, rhs_bottom_mob_free_image, rhs_top_tooltip, rhs_bottom_tooltip],
         'member_config': {'calibrate_exempt': False}
     }
@@ -1889,6 +1889,7 @@ def unit_organization_interface_setup(global_manager):
         'image_id': 'buttons/merge_button.png',
         'input_source': 'displayed_mob',
         'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
+        'reorganize_button': reorganize_unit_button,
     }
     manually_calibrate_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1915,6 +1916,7 @@ def unit_organization_interface_setup(global_manager):
         'image_id': 'buttons/merge_button.png',
         'input_source': 'displayed_mob',
         'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
+        'reorganize_button': reorganize_unit_button,
     }
     manually_calibrate_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 

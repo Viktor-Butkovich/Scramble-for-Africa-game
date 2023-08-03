@@ -159,7 +159,7 @@ class mob(actor):
         '''
         self.temp_movement_disabled = True
     
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -169,13 +169,22 @@ class mob(actor):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
-        if self.disorganized:
+        if 'disorganized' in override_values:
+            disorganized = override_values['disorganized']
+        else:
+            disorganized = self.disorganized
+        if 'has_canoes' in override_values:
+            has_canoes = override_values['has_canoes']
+        else:
+            has_canoes = self.disorganized
+
+        image_id_list = super().get_image_id_list(override_values)
+        if disorganized:
             if self.is_npmob and self.npmob_type == 'beast':
                 image_id_list.append('misc/injured_icon.png')
             else:
                 image_id_list.append('misc/disorganized_icon.png')
-        if self.has_canoes:
+        if has_canoes:
             if self.in_canoes:
                 image_id_list.append('misc/canoes.png')
         return(image_id_list)

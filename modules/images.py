@@ -102,7 +102,7 @@ class image():
         '''
         self.set_image(self.get_image_id_list())
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -852,7 +852,7 @@ class minister_type_image(tooltip_free_image):
             self.set_image('ministers/icons/' + keyword + '.png')
         self.update_image_bundle()
             
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -862,7 +862,7 @@ class minister_type_image(tooltip_free_image):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         if self.current_minister == 'none':
             image_id_list.append('misc/warning_icon.png')
         return(image_id_list)

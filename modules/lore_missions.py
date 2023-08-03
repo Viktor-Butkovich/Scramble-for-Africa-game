@@ -230,7 +230,7 @@ class possible_artifact_location():
         self.proven_false = new_proven_false
         self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile.update_image_bundle()
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 

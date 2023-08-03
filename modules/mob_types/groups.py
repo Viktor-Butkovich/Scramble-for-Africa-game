@@ -364,7 +364,7 @@ class group(pmob):
         self.officer.die('none')
         self.worker.die('none')
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -375,7 +375,7 @@ class group(pmob):
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
         #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #group default image is empty
         image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer, self.global_manager)
         return(image_id_list)
