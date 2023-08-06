@@ -7,7 +7,8 @@ from . import images
 class interface_element():
     '''
     Abstract base interface element class
-    Object that can be contained in an interface collection and has a location, rect, and image bundle with particular conditions for displaying, along with an optional tooltip when displayed
+    Object that can be contained in an interface collection and has a location, rect, and image bundle with particular conditions for displaying, along with an optional 
+        tooltip when displayed
     '''
     def __init__(self, input_dict, global_manager):
         '''
@@ -57,6 +58,11 @@ class interface_element():
             self.create_image(input_dict['image_id'])
 
     def create_image(self, image_id):
+        '''
+        Description:
+            Creates an image associated with this interface element - can be overridden by subclasses to allow different kinds of images to be created at the same initialization 
+                step
+        '''
         self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
 
     def can_show(self):
@@ -93,12 +99,6 @@ class interface_element():
         if self.has_parent_collection:
             self.x_offset = self.x - self.parent_collection.x
             self.y_offset = self.y - self.parent_collection.y
-
-    def set_origin_rect(self, new_rect):
-        self.x = new_rect.x
-        self.Rect.x = self.x
-        self.y = new_rect.y - self.height + self.global_manager.get('display_height')
-        self.Rect.y = new_rect.y
 
     def set_modes(self, new_modes):
         '''
@@ -261,6 +261,11 @@ class interface_collection(interface_element):
             customize_button_x_offset += customize_button_size + 5
 
     def create_image(self, image_id):
+        '''
+        Description:
+            Creates an image associated with this interface element - overrides parent version to create a collection image instead of the default button images at the same
+                initialization step
+        '''
         self.image = images.collection_image(self, self.width, self.height, image_id, self.global_manager)
 
     def calibrate(self, new_actor, override_exempt=False):
@@ -364,6 +369,17 @@ class interface_collection(interface_element):
             member.set_modes(new_modes)
 
     def allow_show(self, member, ignore_minimized):
+        '''
+        Description:
+            Returns whether this collection would allow the inputted member to be shown, given an ignore minimized value - allows collection to have control over whether 
+                members are shown without modifying either can_show logic - 
+                for example, for a tabbed collection, the collection wants control over whether a member is shown based on which tab is selected but doesn't want this logic
+                to interfere with its own can_show logic, since the overall tabbed collection should show regardless of which tab is selected
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear during the current game mode, otherwise returns False
+        '''
         return(self.can_show(ignore_minimized))
 
     def can_show(self, ignore_minimized = False):
@@ -395,7 +411,25 @@ class interface_collection(interface_element):
                     self.image.update_state(self.image.x, self.image.y, self.Rect.width, self.Rect.height)
 
 class tabbed_collection(interface_collection):
+    '''
+    High-level collection that controls a collection of tab buttons that each select an associated member collection "tab" to be shown, with only the tab buttons and the
+        currently selected tab showing at a time
+    '''
     def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         self.tabbed_members = []
         self.current_tabbed_member = None
         super().__init__(input_dict, global_manager)
@@ -410,6 +444,17 @@ class tabbed_collection(interface_collection):
         self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element(tabs_collection_input_dict, global_manager)
 
     def allow_show(self, member, ignore_minimized):
+        '''
+        Description:
+            Returns whether this collection would allow the inputted member to be shown, given an ignore minimized value - allows collection to have control over whether 
+                members are shown without modifying either can_show logic - 
+                for example, for a tabbed collection, the collection wants control over whether a member is shown based on which tab is selected but doesn't want this logic
+                to interfere with its own can_show logic, since the overall tabbed collection should show regardless of which tab is selected
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear during the current game mode, otherwise returns False
+        '''
         if member in self.tabbed_members and member != self.current_tabbed_member:
             return(False)
         return(super().allow_show(member, ignore_minimized))
@@ -417,7 +462,8 @@ class tabbed_collection(interface_collection):
     def add_member(self, new_member, member_config={}):
         '''
         Description:
-            Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates
+            Adds an existing interface element as a member of this collection and sets its origin coordinates relative to this collection's origin coordinates. If adding a
+                collection that is designated as a tab, it is automatically linked with a new tab button
         Input:
 
         Output:
@@ -444,8 +490,27 @@ class tabbed_collection(interface_collection):
             if len(self.tabbed_members) == 1:
                 self.current_tabbed_member = new_member
 
-class ordered_collection(interface_collection): #work on ordered collection documentation, remove info display documentation, add limited length ordered collections
-    def __init__(self, input_dict, global_manager): #and change inventory display to a collection so that it orders correctly
+class ordered_collection(interface_collection):
+    '''
+    Collection that moves its members to display each visible element in order
+    '''
+    def __init__(self, input_dict, global_manager): #change inventory display to a collection so that it orders correctly
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'separation' = scaling.scale_height(5, global_manager): int value - Distance to set between ordered members
+                'direction' = 'vertical': string value - Direction to order members in
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
         if not 'separation' in input_dict:
             input_dict['separation'] = scaling.scale_height(5, global_manager)
         if not 'direction' in input_dict:
@@ -514,10 +579,11 @@ class ordered_collection(interface_collection): #work on ordered collection docu
             self.order_exempt_list.remove(removed_member)
         super().remove_member(removed_member)
 
-    def update_collection(self): #def order_members(self):
+    def update_collection(self):
         '''
         Description:
-            Changes locations of collection members to put all visible members in order while skipping hidden ones
+            Changes locations of collection members to put all visible members in order while skipping hidden ones. Each overlapped element follows ordering logic but
+                causes no change in the current ordering location (causing next element to appear at its location), while each exempt element ignores ordering logic
         Input:
             None
         Output:
@@ -535,7 +601,7 @@ class ordered_collection(interface_collection): #work on ordered collection docu
                     new_y = current_y + member.order_y_offset
                     if (member.x, member.y) != (new_x, new_y):
                         effective_y = current_y + member.order_y_offset
-                        if hasattr(member, 'order_overlap_list') and member.is_info_display: #ordered collections have coordinates from top left instead of bottom left
+                        if hasattr(member, 'order_overlap_list') and member.is_info_display: #account for ordered collections having coordinates from top left instead of bottom left
                             effective_y += member.height
                         member.set_origin(self.x + member.order_x_offset, effective_y)
 

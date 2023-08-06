@@ -541,14 +541,22 @@ def generate_group_image_id_list(worker, officer, global_manager):
     right_worker_dict['image_id'] = worker.image_variants[worker.second_image_variant]
     right_worker_dict['x_offset'] *= -1
 
-    if officer.officer_type == 'major': #self.is_battalion:
-        left_worker_dict['image_id'] = worker.image_dict['soldier']
+    if officer.officer_type == 'major':
+        if 'soldier' in worker.image_dict:
+            soldier = worker.image_dict['soldier']
+        else:
+            soldier = worker.image_dict['default']
+        left_worker_dict['image_id'] = soldier
         left_worker_dict['green_screen'] = global_manager.get('current_country').colors
-        right_worker_dict['image_id'] = worker.image_dict['soldier']
+        right_worker_dict['image_id'] = soldier
         right_worker_dict['green_screen'] = global_manager.get('current_country').colors
-    elif officer.officer_type in ['merchant', 'driver']: #self.can_hold_commodities:
-        left_worker_dict['image_id'] = worker.image_dict['porter']
-        right_worker_dict['image_id'] = worker.image_dict['porter']
+    elif officer.officer_type in ['merchant', 'driver']:
+        if 'porter' in worker.image_dict:
+            porter = worker.image_dict['porter']
+        else:
+            porter = worker.image_dict['default']
+        left_worker_dict['image_id'] = porter
+        right_worker_dict['image_id'] = porter
 
     officer_dict = {
         'image_id': officer.image_dict['default'],

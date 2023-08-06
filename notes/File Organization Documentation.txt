@@ -239,6 +239,8 @@ SFA folder
 	        	class commodity_button
 	        	class show_previous_financial_report_button
 				class tab_button
+				class reorganize_unit_button
+				class manually_calibrate_button
 
         cells.py
             imports pygame, random, actor_utility

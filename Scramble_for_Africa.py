@@ -24,7 +24,7 @@ try:
     setup.trial_screen_setup(global_manager)
     setup.new_game_setup_screen_setup(global_manager)
 
-    setup.mob_interface_setup(global_manager) 
+    setup.mob_interface_setup(global_manager)
     setup.tile_interface_setup(global_manager)
     setup.inventory_interface_setup(global_manager)
     setup.unit_organization_interface_setup(global_manager)
@@ -38,3 +38,4 @@ try:
 
 except Exception: #displays error message and records error message in crash log file
     setup.manage_crash(Exception)
+#update documentation, start on investigation

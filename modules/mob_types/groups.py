@@ -45,8 +45,8 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        if self.officer.veteran:
-            self.promote()
+        #if self.officer.veteran:
+        #    self.promote()
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -65,6 +65,8 @@ class group(pmob):
         self.default_min_crit_success = 6
         self.set_group_type('none')
         self.update_image_bundle()
+        if self.officer.veteran:
+            self.promote()
 
     def replace_worker(self, new_worker_type):
         '''
