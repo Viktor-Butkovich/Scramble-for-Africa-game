@@ -171,7 +171,7 @@ class zoom_notification(notification):
         if self.global_manager.get('strategic_map_grid') in target.grids:
             self.global_manager.get('minimap_grid').calibrate(target.x, target.y)
         if target.actor_type == 'tile':
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), target)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), target)
             if not target.cell.grid.mini_grid == 'none':
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
         elif target.actor_type == 'mob':
@@ -182,4 +182,4 @@ class zoom_notification(notification):
                    target.grids[0].mini_grid.calibrate(target.x, target.y)
             else: #if hidden mob, move to location and select tile
                 target.grids[0].mini_grid.calibrate(target.x, target.y)
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), target.grids[0].find_cell(target.x, target.y).tile)
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), target.grids[0].find_cell(target.x, target.y).tile)

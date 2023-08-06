@@ -135,7 +135,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile().inventory[commodity] += change #doesn't call other tile's function to avoid recursion
             if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def set_inventory(self, commodity, new_value):
         '''
@@ -152,7 +152,7 @@ class tile(actor): #to do: make terrain tiles a subclass
             if not self.grid.attached_grid == 'none': #only get equivalent if there is an attached grid
                 self.get_equivalent_tile.inventory[commodity] = new_value
             if self.global_manager.get('displayed_tile') == self or self.global_manager.get('displayed_tile') == self.get_equivalent_tile():
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def get_main_grid_coordinates(self):
         '''

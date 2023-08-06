@@ -45,9 +45,9 @@ class actor_display_label(label):
         m_increment = scaling.scale_width(11, self.global_manager)
         l_increment = scaling.scale_width(30, self.global_manager)
         
-        if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
-            #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
-            self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
+        #if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
+        #    #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
+        #    self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
         s_size = self.height + s_increment
         m_size = self.height + m_increment
         l_size = self.height + l_increment
@@ -91,11 +91,13 @@ class actor_display_label(label):
             input_dict['image_id'] = 'buttons/crew_ship_button.png'
             input_dict['keybind_id'] = 'buttons/crew_ship_button.png'
             input_dict['keybind_id'] = pygame.K_m
+            input_dict['vehicle_type'] = 'ship'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'worker crew vehicle button'
             input_dict['image_id'] = 'buttons/crew_train_button.png'
             input_dict['keybind_id'] = pygame.K_m
+            input_dict['vehicle_type'] = 'train'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'work crew to building button'
@@ -420,7 +422,8 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-            self.attached_images.append(minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager))
+            attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
+            self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
             self.image_y_displacement = 5
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
@@ -446,7 +449,7 @@ class actor_display_label(label):
                 self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             if 'trial' in self.modes:
                 input_dict['init_type'] = 'fabricate evidence button'
-                input_dict['width'], input_dict['height'] = (l_size, l_size)
+                input_dict['width'], input_dict['height'] = (m_size, m_size)
                 self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
                 
                 input_dict['init_type'] = 'bribe judge button'
@@ -552,7 +555,9 @@ class actor_display_label(label):
                     tooltip_text.append('This unit can hold a maximum of ' + str(self.actor.inventory_capacity) + ' commodities')
             elif self.actor_label_type == 'tile inventory capacity':
                 if not self.actor == 'none':
-                    if self.actor.can_hold_infinite_commodities:
+                    if not self.actor.cell.visible:
+                        tooltip_text.append('This tile has not been discovered')
+                    elif self.actor.can_hold_infinite_commodities:
                         tooltip_text.append('This tile can hold infinite commodities.')
                     else:
                         tooltip_text.append('This tile currently contains ' + str(self.actor.get_inventory_used()) + ' commodities')
@@ -791,8 +796,11 @@ class actor_display_label(label):
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').population))
                     elif self.actor_label_type == 'native available workers':
                         self.set_label(self.message_start + str(self.actor.cell.get_building('village').available_workers))
+
             elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
-                if self.actor.can_hold_infinite_commodities:
+                if self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible:
+                    self.set_label(self.message_start + 'n/a')
+                elif self.actor.can_hold_infinite_commodities:
                     self.set_label(self.message_start + 'unlimited')
                 else:
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
@@ -801,7 +809,6 @@ class actor_display_label(label):
                 if self.actor.controllable:
                     if not self.actor.controlling_minister == 'none':
                         self.set_label(self.message_start + self.actor.controlling_minister.name)
-                    self.attached_images[0].calibrate(self.actor.controlling_minister)
                     
             elif self.actor_label_type == 'evidence':
                 if new_actor.fabricated_evidence == 0:
@@ -851,32 +858,30 @@ class actor_display_label(label):
             None
         '''
         super().set_label(new_message)
-        x_displacement = 0
-        for current_button_index in range(len(self.attached_buttons)):
-            current_button = self.attached_buttons[current_button_index]
-            if current_button.can_show():
-                current_button.x = self.x + self.width + 5 + x_displacement
-                current_button.Rect.x = current_button.x
-                current_button.outline.x = current_button.x - current_button.outline_width
-                x_displacement += (current_button.width + 5)
+        self.update_label_button_locations()
 
-    def set_y(self, new_y):
+    def set_origin(self, new_x, new_y):
         '''
         Description:
-            Sets this label's y position and that of its attached buttons
+            Sets this interface element's location at the inputted coordinates
         Input:
-            int new_y: New y coordinate to set this label and its buttons to
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
         Output:
             None
         '''
-        self.y = new_y
-        self.image.y = self.y
-        self.Rect.y = self.global_manager.get('display_height') - (self.y + self.height)
-        self.image.Rect = self.Rect    
-        for current_button in self.attached_buttons:
-            current_button.set_y(self)
+        super().set_origin(new_x, new_y)
+        self.update_label_button_locations()
         for current_image in self.attached_images:
-            current_image.set_y(self)
+            current_image.set_origin(current_image.x, new_y)
+
+    def update_label_button_locations(self):
+        x_displacement = 0
+        for current_button in self.attached_buttons:
+            if current_button.can_show():
+                current_button.set_origin(self.x + self.width + 5 + x_displacement, self.y - ((current_button.height - self.height) / 2))
+                x_displacement += (current_button.width + 5)
+
 
     def can_show(self):
         '''
@@ -891,8 +896,6 @@ class actor_display_label(label):
         if result ==  False:
             return(False)
         elif self.actor == 'none':
-            return(False)
-        elif self.actor_label_type == 'tile inventory capacity' and not self.actor.cell.visible: #do not show inventory capacity in unexplored tiles
             return(False)
         elif self.actor_label_type == 'resource' and (self.actor.cell.resource == 'none' or (not self.actor.cell.visible) or self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village')))): #self.actor.actor_type == 'tile' and self.actor.grid.is_abstract_grid or (self.actor.cell.visible and (self.actor.cell.has_building('resource') or self.actor.cell.has_building('village'))): #do not show resource label on the Europe tile
             return(False)
@@ -1154,19 +1157,22 @@ class commodity_display_label(actor_display_label):
         self.commodity_index = input_dict['commodity_index']
         self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
         input_dict = {
-            'coordinates': (self.x, self.y),
+            'coordinates': (self.x, self.y + 200),
             'width': self.height,
             'height': self.height,
             'modes': self.modes,
             'attached_label': self,
             'init_type': 'label button'
         }
+
+        self.insert_collection_above()
+        self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
+        input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
             input_dict['button_type'] = 'drop commodity'
             input_dict['image_id'] = 'buttons/commodity_drop_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
+            
             input_dict['button_type'] = 'drop all commodity'
             input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
@@ -1176,17 +1182,14 @@ class commodity_display_label(actor_display_label):
             input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + self.height + 6, input_dict['coordinates'][1])
             input_dict['button_type'] = 'pick up all commodity'
             input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 2), input_dict['coordinates'][1])
             input_dict['button_type'] = 'sell commodity'
             input_dict['image_id'] = 'buttons/commodity_sell_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
             
-            input_dict['coordinates'] = (input_dict['coordinates'][0] + ((self.height + 6) * 3), input_dict['coordinates'][1])
             input_dict['button_type'] = 'sell all commodity'
             input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))

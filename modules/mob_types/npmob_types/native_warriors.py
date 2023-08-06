@@ -93,7 +93,7 @@ class native_warriors(npmob):
         super().remove()
         self.origin_village.attached_warriors = utility.remove_from_list(self.origin_village.attached_warriors, self)
         if self.origin_village.population == 0 and len(self.origin_village.attached_warriors) == 0:
-            self.origin_village.aggressiveness = 0
+            self.origin_village.set_aggressiveness(0)
 
     def check_despawn(self):
         '''
@@ -109,7 +109,7 @@ class native_warriors(npmob):
             self.despawning = True
             self.origin_village.change_population(1)
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -119,7 +119,7 @@ class native_warriors(npmob):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #remove default middle warrior
         left_warrior_dict = {
             'image_id': self.image_dict['default'],

@@ -282,7 +282,7 @@ class building(actor):
         '''
         return(self.get_build_cost() / 2)
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -292,7 +292,7 @@ class building(actor):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         if self.damaged:
             image_id_list.remove(self.image_dict['default'])
             image_id_list.append(self.image_dict['damaged'])
@@ -401,7 +401,7 @@ class infrastructure_building(building):
         '''
         return(False)
     
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -411,7 +411,7 @@ class infrastructure_building(building):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         if self.cell.terrain != 'water':
             for direction in ['up', 'down', 'left', 'right']:
                 adjacent_cell = self.cell.adjacent_cells[direction]
@@ -638,7 +638,7 @@ class warehouses(building):
         self.warehouse_level += 1
         self.set_default_inventory_capacity(self.default_inventory_capacity + 9)
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -900,9 +900,9 @@ class slums(building):
         }
         super().__init__(from_save, input_dict, global_manager)
         if self.cell.tile == self.global_manager.get('displayed_tile'):
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile) #show self after creation
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile) #show self after creation
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -912,7 +912,7 @@ class slums(building):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default'])
         if self.available_workers <= 2:
             image_id = self.size_image_dict['small']
@@ -960,7 +960,7 @@ class slums(building):
             self.available_workers = 0
         self.cell.tile.update_image_bundle()
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
         if self.available_workers == 0:
             self.remove()
             

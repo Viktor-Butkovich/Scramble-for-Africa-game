@@ -150,7 +150,7 @@ class worker_crew_vehicle_button(label_button):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
         self.was_showing = result
         return(result)
 
@@ -454,7 +454,7 @@ class uncrew_vehicle_button(label_button):
                 crew = vehicle.crew
                 if len(vehicle.contained_mobs) == 0 and len(vehicle.get_held_commodities()) == 0:
                     crew.uncrew_vehicle(vehicle)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), vehicle)
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), vehicle)
                 else:
                     text_tools.print_to_screen('You can not remove the crew from a ' + self.vehicle_type + ' with passengers or cargo.', self.global_manager)
             else:
@@ -547,7 +547,6 @@ class merge_button(label_button):
                     text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
             else:
                 text_tools.print_to_screen('You are busy and can not form a group.', self.global_manager)
-
 
 class split_button(label_button):
     '''
@@ -738,7 +737,7 @@ class disable_sentry_mode_button(label_button):
             self.showing_outline = True
             if main_loop_tools.action_possible(self.global_manager):         
                 self.attached_label.actor.set_sentry_mode(False)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
             else:
                 text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
 
@@ -1146,7 +1145,7 @@ class embark_vehicle_button(label_button):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
         self.was_showing = result
         return(result)
     
@@ -1246,7 +1245,7 @@ class cycle_passengers_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 moved_mob = self.attached_label.actor.contained_mobs.pop(0)
                 self.attached_label.actor.contained_mobs.append(moved_mob)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self.attached_label.actor) #updates mob info display list to show changed passenger order
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor) #updates mob info display list to show changed passenger order
             else:
                 text_tools.print_to_screen('You are busy and can not cycle passengers.', self.global_manager)
 
@@ -1316,7 +1315,7 @@ class cycle_work_crews_button(label_button):
             if main_loop_tools.action_possible(self.global_manager):
                 moved_mob = self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.pop(0)
                 self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.attached_label.actor) #updates tile info display list to show changed work crew order
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_label.actor) #updates tile info display list to show changed work crew order
             else:
                 text_tools.print_to_screen('You are busy and can not cycle work crews.', self.global_manager)
 
@@ -3443,7 +3442,7 @@ class fabricate_evidence_button(label_button):
                         ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
                     defense.fabricated_evidence += 1
                     defense.corruption_evidence += 1
-                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display_list'), defense) #updates trial display with new evidence
+                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display'), defense) #updates trial display with new evidence
                 else:
                     text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
             else:
@@ -3742,7 +3741,7 @@ class automatic_route_button(label_button):
                         if attached_mob.can_follow_automatic_route():
                             attached_mob.follow_automatic_route()
                             attached_mob.remove_from_turn_queue()
-                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), attached_mob) #updates mob info display if automatic route changed anything
+                            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), attached_mob) #updates mob info display if automatic route changed anything
                         else:
                             text_tools.print_to_screen('This unit is currently not able to progress along its designated route.', self.global_manager)
                 else:

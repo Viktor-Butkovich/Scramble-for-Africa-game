@@ -30,6 +30,8 @@ class actor():
         '''
         self.global_manager = global_manager
         self.from_save = from_save
+        if 'init_type' in input_dict:
+            self.init_type = input_dict['init_type']
         global_manager.get('actor_list').append(self)
         self.modes = input_dict['modes']
         if self.from_save:
@@ -125,10 +127,10 @@ class actor():
                 current_image.set_image(new_image)
         if self.actor_type == 'mob':
             if self.global_manager.get('displayed_mob') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
         elif self.actor_type == 'tile':
             if self.global_manager.get('displayed_tile') == self:
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self)
 
     def load_inventory(self, inventory_dict):
         '''
@@ -503,7 +505,7 @@ class actor():
             self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -515,8 +517,6 @@ class actor():
         '''
         image_id_list = []
         image_id_list.append(self.image_dict['default'])
-        #image_id_list.append(self.images[0].image)
-        #print(self.image[0].image)
         return(image_id_list)
 
     def update_image_bundle(self):

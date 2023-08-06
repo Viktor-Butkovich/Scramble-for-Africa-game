@@ -38,7 +38,7 @@ class officer(pmob):
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
         if not from_save:
             self.veteran = False
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for is_officer changing
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_officer changing
             self.selection_sound()
         else:
             self.veteran = input_dict['veteran']
@@ -91,7 +91,7 @@ class officer(pmob):
         self.set_name('veteran ' + self.name)
         self.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with veteran icon
 
     def load_veteran(self):
         '''
@@ -104,7 +104,7 @@ class officer(pmob):
         '''
         self.promote()
         if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
 
     def can_show_tooltip(self):
         '''
@@ -152,7 +152,7 @@ class officer(pmob):
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
 
     def remove(self):
         '''

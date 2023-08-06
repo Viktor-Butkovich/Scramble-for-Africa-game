@@ -15,6 +15,7 @@ from .mob_types.npmob_types import native_warriors
 from .mob_types.npmob_types import beasts
 from .mob_types import vehicles
 from .mob_types import officers
+from . import dummy
 from . import mobs
 from . import buildings
 from . import ministers
@@ -31,6 +32,7 @@ from . import choice_notifications
 from . import instructions
 from . import action_notifications
 from . import europe_transactions
+from . import interface_elements
 from .actor_display_tools import buttons as actor_display_buttons
 from .actor_display_tools import labels as actor_display_labels
 
@@ -132,6 +134,21 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
 
         return(new_actor)
 
+    def create_dummy(self, input_dict, global_manager):
+        '''
+        Description:
+            Creates a special fake version of a unit to display as a hypothetical, with the same images and tooltips as a real unit
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize the object, with contents varying based on the type of object
+                'init_type': string value - Always required, determines type of object created
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            actor: Returns the unit that was created
+        '''
+        #make sure dummies include things like veteran stars, disorganized, etc.
+        new_actor = dummy.dummy(input_dict, global_manager)
+        return(new_actor)
+
     def create_interface_element(self, input_dict, global_manager):
         '''
         Description:
@@ -147,6 +164,14 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         #interface elements
         if init_type == 'button':
             new_element = buttons.button(input_dict, global_manager)
+        if init_type == 'interface element':
+            new_element = interface_elements.interface_element(input_dict, global_manager)
+        elif init_type == 'interface collection':
+            new_element = interface_elements.interface_collection(input_dict, global_manager)
+        elif init_type == 'ordered collection':
+            new_element = interface_elements.ordered_collection(input_dict, global_manager)
+        elif init_type == 'tabbed collection':
+            new_element = interface_elements.tabbed_collection(input_dict, global_manager)
         if init_type.endswith('button'):
             base = init_type.removesuffix('button')
             #buttons buttons
@@ -170,6 +195,12 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.commodity_button(input_dict, global_manager)
                 elif base == 'show previous financial report':
                     new_element = buttons.show_previous_financial_report_button(input_dict, global_manager)
+                elif base == 'tab':
+                    new_element = buttons.tab_button(input_dict, global_manager)
+                elif base == 'reorganize unit':
+                    new_element = buttons.reorganize_unit_button(input_dict, global_manager)
+                elif base == 'manually calibrate':
+                    new_element = buttons.manually_calibrate_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':
@@ -436,19 +467,19 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
         input_dict['image'] = 'misc/empty.png'
-        if not officer.officer_type == 'major':
-            name = ''
-            for character in input_dict['init_type']:
-                if not character == '_':
-                    name += character
-                else:
-                    name += ' '
-        else: #battalions have special naming convention based on worker type
-            if worker.worker_type == 'European':
-                name = 'imperial battalion'
-            else:
-                name = 'colonial battalion'
-        input_dict['name'] = name
+        #if not officer.officer_type == 'major':
+        #    name = ''
+        #    for character in input_dict['init_type']:
+        #        if not character == '_':
+        #            name += character
+        #        else:
+        #            name += ' '
+        #else: #battalions have special naming convention based on worker type
+        #    if worker.worker_type == 'European':
+        #        name = 'imperial battalion'
+        #    else:
+        #        name = 'colonial battalion'
+        input_dict['name'] = actor_utility.generate_group_name(worker, officer, global_manager) #name
         return(self.create(False, input_dict, global_manager))
 
     def create_initial_ministers(self, global_manager):
@@ -506,5 +537,16 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         Ouptut:
             None
         '''
-        dice.die(coordinates, width, height, modes, num_sides, result_outcome_dict, outcome_color_dict, final_result, global_manager)
+        input_dict = {
+            'coordinates': coordinates,
+            'width': width,
+            'height': height,
+            'modes': modes,
+            'num_sides': num_sides,
+            'result_outcome_dict': result_outcome_dict,
+            'outcome_color_dict': outcome_color_dict,
+            'final_result': final_result,
+            'init_type': 'die'
+        }
+        new_die = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     

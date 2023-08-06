@@ -3,8 +3,8 @@
 import random
 import os
 import pygame
+import math
 
-from . import scaling
 from . import utility
 
 def reset_action_prices(global_manager):
@@ -331,53 +331,33 @@ def get_random_ocean_coordinates(global_manager):
     start_y = 0
     return(start_x, start_y)
 
-def calibrate_actor_info_display(global_manager, info_display_list, new_actor):
+def calibrate_actor_info_display(global_manager, info_display, new_actor, override_exempt=False):
     '''
     Description:
         Updates all relevant objects to display a certain mob or tile
     Input:
         global_manager_template global_manager: Object that accesses shared variables
-        button/actor list info_display_list: All buttons and actors that are updated when the displayed mob or tile changes. Can be 'tile_info_display_list' if the displayed tile is changing or 'mob_info_display_list' if the displayed
-            mob is changing
+        interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
         string new_actor: The new mob or tile that is displayed
     Output:
         None
     '''
-    #id() == id() compares memory addresses - if 2 lists have same contents but different memory addresses, will not be considered equal
-    if id(info_display_list) == id(global_manager.get('tile_info_display_list')):
+    if info_display == global_manager.get('tile_info_display'):
         for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
             current_same_tile_icon.reset()
         global_manager.set('displayed_tile', new_actor)
         if new_actor != 'none':
             new_actor.select() #plays correct music based on tile selected - slave traders/village/europe music
-    elif id(info_display_list) == id(global_manager.get('mob_info_display_list')):
+
+    elif info_display == global_manager.get('mob_info_display'):
         global_manager.set('displayed_mob', new_actor)
         if new_actor != 'none' and new_actor.images[0].current_cell.tile == global_manager.get('displayed_tile'):
             for current_same_tile_icon in global_manager.get('same_tile_icon_list'):
                 current_same_tile_icon.reset()
-    elif id(info_display_list) == id(global_manager.get('country_info_display_list')):
-        global_manager.set('displayed_country', new_actor)
-    for current_object in info_display_list:
-        current_object.calibrate(new_actor)
 
-def order_actor_info_display(global_manager, info_display_list, default_y): #displays actor info display labels in order, skipping hidden ones
-    '''
-    Description:
-        Changes locations of actor display labels to put all visible labels in order, used by main_loop_tools in update_display
-    Input:
-        global_manager_template global_manager: Object that accesses shared variables
-        actor_match_label list info_display_list: All actor match labels associated with either mobs or tiles to put in order
-        int default_y: y coordinate that the top label is moved to
-    Output:
-        None
-    '''
-    current_y = default_y
-    for current_label in info_display_list:
-        if current_label.can_show():
-            current_y -= 35
-            scaled_y = scaling.scale_height(current_y, global_manager)
-            if not current_label.y == scaled_y: #if y is not the same as last time, move it
-                current_label.set_y(scaled_y)
+    elif info_display == global_manager.get('country_info_display'):
+        global_manager.set('displayed_country', new_actor)
+    info_display.calibrate(new_actor, override_exempt)
 
 def get_migration_destinations(global_manager):
     '''
@@ -547,3 +527,75 @@ def set_slave_traders_strength(new_strength, global_manager):
     if global_manager.has('slave_traders_grid'):
         slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
         slave_traders_tile.update_image_bundle()
+
+def generate_group_image_id_list(worker, officer, global_manager):
+    left_worker_dict = {
+        'image_id': worker.image_dict['default'],
+        'size': 0.8,
+        'x_offset': -0.28,
+        'y_offset': 0.05,
+        'level': -2
+    }
+
+    right_worker_dict = left_worker_dict.copy()
+    right_worker_dict['image_id'] = worker.image_variants[worker.second_image_variant]
+    right_worker_dict['x_offset'] *= -1
+
+    if officer.officer_type == 'major':
+        if 'soldier' in worker.image_dict:
+            soldier = worker.image_dict['soldier']
+        else:
+            soldier = worker.image_dict['default']
+        left_worker_dict['image_id'] = soldier
+        left_worker_dict['green_screen'] = global_manager.get('current_country').colors
+        right_worker_dict['image_id'] = soldier
+        right_worker_dict['green_screen'] = global_manager.get('current_country').colors
+    elif officer.officer_type in ['merchant', 'driver']:
+        if 'porter' in worker.image_dict:
+            porter = worker.image_dict['porter']
+        else:
+            porter = worker.image_dict['default']
+        left_worker_dict['image_id'] = porter
+        right_worker_dict['image_id'] = porter
+
+    officer_dict = {
+        'image_id': officer.image_dict['default'],
+        'size': 0.85,
+        'x_offset': 0,
+        'y_offset': -0.05,
+        'level': -1
+    }
+
+    return([left_worker_dict, right_worker_dict, officer_dict])
+
+def generate_group_name(worker, officer, global_manager, add_veteran=False):
+    if not officer.officer_type == 'major':
+        name = ''
+        for character in global_manager.get('officer_group_type_dict')[officer.officer_type]:
+            if not character == '_':
+                name += character
+            else:
+                name += ' '
+    else: #battalions have special naming convention based on worker type
+        if worker.worker_type == 'European':
+            name = 'imperial battalion'
+        else:
+            name = 'colonial battalion'
+    if add_veteran and officer.veteran:
+        name = 'veteran ' + name
+    return(name)
+
+def generate_group_movement_points(worker, officer, global_manager, generate_max=False):
+    if generate_max:
+        max_movement_points = officer.max_movement_points
+        if officer.officer_type == 'driver' and officer.veteran:
+            max_movement_points = 6
+        return(max_movement_points)
+    else:
+        max_movement_points = generate_group_movement_points(worker, officer, global_manager, generate_max=True)
+        worker_movement_ratio_remaining = worker.movement_points / worker.max_movement_points
+        officer_movement_ratio_remaining = officer.movement_points / officer.max_movement_points
+        if worker_movement_ratio_remaining > officer_movement_ratio_remaining:
+            return(math.floor(max_movement_points * officer_movement_ratio_remaining))
+        else:
+            return(math.floor(max_movement_points * worker_movement_ratio_remaining))

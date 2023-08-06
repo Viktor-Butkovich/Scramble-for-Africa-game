@@ -772,7 +772,7 @@ class notification_manager_template():
             input_dict['init_type'] = 'combat notification'
             input_dict['is_last'] = True
         elif notification_type == 'trial':
-            input_dict['init_type'] = 'combat notification'
+            input_dict['init_type'] = 'trial notification'
             input_dict['is_last'] = True
         elif notification_type == 'choice':
             del input_dict['notification_dice']
@@ -810,7 +810,8 @@ class sound_manager_template():
         '''
         self.global_manager = global_manager
         self.default_music_dict = {
-            'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme'],
+            'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme',
+                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2'],
             'main menu': ['main theme'],
             'village peaceful': ['village peaceful'],
             'village neutral': ['village neutral'],

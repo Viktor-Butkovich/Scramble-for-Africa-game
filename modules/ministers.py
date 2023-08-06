@@ -278,7 +278,7 @@ class minister():
         save_dict['portrait_sections'] = self.portrait_sections
         return(save_dict)
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -453,6 +453,7 @@ class minister():
                 current_minister_type_image.calibrate('none')
         if self.global_manager.get('displayed_minister') == self:
             minister_utility.calibrate_minister_info_display(self.global_manager, self) #update minister label
+
         minister_utility.update_available_minister_display(self.global_manager)
         
         if not self.global_manager.get('minister_appointment_tutorial_completed'):

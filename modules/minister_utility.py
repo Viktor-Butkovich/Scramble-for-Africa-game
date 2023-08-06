@@ -33,27 +33,27 @@ def calibrate_minister_info_display(global_manager, new_minister):
         None
     '''
     global_manager.set('displayed_minister', new_minister)
-    for current_object in global_manager.get('minister_info_display_list'):
-        current_object.calibrate(new_minister)
+    global_manager.get('minister_info_display').calibrate(new_minister)
 
-def calibrate_trial_info_display(global_manager, info_display_list, new_minister):
+def calibrate_trial_info_display(global_manager, info_display, new_minister):
     '''
     Description:
         Updates all relevant objects to display the inputted minister for a certain side of a trial
     Input:
         global_manager_template global_manager: Object that accesses shared variables
-        button/actor list info_display_list: All buttons and actors that are updated when the displayed mob or tile changes. Can be 'prosecution_info_display_list' or 'defense_info_display_list' depending on the minister's side in
+        button/actor list info_display: Interface collection that is calibrated to the inputted minister
             the trial
-        string new_minister: The new minister that is displayed
+        minister/string new_minister: The new minister that is displayed, or 'none'
     Output:
         None
     '''
-    if info_display_list == global_manager.get('defense_info_display_list'):
+    if type(info_display) == list:
+        return
+    info_display.calibrate(new_minister)
+    if info_display == global_manager.get('defense_info_display'):
         global_manager.set('displayed_defense', new_minister)
-    elif info_display_list == global_manager.get('prosecution_info_display_list'):
+    elif info_display == global_manager.get('prosecution_info_display'):
         global_manager.set('displayed_prosecution', new_minister)
-    for current_object in info_display_list:
-        current_object.calibrate(new_minister)
 
 def trial_setup(defense, prosecution, global_manager):
     '''
@@ -65,8 +65,8 @@ def trial_setup(defense, prosecution, global_manager):
     Output:
         None
     '''
-    calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display_list'), defense)
-    calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display_list'), prosecution)
+    calibrate_trial_info_display(global_manager, global_manager.get('defense_info_display'), defense)
+    calibrate_trial_info_display(global_manager, global_manager.get('prosecution_info_display'), prosecution)
     
 def update_available_minister_display(global_manager):
     '''

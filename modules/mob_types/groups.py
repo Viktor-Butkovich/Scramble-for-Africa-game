@@ -45,8 +45,8 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        if self.officer.veteran:
-            self.promote()
+        #if self.officer.veteran:
+        #    self.promote()
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
@@ -58,19 +58,15 @@ class group(pmob):
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self
-
-            worker_movement_ratio_remaining = self.worker.movement_points / self.worker.max_movement_points
-            officer_movement_ratio_remaining = self.officer.movement_points / self.officer.max_movement_points
-            if worker_movement_ratio_remaining > officer_movement_ratio_remaining:
-                self.set_movement_points(math.floor(self.max_movement_points * officer_movement_ratio_remaining))
-            else:
-                self.set_movement_points(math.floor(self.max_movement_points * worker_movement_ratio_remaining))
+            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer, global_manager))
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.set_group_type('none')
         self.update_image_bundle()
+        if self.officer.veteran:
+            self.promote()
 
     def replace_worker(self, new_worker_type):
         '''
@@ -117,7 +113,7 @@ class group(pmob):
             actor_utility.deselect_all(self.global_manager)
 
         if self.images[0].current_cell != 'none' and self.global_manager.get('displayed_tile') == self.images[0].current_cell.tile:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display_list'), self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
 
     def move(self, x_change, y_change):
         '''
@@ -298,8 +294,10 @@ class group(pmob):
             self.officer.set_name('veteran ' + self.officer.name)
             self.officer.veteran = True
         self.update_image_bundle()
+        self.officer.update_image_bundle()
+        #self.officer.update_image_bundle()
         if self.global_manager.get('displayed_mob') == self:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates actor info display with veteran icon
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates actor info display with veteran icon
 
     def go_to_grid(self, new_grid, new_coordinates):
         '''
@@ -368,7 +366,7 @@ class group(pmob):
         self.officer.die('none')
         self.worker.die('none')
 
-    def get_image_id_list(self):
+    def get_image_id_list(self, override_values={}):
         '''
         Description:
             Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
@@ -378,38 +376,8 @@ class group(pmob):
         Output:
             list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
         '''
-        image_id_list = super().get_image_id_list()
+        #make an actor utility function that generates group image id list from worker and officer, regarless of if they are in the same group
+        image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #group default image is empty
-        left_worker_dict = {
-            'image_id': self.worker.image_dict['default'],
-            'size': 0.8,
-            'x_offset': -0.28,
-            'y_offset': 0.05,
-            'level': -2
-        }
-
-        right_worker_dict = left_worker_dict.copy()
-        right_worker_dict['image_id'] = self.worker.image_variants[self.worker.second_image_variant]
-        right_worker_dict['x_offset'] *= -1
-
-        if self.is_battalion:
-            left_worker_dict['image_id'] = self.worker.image_dict['soldier']
-            left_worker_dict['green_screen'] = self.global_manager.get('current_country').colors
-            right_worker_dict['image_id'] = self.worker.image_dict['soldier']
-            right_worker_dict['green_screen'] = self.global_manager.get('current_country').colors
-        elif self.can_hold_commodities:
-            left_worker_dict['image_id'] = self.worker.image_dict['porter']
-            right_worker_dict['image_id'] = self.worker.image_dict['porter']
-
-        officer_dict = {
-            'image_id': self.officer.image_dict['default'],
-            'size': 0.85,
-            'x_offset': 0,
-            'y_offset': -0.05,
-            'level': -1
-        }
-
-        image_id_list.append(left_worker_dict)
-        image_id_list.append(right_worker_dict)
-        image_id_list.append(officer_dict)
+        image_id_list += actor_utility.generate_group_image_id_list(self.worker, self.officer, self.global_manager)
         return(image_id_list)

@@ -304,3 +304,6 @@ def main_loop(global_manager):
         start_time = time.time()
         global_manager.set('start_time', start_time)
         global_manager.set('current_time', time.time())
+        #use to test interface collection set origin - entire collection should follow mouse while retaining relative positions
+        #mouse_x, mouse_y = pygame.mouse.get_pos()
+        #global_manager.get('prosecution_info_display').set_origin(mouse_x, global_manager.get('display_height') -  mouse_y)

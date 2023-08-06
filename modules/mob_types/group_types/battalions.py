@@ -48,7 +48,7 @@ class battalion(group):
         self.attack_mark_list = []
         self.set_group_type('battalion')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
 
     def get_movement_cost(self, x_change, y_change, post_attack = False):
         '''
@@ -675,7 +675,7 @@ class safari(battalion):
         self.attack_cost = self.global_manager.get('action_prices')['hunting']
         self.set_group_type('safari')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates label to show new combat strength
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
 
     def attempt_local_combat(self):
         '''

@@ -40,7 +40,7 @@ class missionaries(group):
         self.can_convert = True
         self.set_group_type('missionaries')
         if not from_save:
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display_list'), self) #updates mob info display list to account for new missionary actions
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for new missionary actions
 
     def start_converting(self):
         '''

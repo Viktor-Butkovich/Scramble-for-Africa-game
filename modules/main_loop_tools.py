@@ -17,10 +17,10 @@ def update_display(global_manager):
     Output:
         None
     '''
-    actor_utility.order_actor_info_display(global_manager, global_manager.get('mob_ordered_label_list'), global_manager.get('mob_ordered_list_start_y')) #global manager, list to order, top y of list
-    actor_utility.order_actor_info_display(global_manager, global_manager.get('tile_ordered_label_list'), global_manager.get('tile_ordered_list_start_y'))
-    actor_utility.order_actor_info_display(global_manager, global_manager.get('minister_ordered_label_list'), global_manager.get('minister_ordered_list_start_y'))
-    actor_utility.order_actor_info_display(global_manager, global_manager.get('country_ordered_label_list'), global_manager.get('country_ordered_list_start_y'))
+    for interface_collection in global_manager.get('interface_collection_list'):
+        if interface_collection.can_show():
+            interface_collection.update_collection()#order_members()
+            
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
         draw_loading_screen(global_manager)
@@ -372,7 +372,7 @@ def manage_rmb_down(clicked_button, global_manager):
                             moved_mob.select()
                             if moved_mob.is_pmob:
                                 moved_mob.selection_sound()
-                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), moved_mob.images[0].current_cell.tile)
+                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), moved_mob.images[0].current_cell.tile)
     elif global_manager.get('drawing_automatic_route'):
         stopping = True
         global_manager.set('drawing_automatic_route', False)
@@ -388,7 +388,7 @@ def manage_rmb_down(clicked_button, global_manager):
             global_manager.get('displayed_mob').clear_automatic_route()
             text_tools.print_to_screen('The created route must go between at least 2 tiles', global_manager)
         global_manager.get('minimap_grid').calibrate(global_manager.get('displayed_mob').x, global_manager.get('displayed_mob').y)
-        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), global_manager.get('displayed_mob').images[0].current_cell.tile)
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('displayed_mob').images[0].current_cell.tile)
     if not stopping:
         manage_lmb_down(clicked_button, global_manager)
     
@@ -413,9 +413,9 @@ def manage_lmb_down(clicked_button, global_manager):
             if global_manager.get('current_game_mode') == 'ministers':
                 minister_utility.calibrate_minister_info_display(global_manager, 'none')
             elif global_manager.get('current_game_mode') == 'new_game_setup':
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display_list'), 'none')
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
             else:
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), 'none')
+                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
@@ -433,9 +433,9 @@ def manage_lmb_down(clicked_button, global_manager):
                                         if not main_cell == 'none':
                                             main_tile = main_cell.tile
                                             if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), main_tile)
-                                    else: #elif current_grid == global_manager.get('strategic_map_grid'):
-                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_cell.tile)
+                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
+                                    else:
+                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_new_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)
                 if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
@@ -468,8 +468,8 @@ def manage_lmb_down(clicked_button, global_manager):
                                 global_manager.set('show_selection_outlines', True)
                                 global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when destination chosen
                                 chooser.remove_from_turn_queue()
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display_list'), chooser)
-                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), chooser.images[0].current_cell.tile)
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
+                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
                         else: #can not move to same continent
                             text_tools.print_to_screen('You can only send ships to other theatres.', global_manager)
             global_manager.set('choosing_destination', False)
@@ -553,7 +553,7 @@ def click_move_minimap(global_manager):
                     elif current_grid == global_manager.get('strategic_map_grid'):
                         global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display_list'), current_grid.cell_list[0].tile)
+                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_grid.cell_list[0].tile)
                     breaking = True
                     break
                 if breaking:

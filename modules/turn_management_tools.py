@@ -587,6 +587,7 @@ def manage_ministers(global_manager):
         else: #if not retired/fired
             if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1: #1/36 chance to increase relevant specific skill
                 current_minister.gain_experience()
+        current_minister.just_removed = False
 
         if current_minister.fabricated_evidence > 0:
             prosecutor = global_manager.get('current_ministers')['Prosecutor']

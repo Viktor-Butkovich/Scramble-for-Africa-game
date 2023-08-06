@@ -91,6 +91,34 @@ class image():
         if self.can_show():
             self.complete_draw()
 
+    def update_image_bundle(self):
+        '''
+        Description:
+            Updates this actor's images with its current image id list
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_image(self.get_image_id_list())
+
+    def get_image_id_list(self, override_values={}):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        if type(self.image_id) == str:
+            image_id_list = [self.image_id]
+        else:
+            image_id_list = self.image_id
+        return(image_id_list)
+
+
 class image_bundle(image):
     '''
     Group of 'anonymous' bundle images that act as a single image object and are always drawn together in a particular order
@@ -373,13 +401,46 @@ class free_image(image):
             None
         '''
         self.image_type = 'free'
+        self.has_parent_collection = False
         super().__init__(width, height, global_manager)
         self.modes = modes
         self.set_image(image_id)
-        self.x, self.y = coordinates
-        self.y = self.global_manager.get('display_height') - self.y
+        self.set_origin(coordinates[0], coordinates[1])
         self.to_front = to_front
         self.global_manager.get('free_image_list').append(self)
+
+    def calibrate(self, new_actor):
+        return
+
+    def set_origin(self, new_x, new_y):
+        '''
+        Description:
+            Sets this interface element's location at the inputted coordinates. Along with set_modes, allows a free image to behave as an interface element and join interface collections
+        Input:
+            int new_x: New x coordinate for this element's origin
+            int new_y: New y coordinate for this element's origin
+        Output:
+            None
+        '''
+        self.x = new_x
+        self.y = self.global_manager.get('display_height') - new_y
+        if hasattr(self, 'Rect') and self.Rect != 'none':
+            self.Rect.x = self.x
+            self.Rect.y = self.global_manager.get('display_height') - (new_y + self.height)
+        if self.has_parent_collection:
+            self.x_offset = new_x - self.parent_collection.x
+            self.y_offset = new_y - self.parent_collection.y
+
+    def set_modes(self, new_modes):
+        '''
+        Description:
+            Sets this interface element's active modes to the inputted list. Along with set_origin, allows a free image to behave as an interface element and join interface collections
+        Input:
+            string list new_modes: List of game modes in which this element is active
+        Output:
+            None
+        '''
+        self.modes = new_modes
 
     def set_y(self, attached_label): #called by actor display labels
         '''
@@ -403,10 +464,10 @@ class free_image(image):
         Output:
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
-            return(True)
-        else:
-            return(False)
+        if (self.has_parent_collection and self.parent_collection.can_show()) or not self.has_parent_collection:
+            if self.global_manager.get('current_game_mode') in self.modes:
+                return(True)
+        return(False)
 
     def remove(self):
         '''
@@ -726,7 +787,6 @@ class minister_type_image(tooltip_free_image):
         '''
         self.current_minister = 'none'
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
-        self.warning_image = warning_image(self, global_manager) #displays warning when no minister present
         self.attached_label = attached_label
         self.minister_type = minister_type #position, like General
         if not self.minister_type == 'none':
@@ -743,6 +803,21 @@ class minister_type_image(tooltip_free_image):
         Output:
             None
         '''
+        if new_minister != 'none':
+            if new_minister.actor_type != 'minister':
+                if hasattr(new_minister, 'controlling_minister'):
+                    new_minister = new_minister.controlling_minister
+                else:
+                    new_minister = 'none'
+        else:
+            new_minister = 'none'
+
+        #if new_minister != 'none' and new_minister.actor_type == 'minister':
+        #    continue
+        #if new_minister != 'none' and hasattr(new_minister, 'controlling_minister'): #if calibrating to a mob, calibrate to its minister instead
+        #    new_minister = new_minister.controlling_minister
+        #else:
+        #    new_minister = 'none'
         self.current_minister = new_minister
         if not new_minister == 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
@@ -775,32 +850,23 @@ class minister_type_image(tooltip_free_image):
             if new_minister == 'none':
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             self.set_image('ministers/icons/' + keyword + '.png')
-
-    def set_y(self, attached_label):
-        '''
-        Description:
-            Sets this image's y position and that of its warning image to be at the same height as the inputted label
-        Input:
-            actor_display_label attached_label: Label to match this image's y position and that of its warning image with
-        Output:
-            None
-        '''
-        super().set_y(attached_label)
-        self.warning_image.set_y(attached_label)
-
-    def can_show_warning(self):
-        '''
-        Description:
-            Returns whether this image should display its warning image over itself. It should be shown when this image is visible and there is no minister in the office it is attached to
-        Input:
-            None
-        Output:
-            Returns whether this image should display its warning image
-        '''
-        if self.can_show() and self.current_minister == 'none':
-            return(True)
-        return(False)
+        self.update_image_bundle()
             
+    def get_image_id_list(self, override_values={}):
+        '''
+        Description:
+            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
+                orientation
+        Input:
+            None
+        Output:
+            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
+        '''
+        image_id_list = super().get_image_id_list(override_values)
+        if self.current_minister == 'none':
+            image_id_list.append('misc/warning_icon.png')
+        return(image_id_list)
+
     def update_tooltip(self):
         '''
         Description:
@@ -1239,6 +1305,14 @@ class button_image(actor_image):
             None
         '''
         return()
+
+class collection_image(button_image):
+    def draw(self):
+        if self.button.can_show():
+            self.x = self.button.x
+            self.y = self.global_manager.get('display_height') + self.height - self.button.y# + self.height
+            #self.y = self.global_manager.get('display_height') + self.button.y - (self.height * 3)
+            self.complete_draw()
 
 class tile_image(actor_image):
     '''

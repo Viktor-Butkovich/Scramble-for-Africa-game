@@ -127,35 +127,35 @@ SFA folder
 				imports random, mob_types.officers, modules.actor_utility, modules.notification_tools, modules.dice_utility, modules.market_tools, modules.scaling, modules.images
 				class merchant(mob_types.officers.officer)	    
 
-            groups.py
-	        	imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
-            	class group(modules.mobs.mob)
+        groups.py
+	        imports random, math, pmobs, modules.actor_utility, modules.utility, modules.notification_tools
+            class group(modules.mobs.mob)
 
-			npmobs.py
-				imports random, modules.mobs, modules.utility, modules.turn_management_tools
-				class npmob(modules.mob)
+		npmobs.py
+			imports random, modules.mobs, modules.utility, modules.turn_management_tools
+			class npmob(modules.mob)
 
-	    	officers.py
-	        	imports pmobs, modules.utility, modules.actor_utility
-	        	class officer(pmobs.pmob)
+	    officers.py
+	        imports pmobs, modules.utility, modules.actor_utility
+	        class officer(pmobs.pmob)
 
-	    	pmobs.py
-		    	imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
-		        	modules.turn_management_tools, modules.minister_utility
-		    	class pmob(modules.mob)
+	    pmobs.py
+		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
+		    	modules.turn_management_tools, modules.minister_utility
+		    class pmob(modules.mob)
 
-	    	vehicles.py
-	        	imports random, pmobs, modules.text_tools, modules.actor_utility, modules.notification_tools
-	        	class vehicle(pmobs.pmob)
-		    		class train
-                	class ship
-			    	class boat
+	    vehicles.py
+	    	imports random, pmobs, modules.text_tools, modules.actor_utility, modules.notification_tools
+        	class vehicle(pmobs.pmob)
+				class train
+            	class ship
+		    	class boat
 
-	    	workers.py
-	        	imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
-	        	class worker(pmobs.pmob)
-		    		class church_volunteers
-		    		class slave_worker
+	    workers.py
+	    	imports random, modules.mobs, modules.actor_utility, modules.utility, modules.market_tools, modules.text_tools
+        	class worker(pmobs.pmob)
+		    	class church_volunteers
+		    	class slave_worker
 
         action_notifications.py
 	        imports images, notifications, utility, scaling, actor_utility, trial_utility
@@ -178,12 +178,12 @@ SFA folder
         actor_creation_tools.py
             imports random, mobs, mob_types.workers, mob_types.officers, mob_types.officer_types.caravans, mob_types.group_types.construction_gangs, mob_types.group_types.expeditions, mob_types.group_types.missionaries, 
 		    	mob_types.group_types.porters, mob_types.group_types.work_crews, mob_types.vehicles, mob_types.group_types.battalions, mob_types.npmob_types.native_warriors, mob_types.npmob_types.beasts, buildings, ministers, 
-		    	lore_missions, notification_tools, utility, actor_utility, market_tools, dice, buttons, labels, notifications, choice_notifications, instructions, action_notifications, europe_transactions, 
+		    	lore_missions, notification_tools, utility, actor_utility, market_tools, dice, buttons, labels, notifications, choice_notifications, instructions, action_notifications, europe_transactions, interface_elements
 				actor_display_tools/buttons, actor_display_tools/labels
             class actor_creation_manager_template
 
         actor_utility.py
-            imports random, os, pygame, scaling, utility
+            imports random, os, pygame, utility
 			def reset_action_prices
 			def double_action_price
 			def get_building_cost
@@ -197,7 +197,6 @@ SFA folder
 			def deselect_all
 			def get_random_ocean_coordinates
 			def calibrate_actor_info_display
-			def order_actor_info_display
 			def get_migration_destinations
 			def get_migration_sources
 			def get_num_available_workers
@@ -239,6 +238,9 @@ SFA folder
 	        	class cycle_available_ministers_button
 	        	class commodity_button
 	        	class show_previous_financial_report_button
+				class tab_button
+				class reorganize_unit_button
+				class manually_calibrate_button
 
         cells.py
             imports pygame, random, actor_utility
@@ -287,6 +289,10 @@ SFA folder
             def rect_to_surface
             def display_image
             def display_image_angle
+
+		dummy.py
+			imports pygame, text_tools, scaling, mobs
+			class dummy(mob)
 
 		effects.py
 			import utility
@@ -340,9 +346,11 @@ SFA folder
             def display_instructions_page
 
 		interface_elements.py
-			import pygame
+			import pygame, scaling, images
 			class interface_element
 				class interface_collection
+					class tabbed_collection
+					class ordered_collection
 
         labels.py
         	imports pygame, buttons, scaling, text_tools, utility, market_tools
@@ -451,6 +459,7 @@ SFA folder
 		    def mob_interface_setup
 		    def tile_interface_setup
 		    def inventory_interface_setup
+			def unit_organization_interface_setup
 		    def minister_interface_setup
 		    def country_interface_setup
 		    def debug_tools_setup
