@@ -608,6 +608,10 @@ class actor_display_label(label):
             tooltip_text = [self.message]
             tooltip_text.append('While some interests are derived from a minister\'s legitimate talent or experience in a particular field, others are mere fancies')
             self.set_tooltip(tooltip_text)
+
+        elif self.actor_label_type == 'skill':
+            tooltip_text = [self.message]
+            self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'building workers':
             tooltip_text = []
@@ -824,6 +828,9 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'interests':
                 self.set_label(self.message_start + new_actor.interests[0] + ' and ' + new_actor.interests[1])
+
+            elif self.actor_label_type == 'skill':
+                self.set_label(self.message_start + new_actor.get_skill_description('average'))
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)

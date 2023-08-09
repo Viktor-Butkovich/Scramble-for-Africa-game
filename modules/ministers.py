@@ -54,6 +54,7 @@ class minister():
             self.personal_savings = input_dict['personal_savings']
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
+            self.apparent_skills = input_dict['apparent_skills']
             self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
@@ -254,6 +255,7 @@ class minister():
                 'personal savings': double value - How much non-stolen money this minister has based on their social status
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
+                'apparent_skills': dictionary value - String keys corresponding to 'unknown'/int values for estimate of minister skill, based on prosecutor and rumors
                 'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
@@ -267,6 +269,7 @@ class minister():
         save_dict['current_position'] = self.current_position
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
+        save_dict['apparent_skills'] = self.apparent_skills
         save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
         save_dict['stolen_money'] = self.stolen_money
@@ -313,8 +316,6 @@ class minister():
         min_result = 1
         max_result = num_sides
         result = self.no_corruption_roll(num_sides, roll_type)
-        #result = random.randrange(1, num_sides + 1)
-        #result += self.get_roll_modifier()
         
         if (predetermined_corruption or self.check_corruption()):
             if not self.stolen_already: #true if stealing
@@ -476,11 +477,13 @@ class minister():
         '''
         self.general_skill = random.randrange(1, 4) #1-3, general skill as in all fields, not military
         self.specific_skills = {}
+        self.apparent_skills = {}
         background_skill = random.choice(self.global_manager.get('background_skills_dict')[self.background])
         if background_skill == 'random':
             background_skill = random.choice(self.global_manager.get('skill_types'))
         for current_minister_type in self.global_manager.get('minister_types'):
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
+            self.apparent_skills[current_minister_type] = 'unknown'
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
                 self.specific_skills[current_minister_type] += 1
 
@@ -524,7 +527,51 @@ class minister():
         '''
         self.corruption = random.randrange(1, 7) #1-7
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
-            
+
+    def get_average_apparent_skill(self):
+        '''
+        Description:
+            Calculates and returns the average apparent skill number for this minister
+        Input:
+            None
+        Output:
+            string/double: Returns average of all esimated apparent skill numbers for this minister, or 'unknown' if no skills have estimates
+        '''
+        num_data_points = 0
+        total_apparent_skill = 0
+        for skill_type in self.global_manager.get('minister_types'):
+            if self.apparent_skills[skill_type] != 'unknown':
+                num_data_points += 1
+                total_apparent_skill += self.apparent_skills[skill_type]
+        if num_data_points == 0:
+            return('unknown')
+        else:
+            return(total_apparent_skill / num_data_points)
+        
+    def get_skill_description(self, skill_type):
+        '''
+        Description:
+            Calculates and returns an apparent skill description for one of this minister's skills, or overall
+        Input:
+            string: Type of skill to return a description for, including 'average'
+        Output:
+            string: Description of minister's apparent skill of inputted type
+        '''
+        if skill_type == 'average':
+            skill_value = self.get_average_apparent_skill()
+        else:
+            skill_value = self.apparent_skills[skill_type]
+
+        if skill_value == 'unknown':
+            return_value = skill_value
+        elif skill_value >= 5:
+            return_value = 'expert'
+        elif skill_value >= 3:
+            return_value = 'average'
+        else:
+            return_value = 'incompetent'
+        return(return_value)
+
     def check_corruption(self): #returns true if stealing for this roll
         '''
         Description:

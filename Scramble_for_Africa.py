@@ -38,4 +38,3 @@ try:
 
 except Exception: #displays error message and records error message in crash log file
     setup.manage_crash(Exception)
-#update documentation, start on investigation
