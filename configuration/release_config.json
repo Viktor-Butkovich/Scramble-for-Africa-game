@@ -14,7 +14,7 @@
       "infinite_commodities", 
       "band_of_thieves", 
       "nine_mortal_men", 
-      "ministry_of_magic", 
+      "ministry_of_magic",
       "farm_upstate",
       "show_modifiers", 
       "hide_grid_lines", 
@@ -25,7 +25,8 @@
       "promote_on_sentry",
       "debug_print",
       "eradicate_slave_trade",
-      "track_fps"
+      "track_fps",
+      "transparent_ministers"
    ],
    "active_effects": [
 

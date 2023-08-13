@@ -41,7 +41,6 @@ class minister():
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
         self.tooltip_text = []
-        #self.portrait_section_types = ['base_skin', 'outfit_background', 'outfit', 'mouth', 'nose', 'eyes', 'hair', 'facial_hair', 'portrait']
         self.portrait_section_types = ['base_skin', 'mouth', 'nose', 'eyes', 'hair', 'outfit', 'facial_hair', 'hat', 'portrait']
         self.portrait_sections = {}
         if from_save:
@@ -55,6 +54,7 @@ class minister():
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
             self.apparent_skills = input_dict['apparent_skills']
+            self.apparent_corruption = input_dict['apparent_corruption']
             self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
@@ -256,6 +256,7 @@ class minister():
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
                 'apparent_skills': dictionary value - String keys corresponding to 'unknown'/int values for estimate of minister skill, based on prosecutor and rumors
+                'apparent_corruption': int/string value - Value from 1 to 6 or 'unknown' corresponding to estimate of minister corruption
                 'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
@@ -270,6 +271,7 @@ class minister():
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
         save_dict['apparent_skills'] = self.apparent_skills
+        save_dict['apparent_corruption'] = self.apparent_corruption
         save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
         save_dict['stolen_money'] = self.stolen_money
@@ -483,7 +485,10 @@ class minister():
             background_skill = random.choice(self.global_manager.get('skill_types'))
         for current_minister_type in self.global_manager.get('minister_types'):
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
-            self.apparent_skills[current_minister_type] = 'unknown'
+            if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+                self.apparent_skills[current_minister_type] = self.specific_skills[current_minister_type] + self.general_skill
+            else:
+                self.apparent_skills[current_minister_type] = 'unknown'
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
                 self.specific_skills[current_minister_type] += 1
 
@@ -525,8 +530,12 @@ class minister():
         Output:
             None
         '''
-        self.corruption = random.randrange(1, 7) #1-7
+        self.corruption = random.randrange(1, 7) #1-6
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
+        if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+            self.apparent_corruption = self.corruption
+        else:
+            self.apparent_corruption = 'unknown'
 
     def get_average_apparent_skill(self):
         '''
@@ -548,7 +557,7 @@ class minister():
         else:
             return(total_apparent_skill / num_data_points)
         
-    def get_skill_description(self, skill_type):
+    def get_description(self, description_type, sub_type='none'):
         '''
         Description:
             Calculates and returns an apparent skill description for one of this minister's skills, or overall
@@ -557,19 +566,35 @@ class minister():
         Output:
             string: Description of minister's apparent skill of inputted type
         '''
-        if skill_type == 'average':
-            skill_value = self.get_average_apparent_skill()
-        else:
-            skill_value = self.apparent_skills[skill_type]
+        return_value = 'none'
+        if description_type == 'skill':
+            if sub_type == 'average':
+                skill_value = self.get_average_apparent_skill()
+            else:
+                skill_value = self.apparent_skills[sub_type]
 
-        if skill_value == 'unknown':
-            return_value = skill_value
-        elif skill_value >= 5:
-            return_value = 'expert'
-        elif skill_value >= 3:
-            return_value = 'average'
-        else:
-            return_value = 'incompetent'
+            if skill_value == 'unknown':
+                return_value = skill_value
+            elif skill_value >= 4.5:
+                return_value = 'expert'
+            elif skill_value >= 2.5:
+                return_value = 'average'
+            else:
+                return_value = 'incompetent'
+        elif description_type == 'loyalty':
+            if self.apparent_corruption == 'unknown':
+                apparent_loyalty = 'unknown'
+                return_value = apparent_loyalty
+            else:
+                apparent_loyalty = 7 - self.apparent_corruption
+                if apparent_loyalty >= 4:
+                    return_value = 'solid'
+                elif apparent_loyalty == 3:
+                    return_value = 'disloyal 1'
+                elif apparent_loyalty == 2:
+                    return_value = 'disloyal 2'
+                elif apparent_loyalty == 1:
+                    return_value = 'disloyal 3'
         return(return_value)
 
     def check_corruption(self): #returns true if stealing for this roll

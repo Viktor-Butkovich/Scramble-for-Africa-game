@@ -611,6 +611,14 @@ class actor_display_label(label):
 
         elif self.actor_label_type == 'skill':
             tooltip_text = [self.message]
+            if not self.actor == 'none':
+                for skill_type in self.actor.apparent_skills:
+                    skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                    tooltip_text.append('    ' + skill_name.capitalize() + ': ' + self.actor.get_description('skill', skill_type))
+            self.set_tooltip(tooltip_text)
+
+        elif self.actor_label_type == 'loyalty':
+            tooltip_text = [self.message]
             self.set_tooltip(tooltip_text)
             
         elif self.actor_label_type == 'building workers':
@@ -830,7 +838,10 @@ class actor_display_label(label):
                 self.set_label(self.message_start + new_actor.interests[0] + ' and ' + new_actor.interests[1])
 
             elif self.actor_label_type == 'skill':
-                self.set_label(self.message_start + new_actor.get_skill_description('average'))
+                self.set_label(self.message_start + new_actor.get_description('skill', 'average'))
+
+            elif self.actor_label_type == 'loyalty':
+                self.set_label(self.message_start + new_actor.get_description('loyalty'))
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)

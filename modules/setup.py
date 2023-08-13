@@ -1997,7 +1997,7 @@ def minister_interface_setup(global_manager):
         'parent_collection': minister_info_display
     }
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'skill', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'skill', 'loyalty', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager)

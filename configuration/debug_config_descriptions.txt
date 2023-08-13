@@ -23,3 +23,4 @@ instant_lore_mission: provides a lore mission at the end of the turn if one is n
 promote_on_sentry: promotes a unit when sentry mode is turned on, for promotion testing
 debug_print: prints a list of active effects whenever p is pressed
 eradicate_slave_trade: sets slave traders strength to 0 on setup
+transparent_ministers: sets all ministers to start with accurate skill/loyalty values rather than unknown
