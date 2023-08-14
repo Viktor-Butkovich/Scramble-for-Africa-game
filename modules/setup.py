@@ -1617,13 +1617,14 @@ def tile_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
+            #'coordinates': scaling.scale_coordinates(0, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
-            'parent_collection': tile_info_display
+            'parent_collection': tile_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement, global_manager)}
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = 'actor display label'
@@ -1638,7 +1639,7 @@ def tile_interface_setup(global_manager):
             global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type == 'current building work crew':
             input_dict['init_type'] = 'list item label'
-            input_dict['list_type'] = 'building'
+            input_dict['list_type'] = 'resource building'
             for i in range(0, 3):
                 input_dict['list_index'] = i
                 global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)

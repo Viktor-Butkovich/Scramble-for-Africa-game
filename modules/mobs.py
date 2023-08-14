@@ -176,7 +176,7 @@ class mob(actor):
         if 'has_canoes' in override_values:
             has_canoes = override_values['has_canoes']
         else:
-            has_canoes = self.disorganized
+            has_canoes = self.has_canoes
 
         image_id_list = super().get_image_id_list(override_values)
         if disorganized:

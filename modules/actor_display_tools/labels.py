@@ -317,11 +317,12 @@ class actor_display_label(label):
             input_dict['image_id'] = 'buttons/cycle_passengers_down_button.png'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-        elif self.actor_label_type == 'building work crew':
+        elif self.actor_label_type == 'current building work crew':
             self.message_start = ''
             self.attached_building = 'none'
             input_dict['init_type'] = 'remove work crew button'
             input_dict['image_id'] = 'buttons/remove_work_crew_button.png'
+            input_dict['building_type'] = 'resource'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'crew':
@@ -755,7 +756,7 @@ class actor_display_label(label):
                 if not self.actor.controllable:
                     self.set_label('You do not control this unit')
                             
-            elif self.actor_label_type == 'building work crew':
+            elif self.actor_label_type == 'current building work crew': # or self.actor_label_type == 'building list item':
                 if self.list_type == 'resource building':
                     if new_actor.cell.has_building('resource'):
                         self.attached_building = new_actor.cell.get_building('resource')
@@ -971,6 +972,7 @@ class list_item_label(actor_display_label):
         '''
         self.list_index = input_dict['list_index']
         self.list_type = input_dict['list_type']
+        #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
         super().__init__(input_dict, global_manager)
 
@@ -984,6 +986,7 @@ class list_item_label(actor_display_label):
             None
         '''
         self.attached_list = []
+        #print(self.actor_label_type)
         super().calibrate(new_actor)
 
     def can_show(self):
