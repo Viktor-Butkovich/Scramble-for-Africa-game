@@ -467,18 +467,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         input_dict['modes'] = input_dict['grids'][0].modes #if created in Africa grid, should be ['strategic']. If created in Europe, should be ['strategic', 'europe']
         input_dict['init_type'] = global_manager.get('officer_group_type_dict')[officer.officer_type]
         input_dict['image'] = 'misc/empty.png'
-        #if not officer.officer_type == 'major':
-        #    name = ''
-        #    for character in input_dict['init_type']:
-        #        if not character == '_':
-        #            name += character
-        #        else:
-        #            name += ' '
-        #else: #battalions have special naming convention based on worker type
-        #    if worker.worker_type == 'European':
-        #        name = 'imperial battalion'
-        #    else:
-        #        name = 'colonial battalion'
         input_dict['name'] = actor_utility.generate_group_name(worker, officer, global_manager) #name
         return(self.create(False, input_dict, global_manager))
 

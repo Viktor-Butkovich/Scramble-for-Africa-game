@@ -197,6 +197,7 @@ def trial(global_manager): #called by choice notification button
     else:
         text += '+ 0 judge bias '
     text += '= ' + str(effective_evidence) + ' evidence rolls /n /n'
+    global_manager.get('sound_manager').play_sound('trial starting')
     notification_tools.display_notification(text, 'default', global_manager)
     
     global_manager.set('trial_rolls', [])
@@ -250,8 +251,8 @@ def complete_trial(final_roll, global_manager):
     prosecution = global_manager.get('displayed_prosecution')
     defense = global_manager.get('displayed_defense')
     game_transitions.set_game_mode('ministers', global_manager)
-    
     if final_roll >= 5:
+        global_manager.get('sound_manager').play_sound('guilty')
         confiscated_money = defense.stolen_money / 2.0
         text = 'You have won the trial, removing ' + defense.name + ' as ' + defense.current_position + ' and putting him in prison. /n /n'
         if confiscated_money > 0:
@@ -268,9 +269,11 @@ def complete_trial(final_roll, global_manager):
         defense.respond('prison')
         defense.remove()
         global_manager.get('fear_tracker').change(1)
+        
         notification_tools.display_notification('Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n', 'default', global_manager)
 
     else:
+        global_manager.get('sound_manager').play_sound('not guilty')
         text = 'You have lost the trial and ' + defense.name + ' goes unpunished, remaining your ' + defense.current_position + '. /n /n'
         fabricated_evidence = defense.fabricated_evidence
         real_evidence = defense.corruption_evidence - defense.fabricated_evidence

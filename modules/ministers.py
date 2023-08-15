@@ -1,6 +1,7 @@
 #Contains functionality for ministers
 
 import random
+import os
 
 from . import utility
 from . import actor_utility
@@ -64,6 +65,8 @@ class minister():
             self.corruption_evidence = input_dict['corruption_evidence']
             self.fabricated_evidence = input_dict['fabricated_evidence']
             self.just_removed = input_dict['just_removed']
+            self.voice_set = input_dict['voice_set']
+            self.voice_setup(from_save)
             if not self.current_position == 'none':
                 self.appoint(self.current_position)
             else:
@@ -76,6 +79,7 @@ class minister():
             self.status = status_number_dict[self.status_number]
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
             self.skill_setup()
+            self.voice_setup()
             self.interests_setup()
             self.corruption_setup()
             self.current_position = 'none'
@@ -177,7 +181,7 @@ class minister():
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
             self.tooltip_text.append('If not reappointed by the end of the turn, they will be permanently fired, incurring a large public opinion penalty.')
 
-    def display_message(self, text):
+    def display_message(self, text, audio=''):
         '''
         Description:
             Displays a notification message from this minister with an attached portrait
@@ -192,7 +196,7 @@ class minister():
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
             self, 'portrait', self.global_manager, True)
         self.global_manager.get('notification_manager').minister_message_queue.append(self)
-        notification_tools.display_notification(text, 'minister', self.global_manager, 0)
+        notification_tools.display_notification(text, 'minister', self.global_manager, 0, audio)
 
     def steal_money(self, value, theft_type = 'none'):
         '''
@@ -264,6 +268,7 @@ class minister():
                 'corruption_evidence': int value - Number of pieces of evidence that can be used against this minister in a trial, includes fabricated evidence
                 'fabricated_evidence': int value - Number of temporary fabricated pieces of evidence that can be used against this minister in a trial this turn
                 'portrait_sections': string list value - List of image file paths for each of this minister's portrait sections
+                'voice_set': string value - Name of voice set assigned to this minister
         '''    
         save_dict = {}
         save_dict['name'] = self.name
@@ -281,6 +286,7 @@ class minister():
         save_dict['background'] = self.background
         save_dict['personal_savings'] = self.personal_savings
         save_dict['portrait_sections'] = self.portrait_sections
+        save_dict['voice_set'] = self.voice_set
         return(save_dict)
 
     def get_image_id_list(self, override_values={}):
@@ -491,6 +497,30 @@ class minister():
                 self.apparent_skills[current_minister_type] = 'unknown'
             if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
                 self.specific_skills[current_minister_type] += 1
+
+    def voice_setup(self, from_save=False):
+        '''
+        Description:
+            Gathers a set of voice lines for this minister, either using a saved voice set or a random new one
+        Input:
+            boolean from_save=False: Whether this minister is being loaded and has an existing voice set that should be used
+        Output:
+            None
+        '''
+        if not from_save:
+            self.voice_set = random.choice(os.listdir('sounds/voices/voice sets'))
+        self.voice_lines = {
+            'acknowledgement': [],
+            'fired': [],
+            'evidence': [],
+        }
+        self.last_voice_line = ''
+        folder_path = 'voices/voice sets/' + self.voice_set
+        for file_name in os.listdir('sounds/' + folder_path):
+            for key in self.voice_lines:
+                if file_name.startswith(key):
+                    file_name = file_name[:-4] #cuts off last 4 characters - .wav
+                    self.voice_lines[key].append(folder_path + '/' + file_name)
 
     def interests_setup(self):
         '''
@@ -726,7 +756,6 @@ class minister():
                 if current_minister_image.minister_type == self.current_position:
                     current_minister_image.calibrate('none')
             self.current_position = 'none'
-        #self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
         self.global_manager.set('minister_list', utility.remove_from_list(self.global_manager.get('minister_list'), self))
         self.global_manager.set('available_minister_list', utility.remove_from_list(self.global_manager.get('available_minister_list'), self))
         minister_utility.update_available_minister_display(self.global_manager)
@@ -741,6 +770,7 @@ class minister():
             None
         '''
         text = ''
+        audio = ''
         public_opinion_change = 0
 
         if self.status_number >= 3:
@@ -818,6 +848,7 @@ class minister():
                 text += random.choice(warnings)
             text += ' /n /n /nYou have lost ' + str(-1 * public_opinion_change) + ' public opinion. /n'
             text += self.name + ' has been fired and removed from the game. /n /n'
+            audio = self.get_voice_line('fired')
             
         elif event == 'prison':
             text += 'From: ' + self.name + ' /n /n'
@@ -836,6 +867,7 @@ class minister():
             text += random.choice(intro_options)
             text += ' /n /n /n'
             text += self.name + ' is now in prison and has been removed from the game. /n /n'
+            audio = self.get_voice_line('fired')
 
         elif event == 'retirement':
             if self.current_position == 'none':
@@ -884,18 +916,32 @@ class minister():
                 text += 'Their position will need to be filled by a replacement as soon as possible for your company to continue operations. /n /n'
         self.global_manager.get('public_opinion_tracker').change(public_opinion_change)
         if not text == '':
-            self.display_message(text)
+            self.display_message(text, audio)
 
-    def selection_sound(self):
+    def get_voice_line(self, type):
         '''
         Description:
-            Plays a sound when this minister is selected
+            Attempts to retrieve one of this minister's voice lines of the inputted type
         Input:
-            None
+            string type: Type of voice line to retrieve
+        Output:
+            string: Returns sound_manager file path of retrieved voice line
+        '''
+        selected_line = ''
+        if len(self.voice_lines[type]) > 0:
+            selected_line = random.choice(self.voice_lines[type])
+            while len(self.voice_lines[type]) > 1 and selected_line == self.last_voice_line:
+                selected_line = random.choice(self.voice_lines[type])
+        return(selected_line)
+
+    def play_voice_line(self, type):
+        '''
+        Description:
+            Attempts to play one of this minister's voice lines of the inputted type
+        Input:
+            string type: Type of voice line to play
         Output:
             None
         '''
-        possible_sounds = []
-        for i in range(1, 8):
-            possible_sounds.append('voices/minister ' + str(i))
-        self.global_manager.get('sound_manager').play_sound(random.choice(possible_sounds))
+        if len(self.voice_lines[type]) > 0:
+            self.global_manager.get('sound_manager').play_sound(self.get_voice_line(type))

@@ -1,6 +1,6 @@
 #Contains functions that control the display of new notifications
 
-def display_notification(message, notification_type, global_manager, num_dice_shown = 0): #default, exploration, or roll
+def display_notification(message, notification_type, global_manager, num_dice_shown = 0, audio=''): #default, exploration, or roll
     '''
     Description:
         Adds a future notification to the notification queue with the inputted text and type. If other notifications are already in the notification queue, adds this notification to the back, causing it to appear last. When a
@@ -10,12 +10,14 @@ def display_notification(message, notification_type, global_manager, num_dice_sh
         string notification_type: Type of notification created, like 'roll, 'choice', or 'exploration'
         global_manager_template global_manager: Object that accesses shared variables
         int num_dice_shown = 0: Determines number of dice allowed to be shown during the displayed notification, allowing the correct ones to be shown when multiple notifications are queued
+        string audio='': Sound to play when notification appears
     Output:
         None
     '''
     global_manager.get('notification_manager').notification_queue.append(message)#global_manager.get('notification_queue').append(message)
     global_manager.get('notification_manager').notification_type_queue.append(notification_type)#global_manager.get('notification_type_queue').append(notification_type)
     global_manager.get('notification_manager').notification_dice_queue.append(num_dice_shown)
+    global_manager.get('notification_manager').notification_sound_queue.append(audio)
     if len(global_manager.get('notification_manager').notification_queue) == 1: #_type_queue
         global_manager.get('notification_manager').notification_to_front(message)#notifications.notification_to_front(message, global_manager)
 
@@ -36,6 +38,7 @@ def display_choice_notification(message, choices, choice_info_dict, global_manag
     global_manager.get('notification_manager').notification_queue.append(message)#global_manager.get('notification_queue').append(message)
     global_manager.get('notification_manager').notification_type_queue.append('choice')#global_manager.get('notification_type_queue').append(notification_type)
     global_manager.get('notification_manager').notification_dice_queue.append(0)
+    global_manager.get('notification_manager').notification_sound_queue.append(0)
     global_manager.get('notification_manager').choice_notification_choices_queue.append(choices)
     global_manager.get('notification_manager').choice_notification_info_dict_queue.append(choice_info_dict)
     if len(global_manager.get('notification_manager').notification_queue) == 1: #_type_queue
@@ -56,6 +59,7 @@ def display_zoom_notification(message, target, global_manager):
     global_manager.get('notification_manager').notification_queue.append(message)
     global_manager.get('notification_manager').notification_type_queue.append('zoom')
     global_manager.get('notification_manager').notification_dice_queue.append(0)
+    global_manager.get('notification_manager').notification_sound_queue.append('')
     global_manager.get('notification_manager').choice_notification_choices_queue.append(target)
     global_manager.get('notification_manager').choice_notification_info_dict_queue.append('n/a')
     if len(global_manager.get('notification_manager').notification_queue) == 1:

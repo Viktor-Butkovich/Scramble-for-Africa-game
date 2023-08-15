@@ -63,7 +63,7 @@ def fundamental_setup(global_manager):
     global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
-    global_manager.set('default_music_volume', 1)
+    global_manager.set('default_music_volume', 0.5)
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 

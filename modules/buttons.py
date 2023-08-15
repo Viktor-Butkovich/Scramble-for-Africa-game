@@ -1953,14 +1953,14 @@ class minister_portrait_image(button):
         '''
         if main_loop_tools.action_possible(self.global_manager):
             if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
+                if self.current_minister != 'none':
+                    self.current_minister.play_voice_line('acknowledgement')
                 if self in self.global_manager.get('available_minister_portrait_list'): #if available minister portrait
                     own_index = self.global_manager.get('available_minister_list').index(self.current_minister)
                     self.global_manager.set('available_minister_left_index', own_index - 2)
                     minister_utility.update_available_minister_display(self.global_manager)
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
-                if not self.current_minister == 'none':
-                    self.current_minister.selection_sound()
         else:
             text_tools.print_to_screen('You are busy and can not select other ministers.', self.global_manager)
 

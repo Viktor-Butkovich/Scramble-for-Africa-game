@@ -327,6 +327,9 @@ class flavor_text_manager_template():
             if background == 'royal heir' or (background == 'aristocrat' and random.randrange(1, 7) >= 5):
                 while not first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
+                    if background != 'royal heir':
+                        while first_name in ['Prince', 'Infante', 'Reichsfürst', 'Principe']: #only allow prince titles for royal heir
+                            first_name = self.generate_flavor_text('minister_first_names')
             else:
                 while first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
@@ -334,9 +337,13 @@ class flavor_text_manager_template():
             if background in ['royal heir', 'aristocrat']:
                 while not first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
+                    if background != 'royal heir':
+                        while first_name in ['Prince', 'Infante', 'Reichsfürst', 'Principe']: #only allow prince titles for royal heir
+                            first_name = self.generate_flavor_text('minister_first_names')
             else:
                 while first_name in titles:
                     first_name = self.generate_flavor_text('minister_first_names')
+
         name = first_name + ' '
         if self.allow_particles:
             if self.aristocratic_particles:
@@ -553,6 +560,7 @@ class notification_manager_template():
         self.notification_queue = []
         self.notification_type_queue = []
         self.notification_dice_queue = []
+        self.notification_sound_queue = []
         self.choice_notification_choices_queue = []
         self.choice_notification_info_dict_queue = []
         self.minister_message_queue = []
@@ -670,6 +678,9 @@ class notification_manager_template():
 
         notification_type = self.notification_type_queue.pop(0)
         notification_dice = self.notification_dice_queue.pop(0) #number of dice of selected mob to show when notification is visible
+        if self.notification_sound_queue[0]:
+            self.global_manager.get('sound_manager').play_sound(self.notification_sound_queue[0])
+        self.notification_sound_queue.pop(0)
 
         input_dict = {
             'coordinates': scaling.scale_coordinates(self.notification_x, self.notification_y, self.global_manager),
@@ -811,7 +822,8 @@ class sound_manager_template():
         self.global_manager = global_manager
         self.default_music_dict = {
             'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme',
-                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2'],
+                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2', 'Prince of Tuscany', 'Portuguese theme',
+                       'Das lied der deutschen', 'La Marseillaise', 'Rule Britannia', 'religious 1', 'spirited French 1', 'spirited Portuguese 1'],
             'main menu': ['main theme'],
             'village peaceful': ['village peaceful'],
             'village neutral': ['village neutral'],
