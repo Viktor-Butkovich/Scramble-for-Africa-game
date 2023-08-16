@@ -56,8 +56,8 @@ class actor_display_free_image(free_image):
                 else: #if id is list of strings for image bundle
                     image_id_list += new_actor.get_image_id_list() #images[0].image.to_list()
                 if new_actor.actor_type == 'mob':
+                    image_id_list.append({'image_id': 'misc/mob_background.png', 'level': -10})
                     if new_actor.is_pmob:
-                        image_id_list.append({'image_id': 'misc/mob_background.png', 'level': -10})
                         image_id_list.append('misc/pmob_outline.png')
                     else:
                         image_id_list.append('misc/npmob_outline.png')
@@ -65,21 +65,7 @@ class actor_display_free_image(free_image):
                     image_id_list.append('misc/tile_outline.png')
                 self.set_image(image_id_list)
         else:
-            self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])#self.set_image('misc/empty.png')
-
-    #def can_show(self):
-    #    '''
-    #    Description:
-    #        Returns whether this image should be drawn
-    #    Input:
-    #        None
-    #    Output:
-    #        boolean: False if there is no actor in the info display, otherwise returns same value as superclass
-    #    '''
-    #    if self.actor == 'none':
-    #        return(False)
-    #    else:
-    #        return(super().can_show())
+            self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])
 
 class actor_display_infrastructure_connection_image(actor_display_free_image):
     '''

@@ -406,16 +406,7 @@ def manage_lmb_down(clicked_button, global_manager):
     '''
     if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route'):
         if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
-            mouse_x, mouse_y = pygame.mouse.get_pos()
             selected_new_mob = False
-            if (not global_manager.get('capital')):
-                actor_utility.deselect_all(global_manager)
-            if global_manager.get('current_game_mode') == 'ministers':
-                minister_utility.calibrate_minister_info_display(global_manager, 'none')
-            elif global_manager.get('current_game_mode') == 'new_game_setup':
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
-            else:
-                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
@@ -424,24 +415,32 @@ def manage_lmb_down(clicked_button, global_manager):
                                 my_cell = current_cell
                                 if len(current_cell.contained_mobs) > 0:
                                     selected_new_mob = True
-                                    current_cell.contained_mobs[0].select()
-                                    if current_cell.contained_mobs[0].is_pmob:
-                                        current_cell.contained_mobs[0].selection_sound()
-                                    if current_grid == global_manager.get('minimap_grid'):
-                                        main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                        main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
-                                        if not main_cell == 'none':
-                                            main_tile = main_cell.tile
-                                            if not main_tile == 'none':
-                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
-                                    else:
-                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
+                                    if current_cell.contained_mobs[0] != global_manager.get('displayed_mob'):
+                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                                        current_cell.contained_mobs[0].select()
+                                        if current_cell.contained_mobs[0].is_pmob:
+                                            current_cell.contained_mobs[0].selection_sound()
+                                        if current_grid == global_manager.get('minimap_grid'):
+                                            main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                            main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                            if not main_cell == 'none':
+                                                main_tile = main_cell.tile
+                                                if not main_tile == 'none':
+                                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
+                                        else:
+                                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
             if selected_new_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)
                 if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
                     global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
                     
             else:
+                if global_manager.get('current_game_mode') == 'ministers':
+                    minister_utility.calibrate_minister_info_display(global_manager, 'none')
+                elif global_manager.get('current_game_mode') == 'new_game_setup':
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
+                else:
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 click_move_minimap(global_manager)
                 
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere

@@ -823,7 +823,8 @@ class sound_manager_template():
         self.default_music_dict = {
             'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme',
                        'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2', 'Prince of Tuscany', 'Portuguese theme',
-                       'Das lied der deutschen', 'La Marseillaise', 'Rule Britannia', 'religious 1', 'spirited French 1', 'spirited Portuguese 1'],
+                       'Das lied der deutschen', 'La Marseillaise', 'Rule Britannia', 'religious 1', 'spirited French 1', 'spirited Portuguese 1', 'Santa Lucia',
+                       'original waltz 1', 'original waltz 2'],
             'main menu': ['main theme'],
             'village peaceful': ['village peaceful'],
             'village neutral': ['village neutral'],

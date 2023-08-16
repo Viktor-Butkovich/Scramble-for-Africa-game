@@ -45,20 +45,12 @@ class group(pmob):
         self.worker.join_group()
         self.officer.join_group()
         self.is_group = True
-        #if self.officer.veteran:
-        #    self.promote()
         for current_commodity in self.global_manager.get('commodity_types'): #merges individual inventory to group inventory and clears individual inventory
             self.change_inventory(current_commodity, self.worker.get_inventory(current_commodity))
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
         self.global_manager.get('group_list').append(self)
-        if not from_save:
-            self.select()
-            self.status_icons = self.officer.status_icons
-            for current_status_icon in self.status_icons:
-                current_status_icon.actor = self
-            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer, global_manager))
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -67,6 +59,13 @@ class group(pmob):
         self.update_image_bundle()
         if self.officer.veteran:
             self.promote()
+        if not from_save:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            self.select()
+            self.status_icons = self.officer.status_icons
+            for current_status_icon in self.status_icons:
+                current_status_icon.actor = self
+            self.set_movement_points(actor_utility.generate_group_movement_points(self.worker, self.officer, global_manager))
 
     def replace_worker(self, new_worker_type):
         '''

@@ -1498,7 +1498,8 @@ def mob_interface_setup(global_manager):
 
 
     #mob info labels setup
-    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew',
+                               'passengers', 'current passenger'] #order of mob info display labels
     for current_actor_label_type in mob_info_display_labels:
         if current_actor_label_type == 'minister': #how far from edge of screen
             x_displacement = 40

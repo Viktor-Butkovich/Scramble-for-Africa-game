@@ -28,6 +28,7 @@ class interface_element():
         '''
         old_input_dict = input_dict
         self.global_manager = global_manager
+        self.can_show_override = 'none'
         self.width = input_dict['width']
         self.height = input_dict['height']
         self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
@@ -65,22 +66,25 @@ class interface_element():
         '''
         self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
 
-    def can_show(self):
+    def can_show(self, ignore_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown. By default, elements can be shown during game modes in which they can appear, iff their parent collection (if any) is also showing
         Input:
-            None
+            boolean ignore_parent_collection=False: Whether can_show should rely on parent collection also showing
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        if not self.has_parent_collection:
-            if self.global_manager.get('current_game_mode') in self.modes:
-                return(True)
-        elif self.parent_collection.allow_show(self, self.ignore_minimized):
-            if self.global_manager.get('current_game_mode') in self.modes:
-                return(True)
-        return(False)
+        if self.can_show_override == 'none':
+            if (not self.has_parent_collection) or ignore_parent_collection:
+                if self.global_manager.get('current_game_mode') in self.modes:
+                    return(True)
+            elif self.parent_collection.allow_show(self, self.ignore_minimized):
+                if self.global_manager.get('current_game_mode') in self.modes:
+                    return(True)
+            return(False)
+        else:
+            return(self.can_show_override.can_show(ignore_parent_collection=True))
 
     def set_origin(self, new_x, new_y):
         '''
@@ -382,7 +386,7 @@ class interface_collection(interface_element):
         '''
         return(self.can_show(ignore_minimized))
 
-    def can_show(self, ignore_minimized = False):
+    def can_show(self, ignore_minimized=False, ignore_parent_collection=False):
         '''
         Description:
             Returns whether this collection can be shown. A collection can be shown if it is not minimized and could otherwise be shown
@@ -391,7 +395,7 @@ class interface_collection(interface_element):
         Output:
             boolean: Returns True if this button can appear under current conditions, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(ignore_parent_collection)
         if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
             return(False)
         elif ignore_minimized:

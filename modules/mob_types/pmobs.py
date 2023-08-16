@@ -79,6 +79,7 @@ class pmob(mob):
             actor_utility.deselect_all(self.global_manager)
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 self.select()
         self.current_roll_modifier = 0
         self.default_min_success = 4

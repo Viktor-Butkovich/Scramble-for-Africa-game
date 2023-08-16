@@ -33,6 +33,7 @@ def cycle_player_turn(global_manager, start_of_turn = False):
             turn_queue[0].selection_sound()
         else: 
             turn_queue.append(turn_queue.pop(0)) #if unit is already selected, move it to the end and shift to the next one
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
         turn_queue[0].select()
         turn_queue[0].move_to_front()
         if not turn_queue[0].grids[0].mini_grid == 'none':

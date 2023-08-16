@@ -812,12 +812,6 @@ class minister_type_image(tooltip_free_image):
         else:
             new_minister = 'none'
 
-        #if new_minister != 'none' and new_minister.actor_type == 'minister':
-        #    continue
-        #if new_minister != 'none' and hasattr(new_minister, 'controlling_minister'): #if calibrating to a mob, calibrate to its minister instead
-        #    new_minister = new_minister.controlling_minister
-        #else:
-        #    new_minister = 'none'
         self.current_minister = new_minister
         if not new_minister == 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position

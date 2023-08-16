@@ -619,6 +619,12 @@ class button(interface_elements.interface_element):
                 description = 'attached panel'
             self.set_tooltip(['Displays the ' + description])
 
+        elif self.button_type == 'manually calibrate':
+            if self.input_source == 'none':
+                self.set_tooltip(['Empties this reorganization cell'])
+            else:
+                self.set_tooltip(['Uploads the selected unit to this reorganization cell'])
+
         else:
             self.set_tooltip(['placeholder'])
             
@@ -1298,7 +1304,7 @@ class button(interface_elements.interface_element):
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
-    def can_show(self):
+    def can_show(self, ignore_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown. By default, it can be shown during game modes in which this button can appear
@@ -1313,7 +1319,7 @@ class button(interface_elements.interface_element):
             destination_x, destination_y = (x + self.parent_collection.move_with_mouse_config['mouse_x_offset'], y + self.parent_collection.move_with_mouse_config['mouse_y_offset'])
             self.parent_collection.set_origin(destination_x, destination_y)
 
-        if super().can_show():
+        if super().can_show(ignore_parent_collection=ignore_parent_collection):
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
@@ -2358,6 +2364,8 @@ class reorganize_unit_button(button):
         '''
         input_dict['button_type'] = 'reorganize unit'
         self.input_sources = input_dict['input_sources']
+        self.autofill_attempts = 0
+        self.current_input = ['none', 'none']
         self.output_destinations = input_dict['output_destinations']
         self.procedure_dict = {'procedure_type': 'none'}
         self.manually_calibrate_buttons = []
@@ -2415,10 +2423,23 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
-        self.current_input = [current_source.actor for current_source in self.input_sources]
+        self.attempt_autofill()
         self.current_output = self.generate_output(self.current_input)
         for index, item in enumerate(self.current_output):
             self.output_destinations[index].calibrate(item)
+
+    def attempt_autofill(self):
+        self.autofill_attempts += 1
+        previous_input = self.current_input
+        self.current_input = [current_source.actor for current_source in self.input_sources]
+        if self.autofill_attempts == 1:
+            #if not ((self.current_input[0] == 'none' and previous_input[0] != 'none') or (self.current_input[1] == 'none' and previous_input[1] != 'none')):
+                #don't attempt to autofill if user just emptied a cell
+            if self.current_input[0] != 'none' and self.current_input[1] != 'none':
+                return(self.current_input)
+            elif self.current_input[0] == 'none' and self.current_input[1] == 'none':
+                self.manually_calibrate_buttons[0].on_click()
+            self.current_input = [current_source.actor for current_source in self.input_sources]
 
     def generate_output(self, input):
         '''
@@ -2446,7 +2467,8 @@ class reorganize_unit_button(button):
                     procedure = 'split'
             elif unit.is_vehicle:
                 if unit.contained_mobs:
-                    procedure = 'disembark'
+                    #procedure = 'disembark'
+                    procedure = 'none'
                 elif unit.crew != 'none':
                     procedure = 'uncrew'
         elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
@@ -2465,6 +2487,7 @@ class reorganize_unit_button(button):
             else:
                 vehicle = input[1]
                 worker = input[0]
+        '''
         elif (input[0].is_vehicle and input[0].has_crew and not input[1].is_vehicle) or (input[1].is_vehicle and input[1].has_crew and not input[0].is_vehicle):
             procedure = 'embark'
             if input[0].is_vehicle:
@@ -2473,7 +2496,7 @@ class reorganize_unit_button(button):
             else:
                 vehicle = input[1]
                 passenger = input[0]
-
+        '''
 
         required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
                               'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
@@ -2491,19 +2514,20 @@ class reorganize_unit_button(button):
 
         if procedure == 'split':
             output = self.handle_split(unit, required_dummy_attributes, dummy_input_dict)
-        elif procedure == 'disembark':
-            output = self.handle_disembark(unit, required_dummy_attributes, dummy_input_dict)
+        #elif procedure == 'disembark':
+        #    output = self.handle_disembark(unit, required_dummy_attributes, dummy_input_dict)
         elif procedure == 'uncrew':
             output = self.handle_uncrew(unit, required_dummy_attributes, dummy_input_dict)
         elif procedure == 'merge':
             output = self.handle_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
         elif procedure == 'crew':
             output = self.handle_crew(vehicle, worker, required_dummy_attributes, dummy_input_dict)
-        elif procedure == 'embark':
-            output = self.handle_embark(vehicle, passenger, required_dummy_attributes, dummy_input_dict)
+        #elif procedure == 'embark':
+        #    output = self.handle_embark(vehicle, passenger, required_dummy_attributes, dummy_input_dict)
         if procedure in ['invalid', 'none']:
             output = ['none', 'none']
         output += output #replicates results to also calibrate corresponding tooltip objects
+        self.autofill_attempts = 0
         return(output)
 
     def handle_split(self, unit, required_dummy_attributes, dummy_input_dict):
@@ -2804,6 +2828,9 @@ class manually_calibrate_button(button):
         '''
         for target in self.output_destinations:
             if self.input_source == 'none':
+                if not hasattr(target, 'actor'):
+                    target.autofill_attempts = 1 #prevents attempting to autofill immediately after emptying
                 target.calibrate(self.input_source)
             else:
+                #if hasattr(target, 'actor') and target.actor != self.global_manager.get(self.input_source):
                 target.calibrate(self.global_manager.get(self.input_source))

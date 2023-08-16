@@ -339,6 +339,7 @@ def calibrate_actor_info_display(global_manager, info_display, new_actor, overri
         global_manager_template global_manager: Object that accesses shared variables
         interface_collection info_display: Collection of interface elements to calibrate to the inputted actor
         string new_actor: The new mob or tile that is displayed
+        boolean override_exempt=False: Whether to calibrate interface elements that are normally exempt, such as the reorganization interface
     Output:
         None
     '''

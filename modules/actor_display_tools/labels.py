@@ -425,6 +425,7 @@ class actor_display_label(label):
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
             self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
+            self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
@@ -902,7 +903,7 @@ class actor_display_label(label):
                 x_displacement += (current_button.width + 5)
 
 
-    def can_show(self):
+    def can_show(self, ignore_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -911,7 +912,7 @@ class actor_display_label(label):
         Output:
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(ignore_parent_collection=ignore_parent_collection)
         if result ==  False:
             return(False)
         elif self.actor == 'none':
