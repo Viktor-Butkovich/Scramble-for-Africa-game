@@ -55,6 +55,7 @@ class worker(pmob):
         if not from_save:
             self.second_image_variant = random.randrange(0, len(self.image_variants))
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()

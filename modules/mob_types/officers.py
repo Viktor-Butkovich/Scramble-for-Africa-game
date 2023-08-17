@@ -38,6 +38,7 @@ class officer(pmob):
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
         if not from_save:
             self.veteran = False
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_officer changing
             self.selection_sound()
         else:
@@ -149,6 +150,7 @@ class officer(pmob):
         self.show_images()
         #self.disorganized = group.disorganized #officers should not become disorganized
         self.go_to_grid(self.images[0].current_cell.grid, (self.x, self.y))
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
         self.select()
         if self.movement_points > 0:
             self.add_to_turn_queue()

@@ -737,6 +737,7 @@ class pmob(mob):
         vehicle.hide_images()
         vehicle.show_images() #moves vehicle images to front
         if focus and not vehicle.initializing: #don't select vehicle if loading in at start of game
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             vehicle.select()
         if not self.global_manager.get('loading_save'):
             self.global_manager.get('sound_manager').play_sound('footsteps')
@@ -774,6 +775,7 @@ class pmob(mob):
 
         self.add_to_turn_queue()
         if focus:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             self.select()
             if self.global_manager.get('minimap_grid') in self.grids:
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)

@@ -79,6 +79,7 @@ class mob(actor):
         self.movement_cost = 1
         self.has_infinite_movement = False
         self.temp_movement_disabled = False
+        self.default_interface_tab = 'reorganization'
         if from_save:
             self.set_max_movement_points(input_dict['max_movement_points'])
             self.set_movement_points(input_dict['movement_points'])
@@ -518,6 +519,11 @@ class mob(actor):
         self.global_manager.set('show_selection_outlines', True)
         self.global_manager.set('last_selection_outline_switch', time.time())#outlines should be shown immediately when selected
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self)
+        for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members: #automatically selects default interface tab when selected
+            if hasattr(tab_button.linked_element, 'identifier'):
+                if tab_button.linked_element.identifier == self.default_interface_tab and tab_button.linked_element != self.global_manager.get('mob_tabbed_collection').current_tabbed_member:
+                    tab_button.on_click()
+                    continue
 
     def move_to_front(self):
         '''

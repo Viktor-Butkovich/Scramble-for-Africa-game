@@ -482,8 +482,8 @@ class tabbed_collection(interface_collection):
 
         if member_config['tabbed']:
             tab_button_input_dict = {
-                'width': scaling.scale_width(20, self.global_manager),
-                'height': scaling.scale_height(20, self.global_manager),
+                'width': scaling.scale_width(36, self.global_manager), #20
+                'height': scaling.scale_height(36, self.global_manager),
                 'init_type': 'tab button',
                 'parent_collection': self.tabs_collection,
                 'image_id': member_config['button_image_id'],
@@ -493,6 +493,8 @@ class tabbed_collection(interface_collection):
             self.tabbed_members.append(new_member)
             if len(self.tabbed_members) == 1:
                 self.current_tabbed_member = new_member
+            if 'identifier' in member_config:
+                new_member.identifier = member_config['identifier']
 
 class ordered_collection(interface_collection):
     '''

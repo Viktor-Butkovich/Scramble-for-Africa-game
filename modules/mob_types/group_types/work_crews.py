@@ -58,7 +58,7 @@ class work_crew(group):
         self.remove_from_turn_queue()
         building.contained_work_crews.append(self)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), building.cell.tile) #update tile ui with worked building
-        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none')
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
 
     def leave_building(self, building):
         '''
@@ -75,6 +75,7 @@ class work_crew(group):
         self.add_to_turn_queue()
         building.contained_work_crews = utility.remove_from_list(building.contained_work_crews, self)
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #update tile ui with worked building
+        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
         self.select()
 
     def attempt_production(self, building):

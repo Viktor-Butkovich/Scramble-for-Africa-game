@@ -997,6 +997,10 @@ class button(interface_elements.interface_element):
                                             displayed_mob.set_sentry_mode(False)
                                         displayed_mob.change_inventory(commodity, amount_transferred)
                                         displayed_tile.change_inventory(commodity, -1 * amount_transferred)
+                                        for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members:
+                                            if tab_button.linked_element == self.global_manager.get('mob_inventory_collection'):
+                                                tab_button.on_click()
+                                                continue
                                 else:
                                     text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
                             else:
@@ -1422,7 +1426,7 @@ class cycle_same_tile_button(button):
     def on_click(self):
         '''
         Description:
-            Controls this button's behavior when clicked. This type of button cycles the order of mobs displayed in a tile, moving the first one shown to the bototm and moving others up
+            Controls this button's behavior when clicked. This type of button cycles the order of mobs displayed in a tile, moving the first one shown to the bottom and moving others up
         Input:
             None
         Output:
@@ -2432,13 +2436,42 @@ class reorganize_unit_button(button):
         self.autofill_attempts += 1
         previous_input = self.current_input
         self.current_input = [current_source.actor for current_source in self.input_sources]
-        if self.autofill_attempts == 1:
+        if self.autofill_attempts == 1 and self.global_manager.get('displayed_mob') != 'none':
             #if not ((self.current_input[0] == 'none' and previous_input[0] != 'none') or (self.current_input[1] == 'none' and previous_input[1] != 'none')):
                 #don't attempt to autofill if user just emptied a cell
-            if self.current_input[0] != 'none' and self.current_input[1] != 'none':
+            if self.current_input[0] != 'none' and self.current_input[1] != 'none': #keep cells same if both are filled
                 return(self.current_input)
             elif self.current_input[0] == 'none' and self.current_input[1] == 'none':
-                self.manually_calibrate_buttons[0].on_click()
+                self.manually_calibrate_buttons[0].on_click() #select displayed mob if both cells are empty
+
+                self.current_input = [current_source.actor for current_source in self.input_sources]
+
+                if self.current_input[0] != 'none':
+                    unit = self.current_input[0]
+                else:
+                    unit = self.current_input[1]
+                if unit.is_officer: #set up merge if only officer selected
+                    officer = unit
+                    worker = 'none'
+                    if officer.officer_type == 'evangelist':
+                        worker_type_list = ['religious']
+                    else:
+                        worker_type_list = ['African', 'European', 'slave']
+                    worker = officer.images[0].current_cell.get_worker(possible_types=worker_type_list)
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
+                    self.manually_calibrate_buttons[1].on_click()
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), officer)
+                elif unit.is_vehicle:
+                    vehicle = unit
+                    worker = 'none'
+                    worker_type_list = ['European']
+                    if not (vehicle.vehicle_type == 'ship' and vehicle.can_swim_ocean):
+                        worker_type_list.append('African')
+                    worker = vehicle.images[0].current_cell.get_worker(possible_types=worker_type_list)
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
+                    self.manually_calibrate_buttons[1].on_click()
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), vehicle)
+
             self.current_input = [current_source.actor for current_source in self.input_sources]
 
     def generate_output(self, input):

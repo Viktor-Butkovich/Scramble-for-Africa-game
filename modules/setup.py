@@ -1528,6 +1528,19 @@ def mob_interface_setup(global_manager):
                 input_dict['list_index'] = i
                 global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
+    tab_collection_relative_coordinates = (450, -30)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('mob_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'unit information tabs'
+    }
+    global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
 def tile_interface_setup(global_manager):
     '''
     Description:
@@ -1648,6 +1661,19 @@ def tile_interface_setup(global_manager):
             input_dict['init_type'] = current_actor_label_type + ' label'
             global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
+    tab_collection_relative_coordinates = (450, -30)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('tile_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'tile information tabs'
+    }
+    global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
 def inventory_interface_setup(global_manager):
     '''
     Description:
@@ -1683,26 +1709,27 @@ def inventory_interface_setup(global_manager):
 
     tab_collection_relative_coordinates = (450, -30)
 
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
-        'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('mob_info_display'),
-        'member_config': {'order_exempt': True},
-        'description': 'unit information tabs'
-    }
-    global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+    #input_dict = {
+    #    'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+    #    'width': scaling.scale_width(10, global_manager),
+    #    'height': scaling.scale_height(30, global_manager),
+    #    'init_type': 'tabbed collection',
+    #    'parent_collection': global_manager.get('mob_info_display'),
+    #    'member_config': {'order_exempt': True},
+    #    'description': 'unit information tabs'
+    #}
+    #global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
-        'description': 'unit inventory panel',
+        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
+        'description': 'unit inventory panel'
     }
     mob_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    global_manager.set('mob_inventory_collection', mob_inventory_collection)
 
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
@@ -1722,16 +1749,16 @@ def inventory_interface_setup(global_manager):
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
-        'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('tile_info_display'),
-        'member_config': {'order_exempt': True},
-        'description': 'tile information tabs'
-    }
-    global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+    #input_dict = {
+    #    'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+    #    'width': scaling.scale_width(10, global_manager),
+    #    'height': scaling.scale_height(30, global_manager),
+    #    'init_type': 'tabbed collection',
+    #    'parent_collection': global_manager.get('tile_info_display'),
+    #    'member_config': {'order_exempt': True},
+    #    'description': 'tile information tabs'
+    #}
+    #global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
@@ -1780,7 +1807,7 @@ def unit_organization_interface_setup(global_manager):
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'interface collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
-        'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png'},
+        'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png', 'identifier': 'reorganization'},
         'description': 'unit organization panel',
         'direction': 'horizontal'
     }

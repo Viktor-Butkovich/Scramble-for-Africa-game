@@ -65,6 +65,10 @@ class vehicle(pmob):
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['transportation'])
         if not self.has_crew:
             self.remove_from_turn_queue()
+        if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
+            self.select()
 
     def set_crew(self, new_crew): #continue adding set_crew
         '''
