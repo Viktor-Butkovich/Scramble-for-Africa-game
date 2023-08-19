@@ -551,6 +551,8 @@ class minister():
             self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
             if not (self.global_manager.get('creating_new_game') or self.initializing):
                 self.update_tooltip()
+            if self.global_manager.get('displayed_minister') == self:
+                minister_utility.calibrate_minister_info_display(self.global_manager, self)
 
     def voice_setup(self, from_save=False):
         '''
@@ -634,6 +636,8 @@ class minister():
             self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
             if not (self.global_manager.get('creating_new_game') or self.initializing):
                 self.update_tooltip()
+            if self.global_manager.get('displayed_minister') == self:
+                minister_utility.calibrate_minister_info_display(self.global_manager, self)
 
     def get_average_apparent_skill(self):
         '''
@@ -689,7 +693,7 @@ class minister():
                             previous_values[category] = self.apparent_corruption_description
                         else:
                             previous_values[category] = self.apparent_skill_descriptions[category]
-                        self.attempt_rumor(category, prosecutor) #add bribes for prosecutor when finding loyalty
+                        self.attempt_rumor(category, prosecutor)
                         if category == 'loyalty':
                             if self.apparent_corruption_description != previous_values[category]:
                                 new_values[category] = self.apparent_corruption_description
@@ -711,7 +715,7 @@ class minister():
                                 new_values[category] = self.apparent_skill_descriptions[category]
         message = ''
         if new_values:
-            message = 'An investigation has been launched for ' + str(cost) + ' money, resulting in the following discoveries: /n /n'
+            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money resulted in the following discoveries: /n /n'
             for category in new_values:
                 if category == 'loyalty':
                     category_name = category
@@ -724,9 +728,9 @@ class minister():
                     message += ' (formerly ' + previous_values[category] + ') /n'
 
         else:
-            message = 'An investigation has been launched for ' + str(cost) + ' money, which failed to uncover any significant information regarding ' + self.name + '. /n'
+            message = 'The investigation launched against ' + self.name + ' for ' + str(cost) + ' money failed to make any significant discoveries. /n'
         message += ' /n'
-        prosecutor.display_message(message)
+        self.display_message(message)
 
     def attempt_rumor(self, rumor_type, prosecutor):
         if prosecutor == 'none':
@@ -746,9 +750,24 @@ class minister():
         apparent_value = max(apparent_value, 1)
         apparent_value = min(apparent_value, 6)
 
+        changed_value = False
         if rumor_type == 'loyalty':
+            if apparent_value >= 4 and prosecutor != 'none':
+                if (self.check_corruption() or self.check_corruption()) and (prosecutor.check_corruption() or prosecutor.check_corruption()): #conspiracy check with advantage
+                    bribe_cost = 5
+                    if self.personal_savings + self.stolen_money >= bribe_cost:
+                        self.personal_savings -= bribe_cost
+                        if self.personal_savings < 0: #spend from personal savings, transfer stolen to personal savings if not enough
+                            self.stolen_money += self.personal_savings
+                            self.personal_savings = 0
+                        prosecutor.steal_money(bribe_cost, 'bribery')
+                        apparent_value = random.randrange(1, 4)
+            #if self.apparent_corruption_description == 'unknown' or prosecutor != 'none': #don't actually change value unless 
+            #    changed_value = True
             self.set_apparent_corruption(apparent_value)
         else:
+            #if self.apparent_skill_descriptions[rumor_type] == 'unknown' or prosecutor != 'none': #don't actually change established value from rumor
+                #changed_value = True
             self.set_apparent_skill(rumor_type, apparent_value)
 
         if prosecutor == 'none' :
@@ -765,6 +784,8 @@ class minister():
                     skill_name = self.global_manager.get('minister_type_dict')[rumor_type]
                     message += utility.generate_article(self.apparent_skill_descriptions[rumor_type]) + ' ' + self.apparent_skill_descriptions[rumor_type] + ' ' + skill_name + ' ability'
                 message += '. /n /n'
+                #if not changed_value:
+                #    message + 'As this information is just a rumor, it will not replace '
                 self.display_message(message)
 
     def check_corruption(self): #returns true if stealing for this roll

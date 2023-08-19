@@ -3407,7 +3407,7 @@ class active_investigation_button(label_button):
         '''
         input_dict['button_type'] = 'active investigation'
         input_dict['modes'] = input_dict['attached_label'].modes
-        input_dict['image_id'] = 'buttons/to_trial_button.png'
+        input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
         super().__init__(input_dict, global_manager)
 
     def can_show(self):
