@@ -38,6 +38,7 @@ class minister():
         Output:
             None
         '''
+        self.initializing = True
         self.actor_type = 'minister' #used for actor display labels and images
         self.global_manager = global_manager
         self.global_manager.get('minister_list').append(self)
@@ -55,7 +56,9 @@ class minister():
             self.general_skill = input_dict['general_skill']
             self.specific_skills = input_dict['specific_skills']
             self.apparent_skills = input_dict['apparent_skills']
+            self.apparent_skill_descriptions = input_dict['apparent_skill_descriptions']
             self.apparent_corruption = input_dict['apparent_corruption']
+            self.apparent_corruption_description = input_dict['apparent_corruption_description']
             self.interests = input_dict['interests']
             self.corruption = input_dict['corruption']
             self.corruption_threshold = 10 - self.corruption
@@ -78,11 +81,11 @@ class minister():
             status_number_dict = {1: 'low', 2: 'moderate', 3: 'high', 4: 'very high'}
             self.status = status_number_dict[self.status_number]
             self.personal_savings = 5 ** (self.status_number - 1) + random.randrange(0, 6) #1-6 for lowborn, 5-10 for middle, 25-30 for high, 125-130 for very high
+            self.current_position = 'none'
             self.skill_setup()
             self.voice_setup()
             self.interests_setup()
             self.corruption_setup()
-            self.current_position = 'none'
             self.global_manager.get('available_minister_list').append(self)
             self.portrait_sections_setup()
             self.stolen_money = 0
@@ -92,6 +95,7 @@ class minister():
         minister_utility.update_available_minister_display(self.global_manager)
         self.stolen_already = False
         self.update_tooltip()
+        self.initializing = False
 
     def portrait_sections_setup(self):
         '''
@@ -176,6 +180,37 @@ class minister():
         self.tooltip_text.append('Background: ' + self.background)
         self.tooltip_text.append('Social status: ' + self.status)
         self.tooltip_text.append('Interests: ' + self.interests[0] + ' and ' + self.interests[1])
+
+        if self.apparent_corruption_description != 'unknown':
+            self.tooltip_text.append('Loyalty: ' + self.apparent_corruption_description)
+
+        if self.current_position == 'none':
+            displayed_skill = self.get_max_apparent_skill()
+        else:
+            displayed_skill = self.current_position
+
+        if displayed_skill != 'unknown':
+            displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military]
+            if self.apparent_skill_descriptions[displayed_skill] != 'unknown':
+                if self.current_position == 'none':
+                    message = 'Highest ability: ' + self.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
+                else:
+                    message = displayed_skill_name.capitalize() + ' ability: ' + self.apparent_skill_descriptions[displayed_skill]
+                self.tooltip_text.append(message)
+        #elif self.current_position == 'none':
+        #    message = 'Highest ability: unknown'
+        #else:
+        #    message = self.global_manager.get('minister_type_dict')[self.current_position] + 'ability: unknown'
+        #self.tooltip_text.append(message)
+
+        rank = 0
+        for skill_value in range(6, 0, -1): #iterates backwards from 6 to 1
+            for skill_type in self.apparent_skills:
+                if self.apparent_skills[skill_type] == skill_value:
+                    rank += 1
+                    skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                    self.tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.apparent_skill_descriptions[skill_type])
+
         self.tooltip_text.append('Evidence: ' + str(self.corruption_evidence))
         if self.just_removed and self.current_position == 'none':
             self.tooltip_text.append('This minister was just removed from office and expects to be reappointed to an office by the end of the turn.')
@@ -210,7 +245,7 @@ class minister():
             None
         '''
         prosecutor = self.global_manager.get('current_ministers')['Prosecutor']
-        if not prosecutor == 'none':
+        if prosecutor != 'none':
             if self.global_manager.get('effect_manager').effect_active('show_minister_stealing'):
                 print(self.current_position + ' ' + self.name + ' stole ' + str(value) + ' money from ' + self.global_manager.get('transaction_descriptions')[theft_type] + '.')
             difficulty = self.no_corruption_roll(6, 'minister_stealing')
@@ -260,7 +295,9 @@ class minister():
                 'general_skill': int value - Value from 1 to 3 that changes what is added to or subtracted from dice rolls
                 'specific_skills': dictionary value - String keys corresponding to int values to record skill values for each minister office
                 'apparent_skills': dictionary value - String keys corresponding to 'unknown'/int values for estimate of minister skill, based on prosecutor and rumors
+                'apparent_skill_descriptions': dictionary value - String keys corresponding to string description values for estimate of minister skill
                 'apparent_corruption': int/string value - Value from 1 to 6 or 'unknown' corresponding to estimate of minister corruption
+                'apparent_corruption_description': string value - String description value for estimate of minister corruption
                 'interests': string list value - List of strings describing the skill categories this minister is interested in
                 'corruption': int value - Measure of how corrupt a minister is, with 6 having a 1/2 chance to steal, 5 having 1/3 chance, etc.
                 'stolen_money': double value - Amount of money this minister has stolen or taken in bribes
@@ -276,7 +313,9 @@ class minister():
         save_dict['general_skill'] = self.general_skill
         save_dict['specific_skills'] = self.specific_skills
         save_dict['apparent_skills'] = self.apparent_skills
+        save_dict['apparent_skill_descriptions'] = self.apparent_skill_descriptions
         save_dict['apparent_corruption'] = self.apparent_corruption
+        save_dict['apparent_corruption_description'] = self.apparent_corruption_description
         save_dict['interests'] = self.interests
         save_dict['corruption'] = self.corruption
         save_dict['stolen_money'] = self.stolen_money
@@ -486,17 +525,32 @@ class minister():
         self.general_skill = random.randrange(1, 4) #1-3, general skill as in all fields, not military
         self.specific_skills = {}
         self.apparent_skills = {}
+        self.apparent_skill_descriptions = {}
         background_skill = random.choice(self.global_manager.get('background_skills_dict')[self.background])
         if background_skill == 'random':
             background_skill = random.choice(self.global_manager.get('skill_types'))
         for current_minister_type in self.global_manager.get('minister_types'):
             self.specific_skills[current_minister_type] = random.randrange(0, 4) #0-3
-            if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
-                self.apparent_skills[current_minister_type] = self.specific_skills[current_minister_type] + self.general_skill
-            else:
-                self.apparent_skills[current_minister_type] = 'unknown'
-            if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill:
+            if self.global_manager.get('minister_type_dict')[current_minister_type] == background_skill and (self.specific_skills[current_minister_type] + self.general_skill) < 6:
                 self.specific_skills[current_minister_type] += 1
+            if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
+                self.set_apparent_skill(current_minister_type, self.specific_skills[current_minister_type] + self.general_skill)
+            else:
+                self.set_apparent_skill(current_minister_type, 0)
+
+    def set_apparent_skill(self, skill_type, new_value):
+        '''
+        Description:
+            Sets this minister's apparent skill and apparent skill description to match the new apparent skill value for the inputted skill type
+        Input:
+            string skill_type: Type of skill to set, like 'Minister of Transportation'
+            int new_value: New skill value from 0-6, with 0 corresponding to 'unknown'
+        '''
+        if (not skill_type in self.apparent_skills) or self.apparent_skills[skill_type] != new_value:
+            self.apparent_skills[skill_type] = new_value
+            self.apparent_skill_descriptions[skill_type] = random.choice(self.global_manager.get('minister_skill_to_description_dict')[new_value])
+            if not (self.global_manager.get('creating_new_game') or self.initializing):
+                self.update_tooltip()
 
     def voice_setup(self, from_save=False):
         '''
@@ -562,10 +616,24 @@ class minister():
         '''
         self.corruption = random.randrange(1, 7) #1-6
         self.corruption_threshold = 10 - self.corruption #minimum roll on D6 required for corruption to occur
+        
         if self.global_manager.get('effect_manager').effect_active('transparent_ministers'):
-            self.apparent_corruption = self.corruption
+            self.set_apparent_corruption(self.corruption)
         else:
-            self.apparent_corruption = 'unknown'
+            self.set_apparent_corruption(0)
+
+    def set_apparent_corruption(self, new_value):
+        '''
+        Description:
+            Sets this minister's apparent corruption and apparent corruption description to match the new apparent corruption value
+        Input:
+            int new_value: New corruption value from 0-6, with 0 corresponding to 'unknown'
+        '''
+        if (not hasattr(self, 'apparent_corruption')) or self.apparent_corruption != new_value:
+            self.apparent_corruption = new_value
+            self.apparent_corruption_description = random.choice(self.global_manager.get('minister_corruption_to_description_dict')[new_value])
+            if not (self.global_manager.get('creating_new_game') or self.initializing):
+                self.update_tooltip()
 
     def get_average_apparent_skill(self):
         '''
@@ -587,45 +655,117 @@ class minister():
         else:
             return(total_apparent_skill / num_data_points)
         
-    def get_description(self, description_type, sub_type='none'):
+    def get_max_apparent_skill(self):
         '''
         Description:
-            Calculates and returns an apparent skill description for one of this minister's skills, or overall
+            Calculates and returns the highest apparent skill category for this minister, like 'Minister of Transportation'
         Input:
-            string: Type of skill to return a description for, including 'average'
+            None
         Output:
-            string: Description of minister's apparent skill of inputted type
+            string: Returns highest apparent skill category for this minister
         '''
-        return_value = 'none'
-        if description_type == 'skill':
-            if sub_type == 'average':
-                skill_value = self.get_average_apparent_skill()
-            else:
-                skill_value = self.apparent_skills[sub_type]
+        max_skills = ['unknown']
+        max_skill_value = 0
+        for skill_type in self.global_manager.get('minister_types'):
+            if self.apparent_skills[skill_type] != 'unknown':
+                if self.apparent_skills[skill_type] > max_skill_value:
+                    max_skills = [skill_type]
+                    max_skill_value = self.apparent_skills[skill_type]
+                elif self.apparent_skills[skill_type] == max_skill_value:
+                    max_skills.append(skill_type)
+        return(max_skills[0])
 
-            if skill_value == 'unknown':
-                return_value = skill_value
-            elif skill_value >= 4.5:
-                return_value = 'expert'
-            elif skill_value >= 2.5:
-                return_value = 'average'
-            else:
-                return_value = 'incompetent'
-        elif description_type == 'loyalty':
-            if self.apparent_corruption == 'unknown':
-                apparent_loyalty = 'unknown'
-                return_value = apparent_loyalty
-            else:
-                apparent_loyalty = 7 - self.apparent_corruption
-                if apparent_loyalty >= 4:
-                    return_value = 'solid'
-                elif apparent_loyalty == 3:
-                    return_value = 'disloyal 1'
-                elif apparent_loyalty == 2:
-                    return_value = 'disloyal 2'
-                elif apparent_loyalty == 1:
-                    return_value = 'disloyal 3'
-        return(return_value)
+    def attempt_active_investigation(self, prosecutor, cost):
+        #1/2 chance of success - if successful:
+            #1/6 chance of report for each secondary, 1/2 for loyalty and main ability
+        previous_values = {}
+        new_values = {}
+        roll_result = prosecutor.roll(6, 4, 0, self.global_manager.get('action_prices')['active_investigation'], 'active_investigation')
+        if roll_result >= 4:
+            for category in self.global_manager.get('minister_types') + ['loyalty']:
+                if category == 'loyalty' or category == self.current_position: #simplify this
+                    if random.randrange(1, 7) >= 4:
+                        if category == 'loyalty':
+                            previous_values[category] = self.apparent_corruption_description
+                        else:
+                            previous_values[category] = self.apparent_skill_descriptions[category]
+                        self.attempt_rumor(category, prosecutor) #add bribes for prosecutor when finding loyalty
+                        if category == 'loyalty':
+                            if self.apparent_corruption_description != previous_values[category]:
+                                new_values[category] = self.apparent_corruption_description
+                        else:
+                            if self.apparent_skill_descriptions[category] != previous_values[category]:
+                                new_values[category] = self.apparent_skill_descriptions[category]
+                else:
+                    if random.randrange(1, 7) == 1:
+                        if category == 'loyalty':
+                            previous_values[category] = self.apparent_corruption_description
+                        else:
+                            previous_values[category] = self.apparent_skill_descriptions[category]
+                        self.attempt_rumor(category, prosecutor)
+                        if category == 'loyalty':
+                            if self.apparent_corruption_description != previous_values[category]:
+                                new_values[category] = self.apparent_corruption_description
+                        else:
+                            if self.apparent_skill_descriptions[category] != previous_values[category]:
+                                new_values[category] = self.apparent_skill_descriptions[category]
+        message = ''
+        if new_values:
+            message = 'An investigation has been launched for ' + str(cost) + ' money, resulting in the following discoveries: /n /n'
+            for category in new_values:
+                if category == 'loyalty':
+                    category_name = category
+                else:
+                    category_name = self.global_manager.get('minister_type_dict')[category]
+                message += '    ' + category_name.capitalize() + ': ' + new_values[category]
+                if previous_values[category] == 'unknown': #if unknown
+                    message += ' /n'
+                else:
+                    message += ' (formerly ' + previous_values[category] + ') /n'
+
+        else:
+            message = 'An investigation has been launched for ' + str(cost) + ' money, which failed to uncover any significant information regarding ' + self.name + '. /n'
+        message += ' /n'
+        prosecutor.display_message(message)
+
+    def attempt_rumor(self, rumor_type, prosecutor):
+        if prosecutor == 'none':
+            roll_result = random.randrange(1, 7) - random.randrange(0, 2) #as if done by a prosecutor with a negative skill modifier
+        else:
+            roll_result = prosecutor.no_corruption_roll(6)
+
+        if rumor_type == 'loyalty':
+            apparent_value = self.corruption
+        else:
+            apparent_value = self.general_skill + self.specific_skills[rumor_type]
+
+        if roll_result < 5: #5+ accuracy roll
+            for i in range(3):
+                apparent_value += random.randrange(-1, 2)
+
+        apparent_value = max(apparent_value, 1)
+        apparent_value = min(apparent_value, 6)
+
+        if rumor_type == 'loyalty':
+            self.set_apparent_corruption(apparent_value)
+        else:
+            self.set_apparent_skill(rumor_type, apparent_value)
+
+        if prosecutor == 'none' :
+            if not self.global_manager.get('creating_new_game'):
+                message = 'A rumor has been found that ' + self.name + ', '
+                if self.current_position == 'none':
+                    message += ' a potential minister candidate, '
+                else:
+                    message += ' your ' + self.current_position + ', '
+                message += 'has '
+                if rumor_type == 'loyalty':
+                    message += self.apparent_corruption_description + ' loyalty'
+                else:
+                    skill_name = self.global_manager.get('minister_type_dict')[rumor_type]
+                    message += utility.generate_article(self.apparent_skill_descriptions[rumor_type]) + ' ' + self.apparent_skill_descriptions[rumor_type] + ' ' + skill_name + ' ability'
+                message += '. /n /n'
+                self.display_message(message)
 
     def check_corruption(self): #returns true if stealing for this roll
         '''

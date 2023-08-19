@@ -3382,7 +3382,74 @@ class to_trial_button(label_button):
                 else:
                     text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not start a trial.', self.global_manager)   
+                text_tools.print_to_screen('You are busy and can not start a trial.', self.global_manager)
+
+class active_investigation_button(label_button):
+    '''
+    Button that starts an active investigation on a minister
+    '''
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
+                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
+                'attached_label': label value - Label that this button is attached to
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        input_dict['button_type'] = 'active investigation'
+        input_dict['modes'] = input_dict['attached_label'].modes
+        input_dict['image_id'] = 'buttons/to_trial_button.png'
+        super().__init__(input_dict, global_manager)
+
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this button should be drawn
+        Input:
+            None
+        Output:
+            boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
+        '''
+        if super().can_show():
+            displayed_minister = self.global_manager.get('displayed_minister')
+            if displayed_minister != 'none' and displayed_minister.current_position != 'Prosecutor':
+                return(True)
+        return(False)
+
+    def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button goes to the trial screen to remove the selected minister from the game and confiscate a portion of their
+                stolen money
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self.can_show():
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['active_investigation']:
+                    if minister_utility.positions_filled(self.global_manager):
+                        cost = self.global_manager.get('action_prices')['active_investigation']
+                        self.global_manager.get('money_tracker').change(-1 * cost, 'active_investigation')
+                        self.global_manager.get('displayed_minister').attempt_active_investigation(self.global_manager.get('current_ministers')['Prosecutor'], cost)
+                        actor_utility.double_action_price(self.global_manager, 'active_investigation')
+                    else:
+                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                else:
+                    text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['active_investigation']) + ' money needed to start an active investigation.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and can not start an active investigation.', self.global_manager)
 
 class fabricate_evidence_button(label_button):
     '''

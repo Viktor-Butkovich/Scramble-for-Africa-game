@@ -430,6 +430,9 @@ class actor_display_label(label):
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
+            if self.actor_label_type == 'minister_name':
+                input_dict['init_type'] = 'active investigation button'
+                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
         
         elif self.actor_label_type == 'country_effect':
             self.message_start = 'Effect: '
@@ -611,12 +614,16 @@ class actor_display_label(label):
             tooltip_text.append('While some interests are derived from a minister\'s legitimate talent or experience in a particular field, others are mere fancies')
             self.set_tooltip(tooltip_text)
 
-        elif self.actor_label_type == 'skill':
+        elif self.actor_label_type == 'ability':
             tooltip_text = [self.message]
+            rank = 0
             if not self.actor == 'none':
-                for skill_type in self.actor.apparent_skills:
-                    skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
-                    tooltip_text.append('    ' + skill_name.capitalize() + ': ' + self.actor.get_description('skill', skill_type))
+                for skill_value in range(6, 0, -1): #iterates backwards from 6 to 1
+                    for skill_type in self.actor.apparent_skills:
+                        if self.actor.apparent_skills[skill_type] == skill_value:
+                            rank += 1
+                            skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                            tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.actor.apparent_skill_descriptions[skill_type])
             self.set_tooltip(tooltip_text)
 
         elif self.actor_label_type == 'loyalty':
@@ -839,11 +846,23 @@ class actor_display_label(label):
             elif self.actor_label_type == 'interests':
                 self.set_label(self.message_start + new_actor.interests[0] + ' and ' + new_actor.interests[1])
 
-            elif self.actor_label_type == 'skill':
-                self.set_label(self.message_start + new_actor.get_description('skill', 'average'))
+            elif self.actor_label_type == 'ability':
+                message = ''
+                if new_actor.current_position == 'none':
+                    displayed_skill = new_actor.get_max_apparent_skill()
+                    message += 'Highest ability: '
+                else:
+                    displayed_skill = new_actor.current_position
+                    message += 'Current ability: '
+                if displayed_skill != 'unknown':
+                    displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military
+                    message += new_actor.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
+                else:
+                    message += displayed_skill
+                self.set_label(message)
 
             elif self.actor_label_type == 'loyalty':
-                self.set_label(self.message_start + new_actor.get_description('loyalty'))
+                self.set_label(self.message_start + new_actor.apparent_corruption_description)
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
@@ -941,6 +960,17 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != self.global_manager.get('slave_traders_grid'):
             return(False)
+        elif self.actor_label_type == 'loyalty' and self.actor.apparent_corruption_description == 'unknown':
+            return(False)
+        elif self.actor_label_type == 'ability':
+            empty = True
+            for skill_type in self.actor.apparent_skills:
+                if self.actor.apparent_skill_descriptions[skill_type] != 'unknown':
+                    empty = False
+            if empty:
+                return(False)
+            else:
+                return(result)
         else:
             return(result)
 

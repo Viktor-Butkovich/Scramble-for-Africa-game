@@ -482,7 +482,6 @@ def create_weighted_migration_destinations(destination_cell_list):
             weighted_cell_list.append(current_cell)
     return(weighted_cell_list)
 
-
 def manage_warriors(global_manager):
     '''
     Description:
@@ -538,7 +537,6 @@ def manage_beasts(global_manager):
     if random.randrange(1, 7) == 1:
         actor_utility.spawn_beast(global_manager)
     
-
 def manage_enemy_movement(global_manager):
     '''
     Description:
@@ -634,6 +632,22 @@ def manage_ministers(global_manager):
     second_roll = random.randrange(1, 7)
     if first_roll == 1 and second_roll <= 3:
         global_manager.get('fear_tracker').change(-1)
+    manage_minister_rumors(global_manager)
+
+def manage_minister_rumors(global_manager):
+    for current_minister in global_manager.get('minister_list'):
+        if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+            current_minister.attempt_rumor('loyalty', 'none')
+        for skill_type in global_manager.get('minister_types'):
+            if skill_type == current_minister.current_position:
+                if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                    current_minister.attempt_rumor(skill_type, 'none')
+            elif random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
+                current_minister.attempt_rumor(skill_type, 'none')
+        #1/36 of getting loyalty report
+        #if currently employed, 1/36 of getting report on working skill
+        #if currently employed, 1/216 of getting report on each non-working skill
+        #if not employed, 1/216 of getting report on each skill
 
 def game_end_check(global_manager):
     '''

@@ -503,6 +503,10 @@ class button(interface_elements.interface_element):
                               'While entering this screen is free, a trial costs ' + str(self.global_manager.get('action_prices')['trial']) + ' money once started',
                               'Each trial attempted doubles the cost of other trials in the same turn'])
 
+        elif self.button_type == 'active investigation':
+            if self.global_manager.get('displayed_minister') !=  'none':
+                self.set_tooltip(['Conducts an active investigation against ' + self.global_manager.get('displayed_minister').name + ' for ' + str(self.global_manager.get('action_prices')['active_investigation']) + ' money'])
+
         elif self.button_type == 'launch trial':
             self.set_tooltip(['Tries the defending minister in an attempt to remove him from office and imprison him for corruption',
                               'Costs ' + str(self.global_manager.get('action_prices')['trial']) + ' money',

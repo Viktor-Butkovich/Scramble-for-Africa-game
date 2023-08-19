@@ -301,6 +301,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = actor_display_buttons.remove_minister_button(input_dict, global_manager)
                 elif base == 'to trial':
                     new_element = actor_display_buttons.to_trial_button(input_dict, global_manager)
+                elif base == 'active investigation':
+                    new_element = actor_display_buttons.active_investigation_button(input_dict, global_manager)
                 elif base == 'fabricate evidence':
                     new_element = actor_display_buttons.fabricate_evidence_button(input_dict, global_manager)
                 elif base == 'bribe judge':

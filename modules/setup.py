@@ -526,6 +526,31 @@ def ministers_setup(global_manager):
         'battalion': type_minister_dict['military']
         }
     )
+
+    global_manager.set('minister_skill_to_description_dict', #not literally a dict, but index of skill number can be used like a dictionary
+        [
+            ['unknown'],
+            ['brainless', 'moronic', 'stupid', 'idiotic'],
+            ['incompetent', 'dull', 'slow', 'bad'],
+            ['incapable', 'poor', 'ineffective', 'lacking'],
+            ['able', 'capable', 'effective', 'competent'],
+            ['smart', 'clever', 'quick', 'good'],
+            ['expert', 'genius', 'brilliant', 'superior'],
+        ]
+    )
+
+    global_manager.set('minister_corruption_to_description_dict', #not literally a dict, but index of corruption number can be used like a dictionary
+        [
+            ['unknown'],
+            ['absolute', 'fanatic', 'pure', 'saintly'],
+            ['steadfast', 'honest', 'straight', 'solid'],
+            ['decent', 'obedient', 'dependable', 'trustworthy'],
+            ['opportunist', 'questionable', 'undependable', 'untrustworthy'],
+            ['shady', 'dishonest', 'slippery', 'mercurial'],
+            ['corrupt', 'crooked', 'rotten', 'treacherous'],
+        ]
+    )
+
     global_manager.set('minister_limit', 15)
 
 def countries_setup(global_manager):
@@ -783,6 +808,7 @@ def transactions_setup(global_manager):
         'slave_capture': 5,
         'suppress_slave_trade': 5,
         'trial': 5,
+        'active_investigation': 5,
         'hunting': 5,
         'rumor_search': 5,
         'artifact_search': 5,
@@ -810,6 +836,7 @@ def transactions_setup(global_manager):
         'slave_capture': 'capturing slaves',
         'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
+        'active_investigation': 'investigations',
         'hunting': 'hunting supplies',
         'rumor_search': 'artifact rumor searches',
         'artifact_search': 'artifact searches',
@@ -1707,19 +1734,6 @@ def inventory_interface_setup(global_manager):
         input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
         new_commodity_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    tab_collection_relative_coordinates = (450, -30)
-
-    #input_dict = {
-    #    'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-    #    'width': scaling.scale_width(10, global_manager),
-    #    'height': scaling.scale_height(30, global_manager),
-    #    'init_type': 'tabbed collection',
-    #    'parent_collection': global_manager.get('mob_info_display'),
-    #    'member_config': {'order_exempt': True},
-    #    'description': 'unit information tabs'
-    #}
-    #global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
@@ -1748,17 +1762,6 @@ def inventory_interface_setup(global_manager):
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    #input_dict = {
-    #    'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-    #    'width': scaling.scale_width(10, global_manager),
-    #    'height': scaling.scale_height(30, global_manager),
-    #    'init_type': 'tabbed collection',
-    #    'parent_collection': global_manager.get('tile_info_display'),
-    #    'member_config': {'order_exempt': True},
-    #    'description': 'tile information tabs'
-    #}
-    #global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
@@ -2026,7 +2029,7 @@ def minister_interface_setup(global_manager):
         'parent_collection': minister_info_display
     }
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'skill', 'loyalty', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager)
