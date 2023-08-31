@@ -32,6 +32,7 @@ class mob(actor):
         Output:
             None
         '''
+        self.is_dummy = False
         self.in_group = False
         self.in_vehicle = False
         self.in_building = False
@@ -144,9 +145,6 @@ class mob(actor):
             save_dict['image_variant'] = self.image_variant
             if hasattr(self, 'second_image_variant'):
                 save_dict['second_image_variant'] = self.second_image_variant
-        #if self.has_canoes:
-        #    save_dict['canoes_image'] = self.image_dict['canoes'][0]
-        #    save_dict['image'] = self.image_dict['no_canoes'][0]
         return(save_dict)        
 
     def temp_disable_movement(self):

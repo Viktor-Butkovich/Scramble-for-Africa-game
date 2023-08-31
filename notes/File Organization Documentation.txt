@@ -140,7 +140,7 @@ SFA folder
 	        class officer(pmobs.pmob)
 
 	    pmobs.py
-		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.dice, modules.scaling, modules.images, modules.dice_utility, 
+		    imports pygame, random, modules.mobs, modules.text_tools, modules.utility, modules.actor_utility, modules.notification_tools, modules.scaling, modules.images, modules.dice_utility, 
 		    	modules.turn_management_tools, modules.minister_utility
 		    class pmob(modules.mob)
 

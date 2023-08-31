@@ -6,7 +6,7 @@ class actor_display_free_image(free_image):
     '''
     Free image that changes its appearance to match selected mobs or tiles
     '''
-    def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager):
+    def __init__(self, coordinates, width, height, modes, actor_image_type, global_manager, default_image_id='none'):
         '''
         Description:
             Initializes this object
@@ -17,11 +17,13 @@ class actor_display_free_image(free_image):
             string list modes: Game modes during which this image can appear
             string actor_image_type: Type of actor whose appearance will be copied by this image
             global_manager_template global_manager: Object that accesses shared variables
+            string default_image_id='none': Default image to use, if any, when this image is calibrated to 'none'
         Output:
             None
         '''
         self.actor_image_type = actor_image_type
         self.actor = 'none'
+        self.default_image_id = default_image_id
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
 
     def calibrate(self, new_actor):
@@ -41,22 +43,21 @@ class actor_display_free_image(free_image):
                 if (not self.global_manager.get('current_lore_mission') == 'none') and self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(new_actor.x, new_actor.y):
                     self.set_image('misc/possible_artifact_location_icon.png') #only show icon if revealed location in displayed tile
                 else:
-                    #self.set_image('misc/empty.png')
                     self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])
             else:
                 image_id_list = []
                 default_image_key = 'default'
 
-                if new_actor.actor_type == 'mob':
-                    nothing = 0
-                elif not new_actor.cell.visible:
+                if new_actor.actor_type != 'mob' and not new_actor.cell.visible:
                     default_image_key = 'hidden'
                 if isinstance(new_actor.images[0].image_id, str): #if id is string image path
                     image_id_list.append(new_actor.image_dict[default_image_key])
                 else: #if id is list of strings for image bundle
-                    image_id_list += new_actor.get_image_id_list() #images[0].image.to_list()
+                    image_id_list += new_actor.get_image_id_list()
                 if new_actor.actor_type == 'mob':
                     image_id_list.append({'image_id': 'misc/mob_background.png', 'level': -10})
+                    if new_actor.is_dummy:
+                        image_id_list.append('misc/shader.png')
                     if new_actor.is_pmob:
                         image_id_list.append('misc/pmob_outline.png')
                     else:
@@ -65,7 +66,15 @@ class actor_display_free_image(free_image):
                     image_id_list.append('misc/tile_outline.png')
                 self.set_image(image_id_list)
         else:
-            self.set_image(['misc/mob_background.png', 'misc/pmob_outline.png'])
+            image_id_list = ['misc/mob_background.png']
+            if self.default_image_id != 'none':
+                if type(self.default_image_id) == str:
+                    image_id_list.append(self.default_image_id)
+                else:
+                    image_id_list += self.default_image_id
+                image_id_list.append('misc/shader.png')
+            image_id_list.append('misc/pmob_outline.png')
+            self.set_image(image_id_list)
 
 class actor_display_infrastructure_connection_image(actor_display_free_image):
     '''
@@ -178,23 +187,6 @@ class minister_background_image(mob_background_image):
             if self.actor.just_removed and self.actor.current_position == 'none':
                 image_id_list.append({'image_id': 'misc/warning_icon.png', 'x_offset': 0.75})
         return(image_id_list)
-
-    #def calibrate(self, new_minister):
-    #    '''
-    #    Description:
-    #        Updates which minister is in front of this image and changes its appearance to match the minister's current office
-    #    Input:
-    #        string/minister new_minister: The displayed minister that goes in front of this image. If this equals 'none', there is no minister in front of it
-    #    Output:
-    #        None
-    #    '''
-    #    super().calibrate(new_minister)
-    #    if not new_minister == 'none':
-    #        if new_minister.current_position == 'none':
-    #            self.set_image('misc/mob_background.png')
-    #        else:
-    #            self.set_image('ministers/icons/' + self.global_manager.get('minister_type_dict')[new_minister.current_position] + '.png')
-    #    self.update_image_bundle()
 
 class label_image(free_image):
     '''

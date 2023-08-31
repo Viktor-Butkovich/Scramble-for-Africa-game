@@ -2562,7 +2562,7 @@ class reorganize_unit_button(button):
         #elif procedure == 'embark':
         #    output = self.handle_embark(vehicle, passenger, required_dummy_attributes, dummy_input_dict)
         if procedure in ['invalid', 'none']:
-            output = ['none', 'none']
+            output = ['none']#['none', 'none']
         output += output #replicates results to also calibrate corresponding tooltip objects
         self.autofill_attempts = 0
         return(output)
@@ -2672,7 +2672,7 @@ class reorganize_unit_button(button):
         image_id_list = officer.get_image_id_list()
         image_id_list.remove(officer.image_dict['default']) #group default image is empty
         dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer, self.global_manager)
-        return([self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager), 'none'])
+        return([self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager)])
 
     def handle_crew(self, vehicle, worker, required_dummy_attributes, dummy_input_dict):
         '''
@@ -2695,7 +2695,7 @@ class reorganize_unit_button(button):
         dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes, {'has_crew': True})
         dummy_vehicle.has_crew = True
         dummy_vehicle.crew = worker
-        return([dummy_vehicle, 'none'])
+        return([dummy_vehicle])
 
     def handle_embark(self, vehicle, passenger, required_dummy_attributes, dummy_input_dict):
         '''
@@ -2717,7 +2717,7 @@ class reorganize_unit_button(button):
         }
         dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes)
         dummy_vehicle.contained_mobs = dummy_vehicle.contained_mobs + [passenger] #gets around contained mobs being a shallow copy from original
-        return([dummy_vehicle, 'none'])
+        return([dummy_vehicle])
 
     def on_click(self):
         '''

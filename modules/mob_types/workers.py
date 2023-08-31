@@ -52,14 +52,17 @@ class worker(pmob):
                 market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
                 
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
+
         if not from_save:
             self.second_image_variant = random.randrange(0, len(self.image_variants))
+        self.update_image_bundle()
+        if not from_save:
             if ('select_on_creation' in input_dict) and input_dict['select_on_creation']:
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates mob info display list to account for is_worker changing
                 self.selection_sound()
         self.global_manager.get('money_label').check_for_updates()
-        self.update_image_bundle()
+        #self.update_image_bundle()
 
     def replace(self, attached_group = 'none'):
         '''
@@ -303,19 +306,8 @@ class worker(pmob):
         '''
         image_id_list = super().get_image_id_list(override_values)
         image_id_list.remove(self.image_dict['default']) #remove default middle worker
-        left_worker_dict = {
-            'image_id': self.image_dict['default'],
-            'size': 0.85,
-            'x_offset': -0.25,
-            'y_offset': 0,
-            'level': -1
-        }
-        image_id_list.append(left_worker_dict)
-
-        right_worker_dict = left_worker_dict.copy()
-        right_worker_dict['image_id'] = self.image_variants[self.second_image_variant]
-        right_worker_dict['x_offset'] *= -1
-        image_id_list.append(right_worker_dict)
+        image_id_list.append(actor_utility.generate_unit_component_image_id(self.image_dict['default'], 'left'))
+        image_id_list.append(actor_utility.generate_unit_component_image_id(self.image_variants[self.second_image_variant], 'right'))
         return(image_id_list)
 
 class slave_worker(worker):

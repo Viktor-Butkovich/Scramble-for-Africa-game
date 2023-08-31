@@ -1832,8 +1832,7 @@ def unit_organization_interface_setup(global_manager):
 
     #mob image
     lhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    #unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id='mobs/default/mock_officer.png')
     unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
 
     input_dict = {
@@ -1851,10 +1850,10 @@ def unit_organization_interface_setup(global_manager):
     lhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     #mob image
+    default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'left', to_front=True), actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'right', to_front=True)]
     lhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id=default_image_id)
     unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
-    #unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     #right side
     input_dict = {
@@ -1866,50 +1865,64 @@ def unit_organization_interface_setup(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)}
     }
     #mob background image's tooltip
     rhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     #mob image
+    default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group left', to_front=True)]
+    default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group right', to_front=True))
+    default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_officer.png', 'center', to_front=True))
     rhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    #unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
-    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id=default_image_id)
+    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)})
 
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset, -1 * (image_height - 5), global_manager),
-        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
-        'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
-        'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True},
-    }
+    #input_dict = {
+    #    'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset, -1 * (image_height - 5), global_manager),
+    #    'minimum_width': scaling.scale_width(image_height - 10, global_manager),
+    #    'height': scaling.scale_height(image_height - 10, global_manager),
+    #    'image_id': 'misc/empty.png',
+    #    'actor_label_type': 'tooltip',
+    #    'actor_type': 'mob',
+    #    'init_type': 'actor display label',
+    #    'parent_collection': unit_organization_collection,
+    #    'member_config': {'calibrate_exempt': True},
+    #}
     #mob background image's tooltip
-    rhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    #rhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     #mob image
-    rhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
+    #rhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
+    #    scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
     #unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
-    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    #unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
 
     input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60, -1 * (image_height - 15) + 40, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30, global_manager),
         'width': scaling.scale_width(60, global_manager),
-        'height': scaling.scale_height(60, global_manager),
+        'height': scaling.scale_height(25, global_manager),
         'init_type': 'reorganize unit button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_button.png',
         'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image, lhs_top_tooltip, lhs_bottom_tooltip],
-        'output_destinations': [rhs_top_mob_free_image, rhs_bottom_mob_free_image, rhs_top_tooltip, rhs_bottom_tooltip],
+        'output_destinations': [rhs_top_mob_free_image, rhs_top_tooltip],
         'member_config': {'calibrate_exempt': False}
     }
     reorganize_unit_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15, global_manager),
+        'width': scaling.scale_width(60, global_manager),
+        'height': scaling.scale_height(25, global_manager),
+        'init_type': 'reorganize unit button',
+        'parent_collection': unit_organization_collection,
+        'image_id': 'buttons/cycle_units_reverse_button.png',
+        'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image, lhs_top_tooltip, lhs_bottom_tooltip],
+        'output_destinations': [rhs_top_mob_free_image, rhs_top_tooltip],
+        'member_config': {'calibrate_exempt': False}
+    } #this button should have inputs and outputs reversed for splitting operations
+    reorganize_unit_reverse_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
         #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),

@@ -12,6 +12,7 @@ class dummy(mobs.mob):
         '''
         for key in input_dict:
             setattr(self, key, input_dict[key])
+        self.is_dummy = True
         self.global_manager = global_manager
 
     def set_tooltip(self, tooltip_text):

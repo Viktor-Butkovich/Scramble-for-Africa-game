@@ -529,18 +529,61 @@ def set_slave_traders_strength(new_strength, global_manager):
         slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
         slave_traders_tile.update_image_bundle()
 
-def generate_group_image_id_list(worker, officer, global_manager):
-    left_worker_dict = {
-        'image_id': worker.image_dict['default'],
-        'size': 0.8,
-        'x_offset': -0.28,
-        'y_offset': 0.05,
-        'level': -2
-    }
+def generate_unit_component_image_id(base_image, component, to_front=False):
+    '''
+    Description:
+        Generates and returns an image id dict for the inputted base_image moved to the inputted section of the frame, like 'group left' for a group's left worker
+    Input:
+        string base_image: Base image file path to display
+        string component: Section of the frame to display base image in, like 'group left'
+        boolean to_front=False: Whether image level/layer should be a positive or negative
+    Output:
+        dict: Returns generated image id dict
+    '''
+    return_dict = {}
+    if component in ['group left', 'group right']:
+        return_dict = {
+            'image_id': base_image,
+            'size': 0.8,
+            'x_offset': -0.28,
+            'y_offset': 0.05,
+            'level': -2
+        }
+    elif component in ['left', 'right']:
+        return_dict = {
+            'image_id': base_image,
+            'size': 0.85,
+            'x_offset': -0.25,
+            'y_offset': 0,
+            'level': -1
+        }
+    else:
+        return_dict = {
+            'image_id': base_image,
+            'size': 0.85,
+            'x_offset': 0,
+            'y_offset': -0.05,
+            'level': -1
+        }
+    if component.endswith('right'):
+        return_dict['x_offset'] *= -1
+    if to_front:
+        return_dict['level'] *= -1
+    return(return_dict)
 
-    right_worker_dict = left_worker_dict.copy()
-    right_worker_dict['image_id'] = worker.image_variants[worker.second_image_variant]
-    right_worker_dict['x_offset'] *= -1
+def generate_group_image_id_list(worker, officer, global_manager):
+    '''
+    Description:
+        Generates and returns an image id list that a group formed from the inputted worker and officer would have
+    Input:
+        worker worker: Worker to use for group image
+        officer officer: Officer to use for group image
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        list: Returns image id list of dictionaries for each part of the group image
+    '''
+    left_worker_dict = generate_unit_component_image_id(worker.image_dict['default'], 'group left')
+    right_worker_dict = generate_unit_component_image_id(worker.image_variants[worker.second_image_variant], 'group right')
 
     if officer.officer_type == 'major':
         if 'soldier' in worker.image_dict:
@@ -559,17 +602,23 @@ def generate_group_image_id_list(worker, officer, global_manager):
         left_worker_dict['image_id'] = porter
         right_worker_dict['image_id'] = porter
 
-    officer_dict = {
-        'image_id': officer.image_dict['default'],
-        'size': 0.85,
-        'x_offset': 0,
-        'y_offset': -0.05,
-        'level': -1
-    }
+    officer_dict = generate_unit_component_image_id(officer.image_dict['default'], 'center')
 
     return([left_worker_dict, right_worker_dict, officer_dict])
 
 def generate_group_name(worker, officer, global_manager, add_veteran=False):
+    '''
+    Description:
+        Generates and returns the name that a group formed from the inputted worker and officer would have
+    Input:
+        worker worker: Worker to use for group name
+        officer officer: Officer to use for group name
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean add_veteran=False: Whether veteran should be added to the start of the name if the officer is a veteran - while a mock group needs veteran to be added, a
+            group actually being created will add veteran to its name automatically when it promotes
+    Output:
+        list: Returns image id list of dictionaries for each part of the group image
+    '''
     if not officer.officer_type == 'major':
         name = ''
         for character in global_manager.get('officer_group_type_dict')[officer.officer_type]:
@@ -587,6 +636,17 @@ def generate_group_name(worker, officer, global_manager, add_veteran=False):
     return(name)
 
 def generate_group_movement_points(worker, officer, global_manager, generate_max=False):
+    '''
+    Description:
+        Generates and returns either the current or maximum movement points that a group created from the inputted worker and officer would have
+    Input:
+        worker worker: Worker to use for group
+        officer officer: Officer to use for group
+        global_manager_template global_manager: Object that accesses shared variables
+        boolean generate_max=False: Whether to return the group's current or maximum number of movement points
+    Output:
+        list: Returns image id list of dictionaries for each part of the group image
+    '''
     if generate_max:
         max_movement_points = officer.max_movement_points
         if officer.officer_type == 'driver' and officer.veteran:
