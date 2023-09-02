@@ -154,7 +154,7 @@ class beast(npmob):
     def set_hidden(self, new_hidden, on_load = False):
         '''
         Description:
-            Sets this beast's new hidden status. A hidden beast can move around the map as usual and can not be attacked until revealed. A beast reveals itself as it attacks (hiding itself afterward) and can be revealed by a safari
+            Sets this beast's new hidden status. A hidden beast can move around the map as usual and cannot be attacked until revealed. A beast reveals itself as it attacks (hiding itself afterward) and can be revealed by a safari
                 beasts nearby 
         '''
         self.hidden = new_hidden

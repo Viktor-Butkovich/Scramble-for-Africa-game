@@ -146,8 +146,8 @@ class actor():
                 self.set_inventory(current_commodity, inventory_dict[current_commodity])
             else:
                 self.set_inventory(current_commodity, 0)
-        if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
-            self.default_interface_tab = 'inventory'
+        #if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
+        #    self.default_interface_tab = 'inventory'
 
     def inventory_setup(self):
         '''
@@ -164,8 +164,8 @@ class actor():
                 self.inventory[current_commodity] = 10
             else:
                 self.inventory[current_commodity] = 0
-        if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
-            self.default_interface_tab = 'inventory'
+        #if self.actor_type == 'mob' and self.is_pmob and self.inventory_capacity >= 9:
+        #    self.default_interface_tab = 'inventory'
 
     def drop_inventory(self):
         '''

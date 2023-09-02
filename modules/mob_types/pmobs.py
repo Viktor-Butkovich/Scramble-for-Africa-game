@@ -191,7 +191,7 @@ class pmob(mob):
     def follow_automatic_route(self):
         '''
         Description:
-            Moves along this unit's in-progress movement route until it can not complete the next step. A unit will wait for commodities to transport from the start, then pick them up and move along the path, picking up others along
+            Moves along this unit's in-progress movement route until it cannot complete the next step. A unit will wait for commodities to transport from the start, then pick them up and move along the path, picking up others along
                 the way. At the end of the path, it drops all commodities and moves back towards the start
         Input:
             None
@@ -511,7 +511,7 @@ class pmob(mob):
             return(True)
         else:
             text_tools.print_to_screen('', self.global_manager)
-            text_tools.print_to_screen('You can not do that until all ministers have been appointed', self.global_manager)
+            text_tools.print_to_screen('You cannot do that until all ministers have been appointed', self.global_manager)
             text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', self.global_manager)
             return(False)
 
@@ -654,9 +654,9 @@ class pmob(mob):
                                             if (future_y == 0 and not self.can_swim_ocean) or (future_y > 0 and (not self.can_swim_river) and (not self.can_walk)):
                                                 if can_print:
                                                     if future_y == 0:
-                                                        text_tools.print_to_screen('This unit can not move into the ocean.', self.global_manager)
+                                                        text_tools.print_to_screen('This unit cannot move into the ocean.', self.global_manager)
                                                     elif future_y > 0:
-                                                        text_tools.print_to_screen('This unit can not move through rivers.', self.global_manager)
+                                                        text_tools.print_to_screen('This unit cannot move through rivers.', self.global_manager)
                                                 return(False)
                                     
                                 if self.movement_points >= self.get_movement_cost(x_change, y_change) or self.has_infinite_movement and self.movement_points > 0: #self.movement_cost:
@@ -664,7 +664,7 @@ class pmob(mob):
                                         return(True)
                                     else:
                                         if can_print:
-                                            text_tools.print_to_screen('You can not move through enemy units.', self.global_manager)
+                                            text_tools.print_to_screen('You cannot move through enemy units.', self.global_manager)
                                         return(False)
                                 else:
                                     if can_print:
@@ -673,32 +673,32 @@ class pmob(mob):
                                     return(False)
                             elif destination_type == 'land' and not self.can_walk: #if trying to walk on land and can't
                                 if can_print:
-                                    text_tools.print_to_screen('You can not move on land with this unit unless there is a port.', self.global_manager)
+                                    text_tools.print_to_screen('You cannot move on land with this unit unless there is a port.', self.global_manager)
                                 return(False)
                             else: #if trying to swim in water and can't 
                                 if can_print:
-                                    text_tools.print_to_screen('You can not move on ocean with this unit.', self.global_manager)
+                                    text_tools.print_to_screen('You cannot move on ocean with this unit.', self.global_manager)
                                 return(False)
                         else:
                             if can_print:
-                                text_tools.print_to_screen('You can not move into an unexplored tile.', self.global_manager)
+                                text_tools.print_to_screen('You cannot move into an unexplored tile.', self.global_manager)
                             return(False)
                     else:
-                        text_tools.print_to_screen('You can not move off of the map.', self.global_manager)
+                        text_tools.print_to_screen('You cannot move off of the map.', self.global_manager)
                         return(False)
                 else:
                     if can_print:
-                        text_tools.print_to_screen('You can not move while in this area.', self.global_manager)
+                        text_tools.print_to_screen('You cannot move while in this area.', self.global_manager)
                     return(False)
         else:
             if can_print:
-                text_tools.print_to_screen('You can not move units before a Minister of Transportation has been appointed.', self.global_manager)
+                text_tools.print_to_screen('You cannot move units before a Minister of Transportation has been appointed.', self.global_manager)
             return(False)
 
     def can_show_tooltip(self):
         '''
         Description:
-            Returns whether this mob's tooltip can be shown. Along with the superclass' requirements, mob tooltips can not be shown when attached to another actor, such as when working in a building
+            Returns whether this mob's tooltip can be shown. Along with the superclass' requirements, mob tooltips cannot be shown when attached to another actor, such as when working in a building
         Input:
             None
         Output:
@@ -1058,7 +1058,7 @@ class pmob(mob):
                                                   'Parliament concludes that its subsidies are being wasted on incompetents who can\'t deal with a few savages and considers lowering them in the future.',
                                                   'Sensationalized news stories circulate of indolent ministers sending the empire\'s finest to die in some jungle.']
                         text += random.choice(killed_by_natives_flavor) + ' Public opinion has decreased by ' + str(self.public_opinion_change * -1) + '. /n /n'
-        if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units can not become veterans through combat
+        if (not self.veteran) and own_roll >= 6 and ((self.is_battalion and not enemy.npmob_type == 'beast') or (self.is_safari and enemy.npmob_type == 'beast')): #civilian units cannot become veterans through combat
             if self.is_battalion:
                 self.just_promoted = True
                 text += ' This battalion\'s major is now a veteran. /n /n'  

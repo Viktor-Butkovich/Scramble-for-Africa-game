@@ -162,7 +162,7 @@ def minister_appointed(minister_type, global_manager):
     else:
         keyword = global_manager.get('minister_type_dict')[minister_type]
         text_tools.print_to_screen('', global_manager)
-        text_tools.print_to_screen('You can not do ' + keyword + ' actions because a ' + minister_type + ' has not been appointed', global_manager)
+        text_tools.print_to_screen('You cannot do ' + keyword + ' actions because a ' + minister_type + ' has not been appointed', global_manager)
         text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', global_manager)
         return(False)
 
@@ -406,30 +406,28 @@ def manage_lmb_down(clicked_button, global_manager):
     '''
     if action_possible(global_manager) or global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route'):
         if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
-            selected_new_mob = False
+            selected_mob = False
             for current_grid in global_manager.get('grid_list'):
                 if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
                             if current_cell.visible:
-                                my_cell = current_cell
                                 if len(current_cell.contained_mobs) > 0:
-                                    selected_new_mob = True
-                                    if current_cell.contained_mobs[0] != global_manager.get('displayed_mob'):
-                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                                        current_cell.contained_mobs[0].select()
-                                        if current_cell.contained_mobs[0].is_pmob:
-                                            current_cell.contained_mobs[0].selection_sound()
-                                        if current_grid == global_manager.get('minimap_grid'):
-                                            main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
-                                            main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
-                                            if not main_cell == 'none':
-                                                main_tile = main_cell.tile
-                                                if not main_tile == 'none':
-                                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
-                                        else:
-                                            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
-            if selected_new_mob:
+                                    selected_mob = True
+                                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                                    current_cell.contained_mobs[0].select()
+                                    if current_cell.contained_mobs[0].is_pmob:
+                                        current_cell.contained_mobs[0].selection_sound()
+                                    if current_grid == global_manager.get('minimap_grid'):
+                                        main_x, main_y = global_manager.get('minimap_grid').get_main_grid_coordinates(current_cell.x, current_cell.y) #main_x, main_y = global_manager.get('strategic_map_grid').get_main_grid_coordinates(current_cell.x, current_cell.y)
+                                        main_cell = global_manager.get('strategic_map_grid').find_cell(main_x, main_y)
+                                        if not main_cell == 'none':
+                                            main_tile = main_cell.tile
+                                            if not main_tile == 'none':
+                                                actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), main_tile)
+                                    else:
+                                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_cell.tile)
+            if selected_mob:
                 selected_list = actor_utility.get_selected_list(global_manager)
                 if len(selected_list) == 1 and selected_list[0].grids[0] == global_manager.get('minimap_grid').attached_grid: #do not calibrate minimap if selecting someone outside of attached grid
                     global_manager.get('minimap_grid').calibrate(selected_list[0].x, selected_list[0].y)
@@ -469,7 +467,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                 chooser.remove_from_turn_queue()
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
-                        else: #can not move to same continent
+                        else: #cannot move to same continent
                             text_tools.print_to_screen('You can only send ships to other theatres.', global_manager)
             global_manager.set('choosing_destination', False)
             global_manager.set('choosing_destination_info_dict', {})
@@ -500,7 +498,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
                                 destination_infrastructure = target_cell.get_building('infrastructure')
                                 if not target_cell.visible:
-                                    text_tools.print_to_screen('Movement routes can not be created through unexplored tiles.', global_manager)
+                                    text_tools.print_to_screen('Movement routes cannot be created through unexplored tiles.', global_manager)
                                     return()
                                 elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
                                     text_tools.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
@@ -508,16 +506,16 @@ def manage_lmb_down(clicked_button, global_manager):
                                 elif (target_cell.terrain == 'water' and not displayed_mob.can_swim) and (displayed_mob.is_vehicle and destination_infrastructure == 'none'): 
                                     #non-train units can still move slowly through water, even w/o canoes or a bridge
                                     #railroad bridge allows anything to move through
-                                    text_tools.print_to_screen('This unit can not create movement routes through water.', global_manager)
+                                    text_tools.print_to_screen('This unit cannot create movement routes through water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:
-                                    text_tools.print_to_screen('This unit can not create movement routes through ocean water.', global_manager)
+                                    text_tools.print_to_screen('This unit cannot create movement routes through ocean water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_river) and destination_y > 0:
-                                    text_tools.print_to_screen('This unit can not create movement routes through river water.', global_manager)
+                                    text_tools.print_to_screen('This unit cannot create movement routes through river water.', global_manager)
                                     return()
                                 elif (not target_cell.terrain == 'water') and (not displayed_mob.can_walk) and not target_cell.has_intact_building('port'):
-                                    text_tools.print_to_screen('This unit can not create movement routes on land, except through ports.', global_manager)
+                                    text_tools.print_to_screen('This unit cannot create movement routes on land, except through ports.', global_manager)
                                     return()
                                                                      
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))

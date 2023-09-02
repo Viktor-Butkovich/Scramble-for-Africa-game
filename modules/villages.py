@@ -84,7 +84,7 @@ class village():
     def can_spawn_warrior(self):
         '''
         Description:
-            Returns whether this village can currently spawn a warrior. A village with 0 population can not spawn warriors, and available workers will not become warriors
+            Returns whether this village can currently spawn a warrior. A village with 0 population cannot spawn warriors, and available workers will not become warriors
         Input:
             None
         Output:

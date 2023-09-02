@@ -465,10 +465,10 @@ class cell():
                 return(True)
         return(False)
 
-    def get_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
+    def get_worker(self, possible_types=['African', 'European', 'slave', 'religious']):
         '''
         Description:
-            Returns the first worker in this cell of the inputted types, or 'none' if none are present
+            Finds and returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
             string list possible_types: Type of worker that can be returned, includes all workers by default
         Output:
@@ -476,6 +476,20 @@ class cell():
         '''
         for current_mob in self.contained_mobs:
             if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types:
+                return(current_mob)
+        return('none')
+
+    def get_officer(self, allow_vehicles=True):
+        '''
+        Description:
+            Finds and returns the first officer or, optionally, uncrewed vehicle, in this cell, or 'none' if none are present
+        Input:
+            boolean allow_vehicles=True: Whether uncrewed vehicles can be returned or just officers
+        Output:
+            string/actor: Returns the first officer, or, optionally, uncrewed vehicle in this cell, or 'none' if none are present
+        '''
+        for current_mob in self.contained_mobs:
+            if current_mob.is_pmob and (current_mob.is_officer or (current_mob.is_vehicle and not current_mob.has_crew)):
                 return(current_mob)
         return('none')
 
@@ -551,7 +565,7 @@ class cell():
         elif mob_type == 'pmob':
             for current_mob in self.contained_mobs:
                 if current_mob.is_pmob:
-                    if current_mob.get_combat_strength() > 0: #unit with 0 combat strength can not fight
+                    if current_mob.get_combat_strength() > 0: #unit with 0 combat strength cannot fight
                         current_combat_modifier = current_mob.get_combat_modifier()
                         if current_mob.is_safari and target_type == 'beast': #more likely to pick safaris for defense against beasts
                             current_combat_modifier += 3

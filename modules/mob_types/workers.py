@@ -166,7 +166,7 @@ class worker(pmob):
     def can_show_tooltip(self):
         '''
         Description:
-            Returns whether this worker's tooltip can be shown. Along with the superclass' requirements, worker tooltips can not be shown when attached to another actor, such as when part of a group
+            Returns whether this worker's tooltip can be shown. Along with the superclass' requirements, worker tooltips cannot be shown when attached to another actor, such as when part of a group
         Input:
             None
         Output:

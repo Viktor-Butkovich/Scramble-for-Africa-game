@@ -90,7 +90,7 @@ class recruitment_button(button):
                 else:
                     text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not recruit a unit', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot recruit a unit', self.global_manager)
 
     def calibrate(self, country):
         '''
@@ -179,7 +179,7 @@ class buy_commodity_button(button):
                 else:
                     text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not purchase commodities', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot purchase commodities', self.global_manager)
 
     def update_tooltip(self):
         '''

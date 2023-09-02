@@ -3,6 +3,7 @@
 import pygame
 from . import scaling
 from . import images
+from . import dummy_utility
 
 class interface_element():
     '''
@@ -26,7 +27,6 @@ class interface_element():
         Output:
             None
         '''
-        old_input_dict = input_dict
         self.global_manager = global_manager
         self.can_show_override = 'none'
         self.width = input_dict['width']
@@ -185,7 +185,7 @@ class interface_collection(interface_element):
     Like an image bundle, members of an interface collection should have independent types and characteristics but be controlled as a unit and created in a list with a dictionary or simple 
         string. Unlike an image bundle, a collection does not necessarily have to be saved, and 
     '''
-    def __init__(self, input_dict, global_manager):    
+    def __init__(self, input_dict, global_manager):
         '''
         Description:
             Initializes this object
@@ -413,6 +413,50 @@ class interface_collection(interface_element):
                 if hasattr(self, 'image'):
                     self.x = self.Rect.x
                     self.image.update_state(self.image.x, self.image.y, self.Rect.width, self.Rect.height)
+
+class autofill_collection(interface_collection):
+    '''
+    Collection that will calibrate particular 'target' members with specific actors instead of the one the entire collection is calibrating to - such as calibrating the
+        group, officer, and worker cells to the corresponding actors in the autofill operation when an officer is selected
+    '''
+    def __init__(self, input_dict, global_manager):
+        '''
+        Description:
+            Initializes this object
+        Input:
+            dictionary input_dict: Keys corresponding to the values needed to initialize this object
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
+                'width': int value - pixel width of this element
+                'height': int value - pixel height of this element
+                'modes': string list value - Game modes during which this element can appear
+                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
+                'autofill target': dict value - Dictionary with lists of the elements to calibrate to each autofill target type, like {'officer': [...], 'group': [...]}
+            global_manager_template global_manager: Object that accesses shared variables
+        Output:
+            None
+        '''
+        self.autofill_targets = input_dict['autofill_targets']
+        self.autofill_actors = {}
+        for autofill_target_type in self.autofill_targets:
+            self.autofill_actors[autofill_target_type] = 'none'
+        self.autofill_actors['procedure'] = 'none'
+        super().__init__(input_dict, global_manager)
+
+    def calibrate(self, new_actor, override_exempt=False):
+        '''
+        Description:
+            Atttaches this collection and its members to inputted actor and updates their information based on the inputted actor
+        Input:
+            string/actor new_actor: The displayed actor whose information is matched by this label. If this equals 'none', the label does not match any actors.
+        Output:
+            None
+        '''
+        self.autofill_actors = dummy_utility.generate_autofill_actors(self.global_manager)
+        for autofill_target_type in self.autofill_targets:
+            for autofill_target in self.autofill_targets[autofill_target_type]:
+                #eg. generate autofill actors gives back a dummy officer, which all autofill targets that accept officers then calibrate to, repeat for worker/group targets
+                autofill_target.calibrate(self.autofill_actors[autofill_target_type])
+        super().calibrate(new_actor, override_exempt)
 
 class tabbed_collection(interface_collection):
     '''

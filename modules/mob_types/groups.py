@@ -144,7 +144,7 @@ class group(pmob):
     def manage_health_attrition(self, current_cell = 'default'):
         '''
         Description:
-            Checks this mob for health attrition each turn. A group's worker and officer each roll for attrition independently, but the group itself can not suffer attrition
+            Checks this mob for health attrition each turn. A group's worker and officer each roll for attrition independently, but the group itself cannot suffer attrition
         Input:
             string/cell current_cell = 'default': Records which cell the attrition is taking place in, used when a unit is in a building or another mob and does not technically exist in any cell
         Output:

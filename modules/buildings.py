@@ -11,7 +11,7 @@ from . import text_tools
 
 class building(actor):
     '''
-    Actor that exists in cells of multiple grids in front of tiles and behind mobs that can not be clicked
+    Actor that exists in cells of multiple grids in front of tiles and behind mobs that cannot be clicked
     '''
     def __init__(self, from_save, input_dict, global_manager): 
         '''

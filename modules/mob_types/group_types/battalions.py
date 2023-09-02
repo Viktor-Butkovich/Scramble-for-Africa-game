@@ -183,7 +183,7 @@ class battalion(group):
                     text_tools.print_to_screen('You do not have enough money to supply an attack.', self.global_manager)
         elif defender == 'none' and ((self.is_battalion and not future_cell.get_best_combatant('npmob', 'beast') == 'none') or (self.is_safari and not future_cell.get_best_combatant('npmob') == 'none')): #if wrong type of defender present
             if self.is_battalion:
-                text_tools.print_to_screen('Battalions can not attack beasts.', self.global_manager)
+                text_tools.print_to_screen('Battalions cannot attack beasts.', self.global_manager)
             elif self.is_safari:
                 text_tools.print_to_screen('Safaris can only attack beasts.', self.global_manager)
         else: #if destination empty or attack already confirmed, move in

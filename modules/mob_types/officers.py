@@ -110,7 +110,7 @@ class officer(pmob):
     def can_show_tooltip(self):
         '''
         Description:
-            Returns whether this officer's tooltip can be shown. Along with the superclass' requirements, officer tooltips can not be shown when attached to another actor, such as when part of a group
+            Returns whether this officer's tooltip can be shown. Along with the superclass' requirements, officer tooltips cannot be shown when attached to another actor, such as when part of a group
         Input:
             None
         Output:

@@ -335,10 +335,10 @@ class vehicle(pmob):
                 return(super().can_move(x_change, y_change, can_print))
             else:
                 if can_print:
-                    text_tools.print_to_screen('This ' + self.name + ' is still having its crew replaced and can not move this turn.', self.global_manager)
+                    text_tools.print_to_screen('This ' + self.name + ' is still having its crew replaced and cannot move this turn.', self.global_manager)
         else:
             if can_print:
-                text_tools.print_to_screen('A ' + self.vehicle_type + ' can not move without crew.', self.global_manager)
+                text_tools.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.', self.global_manager)
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -482,12 +482,12 @@ class ship(vehicle):
     def can_leave(self):
         '''
         Description:
-            Returns whether this mob is allowed to move away from its current cell. A ship can not move away when there are any mobs in its tile that can not move on water and are not in a ship, preventing ships from leaving behind
+            Returns whether this mob is allowed to move away from its current cell. A ship cannot move away when there are any mobs in its tile that cannot move on water and are not in a ship, preventing ships from leaving behind
                 disembarking passengers
         Input:
             None
         Output:
-            boolean: Returns False if this ship is in a water tile and there are any mobs in its tile that can not move on water and are not in a ship, otherwise returns True
+            boolean: Returns False if this ship is in a water tile and there are any mobs in its tile that cannot move on water and are not in a ship, otherwise returns True
         '''
         num_ships = 0
         for current_mob in self.images[0].current_cell.contained_mobs:
@@ -497,7 +497,7 @@ class ship(vehicle):
             if self.images[0].current_cell.terrain == 'water':
                 for current_mob in self.images[0].current_cell.contained_mobs:
                     if current_mob.controllable and not current_mob.can_swim_at(self.images[0].current_cell):
-                        text_tools.print_to_screen('A ' + self.vehicle_type + ' can not leave without taking unaccompanied units as passengers.', self.global_manager)
+                        text_tools.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.', self.global_manager)
                         return(False)
         return(True)
 

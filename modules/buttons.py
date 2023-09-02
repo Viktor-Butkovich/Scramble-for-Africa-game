@@ -55,6 +55,10 @@ class button(interface_elements.interface_element):
             self.set_keybind(self.keybind_id)
         if 'color' in input_dict:
             self.color = self.global_manager.get('color_dict')[input_dict['color']]
+        if 'enable_shader' in input_dict:
+            self.enable_shader = input_dict['enable_shader']
+        else:
+            self.enable_shader = False
         self.showing_outline = False
         self.showing_background = True
         self.button_type = input_dict['button_type']
@@ -63,6 +67,34 @@ class button(interface_elements.interface_element):
         self.confirming = False
         self.being_pressed = False
         self.in_notification = False #used to prioritize notification buttons in drawing and tooltips
+
+    def calibrate(self, new_actor, override_exempt=False):
+        super().calibrate(new_actor, override_exempt)
+        if self.enable_shader:
+            shader_image_id = 'misc/shader.png'
+            if self.enable_shader_condition():
+                if type(self.image.image_id) == str:
+                    self.image.set_image([self.image.image_id, shader_image_id])
+                elif not shader_image_id in self.image.image_id:
+                    self.image.set_image(self.image.image_id + shader_image_id)
+            else:
+                if not type(self.image.image_id) == str:
+                    if shader_image_id in self.image.image_id:
+                        image_id = utility.remove_from_list(self.image.image_id, shader_image_id)
+                        if len(image_id) == 1:
+                            image_id = image_id[0]
+                        self.image.set_image(image_id)
+
+    def enable_shader_condition(self):
+        '''
+        Description:
+            Calculates and returns whether this button should display its shader, given that it has shader enabled - open to be redefined by subclasses w/ specific criteria
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should display its shader, given that it has shader enabled
+        '''
+        return(True)
 
     def set_origin(self, new_x, new_y):
         '''
@@ -197,10 +229,10 @@ class button(interface_elements.interface_element):
                             tooltip_text.append('Press to attempt to explore in the ' + direction)
                             tooltip_text.append('Attempting to explore would cost ' + str(self.global_manager.get('action_prices')['exploration']) + ' money and all remaining movement points, at least 1')
                         else:
-                            tooltip_text.append('This unit can not currently move to the ' + direction)
-                            tooltip_text.append('This unit can not move into unexplored areas')
+                            tooltip_text.append('This unit cannot currently move to the ' + direction)
+                            tooltip_text.append('This unit cannot move into unexplored areas')
                     else:
-                        tooltip_text.append('This unit can not currently move to the ' + direction)
+                        tooltip_text.append('This unit cannot currently move to the ' + direction)
 
                 else:
                     tooltip_text.append('Moving in this direction would move off of the map')
@@ -448,7 +480,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'track beasts':
             self.set_tooltip(['Attempts to reveal beasts in this tile and adjacent tiles',
                               'If successful, beasts in the area will be visible until the end of the turn, allowing the safari to hunt them',
-                              'Can not reveal beasts in unexplored tiles',
+                              'Cannot reveal beasts in unexplored tiles',
                               'Costs 1 movement point'])
 
         elif self.button_type == 'convert':
@@ -841,7 +873,7 @@ class button(interface_elements.interface_element):
                                         mob.set_sentry_mode(False)
                                     mob.clear_automatic_route()
                             else:
-                                text_tools.print_to_screen('You can not move while in the European HQ screen.', self.global_manager)
+                                text_tools.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
                         elif len(selected_list) < 1:
                             text_tools.print_to_screen('There are no selected units to move.', self.global_manager)
                         else:
@@ -850,7 +882,7 @@ class button(interface_elements.interface_element):
                         text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
                         text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and can not move.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot move.', self.global_manager)
             elif self.button_type == 'toggle grid lines':
                 self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
 
@@ -932,7 +964,7 @@ class button(interface_elements.interface_element):
                         text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
                         text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and can not move units.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot move units.', self.global_manager)
                 
 
             elif self.button_type == 'do something':
@@ -966,14 +998,14 @@ class button(interface_elements.interface_element):
                                     displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                     displayed_tile.change_inventory(commodity, num_commodity)
                                     if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                        text_tools.print_to_screen('This tile can not hold this many commodities.', self.global_manager)
+                                        text_tools.print_to_screen('This tile cannot hold this many commodities.', self.global_manager)
                                         text_tools.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
                             else:
                                 text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
                             text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
                 else:
-                     text_tools.print_to_screen('You are busy and can not transfer commodities.', self.global_manager)
+                     text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
                 
             elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
                 if main_loop_tools.action_possible(self.global_manager):
@@ -1006,13 +1038,13 @@ class button(interface_elements.interface_element):
                                                 tab_button.on_click()
                                                 continue
                                 else:
-                                    text_tools.print_to_screen('This unit can not hold commodities.', self.global_manager)
+                                    text_tools.print_to_screen('This unit cannot hold commodities.', self.global_manager)
                             else:
                                 text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                         else:
                             text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
                 else:
-                     text_tools.print_to_screen('You are busy and can not transfer commodities.', self.global_manager)
+                     text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
 
             elif self.button_type == 'remove worker':
                 if not self.attached_label.attached_building == 'none':
@@ -1045,7 +1077,7 @@ class button(interface_elements.interface_element):
                         choice_info_dict = {'type': 'end turn'}
                         notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                 else:
-                    text_tools.print_to_screen('You are busy and can not end your turn.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
     
             elif self.button_type == 'end turn':
                 turn_management_tools.end_turn(self.global_manager)
@@ -1066,14 +1098,14 @@ class button(interface_elements.interface_element):
                 if main_loop_tools.action_possible(self.global_manager):
                     game_transitions.cycle_player_turn(self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and can not cycle through units.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
 
             elif self.button_type == 'new game':
                 if self.global_manager.get('current_game_mode') == 'new_game_setup':
                     if not self.global_manager.get('displayed_country') == 'none':
                         self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
                     else:
-                        text_tools.print_to_screen('You can not start a game without selecting a country.', self.global_manager)
+                        text_tools.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
                 else:
                     game_transitions.set_game_mode('new_game_setup', self.global_manager)
 
@@ -1082,7 +1114,7 @@ class button(interface_elements.interface_element):
                     self.global_manager.get('save_load_manager').save_game('save1.pickle')
                     notification_tools.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and can not save the game', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot save the game', self.global_manager)
 
             elif self.button_type == 'load game':
                 self.global_manager.get('save_load_manager').load_game('save1.pickle')
@@ -1216,7 +1248,7 @@ class button(interface_elements.interface_element):
                     else:
                         text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and can not start a trial.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
                     
             elif self.button_type == 'confirm main menu':
                 self.global_manager.set('game_over', False)
@@ -1232,7 +1264,7 @@ class button(interface_elements.interface_element):
                             current_pmob.set_sentry_mode(False)
                     actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
                 else:
-                    text_tools.print_to_screen('You are busy and can not disable sentry mode.', self.global_manager)
+                    text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
             elif self.button_type == 'confirm remove minister':
                 removed_minister = self.global_manager.get('displayed_minister')
@@ -1447,7 +1479,7 @@ class cycle_same_tile_button(button):
                     cycled_tile.cell.contained_mobs[0].selection_sound()
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
             else:
-                text_tools.print_to_screen('You are busy and can not cycle units.', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
 
     def can_show(self):
         '''
@@ -1535,7 +1567,7 @@ class same_tile_icon(button):
                         while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
                             current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
             else:
-                text_tools.print_to_screen('You are busy and can not select a different unit', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot select a different unit', self.global_manager)
 
     def can_show(self):
         '''
@@ -1685,7 +1717,7 @@ class fire_unit_button(button):
                             message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
                     notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not fire a unit', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
 
     def can_show(self):
         '''
@@ -1767,7 +1799,7 @@ class free_unit_slaves_button(button):
                     message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
                     notification_tools.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not free slaves', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot free slaves', self.global_manager)
 
     def can_show(self):
         '''
@@ -1872,7 +1904,7 @@ class switch_game_mode_button(button):
                     text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
                     text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and can not switch screens.', self.global_manager)
+                text_tools.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
 
     def update_tooltip(self):
         '''
@@ -1976,7 +2008,7 @@ class minister_portrait_image(button):
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
         else:
-            text_tools.print_to_screen('You are busy and can not select other ministers.', self.global_manager)
+            text_tools.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
 
     def calibrate(self, new_minister):
         '''
@@ -2072,7 +2104,7 @@ class country_selection_image(button):
         if main_loop_tools.action_possible(self.global_manager):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display'), self.current_country)
         else:
-            text_tools.print_to_screen('You are busy and can not select another country.', self.global_manager)
+            text_tools.print_to_screen('You are busy and cannot select another country.', self.global_manager)
 
     def calibrate(self, new_country):
         '''
@@ -2172,7 +2204,7 @@ class cycle_available_ministers_button(button):
             minister_utility.update_available_minister_display(self.global_manager)
             self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
         else:
-            text_tools.print_to_screen('You are busy and can not select other ministers.', self.global_manager)
+            text_tools.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
 
 class commodity_button(button):
     '''
@@ -2219,7 +2251,7 @@ class commodity_button(button):
         '''
         if self.global_manager.get('choosing_advertised_commodity'):
             if self.commodity == 'consumer goods':
-                text_tools.print_to_screen('You can not advertise consumer goods.', self.global_manager)
+                text_tools.print_to_screen('You cannot advertise consumer goods.', self.global_manager)
             else:
                 can_advertise = False
                 for current_commodity in self.global_manager.get('collectable_resources'):
@@ -2230,7 +2262,7 @@ class commodity_button(button):
                     self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
                     self.global_manager.set('choosing_advertised_commodity', False)
                 else:
-                    text_tools.print_to_screen('You can not advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
+                    text_tools.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
 
     def can_show_tooltip(self):
         '''
@@ -2297,7 +2329,7 @@ class show_previous_financial_report_button(button):
         if main_loop_tools.action_possible(self.global_manager):
             notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
         else:
-            text_tools.print_to_screen('You are busy and can not view the last turn\'s financial report', self.global_manager)
+            text_tools.print_to_screen('You are busy and cannot view the last turn\'s financial report', self.global_manager)
 
 class tab_button(button):
     '''
@@ -2366,18 +2398,26 @@ class reorganize_unit_button(button):
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
                 'input_sources': string list value - List of interface elements to use to determine the pmobs to use as formula input
                 'output_destinations': string list value - List of interface elements to send formula results to
+                'allowed_procedures': string list value - Types of merge/split procedure this button can execute
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'reorganize unit'
-        self.input_sources = input_dict['input_sources']
-        self.autofill_attempts = 0
-        self.current_input = ['none', 'none']
-        self.output_destinations = input_dict['output_destinations']
-        self.procedure_dict = {'procedure_type': 'none'}
-        self.manually_calibrate_buttons = []
+        self.allowed_procedures = input_dict['allowed_procedures']
         super().__init__(input_dict, global_manager)
+
+    def enable_shader_condition(self):
+        '''
+        Description:
+            Calculates and returns whether this button should display its shader, given that it has shader enabled - reorganize button displays shader when current
+                procedure is not in this button's allowed procedures
+        Input:
+            None
+        Output:
+            boolean: Returns whether this button should display its shader, given that it has shader enabled
+        '''
+        return(super().enable_shader_condition() and not self.parent_collection.autofill_actors['procedure'] in self.allowed_procedures)
 
     def update_tooltip(self):
         '''
@@ -2388,6 +2428,8 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
+        super().update_tooltip()
+        return
         self.tooltip_text = ['Reorganizes the inputted units into the displayed output']
         if self.input_sources[0].actor == 'none':
             first_name = 'none'
@@ -2422,303 +2464,6 @@ class reorganize_unit_button(button):
 
         self.set_tooltip(self.tooltip_text)
 
-    def calibrate(self, new_actor):
-        '''
-        Description:
-            Updates this button's output based on the current inputs - called immediately after inputs are calibrated to inputted actor
-        Input:
-            string/actor new_actor: The actor whose information is matched by this button. If this equals 'none', this button is detached from any actor
-        Output:
-            None
-        '''
-        self.attempt_autofill()
-        self.current_output = self.generate_output(self.current_input)
-        for index, item in enumerate(self.current_output):
-            self.output_destinations[index].calibrate(item)
-
-    def attempt_autofill(self):
-        self.autofill_attempts += 1
-        previous_input = self.current_input
-        self.current_input = [current_source.actor for current_source in self.input_sources]
-        if self.autofill_attempts == 1 and self.global_manager.get('displayed_mob') != 'none':
-            #if not ((self.current_input[0] == 'none' and previous_input[0] != 'none') or (self.current_input[1] == 'none' and previous_input[1] != 'none')):
-                #don't attempt to autofill if user just emptied a cell
-            if self.current_input[0] != 'none' and self.current_input[1] != 'none': #keep cells same if both are filled
-                return(self.current_input)
-            elif self.current_input[0] == 'none' and self.current_input[1] == 'none':
-                self.manually_calibrate_buttons[0].on_click() #select displayed mob if both cells are empty
-
-                self.current_input = [current_source.actor for current_source in self.input_sources]
-
-                if self.current_input[0] != 'none':
-                    unit = self.current_input[0]
-                else:
-                    unit = self.current_input[1]
-                if unit.is_officer: #set up merge if only officer selected
-                    officer = unit
-                    worker = 'none'
-                    if officer.officer_type == 'evangelist':
-                        worker_type_list = ['religious']
-                    else:
-                        worker_type_list = ['African', 'European', 'slave']
-                    worker = officer.images[0].current_cell.get_worker(possible_types=worker_type_list)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
-                    self.manually_calibrate_buttons[1].on_click()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), officer)
-                elif unit.is_vehicle:
-                    vehicle = unit
-                    worker = 'none'
-                    worker_type_list = ['European']
-                    if not (vehicle.vehicle_type == 'ship' and vehicle.can_swim_ocean):
-                        worker_type_list.append('African')
-                    worker = vehicle.images[0].current_cell.get_worker(possible_types=worker_type_list)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
-                    self.manually_calibrate_buttons[1].on_click()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), vehicle)
-
-            self.current_input = [current_source.actor for current_source in self.input_sources]
-
-    def generate_output(self, input):
-        '''
-        Description:
-            Based on the input cell's actors, determine a procedure (such as 'merge' if inputs contain officer and worker) and creates the correct mock outputs (such as a 
-                mock group composed of the officer and worker for 1 cell/tooltip and 'none' for the other) to represent the outcome of the determined procedure
-        Input:
-            string/actor list: List of current actors from each input cell
-        Output:
-            string/dummy list: List of dummy mobs to calibrate each output cell to - needs to send separately to output and output's tooltip, so length will be twice that 
-                of the input
-        '''
-        procedure = 'none'
-        self.procedure_dict = {'procedure_type': 'none'}
-        if input[0] == 'none' and input[1] == 'none':
-            procedure = 'none'
-        elif input[0] == 'none' or input[1] == 'none':
-            procedure = 'none'
-            if input[0] == 'none':
-                unit = input[1]
-            else:
-                unit = input[0]
-            if unit.is_group:
-                if not (unit.can_hold_commodities and len(unit.get_held_commodities()) > 0):
-                    procedure = 'split'
-            elif unit.is_vehicle:
-                if unit.contained_mobs:
-                    #procedure = 'disembark'
-                    procedure = 'none'
-                elif unit.crew != 'none':
-                    procedure = 'uncrew'
-        elif (input[0].is_officer and input[1].is_worker) or (input[1].is_officer and input[0].is_worker):
-            procedure = 'merge'
-            if input[0].is_officer:
-                officer = input[0]
-                worker = input[1]
-            else:
-                officer = input[1]
-                worker = input[0]
-        elif (input[0].is_vehicle and (not input[0].has_crew) and input[1].is_worker) or (input[1].is_vehicle and (not input[1].has_crew) and input[0].is_worker):
-            procedure = 'crew'
-            if input[0].is_vehicle:
-                vehicle = input[0]
-                worker = input[1]
-            else:
-                vehicle = input[1]
-                worker = input[0]
-        '''
-        elif (input[0].is_vehicle and input[0].has_crew and not input[1].is_vehicle) or (input[1].is_vehicle and input[1].has_crew and not input[0].is_vehicle):
-            procedure = 'embark'
-            if input[0].is_vehicle:
-                vehicle = input[0]
-                passenger = input[1]
-            else:
-                vehicle = input[1]
-                passenger = input[0]
-        '''
-
-        required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
-                              'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
-                              'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
-
-        dummy_input_dict = {
-            'actor_type': 'mob',
-            'in_vehicle': False,
-            'in_group': False,
-            'in_building': False,
-            'images': [self.global_manager.get('actor_creation_manager').create_dummy({
-                'image_id': None
-            }, self.global_manager)],
-        }
-
-        if procedure == 'split':
-            output = self.handle_split(unit, required_dummy_attributes, dummy_input_dict)
-        #elif procedure == 'disembark':
-        #    output = self.handle_disembark(unit, required_dummy_attributes, dummy_input_dict)
-        elif procedure == 'uncrew':
-            output = self.handle_uncrew(unit, required_dummy_attributes, dummy_input_dict)
-        elif procedure == 'merge':
-            output = self.handle_merge(officer, worker, required_dummy_attributes, dummy_input_dict)
-        elif procedure == 'crew':
-            output = self.handle_crew(vehicle, worker, required_dummy_attributes, dummy_input_dict)
-        #elif procedure == 'embark':
-        #    output = self.handle_embark(vehicle, passenger, required_dummy_attributes, dummy_input_dict)
-        if procedure in ['invalid', 'none']:
-            output = ['none']#['none', 'none']
-        output += output #replicates results to also calibrate corresponding tooltip objects
-        self.autofill_attempts = 0
-        return(output)
-
-    def handle_split(self, unit, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the split procedure based on the inputted information
-        Input:
-            group unit: Group being split - component officer and worker used to base mock output units off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy officer and worker resulting from split
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'split',
-            'unit': unit,
-        }
-        dummy_worker_dict = dummy_input_dict
-        dummy_officer_dict = dummy_input_dict.copy()
-        dummy_worker = self.create_dummy_copy(unit.worker, dummy_worker_dict, required_dummy_attributes)
-        dummy_officer = self.create_dummy_copy(unit.officer, dummy_officer_dict, required_dummy_attributes)
-        return([dummy_officer, dummy_worker])
-
-    def handle_disembark(self, unit, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the disembark procedure based on the inputted information
-        Input:
-            vehicle unit: Vehicle being disembarked - vehicle and first passenger used to base mock output units off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy vehicle and passenger from disembark
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'disembark',
-            'unit': unit,
-            'passenger': unit.contained_mobs[0]
-        }
-        disorganized = self.procedure_dict['passenger'].disorganized
-        if unit.vehicle_type == 'ship' and not unit.images[0].current_cell.has_building('port'):
-            disorganized = True
-        dummy_passenger = self.create_dummy_copy(self.procedure_dict['passenger'], dummy_input_dict.copy(), required_dummy_attributes, {'disorganized': disorganized})
-        dummy_vehicle = self.create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes)
-        dummy_vehicle.contained_mobs = utility.remove_from_list(dummy_vehicle.contained_mobs, self.procedure_dict['passenger']) #remove(self.procedure_dict['passenger'])
-        dummy_passenger.disorganized = disorganized
-        return([dummy_vehicle,  dummy_passenger])
-
-    def handle_uncrew(self, unit, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the uncrew procedure based on the inputted information
-        Input:
-            vehicle unit: Vehicle being uncrewed - vehicle and crew worker used to base mock output units off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy vehicle and worker from uncrew
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'uncrew',
-            'unit': unit,
-        }
-        dummy_worker = self.create_dummy_copy(unit.crew, dummy_input_dict.copy(), required_dummy_attributes)
-        dummy_vehicle = self.create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes, {'has_crew': False})
-        dummy_vehicle.has_crew = False
-        return([dummy_vehicle, dummy_worker])
-
-    def handle_merge(self, officer, worker, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the merge procedure based on the inputted information
-        Input:
-            officer officer: Officer being merged - used to base mock output unit off of
-            worker worker: Worker being merged - used to base mock output unit off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy group and 'none' from merge
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'merge',
-            'officer': officer,
-            'worker': worker,
-        }
-        for attribute in required_dummy_attributes:
-            if hasattr(officer, attribute):
-                dummy_input_dict[attribute] = getattr(officer, attribute)
-        dummy_input_dict['officer'] = officer
-        dummy_input_dict['worker'] = worker
-        dummy_input_dict['group_type'] = self.global_manager.get('officer_group_type_dict')[officer.officer_type]
-        if dummy_input_dict['group_type'] == 'battalion':
-            if worker.worker_type == 'European':
-                dummy_input_dict['battalion_type'] = 'imperial'
-            else:
-                dummy_input_dict['battalion_type'] = 'colonial'
-        dummy_input_dict['name'] = actor_utility.generate_group_name(worker, officer, self.global_manager, add_veteran=True)
-        dummy_input_dict['movement_points'] = actor_utility.generate_group_movement_points(worker, officer, self.global_manager)
-        dummy_input_dict['max_movement_points'] = actor_utility.generate_group_movement_points(worker, officer, self.global_manager, generate_max=True)
-        dummy_input_dict['is_group'] = True #also need to set things like is_batallion for combat strength, anything that shows up in image or tooltip
-        image_id_list = officer.get_image_id_list()
-        image_id_list.remove(officer.image_dict['default']) #group default image is empty
-        dummy_input_dict['image_id_list'] = image_id_list + actor_utility.generate_group_image_id_list(worker, officer, self.global_manager)
-        return([self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager)])
-
-    def handle_crew(self, vehicle, worker, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the crew procedure based on the inputted information
-        Input:
-            vehicle vehicle: Vehicle being crewed - used to base mock output unit off of
-            worker worker: New crew - used to base mock output unit off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy vehicle and 'none' from crew
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'crew',
-            'vehicle': vehicle,
-            'worker': worker,
-        }
-        dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes, {'has_crew': True})
-        dummy_vehicle.has_crew = True
-        dummy_vehicle.crew = worker
-        return([dummy_vehicle])
-
-    def handle_embark(self, vehicle, passenger, required_dummy_attributes, dummy_input_dict):
-        '''
-        Description:
-            Generates the mock output for the embark procedure based on the inputted information
-        Input:
-            vehicle vehicle: Vehicle being embarked - used to base mock output unit off of
-            mob passenger: Mob embarking - used to base mock output unit off of
-            string list required_dummy_attributes: List of attributes required for dummies to have working tooltips/images to copy over from unit
-            dictionary dummy_input_dict: Input dict for mock units with initial values - any values also contained in required attributes will be overridden by the unit 
-                values
-        Output:
-            dummy list: Returns list of dummy objects representing output - dummy vehicle and 'none' from embark
-        '''
-        self.procedure_dict = {
-            'procedure_type': 'embark',
-            'vehicle': vehicle,
-            'passenger': passenger,
-        }
-        dummy_vehicle = self.create_dummy_copy(vehicle, dummy_input_dict, required_dummy_attributes)
-        dummy_vehicle.contained_mobs = dummy_vehicle.contained_mobs + [passenger] #gets around contained mobs being a shallow copy from original
-        return([dummy_vehicle])
-
     def on_click(self):
         '''
         Description:
@@ -2730,72 +2475,50 @@ class reorganize_unit_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            procedure_dict = self.procedure_dict
-            if procedure_dict['procedure_type'] == 'split':
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                worker, officer = procedure_dict['unit'].worker, procedure_dict['unit'].officer
-                procedure_dict['unit'].disband()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), worker)
-                self.manually_calibrate_buttons[1].on_click()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), officer)
-                self.manually_calibrate_buttons[0].on_click()
+            procedure_actors = self.parent_collection.autofill_actors
+            if procedure_actors['procedure'] in self.allowed_procedures:
+                procedure_type = 'none'
+                dummy_autofill_target_to_procedure_dict = {'officer': 'split', 'worker': 'split', 'group': 'merge'}
+                #type of procedure to do if dummy version of corresponding unit found - if a dummy officer is found, the procedure must be a split
 
-            elif procedure_dict['procedure_type'] == 'disembark':
-                if procedure_dict['unit'].vehicle_type == 'train' and not procedure_dict['unit'].images[0].current_cell.has_intact_building('train_station'):
-                    text_tools.print_to_screen('A train can only drop off passengers at a train station.', self.global_manager)
-                else:
-                    if procedure_dict['passenger'].sentry_mode:
-                        procedure_dict['passenger'].set_sentry_mode(False)
-                    procedure_dict['passenger'].selection_sound()
-                    procedure_dict['passenger'].disembark_vehicle(procedure_dict['unit'])
+                for autofill_target_type in dummy_autofill_target_to_procedure_dict:
+                    if procedure_actors[autofill_target_type] != 'none':
+                        if procedure_type != 'invalid' and procedure_actors[autofill_target_type].is_dummy:
+                            procedure_type = dummy_autofill_target_to_procedure_dict[autofill_target_type]
+                    else:
+                        procedure_type = 'invalid'
 
-            elif procedure_dict['procedure_type'] == 'uncrew':
-                if len(procedure_dict['unit'].get_held_commodities()) == 0:
-                    crew = procedure_dict['unit'].crew
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    crew.uncrew_vehicle(procedure_dict['unit'])
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), crew)
-                    self.manually_calibrate_buttons[1].on_click()
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['unit'])
-                    self.manually_calibrate_buttons[0].on_click()
-                else:
-                    text_tools.print_to_screen('You can not remove the crew from a ' + procedure_dict['unit'].vehicle_type + ' with passengers or cargo.', self.global_manager)
+                if procedure_type == 'split' and procedure_actors['officer'].is_vehicle: #if the 'officer' unit is actually a vehicle, do the vehicle version of the procedure
+                    procedure_type = 'uncrew'
+                elif procedure_type == 'merge' and procedure_actors['officer'].is_vehicle:
+                    procedure_type = 'crew'
 
-            elif procedure_dict['procedure_type'] == 'merge':
-                if procedure_dict['worker'].worker_type == 'religious' and procedure_dict['officer'].officer_type != 'evangelist':
-                    text_tools.print_to_screen('Church volunteers can only be combined with evangelists.', self.global_manager)
-                elif procedure_dict['officer'].officer_type == 'evangelist' and procedure_dict['worker'].worker_type != 'religious':
-                    text_tools.print_to_screen('Evangelists can only be combined with church volunteers.', self.global_manager)
-                else:
-                    if procedure_dict['worker'].sentry_mode:
-                        procedure_dict['worker'].set_sentry_mode(False)
-                    if procedure_dict['officer'].sentry_mode:
-                        procedure_dict['officer'].set_sentry_mode(False)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    self.global_manager.get('actor_creation_manager').create_group(procedure_dict['worker'], procedure_dict['officer'], self.global_manager)
-                    self.manually_calibrate_buttons[0].on_click()
+                if procedure_type == 'merge':
+                    if procedure_actors['worker'].worker_type == 'religious' and procedure_actors['officer'].officer_type != 'evangelist':
+                        text_tools.print_to_screen('Church volunteers can only be combined with evangelists.', self.global_manager)
+                    elif procedure_actors['officer'].officer_type == 'evangelist' and procedure_actors['worker'].worker_type != 'religious':
+                        text_tools.print_to_screen('Evangelists can only be combined with church volunteers.', self.global_manager)
+                    else:
+                        self.global_manager.get('actor_creation_manager').create_group(procedure_actors['worker'], procedure_actors['officer'], self.global_manager)
 
-            elif procedure_dict['procedure_type'] == 'crew':
-                if procedure_dict['worker'].worker_type == 'religious':
-                    text_tools.print_to_screen('Church volunteers can not crew vehicles.', self.global_manager)
-                elif procedure_dict['worker'].worker_type == 'slave':
-                    text_tools.print_to_screen('Slave workers can not crew vehicles.', self.global_manager)
-                elif procedure_dict['worker'].worker_type == 'African' and procedure_dict['vehicle'].vehicle_type == 'ship' and procedure_dict['vehicle'].can_swim_ocean:
-                    text_tools.print_to_screen('Only European workers can crew steamships.', self.global_manager)
-                else:
-                    procedure_dict['worker'].crew_vehicle(procedure_dict['vehicle'])
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['vehicle'])
-                    self.manually_calibrate_buttons[0].on_click() #calibrates as if top input button were pressed, allowing immediate reversal of procedure
+                elif procedure_type == 'crew':
+                    if procedure_actors['worker'].worker_type == 'religious':
+                        text_tools.print_to_screen('Church volunteers cannot crew vehicles.', self.global_manager)
+                    elif procedure_actors['worker'].worker_type == 'slave':
+                        text_tools.print_to_screen('Slave workers cannot crew vehicles.', self.global_manager)
+                    elif procedure_actors['worker'].worker_type == 'African' and procedure_actors['officer'].vehicle_type == 'ship' and procedure_actors['officer'].can_swim_ocean:
+                        text_tools.print_to_screen('Only European workers can crew steamships.', self.global_manager)
+                    else:
+                        procedure_actors['worker'].crew_vehicle(procedure_actors['officer'])
 
-            elif procedure_dict['procedure_type'] == 'embark':
-                if procedure_dict['vehicle'].vehicle_type == 'train' and not procedure_dict['vehicle'].images[0].current_cell.has_intact_building('train_station'):
-                    text_tools.print_to_screen('A train can only pick up passengers at a train station.', self.global_manager)
-                else:
-                    procedure_dict['passenger'].embark_vehicle(procedure_dict['vehicle'])
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), procedure_dict['vehicle'])
-                    self.manually_calibrate_buttons[0].on_click() #calibrates as if top input button were pressed, allowing immediate reversal of procedure
+                elif procedure_type == 'split':
+                    procedure_actors['group'].disband()
+
+                elif procedure_type == 'uncrew':
+                    if procedure_actors['group'].contained_mobs:
+                        text_tools.print_to_screen('You cannot remove the crew from a ' + procedure_actors['group'].vehicle_type + ' with passengers or cargo.', self.global_manager)
+                    else:
+                        procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])
 
     def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
         '''
@@ -2849,8 +2572,8 @@ class manually_calibrate_button(button):
         input_dict['button_type'] = 'manually calibrate'
         self.input_source = input_dict['input_source'] 
         self.output_destinations = input_dict['output_destinations']
-        if 'reorganize_button' in input_dict and input_dict['reorganize_button']:
-            input_dict['reorganize_button'].manually_calibrate_buttons.append(self)
+        #if 'reorganize_button' in input_dict and input_dict['reorganize_button']:
+        #    input_dict['reorganize_button'].manually_calibrate_buttons.append(self)
         super().__init__(input_dict, global_manager)
 
     def on_click(self):
