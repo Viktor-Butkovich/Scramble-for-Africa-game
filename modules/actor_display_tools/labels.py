@@ -62,12 +62,12 @@ class actor_display_label(label):
             self.message_start = 'Name: '
             input_dict['init_type'] = 'merge button'
             input_dict['image_id'] = 'buttons/merge_button.png'
-            input_dict['keybind_id'] = pygame.K_m
+            #input_dict['keybind_id'] = pygame.K_m
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'split button'
             input_dict['image_id'] = 'buttons/split_button.png'
-            input_dict['keybind_id'] = pygame.K_n
+            #input_dict['keybind_id'] = pygame.K_n
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'labor broker button'
@@ -89,14 +89,13 @@ class actor_display_label(label):
 
             input_dict['init_type'] = 'worker crew vehicle button'
             input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_m
+            #input_dict['keybind_id'] = pygame.K_m
             input_dict['vehicle_type'] = 'ship'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'worker crew vehicle button'
             input_dict['image_id'] = 'buttons/crew_train_button.png'
-            input_dict['keybind_id'] = pygame.K_m
+            #input_dict['keybind_id'] = pygame.K_m
             input_dict['vehicle_type'] = 'train'
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
@@ -329,12 +328,12 @@ class actor_display_label(label):
             self.message_start = 'Crew: '
             input_dict['init_type'] = 'crew vehicle button'
             input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_m
+            #input_dict['keybind_id'] = pygame.K_m
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'uncrew vehicle button'
             input_dict['image_id'] = 'buttons/uncrew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_n
+            #input_dict['keybind_id'] = pygame.K_n
             self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
         elif self.actor_label_type == 'passengers':

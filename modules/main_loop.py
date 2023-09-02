@@ -41,11 +41,10 @@ def main_loop(global_manager):
                     if current_button.can_show() and not global_manager.get('typing'):
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
-                                if current_button.has_released:
-                                    current_button.on_click()
-                                    current_button.has_released = False
-                                    current_button.being_pressed = True
-                                    break
+                                current_button.has_released = False
+                                current_button.being_pressed = True
+                                current_button.showing_outline = True
+                                break
                             else:#stop confirming an important button press if user starts doing something else
                                 current_button.confirming = False
                                 current_button.being_pressed = False
@@ -159,7 +158,6 @@ def main_loop(global_manager):
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
                         if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
-                            current_button.on_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
                             current_button.on_release()
                             clicked_button = True
                             stopping = True
@@ -173,7 +171,6 @@ def main_loop(global_manager):
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
                         if current_button.touching_mouse() and current_button.can_show() and not clicked_button: #only click 1 button at a time
-                            current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
                             break
@@ -187,7 +184,7 @@ def main_loop(global_manager):
                     current_button.showing_outline = False
         else:
             for current_button in global_manager.get('button_list'):
-                if not current_button.being_pressed:
+                if current_button.has_released:
                     current_button.showing_outline = False
 
         if not global_manager.get('loading'):

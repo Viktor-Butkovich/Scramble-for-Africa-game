@@ -1894,6 +1894,7 @@ def unit_organization_interface_setup(global_manager):
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_button.png',
         'allowed_procedures': ['merge', 'crew'],
+        'keybind_id': pygame.K_m,
         'enable_shader': True
     }
     reorganize_unit_right_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1907,6 +1908,7 @@ def unit_organization_interface_setup(global_manager):
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_reverse_button.png',
         'allowed_procedures': ['split', 'uncrew'],
+        'keybind_id': pygame.K_n,
         'enable_shader': True
     }
     reorganize_unit_left_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)

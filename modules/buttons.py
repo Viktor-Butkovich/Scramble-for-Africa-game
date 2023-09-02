@@ -1331,6 +1331,8 @@ class button(interface_elements.interface_element):
             None
         '''
         self.showing_outline = False
+        self.has_released = True
+        self.on_click()
 
     def remove(self):
         '''
@@ -2428,39 +2430,27 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
-        super().update_tooltip()
-        return
-        self.tooltip_text = ['Reorganizes the inputted units into the displayed output']
-        if self.input_sources[0].actor == 'none':
-            first_name = 'none'
+        if 'merge' in self.allowed_procedures:
+            self.tooltip_text = ['Combines the units on the left to form the unit on the right']
         else:
-            first_name = self.input_sources[0].actor.name
-        if self.input_sources[1].actor == 'none':
-            second_name = 'none'
+            self.tooltip_text = ['Separates the unit on the right to form the units on the left']
+        if self.parent_collection.autofill_actors['procedure'] in self.allowed_procedures:
+            if self.parent_collection.autofill_actors['procedure'] == 'merge':
+                self.tooltip_text.append('Press to combine the ' + self.parent_collection.autofill_actors['officer'].name + ' and the ' + 
+                                         self.parent_collection.autofill_actors['worker'].name + ' into a ' + self.parent_collection.autofill_actors['group'].name)
+            elif self.parent_collection.autofill_actors['procedure'] == 'split':
+                self.tooltip_text.append('Press to separate the ' + self.parent_collection.autofill_actors['group'].name + ' into a ' + 
+                                         self.parent_collection.autofill_actors['officer'].name + ' and ' + self.parent_collection.autofill_actors['worker'].name)
+            elif self.parent_collection.autofill_actors['procedure'] == 'crew':
+                self.tooltip_text.append('Press to combine the ' + self.parent_collection.autofill_actors['officer'].name + ' and the ' + 
+                                         self.parent_collection.autofill_actors['worker'].name + ' into a crewed ' + self.parent_collection.autofill_actors['group'].name)
+            elif self.parent_collection.autofill_actors['procedure'] == 'uncrew':
+                self.tooltip_text.append('Press to separate the ' + self.parent_collection.autofill_actors['group'].name + ' into ' + 
+                                         self.parent_collection.autofill_actors['worker'].name + ' and a non-crewed ' + self.parent_collection.autofill_actors['officer'].name)
+        elif self.parent_collection.autofill_actors['procedure'] != 'none':
+            self.tooltip_text.append('The ' + self.parent_collection.autofill_actors['procedure'] + ' procedure is controlled by the other button')
         else:
-            second_name = self.input_sources[1].actor.name
-        if first_name == 'none' and second_name == 'none':
-            self.tooltip_text.append('There are currently no inputted units')
-        elif first_name == 'none':
-            self.tooltip_text.append('The current inputted unit is ' + second_name)
-        elif second_name == 'none':
-            self.tooltip_text.append('The current inputted unit is ' + first_name)
-        else:
-            self.tooltip_text.append('The current inputted units are ' + first_name + ' and ' + second_name)
-        if self.procedure_dict['procedure_type'] == 'none':
-            self.tooltip_text.append(first_name.capitalize() + ' and ' + second_name + ' is not a valid combination')
-        elif self.procedure_dict['procedure_type'] == 'split':
-            self.tooltip_text.append('Splits ' + self.procedure_dict['unit'].name + ' into ' + self.procedure_dict['unit'].officer.name + ' and ' + self.procedure_dict['unit'].worker.name)
-        elif self.procedure_dict['procedure_type'] == 'disembark':
-            self.tooltip_text.append('Orders ' + self.procedure_dict['unit'].contained_mobs[0].name + ' to disembark the ' + self.procedure_dict['unit'].name)
-        elif self.procedure_dict['procedure_type'] == 'uncrew':
-            self.tooltip_text.append('Orders ' + self.procedure_dict['unit'].crew.name + ' to stop crewing the ' + self.procedure_dict['unit'].name)
-        elif self.procedure_dict['procedure_type'] == 'merge':
-            self.tooltip_text.append('Combines ' + first_name + ' and ' + second_name + ' into ' + self.output_destinations[0].actor.name)
-        elif self.procedure_dict['procedure_type'] == 'crew':
-            self.tooltip_text.append('Orders ' + self.procedure_dict['worker'].name + ' to crew the ' + self.procedure_dict['vehicle'].name)
-        elif self.procedure_dict['procedure_type'] == 'embark':
-            self.tooltip_text.append('Orders ' + self.procedure_dict['passenger'].name + ' to embark the ' + self.procedure_dict['vehicle'].name)
+            self.tooltip_text.append('The current combination of units has no valid reorganization procedure')
 
         self.set_tooltip(self.tooltip_text)
 

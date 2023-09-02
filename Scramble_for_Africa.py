@@ -39,3 +39,4 @@ try:
 except Exception: #displays error message and records error message in crash log file
     setup.manage_crash(Exception)
 #add label that just shows "working skill" for skill in current job
+#now need to add cycle/remove cell buttons - make sure they are greyed out for dummy units

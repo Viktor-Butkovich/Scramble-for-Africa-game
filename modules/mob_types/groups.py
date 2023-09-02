@@ -57,11 +57,12 @@ class group(pmob):
         self.default_min_crit_success = 6
         self.set_group_type('none')
         self.update_image_bundle()
-        if self.officer.veteran:
-            self.promote()
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), 'none', override_exempt=True)
             self.select()
+        if self.officer.veteran:
+            self.promote()
+        if not from_save:
             self.status_icons = self.officer.status_icons
             for current_status_icon in self.status_icons:
                 current_status_icon.actor = self

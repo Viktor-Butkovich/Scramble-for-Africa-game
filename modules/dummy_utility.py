@@ -56,6 +56,7 @@ def generate_autofill_actors(global_manager):
             elif return_dict['group'].is_vehicle:
                 return_dict['officer'], return_dict['worker'] = simulate_uncrew(return_dict['group'], required_dummy_attributes, dummy_input_dict, global_manager)
                 return_dict['procedure'] = 'uncrew'
+
     return(return_dict)
 
 def create_dummy_copy(unit, dummy_input_dict, required_dummy_attributes, global_manager, override_values={}):
