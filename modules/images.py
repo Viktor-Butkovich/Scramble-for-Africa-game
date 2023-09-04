@@ -845,21 +845,6 @@ class minister_type_image(tooltip_free_image):
                 self.tooltip_text.append('There is currently no ' + current_minister_type + ' appointed, so ' + keyword + '-oriented actions are not possible.')
             self.set_image('ministers/icons/' + keyword + '.png')
         self.update_image_bundle()
-            
-    def get_image_id_list(self, override_values={}):
-        '''
-        Description:
-            Generates and returns a list this actor's image file paths and dictionaries that can be passed to any image object to display those images together in a particular order and 
-                orientation
-        Input:
-            None
-        Output:
-            list: Returns list of string image file paths, possibly combined with string key dictionaries with extra information for offset images
-        '''
-        image_id_list = super().get_image_id_list(override_values)
-        if self.current_minister == 'none':
-            image_id_list.append('misc/warning_icon.png')
-        return(image_id_list)
 
     def update_tooltip(self):
         '''
@@ -890,7 +875,7 @@ class warning_image(free_image):
     '''
     Image that appears over the image it is attached to under certain conditions to draw attention from the player
     '''
-    def __init__(self, attached_image, global_manager, attachment_type = 'image'):
+    def __init__(self, attached_image, global_manager):
         '''
         Description:
             Initializes this object
@@ -902,14 +887,7 @@ class warning_image(free_image):
             None
         '''
         self.attached_image = attached_image
-        if attachment_type == 'image':
-            x_position = self.attached_image.x
-            y_position = global_manager.get('display_height') - self.attached_image.y
-        else:
-            x_position = self.attached_image.x - 100
-            y_position = self.attached_image.y
-            
-        super().__init__('misc/warning_icon.png', (x_position, y_position), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
+        super().__init__('misc/warning_icon.png', (attached_image.x, attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
             global_manager)
 
     def can_show(self):

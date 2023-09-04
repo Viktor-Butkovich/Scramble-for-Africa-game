@@ -1338,7 +1338,6 @@ class button(interface_elements.interface_element):
         '''
         self.showing_outline = False
         self.has_released = True
-        self.on_click()
 
     def remove(self):
         '''
@@ -1407,7 +1406,7 @@ class end_turn_button(button):
         '''
         input_dict['button_type'] = 'start end turn'
         super().__init__(input_dict, global_manager)
-        self.warning_image = images.warning_image(self, global_manager, 'button')
+        self.warning_image = images.warning_image(self, global_manager)
         self.warning_image.set_image('misc/enemy_turn_icon.png')
         self.warning_image.to_front = True
         if self.parent_collection != 'none':
@@ -1562,7 +1561,7 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if (not self.is_last) and (not self.attached_mob == 'none'):
+        if (not self.is_last) and self.attached_mob != 'none':
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.attached_mob.select()
                 if self.attached_mob.is_pmob:
@@ -1583,10 +1582,8 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected or if the selected tile has not been explored, otherwise returns same as superclass
         '''
-        if (not self.global_manager.get('displayed_tile') == 'none') and self.global_manager.get('displayed_tile').cell.visible:
-            return(super().can_show())
-        else:
-            return(False)
+        return(self.global_manager.get('displayed_tile') != 'none' and self.global_manager.get('displayed_tile').cell.visible
+               and len(self.old_contained_mobs) > self.index and super().can_show())
 
     def can_show_tooltip(self):
         '''
@@ -1597,24 +1594,22 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if super().can_show_tooltip():
-            if not self.attached_mob == 'none':
-                return(True)
-        return(False)
-                         
-    def draw(self):
+        return(self.attached_mob != 'none' and super().can_show_tooltip())
+
+    def update(self):
         '''
         Description:
-            Draws this button and draws a copy of the this button's attached mob's image on top of it
+            Updates this icon's appearance based on the corresponding unit in the displayed tile, if any
         Input:
             None
         Output:
             None
         '''
-        if self.can_show():
-            if not self.global_manager.get('displayed_tile') == 'none':
-                new_contained_mobs = self.global_manager.get('displayed_tile').cell.contained_mobs #actor_utility.get_selected_list(self.global_manager)
-                if (not new_contained_mobs == self.old_contained_mobs) or self.resetting:
+        if (self.global_manager.get('displayed_tile') != 'none' and self.global_manager.get('displayed_tile').cell.visible and super().can_show()):
+            displayed_tile = self.global_manager.get('displayed_tile')
+            if displayed_tile != 'none':
+                new_contained_mobs = displayed_tile.cell.contained_mobs
+                if (new_contained_mobs != self.old_contained_mobs) or self.resetting:
                     self.resetting = False
                     self.old_contained_mobs = []
                     for current_item in new_contained_mobs:
@@ -1632,21 +1627,25 @@ class same_tile_icon(button):
                         self.attached_mob = self.old_contained_mobs[self.index]
                         self.image.set_image(self.attached_mob.images[0].image_id)
             else:
-                self.image.set_image('misc/empty.png')
                 self.attached_mob = 'none'
-                
-            if len(self.old_contained_mobs) > self.index:
-                displayed_tile = self.global_manager.get('displayed_tile')
-                if self.index == 0 and self.can_show() and not displayed_tile == 'none':
-                    if displayed_tile.cell.contained_mobs[0].selected: #self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
-                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
-                    else:
-                        pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
-                super().draw()
 
-            else:
-                self.image.set_image('misc/empty.png')
-                self.attached_mob = 'none'
+    def draw(self):
+        '''
+        Description:
+            Draws this button and draws a copy of the this button's attached mob's image on top of it
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.update()
+        if self.can_show():
+            if self.index == 0 and self.global_manager.get('displayed_tile') != 'none':
+                if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
+                else:
+                    pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
+            super().draw()
 
     def update_tooltip(self):
         '''
@@ -1951,10 +1950,17 @@ class minister_portrait_image(button):
         if self.minister_type == 'none': #if available minister portrait
             if 'ministers' in self.modes:
                 self.global_manager.get('available_minister_portrait_list').append(self)
+            warning_x_offset = scaling.scale_width(-100, global_manager)
         else:
             self.type_keyword = self.global_manager.get('minister_type_dict')[self.minister_type]
+            warning_x_offset = 0
         self.global_manager.get('minister_image_list').append(self)
-        self.warning_image = images.warning_image(self, global_manager, 'button')
+        self.warning_image = images.warning_image(self, global_manager)
+
+        #attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
+        self.insert_collection_above().add_member(self.warning_image, {'x_offset': warning_x_offset, 'y_offset': 0}) #offsets are being ignored
+        self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
+
         self.calibrate('none')
 
     def can_show_warning(self):
@@ -1969,6 +1975,8 @@ class minister_portrait_image(button):
         if not self.current_minister == 'none':
             if self.current_minister.just_removed and self.current_minister.current_position == 'none':
                 return(True)
+        elif self.minister_type != 'none': #if portrait in minister table and no minister assigned for office
+            return(True)
         return(False)
 
     def draw(self):
@@ -1980,12 +1988,16 @@ class minister_portrait_image(button):
         Output:
             None
         '''
+        showing = False
         if self.can_show(): #draw outline around portrait if minister selected
+            showing = True
             if not self.current_minister == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
                 if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
         super().draw()
+        if showing and self.warning_image.can_show():
+            self.warning_image.draw()
 
     def on_click(self):
         '''
@@ -2505,6 +2517,10 @@ class reorganize_unit_button(button):
                         text_tools.print_to_screen('You cannot remove the crew from a ' + procedure_actors['group'].vehicle_type + ' with passengers or cargo.', self.global_manager)
                     else:
                         procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])
+            elif 'merge' in self.allowed_procedures:
+                text_tools.print_to_screen('This button does merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile', self.global_manager)
+            elif 'split' in self.allowed_procedures:
+                text_tools.print_to_screen('This button does split and uncrew procedures, which require a group or crewed vehicle to be selected', self.global_manager)
 
     def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
         '''
@@ -2525,10 +2541,9 @@ class reorganize_unit_button(button):
                 dummy_input_dict[attribute] = getattr(unit, attribute)
         return(self.global_manager.get('actor_creation_manager').create_dummy(dummy_input_dict, self.global_manager))
 
-class manually_calibrate_button(button):
+class cycle_autofill_button(button):
     '''
-    Button that manually calibrates from the input source to a list of output destinations - allows manual calibration of interface elements that do not automatically 
-        calibrate with group to allow special functionality
+    Button that cycles the autofill input cells to find the next available worker/officer available for a merge operation
     '''
     def __init__(self, input_dict, global_manager):
         '''
@@ -2546,45 +2561,26 @@ class manually_calibrate_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'input_sources': string list value - List of interface elements to use to determine the pmobs to use as formula input
-                'input_source': string value - String associated with global manager key with actor value that output destinations can calibrate to
-                'output_destinations': string list value - List of interface elements to tell to calibrate
-                'reorganize_button': reorganize_unit_button value - Optional associated button that can "click" its manual calibration buttons to create desired input 
-                    scenarios, even if not actually clicked
+                'autofill_target_type': string value - Type of autofill target that this button cycles through - autofill target types are 'officer', 'worker', and 'group'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
-        input_dict['button_type'] = 'manually calibrate'
-        self.input_source = input_dict['input_source'] 
-        self.output_destinations = input_dict['output_destinations']
-        super().__init__(input_dict, global_manager)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button calibrates its output destinations to 
-                the global manager value associated with the input source key
-        Input:
-            None
-        Output:
-            None
-        '''
-        for target in self.output_destinations:
-            if self.input_source == 'none':
-                if not hasattr(target, 'actor'):
-                    target.autofill_attempts = 1 #prevents attempting to autofill immediately after emptying
-                target.calibrate(self.input_source)
-            else:
-                target.calibrate(self.global_manager.get(self.input_source))
-
-class cycle_autofill_button(button):
-    def __init__(self, input_dict, global_manager):
         self.autofill_target_type = input_dict['autofill_target_type']
         input_dict['button_type'] = 'cycle autofill'
         super().__init__(input_dict, global_manager)
 
     def can_show(self, ignore_parent_collection=False):
+        '''
+        Description:
+            Returns whether this button can be shown. An autofill cycle button is only shown when an autofill is occurring and other options are available - allow cycling
+                autofill if current autofill is a real, non-selected mob and there is at least 1 valid alternative - it makes no sense to cycle a dummy mob for a real one
+                in the same tile, and the selected mob is locked and can't be cycled
+        Input:
+            None
+        Output:
+            boolean: Returns True if this button can appear, otherwise returns False
+        '''
         if super().can_show(ignore_parent_collection=ignore_parent_collection):
             if self.parent_collection.autofill_actors[self.autofill_target_type] != self.global_manager.get('displayed_mob'):
                 if self.parent_collection.autofill_actors[self.autofill_target_type] != 'none':
@@ -2598,7 +2594,16 @@ class cycle_autofill_button(button):
         return(False)
 
     def on_click(self):
+        '''
+        Description:
+            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button cycles the unit in an autofill input
+                cell to the next valid alternative - assumes that there is a valid alternative, as on_click is only possible if can_show is True
+        Input:
+            None
+        Output:
+            None
+        '''
         current_cell =  self.global_manager.get('displayed_mob').images[0].current_cell
         self.parent_collection.search_start_index = current_cell.contained_mobs.index(self.parent_collection.autofill_actors[self.autofill_target_type]) + 1
         self.parent_collection.calibrate(self.global_manager.get('displayed_mob'))
-        #start autofill search for corresponding target type right after the current target actor
+        #start autofill search for corresponding target type at index right after the current target actor

@@ -143,9 +143,10 @@ class interface_element():
             'modes': self.modes,
             'parent_collection': self.parent_collection,
             'init_type': 'interface collection',
-            'member_config': {'index': self.parent_collection.members.index(self)}
+            'member_config': {}
         }
         if self.parent_collection != 'none':
+            input_dict['member_config']['index'] = self.parent_collection.members.index(self)
             if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:
                 input_dict['member_config']['order_overlap'] = True
                 input_dict['member_config']['order_overlap_index'] = self.parent_collections.order_overlap_list.index(self)
@@ -165,10 +166,10 @@ class interface_element():
 
             if hasattr(self, 'order_y_offset'):
                 input_dict['member_config']['order_y_offset'] = self.order_y_offset
-            
-        new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
+        
+            self.parent_collection.remove_member(self)
 
-        self.parent_collection.remove_member(self)
+        new_parent_collection = self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager)
         
         new_parent_collection.add_member(self)
 

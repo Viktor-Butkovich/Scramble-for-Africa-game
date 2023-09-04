@@ -240,7 +240,7 @@ SFA folder
 	        	class show_previous_financial_report_button
 				class tab_button
 				class reorganize_unit_button
-				class manually_calibrate_button
+				class cycle_autofill_button
 
         cells.py
             imports pygame, random, actor_utility

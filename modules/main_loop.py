@@ -43,6 +43,7 @@ def main_loop(global_manager):
                             if event.key == current_button.keybind_id:
                                 current_button.has_released = False
                                 current_button.being_pressed = True
+                                current_button.on_click()
                                 current_button.showing_outline = True
                                 break
                             else:#stop confirming an important button press if user starts doing something else
@@ -158,6 +159,7 @@ def main_loop(global_manager):
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
                         if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
+                            current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
                             stopping = True
@@ -171,6 +173,7 @@ def main_loop(global_manager):
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
                         if current_button.touching_mouse() and current_button.can_show() and not clicked_button: #only click 1 button at a time
+                            current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
                             break
@@ -283,7 +286,6 @@ def main_loop(global_manager):
                     global_manager.get('enemy_turn_queue').pop(0)
                     
                 else: #If unit visible, have short delay depending on action taken to let user see it
-                    new_enemy_coordinates = (current_enemy.x, current_enemy.y)
                     if (not spawning) and (did_nothing or not current_enemy.visible()): #do not wait if not visible or nothing to show, exception for spawning units, which may not be visible as user watches them spawn
                         global_manager.set('end_turn_wait_time', 0)
                     elif spawning and not current_enemy.grids[0].find_cell(current_enemy.x, current_enemy.y).visible: #do not wait if spawning unit won't be visible even after it spawns
