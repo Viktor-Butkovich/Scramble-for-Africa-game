@@ -1913,59 +1913,27 @@ def unit_organization_interface_setup(global_manager):
     }
     reorganize_unit_left_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    #input_dict = {
-    #    #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
-    #    'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
-    #    'width': scaling.scale_width(30, global_manager),
-    #    'height': scaling.scale_height(30, global_manager),
-    #    'init_type': 'manually calibrate button',
-    #    'parent_collection': unit_organization_collection,
-    #    'image_id': 'buttons/cycle_units_button.png',
-    #    'input_source': 'displayed_mob',
-    #    'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_right_button, reorganize_unit_left_button],
-    #    'reorganize_button': reorganize_unit_right_button,
-    #}
-    #manually_calibrate_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35/2, global_manager),
+        'width': scaling.scale_width(30, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'cycle autofill button',
+        'parent_collection': unit_organization_collection,
+        'image_id': 'buttons/reset_button.png',
+        'autofill_target_type': 'officer'
+    }
+    cycle_autofill_officer_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    #input_dict = {
-    #    #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
-    #    'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
-    #    'width': scaling.scale_width(30, global_manager),
-    #    'height': scaling.scale_height(30, global_manager),
-    #    'init_type': 'manually calibrate button',
-    #    'parent_collection': unit_organization_collection,
-    #    'image_id': 'buttons/remove_minister_button.png',
-    #    'input_source': 'none',
-    #    'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
-    #}
-    #manually_calibrate_none_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    #input_dict = {
-    #    #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
-    #    'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
-    #    'width': input_dict['width'],
-    #    'height': input_dict['height'],
-    #    'init_type': input_dict['init_type'],
-    #    'parent_collection': input_dict['parent_collection'],
-    #    'image_id': 'buttons/cycle_units_button.png',
-    #    'input_source': 'displayed_mob',
-    #    'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
-    #    'reorganize_button': reorganize_unit_button,
-    #}
-    #manually_calibrate_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    #input_dict = {
-    #    #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
-    #    'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
-    #    'width': input_dict['width'],
-    #    'height': input_dict['height'],
-    #    'init_type': input_dict['init_type'],
-    #    'parent_collection': input_dict['parent_collection'],
-    #    'image_id': 'buttons/remove_minister_button.png',
-    #    'input_source': 'none',
-    #    'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
-    #}
-    #manually_calibrate_none_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35/2, global_manager),
+        'width': input_dict['width'], #copies most attributes from previous button
+        'height': input_dict['height'],
+        'init_type': input_dict['init_type'],
+        'parent_collection': input_dict['parent_collection'],
+        'image_id': input_dict['image_id'],
+        'autofill_target_type': 'worker'
+    }
+    cycle_autofill_worker_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
 def minister_interface_setup(global_manager):
     '''

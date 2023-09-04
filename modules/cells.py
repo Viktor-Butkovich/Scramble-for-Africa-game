@@ -451,44 +451,80 @@ class cell():
                     return(current_mob)
         return('none')
 
-    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious']):
+    def has_worker(self, possible_types = ['African', 'European', 'slave', 'religious'], required_number=1):
         '''
         Description:
             Returns whether this cell contains a worker of one of the inputted types
         Input:
             string list possible_types: Type of worker that can be detected, includes all workers by default
+            int required_number=1: Number of workers that must be found to return True
         Output:
-            Returns True if this cell contains a worker of one of the inputted types, otherwise returns False
+            Returns True if this cell contains the required number of workers of one of the inputted types, otherwise returns False
         '''
+        num_found = 0
         for current_mob in self.contained_mobs:
             if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types: 
-                return(True)
+                num_found += 1
+                if num_found >= required_number:
+                    return(True)
         return(False)
 
-    def get_worker(self, possible_types=['African', 'European', 'slave', 'religious']):
+    def has_officer(self, allow_vehicle=True, required_number=1):
+        '''
+        Description:
+            Returns whether this cell contains an officer of an allowed type
+        Input:
+            boolean allow_vehicles=True: Whether uncrewed vehicles can be returned or just officers
+            int required_number=1: Number of officers that must be found to return True
+        Output:
+            Returns True if this cell contains the required number of officers of one of the inputted types, otherwise returns False
+        '''
+        num_found = 0
+        for current_mob in self.contained_mobs:
+            if current_mob.is_pmob and (current_mob.is_officer or (current_mob.is_vehicle and not current_mob.has_crew)):
+                num_found += 1
+                if num_found >= required_number:
+                    return(True)
+        return(False)
+
+    def get_worker(self, possible_types=['African', 'European', 'slave', 'religious'], start_index=0):
         '''
         Description:
             Finds and returns the first worker in this cell of the inputted types, or 'none' if none are present
         Input:
             string list possible_types: Type of worker that can be returned, includes all workers by default
+            int start_index=0: Index of contained_mobs to start search from - if starting in middle, wraps around iteration to ensure all items are still checked
         Output:
             string/worker: Returns the first worker in this cell of the inputted types, or 'none' if none are present
         '''
-        for current_mob in self.contained_mobs:
+        if start_index >= len(self.contained_mobs):
+            start_index = 0
+        if start_index == 0: #don't bother slicing/concatenating list if just iterating from index 0
+            iterated_list = self.contained_mobs
+        else:
+            iterated_list = self.contained_mobs[start_index:len(self.contained_mobs)] + self.contained_mobs[0:start_index]
+        for current_mob in iterated_list:
             if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types:
                 return(current_mob)
         return('none')
 
-    def get_officer(self, allow_vehicles=True):
+    def get_officer(self, allow_vehicles=True, start_index=0):
         '''
         Description:
             Finds and returns the first officer or, optionally, uncrewed vehicle, in this cell, or 'none' if none are present
         Input:
             boolean allow_vehicles=True: Whether uncrewed vehicles can be returned or just officers
+            int start_index=0: Index of contained_mobs to start search from - if starting in middle, wraps around iteration to ensure all items are still checked
         Output:
             string/actor: Returns the first officer, or, optionally, uncrewed vehicle in this cell, or 'none' if none are present
         '''
-        for current_mob in self.contained_mobs:
+        if start_index >= len(self.contained_mobs):
+            start_index = 0
+        if start_index == 0: #don't bother slicing/concatenating list if just iterating from index 0
+            iterated_list = self.contained_mobs
+        else:
+            iterated_list = self.contained_mobs[start_index:len(self.contained_mobs)] + self.contained_mobs[0:start_index]
+        for current_mob in iterated_list:
             if current_mob.is_pmob and (current_mob.is_officer or (current_mob.is_vehicle and not current_mob.has_crew)):
                 return(current_mob)
         return('none')

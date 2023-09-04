@@ -661,6 +661,15 @@ class button(interface_elements.interface_element):
             else:
                 self.set_tooltip(['Uploads the selected unit to this reorganization cell'])
 
+        elif self.button_type == 'cycle autofill':
+            if self.parent_collection.autofill_actors[self.autofill_target_type] != 'none':
+                amount = 1
+                if self.autofill_target_type == 'worker':
+                    amount = 2
+                verb = utility.conjugate('be', amount, 'preterite') #was or were
+                self.set_tooltip(['The ' + self.parent_collection.autofill_actors[self.autofill_target_type].name + ' here ' + verb + ' automatically selected for the ' + self.parent_collection.autofill_actors['procedure'] + ' procedure',
+                                'Press to cycle to the next available ' + self.autofill_target_type])
+
         else:
             self.set_tooltip(['placeholder'])
             
@@ -846,469 +855,466 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if self.button_type in ['move left', 'move right', 'move up', 'move down']:
-                x_change = 0
-                y_change = 0
-                if self.button_type == 'move left':
-                    x_change = -1
-                elif self.button_type == 'move right':
-                    x_change = 1
-                elif self.button_type == 'move up':
-                    y_change = 1
-                elif self.button_type == 'move down':
-                    y_change = -1
-                selected_list = actor_utility.get_selected_list(self.global_manager)
-                if main_loop_tools.action_possible(self.global_manager):
-                    if minister_utility.positions_filled(self.global_manager):
-                        if len(selected_list) == 1:
-                            if self.global_manager.get('current_game_mode') == 'strategic':
-                                mob = selected_list[0]
-                                if mob.can_move(x_change, y_change):
-                                    mob.move(x_change, y_change)
-                                    self.global_manager.set('show_selection_outlines', True)
-                                    self.global_manager.set('last_selection_outline_switch', time.time())
-                                    if mob.sentry_mode:
-                                        mob.set_sentry_mode(False)
-                                    mob.clear_automatic_route()
-                            else:
-                                text_tools.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
-                        elif len(selected_list) < 1:
-                            text_tools.print_to_screen('There are no selected units to move.', self.global_manager)
+        if self.button_type in ['move left', 'move right', 'move up', 'move down']:
+            x_change = 0
+            y_change = 0
+            if self.button_type == 'move left':
+                x_change = -1
+            elif self.button_type == 'move right':
+                x_change = 1
+            elif self.button_type == 'move up':
+                y_change = 1
+            elif self.button_type == 'move down':
+                y_change = -1
+            selected_list = actor_utility.get_selected_list(self.global_manager)
+            if main_loop_tools.action_possible(self.global_manager):
+                if minister_utility.positions_filled(self.global_manager):
+                    if len(selected_list) == 1:
+                        if self.global_manager.get('current_game_mode') == 'strategic':
+                            mob = selected_list[0]
+                            if mob.can_move(x_change, y_change):
+                                mob.move(x_change, y_change)
+                                self.global_manager.set('show_selection_outlines', True)
+                                self.global_manager.set('last_selection_outline_switch', time.time())
+                                if mob.sentry_mode:
+                                    mob.set_sentry_mode(False)
+                                mob.clear_automatic_route()
                         else:
-                            text_tools.print_to_screen('You can only move one unit at a time.', self.global_manager)
+                            text_tools.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
+                    elif len(selected_list) < 1:
+                        text_tools.print_to_screen('There are no selected units to move.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                        text_tools.print_to_screen('You can only move one unit at a time.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and cannot move.', self.global_manager)
-            elif self.button_type == 'toggle grid lines':
-                self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
+                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot move.', self.global_manager)
+        elif self.button_type == 'toggle grid lines':
+            self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
 
-            elif self.button_type == 'toggle text box':
-                self.global_manager.set('show_text_box', utility.toggle(self.global_manager.get('show_text_box')))
+        elif self.button_type == 'toggle text box':
+            self.global_manager.set('show_text_box', utility.toggle(self.global_manager.get('show_text_box')))
 
-            elif self.button_type == 'expand text box':
-                if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
-                    self.global_manager.set('text_box_height', scaling.scale_height(self.global_manager.get('default_display_height') - 45, self.global_manager)) #self.height
-                else:
-                    self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
+        elif self.button_type == 'expand text box':
+            if self.global_manager.get('text_box_height') == self.global_manager.get('default_text_box_height'):
+                self.global_manager.set('text_box_height', scaling.scale_height(self.global_manager.get('default_display_height') - 45, self.global_manager)) #self.height
+            else:
+                self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
 
-            elif self.button_type == 'execute movement routes':
-                if main_loop_tools.action_possible(self.global_manager):
-                    if minister_utility.positions_filled(self.global_manager):
-                        if not self.global_manager.get('current_game_mode') == 'strategic':
-                            game_transitions.set_game_mode('strategic', self.global_manager)
+        elif self.button_type == 'execute movement routes':
+            if main_loop_tools.action_possible(self.global_manager):
+                if minister_utility.positions_filled(self.global_manager):
+                    if not self.global_manager.get('current_game_mode') == 'strategic':
+                        game_transitions.set_game_mode('strategic', self.global_manager)
                                 
-                        unit_types = ['porters', 'steamboat', 'steamship', 'train']
-                        moved_units = {}
-                        attempted_units = {}
-                        for current_unit_type in unit_types:
-                            moved_units[current_unit_type] = 0
-                            attempted_units[current_unit_type] = 0
+                    unit_types = ['porters', 'steamboat', 'steamship', 'train']
+                    moved_units = {}
+                    attempted_units = {}
+                    for current_unit_type in unit_types:
+                        moved_units[current_unit_type] = 0
+                        attempted_units[current_unit_type] = 0
+                    
+                    for current_pmob in self.global_manager.get('pmob_list'):
+                        if len(current_pmob.base_automatic_route) > 0:
+                            if current_pmob.is_vehicle:
+                                if current_pmob.vehicle_type == 'train':
+                                    unit_type = 'train'
+                                elif current_pmob.can_swim_ocean:
+                                    unit_type = 'steamship'
+                                else:
+                                    unit_type = 'steamboat'
+                            else:
+                                unit_type = 'porters'
+                            attempted_units[unit_type] += 1
                         
-                        for current_pmob in self.global_manager.get('pmob_list'):
-                            if len(current_pmob.base_automatic_route) > 0:
-                                if current_pmob.is_vehicle:
-                                    if current_pmob.vehicle_type == 'train':
-                                        unit_type = 'train'
-                                    elif current_pmob.can_swim_ocean:
-                                        unit_type = 'steamship'
-                                    else:
-                                        unit_type = 'steamboat'
-                                else:
-                                    unit_type = 'porters'
-                                attempted_units[unit_type] += 1
-                            
-                                progressed = current_pmob.follow_automatic_route()
-                                if progressed:
-                                    moved_units[unit_type] += 1
-                                current_pmob.remove_from_turn_queue()
-                        actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
+                            progressed = current_pmob.follow_automatic_route()
+                            if progressed:
+                                moved_units[unit_type] += 1
+                            current_pmob.remove_from_turn_queue()
+                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob')) #updates mob info display if automatic route changed anything
 
-                        types_moved = 0
-                        text = ''
-                        for current_unit_type in unit_types:
-                            if attempted_units[current_unit_type] > 0:
-                            
-                                if current_unit_type == 'porters':
-                                    singular = 'unit of porters'
-                                    plural = 'units of porters'
+                    types_moved = 0
+                    text = ''
+                    for current_unit_type in unit_types:
+                        if attempted_units[current_unit_type] > 0:
+                        
+                            if current_unit_type == 'porters':
+                                singular = 'unit of porters'
+                                plural = 'units of porters'
+                            else:
+                                singular = current_unit_type
+                                plural = singular + 's'
+                            types_moved += 1
+                            num_attempted = attempted_units[current_unit_type]
+                            num_progressed = moved_units[current_unit_type]
+                            if num_attempted == num_progressed:
+                                if num_attempted == 1:
+                                    text += 'The ' + singular + ' made progress on its designated movement route. /n /n'
                                 else:
-                                    singular = current_unit_type
-                                    plural = singular + 's'
-                                types_moved += 1
-                                num_attempted = attempted_units[current_unit_type]
-                                num_progressed = moved_units[current_unit_type]
-                                if num_attempted == num_progressed:
+                                    text += 'All ' + str(num_attempted) + ' of the ' + plural + ' made progress on their designated movement routes. /n /n'
+                            else:
+                                if num_progressed == 0:
                                     if num_attempted == 1:
-                                        text += 'The ' + singular + ' made progress on its designated movement route. /n /n'
+                                        text += 'The ' + singular + ' made no progress on its designated movement route. /n /n' 
                                     else:
-                                        text += 'All ' + str(num_attempted) + ' of the ' + plural + ' made progress on their designated movement routes. /n /n'
+                                        text += 'None of the ' + plural + ' made progress on their designated movement routes. /n /n'
                                 else:
-                                    if num_progressed == 0:
-                                        if num_attempted == 1:
-                                            text += 'The ' + singular + ' made no progress on its designated movement route. /n /n' 
-                                        else:
-                                            text += 'None of the ' + plural + ' made progress on their designated movement routes. /n /n'
-                                    else:
-                                        text += 'Only ' + str(num_progressed) + ' of the ' + str(num_attempted) + ' ' + plural + ' made progress on their designated movement routes. /n /n'
+                                    text += 'Only ' + str(num_progressed) + ' of the ' + str(num_attempted) + ' ' + plural + ' made progress on their designated movement routes. /n /n'
 
-                        transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
-                        if types_moved > 0:
-                            transportation_minister.display_message(text)
-                        else:
-                            transportation_minister.display_message('There were no units with designated movement routes. /n /n')
+                    transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
+                    if types_moved > 0:
+                        transportation_minister.display_message(text)
                     else:
-                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                        transportation_minister.display_message('There were no units with designated movement routes. /n /n')
                 else:
-                    text_tools.print_to_screen('You are busy and cannot move units.', self.global_manager)
+                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot move units.', self.global_manager)
                 
 
-            elif self.button_type == 'do something':
-                text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
+        elif self.button_type == 'do something':
+            text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
+
+        elif self.button_type == 'exploration':
+            self.expedition.start_exploration(self.x_change, self.y_change)
+
+        elif self.button_type == 'attack':
+            self.battalion.remove_attack_marks()
+            self.battalion.move(self.x_change, self.y_change, True)
+
+        elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
+            if main_loop_tools.action_possible(self.global_manager):
+                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'drop all commodity':
+                        num_commodity = displayed_mob.get_inventory(commodity)
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        if displayed_mob in displayed_tile.cell.contained_mobs:
+                            can_drop_off = True
+                            if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
+                                can_drop_off = False
+                                text_tools.print_to_screen('A train can only drop off cargo at a train station.', self.global_manager)
+                            if can_drop_off:
+                                if displayed_mob.sentry_mode:
+                                    displayed_mob.set_sentry_mode(False)
+                                displayed_mob.change_inventory(commodity, -1 * num_commodity)
+                                displayed_tile.change_inventory(commodity, num_commodity)
+                                if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
+                                    text_tools.print_to_screen('This tile cannot hold this many commodities.', self.global_manager)
+                                    text_tools.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
+                        else:
+                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
+                    else:
+                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
                 
-            elif self.button_type == 'exploration':
-                self.expedition.start_exploration(self.x_change, self.y_change)
-
-            elif self.button_type == 'attack':
-                self.battalion.remove_attack_marks()
-                self.battalion.move(self.x_change, self.y_change, True)
-
-            elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
-                if main_loop_tools.action_possible(self.global_manager):
-                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
-                        displayed_mob = self.global_manager.get('displayed_mob')
-                        displayed_tile = self.global_manager.get('displayed_tile')
-                        commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
-                        num_commodity = 1
-                        if self.button_type == 'drop all commodity':
-                            num_commodity = displayed_mob.get_inventory(commodity)
-                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                            if displayed_mob in displayed_tile.cell.contained_mobs:
-                                can_drop_off = True
+        elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
+            if main_loop_tools.action_possible(self.global_manager):
+                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+                    displayed_mob = self.global_manager.get('displayed_mob')
+                    displayed_tile = self.global_manager.get('displayed_tile')
+                    commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
+                    num_commodity = 1
+                    if self.button_type == 'pick up all commodity':
+                        num_commodity = displayed_tile.get_inventory(commodity)
+                    if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
+                        if displayed_mob in displayed_tile.cell.contained_mobs:
+                            if displayed_mob.can_hold_commodities:
+                                can_pick_up = True
                                 if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                    can_drop_off = False
-                                    text_tools.print_to_screen('A train can only drop off cargo at a train station.', self.global_manager)
-                                if can_drop_off:
+                                    can_pick_up = False
+                                    text_tools.print_to_screen('A train can only pick up cargo at a train station.', self.global_manager)
+                                if can_pick_up:
+                                    if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
+                                        amount_transferred = num_commodity
+                                    else:
+                                        amount_transferred = displayed_mob.get_inventory_remaining()
+                                        text_tools.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.', self.global_manager)
                                     if displayed_mob.sentry_mode:
                                         displayed_mob.set_sentry_mode(False)
-                                    displayed_mob.change_inventory(commodity, -1 * num_commodity)
-                                    displayed_tile.change_inventory(commodity, num_commodity)
-                                    if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                        text_tools.print_to_screen('This tile cannot hold this many commodities.', self.global_manager)
-                                        text_tools.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
+                                    displayed_mob.change_inventory(commodity, amount_transferred)
+                                    displayed_tile.change_inventory(commodity, -1 * amount_transferred)
+                                    for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members:
+                                        if tab_button.linked_element == self.global_manager.get('mob_inventory_collection'):
+                                            tab_button.on_click()
+                                            continue
                             else:
-                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
+                                text_tools.print_to_screen('This unit cannot hold commodities.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
-                else:
-                     text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
-                
-            elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
-                if main_loop_tools.action_possible(self.global_manager):
-                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
-                        displayed_mob = self.global_manager.get('displayed_mob')
-                        displayed_tile = self.global_manager.get('displayed_tile')
-                        commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
-                        num_commodity = 1
-                        if self.button_type == 'pick up all commodity':
-                            num_commodity = displayed_tile.get_inventory(commodity)
-                        if (not displayed_mob == 'none') and (not displayed_tile == 'none'):
-                            if displayed_mob in displayed_tile.cell.contained_mobs:
-                                if displayed_mob.can_hold_commodities:
-                                    can_pick_up = True
-                                    if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
-                                        can_pick_up = False
-                                        text_tools.print_to_screen('A train can only pick up cargo at a train station.', self.global_manager)
-                                    if can_pick_up:
-                                        if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
-                                            amount_transferred = num_commodity
-                                        else:
-                                            amount_transferred = displayed_mob.get_inventory_remaining()
-                                            text_tools.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.', self.global_manager)
-                                        if displayed_mob.sentry_mode:
-                                            displayed_mob.set_sentry_mode(False)
-                                        displayed_mob.change_inventory(commodity, amount_transferred)
-                                        displayed_tile.change_inventory(commodity, -1 * amount_transferred)
-                                        for tab_button in self.global_manager.get('mob_tabbed_collection').tabs_collection.members:
-                                            if tab_button.linked_element == self.global_manager.get('mob_inventory_collection'):
-                                                tab_button.on_click()
-                                                continue
-                                else:
-                                    text_tools.print_to_screen('This unit cannot hold commodities.', self.global_manager)
-                            else:
-                                text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
-                        else:
-                            text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
-                else:
-                     text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
-
-            elif self.button_type == 'remove worker':
-                if not self.attached_label.attached_building == 'none':
-                    if not len(self.attached_label.attached_building.contained_workers) == 0:
-                        self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
+                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('There are no workers to remove from this building.', self.global_manager)
+                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
 
-            elif self.button_type == 'start end turn':
-                if main_loop_tools.action_possible(self.global_manager):
-                    stopping = False
-                    for current_position in self.global_manager.get('minister_types'):
-                        if self.global_manager.get('current_ministers')[current_position] == 'none':
-                            stopping = True
-                    if stopping:
-                        text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                        text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
-                    else:
-                        if not self.global_manager.get('current_game_mode') == 'strategic':
-                            game_transitions.set_game_mode('strategic', self.global_manager)
-                        for current_minister in self.global_manager.get('minister_list'):
-                            if current_minister.just_removed and current_minister.current_position == 'none':
-                                text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
-                                current_minister.display_message(text)
-                        for current_cell in self.global_manager.get('strategic_map_grid').cell_list:
-                            if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
-                                text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
-                                text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
-                                notification_tools.display_zoom_notification(text, current_cell.tile, self.global_manager)
-                        choice_info_dict = {'type': 'end turn'}
-                        notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        elif self.button_type == 'remove worker':
+            if not self.attached_label.attached_building == 'none':
+                if not len(self.attached_label.attached_building.contained_workers) == 0:
+                    self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
                 else:
-                    text_tools.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
+                    text_tools.print_to_screen('There are no workers to remove from this building.', self.global_manager)
+
+        elif self.button_type == 'start end turn':
+            if main_loop_tools.action_possible(self.global_manager):
+                stopping = False
+                for current_position in self.global_manager.get('minister_types'):
+                    if self.global_manager.get('current_ministers')[current_position] == 'none':
+                        stopping = True
+                if stopping:
+                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                else:
+                    if not self.global_manager.get('current_game_mode') == 'strategic':
+                        game_transitions.set_game_mode('strategic', self.global_manager)
+                    for current_minister in self.global_manager.get('minister_list'):
+                        if current_minister.just_removed and current_minister.current_position == 'none':
+                            text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
+                            current_minister.display_message(text)
+                    for current_cell in self.global_manager.get('strategic_map_grid').cell_list:
+                        if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
+                            text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
+                            text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
+                            notification_tools.display_zoom_notification(text, current_cell.tile, self.global_manager)
+                    choice_info_dict = {'type': 'end turn'}
+                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+            else:
+                text_tools.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
     
-            elif self.button_type == 'end turn':
-                turn_management_tools.end_turn(self.global_manager)
+        elif self.button_type == 'end turn':
+            turn_management_tools.end_turn(self.global_manager)
 
-            elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
-                    commodity_list = self.attached_label.actor.get_held_commodities()
-                    commodity = commodity_list[self.attached_label.commodity_index]
-                    num_present = self.attached_label.actor.get_inventory(commodity)
-                    num_sold = 0
-                    if self.button_type == 'sell commodity':
-                        num_sold = 1
-                    else:
-                        num_sold = num_present
-                    market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
-
-            elif self.button_type == 'cycle units':
-                if main_loop_tools.action_possible(self.global_manager):
-                    game_transitions.cycle_player_turn(self.global_manager)
+        elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
+            if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+                commodity_list = self.attached_label.actor.get_held_commodities()
+                commodity = commodity_list[self.attached_label.commodity_index]
+                num_present = self.attached_label.actor.get_inventory(commodity)
+                num_sold = 0
+                if self.button_type == 'sell commodity':
+                    num_sold = 1
                 else:
-                    text_tools.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
+                    num_sold = num_present
+                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
 
-            elif self.button_type == 'new game':
-                if self.global_manager.get('current_game_mode') == 'new_game_setup':
-                    if not self.global_manager.get('displayed_country') == 'none':
-                        self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
-                    else:
-                        text_tools.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
+        elif self.button_type == 'cycle units':
+            if main_loop_tools.action_possible(self.global_manager):
+                game_transitions.cycle_player_turn(self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
+
+        elif self.button_type == 'new game':
+            if self.global_manager.get('current_game_mode') == 'new_game_setup':
+                if not self.global_manager.get('displayed_country') == 'none':
+                    self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
                 else:
-                    game_transitions.set_game_mode('new_game_setup', self.global_manager)
+                    text_tools.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
+            else:
+                game_transitions.set_game_mode('new_game_setup', self.global_manager)
 
-            elif self.button_type == 'save game':
-                if main_loop_tools.action_possible(self.global_manager):
-                    self.global_manager.get('save_load_manager').save_game('save1.pickle')
-                    notification_tools.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
-                else:
-                    text_tools.print_to_screen('You are busy and cannot save the game', self.global_manager)
+        elif self.button_type == 'save game':
+            if main_loop_tools.action_possible(self.global_manager):
+                self.global_manager.get('save_load_manager').save_game('save1.pickle')
+                notification_tools.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot save the game', self.global_manager)
 
-            elif self.button_type == 'load game':
-                self.global_manager.get('save_load_manager').load_game('save1.pickle')
+        elif self.button_type == 'load game':
+            self.global_manager.get('save_load_manager').load_game('save1.pickle')
 
-            elif self.button_type == 'fire':
-                fired_unit = self.global_manager.get('displayed_mob')
-                fired_unit.fire()
+        elif self.button_type == 'fire':
+            fired_unit = self.global_manager.get('displayed_mob')
+            fired_unit.fire()
 
-            elif self.button_type == 'free':
-                displayed_mob = self.global_manager.get('displayed_mob')
-                if displayed_mob.is_group:
-                    displayed_mob.replace_worker('African')
-                elif displayed_mob.is_worker:
-                    displayed_mob.free_and_replace()
+        elif self.button_type == 'free':
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.is_group:
+                displayed_mob.replace_worker('African')
+            elif displayed_mob.is_worker:
+                displayed_mob.free_and_replace()
 
-            elif self.button_type == 'free all':
-                actor_utility.deselect_all(self.global_manager)
-                pmob_list = utility.copy_list(self.global_manager.get('pmob_list')) #alllows iterating through each unit without any issues from removing from list during iteration
-                old_public_opinion = self.global_manager.get('public_opinion')
-                num_freed = 0
-                for current_pmob in pmob_list:
-                    if current_pmob.is_group and current_pmob.worker.worker_type == 'slave':
-                        num_freed += 1
-                        current_pmob.replace_worker('African')
-                    elif current_pmob.is_worker and (not current_pmob.in_group) and current_pmob.worker_type == 'slave':
-                        num_freed += 1
-                        current_pmob.free_and_replace()
-                public_opinion_increase = self.global_manager.get('public_opinion') - old_public_opinion
-                if num_freed > 0:
-                    message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
-                    message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
-                    notification_tools.display_notification(message, 'default', self.global_manager)
-                else:
-                    text_tools.print_to_screen('Your company has no slaves to free.', self.global_manager)
+        elif self.button_type == 'free all':
+            actor_utility.deselect_all(self.global_manager)
+            pmob_list = utility.copy_list(self.global_manager.get('pmob_list')) #alllows iterating through each unit without any issues from removing from list during iteration
+            old_public_opinion = self.global_manager.get('public_opinion')
+            num_freed = 0
+            for current_pmob in pmob_list:
+                if current_pmob.is_group and current_pmob.worker.worker_type == 'slave':
+                    num_freed += 1
+                    current_pmob.replace_worker('African')
+                elif current_pmob.is_worker and (not current_pmob.in_group) and current_pmob.worker_type == 'slave':
+                    num_freed += 1
+                    current_pmob.free_and_replace()
+            public_opinion_increase = self.global_manager.get('public_opinion') - old_public_opinion
+            if num_freed > 0:
+                message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
+                message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
+                notification_tools.display_notification(message, 'default', self.global_manager)
+            else:
+                text_tools.print_to_screen('Your company has no slaves to free.', self.global_manager)
 
-            elif self.button_type == 'stop exploration':
-                actor_utility.stop_exploration(self.global_manager)
+        elif self.button_type == 'stop exploration':
+            actor_utility.stop_exploration(self.global_manager)
 
-            elif self.button_type == 'start trading':
-                caravan = self.notification.choice_info_dict['caravan']
-                caravan.willing_to_trade(self.notification)
+        elif self.button_type == 'start trading':
+            caravan = self.notification.choice_info_dict['caravan']
+            caravan.willing_to_trade(self.notification)
 
-            elif self.button_type == 'start religious campaign':
-                evangelist = self.notification.choice_info_dict['evangelist']
-                evangelist.religious_campaign()
+        elif self.button_type == 'start religious campaign':
+            evangelist = self.notification.choice_info_dict['evangelist']
+            evangelist.religious_campaign()
 
-            elif self.button_type == 'start capture slaves':
-                battalion = self.notification.choice_info_dict['battalion']
-                battalion.capture_slaves()
+        elif self.button_type == 'start capture slaves':
+            battalion = self.notification.choice_info_dict['battalion']
+            battalion.capture_slaves()
             
-            elif self.button_type == 'start suppress slave trade':
-                battalion = self.notification.choice_info_dict['battalion']
-                battalion.suppress_slave_trade()
+        elif self.button_type == 'start suppress slave trade':
+            battalion = self.notification.choice_info_dict['battalion']
+            battalion.suppress_slave_trade()
 
-            elif self.button_type == 'start public relations campaign':
-                evangelist = self.notification.choice_info_dict['evangelist']
-                evangelist.public_relations_campaign()
+        elif self.button_type == 'start public relations campaign':
+            evangelist = self.notification.choice_info_dict['evangelist']
+            evangelist.public_relations_campaign()
 
-            elif self.button_type == 'start advertising campaign':
-                merchant = self.notification.choice_info_dict['merchant']
-                merchant.advertising_campaign()
+        elif self.button_type == 'start advertising campaign':
+            merchant = self.notification.choice_info_dict['merchant']
+            merchant.advertising_campaign()
 
-            elif self.button_type == 'start loan search':
-                merchant = self.notification.choice_info_dict['merchant']
-                merchant.loan_search()
+        elif self.button_type == 'start loan search':
+            merchant = self.notification.choice_info_dict['merchant']
+            merchant.loan_search()
+            for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
+                current_minister_image.remove()
+
+        elif self.button_type == 'start converting':
+            evangelist = self.notification.choice_info_dict['evangelist']
+            evangelist.convert()
+
+        elif self.button_type == 'start rumor search':
+            expedition = self.notification.choice_info_dict['expedition']
+            expedition.rumor_search()
+
+        elif self.button_type == 'start artifact search':
+            expedition = self.notification.choice_info_dict['expedition']
+            expedition.artifact_search()
+
+        elif self.button_type == 'start construction':
+            constructor = self.notification.choice_info_dict['constructor']
+            constructor.construct()
+
+        elif self.button_type == 'start upgrade':
+            constructor = self.notification.choice_info_dict['constructor']
+            constructor.upgrade()
+
+        elif self.button_type == 'start repair':
+            constructor = self.notification.choice_info_dict['constructor']
+            constructor.repair()
+
+        elif self.button_type == 'trade':
+            caravan = self.notification.choice_info_dict['caravan']
+            caravan.trade(self.notification)
+
+        elif self.button_type == 'start trial':
+            trial_utility.trial(self.global_manager)
+
+        elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop public relations campaign', 'stop advertising campaign', 
+                                  'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
+                                  'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
+            self.global_manager.set('ongoing_action', False)
+            self.global_manager.set('ongoing_action_type', 'none')
+            if self.button_type == 'stop attack':
+                self.notification.choice_info_dict['battalion'].remove_attack_marks()
+            elif self.button_type in ['stop loan search', 'decline loan offer']:
                 for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                     current_minister_image.remove()
 
-            elif self.button_type == 'start converting':
-                evangelist = self.notification.choice_info_dict['evangelist']
-                evangelist.convert()
+        elif self.button_type == 'accept loan offer':
+            input_dict = {}
+            input_dict['principal'] = self.notification.choice_info_dict['principal']
+            input_dict['interest'] = self.notification.choice_info_dict['interest']
+            input_dict['remaining_duration'] = 10
+            if self.notification.choice_info_dict['corrupt']:
+                self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
 
-            elif self.button_type == 'start rumor search':
-                expedition = self.notification.choice_info_dict['expedition']
-                expedition.rumor_search()
+            new_loan = market_tools.loan(False, input_dict, self.global_manager)
+            self.global_manager.set('ongoing_action', False)
+            self.global_manager.set('ongoing_action_type', 'none')
 
-            elif self.button_type == 'start artifact search':
-                expedition = self.notification.choice_info_dict['expedition']
-                expedition.artifact_search()
-
-            elif self.button_type == 'start construction':
-                constructor = self.notification.choice_info_dict['constructor']
-                constructor.construct()
-
-            elif self.button_type == 'start upgrade':
-                constructor = self.notification.choice_info_dict['constructor']
-                constructor.upgrade()
-
-            elif self.button_type == 'start repair':
-                constructor = self.notification.choice_info_dict['constructor']
-                constructor.repair()
-
-            elif self.button_type == 'trade':
-                caravan = self.notification.choice_info_dict['caravan']
-                caravan.trade(self.notification)
-
-            elif self.button_type == 'start trial':
-                trial_utility.trial(self.global_manager)
-
-            elif self.button_type in ['stop action', 'stop attack', 'stop trading', 'stop religious campaign', 'stop public relations campaign', 'stop advertising campaign', 
-                                      'stop capture slaves', 'stop suppress slave trade', 'stop loan search', 'decline loan offer', 'stop converting', 'stop rumor search', 
-                                      'stop artifact search', 'stop construction', 'stop upgrade', 'stop repair', 'stop trial']:
-                self.global_manager.set('ongoing_action', False)
-                self.global_manager.set('ongoing_action_type', 'none')
-                if self.button_type == 'stop attack':
-                    self.notification.choice_info_dict['battalion'].remove_attack_marks()
-                elif self.button_type in ['stop loan search', 'decline loan offer']:
-                    for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                        current_minister_image.remove()
-
-            elif self.button_type == 'accept loan offer':
-                input_dict = {}
-                input_dict['principal'] = self.notification.choice_info_dict['principal']
-                input_dict['interest'] = self.notification.choice_info_dict['interest']
-                input_dict['remaining_duration'] = 10
-                if self.notification.choice_info_dict['corrupt']:
-                    self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
-                    
-                new_loan = market_tools.loan(False, input_dict, self.global_manager)
-                self.global_manager.set('ongoing_action', False)
-                self.global_manager.set('ongoing_action_type', 'none')
-
-            elif self.button_type == 'launch trial':
-                if main_loop_tools.action_possible(self.global_manager):
-                    if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
-                        if self.global_manager.get('displayed_defense').corruption_evidence > 0:
-                            self.showing_outline = True
-                            trial_utility.start_trial(self.global_manager)
-                        else:
-                            text_tools.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
+        elif self.button_type == 'launch trial':
+            if main_loop_tools.action_possible(self.global_manager):
+                if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
+                    if self.global_manager.get('displayed_defense').corruption_evidence > 0:
+                        trial_utility.start_trial(self.global_manager)
                     else:
-                        text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
+                        text_tools.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
-                    
-            elif self.button_type == 'confirm main menu':
-                self.global_manager.set('game_over', False)
-                game_transitions.to_main_menu(self.global_manager)
+                    text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
+            else:
+                text_tools.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 
-            elif self.button_type == 'quit':
-                self.global_manager.set('crashed', True)
+        elif self.button_type == 'confirm main menu':
+            self.global_manager.set('game_over', False)
+            game_transitions.to_main_menu(self.global_manager)
 
-            elif self.button_type == 'wake up all':
-                if main_loop_tools.action_possible(self.global_manager):
-                    for current_pmob in self.global_manager.get('pmob_list'):
-                        if current_pmob.sentry_mode:
-                            current_pmob.set_sentry_mode(False)
-                    actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
-                else:
-                    text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
+        elif self.button_type == 'quit':
+            self.global_manager.set('crashed', True)
 
-            elif self.button_type == 'confirm remove minister':
-                removed_minister = self.global_manager.get('displayed_minister')
-                removed_minister.just_removed = True
-                removed_minister.appoint('none')
-                public_opinion_penalty = removed_minister.status_number
-                self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
+        elif self.button_type == 'wake up all':
+            if main_loop_tools.action_possible(self.global_manager):
+                for current_pmob in self.global_manager.get('pmob_list'):
+                    if current_pmob.sentry_mode:
+                        current_pmob.set_sentry_mode(False)
+                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
+            else:
+                text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
-            elif self.button_type == 'generate crash':
-                print(1/0)
+        elif self.button_type == 'confirm remove minister':
+            removed_minister = self.global_manager.get('displayed_minister')
+            removed_minister.just_removed = True
+            removed_minister.appoint('none')
+            public_opinion_penalty = removed_minister.status_number
+            self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
 
-            elif self.button_type == 'minimize interface collection':
-                self.parent_collection.minimized = utility.toggle(self.parent_collection.minimized)
-                if not self.parent_collection.minimized:
-                    #If any movement within the collection occurred while minimized, makes sure all newly shown elements are at their correct locations
-                    self.parent_collection.set_origin(self.parent_collection.x, self.parent_collection.y)
+        elif self.button_type == 'generate crash':
+            print(1/0)
 
-            elif self.button_type == 'move interface collection':
-                if self.parent_collection.move_with_mouse_config['moving']:
-                    self.parent_collection.move_with_mouse_config = {'moving': False}
-                else:
-                    x, y = pygame.mouse.get_pos()
-                    y = self.global_manager.get('display_height') - y
-                    self.parent_collection.move_with_mouse_config = {
-                        'moving': True, 
-                        'mouse_x_offset': self.parent_collection.x - x, 
-                        'mouse_y_offset': self.parent_collection.y - y
-                    }
+        elif self.button_type == 'minimize interface collection':
+            self.parent_collection.minimized = utility.toggle(self.parent_collection.minimized)
+            if not self.parent_collection.minimized:
+                #If any movement within the collection occurred while minimized, makes sure all newly shown elements are at their correct locations
+                self.parent_collection.set_origin(self.parent_collection.x, self.parent_collection.y)
 
-            elif self.button_type == 'reset interface collection':
-                if not self.parent_collection.has_parent_collection:
-                    self.parent_collection.set_origin(self.parent_collection.original_coordinates[0], self.parent_collection.original_coordinates[1])
-                else:
-                    self.parent_collection.set_origin(self.parent_collection.parent_collection.x + self.parent_collection.original_offsets[0], 
-                                                      self.parent_collection.parent_collection.y + self.parent_collection.original_offsets[1])
-                for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
-                    #if hasattr(member, 'original_coordinates'):
-                    if hasattr(member, 'original_offsets'):
-                        #member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
-                        member.set_origin(member.parent_collection.x + member.original_offsets[0], member.parent_collection.y + member.original_offsets[1])
+        elif self.button_type == 'move interface collection':
+            if self.parent_collection.move_with_mouse_config['moving']:
+                self.parent_collection.move_with_mouse_config = {'moving': False}
+            else:
+                x, y = pygame.mouse.get_pos()
+                y = self.global_manager.get('display_height') - y
+                self.parent_collection.move_with_mouse_config = {
+                    'moving': True, 
+                    'mouse_x_offset': self.parent_collection.x - x, 
+                    'mouse_y_offset': self.parent_collection.y - y
+                }
 
-            elif self.button_type == 'tab':
-                tabbed_collection = self.parent_collection.parent_collection
-                tabbed_collection.current_tabbed_member = self.linked_element
+        elif self.button_type == 'reset interface collection':
+            if not self.parent_collection.has_parent_collection:
+                self.parent_collection.set_origin(self.parent_collection.original_coordinates[0], self.parent_collection.original_coordinates[1])
+            else:
+                self.parent_collection.set_origin(self.parent_collection.parent_collection.x + self.parent_collection.original_offsets[0], 
+                                                  self.parent_collection.parent_collection.y + self.parent_collection.original_offsets[1])
+            for member in self.parent_collection.members: #only goes down 1 layer - should modify to recursively iterate through each item below parent in hierarchy
+                #if hasattr(member, 'original_coordinates'):
+                if hasattr(member, 'original_offsets'):
+                    #member.set_origin(member.original_coordinates[0], member.original_coordinates[1])
+                    member.set_origin(member.parent_collection.x + member.original_offsets[0], member.parent_collection.y + member.original_offsets[1])
+
+        elif self.button_type == 'tab':
+            tabbed_collection = self.parent_collection.parent_collection
+            tabbed_collection.current_tabbed_member = self.linked_element
 
     def on_rmb_release(self):
         '''
@@ -1470,18 +1476,16 @@ class cycle_same_tile_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):
-                cycled_tile = self.global_manager.get('displayed_tile')
-                moved_mob = cycled_tile.cell.contained_mobs.pop(0)
-                cycled_tile.cell.contained_mobs.append(moved_mob)
-                cycled_tile.cell.contained_mobs[0].select()
-                if cycled_tile.cell.contained_mobs[0].is_pmob:
-                    cycled_tile.cell.contained_mobs[0].selection_sound()
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
-            else:
-                text_tools.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            cycled_tile = self.global_manager.get('displayed_tile')
+            moved_mob = cycled_tile.cell.contained_mobs.pop(0)
+            cycled_tile.cell.contained_mobs.append(moved_mob)
+            cycled_tile.cell.contained_mobs[0].select()
+            if cycled_tile.cell.contained_mobs[0].is_pmob:
+                cycled_tile.cell.contained_mobs[0].selection_sound()
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
+        else:
+            text_tools.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
 
     def can_show(self):
         '''
@@ -1558,9 +1562,8 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if self.can_show() and (not self.is_last) and (not self.attached_mob == 'none'):
+        if (not self.is_last) and (not self.attached_mob == 'none'):
             if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                self.showing_outline = True
                 self.attached_mob.select()
                 if self.attached_mob.is_pmob:
                     self.attached_mob.selection_sound()
@@ -1700,26 +1703,24 @@ class fire_unit_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
-                if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                    self.showing_outline = True
-                    message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
-                    if self.attached_mob.is_worker:
-                        if self.attached_mob.worker_type in ['European', 'religious']:
-                            if self.attached_mob.worker_type == 'European':
-                                message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
-                                message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                            else:
-                                message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
-                                message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
-                        elif self.attached_mob.worker_type == 'African':
-                            message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
-                        elif self.attached_mob.worker_type == 'slave':
-                            message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-                    notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
-            else:
-                text_tools.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+            if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
+                message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
+                if self.attached_mob.is_worker:
+                    if self.attached_mob.worker_type in ['European', 'religious']:
+                        if self.attached_mob.worker_type == 'European':
+                            message += 'Unlike African workers, fired European workers will never settle in slums and will instead return to Europe. /n /n'
+                            message += 'Firing European workers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                        else:
+                            message += 'Unlike African workers, fired church volunteers will never settle in slums and will instead return to Europe. /n /n'
+                            message += 'Firing church volunteers reflects poorly on your company and will incur a public opinion penalty of 1. /n /n'
+                    elif self.attached_mob.worker_type == 'African':
+                        message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
+                    elif self.attached_mob.worker_type == 'slave':
+                        message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
+                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
 
     def can_show(self):
         '''
@@ -1794,14 +1795,12 @@ class free_unit_slaves_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            if main_loop_tools.action_possible(self.global_manager):
-                if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
-                    self.showing_outline = True
-                    message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
-                    notification_tools.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
-            else:
-                text_tools.print_to_screen('You are busy and cannot free slaves', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
+                message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
+                notification_tools.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot free slaves', self.global_manager)
 
     def can_show(self):
         '''
@@ -1881,32 +1880,30 @@ class switch_game_mode_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):
-                if self.to_mode in ['ministers', 'main_menu', 'new_game_setup'] or (self.global_manager.get('minister_appointment_tutorial_completed') and minister_utility.positions_filled(self.global_manager)):
-                    if self.to_mode == 'ministers' and 'trial' in self.modes:
-                        defense = self.global_manager.get('displayed_defense')
-                        if defense.fabricated_evidence > 0:
-                            text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
-                            text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
-                            notification_tools.display_notification(text, 'default', self.global_manager)
-                        if self.global_manager.get('prosecution_bribed_judge'):
-                            text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
-                            notification_tools.display_notification(text, 'default', self.global_manager)
-                    
-                    if self.to_mode == 'main_menu':
-                        notification_tools.display_choice_notification('Are you sure you want to exit to the main menu without saving? /n /n', ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
-                    elif not self.to_mode == 'previous':
-                        game_transitions.set_game_mode(self.to_mode, self.global_manager)
-                    else:
-                        self.global_manager.set('exit_minister_screen_tutorial_completed', True)
-                        game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            if self.to_mode in ['ministers', 'main_menu', 'new_game_setup'] or (self.global_manager.get('minister_appointment_tutorial_completed') and minister_utility.positions_filled(self.global_manager)):
+                if self.to_mode == 'ministers' and 'trial' in self.modes:
+                    defense = self.global_manager.get('displayed_defense')
+                    if defense.fabricated_evidence > 0:
+                        text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
+                        text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
+                        notification_tools.display_notification(text, 'default', self.global_manager)
+                    if self.global_manager.get('prosecution_bribed_judge'):
+                        text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
+                        notification_tools.display_notification(text, 'default', self.global_manager)
+                
+                if self.to_mode == 'main_menu':
+                    notification_tools.display_choice_notification('Are you sure you want to exit to the main menu without saving? /n /n', ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
+                elif not self.to_mode == 'previous':
+                    game_transitions.set_game_mode(self.to_mode, self.global_manager)
                 else:
-                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    self.global_manager.set('exit_minister_screen_tutorial_completed', True)
+                    game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
+                text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
 
     def update_tooltip(self):
         '''
@@ -2327,7 +2324,6 @@ class show_previous_financial_report_button(button):
         Output:
             None
         '''
-        self.showing_outline = True
         if main_loop_tools.action_possible(self.global_manager):
             notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
         else:
@@ -2562,8 +2558,6 @@ class manually_calibrate_button(button):
         input_dict['button_type'] = 'manually calibrate'
         self.input_source = input_dict['input_source'] 
         self.output_destinations = input_dict['output_destinations']
-        #if 'reorganize_button' in input_dict and input_dict['reorganize_button']:
-        #    input_dict['reorganize_button'].manually_calibrate_buttons.append(self)
         super().__init__(input_dict, global_manager)
 
     def on_click(self):
@@ -2582,5 +2576,29 @@ class manually_calibrate_button(button):
                     target.autofill_attempts = 1 #prevents attempting to autofill immediately after emptying
                 target.calibrate(self.input_source)
             else:
-                #if hasattr(target, 'actor') and target.actor != self.global_manager.get(self.input_source):
                 target.calibrate(self.global_manager.get(self.input_source))
+
+class cycle_autofill_button(button):
+    def __init__(self, input_dict, global_manager):
+        self.autofill_target_type = input_dict['autofill_target_type']
+        input_dict['button_type'] = 'cycle autofill'
+        super().__init__(input_dict, global_manager)
+
+    def can_show(self, ignore_parent_collection=False):
+        if super().can_show(ignore_parent_collection=ignore_parent_collection):
+            if self.parent_collection.autofill_actors[self.autofill_target_type] != self.global_manager.get('displayed_mob'):
+                if self.parent_collection.autofill_actors[self.autofill_target_type] != 'none':
+                    if not self.parent_collection.autofill_actors[self.autofill_target_type].is_dummy:
+                        if self.autofill_target_type == 'worker':
+                            return(self.global_manager.get('displayed_mob').images[0].current_cell.has_worker(required_number=2))
+                        elif self.autofill_target_type == 'officer':
+                            return(self.global_manager.get('displayed_mob').images[0].current_cell.has_officer(required_number=2))
+                        #allow cycling autofill if current autofill is a real, non-selected mob and there is at least 1 alternative
+                        #it makes no sense to cycle a dummy mob for a real one in the same tile, and the selected mob is locked and can't be cycled
+        return(False)
+
+    def on_click(self):
+        current_cell =  self.global_manager.get('displayed_mob').images[0].current_cell
+        self.parent_collection.search_start_index = current_cell.contained_mobs.index(self.parent_collection.autofill_actors[self.autofill_target_type]) + 1
+        self.parent_collection.calibrate(self.global_manager.get('displayed_mob'))
+        #start autofill search for corresponding target type right after the current target actor

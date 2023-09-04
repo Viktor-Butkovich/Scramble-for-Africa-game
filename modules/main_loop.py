@@ -93,7 +93,7 @@ def main_loop(global_manager):
                 for current_button in global_manager.get('button_list'):
                     if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
-                            if event.key == current_button.keybind_id:
+                            if event.key == current_button.keybind_id and current_button.can_show():
                                 current_button.on_release()
                                 current_button.has_released = True
                 if event.key == pygame.K_RSHIFT:

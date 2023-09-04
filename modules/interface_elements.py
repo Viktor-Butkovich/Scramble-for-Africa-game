@@ -440,6 +440,7 @@ class autofill_collection(interface_collection):
         for autofill_target_type in self.autofill_targets:
             self.autofill_actors[autofill_target_type] = 'none'
         self.autofill_actors['procedure'] = 'none'
+        self.search_start_index = 0
         super().__init__(input_dict, global_manager)
 
     def calibrate(self, new_actor, override_exempt=False):
@@ -451,12 +452,14 @@ class autofill_collection(interface_collection):
         Output:
             None
         '''
-        self.autofill_actors = dummy_utility.generate_autofill_actors(self.global_manager)
+        #search start index may be changed by cycle autofill buttons between calibrates
+        self.autofill_actors = dummy_utility.generate_autofill_actors(self.global_manager, search_start_index=self.search_start_index)
         for autofill_target_type in self.autofill_targets:
             for autofill_target in self.autofill_targets[autofill_target_type]:
                 #eg. generate autofill actors gives back a dummy officer, which all autofill targets that accept officers then calibrate to, repeat for worker/group targets
                 autofill_target.calibrate(self.autofill_actors[autofill_target_type])
         super().calibrate(new_actor, override_exempt)
+        self.search_start_index = 0
 
 class tabbed_collection(interface_collection):
     '''

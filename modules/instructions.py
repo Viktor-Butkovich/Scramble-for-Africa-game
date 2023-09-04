@@ -18,15 +18,13 @@ class instructions_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if self.global_manager.get('current_instructions_page') == 'none':
-                display_instructions_page(0, self.global_manager)
-            else:
-                if not self.global_manager.get('current_instructions_page') == 'none':
-                    self.global_manager.get('current_instructions_page').remove()
-                    self.global_manager.set('current_instructions_page', 'none')
-                self.global_manager.set('current_instructions_page_index', 0)
+        if self.global_manager.get('current_instructions_page') == 'none':
+            display_instructions_page(0, self.global_manager)
+        else:
+            if not self.global_manager.get('current_instructions_page') == 'none':
+                self.global_manager.get('current_instructions_page').remove()
+                self.global_manager.set('current_instructions_page', 'none')
+            self.global_manager.set('current_instructions_page_index', 0)
 
 class instructions_page(label):
     '''

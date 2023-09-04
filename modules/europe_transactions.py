@@ -81,16 +81,14 @@ class recruitment_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):
-                if self.global_manager.get('money_tracker').get() >= self.cost:
-                    choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
-                    self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
-                else:
-                    text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            if self.global_manager.get('money_tracker').get() >= self.cost:
+                choice_info_dict = {'recruitment_type': self.recruitment_type, 'cost': self.cost, 'mob_image_id': self.mob_image_id, 'type': 'recruitment'}
+                self.global_manager.get('actor_creation_manager').display_recruitment_choice_notification(choice_info_dict, self.recruitment_name, self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot recruit a unit', self.global_manager)
+                text_tools.print_to_screen('You do not have enough money to recruit this unit', self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot recruit a unit', self.global_manager)
 
     def calibrate(self, country):
         '''
@@ -164,22 +162,20 @@ class buy_commodity_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            self.showing_outline = True
-            if main_loop_tools.action_possible(self.global_manager):
-                self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
-                if self.global_manager.get('money_tracker').get() >= self.cost:
-                    if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
-                        self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
-                        self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
-                        text_tools.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
-                        if random.randrange(1, 7) == 1: #1/6 chance
-                            market_tools.change_price('consumer goods', 1, self.global_manager)
-                            text_tools.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.', self.global_manager)
-                else:
-                    text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
+            if self.global_manager.get('money_tracker').get() >= self.cost:
+                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
+                    self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
+                    self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
+                    text_tools.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
+                    if random.randrange(1, 7) == 1: #1/6 chance
+                        market_tools.change_price('consumer goods', 1, self.global_manager)
+                        text_tools.print_to_screen('The price of consumer goods has increased from ' + str(self.cost) + ' to ' + str(self.cost + 1) + '.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot purchase commodities', self.global_manager)
+                text_tools.print_to_screen('You do not have enough money to purchase this commodity', self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot purchase commodities', self.global_manager)
 
     def update_tooltip(self):
         '''

@@ -92,8 +92,13 @@ def start_player_turn(global_manager, first_turn = False):
     if global_manager.get('displayed_mob') == 'none' or global_manager.get('displayed_mob').is_npmob:
         actor_utility.deselect_all(global_manager)
         game_transitions.cycle_player_turn(global_manager, True)
-    if (not global_manager.get('displayed_mob') == 'none') and (not global_manager.get('displayed_mob').selected):
-        global_manager.get('displayed_mob').select()
+
+    selected_mob = global_manager.get('displayed_mob')
+    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
+    if selected_mob != 'none':
+        selected_mob.select()
+        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'),  selected_mob.images[0].current_cell.tile)
+       
 
 def reset_mobs(mob_type, global_manager):
     '''

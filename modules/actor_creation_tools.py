@@ -203,6 +203,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = buttons.reorganize_unit_button(input_dict, global_manager)
                 elif base == 'manually calibrate':
                     new_element = buttons.manually_calibrate_button(input_dict, global_manager)
+                elif base == 'cycle autofill':
+                    new_element = buttons.cycle_autofill_button(input_dict, global_manager)
 
                 #instructions buttons
                 elif base == 'instructions':

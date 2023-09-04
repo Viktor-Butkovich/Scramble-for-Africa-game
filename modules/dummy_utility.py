@@ -2,7 +2,7 @@
 
 from . import actor_utility
 
-def generate_autofill_actors(global_manager):
+def generate_autofill_actors(global_manager, search_start_index=0):
     '''
     Description:
         Based on the currently displayed mob and the other mobs in its tile, determine a possible merge/split procedure and find/create dummy versions of the other mobs
@@ -34,10 +34,10 @@ def generate_autofill_actors(global_manager):
         if displayed_mob.is_officer or displayed_mob.is_worker or (displayed_mob.is_vehicle and not displayed_mob.has_crew):
             if displayed_mob.is_worker:
                 return_dict['worker'] = displayed_mob
-                return_dict['officer'] = displayed_mob.images[0].current_cell.get_officer()
+                return_dict['officer'] = displayed_mob.images[0].current_cell.get_officer(start_index=search_start_index)
             else:
                 return_dict['officer'] = displayed_mob
-                return_dict['worker'] = displayed_mob.images[0].current_cell.get_worker()
+                return_dict['worker'] = displayed_mob.images[0].current_cell.get_worker(start_index=search_start_index)
             
             if return_dict['worker'] != 'none' and return_dict['officer'] != 'none':
                 if return_dict['officer'].is_officer:
