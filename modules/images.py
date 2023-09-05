@@ -89,6 +89,7 @@ class image():
             None
         '''
         if self.can_show():
+            #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
             self.complete_draw()
 
     def update_image_bundle(self):

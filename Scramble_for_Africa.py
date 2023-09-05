@@ -39,3 +39,13 @@ try:
 except Exception: #displays error message and records error message in crash log file
     setup.manage_crash(Exception)
 #find some solution to reorganization interface overlap, especially with construction gang
+#improve update_display main_loop efficiency - with heirarchical draw system and tracking the parentless top-level collections/interface elements and draw() endpoints
+#ideally, in a single update_display call, can_show() and draw() should be called no more than once per element
+#and there should be a simple hierarchy to add elements to particular priority layers
+#start with a tracker counter to see how many times can_show and draw are being called per frame, record results, and try to improve from there
+#also, it would be simpler if ANYTHING that appears on the screen is in some way an interface element or controlled by one
+#on European screen:
+#can_show_calls: 4368
+#draw calls: 300
+#for some reason, European screen has twice as many can_show calls as African screen
+#also look into the efficiency of image bundles and see if there is a way to improve - very important for future performance

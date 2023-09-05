@@ -17,9 +17,11 @@ def update_display(global_manager):
     Output:
         None
     '''
+    #global_manager.set('can_show_counter', 0)
+    #global_manager.set('draw_counter', 0)
     for interface_collection in global_manager.get('interface_collection_list'):
         if interface_collection.can_show():
-            interface_collection.update_collection()#order_members()
+            interface_collection.update_collection()
             
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
@@ -146,6 +148,8 @@ def update_display(global_manager):
             global_manager.get('fps_tracker').set(global_manager.get('frames_this_second'))
             global_manager.set('frames_this_second', 0)
             global_manager.set('last_fps_update', current_time)
+    #print('can_show calls: ' + str(global_manager.get('can_show_counter')))
+    #print('draw calls: ' + str(global_manager.get('draw_counter')))
 
 def minister_appointed(minister_type, global_manager):
     '''
