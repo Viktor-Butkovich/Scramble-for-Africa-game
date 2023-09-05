@@ -21,8 +21,6 @@ def main_loop(global_manager):
         if len(global_manager.get('notification_list')) == 0:
             stopping = False
         global_manager.get('input_manager').update_input()
-        if global_manager.get('input_manager').taking_input:
-            typing = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 global_manager.set('crashed', True)
@@ -212,8 +210,6 @@ def main_loop(global_manager):
                 turn_management_tools.manage_combat(global_manager)
             else:
                 current_enemy = global_manager.get('enemy_turn_queue')[0]
-
-                enemy_coordinates = (current_enemy.x, current_enemy.y)
                 removed = False
                 spawning = False
                 did_nothing = False

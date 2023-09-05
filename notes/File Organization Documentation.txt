@@ -36,46 +36,45 @@ SFA folder
             buttons.py
 		    	imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, 
 					modules.game_transitions, modules.notification_tools
-	        	class label_button(modules.buttons.button)
-					class worker_crew_vehicle_button
-					class embark_all_passengers_button
-					class disembark_all_passengers_button
-					class crew_vehicle_button
-					class uncrew_vehicle_button
-					class merge_button
-					class split_button
-					class enable_sentry_mode_button
-					class disable_sentry_mode_button
-					class end_unit_turn_button
-					class remove_work_crew_button
-					class disembark_vehicle_button
-					class embark_vehicle_button
-					class cycle_passengers_button
-					class cycle_work_crews_button
-					class work_crew_to_building_button
-					class trade_button
-					class convert_button
-					class capture_slaves_button
-					class suppress_slave_trade_button
-					class evangelist_campaign_button
-					class take_loan_button
-					class labor_broker_button
-					class advertising_campaign_button
-					class track_beasts_button
-					class switch_theatre_button
-					class build_train_button
-					class bulid_steamboat_button
-					class construction_button
-					class repair_button
-					class upgrade_button
-					class appoint_minister_button
-					class remove_minister_button
-					class to_trial_button
-					class fabricate_evidence_button
-					class bribe_judge_button
-					class hire_african_workers_button
-					class buy_slaves_button
-					class automatic_route_button
+				class worker_crew_vehicle_button(modules.buttons.button)
+				class embark_all_passengers_button(modules.buttons.button)
+				class disembark_all_passengers_button(modules.buttons.button)
+				class crew_vehicle_button(modules.buttons.button)
+				class uncrew_vehicle_button(modules.buttons.button)
+				class merge_button(modules.buttons.button)
+				class split_button(modules.buttons.button)
+				class enable_sentry_mode_button(modules.buttons.button)
+				class disable_sentry_mode_button(modules.buttons.button)
+				class end_unit_turn_button(modules.buttons.button)
+				class remove_work_crew_button(modules.buttons.button)
+				class disembark_vehicle_button(modules.buttons.button)
+				class embark_vehicle_button(modules.buttons.button)
+				class cycle_passengers_button(modules.buttons.button)
+				class cycle_work_crews_button(modules.buttons.button)
+				class work_crew_to_building_button(modules.buttons.button)
+				class trade_button(modules.buttons.button)
+				class convert_button(modules.buttons.button)
+				class capture_slaves_button(modules.buttons.button)
+				class suppress_slave_trade_button(modules.buttons.button)
+				class evangelist_campaign_button(modules.buttons.button)
+				class take_loan_button(modules.buttons.button)
+				class labor_broker_button(modules.buttons.button)
+				class advertising_campaign_button(modules.buttons.button)
+				class track_beasts_button(modules.buttons.button)
+				class switch_theatre_button(modules.buttons.button)
+				class build_train_button(modules.buttons.button)(modules.buttons.button)
+				class bulid_steamboat_button(modules.buttons.button)
+				class construction_button(modules.buttons.button)
+				class repair_button(modules.buttons.button)
+				class upgrade_button(modules.buttons.button)
+				class appoint_minister_button(modules.buttons.button)
+				class remove_minister_button(modules.buttons.button)
+				class to_trial_button(modules.buttons.button)
+				class fabricate_evidence_button(modules.buttons.button)(modules.buttons.button)
+				class bribe_judge_button(modules.buttons.button)
+				class hire_african_workers_button(modules.buttons.button)
+				class buy_slaves_button(modules.buttons.button)
+				class automatic_route_button(modules.buttons.button)
 
         mob_types folder
 		group_types folder
@@ -205,6 +204,10 @@ SFA folder
 			def extract_folder_colors
 			def get_slave_traders_strength_modifier
 			def set_slave_traders_strength
+			def generate_unit_component_image_id
+			def generate_group_image_id_list
+			def generate_group_name
+			def generate_group_movement_points
 
         actors.py
             imports pygame, random, text_tools, notification_tools, utility, actor_utility, scaling, market_tools

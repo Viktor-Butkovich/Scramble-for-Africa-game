@@ -77,11 +77,12 @@ class interface_element():
         '''
         if self.can_show_override == 'none':
             if (not self.has_parent_collection) or ignore_parent_collection:
-                if self.global_manager.get('current_game_mode') in self.modes:
-                    return(True)
+                if ignore_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
+                    #ignore_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
+                    return(self.parent_collection.parent_collection.allow_show(self, self.ignore_minimized) and self.global_manager.get('current_game_mode') in self.modes)
+                return(self.global_manager.get('current_game_mode') in self.modes)
             elif self.parent_collection.allow_show(self, self.ignore_minimized):
-                if self.global_manager.get('current_game_mode') in self.modes:
-                    return(True)
+                return(self.global_manager.get('current_game_mode') in self.modes)
             return(False)
         else:
             return(self.can_show_override.can_show(ignore_parent_collection=True))
@@ -126,13 +127,13 @@ class interface_element():
         '''
         return
     
-    def insert_collection_above(self):
+    def insert_collection_above(self, override_input_dict={}):
         '''
         Description:
             Replaces this element's place in its parent collection with a new interface collection, allowing elements to dynamically form collections after initialization 
                 without interfering with above hierarchies
         'Input':
-            None, could potentially modify to allow choosing the init type of collection to insert above
+            string init_type='interface collection': actor_creation_tools init type of collection to create
         'Output':
             None
         '''
@@ -145,6 +146,9 @@ class interface_element():
             'init_type': 'interface collection',
             'member_config': {}
         }
+        for attribute in override_input_dict:
+            input_dict[attribute] = override_input_dict[attribute]
+
         if self.parent_collection != 'none':
             input_dict['member_config']['index'] = self.parent_collection.members.index(self)
             if hasattr(self.parent_collection, 'order_overlap_list') and self in self.parent_collection.order_overlap_list:

@@ -442,19 +442,6 @@ class free_image(image):
         '''
         self.modes = new_modes
 
-    def set_y(self, attached_label): #called by actor display labels
-        '''
-        Description:
-            Sets this image's y position to be at the same height as the inputted label
-        Input:
-            actor_display_label attached_label: Label to match this image's y position with
-        Output:
-            None
-        '''
-        self.y = self.global_manager.get('display_height') - attached_label.y + attached_label.image_y_displacement
-        if not self.Rect == 'none':
-            self.Rect.y = self.y - self.height + attached_label.image_y_displacement
-
     def can_show(self):
         '''
         Description:

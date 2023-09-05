@@ -1578,7 +1578,7 @@ def tile_interface_setup(global_manager):
         None
     '''
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),#
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'width': scaling.scale_width(775, global_manager),
         'height': scaling.scale_height(10, global_manager),
         'modes': ['strategic', 'europe'],

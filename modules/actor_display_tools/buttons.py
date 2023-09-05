@@ -11,66 +11,7 @@ from .. import text_tools
 from .. import game_transitions
 from .. import notification_tools
 
-class label_button(button):
-    '''
-    Button that is attached to a label, has have behavior related to the label, and only shows when the label is showing
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'button_type': string value - Determines the function of this button, like 'end turn'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.attached_label = input_dict['attached_label']
-        super().__init__(input_dict, global_manager)
-
-    def can_show(self):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns same value as superclass if this button's label is showing, otherwise returns False. Exception for sell commodity buttons, which will not be not be able to sell consumer goods and will be hidden when
-                attached to an inventory label showing consumer goods
-        '''
-        if self.attached_label.can_show():
-            if not ((self.button_type == 'sell commodity' or self.button_type == 'sell all commodity') and self.attached_label.current_commodity == 'consumer goods'):
-                return(super().can_show())
-        return(False)
-
-    def set_y(self, attached_label): 
-        ''' 
-        Description:
-            Sets this button's y position to line up the center of this button and its label
-        Input:
-            actor_display_label attached_label: Label to match this button's y position with
-        Output:
-            None
-        '''
-        height_difference = self.height - attached_label.height
-        y_displacement = height_difference / 2
-        self.y = attached_label.y - y_displacement
-        self.Rect.y = self.global_manager.get('display_height') - (attached_label.y + self.height - y_displacement)
-        self.outline.y = self.Rect.y - self.outline_width# - y_displacement
-
-class worker_crew_vehicle_button(label_button):
+class worker_crew_vehicle_button(button):
     '''
     Button that commands a worker to crew a vehicle in its tile
     '''
@@ -152,7 +93,7 @@ class worker_crew_vehicle_button(label_button):
         self.was_showing = result
         return(result)
 
-class embark_all_passengers_button(label_button):
+class embark_all_passengers_button(button):
     '''
     Button that commands a vehicle to take all other mobs in its tile as passengers
     '''
@@ -226,7 +167,7 @@ class embark_all_passengers_button(label_button):
                 self.image.set_image('buttons/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
-class disembark_all_passengers_button(label_button):
+class disembark_all_passengers_button(button):
     '''
     Button that commands a vehicle to eject all of its passengers
     '''
@@ -298,7 +239,7 @@ class disembark_all_passengers_button(label_button):
                 self.image.set_image('buttons/disembark_' + self.vehicle_type + '_button.png')
         return(result)
 
-class crew_vehicle_button(label_button):
+class crew_vehicle_button(button):
     '''
     Button that commands a vehicle to take a worker in its tile as crew. Also updates this button to reflect a train or ship depending on the selected vehicle
     '''
@@ -383,7 +324,7 @@ class crew_vehicle_button(label_button):
                 self.image.set_image('buttons/crew_' + self.vehicle_type + '_button.png')
         return(result)
 
-class uncrew_vehicle_button(label_button):
+class uncrew_vehicle_button(button):
     '''
     Button that commands a vehicle's crew to leave the vehicle
     '''
@@ -450,7 +391,7 @@ class uncrew_vehicle_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot remove a ' + self.vehicle_type + '\'s crew.', self.global_manager)
 
-class merge_button(label_button):
+class merge_button(button):
     '''
     Button that merges a selected officer with a worker in the same tile to form a group
     '''
@@ -536,7 +477,7 @@ class merge_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot form a group.', self.global_manager)
 
-class split_button(label_button):
+class split_button(button):
     '''
     Button that splits a selected group into its component officer and worker
     '''
@@ -600,7 +541,7 @@ class split_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot split a group.', self.global_manager)
 
-class enable_sentry_mode_button(label_button):
+class enable_sentry_mode_button(button):
     '''
     Button that enables sentry mode for a unit, causing it to not be added to the turn cycle queue
     '''
@@ -663,7 +604,7 @@ class enable_sentry_mode_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot enable sentry mode.', self.global_manager)
 
-class disable_sentry_mode_button(label_button):
+class disable_sentry_mode_button(button):
     '''
     Button that disables sentry mode for a unit, causing it to not be added to the turn cycle queue
     '''
@@ -723,7 +664,7 @@ class disable_sentry_mode_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
-class enable_automatic_replacement_button(label_button):
+class enable_automatic_replacement_button(button):
     '''
     Button that enables automatic attrition replacement for a unit or one of its components
     '''
@@ -798,7 +739,7 @@ class enable_automatic_replacement_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot enable automatic replacement.', self.global_manager)
 
-class disable_automatic_replacement_button(label_button):
+class disable_automatic_replacement_button(button):
     '''
     Button that disables automatic attrition replacement for a unit or one of its components
     '''
@@ -873,7 +814,7 @@ class disable_automatic_replacement_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot disable automatic replacement.', self.global_manager)
 
-class end_unit_turn_button(label_button):
+class end_unit_turn_button(button):
     '''
     Button that ends a unit's turn, removing it from the current turn's turn cycle queue
     '''
@@ -933,7 +874,7 @@ class end_unit_turn_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot end this unit\'s turn.', self.global_manager)
 
-class remove_work_crew_button(label_button):
+class remove_work_crew_button(button):
     '''
     Button that removes a work crew from a building
     '''
@@ -992,7 +933,7 @@ class remove_work_crew_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot remove a work crew from a building.', self.global_manager)
 
-class disembark_vehicle_button(label_button):
+class disembark_vehicle_button(button):
     '''
     Button that disembarks a passenger from a vehicle
     '''
@@ -1067,7 +1008,7 @@ class disembark_vehicle_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot disembark from a ' + self.vehicle_type + '.', self.global_manager)
 
-class embark_vehicle_button(label_button):
+class embark_vehicle_button(button):
     '''
     Button that commands a selected mob to embark a vehicle of the correct type in the same tile
     '''
@@ -1151,7 +1092,7 @@ class embark_vehicle_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot embark a ' + self.vehicle_type + '.', self.global_manager)
 
-class cycle_passengers_button(label_button):
+class cycle_passengers_button(button):
     '''
     Button that cycles the order of passengers displayed in a vehicle
     '''
@@ -1214,7 +1155,7 @@ class cycle_passengers_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot cycle passengers.', self.global_manager)
 
-class cycle_work_crews_button(label_button):
+class cycle_work_crews_button(button):
     '''
     Button that cycles the order of work crews in a building
     '''
@@ -1282,7 +1223,7 @@ class cycle_work_crews_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot cycle work crews.', self.global_manager)
 
-class work_crew_to_building_button(label_button):
+class work_crew_to_building_button(button):
     '''
     Button that commands a work crew to work in a certain type of building in its tile
     '''
@@ -1389,7 +1330,7 @@ class work_crew_to_building_button(label_button):
             text_tools.print_to_screen('You are busy and cannot attach a work crew to a building.', self.global_manager)
             
 
-class trade_button(label_button):
+class trade_button(button):
     '''
     Button that commands a caravan to trade with a village
     '''
@@ -1468,7 +1409,7 @@ class trade_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot trade.', self.global_manager)
 
-class convert_button(label_button):
+class convert_button(button):
     '''
     Button that commands missionaries to convert a native village
     '''
@@ -1545,7 +1486,7 @@ class convert_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot convert.', self.global_manager)
 
-class rumor_search_button(label_button):
+class rumor_search_button(button):
     '''
     Button that commands an expedition to search a village for rumors of the location of a lore mission artifact
     '''
@@ -1628,7 +1569,7 @@ class rumor_search_button(label_button):
         else:
             text_tools.print_to_screen('There are no ongoing lore missions for which to find rumors.', self.global_manager)
 
-class artifact_search_button(label_button):
+class artifact_search_button(button):
     '''
     Button that commands an expedition to search a rumored location for a lore mission artifact
     '''
@@ -1701,7 +1642,7 @@ class artifact_search_button(label_button):
         else:
             text_tools.print_to_screen('There are no ongoing lore missions for which to find artifacts.', self.global_manager)
 
-class capture_slaves_button(label_button):
+class capture_slaves_button(button):
     '''
     Button that commands a battalion to capture slaves from a village
     '''
@@ -1775,7 +1716,7 @@ class capture_slaves_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot capture slaves.', self.global_manager)
 
-class suppress_slave_trade_button(label_button):
+class suppress_slave_trade_button(button):
     '''
     Button that commands a battalion to supppress slave trade in the slave traders tile
     '''
@@ -1849,7 +1790,7 @@ class suppress_slave_trade_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot suppress the slave trade.', self.global_manager)
 
-class evangelist_campaign_button(label_button):
+class evangelist_campaign_button(button):
     '''
     Button that commands an evangelist to start a religious campaign in Europe
     '''
@@ -1930,7 +1871,7 @@ class evangelist_campaign_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot start a religious campaign.', self.global_manager)
 
-class take_loan_button(label_button):
+class take_loan_button(button):
     '''
     Button that commands a merchant to start a loan search in Europe
     '''
@@ -2000,7 +1941,7 @@ class take_loan_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot search for a loan offer.', self.global_manager)
 
-class labor_broker_button(label_button):
+class labor_broker_button(button):
     '''
     Buttons that commands a vehicle without crew or an officer to use a labor broker in a port to recruit a worker from a nearby village, with a price based on the village's aggressiveness and distance
     '''
@@ -2104,7 +2045,7 @@ class labor_broker_button(label_button):
         else:
             return([lowest_cost_village, lowest_cost])
 
-class advertising_campaign_button(label_button):
+class advertising_campaign_button(button):
     '''
     Button that starts advertising campaign commodity selection
     '''
@@ -2179,7 +2120,7 @@ class advertising_campaign_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot start an advertising campaign.', self.global_manager)
 
-class track_beasts_button(label_button):
+class track_beasts_button(button):
     '''
     Button that orders a safari to spend 1 movement point to attempt to reveal beasts in its tile and adjacent explored tiles
     '''
@@ -2249,7 +2190,7 @@ class track_beasts_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot track beasts.', self.global_manager)
 
-class switch_theatre_button(label_button):
+class switch_theatre_button(button):
     '''
     Button starts choosing a destination for a ship to travel between theatres, like between Europe and Africa. A destination is chosen when the player clicks a tile in another theatre.
     '''
@@ -2325,7 +2266,7 @@ class switch_theatre_button(label_button):
                 return(False)
         return(result) 
 
-class build_train_button(label_button):
+class build_train_button(button):
     '''
     Button that commands a construction gang to assemble a train at a train station
     '''
@@ -2416,7 +2357,7 @@ class build_train_button(label_button):
         building_info_dict['building_name'] = 'train'
         self.attached_label.actor.start_construction(building_info_dict)
 
-class build_steamboat_button(label_button):
+class build_steamboat_button(button):
     '''
     Button that commands a construction gang to assemble a steammboat at a port
     '''
@@ -2510,7 +2451,7 @@ class build_steamboat_button(label_button):
         building_info_dict['building_name'] = 'steamboat'
         self.attached_label.actor.start_construction(building_info_dict)
 
-class construction_button(label_button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
+class construction_button(button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
     '''
     Button that commands a group to construct a certain type of building
     '''
@@ -2826,7 +2767,7 @@ class construction_button(label_button): #coordinates, width, height, keybind_id
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_construction(building_info_dict)
 
-class repair_button(label_button):
+class repair_button(button):
     '''
     Button that commands a group to repair a certain type of building
     '''
@@ -2981,7 +2922,7 @@ class repair_button(label_button):
             building_info_dict['attached_resource'] = self.attached_resource
         self.attached_mob.start_repair(building_info_dict)
 
-class upgrade_button(label_button):
+class upgrade_button(button):
     '''
     Button that commands a construction gang to upgrade a certain aspect of a building
     '''
@@ -3104,7 +3045,7 @@ class upgrade_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot start upgrading.', self.global_manager)
 
-class appoint_minister_button(label_button):
+class appoint_minister_button(button):
     '''
     Button that appoints the selected minister to the office corresponding to this button
     '''
@@ -3166,7 +3107,7 @@ class appoint_minister_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot appoint a minister.', self.global_manager)
 
-class remove_minister_button(label_button):
+class remove_minister_button(button):
     '''
     Button that removes the selected minister from their current office
     '''
@@ -3234,7 +3175,7 @@ class remove_minister_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot remove a minister.', self.global_manager)
 
-class to_trial_button(label_button):
+class to_trial_button(button):
     '''
     Button that goes to the trial screen to remove the selected minister from their current office
     '''
@@ -3303,7 +3244,7 @@ class to_trial_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 
-class active_investigation_button(label_button):
+class active_investigation_button(button):
     '''
     Button that starts an active investigation on a minister
     '''
@@ -3369,7 +3310,7 @@ class active_investigation_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot start an active investigation.', self.global_manager)
 
-class fabricate_evidence_button(label_button):
+class fabricate_evidence_button(button):
     '''
     Button in the trial screen that fabricates evidence to use against the defense in the current trial. Fabricated evidence disappears at the end of the trial or at the end of the turn
     '''
@@ -3432,7 +3373,7 @@ class fabricate_evidence_button(label_button):
             else:
                 text_tools.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)
 
-class bribe_judge_button(label_button):
+class bribe_judge_button(button):
     '''
     Button in the trial screen that bribes the judge to get an advantage in the next trial this turn
     '''
@@ -3507,7 +3448,7 @@ class bribe_judge_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)  
     
-class hire_african_workers_button(label_button):
+class hire_african_workers_button(button):
     '''
     Button that hires available workers from the displayed village/slum
     '''
@@ -3577,7 +3518,7 @@ class hire_african_workers_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot hire a worker.', self.global_manager)
 
-class buy_slaves_button(label_button):
+class buy_slaves_button(button):
     '''
     Button that buys slaves from slave traders
     '''
@@ -3640,7 +3581,7 @@ class buy_slaves_button(label_button):
         else:
             text_tools.print_to_screen('You are busy and cannot buy slaves.', self.global_manager)
 
-class automatic_route_button(label_button):
+class automatic_route_button(button):
     '''
     Button that modifies a unit's automatic movement route, with an effect depending on the button's type
     '''

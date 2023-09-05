@@ -225,8 +225,6 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
                     new_element = europe_transactions.buy_commodity_button(input_dict, global_manager)
 
                 #actor_display_buttons buttons
-                elif base == 'label':
-                    new_element = actor_display_buttons.label_button(input_dict, global_manager)
                 elif base == 'worker crew vehicle':
                     new_element = actor_display_buttons.worker_crew_vehicle_button(input_dict, global_manager)
                 elif base == 'embark all passengers':

@@ -42,7 +42,9 @@ class button(interface_elements.interface_element):
             None
         '''
         self.outline_width = 2
-        self.outline = pygame.Rect(0, 0, input_dict['width'] + (2 * self.outline_width), input_dict['height'] + (self.outline_width * 2)) 
+        self.outline = pygame.Rect(0, 0, input_dict['width'] + (2 * self.outline_width), input_dict['height'] + (self.outline_width * 2))
+        if 'attached_label' in input_dict:
+            self.attached_label = input_dict['attached_label']
         super().__init__(input_dict, global_manager)
         self.has_released = True
         self.button_type = input_dict['button_type']
@@ -109,17 +111,6 @@ class button(interface_elements.interface_element):
         super().set_origin(new_x, new_y)
         self.outline.y = self.Rect.y - self.outline_width
         self.outline.x = self.Rect.x - self.outline_width
-
-    def set_y(self, attached_label): #called by actor display labels to move to their y position
-        '''
-        Description:
-            Sets this button's y position to be at the same height as the inputted label
-        Input:
-            actor_display_label attached_label: Label to match this button's y position with
-        Output:
-            None
-        '''
-        self.set_origin(self.x, attached_label.y)
 
     def update_tooltip(self):
         '''
@@ -1371,12 +1362,10 @@ class button(interface_elements.interface_element):
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
             elif self.button_type in ['sell commodity', 'sell all commodity']:
-                if self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
+                if self.global_manager.get('europe_grid') in self.attached_label.actor.grids and self.attached_label.current_commodity != 'consumer goods':
                     return(True)
                 else:
                     return(False)
-
-            
             return(True)
         return(False)
 
@@ -2513,7 +2502,7 @@ class reorganize_unit_button(button):
                     procedure_actors['group'].disband()
 
                 elif procedure_type == 'uncrew':
-                    if procedure_actors['group'].contained_mobs:
+                    if procedure_actors['group'].contained_mobs or procedure_actors['group'].get_held_commodities():
                         text_tools.print_to_screen('You cannot remove the crew from a ' + procedure_actors['group'].vehicle_type + ' with passengers or cargo.', self.global_manager)
                     else:
                         procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])

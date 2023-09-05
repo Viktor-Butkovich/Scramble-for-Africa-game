@@ -147,7 +147,6 @@ def update_display(global_manager):
             global_manager.set('frames_this_second', 0)
             global_manager.set('last_fps_update', current_time)
 
-
 def minister_appointed(minister_type, global_manager):
     '''
     Description:
