@@ -271,7 +271,7 @@ class mob(actor):
                 return(True)
         return(False)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this unit can be shown. By default, it can be shown when it is in a discovered cell during the correct game mode and is not attached to any other units or buildings
@@ -296,7 +296,7 @@ class mob(actor):
             None
         '''
         if super().can_show_tooltip():
-            if not self.images[0].current_cell == 'none':
+            if self.images[0].current_cell != 'none':
                 if self.images[0].current_cell.visible:
                     return(True)
         return(False)
@@ -485,13 +485,8 @@ class mob(actor):
         self.x, self.y = new_coordinates
         
         old_image_id = self.images[0].image_id
-        #if isinstance(self.images[0].image_id, str):
-        #    input_image_id = [self.images[0].image_id]
-        #else:
-        #    input_image_id = self.images[0].image_id
         for current_image in self.images:
             current_image.remove_from_cell()
-            self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
         self.grids = [new_grid]
         self.grid = new_grid
         if not new_grid.mini_grid == 'none':

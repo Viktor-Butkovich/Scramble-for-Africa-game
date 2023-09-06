@@ -195,10 +195,7 @@ class exploration_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -280,12 +277,9 @@ class off_tile_exploration_notification(action_notification):
         Output:
             None
         '''
+        super().remove(handle_next_notification=False)
         self.global_manager.set('ongoing_action', False)
         self.global_manager.set('ongoing_action_type', 'none')
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
         notification_manager = self.global_manager.get('notification_manager')
         
         if len(notification_manager.notification_queue) >= 1:
@@ -479,10 +473,7 @@ class religious_campaign_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -539,10 +530,7 @@ class public_relations_campaign_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -571,10 +559,7 @@ class trial_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         for current_die in self.global_manager.get('dice_list'):
             current_die.remove()
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
@@ -646,10 +631,7 @@ class advertising_campaign_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -715,10 +697,7 @@ class conversion_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -777,10 +756,7 @@ class rumor_search_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -839,10 +815,7 @@ class artifact_search_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -918,10 +891,7 @@ class capture_slaves_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -975,10 +945,7 @@ class suppress_slave_trade_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -1036,10 +1003,7 @@ class construction_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)
@@ -1116,10 +1080,7 @@ class combat_notification(action_notification):
         Output:
             None
         '''
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
+        super().remove(handle_next_notification=False)
         notification_manager = self.global_manager.get('notification_manager')
         if len(notification_manager.notification_queue) >= 1:
             notification_manager.notification_queue.pop(0)

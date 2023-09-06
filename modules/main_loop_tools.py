@@ -7,6 +7,7 @@ from . import text_tools
 from . import actor_utility
 from . import minister_utility
 from . import utility
+from . import traversal_utility
 
 def update_display(global_manager):
     '''
@@ -17,70 +18,29 @@ def update_display(global_manager):
     Output:
         None
     '''
-    #global_manager.set('can_show_counter', 0)
-    #global_manager.set('draw_counter', 0)
-    for interface_collection in global_manager.get('interface_collection_list'):
-        if interface_collection.can_show():
-            interface_collection.update_collection()
+    global_manager.set('can_show_counter', 0)
+    global_manager.set('draw_counter', 0)
             
     if global_manager.get('loading'):
-        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #makes it faster if the program starts repeating this part
+        global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #end load timer faster once program starts repeating this part
         draw_loading_screen(global_manager)
     else:
         global_manager.get('game_display').fill((125, 125, 125))
         possible_tooltip_drawers = []
 
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                current_grid.draw()
-
-        for current_image in global_manager.get('image_list'):
-            current_image.has_drawn = False
-
-        for current_background_image in global_manager.get('background_image_list'):
-            current_background_image.draw()
-            current_background_image.has_drawn = True
-            
-        for current_tile in global_manager.get('tile_list'):
-            if global_manager.get('current_game_mode') in current_tile.image.modes and not current_tile in global_manager.get('overlay_tile_list'):
-                current_tile.image.draw()
-                current_tile.image.has_drawn = True
-
-        mob_image_list = []
-        for current_image in global_manager.get('image_list'):
-            if not current_image.has_drawn:
-                if global_manager.get('current_game_mode') in current_image.modes:
-                    if not current_image.image_type == 'mob':
-                        current_image.draw()
-                        current_image.has_drawn = True
-                    else:
-                        mob_image_list.append(current_image)
-
-        for current_image in mob_image_list:
-            current_image.draw()
-            current_image.has_drawn = True
-                
-        for current_overlay_tile in global_manager.get('overlay_tile_list'):
-            if global_manager.get('current_game_mode') in current_overlay_tile.image.modes:
-                current_overlay_tile.image.draw()
-                current_overlay_tile.image.has_drawn = True
-        
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                current_grid.draw_grid_lines()
+        traversal_utility.draw_interface_elements(global_manager.get('independent_interface_elements'), global_manager)
+        #could modify with a layer dictionary to display elements on different layers - currently, drawing elements in order of collection creation is working w/o overlap
+        # issues
 
         displayed_tile = global_manager.get('displayed_tile')
-        if not displayed_tile == 'none':
+        if displayed_tile != 'none':
             displayed_tile.draw_actor_match_outline(False)
 
+        displayed_mob = global_manager.get('displayed_mob')
+        if displayed_mob != 'none':
+            displayed_mob.draw_outline()
+
         for current_mob in global_manager.get('mob_list'):
-            for current_image in current_mob.images:
-                if current_mob.selected and global_manager.get('current_game_mode') in current_image.modes:
-                    current_mob.draw_outline()
-            for current_status_icon in current_mob.status_icons:
-                current_status_icon.image.has_drawn = False #may have been drawn already but draw on top of other images
-                current_status_icon.image.draw()
-                current_status_icon.image.has_drawn = True
             if current_mob.can_show_tooltip():
                 for same_tile_mob in current_mob.images[0].current_cell.contained_mobs:
                     if same_tile_mob.can_show_tooltip() and not same_tile_mob in possible_tooltip_drawers: #if multiple mobs are in the same tile, draw their tooltips in order
@@ -94,34 +54,19 @@ def update_display(global_manager):
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
-        for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
-                for current_cell in current_grid.cell_list:
-                    current_cell.show_num_mobs()
-
         for current_button in global_manager.get('button_list'):
             if not (current_button in global_manager.get('button_list') and current_button.in_notification): #notifications are drawn later
-                current_button.draw()
                 if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                     possible_tooltip_drawers = [current_button]
                 
-        for current_label in global_manager.get('label_list'):
-            if not (current_label in global_manager.get('button_list') and current_label.in_notification):
-                current_label.draw()
-
         for current_free_image in global_manager.get('free_image_list'):
-            if current_free_image.to_front: #draw on top if free image should be in front
-                current_free_image.has_drawn = False
-                current_free_image.draw()
-                current_free_image.has_drawn = True
             if current_free_image.can_show_tooltip():
                 possible_tooltip_drawers = [current_free_image]
 
-        for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
-            if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
-                current_button.draw()
-                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-                    possible_tooltip_drawers = [current_button] #notifications have priority over buttons and will be shown first
+        #for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
+        #    if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
+        #        if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+        #            possible_tooltip_drawers = [current_button] #notifications have priority over buttons and will be shown first
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)
@@ -140,6 +85,7 @@ def update_display(global_manager):
             global_manager.set('old_mouse_y', old_mouse_y)
         if time.time() > global_manager.get('mouse_moved_time') + 0.15: #show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
+        
         pygame.display.update()
     if global_manager.get('effect_manager').effect_active('track_fps'):
         current_time = time.time()
@@ -543,7 +489,7 @@ def click_move_minimap(global_manager):
     mouse_x, mouse_y = pygame.mouse.get_pos()
     breaking = False
     for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
-        if current_grid.can_show():
+        if current_grid.showing:
             for current_cell in current_grid.cell_list:
                 if current_cell.touching_mouse():
                     if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map

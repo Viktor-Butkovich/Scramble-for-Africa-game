@@ -37,7 +37,6 @@ class tile(actor): #to do: make terrain tiles a subclass
         input_dict['grids'] = [input_dict['grid']] #give actor a 1-item list of grids as input
         super().__init__(from_save, input_dict, global_manager)
         self.set_name(input_dict['name'])
-        self.global_manager.get('tile_list').append(self)
         self.image_dict = {'default': input_dict['image']}
         self.image = images.tile_image(self, self.grid.get_cell_width(), self.grid.get_cell_height(), input_dict['grid'], 'default', global_manager)
         self.images = [self.image] #tiles only appear on 1 grid, but have a list of images defined to be more consistent with other actor subclasses
@@ -369,19 +368,6 @@ class tile(actor): #to do: make terrain tiles a subclass
         '''
         self.x = x
         self.y = y
-                
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('tile_list', utility.remove_from_list(self.global_manager.get('tile_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image)) #to do: see if this can be removed, should already be in actor
 
     def can_show_tooltip(self): #only terrain tiles have tooltips
         '''

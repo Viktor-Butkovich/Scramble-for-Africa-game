@@ -183,8 +183,6 @@ def to_main_menu(global_manager, override = False):
         current_minister.remove()
     for current_lore_mission in global_manager.get('lore_mission_list'):
         current_lore_mission.remove()
-    for current_notification in global_manager.get('notification_list'):
-        current_notification.remove()
     for current_die in global_manager.get('dice_list'):
         current_die.remove()
     global_manager.set('loan_list', [])

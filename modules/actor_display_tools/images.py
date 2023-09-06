@@ -131,7 +131,7 @@ class mob_background_image(free_image):
         self.actor = new_actor
         self.update_image_bundle()
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image should be drawn
@@ -147,7 +147,7 @@ class mob_background_image(free_image):
         if self.image_id == 'misc/npmob_background.png' and not self.actor.is_npmob:
             return(False)
         else:
-            return(super().can_show())
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
 
     def update_tooltip(self):
         '''
@@ -209,7 +209,7 @@ class label_image(free_image):
         self.attached_label = attached_label
         super().__init__('misc/empty.png', coordinates, width, height, modes, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image should be drawn
@@ -218,7 +218,7 @@ class label_image(free_image):
         Output:
             boolean: False if this image's label is not showing, otherwise returns same value as superclass
         '''
-        if self.attached_label.can_show():
-            return(super().can_show())
+        if self.attached_label.can_show(skip_parent_collection=skip_parent_collection):
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         else:
             return(False)

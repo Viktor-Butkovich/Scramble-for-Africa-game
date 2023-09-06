@@ -32,7 +32,6 @@ class officer(pmob):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        global_manager.get('officer_list').append(self)
         self.is_officer = True
         self.officer_type = input_dict['officer_type']
         self.set_controlling_minister_type(self.global_manager.get('officer_minister_dict')[self.officer_type])
@@ -155,15 +154,3 @@ class officer(pmob):
         if self.movement_points > 0:
             self.add_to_turn_queue()
         actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.images[0].current_cell.tile) #calibrate info display to officer's tile upon disbanding
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('officer_list', utility.remove_from_list(self.global_manager.get('officer_list'), self))

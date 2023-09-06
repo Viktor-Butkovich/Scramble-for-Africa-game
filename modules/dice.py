@@ -80,7 +80,7 @@ class die(button):
             None
         '''
         if self.global_manager.get('notification_manager').notification_type_queue[0] == 'roll': #if next notification is rolling... notification, clicking on die is alternative to clicking on notification
-            self.global_manager.get('notification_list')[0].on_click()#self.start_rolling()
+            self.global_manager.get('displayed_notification').on_click()#self.start_rolling()
 
     def update_tooltip(self):
         '''
@@ -186,7 +186,7 @@ class die(button):
         Output:
             None
         '''
-        if self.can_show():
+        if self.showing:
             if self.rolling and time.time() >= self.last_roll + self.roll_interval: #if roll_interval time has passed since last_roll
                 self.roll()
             super().draw()
@@ -204,14 +204,13 @@ class die(button):
         Output:
             None
         '''
+        super().remove()
         self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-        self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
         self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
         if self.global_manager.get('displayed_mob') in self.global_manager.get('mob_list'): #only need to remove die from mob's list if mob still alive
             self.global_manager.get('displayed_mob').attached_dice_list = utility.remove_from_list(self.global_manager.get('displayed_mob').attached_dice_list, self)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this die should be shown. The currently displayed notification should have a number of dice attached to it, and only that many of existing dice are shown at once, starting from the those first created
@@ -220,11 +219,11 @@ class die(button):
         Output:
             boolean: Returns whether this die should be shown
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.global_manager.get('ongoing_action_type') == 'trial': #rolls during a trial are not done through a mob, so always show them
                 return(True)
             displayed_mob_dice_list = self.global_manager.get('displayed_mob').attached_dice_list
-            num_notification_dice = self.global_manager.get('notification_list')[0].notification_dice
+            num_notification_dice = self.global_manager.get('displayed_notification').notification_dice
             if self in displayed_mob_dice_list:
                 if displayed_mob_dice_list.index(self) <= (num_notification_dice - 1): #if 1 notification die, index must be <= 0 to be shown
                     return(True)

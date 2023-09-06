@@ -50,7 +50,9 @@ class grid():
         self.external_line_color = input_dict['external_line_color']
         self.cell_list = []
         self.mini_grid = 'none'
+        self.showing = False
         #self.global_manager.get('terrain_list').append('water') #to generate water normally
+        self.global_manager.get('independent_interface_elements').append(self)
         if not from_save:
             self.create_cells()
             if input_dict['strategic_grid']:
@@ -121,9 +123,9 @@ class grid():
         Output:
             None
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
-            for cell in self.cell_list:
-                cell.draw()
+        for cell in self.cell_list:
+            cell.draw()
+        self.draw_grid_lines()
 
     def draw_grid_lines(self):
         '''
@@ -134,35 +136,33 @@ class grid():
         Output:
             None
         '''
-        #if self.global_manager.get('show_grid_lines') and self.global_manager.get('current_game_mode') in self.modes:
-        if self.global_manager.get('current_game_mode') in self.modes:
-            if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
-                for x in range(0, self.coordinate_width+1):
-                    pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
-                for y in range(0, self.coordinate_height+1):
-                    pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
-            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
-            if (not self.mini_grid == 'none') and self.global_manager.get('show_minimap_outlines'):
-                mini_map_outline_color = self.mini_grid.external_line_color
-                left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
-                right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
-                down_y = self.mini_grid.center_y - ((self.mini_grid.coordinate_height - 1) / 2)
-                up_y = self.mini_grid.center_y + ((self.mini_grid.coordinate_height - 1) / 2) + 1
-                if right_x > self.coordinate_width:
-                    right_x = self.coordinate_width
-                if left_x < 0:
-                    left_x = 0
-                if up_y > self.coordinate_height:
-                    up_y = self.coordinate_height
-                if down_y < 0:
-                    down_y = 0
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
-                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
+        if not self.global_manager.get('effect_manager').effect_active('hide_grid_lines'):
+            for x in range(0, self.coordinate_width+1):
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((x, 0)), self.convert_coordinates((x, self.coordinate_height)), self.grid_line_width)
+            for y in range(0, self.coordinate_height+1):
+                pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.internal_line_color], self.convert_coordinates((0, y)), self.convert_coordinates((self.coordinate_width, y)), self.grid_line_width)                     
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((0, self.coordinate_height)), self.grid_line_width + 1)
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((self.coordinate_width, 0)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1)
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, 0)), self.convert_coordinates((self.coordinate_width, 0)), self.grid_line_width + 1)
+        pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[self.external_line_color], self.convert_coordinates((0, self.coordinate_height)), self.convert_coordinates((self.coordinate_width, self.coordinate_height)), self.grid_line_width + 1) 
+        if (not self.mini_grid == 'none') and self.global_manager.get('show_minimap_outlines'):
+            mini_map_outline_color = self.mini_grid.external_line_color
+            left_x = self.mini_grid.center_x - ((self.mini_grid.coordinate_width - 1) / 2)
+            right_x = self.mini_grid.center_x + ((self.mini_grid.coordinate_width - 1) / 2) + 1
+            down_y = self.mini_grid.center_y - ((self.mini_grid.coordinate_height - 1) / 2)
+            up_y = self.mini_grid.center_y + ((self.mini_grid.coordinate_height - 1) / 2) + 1
+            if right_x > self.coordinate_width:
+                right_x = self.coordinate_width
+            if left_x < 0:
+                left_x = 0
+            if up_y > self.coordinate_height:
+                up_y = self.coordinate_height
+            if down_y < 0:
+                down_y = 0
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, down_y)), self.convert_coordinates((left_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((left_x, up_y)), self.convert_coordinates((right_x, up_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, up_y)), self.convert_coordinates((right_x, down_y)), self.grid_line_width + 1)
+            pygame.draw.line(self.global_manager.get('game_display'), self.global_manager.get('color_dict')[mini_map_outline_color], self.convert_coordinates((right_x, down_y)), self.convert_coordinates((left_x, down_y)), self.grid_line_width + 1)
 
     def find_cell_center(self, coordinates):
         '''
@@ -525,7 +525,7 @@ class grid():
         else:
             return(False)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this grid can be shown. By default, it can be shown during game modes in which this grid can appear
@@ -538,6 +538,17 @@ class grid():
             return(True)
         else:
             return(False)
+
+    def can_draw(self):
+        '''
+        Description:
+            Calculates and returns whether it would be valid to call this object's draw()
+        Input:
+            None
+        Output:
+            boolean: Returns whether it would be valid to call this object's draw()
+        '''
+        return(self.showing)
 
     def remove(self):
         '''
@@ -613,6 +624,7 @@ class mini_grid(grid):
                     current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant, update_image_bundle = False)
                     current_cell.set_resource(attached_cell.resource)
                 else: #if the current cell is beyond the boundaries of the attached grid, show an empty cell
+                    current_cell.contained_mobs = []
                     current_cell.set_visibility(True)
                     current_cell.set_terrain('none')
                     current_cell.set_resource('none')
@@ -620,7 +632,7 @@ class mini_grid(grid):
                     current_cell.tile.update_image_bundle()
             self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
             for current_mob in self.global_manager.get('mob_list'):
-                if not (current_mob.images[0].current_cell == 'none'): #if not ((current_mob in self.global_manager.get('officer_list') or current_mob in self.global_manager.get('worker_list')) and current_mob.in_group):
+                if not (current_mob.images[0].current_cell == 'none'):
                     for current_image in current_mob.images:
                         if current_image.grid == self:
                             current_image.add_to_cell()

@@ -906,7 +906,7 @@ class actor_display_label(label):
         else:
             self.set_label(self.message_start + 'n/a')
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -915,7 +915,7 @@ class actor_display_label(label):
         Output:
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
-        result = super().can_show(ignore_parent_collection=ignore_parent_collection)
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result ==  False:
             return(False)
         elif self.actor == 'none':
@@ -1004,7 +1004,7 @@ class list_item_label(actor_display_label):
         #print(self.actor_label_type)
         super().calibrate(new_actor)
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1014,7 +1014,7 @@ class list_item_label(actor_display_label):
             boolean: Returns same value as superclass as long as this label's list is long enough to contain this label's index, otherwise returns False
         '''
         if len(self.attached_list) > self.list_index:
-            return(super().can_show(ignore_parent_collection))
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         return(False)
 
 class building_work_crews_label(actor_display_label):
@@ -1042,7 +1042,7 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
-        self.showing = False
+        self.show_label = False
         self.attached_building = 'none'
         input_dict['actor_label_type'] = 'building workers'
         super().__init__(input_dict, global_manager)
@@ -1058,14 +1058,14 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.actor = new_actor
-        self.showing = False
+        self.show_label = False
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
-                self.showing = True
+                self.show_label = True
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1074,8 +1074,8 @@ class building_work_crews_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
         '''
-        if self.showing:
-            return(super().can_show(ignore_parent_collection))
+        if self.show_label:
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         else:
             return(False)
 
@@ -1104,7 +1104,7 @@ class building_efficiency_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
-        self.showing = False
+        self.show_label = False
         input_dict['actor_label_type'] = 'building efficiency'
         super().__init__(input_dict, global_manager)
         self.building_type = input_dict['building_type']
@@ -1120,14 +1120,14 @@ class building_efficiency_label(actor_display_label):
             None
         '''
         self.actor = new_actor
-        self.showing = False
+        self.show_label = False
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label('Efficiency: ' + str(self.attached_building.efficiency))
-                self.showing = True
+                self.show_label = True
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1136,8 +1136,8 @@ class building_efficiency_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
         '''
-        if self.showing:
-            return(super().can_show(ignore_parent_collection))
+        if self.show_label:
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         else:
             return(False)
 
@@ -1145,7 +1145,7 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
     '''
     Label that shows the population, aggressiveness, or number of available workers in a displayed tile's village
     '''
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1154,7 +1154,7 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
         Output:
             boolean: Returns same value as superclass as long as the displayed tile is explored and has a village, otherwise returns False
         '''
-        result = super().can_show(ignore_parent_collection)
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if self.actor.cell.has_building('village') and self.actor.cell.visible:
                 return(True)
@@ -1205,28 +1205,28 @@ class commodity_display_label(actor_display_label):
         self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
-            input_dict['button_type'] = 'drop commodity'
+            input_dict['init_type'] = 'drop commodity button'
             input_dict['image_id'] = 'buttons/commodity_drop_button.png'
             self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'drop all commodity'
+            input_dict['init_type'] = 'drop all commodity button'
             input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
             self.add_attached_button(input_dict)
             
         elif self.actor_type == 'tile':
-            input_dict['button_type'] = 'pick up commodity'
+            input_dict['init_type'] = 'pick up commodity button'
             input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
             self.add_attached_button(input_dict)
 
-            input_dict['button_type'] = 'pick up all commodity'
+            input_dict['init_type'] = 'pick up all commodity button'
             input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
             self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'sell commodity'
+            input_dict['init_type'] = 'sell commodity button'
             input_dict['image_id'] = 'buttons/commodity_sell_button.png'
             self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'sell all commodity'
+            input_dict['init_type'] = 'sell all commodity button'
             input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
             self.add_attached_button(input_dict)
 
@@ -1270,7 +1270,7 @@ class commodity_display_label(actor_display_label):
             self.showing_commodity = False
             self.set_label('n/a')
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1282,4 +1282,4 @@ class commodity_display_label(actor_display_label):
         if not self.showing_commodity:
             return(False)
         else:
-            return(super().can_show(ignore_parent_collection))
+            return(super().can_show(skip_parent_collection=skip_parent_collection))

@@ -50,7 +50,6 @@ class group(pmob):
             self.change_inventory(current_commodity, self.officer.get_inventory(current_commodity))
         self.worker.inventory_setup()
         self.officer.inventory_setup()
-        self.global_manager.get('group_list').append(self)
         self.current_roll_modifier = 0
         self.default_min_success = 4
         self.default_max_crit_fail = 1
@@ -338,19 +337,6 @@ class group(pmob):
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
         self.officer.set_movement_points(math.floor(movement_ratio_remaining * self.officer.max_movement_points))
-
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists, prevents it from further appearing in or affecting the program, deselects it, and drops any commodities it is carrying. Used when the group is being disbanded, since it does not
-                remove its worker or officer
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('group_list', utility.remove_from_list(self.global_manager.get('group_list'), self))
 
     def die(self, death_type = 'violent'):
         '''

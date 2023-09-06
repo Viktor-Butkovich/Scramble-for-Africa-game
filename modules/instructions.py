@@ -94,7 +94,7 @@ class instructions_page(label):
         Output:
             None
         '''
-        if self.can_show():
+        if self.showing:
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]

@@ -74,7 +74,7 @@ class worker_crew_vehicle_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot crew a ' + self.vehicle_type + '.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -83,7 +83,7 @@ class worker_crew_vehicle_button(button):
         Output:
             boolean: Returns False if a worker is not selected or if its tile does not have an uncrewed vehicle of the correct type, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.worker_type == 'religious')) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
                 result = False
@@ -149,7 +149,7 @@ class embark_all_passengers_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot embark all passengers.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
@@ -158,7 +158,7 @@ class embark_all_passengers_button(button):
         Output:
             boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
                 return(False)
@@ -221,7 +221,7 @@ class disembark_all_passengers_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot disembark all passengers.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
@@ -230,7 +230,7 @@ class disembark_all_passengers_button(button):
         Output:
             boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
                 return(False)
@@ -306,7 +306,7 @@ class crew_vehicle_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot crew a ' + self.vehicle_type + '.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
@@ -315,7 +315,7 @@ class crew_vehicle_button(button):
         Output:
             boolean: Returns False if the selected vehicle has crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if self.attached_label.actor.has_crew:
                 return(False)
@@ -353,7 +353,7 @@ class uncrew_vehicle_button(button):
         input_dict['button_type'] = 'uncrew'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
@@ -362,7 +362,7 @@ class uncrew_vehicle_button(button):
         Output:
             boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.has_crew:
                 return(False)
@@ -419,7 +419,7 @@ class merge_button(button):
         input_dict['button_type'] = 'merge'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -428,7 +428,7 @@ class merge_button(button):
         Output:
             boolean: Returns False if the selected mob is not an officer, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_officer:
                 return(False)
@@ -449,7 +449,7 @@ class merge_button(button):
                 officer = 'none'
                 worker = 'none'
                 for current_selected in selected_list:
-                    if current_selected in self.global_manager.get('officer_list'):
+                    if current_selected.is_pmob and current_selected.is_officer:
                         officer = current_selected
                         if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
                             worker = officer.images[0].current_cell.get_worker(['religious'])
@@ -505,7 +505,7 @@ class split_button(button):
         input_dict['button_type'] = 'split'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -514,7 +514,7 @@ class split_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_group:
                 return(False)
@@ -569,7 +569,7 @@ class enable_sentry_mode_button(button):
         input_dict['button_type'] = 'enable sentry mode'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -578,7 +578,7 @@ class enable_sentry_mode_button(button):
         Output:
             boolean: Returns True if the selected mob is a pmob and is not already in sentry mode, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_pmob:
                 return(False)
@@ -632,7 +632,7 @@ class disable_sentry_mode_button(button):
         input_dict['button_type'] = 'disable sentry mode'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -641,7 +641,7 @@ class disable_sentry_mode_button(button):
         Output:
             boolean: Returns True if the selected mob is a pmob and is in sentry mode, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_pmob:
                 return(False)
@@ -694,7 +694,7 @@ class enable_automatic_replacement_button(button):
         input_dict['button_type'] = 'enable automatic replacement'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -703,7 +703,7 @@ class enable_automatic_replacement_button(button):
         Output:
             boolean: Returns True if the targeted unit component is present and does not already have automatic replacement, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_pmob:
                 return(False)
@@ -769,7 +769,7 @@ class disable_automatic_replacement_button(button):
         input_dict['button_type'] = 'disable automatic replacement'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -778,7 +778,7 @@ class disable_automatic_replacement_button(button):
         Output:
             boolean: Returns True if the targeted unit component is present and has automatic replacement, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_pmob:
                 return(False)
@@ -842,7 +842,7 @@ class end_unit_turn_button(button):
         input_dict['button_type'] = 'end unit turn'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -851,7 +851,7 @@ class end_unit_turn_button(button):
         Output:
             boolean: Returns True if the selected mob is a pmob in the turn queue, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_pmob:
                 return(False)
@@ -904,7 +904,7 @@ class remove_work_crew_button(button):
         input_dict['button_type'] = 'remove worker'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -913,7 +913,7 @@ class remove_work_crew_button(button):
         Output:
             boolean: Returns False if there is not a corresponding work crew to remove, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.attached_list[self.attached_label.list_index].in_building:
                 return(False)
@@ -962,7 +962,7 @@ class disembark_vehicle_button(button):
         input_dict['button_type'] = 'disembark'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
@@ -971,7 +971,7 @@ class disembark_vehicle_button(button):
         Output:
             boolean: Returns False if there is not a corresponding passenger to disembark, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.attached_list[self.attached_label.list_index].in_vehicle:
                 return(False)
@@ -1039,7 +1039,7 @@ class embark_vehicle_button(button):
         input_dict['button_type'] = 'embark'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1048,7 +1048,7 @@ class embark_vehicle_button(button):
         Output:
             boolean: Returns False if the selected mob cannot embark vehicles or if there is no vehicle in the tile to embark, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.controllable:
                 result = False
@@ -1121,7 +1121,7 @@ class cycle_passengers_button(button):
         input_dict['button_type'] = 'cycle passengers'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1130,7 +1130,7 @@ class cycle_passengers_button(button):
         Output:
             boolean: Returns False if the selected mob is not a vehicle or if the vehicle does not have enough passengers to cycle through, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.is_vehicle:
                 return(False)
@@ -1184,7 +1184,7 @@ class cycle_work_crews_button(button):
         input_dict['button_type'] = 'cycle work crews'
         super().__init__(input_dict, global_manager)
         
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1193,7 +1193,7 @@ class cycle_work_crews_button(button):
         Output:
             boolean: Returns same as superclass if the displayed tile's cell has a resource building containing more than 3 work crews, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if self.attached_label.actor.cell.contained_buildings['resource'] == 'none':
                 self.previous_showing_result = False
@@ -1270,7 +1270,7 @@ class work_crew_to_building_button(button):
         else:
             self.attached_building = 'none'
     
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1279,7 +1279,7 @@ class work_crew_to_building_button(button):
         Output:
             boolean: Returns False if the selected mob is not a work crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         self.update_info()
         if result:
             if (not self.attached_work_crew == 'none') and not (self.attached_work_crew.is_work_crew): #if selected but not worker, return false
@@ -1358,7 +1358,7 @@ class trade_button(button):
         input_dict['button_type'] = 'trade'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1367,7 +1367,7 @@ class trade_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of trading, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_trade):
                 return(False)
@@ -1437,7 +1437,7 @@ class convert_button(button):
         input_dict['button_type'] = 'convert'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1446,7 +1446,7 @@ class convert_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_convert):
                 return(False)
@@ -1514,7 +1514,7 @@ class rumor_search_button(button):
         input_dict['button_type'] = 'rumor search'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1523,7 +1523,7 @@ class rumor_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_explore):
                 return(False)
@@ -1597,7 +1597,7 @@ class artifact_search_button(button):
         input_dict['button_type'] = 'artifact search'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1606,7 +1606,7 @@ class artifact_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_explore):
                 return(False)
@@ -1670,7 +1670,7 @@ class capture_slaves_button(button):
         input_dict['button_type'] = 'capture slaves'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1679,7 +1679,7 @@ class capture_slaves_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.is_battalion):
                 return(False)
@@ -1744,7 +1744,7 @@ class suppress_slave_trade_button(button):
         input_dict['button_type'] = 'suppress slave trade'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1753,7 +1753,7 @@ class suppress_slave_trade_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.is_battalion):
                 return(False)
@@ -1819,7 +1819,7 @@ class evangelist_campaign_button(button):
         input_dict['button_type'] = input_dict['campaign_type']
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1828,7 +1828,7 @@ class evangelist_campaign_button(button):
         Output:
             boolean: Returns False if the selected mob is not an evangelist, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist')):
                 return(False)
@@ -1899,7 +1899,7 @@ class take_loan_button(button):
         input_dict['button_type'] = 'take loan'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1908,7 +1908,7 @@ class take_loan_button(button):
         Output:
             boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
                 return(False)
@@ -1969,7 +1969,7 @@ class labor_broker_button(button):
         input_dict['button_type'] = 'labor broker'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1978,7 +1978,7 @@ class labor_broker_button(button):
         Output:
             boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not ((self.attached_label.actor.is_officer and not self.attached_label.actor.officer_type == 'evangelist') or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
                 return(False)
@@ -2073,7 +2073,7 @@ class advertising_campaign_button(button):
         input_dict['button_type'] = 'advertising campaign'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2082,7 +2082,7 @@ class advertising_campaign_button(button):
         Output:
             boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
                 return(False)
@@ -2148,7 +2148,7 @@ class track_beasts_button(button):
         input_dict['button_type'] = 'track beasts'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2157,7 +2157,7 @@ class track_beasts_button(button):
         Output:
             boolean: Returns False if the selected mob is not a safari, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not (self.attached_label.actor.is_group and self.attached_label.actor.is_safari)):
                 return(False)
@@ -2249,7 +2249,7 @@ class switch_theatre_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot move.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2258,7 +2258,7 @@ class switch_theatre_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of traveling between theatres, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if not self.attached_label.actor.controllable:
                 return(False)
@@ -2294,7 +2294,7 @@ class build_train_button(button):
         input_dict['button_type'] = 'build train'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2303,7 +2303,7 @@ class build_train_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_construct):
                 return(False)
@@ -2385,7 +2385,7 @@ class build_steamboat_button(button):
         input_dict['button_type'] = 'build steamboat'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2394,7 +2394,7 @@ class build_steamboat_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if (not self.attached_label.actor.can_construct):
                 return(False)
@@ -2558,7 +2558,7 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
                             self.building_name = 'railroad'
                             self.image.set_image('buildings/buttons/railroad.png')
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2567,7 +2567,7 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
         Output:
             boolean: Returns False if the selected mob is not capable of constructing the building that this button constructs, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             self.update_info()
             can_create = 'none'
@@ -2844,7 +2844,7 @@ class repair_button(button):
                 self.attached_tile = self.attached_mob.images[0].current_cell.tile
                 self.building_name = self.building_type
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2854,7 +2854,7 @@ class repair_button(button):
             boolean: Returns False if the selected mob is not capable of repairing this button's building, otherwise returns same as superclass. A group can repair a building if it is able to build it, and construction gang's can
                 repair any type of building
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if self.attached_label.actor.can_construct or (self.attached_label.actor.can_trade and self.requirement == 'can_trade') or (self.attached_label.actor.can_convert and self.requirement == 'can_convert') or (self.attached_label.actor.is_battalion and self.requirement == 'is_battalion'):
                 #construction gangs can repair all buildings, caravans can only repair trading posts, missionaries can only repair missions, battalions can only repair forts
@@ -2874,7 +2874,7 @@ class repair_button(button):
             None
         '''
         message = []
-        if self.can_show():
+        if self.showing:
             message.append('Attempts to repair the ' + text_tools.remove_underscores(self.building_name) + ' in this tile, restoring it to full functionality')
             if self.building_type in ['port', 'train_station', 'resource']:
                 message.append('If successful, also automatically repairs this tile\'s warehouses')
@@ -2975,7 +2975,7 @@ class upgrade_button(button):
                 if not self.attached_tile.cell.contained_buildings[self.base_building_type] == 'none':
                     self.attached_building = self.attached_tile.cell.get_intact_building(self.base_building_type) #contained_buildings[self.base_building_type]
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2984,7 +2984,7 @@ class upgrade_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of upgrading buildings or if there is no valid building in its tile to upgrade, otherwise returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             self.update_info()
             if (not self.attached_label.actor.can_construct): #show if unit selected can create this building
@@ -3073,7 +3073,7 @@ class appoint_minister_button(button):
         input_dict['image_id'] = 'ministers/icons/' + global_manager.get('minister_type_dict')[self.appoint_type] + '.png'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3082,7 +3082,7 @@ class appoint_minister_button(button):
         Output:
             boolean: Returns same as superclass if the minister office that this button is attached to is open, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and displayed_minister.current_position == 'none': #if there is an available minister displayed
                 if self.global_manager.get('current_ministers')[self.appoint_type] == 'none': #if the position that this button appoints is available
@@ -3133,7 +3133,7 @@ class remove_minister_button(button):
         input_dict['image_id'] = 'buttons/remove_minister_button.png'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3142,7 +3142,7 @@ class remove_minister_button(button):
         Output:
             boolean: Returns same as superclass if the selected minister is currently in an office, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and (not displayed_minister.current_position == 'none'): #if there is an available minister displayed
                 return(True)
@@ -3201,7 +3201,7 @@ class to_trial_button(button):
         input_dict['image_id'] = 'buttons/to_trial_button.png'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3210,7 +3210,7 @@ class to_trial_button(button):
         Output:
             boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             displayed_minister = self.global_manager.get('displayed_minister')
             if (not displayed_minister == 'none') and (not displayed_minister.current_position in ['none', 'Prosecutor']): #if there is an available non-prosecutor minister displayed
                 return(True)
@@ -3270,7 +3270,7 @@ class active_investigation_button(button):
         input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3279,7 +3279,7 @@ class active_investigation_button(button):
         Output:
             boolean: Returns same as superclass if a non-prosecutor minister with an office to be removed from is selected
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             displayed_minister = self.global_manager.get('displayed_minister')
             if displayed_minister != 'none' and displayed_minister.current_position != 'Prosecutor':
                 return(True)
@@ -3357,21 +3357,20 @@ class fabricate_evidence_button(button):
         Output:
             None
         '''
-        if self.can_show():
-            if main_loop_tools.action_possible(self.global_manager):
-                if self.global_manager.get('money') >= self.get_cost():
-                    self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
-                    defense = self.global_manager.get('displayed_defense')
-                    prosecutor = self.global_manager.get('displayed_prosecution')
-                    prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
-                        ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
-                    defense.fabricated_evidence += 1
-                    defense.corruption_evidence += 1
-                    minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display'), defense) #updates trial display with new evidence
-                else:
-                    text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
+        if main_loop_tools.action_possible(self.global_manager):
+            if self.global_manager.get('money') >= self.get_cost():
+                self.global_manager.get('money_tracker').change(-1 * self.get_cost(), 'trial')
+                defense = self.global_manager.get('displayed_defense')
+                prosecutor = self.global_manager.get('displayed_prosecution')
+                prosecutor.display_message(prosecutor.current_position + ' ' + prosecutor.name + ' reports that evidence has been successfully fabricated for ' + str(self.get_cost()) +
+                    ' money. /n /nEach new fabricated evidence will cost twice as much as the last, and fabricated evidence becomes useless at the end of the turn or after it is used in a trial. /n /n')
+                defense.fabricated_evidence += 1
+                defense.corruption_evidence += 1
+                minister_utility.calibrate_trial_info_display(self.global_manager, self.global_manager.get('defense_info_display'), defense) #updates trial display with new evidence
             else:
-                text_tools.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)
+                text_tools.print_to_screen('You do not have the ' + str(self.get_cost()) + ' money needed to fabricate evidence.', self.global_manager)
+        else:
+            text_tools.print_to_screen('You are busy and cannot fabricate evidence.', self.global_manager)
 
 class bribe_judge_button(button):
     '''
@@ -3410,7 +3409,7 @@ class bribe_judge_button(button):
         '''
         return(trial_utility.get_fabricated_evidence_cost(0)) #costs as much as 1st piece of fabricated evidence
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3419,7 +3418,7 @@ class bribe_judge_button(button):
         Output:
             boolean: Returns same as superclass if judge has not been bribed yet, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.global_manager.get('prosecution_bribed_judge'):
                 return(True)
         return(False)
@@ -3481,7 +3480,7 @@ class hire_african_workers_button(button):
             input_dict['button_type'] = 'hire slums worker'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3490,7 +3489,7 @@ class hire_african_workers_button(button):
         Output:
             boolean: Returns same as superclass if a village/slum with available workers is displayed, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.global_manager.get('displayed_tile') == 'none':
                 if self.hire_source_type == 'village':
                     attached_village = self.global_manager.get('displayed_tile').cell.get_building('village')
@@ -3546,7 +3545,7 @@ class buy_slaves_button(button):
         input_dict['button_type'] = 'buy slaves'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -3555,7 +3554,7 @@ class buy_slaves_button(button):
         Output:
             boolean: Returns same as superclass if the displayed tile is in the slave traders grid, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.global_manager.get('displayed_tile') == 'none':
                 if self.global_manager.get('displayed_tile').cell.grid == self.global_manager.get('slave_traders_grid'):
                     if self.global_manager.get('slave_traders_strength') > 0:
@@ -3609,7 +3608,7 @@ class automatic_route_button(button):
         '''
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn. All automatic route buttons can only appear if the selected unit is porters or a crewed vehicle. Additionally, clear and follow automatic route buttons require that an automatic
@@ -3619,7 +3618,7 @@ class automatic_route_button(button):
         Output:
             boolean: Returns whether this button should be drawn
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             attached_mob = self.global_manager.get('displayed_mob')
             if attached_mob.inventory_capacity > 0 and (not (attached_mob.is_group and attached_mob.can_trade)) and (not (attached_mob.is_vehicle and attached_mob.crew == 'none')):
                 if self.button_type in ['clear automatic route', 'follow automatic route']:

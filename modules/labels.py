@@ -105,7 +105,7 @@ class label(button):
         Output:
             None
         '''
-        if self.can_show():
+        if self.showing:
             super().draw()
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))

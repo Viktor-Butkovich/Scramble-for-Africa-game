@@ -36,7 +36,6 @@ class worker(pmob):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.number = 2 #workers is plural
-        global_manager.get('worker_list').append(self)
         self.is_worker = True
         self.is_church_volunteers = False
         self.worker_type = input_dict['worker_type'] #European, African, religious, slave
@@ -270,7 +269,6 @@ class worker(pmob):
             None
         '''
         super().remove()
-        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') - 1)
         elif self.worker_type == 'African':
@@ -428,7 +426,6 @@ class slave_worker(worker):
         '''
         super().remove()
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') - 1)
-        self.global_manager.set('worker_list', utility.remove_from_list(self.global_manager.get('worker_list'), self))
         self.global_manager.get('money_label').check_for_updates()
 
 class church_volunteers(worker):

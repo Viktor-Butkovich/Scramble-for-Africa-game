@@ -26,8 +26,6 @@ class image():
         self.width = width
         self.height = height
         self.Rect = 'none'
-        if self.image_type != 'bundle':
-            self.global_manager.get('image_list').append(self)
     
     def complete_draw(self):
         '''
@@ -66,9 +64,9 @@ class image():
         Output:
             None
         '''
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self))
+        return
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown
@@ -89,7 +87,7 @@ class image():
             None
         '''
         if self.can_show():
-            #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
+            self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
             self.complete_draw()
 
     def update_image_bundle(self):
@@ -402,7 +400,9 @@ class free_image(image):
             None
         '''
         self.image_type = 'free'
+        self.showing = False
         self.has_parent_collection = False
+        global_manager.get('independent_interface_elements').append(self)        
         super().__init__(width, height, global_manager)
         self.modes = modes
         self.set_image(image_id)
@@ -443,7 +443,18 @@ class free_image(image):
         '''
         self.modes = new_modes
 
-    def can_show(self):
+    def can_draw(self):
+        '''
+        Description:
+            Calculates and returns whether it would be valid to call this object's draw()
+        Input:
+            None
+        Output:
+            boolean: Returns whether it would be valid to call this object's draw()
+        '''
+        return(self.showing)
+
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
@@ -452,7 +463,7 @@ class free_image(image):
         Output:
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
-        if (self.has_parent_collection and self.parent_collection.can_show()) or not self.has_parent_collection:
+        if (self.has_parent_collection and self.parent_collection.showing) or not self.has_parent_collection:
             if self.global_manager.get('current_game_mode') in self.modes:
                 return(True)
         return(False)
@@ -467,6 +478,7 @@ class free_image(image):
             None
         '''
         super().remove()
+        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
         self.global_manager.set('free_image_list', utility.remove_from_list(self.global_manager.get('free_image_list'), self))
 
     def set_image(self, new_image):
@@ -633,7 +645,7 @@ class indicator_image(tooltip_free_image):
         self.indicator_type = indicator_type
         super().__init__(image_id, coordinates, width, height, modes, global_manager, to_front)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. Indicator images are shown when their attached variables are at certain values
@@ -642,7 +654,7 @@ class indicator_image(tooltip_free_image):
         Output:
             boolean: Returns True if this image can currently appear, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.indicator_type == 'prosecution_bribed_judge':
                 if self.global_manager.get('prosecution_bribed_judge'):
                     return(True)
@@ -724,7 +736,7 @@ class dice_roll_minister_image(tooltip_free_image):
         else:
             self.set_tooltip([])
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. Normal dice roll minister images return the same as superclass, while minister message images are only shown when their minister's message is currently displayed
@@ -733,10 +745,9 @@ class dice_roll_minister_image(tooltip_free_image):
         Output:
             boolean: Returns True if this image can currently appear, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.minister_message_image:
-                current_notification = self.global_manager.get('notification_list')[0]
-                if current_notification.notification_type == 'minister' and current_notification.attached_minister == self.attached_minister:
+                if self.global_manager.get('displayed_notification').notification_type == 'minister' and self.global_manager.get('displayed_notification').attached_minister == self.attached_minister:
                     return(True)
             else:
                 return(True)
@@ -845,7 +856,7 @@ class minister_type_image(tooltip_free_image):
         '''
         self.set_tooltip(self.tooltip_text)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. If not attached to label, returns same as superclass. Otherwise, returns True if the attached label is showing or False if it is not showing
@@ -854,10 +865,10 @@ class minister_type_image(tooltip_free_image):
         Output:
             boolean: Returns True if this image can currently appear, otherwise returns False
         '''
-        if not self.attached_label == 'none':
-            return(self.attached_label.can_show())
+        if self.attached_label != 'none':
+            return(self.attached_label.showing)
         else:
-            return(super().can_show())
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
 
 class warning_image(free_image):
     '''
@@ -878,7 +889,7 @@ class warning_image(free_image):
         super().__init__('misc/warning_icon.png', (attached_image.x, attached_image.y), self.attached_image.width, self.attached_image.height, self.attached_image.modes,
             global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. A warning image is shown when the image it is attached to says to show a warning
@@ -887,7 +898,7 @@ class warning_image(free_image):
         Output:
             boolean: Returns True if this image can currently appear, otherwise returns False
         '''
-        return(self.attached_image.can_show_warning())
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.attached_image.can_show_warning())
 
 class loading_image_template(free_image):
     '''
@@ -904,9 +915,8 @@ class loading_image_template(free_image):
             None
         '''
         super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self)) #different from other images, should only be drawn when directly requested
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. Unlike other images, a loading screen image will always be visible when draw() is called
@@ -1062,7 +1072,7 @@ class actor_image(image):
         self.tooltip_outline_width = 1
         self.tooltip_outline = pygame.Rect(self.actor.x - self.tooltip_outline_width, self.actor.y + self.tooltip_outline_width, tooltip_width + (2 * self.tooltip_outline_width), tooltip_height + (self.tooltip_outline_width * 2))
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. By default, it can be shown during game modes in which this image can appear
@@ -1139,7 +1149,7 @@ class mob_image(actor_image):
                 self.current_cell.contained_mobs.insert(0, self.actor)
             self.go_to_cell((self.current_cell.x, self.current_cell.y))
             
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this image can be shown. By default, it can be shown when its mob should be visible
@@ -1177,7 +1187,6 @@ class button_image(actor_image):
         self.modes = button.modes
         self.image_id = image_id
         self.set_image(image_id)
-        self.global_manager.get('image_list').append(self)
         self.Rect = self.button.Rect
         self.outline_width = 2
         self.outline = pygame.Rect(self.x - self.outline_width, self.global_manager.get('display_height') - (self.y + self.height + self.outline_width), self.width + (2 * self.outline_width), self.height + (self.outline_width * 2))
@@ -1239,7 +1248,7 @@ class button_image(actor_image):
         Output:
             None
         '''
-        if self.button.can_show():
+        if self.button.showing:
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') - (self.button.y + self.height) + self.height
             self.complete_draw()
@@ -1268,7 +1277,7 @@ class button_image(actor_image):
 
 class collection_image(button_image):
     def draw(self):
-        if self.button.can_show():
+        if self.button.showing:
             self.x = self.button.x
             self.y = self.global_manager.get('display_height') + self.height - self.button.y# + self.height
             #self.y = self.global_manager.get('display_height') + self.button.y - (self.height * 3)

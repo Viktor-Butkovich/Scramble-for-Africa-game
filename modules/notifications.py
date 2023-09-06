@@ -30,7 +30,7 @@ class notification(multi_line_label):
         Output:
             None
         '''
-        global_manager.get('notification_list').append(self)
+        global_manager.set('displayed_notification', self)
         super().__init__(input_dict, global_manager)
         self.in_notification = True
         self.is_action_notification = False
@@ -74,7 +74,7 @@ class notification(multi_line_label):
         if time.time() - 0.1 > self.creation_time: #don't accidentally remove notifications instantly when clicking between them
             self.remove()
             
-    def remove(self):
+    def remove(self, handle_next_notification=True):
         '''
         Description:
             Removes this object from relevant lists and prevents it from further appearing in or affecting the program. By default, notifications are removed when clicked. When a notification is removed, the next notification is shown,
@@ -85,12 +85,13 @@ class notification(multi_line_label):
             None
         '''
         super().remove()
-        notification_manager = self.global_manager.get('notification_manager')
-        self.global_manager.set('notification_list', utility.remove_from_list(self.global_manager.get('notification_list'), self))
-        if len(notification_manager.notification_queue) >= 1:
-            notification_manager.notification_queue.pop(0)
-        if len(notification_manager.notification_queue) > 0:
-            notification_manager.notification_to_front(notification_manager.notification_queue[0])
+        self.global_manager.set('displayed_notification', 'none')
+        if handle_next_notification:
+            notification_manager = self.global_manager.get('notification_manager')
+            if len(notification_manager.notification_queue) >= 1:
+                notification_manager.notification_queue.pop(0)
+            if len(notification_manager.notification_queue) > 0:
+                notification_manager.notification_to_front(notification_manager.notification_queue[0])
 
 class minister_notification(notification):
     '''

@@ -435,9 +435,6 @@ class actor():
             None
         '''
         self.global_manager.set('actor_list', utility.remove_from_list(self.global_manager.get('actor_list'), self))
-        if hasattr(self, 'images'):
-            for current_image in self.images:
-                self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), current_image))
 
     def touching_mouse(self):
         '''

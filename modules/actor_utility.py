@@ -248,7 +248,7 @@ def stop_exploration(global_manager):
     Output:
         None
     '''
-    for current_exploration_mark in global_manager.get('exploration_mark_list'): #copy_exploration_mark_list:
+    for current_exploration_mark in global_manager.get('exploration_mark_list'):
         current_exploration_mark.remove()
     global_manager.set('exploration_mark_list', [])
     for current_mob in global_manager.get('mob_list'):

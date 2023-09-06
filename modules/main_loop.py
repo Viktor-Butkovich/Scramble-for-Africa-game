@@ -18,7 +18,7 @@ def main_loop(global_manager):
         None
     '''
     while not global_manager.get('crashed'):
-        if len(global_manager.get('notification_list')) == 0:
+        if global_manager.get('displayed_notification') == 'none':
             stopping = False
         global_manager.get('input_manager').update_input()
         for event in pygame.event.get():
@@ -36,13 +36,14 @@ def main_loop(global_manager):
                 if event.key == pygame.K_p and global_manager.get('effect_manager').effect_active('debug_print'):
                     main_loop_tools.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
-                    if current_button.can_show() and not global_manager.get('typing'):
+                    if current_button.showing and not global_manager.get('typing'):
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
-                                current_button.has_released = False
-                                current_button.being_pressed = True
-                                current_button.on_click()
-                                current_button.showing_outline = True
+                                if current_button.has_released: #if stuck on loading, don't want multiple 'key down' events to repeat on_click - shouldn't on_click again until released
+                                    current_button.has_released = False
+                                    current_button.being_pressed = True
+                                    current_button.on_click()
+                                    current_button.showing_outline = True
                                 break
                             else:#stop confirming an important button press if user starts doing something else
                                 current_button.confirming = False
@@ -92,9 +93,10 @@ def main_loop(global_manager):
                 for current_button in global_manager.get('button_list'):
                     if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
-                            if event.key == current_button.keybind_id and current_button.can_show():
+                            if event.key == current_button.keybind_id:# and current_button.showing:
                                 current_button.on_release()
                                 current_button.has_released = True
+                                current_button.being_pressed = False
                 if event.key == pygame.K_RSHIFT:
                     global_manager.set('r_shift', 'up')
                 if event.key == pygame.K_LSHIFT:
@@ -131,20 +133,21 @@ def main_loop(global_manager):
                 clicked_button = False
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
-                    for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show() and current_button in global_manager.get('notification_list') and not stopping:
-                            current_button.on_rmb_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
+                    for current_button in global_manager.get('button_list'):#here
+                        if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
+                            current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
                             stopping = True
+                            break
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show():
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing:
                         global_manager.get('current_instructions_page').on_rmb_click()
                         clicked_button = True
                         stopping = True
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show():
+                        if current_button.touching_mouse() and current_button.showing:
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
@@ -156,21 +159,21 @@ def main_loop(global_manager):
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
-                        if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
+                        if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
                             current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
                             stopping = True
                             break
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show(): #if instructions, click before other buttons
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing: #if instructions, click before other buttons
                         global_manager.get('current_instructions_page').on_click()
                         clicked_button = True
                         stopping = True
                         break
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show() and not clicked_button: #only click 1 button at a time
+                        if current_button.touching_mouse() and current_button.showing and not clicked_button: #only click 1 button at a time
                             current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
@@ -179,7 +182,7 @@ def main_loop(global_manager):
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):
-                if current_button.touching_mouse() and current_button.can_show():
+                if current_button.touching_mouse() and current_button.showing:
                     current_button.showing_outline = True
                 elif not current_button.being_pressed:
                     current_button.showing_outline = False

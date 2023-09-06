@@ -201,8 +201,6 @@ class choice_button(buttons.button):
     
         else:
             self.message = input_dict['button_type'].capitalize()
-            
-
         super().__init__(input_dict, global_manager)
         self.font_size = scaling.scale_width(25, global_manager)
         self.font_name = self.global_manager.get('font_name')
@@ -231,7 +229,7 @@ class choice_button(buttons.button):
             None
         '''
         super().draw()
-        if self.can_show():
+        if self.showing:
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 

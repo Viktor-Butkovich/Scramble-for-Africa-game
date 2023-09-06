@@ -375,7 +375,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'cycle passengers':
             tooltip_text = ['Cycles through this ' + self.vehicle_type + '\'s passengers']
             tooltip_text.append('Passengers: ' )
-            if self.can_show():
+            if self.showing:
                 for current_passenger in self.attached_label.actor.contained_mobs:
                     tooltip_text.append('    ' + current_passenger.name)
             self.set_tooltip(tooltip_text)
@@ -383,7 +383,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'cycle work crews':
             tooltip_text = ['Cycles through this  building\'s work crews']
             tooltip_text.append('Work crews: ' )
-            if self.can_show():
+            if self.showing:
                 for current_work_crew in self.attached_label.actor.cell.get_building('resource').contained_work_crews:
                     tooltip_text.append('    ' + current_work_crew.name)
             self.set_tooltip(tooltip_text)
@@ -391,7 +391,7 @@ class button(interface_elements.interface_element):
         elif self.button_type == 'cycle tile mobs':
             tooltip_text = ['Cycles through this tile\'s units']
             tooltip_text.append('Units: ' )
-            if self.can_show():
+            if self.showing:
                 for current_mob in self.global_manager.get('displayed_tile').cell.contained_mobs:
                     tooltip_text.append('    ' + current_mob.name)
             self.set_tooltip(tooltip_text)
@@ -767,7 +767,7 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        if self.touching_mouse() and self.can_show():
+        if self.touching_mouse() and self.showing:
             return(True)
         else:
             return(False)
@@ -781,8 +781,8 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
-        if self.can_show(): #self.global_manager.get('current_game_mode') in self.modes:
+        self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
+        if self.showing: #self.global_manager.get('current_game_mode') in self.modes:
             if self.showing_outline and not self in self.global_manager.get('label_list'):
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
             if self.showing_background and hasattr(self, 'color'):
@@ -808,7 +808,7 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        if self.can_show():
+        if self.showing:
             self.update_tooltip()
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if below_screen:
@@ -1340,10 +1340,10 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
+        super().remove()
         self.global_manager.set('button_list', utility.remove_from_list(self.global_manager.get('button_list'), self))
-        self.global_manager.set('image_list', utility.remove_from_list(self.global_manager.get('image_list'), self.image))
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown. By default, it can be shown during game modes in which this button can appear
@@ -1358,7 +1358,7 @@ class button(interface_elements.interface_element):
             destination_x, destination_y = (x + self.parent_collection.move_with_mouse_config['mouse_x_offset'], y + self.parent_collection.move_with_mouse_config['mouse_y_offset'])
             self.parent_collection.set_origin(destination_x, destination_y)
 
-        if super().can_show(ignore_parent_collection=ignore_parent_collection):
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.button_type in ['move left', 'move right', 'move down', 'move up']:
                 if self.global_manager.get('displayed_mob') == 'none' or (not self.global_manager.get('displayed_mob').is_pmob):
                     return(False)
@@ -1476,7 +1476,7 @@ class cycle_same_tile_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1485,7 +1485,7 @@ class cycle_same_tile_button(button):
         Output:
             boolean: Returns False if the currently displayed tile contains 3 or less mobs. Otherwise, returns same as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             displayed_tile = self.global_manager.get('displayed_tile')
             if not displayed_tile == 'none':
@@ -1563,7 +1563,7 @@ class same_tile_icon(button):
             else:
                 text_tools.print_to_screen('You are busy and cannot select a different unit', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1629,7 +1629,7 @@ class same_tile_icon(button):
             None
         '''
         self.update()
-        if self.can_show():
+        if self.showing:
             if self.index == 0 and self.global_manager.get('displayed_tile') != 'none':
                 if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
@@ -1646,7 +1646,7 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        if not self.can_show():
+        if not self.showing:
             self.set_tooltip([])
         else:
             if self.is_last:
@@ -1711,7 +1711,7 @@ class fire_unit_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1720,7 +1720,7 @@ class fire_unit_button(button):
         Output:
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
@@ -1737,7 +1737,7 @@ class fire_unit_button(button):
         Output:
             None
         '''
-        if not self.can_show():
+        if not self.showing:
             self.set_tooltip([])
         else:
             tooltip_text = ['Click to fire this unit']
@@ -1791,7 +1791,7 @@ class free_unit_slaves_button(button):
         else:
             text_tools.print_to_screen('You are busy and cannot free slaves', self.global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -1800,7 +1800,7 @@ class free_unit_slaves_button(button):
         Output:
             boolean: Returns same as superclass if there is a selected unit, otherwise returns False
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
@@ -1818,7 +1818,7 @@ class free_unit_slaves_button(button):
         Output:
             None
         '''
-        if not self.can_show():
+        if not self.showing:
             self.set_tooltip([])
         else:
             tooltip_text = ['Click to free this unit']
@@ -1979,14 +1979,14 @@ class minister_portrait_image(button):
             None
         '''
         showing = False
-        if self.can_show(): #draw outline around portrait if minister selected
+        if self.showing: #draw outline around portrait if minister selected
             showing = True
             if not self.current_minister == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
                 if self.global_manager.get('displayed_minister') == self.current_minister and self.global_manager.get('show_selection_outlines'): 
                     pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['bright green'], self.outline)
         super().draw()
-        if showing and self.warning_image.can_show():
+        if showing and self.warning_image.showing:
             self.warning_image.draw()
 
     def on_click(self):
@@ -2086,7 +2086,7 @@ class country_selection_image(button):
         Output:
             None
         '''
-        if self.can_show(): #draw outline around portrait if country selected
+        if self.showing: #draw outline around portrait if country selected
             if not self.current_country == 'none':
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.Rect) #draw white background
                 if self.global_manager.get('displayed_country') == self.current_country and self.global_manager.get('show_selection_outlines'): 
@@ -2168,7 +2168,7 @@ class cycle_available_ministers_button(button):
         input_dict['button_type'] = 'cycle available ministers'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2179,12 +2179,12 @@ class cycle_available_ministers_button(button):
         '''
         if self.direction == 'left':
             if self.global_manager.get('available_minister_left_index') > -2:
-                return(super().can_show())
+                return(super().can_show(skip_parent_collection=skip_parent_collection))
             else:
                 return(False)
         elif self.direction == 'right': #left index = 0, left index + 4 = 4 which is greater than the length of a 3-minister list, so can't move right farther
             if not self.global_manager.get('available_minister_left_index') + 4 > len(self.global_manager.get('available_minister_list')):
-                return(super().can_show())
+                return(super().can_show(skip_parent_collection=skip_parent_collection))
             else:
                 return(False)
 
@@ -2303,7 +2303,7 @@ class show_previous_financial_report_button(button):
         input_dict['button_type'] = 'show previous financial report'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button should be drawn
@@ -2312,7 +2312,7 @@ class show_previous_financial_report_button(button):
         Output:
             boolean: Returns False during the first turn when there is no previous financial report to show, otherwise returns same as superclass
         '''
-        if super().can_show():
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if not self.global_manager.get('previous_financial_report') == 'none':
                 return(True)
         return(False)
@@ -2360,7 +2360,7 @@ class tab_button(button):
         self.linked_element = input_dict['linked_element']
         super().__init__(input_dict, global_manager)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown - uses usual can_show logic, but shows outline iff tab is active
@@ -2373,7 +2373,7 @@ class tab_button(button):
             self.showing_outline = True
         else:
             self.showing_outline = False
-        return(super().can_show())
+        return(super().can_show(skip_parent_collection=skip_parent_collection))
 
 class reorganize_unit_button(button):
     '''
@@ -2560,7 +2560,7 @@ class cycle_autofill_button(button):
         input_dict['button_type'] = 'cycle autofill'
         super().__init__(input_dict, global_manager)
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown. An autofill cycle button is only shown when an autofill is occurring and other options are available - allow cycling
@@ -2571,7 +2571,7 @@ class cycle_autofill_button(button):
         Output:
             boolean: Returns True if this button can appear, otherwise returns False
         '''
-        if super().can_show(ignore_parent_collection=ignore_parent_collection):
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             if self.parent_collection.autofill_actors[self.autofill_target_type] != self.global_manager.get('displayed_mob'):
                 if self.parent_collection.autofill_actors[self.autofill_target_type] != 'none':
                     if not self.parent_collection.autofill_actors[self.autofill_target_type].is_dummy:

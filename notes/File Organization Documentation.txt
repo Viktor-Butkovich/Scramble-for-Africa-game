@@ -349,7 +349,7 @@ SFA folder
             def display_instructions_page
 
 		interface_elements.py
-			import pygame, scaling, images
+			import pygame, scaling, images, utility
 			class interface_element
 				class interface_collection
 					class tabbed_collection
@@ -372,7 +372,7 @@ SFA folder
             def main_loop
 
         main_loop_tools.py
-            imports pygame, time, scaling, text_tools, actor_utility, minister_utility, utility
+            imports pygame, time, scaling, text_tools, actor_utility, minister_utility, utility, traversal_utility
             def update_display
 			def minister_appointed
             def action_possible
@@ -484,6 +484,14 @@ SFA folder
             imports pygame, random, images, utility, actor_utility, main_loop_tools, villages, actors
             class tile(actors.actor)
             	class abstract_tile
+
+		traversal_utility.py
+			def draw_interface_elements
+			def collection_traversal
+			def set_showing
+			def update_collection
+			def set_not_showing
+			def check_showing
 
         trial_utility.py
 			imports random, utility, notification_tools, scaling, game_transitions, minister_utility, dice_utility

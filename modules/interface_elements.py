@@ -4,6 +4,7 @@ import pygame
 from . import scaling
 from . import images
 from . import dummy_utility
+from . import utility
 
 class interface_element():
     '''
@@ -32,10 +33,14 @@ class interface_element():
         self.width = input_dict['width']
         self.height = input_dict['height']
         self.Rect = pygame.Rect(0, self.global_manager.get('display_height') - (self.height), self.width, self.height)
+        self.showing = False
         if not 'parent_collection' in input_dict:
             input_dict['parent_collection'] = 'none'
         self.parent_collection = input_dict['parent_collection']
         self.has_parent_collection = self.parent_collection != 'none'
+        if not self.has_parent_collection:
+            self.global_manager.get('independent_interface_elements').append(self)
+
         if not 'coordinates' in input_dict:
             input_dict['coordinates'] = (0, 0)
         self.x, self.y = input_dict['coordinates']
@@ -58,6 +63,29 @@ class interface_element():
         if 'image_id' in input_dict:
             self.create_image(input_dict['image_id'])
 
+    def remove(self):
+        '''
+        Description:
+            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
+        Input:
+            None
+        Output:
+            None
+        '''
+        if self in self.global_manager.get('independent_interface_elements'):
+            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
+
+    def draw(self):
+        '''
+        Description:
+            Draws this element's image - should only call if can_draw()
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.image.draw()
+
     def create_image(self, image_id):
         '''
         Description:
@@ -66,27 +94,38 @@ class interface_element():
         '''
         self.image = images.button_image(self, self.width, self.height, image_id, self.global_manager)
 
-    def can_show(self, ignore_parent_collection=False):
+    def can_draw(self):
+        '''
+        Description:
+            Calculates and returns whether it would be valid to call this object's draw()
+        Input:
+            None
+        Output:
+            boolean: Returns whether it would be valid to call this object's draw()
+        '''
+        return(self.showing and hasattr(self, 'image'))
+
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this button can be shown. By default, elements can be shown during game modes in which they can appear, iff their parent collection (if any) is also showing
         Input:
-            boolean ignore_parent_collection=False: Whether can_show should rely on parent collection also showing
+            boolean skip_parent_collection=False: Whether can_show should rely on parent collection also showing
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        #self.global_manager.set('can_show_counter', self.global_manager.get('can_show_counter') + 1)
+        self.global_manager.set('can_show_counter', self.global_manager.get('can_show_counter') + 1)
         if self.can_show_override == 'none':
-            if (not self.has_parent_collection) or ignore_parent_collection:
-                if ignore_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
-                    #ignore_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
+            if (not self.has_parent_collection) or skip_parent_collection:
+                if skip_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
+                    #skip_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
                     return(self.parent_collection.parent_collection.allow_show(self, self.ignore_minimized) and self.global_manager.get('current_game_mode') in self.modes)
                 return(self.global_manager.get('current_game_mode') in self.modes)
             elif self.parent_collection.allow_show(self, self.ignore_minimized):
                 return(self.global_manager.get('current_game_mode') in self.modes)
             return(False)
         else:
-            return(self.can_show_override.can_show(ignore_parent_collection=True))
+            return(self.can_show_override.can_show(skip_parent_collection=True))
 
     def set_origin(self, new_x, new_y):
         '''
@@ -317,8 +356,10 @@ class interface_collection(interface_element):
         if not 'calibrate_exempt' in member_config:
             member_config['calibrate_exempt'] = False
 
+        if not new_member.has_parent_collection:
+            new_member.has_parent_collection = True
+            self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), new_member))
         new_member.parent_collection = self
-        new_member.has_parent_collection = True
         if not 'index' in member_config:
             self.members.append(new_member)
         else:
@@ -390,9 +431,9 @@ class interface_collection(interface_element):
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        return(self.can_show(ignore_minimized))
+        return(self.showing)
 
-    def can_show(self, ignore_minimized=False, ignore_parent_collection=False):
+    def can_show(self, ignore_minimized=False, skip_parent_collection=False):
         '''
         Description:
             Returns whether this collection can be shown. A collection can be shown if it is not minimized and could otherwise be shown
@@ -401,7 +442,7 @@ class interface_collection(interface_element):
         Output:
             boolean: Returns True if this button can appear under current conditions, otherwise returns False
         '''
-        result = super().can_show(ignore_parent_collection)
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
             return(False)
         elif ignore_minimized:
@@ -652,7 +693,7 @@ class ordered_collection(interface_collection):
         current_y = self.y
         current_x = self.x
         for member in self.members:
-            if member.can_show() and not member in self.order_exempt_list:
+            if member.showing and not member in self.order_exempt_list:
                 if self.direction == 'vertical':
                     current_y -= member.height
 

@@ -463,7 +463,7 @@ class cell():
         '''
         num_found = 0
         for current_mob in self.contained_mobs:
-            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types: 
+            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types: 
                 num_found += 1
                 if num_found >= required_number:
                     return(True)
@@ -504,7 +504,7 @@ class cell():
         else:
             iterated_list = self.contained_mobs[start_index:len(self.contained_mobs)] + self.contained_mobs[0:start_index]
         for current_mob in iterated_list:
-            if current_mob in self.global_manager.get('worker_list') and current_mob.worker_type in possible_types:
+            if current_mob.is_pmob and current_mob.is_worker and current_mob.worker_type in possible_types:
                 return(current_mob)
         return('none')
 
@@ -676,17 +676,17 @@ class cell():
         Output:
             None
         '''
-        if not terrain_variant == 'none':
+        if terrain_variant != 'none':
             self.terrain_variant = terrain_variant
         self.terrain = new_terrain
-        if (not self.tile == 'none'):
+        if self.tile != 'none':
             self.tile.set_terrain(new_terrain, update_image_bundle)
         self.color = self.global_manager.get('terrain_colors')[new_terrain]
             
     def draw(self):
         '''
         Description:
-            Draws this cell as a rectangle with a certain color on its grid, depending on this cell's color value
+            Draws this cell as a rectangle with a certain color on its grid, depending on this cell's color value, along with actors this cell contains
         Input:
             none
         Output:
@@ -696,7 +696,16 @@ class cell():
         red = current_color[0]
         green = current_color[1]
         blue = current_color[2]
+        if not self.visible:
+            red, green, blue = self.global_manager.get('color_dict')['blonde']
         pygame.draw.rect(self.global_manager.get('game_display'), (red, green, blue), self.Rect)
+        if self.tile != 'none':
+            for current_image in self.tile.images:
+                current_image.draw()
+            if self.visible and self.contained_mobs:
+                for current_image in self.contained_mobs[0].images:
+                    current_image.draw()
+                self.show_num_mobs()
 
     def show_num_mobs(self):
         '''
@@ -708,7 +717,7 @@ class cell():
             None
         '''
         length = len(self.contained_mobs)
-        if length >= 2 and self.visible and not self.terrain == 'none':
+        if length >= 2:
             message = str(length)
             color = 'white'
             font_size = round(self.width * 0.3)
