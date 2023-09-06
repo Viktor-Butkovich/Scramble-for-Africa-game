@@ -239,7 +239,7 @@ class tile(actor): #to do: make terrain tiles a subclass
                     image_id_list += self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.cell.x, self.cell.y).get_image_id_list()
         return(image_id_list)
 
-    def update_image_bundle(self):
+    def update_image_bundle(self, override_image=None):
         '''
         Description:
             Updates this actor's images with its current image id list, also updating the minimap grid version if applicable
@@ -248,11 +248,14 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        self.set_image(self.get_image_id_list())
+        if override_image:
+            self.set_image(override_image)
+        else:
+            self.set_image(self.get_image_id_list())
         if self.grid == self.global_manager.get('strategic_map_grid'):
             equivalent_tile = self.get_equivalent_tile()
             if equivalent_tile != 'none':
-                equivalent_tile.update_image_bundle()
+                equivalent_tile.update_image_bundle(override_image=self.image)#(override_image=override_image)
             
     def set_resource(self, new_resource, update_image_bundle = True):
         '''

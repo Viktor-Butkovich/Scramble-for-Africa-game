@@ -12,6 +12,9 @@ def draw_interface_elements(interface_elements, global_manager):
     for current_interface_element in interface_elements:
         collection_traversal(current_interface_element, set_showing, set_not_showing, 
                 check_showing, global_manager, posttraversal_action=update_collection)
+    for current_interface_element in global_manager.get('draw_list'):
+        current_interface_element.draw()
+    global_manager.set('draw_list', [])
         
 def collection_traversal(current_element, pretraversal_action, alternative_action, condition, global_manager, posttraversal_action=None):
     '''
@@ -31,7 +34,7 @@ def collection_traversal(current_element, pretraversal_action, alternative_actio
     '''
     if hasattr(current_element, 'members'):
         for member_element in current_element.members:
-            pretraversal_action(member_element)
+            pretraversal_action(member_element, global_manager)
             if pretraversal_action != alternative_action:
                 if condition(member_element):
                     collection_traversal(member_element, pretraversal_action, alternative_action, condition, global_manager, posttraversal_action=posttraversal_action)
@@ -40,13 +43,13 @@ def collection_traversal(current_element, pretraversal_action, alternative_actio
             else: #if condition was false previously, continue doing alternative action for every element below without checking condition
                 collection_traversal(member_element, alternative_action, alternative_action, condition, global_manager)
             if posttraversal_action:
-                posttraversal_action(member_element)
+                posttraversal_action(member_element, global_manager)
     if (not hasattr(current_element, 'has_parent_collection')) or not current_element.has_parent_collection: #if independent element
-        pretraversal_action(current_element)
+        pretraversal_action(current_element, global_manager)
         if posttraversal_action:
-            posttraversal_action(current_element)
+            posttraversal_action(current_element, global_manager)
 
-def set_showing(current_element):
+def set_showing(current_element, global_manager):
     '''
     Description:
         Updates the inputted elements showing attribute
@@ -57,7 +60,7 @@ def set_showing(current_element):
     '''
     current_element.showing = current_element.can_show()
 
-def update_collection(current_element):
+def update_collection(current_element, global_manager):
     '''
     Description:
         Updates the inputted element's collection and tells it to draw, if it is showing
@@ -70,9 +73,9 @@ def update_collection(current_element):
         if hasattr(current_element, 'members'):
             current_element.update_collection()
         if current_element.can_draw():
-            current_element.draw()
+            global_manager.get('draw_list').append(current_element)
 
-def set_not_showing(current_element):
+def set_not_showing(current_element, global_manager):
     '''
     Description:
         Sets the inputted elements showing attribute to False

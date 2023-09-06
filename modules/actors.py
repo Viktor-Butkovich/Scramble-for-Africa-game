@@ -118,7 +118,7 @@ class actor():
         Description:
             Changes this actor's images to reflect the inputted image file path
         Input:
-            string new_image: Image file path to change this actor's images to
+            string/image new_image: Image file path to change this actor's images to, or an image to copy
         Output:
             None
         '''

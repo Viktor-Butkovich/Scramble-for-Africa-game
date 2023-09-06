@@ -142,13 +142,31 @@ class image_bundle(image):
             None
         '''
         self.image_type = 'bundle'
+        self.combined_surface = 'none'
         super().__init__(parent_image.width, parent_image.height, global_manager)
         self.parent_image = parent_image
         self.members = []
-        for current_image_id in image_id_list:
-            self.add_member(current_image_id)
+        if isinstance(image_id_list, list):
+            for current_image_id in image_id_list:
+                self.add_member(current_image_id)
+        else:
+            if image_id_list.contains_bundle:
+                image_id_list = image_id_list.image
+            self.members = image_id_list.members
+            self.combined_surface = pygame.transform.scale(image_id_list.combined_surface, (self.width, self.height))
         self.scale()
-                
+
+    def copy(self):
+        '''
+        Description:
+            Creates and returns a copy of this image bundle
+        Input:
+            None
+        Output:
+            image_bundle: Returns a copy of this image bundle
+        '''
+        return(image_bundle(self.parent_image, self, self.global_manager))
+
     def scale(self):
         '''
         Description:
@@ -179,6 +197,26 @@ class image_bundle(image):
         while index < len(self.members) and self.members[index].level <= new_member.level: #inserts at back of same level
             index += 1
         self.members.insert(index, new_member)
+        self.combined_surface = self.generate_combined_surface()
+
+    def generate_combined_surface(self):
+        '''
+        Description:
+            Creates and returns a surface that is a combination of each of this bundle's images - allows all images to be drawn with only one blit per frame
+        Input:
+            None
+        Output:
+            pygame.Surface: Returns a Pygame Surface that is a combination of each of this bundle's images
+        '''
+        #this is running whenever image is set, even if being set to same image as another bundle
+        combined_surface = pygame.transform.scale(pygame.image.load('graphics/misc/empty.png'), (self.width, self.height))
+        for member in self.members:
+            if member.is_offset:
+                combined_surface.blit(member.image, ((self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
+                                                        ((self.height * member.y_offset * -1) - (member.height / 2) + (self.height / 2))))
+            else:
+                combined_surface.blit(member.image, (0, 0))
+        return(combined_surface)
 
     def complete_draw(self):
         '''
@@ -189,14 +227,8 @@ class image_bundle(image):
         Output:
             None
         '''
-        for member in self.members:
-            if not member.is_offset:
-                drawing_tools.display_image(member.image, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
-            else:
-                drawing_tools.display_image(member.image, 
-                                            self.parent_image.x + (self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
-                                            (self.parent_image.y - (self.height * member.y_offset) - (member.height / 2) + (self.height / 2)) - self.height, 
-                                            self.global_manager)
+        drawing_tools.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+
     def remove_member(self, member_type):
         '''
         Description:
@@ -211,6 +243,7 @@ class image_bundle(image):
             if current_member.member_type != member_type:
                 new_member_list.append(current_member)
         self.members = new_member_list
+        self.combined_surface = self.generate_combined_surface()
 
     def has_member(self, member_type):
         '''
@@ -236,6 +269,7 @@ class image_bundle(image):
             None
         '''
         self.members = []
+        self.combined_surface = self.generate_combined_surface()
 
     def to_list(self):
         '''
@@ -486,27 +520,32 @@ class free_image(image):
         Description:
             Changes this image to reflect the inputted image file path
         Input:
-            string new_image: Image file path to change this image to
+            string/image new_image: Image file path to change this image to, or an image to copy
         Output:
             None
         '''
-        self.image_id = new_image
-        if isinstance(self.image_id, str): #if set to string image path
-            self.contains_bundle = False
-            full_image_id = 'graphics/' + self.image_id
-            if full_image_id in self.global_manager.get('rendered_images'):
-                self.image = self.global_manager.get('rendered_images')[full_image_id]
-            else:
-                try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                    self.image = pygame.image.load(full_image_id)
-                except:
-                    print(full_image_id)
-                    self.image = pygame.image.load(full_image_id)
-                self.global_manager.get('rendered_images')[full_image_id] = self.image
-            self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        else: #if set to image path list
+        if isinstance(new_image, image_bundle):
             self.contains_bundle = True
-            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+            self.image = new_image.copy()
+        else:
+            if (not hasattr(self, 'image_id')) or new_image != self.image_id:
+                self.image_id = new_image
+                if isinstance(new_image, str): #if set to string image path
+                    self.contains_bundle = False
+                    full_image_id = 'graphics/' + self.image_id
+                    if full_image_id in self.global_manager.get('rendered_images'):
+                        self.image = self.global_manager.get('rendered_images')[full_image_id]
+                    else:
+                        try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                            self.image = pygame.image.load(full_image_id)
+                        except:
+                            print(full_image_id)
+                            self.image = pygame.image.load(full_image_id)
+                        self.global_manager.get('rendered_images')[full_image_id] = self.image
+                    self.image = pygame.transform.scale(self.image, (self.width, self.height))
+                else: #if set to image path list
+                    self.contains_bundle = True
+                    self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
     def can_show_tooltip(self):
         '''
@@ -992,26 +1031,31 @@ class actor_image(image):
         if isinstance(new_image_description, str) and new_image_description in self.actor.image_dict:
             self.image_description = new_image_description
             self.image_id = self.actor.image_dict[new_image_description]
+        elif isinstance(new_image_description, image_bundle):
+            self.contains_bundle = True
+            self.image = new_image_description.copy()
+            self.image_id = self.image.image_id
         else:
             self.image_description = 'default'
             self.image_id = new_image_description
-        
-        if isinstance(self.image_id, str): #if set to string image path
-            self.contains_bundle = False
-            full_image_id = 'graphics/' + self.image_id
-            if full_image_id in self.global_manager.get('rendered_images'):
-                self.image = self.global_manager.get('rendered_images')[full_image_id]
-            else:
-                try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
-                    self.image = pygame.image.load(full_image_id)
-                except:
-                    print(full_image_id)
-                    self.image = pygame.image.load(full_image_id)
-                self.global_manager.get('rendered_images')[full_image_id] = self.image
-            self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        else: #if set to image path list
-            self.contains_bundle = True
-            self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
+
+        if not isinstance(new_image_description, image_bundle):
+            if isinstance(self.image_id, str): #if set to string image path
+                self.contains_bundle = False
+                full_image_id = 'graphics/' + self.image_id
+                if full_image_id in self.global_manager.get('rendered_images'):
+                    self.image = self.global_manager.get('rendered_images')[full_image_id]
+                else:
+                    try: #use if there are any image path issues to help with file troubleshooting, shows the file location in which an image was expected
+                        self.image = pygame.image.load(full_image_id)
+                    except:
+                        print(full_image_id)
+                        self.image = pygame.image.load(full_image_id)
+                    self.global_manager.get('rendered_images')[full_image_id] = self.image
+                self.image = pygame.transform.scale(self.image, (self.width, self.height))
+            else: #if set to image path list
+                self.contains_bundle = True
+                self.image = image_bundle(self, self.image_id, self.global_manager) #self.image_id
         
     def draw(self):
         '''

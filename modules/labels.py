@@ -31,7 +31,6 @@ class label(button):
             None
         '''
         self.global_manager = global_manager
-        self.global_manager.get('label_list').append(self)
         self.font_size = scaling.scale_width(25, global_manager)
         self.font_name = self.global_manager.get('font_name')
         self.font = pygame.font.SysFont(self.font_name, self.font_size)
@@ -84,18 +83,6 @@ class label(button):
         '''
         return
 
-    def remove(self):
-        '''
-        Description:
-            Removes this object from relevant lists and prevents it from further appearing in or affecting the program
-        Input:
-            None
-        Output:
-            None
-        '''
-        super().remove()
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
-
     def draw(self):
         '''
         Description:
@@ -106,7 +93,7 @@ class label(button):
             None
         '''
         if self.showing:
-            super().draw()
+            super().draw(allow_show_outline=False)
             self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 

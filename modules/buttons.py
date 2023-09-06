@@ -772,7 +772,7 @@ class button(interface_elements.interface_element):
         else:
             return(False)
         
-    def draw(self):
+    def draw(self, allow_show_outline=True):
         '''
         Description:
             Draws this button with a description of its keybind if it has one, along with an outline if its keybind is being pressed
@@ -782,8 +782,8 @@ class button(interface_elements.interface_element):
             None
         '''
         self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
-        if self.showing: #self.global_manager.get('current_game_mode') in self.modes:
-            if self.showing_outline and not self in self.global_manager.get('label_list'):
+        if self.showing:
+            if self.showing_outline and allow_show_outline:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)
             if self.showing_background and hasattr(self, 'color'):
                 pygame.draw.rect(self.global_manager.get('game_display'), self.color, self.Rect)

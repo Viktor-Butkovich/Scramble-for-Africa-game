@@ -39,5 +39,4 @@ try:
 except Exception: #displays error message and records error message in crash log file   
     setup.manage_crash(Exception)
 #find some solution to reorganization interface overlap, especially with construction gang
-#also look into the efficiency of image bundles and see if there is a way to improve - very important for future performance, especially on minister screen
-#^ minister screen not significantly impacted by can_show changes
+#do attempt_rumor documentation in ministers.py

@@ -205,7 +205,6 @@ class die(button):
             None
         '''
         super().remove()
-        self.global_manager.set('label_list', utility.remove_from_list(self.global_manager.get('label_list'), self))
         self.global_manager.set('dice_list', utility.remove_from_list(self.global_manager.get('dice_list'), self))
         if self.global_manager.get('displayed_mob') in self.global_manager.get('mob_list'): #only need to remove die from mob's list if mob still alive
             self.global_manager.get('displayed_mob').attached_dice_list = utility.remove_from_list(self.global_manager.get('displayed_mob').attached_dice_list, self)

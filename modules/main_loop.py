@@ -195,13 +195,12 @@ def main_loop(global_manager):
             main_loop_tools.update_display(global_manager)
         else:
             main_loop_tools.draw_loading_screen(global_manager)
-        current_time = time.time()
-        global_manager.set('current_time', current_time)
+        global_manager.set('current_time', time.time())
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
-            global_manager.set('last_selection_outline_switch', time.time())
+            global_manager.set('last_selection_outline_switch', global_manager.get('current_time'))
         global_manager.get('event_manager').update(global_manager.get('current_time'))
-        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= time.time(): #if enough time has passed based on delay from previous movement
+        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= global_manager.get('current_time'): #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
             for enemy in global_manager.get('npmob_list'):
                 if not enemy.turn_done:
@@ -299,9 +298,3 @@ def main_loop(global_manager):
             if global_manager.get('effect_manager').effect_active('fast_turn'):
                 global_manager.set('end_turn_wait_time', 0)
             global_manager.set('previous_turn_time', time.time())
-        start_time = time.time()
-        global_manager.set('start_time', start_time)
-        global_manager.set('current_time', time.time())
-        #use to test interface collection set origin - entire collection should follow mouse while retaining relative positions
-        #mouse_x, mouse_y = pygame.mouse.get_pos()
-        #global_manager.get('prosecution_info_display').set_origin(mouse_x, global_manager.get('display_height') -  mouse_y)

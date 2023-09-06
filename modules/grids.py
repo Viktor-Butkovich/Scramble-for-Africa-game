@@ -617,17 +617,12 @@ class mini_grid(grid):
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                     attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
-                    current_cell.contained_mobs = attached_cell.contained_mobs
-                    current_cell.contained_buildings = attached_cell.contained_buildings
-                    current_cell.village = attached_cell.village
-                    current_cell.set_visibility(attached_cell.visible, update_image_bundle = False)
-                    current_cell.set_terrain(attached_cell.terrain, attached_cell.terrain_variant, update_image_bundle = False)
-                    current_cell.set_resource(attached_cell.resource)
+                    current_cell.copy(attached_cell)
                 else: #if the current cell is beyond the boundaries of the attached grid, show an empty cell
                     current_cell.contained_mobs = []
-                    current_cell.set_visibility(True)
-                    current_cell.set_terrain('none')
-                    current_cell.set_resource('none')
+                    current_cell.set_visibility(True, update_image_bundle=False)
+                    current_cell.set_terrain('none', update_image_bundle=False)
+                    current_cell.set_resource('none', update_image_bundle=False)
                     current_cell.reset_buildings()
                     current_cell.tile.update_image_bundle()
             self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)

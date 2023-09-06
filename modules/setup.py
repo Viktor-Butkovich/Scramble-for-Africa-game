@@ -46,7 +46,6 @@ def fundamental_setup(global_manager):
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', start_time)
     global_manager.set('previous_turn_time', start_time)
-    global_manager.set('start_time', start_time)
     global_manager.set('current_time', start_time)
     global_manager.set('last_selection_outline_switch', start_time)
     global_manager.set('mouse_moved_time', start_time)
@@ -147,9 +146,12 @@ def misc_setup(global_manager):
     global_manager.set('enemy_turn_queue', [])
     global_manager.set('player_turn_queue', [])
     global_manager.set('exploration_mark_list', [])
-    global_manager.set('label_list', [])
     global_manager.set('interface_collection_list', [])
     global_manager.set('independent_interface_elements', [])
+    global_manager.set('dice_list', [])
+    global_manager.set('dice_roll_minister_images', [])
+    global_manager.set('combatant_images', [])
+    global_manager.set('draw_list', [])
 
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_tile', 'none')
@@ -159,9 +161,6 @@ def misc_setup(global_manager):
     global_manager.set('displayed_prosecution', 'none')
     global_manager.set('displayed_notification', 'none')
 
-    global_manager.set('dice_list', [])
-    global_manager.set('dice_roll_minister_images', [])
-    global_manager.set('combatant_images', [])
     pygame.key.set_repeat(300, 200)
     global_manager.set('crashed', False)
     global_manager.set('lmb_down', False)
@@ -204,7 +203,6 @@ def misc_setup(global_manager):
     global_manager.get('background_image_list').append(strategic_background_image)
     strategic_grid_height = 300
     strategic_grid_width = 320
-    mini_grid_height = 600
     mini_grid_width = 640
 
     global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
@@ -239,23 +237,16 @@ def misc_setup(global_manager):
     global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
     pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
 
-    #actor_display_top_y = global_manager.get('default_display_height') - 205 + 125 + 10
-    #actor_display_current_y = actor_display_top_y
-    #global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
-
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, global_manager.get('default_display_height') - 205 + 125, global_manager),
         'width': scaling.scale_width(10, global_manager), #scaling.scale_width(800, global_manager),
         'height': scaling.scale_height(10, global_manager),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
-        #'is_info_display': True,
-        #'actor_type': 'mob',
         'allow_minimize': True,
         'allow_move': True,
         'description': 'general information panel',
         'resize_with_contents': True,
-        #'image_id': 'misc/paper_less_busy.png', #'misc/default_instruction.png'#'misc/default_notification.png'
     }
     global_manager.set('info_displays_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
     anchor = global_manager.get('actor_creation_manager').create_interface_element(

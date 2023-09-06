@@ -639,7 +639,7 @@ class cell():
                     noncombatants.append(current_mob)
         return(noncombatants)
                     
-    def set_visibility(self, new_visibility, update_image_bundle = True):
+    def set_visibility(self, new_visibility, update_image_bundle=True):
         '''
         Description:
             Sets the visibility of this cell and its attached tile to the inputted value. A visible cell's terrain and resource can be seen by the player.
@@ -651,9 +651,9 @@ class cell():
         '''
         self.visible = new_visibility
         if update_image_bundle and not self.tile == 'none':
-            self.tile.update_image_bundle() #self.tile.set_visibility(new_visibility)
+            self.tile.update_image_bundle()
     
-    def set_resource(self, new_resource):
+    def set_resource(self, new_resource, update_image_bundle=True):
         '''
         Description:
             Sets the resource type of this cell and its attached tile to the inputted value
@@ -663,9 +663,9 @@ class cell():
             None
         '''
         self.resource = new_resource
-        self.tile.set_resource(new_resource)
+        self.tile.set_resource(new_resource, update_image_bundle=update_image_bundle)
 
-    def set_terrain(self, new_terrain, terrain_variant = 'none', update_image_bundle = True):
+    def set_terrain(self, new_terrain, terrain_variant = 'none', update_image_bundle=True):
         '''
         Description:
             Sets the terrain type of this cell and its attached tile to the inputted value
@@ -682,7 +682,25 @@ class cell():
         if self.tile != 'none':
             self.tile.set_terrain(new_terrain, update_image_bundle)
         self.color = self.global_manager.get('terrain_colors')[new_terrain]
-            
+
+    def copy(self, other_cell):
+        '''
+        Description:
+            Changes this cell into a copy of the inputted cell
+        Input:
+            cell other_cell: Cell to copy
+        Output:
+            None
+        '''
+        self.contained_mobs = other_cell.contained_mobs
+        self.contained_buildings = other_cell.contained_buildings
+        self.village = other_cell.village
+        self.set_visibility(other_cell.visible, update_image_bundle=False)
+        self.set_terrain(other_cell.terrain, other_cell.terrain_variant, update_image_bundle=False)
+        self.set_resource(other_cell.resource, update_image_bundle=False)
+        #self.tile.update_image_bundle(override_image=other_cell.tile.image) #correctly copies other cell's image bundle but ends up very pixellated due to size difference
+        self.tile.update_image_bundle()
+
     def draw(self):
         '''
         Description:
