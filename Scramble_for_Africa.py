@@ -39,4 +39,6 @@ try:
 except Exception: #displays error message and records error message in crash log file   
     setup.manage_crash(Exception)
 #find some solution to reorganization interface overlap, especially with construction gang
-#do attempt_rumor documentation in ministers.py
+#notification tooltips are broken - items under them are sometimes being prioritized
+#fix overlapping voicelines for 0 evidence trials - court in session and not guilty playing simultaneously
+#exploration direction icons not showing correctly, probably for not being an interface element - same issue probably for attack icons

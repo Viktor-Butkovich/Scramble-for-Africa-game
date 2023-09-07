@@ -37,6 +37,8 @@ class button(interface_elements.interface_element):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
+                'attached_label': label value - Label that this button is attached to, optional except for label-specific buttons, like disembarking a particular passenger
+                    based on which passenger label the button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -273,7 +275,7 @@ class button(interface_elements.interface_element):
                               'Press this when instructions are opened to close them'])
 
         elif self.button_type == 'merge':
-            if (not self.attached_label.actor == 'none') and self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist':
+            if self.global_manager.get('displayed_mob') != 'none' and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'evangelist':
                 self.set_tooltip(['Merges this evangelist with church volunteers in the same tile to form a group of missionaries',
                                   'Requires that an evangelist is selected in the same tile as church volunteers'])
             else:
@@ -376,7 +378,7 @@ class button(interface_elements.interface_element):
             tooltip_text = ['Cycles through this ' + self.vehicle_type + '\'s passengers']
             tooltip_text.append('Passengers: ' )
             if self.showing:
-                for current_passenger in self.attached_label.actor.contained_mobs:
+                for current_passenger in self.global_manager.get('displayed_mob').contained_mobs:
                     tooltip_text.append('    ' + current_passenger.name)
             self.set_tooltip(tooltip_text)
             
@@ -384,7 +386,7 @@ class button(interface_elements.interface_element):
             tooltip_text = ['Cycles through this  building\'s work crews']
             tooltip_text.append('Work crews: ' )
             if self.showing:
-                for current_work_crew in self.attached_label.actor.cell.get_building('resource').contained_work_crews:
+                for current_work_crew in self.global_manager.get('displayed_tile').cell.get_building('resource').contained_work_crews:
                     tooltip_text.append('    ' + current_work_crew.name)
             self.set_tooltip(tooltip_text)
             
@@ -1572,6 +1574,7 @@ class same_tile_icon(button):
         Output:
             boolean: Returns False if there is no tile selected or if the selected tile has not been explored, otherwise returns same as superclass
         '''
+        self.update()
         return(self.global_manager.get('displayed_tile') != 'none' and self.global_manager.get('displayed_tile').cell.visible
                and len(self.old_contained_mobs) > self.index and super().can_show())
 
@@ -1628,7 +1631,6 @@ class same_tile_icon(button):
         Output:
             None
         '''
-        self.update()
         if self.showing:
             if self.index == 0 and self.global_manager.get('displayed_tile') != 'none':
                 if self.global_manager.get('displayed_tile').cell.contained_mobs[0].selected:
@@ -1724,7 +1726,7 @@ class fire_unit_button(button):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
-                if self.attached_mob.controllable:
+                if self.attached_mob.is_pmob:
                     return(True)
         return(False)
 
@@ -1804,7 +1806,7 @@ class free_unit_slaves_button(button):
             if not self.attached_mob == self.global_manager.get('displayed_mob'):
                 self.attached_mob = self.global_manager.get('displayed_mob')
             if not self.attached_mob == 'none':
-                if self.attached_mob.controllable:
+                if self.attached_mob.is_pmob:
                     if (self.attached_mob.is_group and self.attached_mob.worker.worker_type == 'slave') or (self.attached_mob.is_worker and self.attached_mob.worker_type == 'slave'):
                         return(True)
         return(False)

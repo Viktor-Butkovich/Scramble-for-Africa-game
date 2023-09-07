@@ -496,7 +496,7 @@ class ship(vehicle):
         if num_ships <= 1: #can leave units behind if another steamship is present to pick them up
             if self.images[0].current_cell.terrain == 'water':
                 for current_mob in self.images[0].current_cell.contained_mobs:
-                    if current_mob.controllable and not current_mob.can_swim_at(self.images[0].current_cell):
+                    if current_mob.is_pmob and not current_mob.can_swim_at(self.images[0].current_cell):
                         text_tools.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.', self.global_manager)
                         return(False)
         return(True)

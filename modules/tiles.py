@@ -244,7 +244,8 @@ class tile(actor): #to do: make terrain tiles a subclass
         Description:
             Updates this actor's images with its current image id list, also updating the minimap grid version if applicable
         Input:
-            None
+            image_bundle override_image=None: Image bundle to update image with, setting this tile's image to a copy of the image bundle instead of generating a new image
+                bundle
         Output:
             None
         '''
@@ -255,7 +256,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         if self.grid == self.global_manager.get('strategic_map_grid'):
             equivalent_tile = self.get_equivalent_tile()
             if equivalent_tile != 'none':
-                equivalent_tile.update_image_bundle(override_image=self.image)#(override_image=override_image)
+                equivalent_tile.update_image_bundle(override_image=override_image)
             
     def set_resource(self, new_resource, update_image_bundle = True):
         '''

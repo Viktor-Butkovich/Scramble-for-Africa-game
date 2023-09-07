@@ -36,7 +36,6 @@ class npmob(mob): #if enemy.turn_done
         self.can_swim_ocean = False
         self.hostile = False
         self.can_damage_buildings = False
-        self.controllable = False
         self.is_npmob = True
         self.saves_normally = True #units like native warriors are attached to other objects and do not save normally
         self.npmob_type = 'npmob'

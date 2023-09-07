@@ -854,7 +854,7 @@ class minister_type_image(tooltip_free_image):
         if not new_minister == 'none':
             self.minister_type = new_minister.current_position #new_minister.current_position
         current_minister_type = self.minister_type
-        if (not self.attached_label == 'none') and (not self.attached_label.actor == 'none') and self.attached_label.actor.is_pmob:
+        if self.attached_label != 'none' and self.attached_label.actor != 'none' and self.attached_label.actor.is_pmob:
             current_minister_type = self.attached_label.actor.controlling_minister_type
         if not current_minister_type == 'none':
             keyword = self.global_manager.get('minister_type_dict')[current_minister_type] #type, like military

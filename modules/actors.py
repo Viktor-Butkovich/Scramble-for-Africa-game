@@ -71,7 +71,7 @@ class actor():
         save_dict = {}
         init_type = ''
         if self.actor_type == 'mob':
-            if self.controllable: #if pmob
+            if self.is_pmob:
                 if self.is_worker:
                     if self.worker_type == 'religious':
                         init_type = 'church_volunteers'

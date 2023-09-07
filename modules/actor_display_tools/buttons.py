@@ -11,88 +11,6 @@ from .. import text_tools
 from .. import game_transitions
 from .. import notification_tools
 
-class worker_crew_vehicle_button(button):
-    '''
-    Button that commands a worker to crew a vehicle in its tile
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-                'vehicle_type': string value - Type of vehicle this button crews, like 'train' or 'ship'
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.vehicle_type = input_dict['vehicle_type']
-        self.was_showing = False
-        input_dict['button_type'] = 'worker to crew'
-        super().__init__(input_dict, global_manager)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a worker to crew a vehicle in its tile
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_tools.action_possible(self.global_manager):    
-            crew = self.attached_label.actor
-            vehicle = self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, crew.worker_type)
-            if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
-                if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
-                        
-                    if crew.sentry_mode:
-                        crew.set_sentry_mode(False)
-                    if vehicle.sentry_mode:
-                        vehicle.set_sentry_mode(False)
-                    crew.crew_vehicle(vehicle)
-                else:
-                    text_tools.print_to_screen('You must select a worker in the same tile as an uncrewed ' + self.vehicle_type + ' to crew the ' + self.vehicle_type + '.', self.global_manager)
-            else:
-                if crew.worker_type == 'slave':
-                    text_tools.print_to_screen('Slave workers cannot crew vehicles.', self.global_manager)
-                elif crew.worker_type == 'African' and not self.attached_label.actor.images[0].current_cell.get_uncrewed_vehicle(self.vehicle_type, 'European') == 'none':
-                    text_tools.print_to_screen('Only European workers can crew steamships.', self.global_manager)
-                else:
-                    text_tools.print_to_screen('You must select a worker in the same tile as an uncrewed ' + self.vehicle_type + ' to crew the ' + self.vehicle_type + '.', self.global_manager)
-        else:
-            text_tools.print_to_screen('You are busy and cannot crew a ' + self.vehicle_type + '.', self.global_manager)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if a worker is not selected or if its tile does not have an uncrewed vehicle of the correct type, otherwise returns False
-        '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not (self.attached_label.actor.is_worker and not self.attached_label.actor.worker_type == 'religious')) or (not self.attached_label.actor.images[0].current_cell.has_uncrewed_vehicle(self.vehicle_type)):
-                result = False
-        if not result == self.was_showing: #if visibility changes, update actor info display
-            self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
-        self.was_showing = result
-        return(result)
-
 class embark_all_passengers_button(button):
     '''
     Button that commands a vehicle to take all other mobs in its tile as passengers
@@ -113,7 +31,6 @@ class embark_all_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -132,7 +49,7 @@ class embark_all_passengers_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            vehicle = self.attached_label.actor
+            vehicle = self.global_manager.get('displayed_mob')
             can_embark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
@@ -143,7 +60,7 @@ class embark_all_passengers_button(button):
                     vehicle.set_sentry_mode(False)
                 for contained_mob in vehicle.images[0].current_cell.contained_mobs:
                     passenger = contained_mob
-                    if passenger.controllable and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
+                    if passenger.is_pmob and not passenger.is_vehicle: #vehicles and enemies won't be picked up as passengers
                         passenger.embark_vehicle(vehicle)
                 self.global_manager.get('sound_manager').play_sound('voices/all aboard ' + str(random.randrange(1, 4)))
         else:
@@ -160,10 +77,11 @@ class embark_all_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.has_crew: #do not show if ship does not have crew
                 return(False)
-            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
-                self.vehicle_type = self.attached_label.actor.vehicle_type
+            if (not self.vehicle_type == displayed_mob.vehicle_type) and (not displayed_mob.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = displayed_mob.vehicle_type
                 self.image.set_image('buttons/embark_' + self.vehicle_type + '_button.png')
         return(result)
 
@@ -187,7 +105,6 @@ class disembark_all_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -206,7 +123,7 @@ class disembark_all_passengers_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            vehicle = self.attached_label.actor
+            vehicle = self.global_manager.get('displayed_mob')
             can_disembark = True
             if self.vehicle_type == 'train':
                 if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
@@ -232,314 +149,13 @@ class disembark_all_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.has_crew: #do not show if ship does not have crew
+            vehicle = self.global_manager.get('displayed_mob')
+            if not vehicle.has_crew: #do not show if ship does not have crew
                 return(False)
-            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
-                self.vehicle_type = self.attached_label.actor.vehicle_type
+            if (not self.vehicle_type == vehicle.vehicle_type) and (not vehicle.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
+                self.vehicle_type = vehicle.vehicle_type
                 self.image.set_image('buttons/disembark_' + self.vehicle_type + '_button.png')
         return(result)
-
-class crew_vehicle_button(button):
-    '''
-    Button that commands a vehicle to take a worker in its tile as crew. Also updates this button to reflect a train or ship depending on the selected vehicle
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.vehicle_type = 'none'
-        input_dict['button_type'] = 'crew'
-        super().__init__(input_dict, global_manager)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle to take a worker in its tile as crew
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_tools.action_possible(self.global_manager):    
-            vehicle = self.attached_label.actor
-            is_steamship = False
-            if vehicle.can_swim and vehicle.can_swim_ocean: #if steamship
-                is_steamship = True
-                crew = vehicle.images[0].current_cell.get_worker(['European'])
-            else: 
-                crew = vehicle.images[0].current_cell.get_worker(['African', 'European']) #'none'
-            
-            if (not (vehicle == 'none' or crew == 'none')) and (not vehicle.has_crew): #if vehicle and rider selected
-                if vehicle.x == crew.x and vehicle.y == crew.y: #ensure that this doesn't work across grids
-                    if crew.sentry_mode:
-                        crew.set_sentry_mode(False)
-                    if vehicle.sentry_mode:
-                        vehicle.set_sentry_mode(False)
-                    crew.crew_vehicle(vehicle)
-                else:
-                    if is_steamship:
-                        text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a European worker to crew the ' + self.vehicle_type + '.', self.global_manager)
-                    else:
-                        text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a non-slave worker to crew the ' + self.vehicle_type + '.', self.global_manager)
-            else:
-                if is_steamship:
-                    text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a European worker to crew the ' + self.vehicle_type + '.', self.global_manager)
-                else:
-                    text_tools.print_to_screen('You must select an uncrewed ' + self.vehicle_type + ' in the same tile as a non-slave worker to crew the ' + self.vehicle_type + '.', self.global_manager)
-        else:
-            text_tools.print_to_screen('You are busy and cannot crew a ' + self.vehicle_type + '.', self.global_manager)
-
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected vehicle has crew, otherwise returns same as superclass
-        '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if self.attached_label.actor.has_crew:
-                return(False)
-            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'): #update vehicle type and image when shown if type has changed, like train to ship
-                self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('buttons/crew_' + self.vehicle_type + '_button.png')
-        return(result)
-
-class uncrew_vehicle_button(button):
-    '''
-    Button that commands a vehicle's crew to leave the vehicle
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        self.vehicle_type = 'none'
-        input_dict['button_type'] = 'uncrew'
-        super().__init__(input_dict, global_manager)
-        
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn. Also updates this button to reflect a train or ship depending on the selected vehicle
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
-        '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if not self.attached_label.actor.has_crew:
-                return(False)
-            if (not self.vehicle_type == self.attached_label.actor.vehicle_type) and (not self.attached_label.actor.vehicle_type == 'vehicle'):
-                self.vehicle_type = self.attached_label.actor.vehicle_type
-                self.image.set_image('buttons/uncrew_' + self.vehicle_type + '_button.png')
-        return(result)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button commands a vehicle's crew to leave the vehicle
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_tools.action_possible(self.global_manager):
-            vehicle = self.attached_label.actor
-            crew = vehicle.crew
-            if len(vehicle.contained_mobs) == 0 and len(vehicle.get_held_commodities()) == 0:
-                crew.uncrew_vehicle(vehicle)
-                actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), vehicle)
-            else:
-                text_tools.print_to_screen('You cannot remove the crew from a ' + self.vehicle_type + ' with passengers or cargo.', self.global_manager)
-        else:
-            text_tools.print_to_screen('You are busy and cannot remove a ' + self.vehicle_type + '\'s crew.', self.global_manager)
-
-class merge_button(button):
-    '''
-    Button that merges a selected officer with a worker in the same tile to form a group
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        input_dict['button_type'] = 'merge'
-        super().__init__(input_dict, global_manager)
-        
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected mob is not an officer, otherwise returns same as superclass
-        '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if not self.attached_label.actor.is_officer:
-                return(False)
-        return(result)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button merges a selected officer with a worker in the same tile to form a group
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_tools.action_possible(self.global_manager):    
-            selected_list = actor_utility.get_selected_list(self.global_manager)
-            if len(selected_list) == 1:
-                officer = 'none'
-                worker = 'none'
-                for current_selected in selected_list:
-                    if current_selected.is_pmob and current_selected.is_officer:
-                        officer = current_selected
-                        if officer.officer_type == 'evangelist': #if evangelist, look for church volunteers
-                            worker = officer.images[0].current_cell.get_worker(['religious'])
-                        else:
-                            worker = officer.images[0].current_cell.get_worker(['African', 'European', 'slave'])
-                if not (officer == 'none' or worker == 'none'): #if worker and officer selected
-                    if officer.x == worker.x and officer.y == worker.y:
-                        if worker.sentry_mode:
-                            worker.set_sentry_mode(False)
-                        if officer.sentry_mode:
-                            officer.set_sentry_mode(False)
-                        self.global_manager.get('actor_creation_manager').create_group(worker, officer, self.global_manager)
-                    else:
-                        if (not officer == 'none') and officer.officer_type == 'evangelist':
-                            text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
-                        else:  
-                            text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
-                else:
-                    if (not officer == 'none') and officer.officer_type == 'evangelist':
-                        text_tools.print_to_screen('You must select an evangelist in the same tile as church volunteers to create missionaries.', self.global_manager)
-                    else:  
-                        text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
-            else:
-                text_tools.print_to_screen('You must select an officer in the same tile as a worker to create a group.', self.global_manager)
-        else:
-            text_tools.print_to_screen('You are busy and cannot form a group.', self.global_manager)
-
-class split_button(button):
-    '''
-    Button that splits a selected group into its component officer and worker
-    '''
-    def __init__(self, input_dict, global_manager):
-        '''
-        Description:
-            Initializes this object
-        Input:
-            dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of this element
-                'width': int value - pixel width of this element
-                'height': int value - pixel height of this element
-                'modes': string list value - Game modes during which this element can appear
-                'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
-                'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
-                'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
-                    Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
-                    - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
-            global_manager_template global_manager: Object that accesses shared variables
-        Output:
-            None
-        '''
-        input_dict['button_type'] = 'split'
-        super().__init__(input_dict, global_manager)
-        
-    def can_show(self, skip_parent_collection=False):
-        '''
-        Description:
-            Returns whether this button should be drawn
-        Input:
-            None
-        Output:
-            boolean: Returns False if the selected mob is not a group, otherwise returns same as superclass
-        '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if not self.attached_label.actor.is_group:
-                return(False)
-        return(result)
-
-    def on_click(self):
-        '''
-        Description:
-            Does a certain action when clicked or when corresponding key is pressed, depending on button_type. This type of button splits a selected group into its component officer and worker
-        Input:
-            None
-        Output:
-            None
-        '''
-        if main_loop_tools.action_possible(self.global_manager):         
-            displayed_mob = self.global_manager.get('displayed_mob')
-            if (not displayed_mob == 'none') and displayed_mob.is_group:
-                if not (displayed_mob.can_hold_commodities and len(displayed_mob.get_held_commodities()) > 0): #do not disband if trying to disband a porter who is carrying commodities
-                    displayed_mob.disband()
-                else:
-                    text_tools.print_to_screen('You cannot split a unit that is carrying commodities.', self.global_manager)
-            else:
-                text_tools.print_to_screen('Only a group can be split it into a worker and an officer.', self.global_manager)
-        else:
-            text_tools.print_to_screen('You are busy and cannot split a group.', self.global_manager)
 
 class enable_sentry_mode_button(button):
     '''
@@ -561,7 +177,6 @@ class enable_sentry_mode_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -580,9 +195,10 @@ class enable_sentry_mode_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_pmob:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 return(False)
-            elif self.attached_label.actor.sentry_mode:
+            elif displayed_mob.sentry_mode:
                 return(False)
         return(result)
 
@@ -595,12 +211,13 @@ class enable_sentry_mode_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):         
-            self.attached_label.actor.set_sentry_mode(True)
+        if main_loop_tools.action_possible(self.global_manager):   
+            displayed_mob = self.global_manager.get('displayed_mob')      
+            displayed_mob.set_sentry_mode(True)
             if (self.global_manager.get('effect_manager').effect_active('promote_on_sentry') 
-            and (self.attached_label.actor.is_group or self.attached_label.actor.is_officer) 
-            and not self.attached_label.actor.veteran): #purely for promotion testing, not normal functionality
-                self.attached_label.actor.promote()
+            and (displayed_mob.is_group or displayed_mob.is_officer) 
+            and not displayed_mob.veteran): #purely for promotion testing, not normal functionality
+                displayed_mob.promote()
         else:
             text_tools.print_to_screen('You are busy and cannot enable sentry mode.', self.global_manager)
 
@@ -624,7 +241,6 @@ class disable_sentry_mode_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -643,9 +259,10 @@ class disable_sentry_mode_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_pmob:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 return(False)
-            elif not self.attached_label.actor.sentry_mode:
+            elif not displayed_mob.sentry_mode:
                 return(False)
         return(result)
 
@@ -658,9 +275,10 @@ class disable_sentry_mode_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):         
-            self.attached_label.actor.set_sentry_mode(False)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
+        if main_loop_tools.action_possible(self.global_manager):
+            displayed_mob = self.global_manager.get('displayed_mob')     
+            displayed_mob.set_sentry_mode(False)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
         else:
             text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
@@ -684,7 +302,6 @@ class enable_automatic_replacement_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -705,17 +322,18 @@ class enable_automatic_replacement_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_pmob:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 return(False)
-            elif self.attached_label.actor.is_vehicle:
+            elif displayed_mob.is_vehicle:
                 return(False)
-            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+            elif displayed_mob.is_group and self.target_type == 'unit':
                 return(False)
-            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+            elif (not displayed_mob.is_group) and (not self.target_type == 'unit'):
                 return(False)
-            elif ((self.target_type == 'unit' and self.attached_label.actor.automatically_replace) or 
-                (self.target_type == 'worker' and self.attached_label.actor.worker.automatically_replace) or 
-                (self.target_type == 'officer' and self.attached_label.actor.officer.automatically_replace)):
+            elif ((self.target_type == 'unit' and displayed_mob.automatically_replace) or 
+                (self.target_type == 'worker' and displayed_mob.worker.automatically_replace) or 
+                (self.target_type == 'officer' and displayed_mob.officer.automatically_replace)):
                 return(False)
         return(result)
 
@@ -728,13 +346,14 @@ class enable_automatic_replacement_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):         
+        if main_loop_tools.action_possible(self.global_manager):     
+            displayed_mob = self.global_manager.get('displayed_mob')    
             if self.target_type == 'unit':
-                target = self.attached_label.actor
+                target = displayed_mob
             elif self.target_type == 'worker':
-                target = self.attached_label.actor.worker
+                target = displayed_mob.worker
             elif self.target_type == 'officer':
-                target = self.attached_label.actor.officer         
+                target = displayed_mob.officer         
             target.set_automatically_replace(True)
         else:
             text_tools.print_to_screen('You are busy and cannot enable automatic replacement.', self.global_manager)
@@ -759,7 +378,6 @@ class disable_automatic_replacement_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'target_type': string value - Type of unit/subunit targeted by this button, such as 'unit', 'officer', or 'worker'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -780,17 +398,18 @@ class disable_automatic_replacement_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_pmob:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 return(False)
-            elif self.attached_label.actor.is_vehicle:
+            elif displayed_mob.is_vehicle:
                 return(False)
-            elif self.attached_label.actor.is_group and self.target_type == 'unit':
+            elif displayed_mob.is_group and self.target_type == 'unit':
                 return(False)
-            elif (not self.attached_label.actor.is_group) and (not self.target_type == 'unit'):
+            elif (not displayed_mob.is_group) and (not self.target_type == 'unit'):
                 return(False)
-            elif ((self.target_type == 'unit' and not self.attached_label.actor.automatically_replace) or 
-                (self.target_type == 'worker' and not self.attached_label.actor.worker.automatically_replace) or 
-                (self.target_type == 'officer' and not self.attached_label.actor.officer.automatically_replace)):
+            elif ((self.target_type == 'unit' and not displayed_mob.automatically_replace) or 
+                (self.target_type == 'worker' and not displayed_mob.worker.automatically_replace) or 
+                (self.target_type == 'officer' and not displayed_mob.officer.automatically_replace)):
                 return(False)
         return(result)
 
@@ -804,12 +423,13 @@ class disable_automatic_replacement_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
+            displayed_mob = self.global_manager.get('displayed_mob')
             if self.target_type == 'unit':
-                target = self.attached_label.actor
+                target = displayed_mob
             elif self.target_type == 'worker':
-                target = self.attached_label.actor.worker
+                target = displayed_mob.worker
             elif self.target_type == 'officer':
-                target = self.attached_label.actor.officer         
+                target = displayed_mob.officer         
             target.set_automatically_replace(False)
         else:
             text_tools.print_to_screen('You are busy and cannot disable automatic replacement.', self.global_manager)
@@ -834,7 +454,6 @@ class end_unit_turn_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -853,9 +472,10 @@ class end_unit_turn_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_pmob:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 return(False)
-            elif not self.attached_label.actor in self.global_manager.get('player_turn_queue'):
+            elif not displayed_mob in self.global_manager.get('player_turn_queue'):
                 return(False)
         return(result)
 
@@ -869,7 +489,7 @@ class end_unit_turn_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            self.attached_label.actor.remove_from_turn_queue()
+            self.global_manager.get('displayed_mob').remove_from_turn_queue()
             game_transitions.cycle_player_turn(self.global_manager)
         else:
             text_tools.print_to_screen('You are busy and cannot end this unit\'s turn.', self.global_manager)
@@ -1028,7 +648,6 @@ class embark_vehicle_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'vehicle_type': string value - Type of vehicle this button embarks, like 'train' or 'ship'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -1050,15 +669,16 @@ class embark_vehicle_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.controllable:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_pmob:
                 result = False
-            elif self.attached_label.actor.in_vehicle or self.attached_label.actor.is_vehicle:
+            elif displayed_mob.in_vehicle or displayed_mob.is_vehicle:
                 result = False
-            elif not self.attached_label.actor.actor_type == 'minister' and not self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
+            elif not displayed_mob.actor_type == 'minister' and not displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
                 result = False
         if not result == self.was_showing: #if visibility changes, update actor info display
             self.was_showing = result
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob)
         self.was_showing = result
         return(result)
     
@@ -1072,9 +692,10 @@ class embark_vehicle_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            if self.attached_label.actor.images[0].current_cell.has_vehicle(self.vehicle_type):
-                vehicle = self.attached_label.actor.images[0].current_cell.get_vehicle(self.vehicle_type)
-                rider = self.attached_label.actor
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.images[0].current_cell.has_vehicle(self.vehicle_type):
+                vehicle = displayed_mob.images[0].current_cell.get_vehicle(self.vehicle_type)
+                rider = displayed_mob
                 can_embark = True
                 if vehicle.vehicle_type == 'train':
                     if vehicle.images[0].current_cell.contained_buildings['train_station'] == 'none':
@@ -1112,7 +733,6 @@ class cycle_passengers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1132,11 +752,12 @@ class cycle_passengers_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if not self.attached_label.actor.is_vehicle:
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if not displayed_mob.is_vehicle:
                 return(False)
-            elif not len(self.attached_label.actor.contained_mobs) > 3: #only show if vehicle with 3+ passengers
+            elif not len(displayed_mob.contained_mobs) > 3: #only show if vehicle with 3+ passengers
                 return(False)
-            self.vehicle_type = self.attached_label.actor.vehicle_type
+            self.vehicle_type = displayed_mob.vehicle_type
         return(result)
     
     def on_click(self):
@@ -1149,9 +770,10 @@ class cycle_passengers_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            moved_mob = self.attached_label.actor.contained_mobs.pop(0)
-            self.attached_label.actor.contained_mobs.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.attached_label.actor) #updates mob info display list to show changed passenger order
+            displayed_mob = self.global_manager.get('displayed_mob')
+            moved_mob = displayed_mob.contained_mobs.pop(0)
+            displayed_mob.contained_mobs.append(moved_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), displayed_mob) #updates mob info display list to show changed passenger order
         else:
             text_tools.print_to_screen('You are busy and cannot cycle passengers.', self.global_manager)
 
@@ -1195,10 +817,11 @@ class cycle_work_crews_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if self.attached_label.actor.cell.contained_buildings['resource'] == 'none':
+            displayed_tile = self.global_manager.get('displayed_tile')
+            if displayed_tile.cell.contained_buildings['resource'] == 'none':
                 self.previous_showing_result = False
                 return(False)
-            elif not len(self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews) > 3: #only show if building with 3+ work crews
+            elif not len(displayed_tile.cell.contained_buildings['resource'].contained_work_crews) > 3: #only show if building with 3+ work crews
                 self.previous_showing_result = False
                 return(False)
         if self.previous_showing_result == False and result == True:
@@ -1217,9 +840,10 @@ class cycle_work_crews_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            moved_mob = self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.pop(0)
-            self.attached_label.actor.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_label.actor) #updates tile info display list to show changed work crew order
+            displayed_tile = self.global_manager.get('displayed_tile')
+            moved_mob = displayed_tile.cell.contained_buildings['resource'].contained_work_crews.pop(0)
+            displayed_tile.cell.contained_buildings['resource'].contained_work_crews.append(moved_mob)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), displayed_tile) #updates tile info display list to show changed work crew order
         else:
             text_tools.print_to_screen('You are busy and cannot cycle work crews.', self.global_manager)
 
@@ -1243,7 +867,6 @@ class work_crew_to_building_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'building_type': string value - Type of buliding this button attaches workers to, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -1264,8 +887,8 @@ class work_crew_to_building_button(button):
         Output:
             None
         '''
-        self.attached_work_crew = self.attached_label.actor
-        if (not self.attached_work_crew == 'none') and self.attached_work_crew.is_work_crew:
+        self.attached_work_crew = self.global_manager.get('displayed_mob')
+        if self.attached_work_crew != 'none' and self.attached_work_crew.is_work_crew:
             self.attached_building = self.attached_work_crew.images[0].current_cell.get_intact_building(self.building_type)
         else:
             self.attached_building = 'none'
@@ -1279,12 +902,8 @@ class work_crew_to_building_button(button):
         Output:
             boolean: Returns False if the selected mob is not a work crew, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
         self.update_info()
-        if result:
-            if (not self.attached_work_crew == 'none') and not (self.attached_work_crew.is_work_crew): #if selected but not worker, return false
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.attached_work_crew != 'none' and self.attached_work_crew.is_work_crew)
     
     def update_tooltip(self):
         '''
@@ -1350,7 +969,6 @@ class trade_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1367,11 +985,7 @@ class trade_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of trading, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_trade):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_trade)
 
     def on_click(self):
         '''
@@ -1383,7 +997,7 @@ class trade_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trade']:
                     current_cell = current_mob.images[0].current_cell
@@ -1429,7 +1043,6 @@ class convert_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1446,11 +1059,7 @@ class convert_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_convert):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_convert)
 
     def on_click(self):
         '''
@@ -1462,7 +1071,7 @@ class convert_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['conversion']:
                     current_cell = current_mob.images[0].current_cell
@@ -1506,7 +1115,6 @@ class rumor_search_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1523,11 +1131,7 @@ class rumor_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_explore):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_explore)
 
     def on_click(self):
         '''
@@ -1540,7 +1144,7 @@ class rumor_search_button(button):
         '''
         if not self.global_manager.get('current_lore_mission') == 'none':
             if main_loop_tools.action_possible(self.global_manager):
-                current_mob = self.attached_label.actor
+                current_mob = self.global_manager.get('displayed_mob')
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['rumor_search']:
                         current_cell = current_mob.images[0].current_cell
@@ -1589,7 +1193,6 @@ class artifact_search_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1606,11 +1209,7 @@ class artifact_search_button(button):
         Output:
             boolean: Returns False if the selected mob is not an expedition, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_explore):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_explore)
 
     def on_click(self):
         '''
@@ -1621,9 +1220,9 @@ class artifact_search_button(button):
         Output:
             None
         '''
-        if not self.global_manager.get('current_lore_mission') == 'none':
+        if self.global_manager.get('current_lore_mission') != 'none':
             if main_loop_tools.action_possible(self.global_manager):
-                current_mob = self.attached_label.actor
+                current_mob = self.global_manager.get('displayed_mob')
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['artifact_search']:
                         if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(current_mob.x, current_mob.y):
@@ -1662,7 +1261,6 @@ class capture_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1679,11 +1277,7 @@ class capture_slaves_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.is_battalion):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_battalion)
 
     def on_click(self):
         '''
@@ -1695,7 +1289,7 @@ class capture_slaves_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['slave_capture']:
                     current_cell = current_mob.images[0].current_cell
@@ -1736,7 +1330,6 @@ class suppress_slave_trade_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1753,11 +1346,7 @@ class suppress_slave_trade_button(button):
         Output:
             boolean: Returns False if the selected mob is not a group of missionaries, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.is_battalion):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_battalion)
 
     def on_click(self):
         '''
@@ -1769,7 +1358,7 @@ class suppress_slave_trade_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['suppress_slave_trade']:
                     current_cell = current_mob.images[0].current_cell
@@ -1810,7 +1399,6 @@ class evangelist_campaign_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'campaign_type': string value - Type of evanglist campaign started by this button, like 'religious campaign' or 'public relations campaign'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -1828,11 +1416,7 @@ class evangelist_campaign_button(button):
         Output:
             boolean: Returns False if the selected mob is not an evangelist, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'evangelist')):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'evangelist')
 
     def on_click(self):
         '''
@@ -1845,7 +1429,7 @@ class evangelist_campaign_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('europe_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.button_type == 'religious campaign':
@@ -1891,7 +1475,6 @@ class take_loan_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1908,11 +1491,7 @@ class take_loan_button(button):
         Output:
             boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'merchant')
 
     def on_click(self):
         '''
@@ -1924,7 +1503,7 @@ class take_loan_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('europe_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['loan']:
@@ -1961,7 +1540,6 @@ class labor_broker_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -1978,13 +1556,13 @@ class labor_broker_button(button):
         Output:
             boolean: Returns False if the selected mob is not an officer, a steamship, or a non-steamship vehicle without crew, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not ((self.attached_label.actor.is_officer and not self.attached_label.actor.officer_type == 'evangelist') or (self.attached_label.actor.is_vehicle and self.attached_label.actor.crew == 'none'))):
-                return(False)
-            elif self.attached_label.actor.is_vehicle and self.attached_label.actor.can_swim_ocean:
-                return(False)
-        return(result)
+        if super().can_show(skip_parent_collection=skip_parent_collection):
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.is_officer and displayed_mob.officer_type != 'evangelist':
+                return(True)
+            elif displayed_mob.is_vehicle and not (displayed_mob.can_swim_ocean or displayed_mob.has_crew):
+                return(True)
+        return(False)
 
     def on_click(self):
         '''
@@ -1996,7 +1574,7 @@ class labor_broker_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                 if current_mob.images[0].current_cell.has_intact_building('port'):
                     cost_info_list = self.get_cost()
@@ -2035,7 +1613,7 @@ class labor_broker_button(button):
         lowest_cost = 0
         for current_village in self.global_manager.get('village_list'):
             if current_village.population > 0:
-                distance = int(utility.find_object_distance(current_village, self.attached_label.actor))
+                distance = int(utility.find_object_distance(current_village, self.global_manager.get('displayed_mob')))
                 cost = (5 * current_village.aggressiveness) + distance
                 if cost < lowest_cost or lowest_cost_village == 'none':
                     lowest_cost_village = current_village
@@ -2065,7 +1643,6 @@ class advertising_campaign_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2082,11 +1659,7 @@ class advertising_campaign_button(button):
         Output:
             boolean: Returns False if the selected mob is not a merchant, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not (self.attached_label.actor.is_officer and self.attached_label.actor.officer_type == 'merchant')):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_officer and self.global_manager.get('displayed_mob').officer_type == 'merchant')
 
     def on_click(self):
         '''
@@ -2099,7 +1672,7 @@ class advertising_campaign_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('europe_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['advertising_campaign']:
@@ -2140,7 +1713,6 @@ class track_beasts_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2157,11 +1729,7 @@ class track_beasts_button(button):
         Output:
             boolean: Returns False if the selected mob is not a safari, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not (self.attached_label.actor.is_group and self.attached_label.actor.is_safari)):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_group and self.global_manager.get('displayed_mob').is_safari)
 
     def on_click(self):
         '''
@@ -2173,7 +1741,7 @@ class track_beasts_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if self.global_manager.get('strategic_map_grid') in current_mob.grids:
                 if current_mob.movement_points >= 1:
                     if self.global_manager.get('money') >= self.global_manager.get('action_prices')['track_beasts']:
@@ -2210,7 +1778,6 @@ class switch_theatre_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2229,7 +1796,7 @@ class switch_theatre_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            current_mob = self.attached_label.actor
+            current_mob = self.global_manager.get('displayed_mob')
             if current_mob.movement_points >= 1:
                 if not (self.global_manager.get('strategic_map_grid') in current_mob.grids and (current_mob.y > 1 or (current_mob.y == 1 and not current_mob.images[0].current_cell.has_intact_building('port')))): #can leave if in ocean or if in coastal port
                     if current_mob.can_leave(): #not current_mob.grids[0] in self.destination_grids and
@@ -2258,13 +1825,7 @@ class switch_theatre_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of traveling between theatres, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if not self.attached_label.actor.controllable:
-                return(False)
-            if (not self.attached_label.actor.can_travel()): 
-                return(False)
-        return(result) 
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').is_pmob and self.global_manager.get('displayed_mob').can_travel())
 
 class build_train_button(button):
     '''
@@ -2286,7 +1847,6 @@ class build_train_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2303,11 +1863,7 @@ class build_train_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_construct):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_construct)
 
     def on_click(self):
         '''
@@ -2319,15 +1875,16 @@ class build_train_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            if self.attached_label.actor.movement_points >= 1:
-                cost = actor_utility.get_building_cost(self.global_manager, self.attached_label.actor, 'train')
-                if self.global_manager.get('money') >= cost: #self.global_manager.get('building_prices')['train']:
-                    if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
-                        if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                            if self.attached_label.actor.images[0].current_cell.has_intact_building('train_station'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                if self.attached_label.actor.ministers_appointed():
-                                    if self.attached_label.actor.sentry_mode:
-                                        self.attached_label.actor.set_sentry_mode(False)
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.movement_points >= 1:
+                cost = actor_utility.get_building_cost(self.global_manager, displayed_mob, 'train')
+                if self.global_manager.get('money') >= cost:
+                    if not self.global_manager.get('europe_grid') in displayed_mob.grids:
+                        if not displayed_mob.images[0].current_cell.terrain == 'water':
+                            if displayed_mob.images[0].current_cell.has_intact_building('train_station'):
+                                if displayed_mob.ministers_appointed():
+                                    if displayed_mob.sentry_mode:
+                                        displayed_mob.set_sentry_mode(False)
                                     self.construct()
                             else:
                                 text_tools.print_to_screen('A train can only be assembled on a train station.', self.global_manager)
@@ -2339,7 +1896,7 @@ class build_train_button(button):
                     text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to assemble a train.', self.global_manager)
             else:
                 text_tools.print_to_screen('You do not have enough movement points to assemble a train.', self.global_manager)
-                text_tools.print_to_screen('You have ' + str(self.attached_label.actor.movement_points) + ' movement points while 1 is required.', self.global_manager)
+                text_tools.print_to_screen('You have ' + str(displayed_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
         else:
             text_tools.print_to_screen('You are busy and cannot build a train.', self.global_manager)
 
@@ -2355,7 +1912,7 @@ class build_train_button(button):
         building_info_dict = {}
         building_info_dict['building_type'] = 'train'
         building_info_dict['building_name'] = 'train'
-        self.attached_label.actor.start_construction(building_info_dict)
+        self.global_manager.get('displayed_mob').start_construction(building_info_dict)
 
 class build_steamboat_button(button):
     '''
@@ -2377,7 +1934,6 @@ class build_steamboat_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -2394,11 +1950,7 @@ class build_steamboat_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of constructing buildings, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
-            if (not self.attached_label.actor.can_construct):
-                return(False)
-        return(result)
+        return(super().can_show(skip_parent_collection=skip_parent_collection) and self.global_manager.get('displayed_mob').can_construct)
 
     def on_click(self):
         '''
@@ -2410,16 +1962,17 @@ class build_steamboat_button(button):
             None
         '''
         if main_loop_tools.action_possible(self.global_manager):
-            if self.attached_label.actor.movement_points >= 1:
-                cost = actor_utility.get_building_cost(self.global_manager, self.attached_label.actor, 'steamboat')
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.movement_points >= 1:
+                cost = actor_utility.get_building_cost(self.global_manager, displayed_mob, 'steamboat')
                 if self.global_manager.get('money') >= cost:
-                    if not self.global_manager.get('europe_grid') in self.attached_label.actor.grids:
-                        if not self.attached_label.actor.images[0].current_cell.terrain == 'water':
-                            if self.attached_label.actor.images[0].current_cell.has_intact_building('port'): #not self.attached_label.actor.images[0].current_cell.contained_buildings['train_station'] == 'none': #if train station present
-                                if self.attached_label.actor.adjacent_to_river():
-                                    if self.attached_label.actor.ministers_appointed():
-                                        if self.attached_label.actor.sentry_mode:
-                                            self.attached_label.actor.set_sentry_mode(False)
+                    if not self.global_manager.get('europe_grid') in displayed_mob.grids:
+                        if not displayed_mob.images[0].current_cell.terrain == 'water':
+                            if displayed_mob.images[0].current_cell.has_intact_building('port'):
+                                if displayed_mob.adjacent_to_river():
+                                    if displayed_mob.ministers_appointed():
+                                        if displayed_mob.sentry_mode:
+                                            displayed_mob.set_sentry_mode(False)
                                         self.construct()
                                 else:
                                     text_tools.print_to_screen('A steamboat assembled here would not be able to access any rivers.', self.global_manager)
@@ -2433,7 +1986,7 @@ class build_steamboat_button(button):
                     text_tools.print_to_screen('You do not have the ' + str(cost) + ' money needed to assemble a steamboat.', self.global_manager)
             else:
                 text_tools.print_to_screen('You do not have enough movement points to assemble a steamboat.', self.global_manager)
-                text_tools.print_to_screen('You have ' + str(self.attached_label.actor.movement_points) + ' movement points while 1 is required.', self.global_manager)
+                text_tools.print_to_screen('You have ' + str(displayed_mob.movement_points) + ' movement points while 1 is required.', self.global_manager)
         else:
             text_tools.print_to_screen('You are busy and cannot build a train.', self.global_manager)
 
@@ -2449,9 +2002,9 @@ class build_steamboat_button(button):
         building_info_dict = {}
         building_info_dict['building_type'] = 'steamboat'
         building_info_dict['building_name'] = 'steamboat'
-        self.attached_label.actor.start_construction(building_info_dict)
+        self.global_manager.get('displayed_mob').start_construction(building_info_dict)
 
-class construction_button(button): #coordinates, width, height, keybind_id, modes, image_id, attached_label, global_manager
+class construction_button(button):
     '''
     Button that commands a group to construct a certain type of building
     '''
@@ -2471,7 +2024,6 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'building_type': Type of building built by this button, like 'resource'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -2523,8 +2075,8 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
         Output:
             None
         '''
-        self.attached_mob = self.attached_label.actor #new_attached_mob
-        if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
+        self.attached_mob = self.global_manager.get('displayed_mob')
+        if self.attached_mob != 'none' and self.attached_mob.images[0].current_cell != 'none':
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
             if self.attached_mob.can_construct:
                 if self.building_type == 'resource':
@@ -2571,14 +2123,15 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
         if result:
             self.update_info()
             can_create = 'none'
+            displayed_mob = self.global_manager.get('displayed_mob')
             if self.requirement == 'can_construct':
-                can_create = self.attached_label.actor.can_construct
+                can_create = displayed_mob.can_construct
             elif self.requirement == 'can_trade':
-                can_create = self.attached_label.actor.can_trade
+                can_create = displayed_mob.can_trade
             elif self.requirement == 'can_convert':
-                can_create = self.attached_label.actor.can_convert
+                can_create = displayed_mob.can_convert
             elif self.requirement == 'is_battalion':
-                can_create = self.attached_label.actor.is_battalion
+                can_create = displayed_mob.is_battalion
             if not can_create: #show if unit selected can create this building
                 return(False)
             if not self.attached_tile == 'none':
@@ -2680,33 +2233,34 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
                     if current_building == 'none' or (self.building_name in ['railroad', 'railroad_bridge'] and current_building.is_road): #able to upgrade to railroad even though road is present, later add this to all upgradable buildings
                         if self.global_manager.get('strategic_map_grid') in self.attached_mob.grids:
                             if self.building_name in ['road_bridge', 'railroad_bridge'] or not self.attached_tile.cell.terrain == 'water':
-                                if self.attached_label.actor.ministers_appointed():
+                                displayed_mob = self.global_manager.get('displayed_mob')
+                                if displayed_mob.ministers_appointed():
                                     if self.building_type == 'resource':
                                         if not self.attached_resource == 'none':
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
+                                            if displayed_mob.sentry_mode:
+                                                displayed_mob.set_sentry_mode(False)
                                             self.construct()
                                         else:
                                             text_tools.print_to_screen('This building can only be built in tiles with resources.', self.global_manager)
                                     elif self.building_type == 'port':
                                         if self.attached_mob.adjacent_to_water():
                                             if not self.attached_mob.images[0].current_cell.terrain == 'water':
-                                                if self.attached_label.actor.sentry_mode:
-                                                    self.attached_label.actor.set_sentry_mode(False)
+                                                if displayed_mob.sentry_mode:
+                                                    displayed_mob.set_sentry_mode(False)
                                                 self.construct()
                                         else:
                                             text_tools.print_to_screen('This building can only be built in tiles adjacent to discovered water.', self.global_manager)
                                     elif self.building_type == 'train_station':
                                         if self.attached_tile.cell.has_intact_building('railroad'):
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
+                                            if displayed_mob.sentry_mode:
+                                                displayed_mob.set_sentry_mode(False)
                                             self.construct()
                                         else:
                                             text_tools.print_to_screen('This building can only be built on railroads.', self.global_manager)
                                     elif self.building_type == 'trading_post' or self.building_type == 'mission':
                                         if self.attached_tile.cell.has_building('village'):
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
+                                            if displayed_mob.sentry_mode:
+                                                displayed_mob.set_sentry_mode(False)
                                             self.construct()
                                         else:
                                             text_tools.print_to_screen('This building can only be built in villages.', self.global_manager)
@@ -2724,15 +2278,15 @@ class construction_button(button): #coordinates, width, height, keybind_id, mode
                                                 if left_cell.visible and down_cell.visible:
                                                     passed = True
                                         if passed:
-                                            if self.attached_label.actor.sentry_mode:
-                                                self.attached_label.actor.set_sentry_mode(False)
+                                            if displayed_mob.sentry_mode:
+                                                displayed_mob.set_sentry_mode(False)
                                             self.construct()
                                         else:
                                             text_tools.print_to_screen('A bridge can only be built on a river tile between 2 discovered land tiles', self.global_manager)
 
-                                    else: # self.building_type in ['infrastructure', 'fort']:
-                                        if self.attached_label.actor.sentry_mode:
-                                            self.attached_label.actor.set_sentry_mode(False)
+                                    else:
+                                        if displayed_mob.sentry_mode:
+                                            displayed_mob.set_sentry_mode(False)
                                         self.construct()
                             else:
                                 text_tools.print_to_screen('This building cannot be built in water.', self.global_manager)
@@ -2787,7 +2341,6 @@ class repair_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'building_type': string value - Type of building built by this button, like 'resource building'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -2823,7 +2376,7 @@ class repair_button(button):
         Output:
             None
         '''
-        self.attached_mob = self.attached_label.actor
+        self.attached_mob = self.global_manager.get('displayed_mob')
         if self.building_type == 'resource':
             if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
                 self.attached_tile = self.attached_mob.images[0].current_cell.tile
@@ -2856,9 +2409,10 @@ class repair_button(button):
         '''
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
-            if self.attached_label.actor.can_construct or (self.attached_label.actor.can_trade and self.requirement == 'can_trade') or (self.attached_label.actor.can_convert and self.requirement == 'can_convert') or (self.attached_label.actor.is_battalion and self.requirement == 'is_battalion'):
+            displayed_mob = self.global_manager.get('displayed_mob')
+            if displayed_mob.can_construct or (displayed_mob.can_trade and self.requirement == 'can_trade') or (displayed_mob.can_convert and self.requirement == 'can_convert') or (displayed_mob.is_battalion and self.requirement == 'is_battalion'):
                 #construction gangs can repair all buildings, caravans can only repair trading posts, missionaries can only repair missions, battalions can only repair forts
-                attached_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
+                attached_building = displayed_mob.images[0].current_cell.get_building(self.building_type)
                 if (not attached_building == 'none') and attached_building.damaged:
                     self.update_info()
                     return(result)
@@ -2892,7 +2446,7 @@ class repair_button(button):
         '''
         if main_loop_tools.action_possible(self.global_manager):
             if self.attached_mob.movement_points >= 1:
-                attached_building = self.attached_label.actor.images[0].current_cell.get_building(self.building_type)
+                attached_building = self.attached_mob.images[0].current_cell.get_building(self.building_type)
                 cost = attached_building.get_repair_cost()
                 if self.global_manager.get('money') >= cost: #self.global_manager.get('building_prices')[self.building_type] / 2:
                     if self.attached_mob.sentry_mode:
@@ -2942,7 +2496,6 @@ class upgrade_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'base_building_type': string value - Type of building upgraded by ths button, like 'resource building'
                 'upgrade_type': string value - Aspect of building upgraded by this button, like 'scale' or 'efficiency'
             global_manager_template global_manager: Object that accesses shared variables
@@ -2968,7 +2521,7 @@ class upgrade_button(button):
             None
         '''
         self.attached_building = 'none'
-        self.attached_mob = self.attached_label.actor #new_attached_mob
+        self.attached_mob = self.global_manager.get('displayed_mob')
         if (not self.attached_mob == 'none') and (not self.attached_mob.images[0].current_cell == 'none'):
             self.attached_tile = self.attached_mob.images[0].current_cell.tile
             if self.attached_mob.can_construct:
@@ -2984,14 +2537,10 @@ class upgrade_button(button):
         Output:
             boolean: Returns False if the selected mob is not capable of upgrading buildings or if there is no valid building in its tile to upgrade, otherwise returns same as superclass
         '''
-        result = super().can_show(skip_parent_collection=skip_parent_collection)
-        if result:
+        if super().can_show(skip_parent_collection=skip_parent_collection):
             self.update_info()
-            if (not self.attached_label.actor.can_construct): #show if unit selected can create this building
-                return(False)
-            if self.attached_building == 'none' or not self.attached_building.can_upgrade(self.upgrade_type):
-                return(False)
-        return(result) 
+            return(self.global_manager.get('displayed_mob').can_construct and self.attached_building != 'none' and self.attached_building.can_upgrade(self.upgrade_type))
+        return(False)
 
     def update_tooltip(self):
         '''
@@ -3029,7 +2578,7 @@ class upgrade_button(button):
         if main_loop_tools.action_possible(self.global_manager):
             if self.attached_mob.movement_points >= 1:
                 if self.global_manager.get('money') >= self.attached_building.get_upgrade_cost():
-                    if self.attached_label.actor.ministers_appointed():
+                    if self.global_manager.get('displayed_mob').ministers_appointed():
                         if self.attached_mob.sentry_mode:
                             self.attached_mob.set_sentry_mode(False)        
                         building_info_dict = {}
@@ -3061,7 +2610,6 @@ class appoint_minister_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
                 'appoint_type': string value - Office appointed to by this button, like 'Minister of Trade'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -3123,7 +2671,6 @@ class remove_minister_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -3191,7 +2738,6 @@ class to_trial_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -3260,13 +2806,12 @@ class active_investigation_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'active investigation'
-        input_dict['modes'] = input_dict['attached_label'].modes
+        input_dict['modes'] = ['ministers']
         input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
         super().__init__(input_dict, global_manager)
 
@@ -3326,13 +2871,12 @@ class fabricate_evidence_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'fabricate evidence'
-        input_dict['modes'] = input_dict['attached_label'].modes
+        input_dict['modes'] = ['trial', 'ministers']
         input_dict['image_id'] = 'buttons/fabricate_evidence_button.png'
         super().__init__(input_dict, global_manager)
 
@@ -3388,13 +2932,12 @@ class bribe_judge_button(button):
                 'parent_collection' = 'none': interface_collection value - Interface collection that this element directly reports to, not passed for independent element
                 'color': string value - Color in the color_dict dictionary for this button when it has no image, like 'bright blue'
                 'keybind_id' = 'none': pygame key object value: Determines the keybind id that activates this button, like pygame.K_n, not passed for no-keybind buttons
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
         '''
         input_dict['button_type'] = 'bribe judge'
-        input_dict['modes'] = input_dict['attached_label'].modes
+        input_dict['modes'] = ['trial']
         input_dict['image_id'] = 'buttons/bribe_judge_button.png'
         super().__init__(input_dict, global_manager)
 
@@ -3467,7 +3010,6 @@ class hire_african_workers_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
                 'hire_source_type': string value - Type of location workers are hired from, like 'village' or 'slums'
             global_manager_template global_manager: Object that accesses shared variables
         Output:
@@ -3537,7 +3079,6 @@ class buy_slaves_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -3601,7 +3142,6 @@ class automatic_route_button(button):
                 'image_id': string/dictionary/list value - String file path/offset image dictionary/combined list used for this object's image bundle
                     Example of possible image_id: ['mobs/default/button.png', {'image_id': 'mobs/default/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
                     - Signifies default button image overlayed by a default mob image scaled to 0.95x size
-                'attached_label': label value - Label that this button is attached to
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None

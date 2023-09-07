@@ -733,6 +733,16 @@ class minister():
         self.display_message(message)
 
     def attempt_rumor(self, rumor_type, prosecutor):
+        '''
+        Description:
+            Orders the inputted prosecutor to attempt to find a rumor about this minister's rumor_type field - the result will be within a range of error, and a discovered
+                low loyalty could result in a bribe to report a high loyalty
+        Input:
+            string rumor_type: Type of field to uncover, like 'loyalty' or some skill type
+            minister/string prosecutor: Prosecutor finding the rumor, or 'none' for passive rumors
+        Output:
+            None
+        '''
         if prosecutor == 'none':
             roll_result = random.randrange(1, 7) - random.randrange(0, 2) #as if done by a prosecutor with a negative skill modifier
         else:
@@ -750,7 +760,6 @@ class minister():
         apparent_value = max(apparent_value, 1)
         apparent_value = min(apparent_value, 6)
 
-        changed_value = False
         if rumor_type == 'loyalty':
             if apparent_value >= 4 and prosecutor != 'none':
                 if (self.check_corruption() or self.check_corruption()) and (prosecutor.check_corruption() or prosecutor.check_corruption()): #conspiracy check with advantage

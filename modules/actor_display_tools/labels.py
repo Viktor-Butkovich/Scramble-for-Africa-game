@@ -57,15 +57,6 @@ class actor_display_label(label):
         }
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            input_dict['init_type'] = 'merge button'
-            input_dict['image_id'] = 'buttons/merge_button.png'
-            #input_dict['keybind_id'] = pygame.K_m
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'split button'
-            input_dict['image_id'] = 'buttons/split_button.png'
-            #input_dict['keybind_id'] = pygame.K_n
-            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'labor broker button'
             input_dict['image_id'] = 'buttons/labor_broker_button.png'
@@ -81,18 +72,6 @@ class actor_display_label(label):
             input_dict['init_type'] = 'embark vehicle button'
             input_dict['image_id'] = 'buttons/embark_train_button.png'
             input_dict['keybind_id'] = pygame.K_b
-            input_dict['vehicle_type'] = 'train'
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'worker crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            #input_dict['keybind_id'] = pygame.K_m
-            input_dict['vehicle_type'] = 'ship'
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'worker crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_train_button.png'
-            #input_dict['keybind_id'] = pygame.K_m
             input_dict['vehicle_type'] = 'train'
             self.add_attached_button(input_dict)
 
@@ -321,18 +300,6 @@ class actor_display_label(label):
             input_dict['building_type'] = 'resource'
             self.add_attached_button(input_dict)
 
-        elif self.actor_label_type == 'crew':
-            self.message_start = 'Crew: '
-            input_dict['init_type'] = 'crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            #input_dict['keybind_id'] = pygame.K_m
-            self.add_attached_button(input_dict)
-
-            input_dict['init_type'] = 'uncrew vehicle button'
-            input_dict['image_id'] = 'buttons/uncrew_ship_button.png'
-            #input_dict['keybind_id'] = pygame.K_n
-            self.add_attached_button(input_dict)
-
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
             input_dict['init_type'] = 'cycle passengers button'
@@ -483,7 +450,7 @@ class actor_display_label(label):
         elif self.actor_label_type == 'preferred_terrains':
             self.message_start = 'Preferred terrain: '
 
-        elif self.actor_label_type == 'building workers':
+        elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
 
         else:
@@ -649,7 +616,7 @@ class actor_display_label(label):
             tooltip_text = [self.message]
             self.set_tooltip(tooltip_text)
             
-        elif self.actor_label_type == 'building workers':
+        elif self.actor_label_type == 'building work crews':
             tooltip_text = []
             tooltip_text.append('Increase work crew capacity by upgrading the building\'s scale with a construction gang')
             if (not self.attached_building == 'none'):
@@ -749,7 +716,7 @@ class actor_display_label(label):
                     self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
 
             elif self.actor_label_type == 'movement':
-                if self.actor.controllable:
+                if self.actor.is_pmob:
                     if (new_actor.is_vehicle and new_actor.has_crew and (not new_actor.has_infinite_movement) and not new_actor.temp_movement_disabled) or not new_actor.is_vehicle: #if riverboat/train with crew or normal unit
                         self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
                     else: #if ship or riverboat/train without crew
@@ -766,7 +733,7 @@ class actor_display_label(label):
 
 
             elif self.actor_label_type == 'attitude':
-                if not self.actor.controllable:
+                if not self.actor.is_pmob:
                     if self.actor.hostile:
                         self.set_label(self.message_start + 'hostile')
                     else:
@@ -780,7 +747,7 @@ class actor_display_label(label):
                     self.set_label(self.message_start + ' ' + self.actor.preferred_terrains[0] + ', ' + self.actor.preferred_terrains[1] + ', ' + self.actor.preferred_terrains[2])
 
             elif self.actor_label_type == 'controllable':
-                if not self.actor.controllable:
+                if not self.actor.is_pmob:
                     self.set_label('You do not control this unit')
                             
             elif self.actor_label_type == 'current building work crew': # or self.actor_label_type == 'building list item':
@@ -846,9 +813,8 @@ class actor_display_label(label):
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
                     
             elif self.actor_label_type == 'minister':
-                if self.actor.controllable:
-                    if not self.actor.controlling_minister == 'none':
-                        self.set_label(self.message_start + self.actor.controlling_minister.name)
+                if self.actor.is_pmob and self.actor.controlling_minister != 'none':
+                    self.set_label(self.message_start + self.actor.controlling_minister.name)
                     
             elif self.actor_label_type == 'evidence':
                 if new_actor.fabricated_evidence == 0:
@@ -934,9 +900,9 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'slums' and not self.actor.cell.has_building('slums'):
             return(False)
-        elif self.actor_label_type == 'minister' and not self.actor.controllable:
+        elif self.actor_label_type == 'minister' and not self.actor.is_pmob:
             return(False)
-        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
+        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.is_pmob:
             return(False)
         elif self.actor_label_type == 'preferred_terrains' and not (self.actor.is_npmob and self.actor.npmob_type == 'beast'):
             return(False)
@@ -1044,7 +1010,7 @@ class building_work_crews_label(actor_display_label):
         self.remove_work_crew_button = 'none'
         self.show_label = False
         self.attached_building = 'none'
-        input_dict['actor_label_type'] = 'building workers'
+        input_dict['actor_label_type'] = 'building work crews'
         super().__init__(input_dict, global_manager)
         self.building_type = input_dict['building_type']
 
@@ -1191,7 +1157,7 @@ class commodity_display_label(actor_display_label):
         super().__init__(input_dict, global_manager)
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
-        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
+        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager)
         input_dict = {
             'coordinates': (self.x, self.y + 200),
             'width': self.height,

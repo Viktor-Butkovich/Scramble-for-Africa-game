@@ -36,13 +36,8 @@ SFA folder
             buttons.py
 		    	imports modules.buttons, modules.main_loop_tools, modules.utility, modules.actor_utility, modules.minister_utility, modules.trial_utility, modules.text_tools, 
 					modules.game_transitions, modules.notification_tools
-				class worker_crew_vehicle_button(modules.buttons.button)
 				class embark_all_passengers_button(modules.buttons.button)
 				class disembark_all_passengers_button(modules.buttons.button)
-				class crew_vehicle_button(modules.buttons.button)
-				class uncrew_vehicle_button(modules.buttons.button)
-				class merge_button(modules.buttons.button)
-				class split_button(modules.buttons.button)
 				class enable_sentry_mode_button(modules.buttons.button)
 				class disable_sentry_mode_button(modules.buttons.button)
 				class end_unit_turn_button(modules.buttons.button)

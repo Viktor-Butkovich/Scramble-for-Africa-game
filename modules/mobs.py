@@ -51,7 +51,6 @@ class mob(actor):
         self.can_construct = False #if can construct buildings
         self.can_trade = False #if can trade or create trading posts
         self.can_convert = False #if can convert natives or build missions
-        self.controllable = True
         self.just_promoted = False
         self.selected = False
         self.number = 1 #how many entities are in a unit, used for verb conjugation
@@ -559,7 +558,7 @@ class mob(actor):
         
         tooltip_list.append('Name: ' + self.name[:1].capitalize() + self.name[1:]) #capitalizes first letter while keeping rest the same
         
-        if self.controllable:
+        if self.is_pmob:
             if self.is_group:
                 tooltip_list.append('    Officer: ' + self.officer.name.capitalize())
                 tooltip_list.append('    Workers: ' + self.worker.name.capitalize())

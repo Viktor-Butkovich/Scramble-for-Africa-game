@@ -17,7 +17,7 @@ def generate_autofill_actors(global_manager, search_start_index=0):
     displayed_mob = global_manager.get('displayed_mob')
     if displayed_mob != 'none' and displayed_mob.is_pmob:
 
-        required_dummy_attributes = ['name', 'controllable', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
+        required_dummy_attributes = ['name', 'is_group', 'is_vehicle', 'is_pmob', 'is_npmob', 'is_officer', 'has_crew', 'has_infinite_movement', 'crew', 
                               'movement_points', 'max_movement_points', 'can_hold_commodities', 'inventory', 'contained_mobs', 'temp_movement_disabled', 'disorganized', 
                               'veteran', 'sentry_mode', 'base_automatic_route', 'end_turn_destination', 'officer', 'worker', 'group_type', 'battalion_type']
 
