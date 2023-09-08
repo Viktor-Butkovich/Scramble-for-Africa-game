@@ -27,6 +27,7 @@ from . import market_tools
 from . import dice
 from . import buttons
 from . import labels
+from . import panels
 from . import notifications
 from . import choice_notifications
 from . import instructions
@@ -325,6 +326,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = buttons.country_selection_image(input_dict, global_manager)
         elif init_type == 'die':
             new_element = dice.die(input_dict, global_manager)
+        elif init_type == 'panel':
+            new_element = panels.panel(input_dict, global_manager)
 
         elif init_type.endswith('label'):
             base = init_type.removesuffix('label')

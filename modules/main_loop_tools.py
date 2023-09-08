@@ -54,19 +54,20 @@ def update_display(global_manager):
             if current_actor.can_show_tooltip() and not current_actor in possible_tooltip_drawers:
                 possible_tooltip_drawers.append(current_actor) #only one of these will be drawn to prevent overlapping tooltips
 
+        notification_tooltip_button = 'none'
         for current_button in global_manager.get('button_list'):
-            if not (current_button in global_manager.get('button_list') and current_button.in_notification): #notifications are drawn later
-                if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+            if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
+                if current_button.in_notification and current_button != global_manager.get('current_instructions_page'):
+                    notification_tooltip_button = current_button
+                else:
                     possible_tooltip_drawers = [current_button]
-                
-        for current_free_image in global_manager.get('free_image_list'):
-            if current_free_image.can_show_tooltip():
-                possible_tooltip_drawers = [current_free_image]
-
-        #for current_button in global_manager.get('button_list'): #draws notifications and buttons attached to notifications
-        #    if current_button.in_notification and not current_button == global_manager.get('current_instructions_page'):
-        #        if current_button.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
-        #            possible_tooltip_drawers = [current_button] #notifications have priority over buttons and will be shown first
+        
+        if notification_tooltip_button == 'none':
+            for current_free_image in global_manager.get('free_image_list'):
+                if current_free_image.can_show_tooltip():
+                    possible_tooltip_drawers = [current_free_image]
+        else:
+            possible_tooltip_drawers = [notification_tooltip_button]
                 
         if global_manager.get('show_text_box'):
             draw_text_box(global_manager)

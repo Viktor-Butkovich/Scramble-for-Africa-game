@@ -86,7 +86,7 @@ class label(button):
     def draw(self):
         '''
         Description:
-            Draws this label and draws its text on top of it
+            Draws this label and draws its text on top of it, ignoring outlines from the label being clicked
         Input:
             None
         Output:

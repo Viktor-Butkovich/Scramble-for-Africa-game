@@ -155,7 +155,8 @@ def main_loop(global_manager):
 
         if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'): #if lmb changes
             if not global_manager.get('lmb_down'): #if user just released lmb
-                clicked_button = False
+                clicked_button = False #if any button, including a panel, is clicked, do not deselect units
+                allow_on_click = True #certain buttons, like panels, allow clicking on another button at the same time
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
@@ -163,21 +164,27 @@ def main_loop(global_manager):
                             current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
+                            allow_on_click = False
                             stopping = True
                             break
                 else:
                     if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing: #if instructions, click before other buttons
                         global_manager.get('current_instructions_page').on_click()
                         clicked_button = True
+                        allow_on_click = False
                         stopping = True
                         break
+
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.showing and not clicked_button: #only click 1 button at a time
-                            current_button.on_click()
+                        if current_button.touching_mouse() and current_button.showing and allow_on_click: #only click 1 button at a time
+                            if current_button.on_click(): #if on_click has return value, nothing happened - allow other buttons to click but do not deselect units
+                                allow_on_click = True
+                            else:
+                                allow_on_click = False
                             current_button.on_release()
                             clicked_button = True
-                            break
+                            #break
                 main_loop_tools.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):

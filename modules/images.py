@@ -38,7 +38,7 @@ class image():
         '''
         if self.contains_bundle:
             self.image.complete_draw()
-        else:
+        elif self.image_id != 'misc/empty.png':
             drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
     def touching_mouse(self):
@@ -116,7 +116,6 @@ class image():
         else:
             image_id_list = self.image_id
         return(image_id_list)
-
 
 class image_bundle(image):
     '''
@@ -209,13 +208,19 @@ class image_bundle(image):
             pygame.Surface: Returns a Pygame Surface that is a combination of each of this bundle's images
         '''
         #this is running whenever image is set, even if being set to same image as another bundle
-        combined_surface = pygame.transform.scale(pygame.image.load('graphics/misc/empty.png'), (self.width, self.height))
+        combined_surface = pygame.Surface((self.width, self.height)) #has strange interaction with smoke effects
+        combined_surface.fill(self.global_manager.get('color_dict')['transparent'])
+        combined_surface.set_colorkey(self.global_manager.get('color_dict')['transparent'], pygame.RLEACCEL)
+        blit_sequence = []
         for member in self.members:
-            if member.is_offset:
-                combined_surface.blit(member.image, ((self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
-                                                        ((self.height * member.y_offset * -1) - (member.height / 2) + (self.height / 2))))
-            else:
-                combined_surface.blit(member.image, (0, 0))
+            if member.image_id != 'misc/empty.png':
+                if member.is_offset:
+                    blit_sequence.append((member.image, (((self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
+                                                            ((self.height * member.y_offset * -1) - (member.height / 2) + (self.height / 2))))))
+                else:
+                    blit_sequence.append((member.image, (0, 0)))
+        if blit_sequence:
+            combined_surface.blits(blit_sequence)
         return(combined_surface)
 
     def complete_draw(self):

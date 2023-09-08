@@ -88,7 +88,8 @@ def fundamental_setup(global_manager):
         'yellow': (255, 255, 0),
         'brown': (85, 53, 22),
         'blonde': (188, 175, 123),
-        'purple': (127, 0, 170)
+        'purple': (127, 0, 170),
+        'transparent': (1, 1, 1)
         }
     )
     global_manager.set('green_screen_colors', 
@@ -201,6 +202,16 @@ def misc_setup(global_manager):
 
     strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
+
+    input_dict = {
+        'width': global_manager.get('display_width') / 2 - scaling.scale_width(35, global_manager),
+        'height': global_manager.get('display_height'),
+        'modes': ['strategic', 'europe', 'ministers'],
+        'image_id': 'misc/empty.png', #make a good image for this
+        'init_type': 'panel',
+    }
+    safe_click_area = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
     strategic_grid_height = 300
     strategic_grid_width = 320
     mini_grid_width = 640
