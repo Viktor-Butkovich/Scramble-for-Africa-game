@@ -401,6 +401,7 @@ class bundle_image():
             except:
                 print(full_image_id)
                 self.image = pygame.image.load(full_image_id)
+            self.image.convert()
             if self.is_offset and self.has_green_screen:
                 width, height = self.image.get_size()
                 index = 0

@@ -16,7 +16,23 @@ import modules.actor_utility as actor_utility
 import modules.countries as countries
 import modules.effects as effects
 
-def fundamental_setup(global_manager):
+def setup(global_manager, *args):
+    '''
+    Description:
+        Runs the inputted setup functions in order
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        function list args: List of setup functions to run
+    Output:
+        None 
+    '''
+    global_manager.set('startup_complete', False)
+    for setup_function in args:
+        setup_function(global_manager)
+    global_manager.set('startup_complete', True)
+    global_manager.set('creating_new_game', False)
+
+def fundamental(global_manager):
     '''
     Description:
         Initializes pygame and most manager objects and defines screen size, times, fonts, and colors
@@ -27,7 +43,6 @@ def fundamental_setup(global_manager):
     '''
     pygame.init()
     pygame.mixer.init()
-    global_manager.set('startup_complete', False)
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
@@ -99,7 +114,8 @@ def fundamental_setup(global_manager):
         (110, 107, 3)
         ]
     )
-def misc_setup(global_manager):
+
+def misc(global_manager):
     '''
     Description:
         Initializes object lists, current object variables, current status booleans, and other misc. values
@@ -264,7 +280,7 @@ def misc_setup(global_manager):
         {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': global_manager.get('info_displays_collection')}, 
         global_manager) #rect at original location prevents collection from moving unintentionally when resizing
 
-def terrains_setup(global_manager):
+def terrains(global_manager):
     '''
     Description:
         Defines terrains and beasts
@@ -340,7 +356,7 @@ def terrains_setup(global_manager):
         current_index -= 1 #back up from index that didn't work
         global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
-def commodities_setup(global_manager):
+def commodities(global_manager):
     '''
     Description:
         Defines commodities with associated buildings and icons, along with buildings
@@ -396,7 +412,7 @@ def commodities_setup(global_manager):
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-def ministers_setup(global_manager):
+def def_ministers(global_manager):
     '''
     Description:
         Defines minister positions, backgrounds, and associated units
@@ -550,7 +566,7 @@ def ministers_setup(global_manager):
 
     global_manager.set('minister_limit', 15)
 
-def countries_setup(global_manager):
+def def_countries(global_manager):
     '''
     Description:
         Defines countries with associated passive effects and background, name, and unit sets
@@ -730,7 +746,7 @@ def countries_setup(global_manager):
     }
     global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     
-def transactions_setup(global_manager):
+def transactions(global_manager):
     '''
     Description:
         Defines recruitment, upkeep, building, and action costs, along with action and financial transaction types
@@ -862,7 +878,7 @@ def transactions_setup(global_manager):
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     actor_utility.set_slave_traders_strength(0, global_manager)
 
-def lore_setup(global_manager):
+def lore(global_manager):
     '''
     Description:
         Defines the types of lore missions, artifacts within each one, and the current lore mission
@@ -916,7 +932,7 @@ def lore_setup(global_manager):
     global_manager.set('lore_mission_list', [])
     global_manager.set('completed_lore_mission_types', [])
 
-def value_trackers_setup(global_manager):
+def value_trackers(global_manager):
     '''
     Description:
         Defines important global values and initializes associated tracker labels
@@ -999,7 +1015,7 @@ def value_trackers_setup(global_manager):
     
     global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
 
-def buttons_setup(global_manager):
+def buttons(global_manager):
     '''
     Description:
         Initializes static buttons
@@ -1184,7 +1200,7 @@ def buttons_setup(global_manager):
     input_dict['init_type'] = 'generate crash button'
     generate_crash_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def europe_screen_setup(global_manager):
+def europe_screen(global_manager):
     '''
     Description:
         Initializes static interface of Europe screen
@@ -1217,7 +1233,7 @@ def europe_screen_setup(global_manager):
     }
     new_consumer_goods_buy_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def ministers_screen_setup(global_manager):
+def ministers_screen(global_manager):
     '''
     Description:
         Initializes static interface of ministers screen
@@ -1287,7 +1303,7 @@ def ministers_screen_setup(global_manager):
     cycle_input_dict['direction'] = 'right'
     cycle_right_button = global_manager.get('actor_creation_manager').create_interface_element(cycle_input_dict, global_manager)
 
-def trial_screen_setup(global_manager):
+def trial_screen(global_manager):
     '''
     Description:
         Initializes static interface of trial screen
@@ -1430,7 +1446,7 @@ def trial_screen_setup(global_manager):
 
     global_manager.set('evidence_just_found', False)
 
-def new_game_setup_screen_setup(global_manager):
+def new_game_setup_screen(global_manager):
     '''
     Description:
         Initializes new game setup screen interface
@@ -1456,7 +1472,7 @@ def new_game_setup_screen_setup(global_manager):
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         current_country_index += 1
 
-def mob_interface_setup(global_manager):
+def mob_interface(global_manager):
     '''
     Description:
         Initializes mob selection interface
@@ -1565,7 +1581,7 @@ def mob_interface_setup(global_manager):
     }
     global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-def tile_interface_setup(global_manager):
+def tile_interface(global_manager):
     '''
     Description:
         Initializes tile selection interface
@@ -1698,7 +1714,7 @@ def tile_interface_setup(global_manager):
     }
     global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
-def inventory_interface_setup(global_manager):
+def inventory_interface(global_manager):
     '''
     Description:
         Initializes the commodity prices display and both mob/tile tabbed collections and inventory interfaces
@@ -1788,7 +1804,7 @@ def inventory_interface_setup(global_manager):
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def unit_organization_interface_setup(global_manager):
+def unit_organization_interface(global_manager):
     '''
     Description:
         Initializes the unit organization interface as part of the mob tabbed collection
@@ -1932,7 +1948,7 @@ def unit_organization_interface_setup(global_manager):
     }
     cycle_autofill_worker_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def minister_interface_setup(global_manager):
+def minister_interface(global_manager):
     '''
     Description:
         Initializes minister selection interface
@@ -2004,7 +2020,7 @@ def minister_interface_setup(global_manager):
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     #minister info labels setup
 
-def country_interface_setup(global_manager):
+def country_interface(global_manager):
     '''
     Description:
         Initializes country selection interface
@@ -2067,7 +2083,7 @@ def country_interface_setup(global_manager):
         input_dict['actor_label_type'] = current_actor_label_type
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def debug_tools_setup(global_manager):
+def debug_tools(global_manager):
     '''
     Description:
         Initializes toggleable effects for debugging

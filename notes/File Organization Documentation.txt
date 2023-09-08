@@ -444,28 +444,28 @@ SFA folder
 		setup.py
 		    imports pygame, time, os, logging, scaling, images, game_transitions, data_managers,, actor_display_tools.images, mouse_followers, save_load_tools, actor_creation_tools, 
 				actor_utility, countries, effects
-		    def fundamental_setup
-		    def misc_setup
-		    def terrains_setup
-		    def commodities_setup
-		    def ministers_setup
-		    def countries_setup
-		    def transactions_setup
-			def lore_setup
-		    def value_trackers_setup
-		    def buttons_setup
-		    def europe_screen_setup
-		    def ministers_screen_setup
-		    def trial_screen_setup
-		    def new_game_setup_screen_setup
-		    def mob_interface_setup
-		    def tile_interface_setup
-		    def inventory_interface_setup
-			def unit_organization_interface_setup
-		    def minister_interface_setup
-		    def country_interface_setup
-		    def debug_tools_setup
-			def configure_debug_tools
+		    def setup
+			def fundamental
+		    def misc
+		    def terrains
+		    def commodities
+		    def def_ministers
+		    def def_countries
+		    def transactions
+			def lore
+		    def value_trackers
+		    def buttons	
+		    def europe_screen
+		    def ministers_screen
+		    def trial_screen
+		    def new_game_setup_screen
+		    def mob_interface
+		    def tile_interface
+		    def inventory_interface
+			def unit_organization_interface
+		    def minister_interface
+		    def country_interface
+		    def debug_tools
 		    def manage_crash
 
         text_tools.py
@@ -594,6 +594,6 @@ SFA folder
     README.txt
 
     Scramble_for_Africa.py
-        imports pygame, main_loop, data_managers, setup
+        imports main_loop, data_managers, setup
 
 As of last count, this program contains 26,958 lines of code across 56 python files

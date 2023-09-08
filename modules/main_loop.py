@@ -305,3 +305,4 @@ def main_loop(global_manager):
             if global_manager.get('effect_manager').effect_active('fast_turn'):
                 global_manager.set('end_turn_wait_time', 0)
             global_manager.set('previous_turn_time', time.time())
+    pygame.quit()
