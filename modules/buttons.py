@@ -783,7 +783,7 @@ class button(interface_elements.interface_element):
         Output:
             None
         '''
-        self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
+        #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
         if self.showing:
             if self.showing_outline and allow_show_outline:
                 pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.outline)

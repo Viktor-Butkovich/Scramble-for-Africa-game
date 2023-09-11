@@ -36,7 +36,7 @@ class recruitment_button(button):
         '''
         self.recruitment_type = input_dict['recruitment_type']
         if self.recruitment_type in global_manager.get('country_specific_units'):
-            if not global_manager.get('current_country') == 'none':
+            if global_manager.get('current_country') != 'none':
                 self.mob_image_id = 'mobs/' + self.recruitment_type + '/' + global_manager.get('current_country').adjective + '/default.png'
             else:
                 self.mob_image_id = 'mobs/default/default.png'

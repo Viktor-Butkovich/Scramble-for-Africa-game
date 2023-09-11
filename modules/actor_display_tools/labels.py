@@ -161,12 +161,12 @@ class actor_display_label(label):
             del input_dict['upgrade_type']
             
             input_dict['init_type'] = 'build train button'
-            input_dict['image_id'] = 'mobs/train/button.png'
+            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
             input_dict['keybind_id'] = pygame.K_y
             self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'build steamboat button'
-            input_dict['image_id'] = 'mobs/steamboat/button.png'
+            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
             input_dict['keybind_id'] = pygame.K_u
             self.add_attached_button(input_dict)
 

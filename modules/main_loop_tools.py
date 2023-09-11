@@ -18,14 +18,13 @@ def update_display(global_manager):
     Output:
         None
     '''
-    global_manager.set('can_show_counter', 0)
-    global_manager.set('draw_counter', 0)
-            
+    #global_manager.set('can_show_counter', 0)
+    #global_manager.set('draw_counter', 0)
+
     if global_manager.get('loading'):
         global_manager.set('loading_start_time', global_manager.get('loading_start_time') - 1) #end load timer faster once program starts repeating this part
         draw_loading_screen(global_manager)
     else:
-        global_manager.get('game_display').fill((125, 125, 125))
         possible_tooltip_drawers = []
 
         traversal_utility.draw_interface_elements(global_manager.get('independent_interface_elements'), global_manager)
@@ -74,12 +73,12 @@ def update_display(global_manager):
 
         global_manager.get('mouse_follower').draw()
             
-        if not global_manager.get('current_instructions_page') == 'none':
+        if global_manager.get('current_instructions_page') != 'none':
             instructions_page = global_manager.get('current_instructions_page')
             instructions_page.draw()
             if instructions_page.can_show_tooltip(): #while multiple actor tooltips can be shown at once, if a button tooltip is showing no other tooltips should be showing
                 possible_tooltip_drawers = [instructions_page] #instructions have priority over everything
-        if not (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) == pygame.mouse.get_pos():
+        if (global_manager.get('old_mouse_x'), global_manager.get('old_mouse_y')) != pygame.mouse.get_pos():
             global_manager.set('mouse_moved_time', time.time())
             old_mouse_x, old_mouse_y = pygame.mouse.get_pos()
             global_manager.set('old_mouse_x', old_mouse_x)
@@ -87,7 +86,8 @@ def update_display(global_manager):
         if time.time() > global_manager.get('mouse_moved_time') + 0.15: #show tooltip when mouse is still
             manage_tooltip_drawing(possible_tooltip_drawers, global_manager)
         
-        pygame.display.update()
+    pygame.display.update()
+
     if global_manager.get('effect_manager').effect_active('track_fps'):
         current_time = time.time()
         global_manager.set('frames_this_second', global_manager.get('frames_this_second') + 1)
@@ -152,9 +152,7 @@ def draw_loading_screen(global_manager):
     Output:
         None
     '''
-    global_manager.get('game_display').fill((125, 125, 125))
-    global_manager.get('loading_image').draw()
-    pygame.display.update()    
+    global_manager.get('loading_image').draw() 
     if global_manager.get('loading_start_time') + 1.01 < time.time():#max of 1 second, subtracts 1 in update_display to lower loading screen showing time
         global_manager.set('loading', False)
 

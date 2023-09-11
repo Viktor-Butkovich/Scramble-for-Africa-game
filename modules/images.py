@@ -87,7 +87,7 @@ class image():
             None
         '''
         if self.can_show():
-            self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
+            #self.global_manager.set('draw_counter', self.global_manager.get('draw_counter') + 1)
             self.complete_draw()
 
     def update_image_bundle(self):
@@ -418,7 +418,6 @@ class bundle_image():
                                     self.image.set_at((x, y), (replace_with[0], replace_with[1], replace_with[2], current_color[3])) #preserves alpha value
                     index += 1
             self.bundle.global_manager.get('rendered_images')[key] = self.image
-            #print('loading new image' + str(time.time()))
 
 class free_image(image):
     '''
@@ -960,6 +959,7 @@ class loading_image_template(free_image):
             None
         '''
         super().__init__(image_id, (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), [], global_manager)
+        self.global_manager.set('independent_interface_elements', utility.remove_from_list(self.global_manager.get('independent_interface_elements'), self))
 
     def can_show(self, skip_parent_collection=False):
         '''

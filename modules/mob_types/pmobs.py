@@ -1366,11 +1366,11 @@ class pmob(mob):
             elif self.building_type == 'fort':
                 input_dict['image'] = 'buildings/fort.png'
             elif self.building_type == 'train':
-                image_dict = {'default': 'mobs/train/crewed.png', 'crewed': 'mobs/train/crewed.png', 'uncrewed': 'mobs/train/uncrewed.png'}
+                image_dict = {'default': 'mobs/train/default.png', 'crewed': 'mobs/train/default.png', 'uncrewed': 'mobs/train/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['crew'] = 'none'
             elif self.building_type == 'steamboat':
-                image_dict = {'default': 'mobs/steamboat/crewed.png', 'crewed': 'mobs/steamboat/crewed.png', 'uncrewed': 'mobs/steamboat/uncrewed.png'}
+                image_dict = {'default': 'mobs/steamboat/default.png', 'crewed': 'mobs/steamboat/default.png', 'uncrewed': 'mobs/steamboat/uncrewed.png'}
                 input_dict['image_dict'] = image_dict
                 input_dict['crew'] = 'none'
                 input_dict['init_type'] = 'boat'

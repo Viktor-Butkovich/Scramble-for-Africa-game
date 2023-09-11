@@ -114,7 +114,7 @@ class interface_element():
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        self.global_manager.set('can_show_counter', self.global_manager.get('can_show_counter') + 1)
+        #self.global_manager.set('can_show_counter', self.global_manager.get('can_show_counter') + 1)
         if self.can_show_override == 'none':
             if (not self.has_parent_collection) or skip_parent_collection:
                 if skip_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:

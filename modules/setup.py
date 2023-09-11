@@ -43,6 +43,7 @@ def fundamental(global_manager):
     '''
     pygame.init()
     pygame.mixer.init()
+    pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
@@ -125,7 +126,6 @@ def misc(global_manager):
         None
     '''
     global_manager.set('rendered_images', {})
-    global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
     global_manager.set('button_list', [])
     global_manager.set('recruitment_button_list', [])
     global_manager.set('current_instructions_page', 'none')
