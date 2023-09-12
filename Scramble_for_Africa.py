@@ -18,6 +18,3 @@ except Exception: #displays error message and records error message in crash log
 #find some solution to reorganization interface overlap, especially with construction gang
 #fix overlapping voicelines for 0 evidence trials - court in session and not guilty playing simultaneously
 #exploration direction icons not showing correctly, probably for not being an interface element - same issue probably for attack icons
-#fix canoes image transparency
-#can make resizable/windowed fullscreen with global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height')), pygame.RESIZABLE))
-# ^ need to update all interface and display_width/height, but should be feasible

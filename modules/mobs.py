@@ -72,8 +72,7 @@ class mob(actor):
         self.can_swim_river = False
         self.can_swim_ocean = False
         self.can_walk = True #if can enter land areas
-        self.has_canoes = False
-        self.in_canoes = False
+        self.set_has_canoes(False)
         self.max_movement_points = 1
         self.movement_points = self.max_movement_points
         self.movement_cost = 1
@@ -174,6 +173,7 @@ class mob(actor):
         if 'has_canoes' in override_values:
             has_canoes = override_values['has_canoes']
         else:
+
             has_canoes = self.has_canoes
 
         image_id_list = super().get_image_id_list(override_values)
@@ -182,9 +182,8 @@ class mob(actor):
                 image_id_list.append('misc/injured_icon.png')
             else:
                 image_id_list.append('misc/disorganized_icon.png')
-        if has_canoes:
-            if self.in_canoes:
-                image_id_list.append('misc/canoes.png')
+        if has_canoes and self.in_canoes:
+            image_id_list.append('misc/canoes.png')
         return(image_id_list)
 
     def set_disorganized(self, new_value):
@@ -804,6 +803,22 @@ class mob(actor):
             return(True)
         return(False)
 
+    def set_has_canoes(self, new_canoes):
+        '''
+        Description:
+            Sets this unit to have canoes, automatically updating its in_canoes, swimming capabilities, and images
+        Input:
+            boolean new_canoes: New canoes value
+        Output:
+            None
+        '''
+        self.has_canoes = new_canoes
+        self.can_swim = self.has_canoes
+        self.can_swim_ocean = False
+        self.can_swim_river = self.has_canoes
+        if new_canoes:
+            self.update_canoes()
+
     def update_canoes(self):
         '''
         Description:
@@ -813,19 +828,13 @@ class mob(actor):
         Output:
             None
         '''
-        if self.is_pmob and self.images[0].current_cell == 'none': #if in vehicle, group, etc.
-            return()
-        
-        current_cell = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y)
-        if current_cell == 'none':
-            return()
+        current_cell = self.images[0].current_cell
 
-        if current_cell.terrain == 'water' and self.y > 0:
-            self.in_canoes = True
-            self.update_image_bundle()
+        if current_cell != 'none' and current_cell.terrain == 'water' and self.y > 0:
+            self.in_canoes = self.has_canoes
         else:
             self.in_canoes = False
-            self.update_image_bundle()
+        self.update_image_bundle()
             
     def retreat(self):
         '''

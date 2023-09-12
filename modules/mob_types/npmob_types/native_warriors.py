@@ -39,14 +39,12 @@ class native_warriors(npmob):
         self.origin_village.attached_warriors.append(self)
         self.npmob_type = 'native_warriors'
         self.despawning = False
-        self.has_canoes = True
         if not from_save:
             self.set_max_movement_points(4)
             if not global_manager.get('creating_new_game'):
                 self.hide_images() #show native warriors spawning in main_loop during enemy turn, except during setup
             self.second_image_variant = random.randrange(0, len(self.image_variants))
-        self.update_canoes()
-        self.update_image_bundle()
+        self.set_has_canoes(True)
 
     def attack_on_spawn(self):
         '''

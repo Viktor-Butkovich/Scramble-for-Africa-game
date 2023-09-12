@@ -40,16 +40,9 @@ class expedition(group):
         '''
         super().__init__(from_save, input_dict, global_manager)
         self.exploration_mark_list = []
-        self.exploration_cost = self.global_manager.get('action_prices')['exploration']#2
+        self.exploration_cost = self.global_manager.get('action_prices')['exploration']
         self.can_explore = True
-        self.can_swim = True
-        self.can_swim_river = True
-        self.can_swim_ocean = False
-        
-        self.has_canoes = True
-        #self.image_dict['canoes'] = input_dict['canoes_image']
-        #self.image_dict['no_canoes'] = self.image_dict['default']
-        self.update_canoes()
+        self.set_has_canoes(True)
         
         self.set_group_type('expedition')
         self.destination_cells = [] #used for off tile exploration, like when seeing nearby tiles when on water
