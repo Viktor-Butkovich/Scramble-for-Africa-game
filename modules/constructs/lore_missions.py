@@ -112,6 +112,18 @@ class lore_mission():
             possible_coordinates = (random.randrange(0, self.global_manager.get('strategic_map_width')), random.randrange(1, self.global_manager.get('strategic_map_height')))
         return(possible_coordinates)
 
+    def remove_complete(self):
+        '''
+        Description:
+            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
+        del self
+
     def remove(self):
         '''
         Description:

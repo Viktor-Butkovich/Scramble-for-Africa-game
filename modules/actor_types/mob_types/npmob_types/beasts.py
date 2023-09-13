@@ -176,7 +176,7 @@ class beast(npmob):
             None
         '''
         if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
-            self.remove()  
+            self.remove_complete()
 
     def remove(self):
         '''
@@ -199,4 +199,4 @@ class beast(npmob):
         Output:
             None
         '''
-        nothing = 0 #beasts ignore buildings
+        return

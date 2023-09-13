@@ -1341,7 +1341,7 @@ class pmob(mob):
             input_dict['init_type'] = self.building_type
             if not self.building_type in ['train', 'steamboat']:
                 if self.images[0].current_cell.has_building(self.building_type): #if building of same type exists, remove it and replace with new one
-                    self.images[0].current_cell.get_building(self.building_type).remove()
+                    self.images[0].current_cell.get_building(self.building_type).remove_complete()
             if self.building_type == 'resource':
                 input_dict['image'] = self.global_manager.get('resource_building_dict')[self.attached_resource]
                 input_dict['resource_type'] = self.attached_resource

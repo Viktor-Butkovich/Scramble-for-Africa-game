@@ -249,7 +249,7 @@ def stop_exploration(global_manager):
         None
     '''
     for current_exploration_mark in global_manager.get('exploration_mark_list'):
-        current_exploration_mark.remove()
+        current_exploration_mark.remove_complete()
     global_manager.set('exploration_mark_list', [])
     for current_mob in global_manager.get('mob_list'):
         if current_mob.can_explore:

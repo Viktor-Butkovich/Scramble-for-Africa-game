@@ -75,4 +75,3 @@ def unscale_height(height, global_manager):
     ratio = global_manager.get('display_height')/global_manager.get('default_display_height')
     unscaled_height = round(height / ratio)
     return(unscaled_height)
-

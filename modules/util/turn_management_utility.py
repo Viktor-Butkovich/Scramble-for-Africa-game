@@ -580,9 +580,10 @@ def manage_ministers(global_manager):
     '''
     removed_ministers = []
     for current_minister in global_manager.get('minister_list'):
+        removing_minister = True
         if current_minister.just_removed and current_minister.current_position == 'none':
             current_minister.respond('fired')
-            current_minister.remove()
+            #current_minister.remove_complete()
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
         elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('effect_manager').effect_active('farm_upstate'):
@@ -614,7 +615,8 @@ def manage_ministers(global_manager):
             else:
                 current_minister.display_message(str(evidence_lost) + ' of the ' + str(current_minister.corruption_evidence) + ' evidence of ' + current_position + ' ' + current_minister.name + '\'s corruption has lost potency over time and will no longer be usable in trials against him. /n /n')
             current_minister.corruption_evidence -= evidence_lost
-
+        if removing_minister:
+            current_minister.remove_complete()
     if global_manager.get('prosecution_bribed_judge'):
         text_utility.print_to_screen('The effect of bribing the judge has faded and will not affect the next trial.', global_manager)
     global_manager.set('prosecution_bribed_judge', False)
@@ -728,7 +730,4 @@ def manage_lore(global_manager):
     '''
     if global_manager.get('current_lore_mission') == 'none':
         if (random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1) or global_manager.get('effect_manager').effect_active('instant_lore_mission'):
-        #if 1 == 1:
-            #mission_type = random.choice(global_manager.get('lore_types'))
             global_manager.get('actor_creation_manager').create_lore_mission(False, {}, global_manager)
-            #notification_tools.display_notification('A new lore mission has been issued for ' + mission_type + '. /n /n', 'none', global_manager)

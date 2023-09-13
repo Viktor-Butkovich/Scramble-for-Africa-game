@@ -222,7 +222,7 @@ class battalion(group):
             None
         '''
         for attack_mark in self.attack_mark_list:
-            attack_mark.remove()
+            attack_mark.remove_complete()
         self.attack_mark_list = []
 
     def start_capture_slaves(self):

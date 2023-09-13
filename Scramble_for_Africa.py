@@ -23,3 +23,4 @@ except Exception: #displays error message and records error message in crash log
 # not ideal - maybe make a special grid free image that can exist in all versions of a tile? Should not have to edit the tile's get_image_id_list, as the exploration mark
 # list isn't a characteristic of the tile
 # continue work on cell_icons
+# make grid an actual interface element subclass, maybe even with interface customization buttons - probably the best place to have those

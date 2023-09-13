@@ -74,7 +74,7 @@ class native_warriors(npmob):
                 else:
                     self.global_manager.get('attacker_queue').append(self)
             else:
-                self.remove()
+                self.remove_complete()
                 self.origin_village.change_population(1) #despawn if pmob on tile and can't retreat anywhere
         else:
             self.damage_buildings()
@@ -103,7 +103,6 @@ class native_warriors(npmob):
             None
         '''
         if random.randrange(1, 7) >= 4 and random.randrange(1, 7) >= 4: #1/4 chance of despawn
-            #self.remove()
             self.despawning = True
             self.origin_village.change_population(1)
 

@@ -267,7 +267,7 @@ def complete_trial(final_roll, global_manager):
         defense.appoint('none')
         minister_utility.calibrate_minister_info_display(global_manager, 'none')
         defense.respond('prison')
-        defense.remove()
+        defense.remove_complete()
         global_manager.get('fear_tracker').change(1)
         
         notification_utility.display_notification('Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n', 'default', global_manager)

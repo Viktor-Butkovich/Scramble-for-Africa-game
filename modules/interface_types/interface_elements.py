@@ -63,6 +63,18 @@ class interface_element():
         if 'image_id' in input_dict:
             self.create_image(input_dict['image_id'])
 
+    def remove_complete(self):
+        '''
+        Description:
+            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
+        del self
+
     def remove(self):
         '''
         Description:

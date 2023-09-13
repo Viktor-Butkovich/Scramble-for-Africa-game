@@ -1182,7 +1182,7 @@ class button(interface_elements.interface_element):
             merchant = self.notification.choice_info_dict['merchant']
             merchant.loan_search()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
 
         elif self.button_type == 'start converting':
             evangelist = self.notification.choice_info_dict['evangelist']
@@ -1224,7 +1224,7 @@ class button(interface_elements.interface_element):
                 self.notification.choice_info_dict['battalion'].remove_attack_marks()
             elif self.button_type in ['stop loan search', 'decline loan offer']:
                 for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                    current_minister_image.remove()
+                    current_minister_image.remove_complete()
 
         elif self.button_type == 'accept loan offer':
             input_dict = {}

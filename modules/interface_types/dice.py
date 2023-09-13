@@ -155,7 +155,7 @@ class die(button):
                 if current_die.rolling:
                     dice_rolling = True
             if (not self.global_manager.get('current_dice_rolling_notification') == 'none') and not dice_rolling: #if notification present and dice finished rolling, remove notification
-                self.global_manager.get('current_dice_rolling_notification').remove()
+                self.global_manager.get('current_dice_rolling_notification').remove_complete()
         else:
             self.roll_result = 0
             if self.rolls_completed == self.num_rolls - 1: #if last roll

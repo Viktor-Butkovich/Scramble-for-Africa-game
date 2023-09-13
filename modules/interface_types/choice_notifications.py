@@ -104,7 +104,7 @@ class choice_notification(notifications.notification):
         self.global_manager.set('making_choice', False)
         super().remove()
         for current_choice_button in self.choice_buttons:
-            current_choice_button.remove()
+            current_choice_button.remove_complete()
 
 class choice_button(buttons.button):
     '''
@@ -217,7 +217,7 @@ class choice_button(buttons.button):
             None
         '''
         super().on_click()
-        self.notification.remove()
+        self.notification.remove_complete()
 
     def draw(self):
         '''

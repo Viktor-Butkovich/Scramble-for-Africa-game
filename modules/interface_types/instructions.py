@@ -22,7 +22,7 @@ class instructions_button(button):
             display_instructions_page(0, self.global_manager)
         else:
             if not self.global_manager.get('current_instructions_page') == 'none':
-                self.global_manager.get('current_instructions_page').remove()
+                self.global_manager.get('current_instructions_page').remove_complete()
                 self.global_manager.set('current_instructions_page', 'none')
             self.global_manager.set('current_instructions_page_index', 0)
 
@@ -65,10 +65,10 @@ class instructions_page(label):
             self.global_manager.set('current_instructions_page_index', self.global_manager.get('current_instructions_page_index') + 1)
             self.global_manager.set('current_instructions_page_text', self.global_manager.get('instructions_list')[self.global_manager.get('current_instructions_page_index')])
             self.global_manager.set('current_instructions_page', instructions_page(self.global_manager.get('current_instructions_page_text')), self.global_manager) #create a new page and remove this one
-            self.remove()
+            self.remove_complete()
         else:
-            self.remove()
             self.global_manager.set('current_instructions_page', 'none')
+            self.remove_complete()
 
     def set_label(self, new_message):
         '''

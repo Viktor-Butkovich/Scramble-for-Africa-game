@@ -3,7 +3,7 @@
 import random
 import pygame
 
-from ..util import csv_tools
+from ..util import csv_utility
 from ..util import scaling
 from ..util import text_utility
 from . import events
@@ -240,7 +240,7 @@ class flavor_text_manager_template():
             None
         '''
         flavor_text_list = []
-        current_flavor_text = csv_tools.read_csv(file)
+        current_flavor_text = csv_utility.read_csv(file)
         for line in current_flavor_text: #each line is a list
             flavor_text_list.append(line[0])
         self.subject_dict[topic] = flavor_text_list

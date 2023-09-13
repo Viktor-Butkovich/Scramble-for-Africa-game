@@ -174,17 +174,17 @@ def to_main_menu(global_manager, override = False):
     minister_utility.calibrate_minister_info_display(global_manager, 'none')
     #set_game_mode('main_menu', global_manager)
     for current_actor in global_manager.get('actor_list'):
-        current_actor.remove()
+        current_actor.remove_complete()
     for current_grid in global_manager.get('grid_list'):
-        current_grid.remove()
+        current_grid.remove_complete()
     for current_village in global_manager.get('village_list'):
-        current_village.remove()
+        current_village.remove_complete()
     for current_minister in global_manager.get('minister_list'):
-        current_minister.remove()
+        current_minister.remove_complete()
     for current_lore_mission in global_manager.get('lore_mission_list'):
-        current_lore_mission.remove()
+        current_lore_mission.remove_complete()
     for current_die in global_manager.get('dice_list'):
-        current_die.remove()
+        current_die.remove_complete()
     global_manager.set('loan_list', [])
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_tile', 'none')
@@ -193,7 +193,7 @@ def to_main_menu(global_manager, override = False):
     global_manager.set('player_turn_queue', [])
     global_manager.set('current_lore_mission', 'none')
     if not global_manager.get('current_instructions_page') == 'none':
-        global_manager.get('current_instructions_page').remove()
+        global_manager.get('current_instructions_page').remove_complete()
         global_manager.set('current_instructions_page', 'none')
     if not global_manager.get('current_country') == 'none':
         global_manager.get('current_country').deselect()

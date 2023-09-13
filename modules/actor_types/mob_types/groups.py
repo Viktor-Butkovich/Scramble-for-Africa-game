@@ -239,7 +239,7 @@ class group(pmob):
         '''
         self.officer.fire()
         self.worker.fire()
-        self.remove()
+        self.remove_complete()
 
     def set_group_type(self, new_type):
         '''
@@ -325,7 +325,6 @@ class group(pmob):
         '''
         if self.can_hold_commodities:
             self.drop_inventory()
-        self.remove()
         self.worker.leave_group(self)
 
         movement_ratio_remaining = self.movement_points / self.max_movement_points
@@ -336,6 +335,7 @@ class group(pmob):
         self.officer.veteran = self.veteran
         self.officer.leave_group(self)
         self.officer.set_movement_points(math.floor(movement_ratio_remaining * self.officer.max_movement_points))
+        self.remove_complete()
 
     def die(self, death_type = 'violent'):
         '''

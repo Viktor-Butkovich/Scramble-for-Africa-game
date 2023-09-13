@@ -55,6 +55,18 @@ class image():
         else:
             return(False)
         
+    def remove_complete(self):
+        '''
+        Description:
+            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
+        del self
+
     def remove(self):
         '''
         Description:

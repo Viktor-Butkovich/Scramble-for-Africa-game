@@ -644,7 +644,7 @@ class mob(actor):
         super().remove()
         self.global_manager.set('mob_list', utility.remove_from_list(self.global_manager.get('mob_list'), self)) #make a version of mob_list without self and set mob_list to it
         for current_status_icon in self.status_icons:
-            current_status_icon.remove()
+            current_status_icon.remove_complete()
         self.status_icons = []
 
     def die(self, death_type = 'violent'):
@@ -657,9 +657,9 @@ class mob(actor):
         Output:
             None
         '''
-        self.remove()
         if self.is_pmob:
             self.death_sound(death_type)
+        self.remove_complete()
 
     def death_sound(self, death_type = 'violent'):
         '''

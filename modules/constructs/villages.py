@@ -53,6 +53,18 @@ class village():
         if not self.cell.grid.is_mini_grid: #villages should not be created in mini grid cells, so do not allow village to be visible to rest of program if it is on a mini grid cell
             self.global_manager.get('village_list').append(self) #have more permanent fix later
 
+    def remove_complete(self):
+        '''
+        Description:
+            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.remove()
+        del self
+
     def remove(self):
         '''
         Description:

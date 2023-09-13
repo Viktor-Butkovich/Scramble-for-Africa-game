@@ -18,3 +18,5 @@ __init__.py
 Instructions.docx
 README.txt
 Scramble_for_Africa.py: Main executable file
+
+As of the last count, the program contains 33,963 lines of code

@@ -203,14 +203,14 @@ class exploration_notification(action_notification):
             if self.global_manager.get('exploration_result')[0].movement_points >= 1: #fix to exploration completing multiple times bug
                 self.global_manager.get('exploration_result')[0].complete_exploration() #tells index 0 of exploration result, the explorer object, to finish exploring when notifications removed
                 for current_die in self.global_manager.get('dice_list'):
-                    current_die.remove()
+                    current_die.remove_complete()
                 for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                    current_minister_image.remove()
+                    current_minister_image.remove_complete()
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last:
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class off_tile_exploration_notification(action_notification):
     '''
@@ -291,7 +291,7 @@ class off_tile_exploration_notification(action_notification):
             current_expedition = self.global_manager.get('displayed_mob')
             self.global_manager.get('minimap_grid').calibrate(current_expedition.x, current_expedition.y)
         for current_image in self.notification_images:
-            current_image.remove()
+            current_image.remove_complete()
         
 class trade_notification(action_notification):
     '''
@@ -389,7 +389,7 @@ class trade_notification(action_notification):
             caravan.complete_trade(self.gives_commodity, self.trade_result)
         super().remove()
         for current_image in self.notification_images:
-            current_image.remove()
+            current_image.remove_complete()
         if self.dies:
             caravan = self.trade_result[0]
             village = caravan.images[0].current_cell.village
@@ -398,9 +398,9 @@ class trade_notification(action_notification):
             warrior.attack_on_spawn()
         if self.is_last:
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
         if self.stops_trade:
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
@@ -479,16 +479,16 @@ class religious_campaign_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('religious_campaign_result')[0].complete_religious_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class public_relations_campaign_notification(action_notification):
     '''
@@ -536,9 +536,9 @@ class public_relations_campaign_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('public_relations_campaign_result')[0].complete_public_relations_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -560,7 +560,7 @@ class trial_notification(action_notification):
         '''
         super().remove(handle_next_notification=False)
         for current_die in self.global_manager.get('dice_list'):
-            current_die.remove()
+            current_die.remove_complete()
         previous_roll = self.global_manager.get('trial_rolls').pop(0)
         if previous_roll >= 5:
             self.global_manager.set('trial_rolls', []) #stop trial after success
@@ -637,16 +637,16 @@ class advertising_campaign_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('advertising_campaign_result')[0].complete_advertising_campaign()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class conversion_notification(action_notification):
     '''
@@ -703,16 +703,16 @@ class conversion_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('conversion_result')[0].complete_conversion()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful campaign, remove image of church volunteer
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class rumor_search_notification(action_notification):
     '''
@@ -762,16 +762,16 @@ class rumor_search_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] in ['none', 'off_tile_exploration']: #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('rumor_search_result')[0].complete_rumor_search()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful campaign, remove any attached images
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class artifact_search_notification(action_notification):
     '''
@@ -820,9 +820,9 @@ class artifact_search_notification(action_notification):
             notification_manager.notification_queue.pop(0)
         if len(notification_manager.notification_type_queue) > 0 and not notification_manager.notification_type_queue[0] == 'roll':
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
         if len(notification_manager.notification_queue) > 0 and notification_manager.notification_type_queue[0] in ['final_artifact_search', 'default'] and not self.is_last: #if roll failed or succeeded and about to complete
             self.global_manager.get('artifact_search_result')[0].complete_artifact_search()
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -897,16 +897,16 @@ class capture_slaves_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1: #if last notification, create church volunteers if success, remove dice, and allow actions again
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('capture_slaves_result')[0].complete_capture_slaves()
             
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
         if self.is_last: #if is last notification in successful capture, remove image of slaves
             for current_image in self.notification_images:
-                current_image.remove()
+                current_image.remove_complete()
 
 class suppress_slave_trade_notification(action_notification):
     '''
@@ -951,9 +951,9 @@ class suppress_slave_trade_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1 and not self.global_manager.get('notification_manager').notification_type_queue[0] == 'none': #if last notification, remove dice and complete action
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             self.global_manager.get('suppress_slave_trade_result')[0].complete_suppress_slave_trade()
             
         elif len(notification_manager.notification_queue) > 0:
@@ -1009,9 +1009,9 @@ class construction_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
             constructor = self.global_manager.get('construction_result')[0]
             if constructor.current_construction_type == 'default':
                 constructor.complete_construction()
@@ -1086,9 +1086,9 @@ class combat_notification(action_notification):
         if len(self.global_manager.get('notification_manager').notification_queue) == 1:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
             for current_die in self.global_manager.get('dice_list'):
-                current_die.remove()
+                current_die.remove_complete()
             for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
-                current_minister_image.remove()
+                current_minister_image.remove_complete()
     
         elif len(notification_manager.notification_queue) > 0:
             notification_manager.notification_to_front(notification_manager.notification_queue[0])
@@ -1096,5 +1096,5 @@ class combat_notification(action_notification):
         if self.is_last:
             self.global_manager.get('combat_result')[0].complete_combat()
             for current_image in self.global_manager.get('combatant_images'):
-                current_image.remove()
+                current_image.remove_complete()
             self.global_manager.set('combatant_images', [])

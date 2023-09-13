@@ -962,7 +962,7 @@ class slums(building):
         if self.cell.tile == self.global_manager.get('displayed_tile'): #if being displayed, change displayed population value
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.cell.tile)
         if self.available_workers == 0:
-            self.remove()
+            self.remove_complete()
             
     def recruit_worker(self):
         '''

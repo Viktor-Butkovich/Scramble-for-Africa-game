@@ -225,7 +225,7 @@ def main_loop(global_manager):
                 moving = False
                 if current_enemy.npmob_type == 'native_warriors' and current_enemy.despawning:
                     if current_enemy.selected or not current_enemy.visible():
-                        current_enemy.remove()
+                        current_enemy.remove_complete()
                         removed = True
                         
                 elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == global_manager.get('turn'): #if unit just created
