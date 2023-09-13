@@ -580,10 +580,10 @@ def manage_ministers(global_manager):
     '''
     removed_ministers = []
     for current_minister in global_manager.get('minister_list'):
-        removing_minister = True
+        removing_minister = False
         if current_minister.just_removed and current_minister.current_position == 'none':
             current_minister.respond('fired')
-            #current_minister.remove_complete()
+            removing_minister = True
         elif current_minister.current_position == 'none' and random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2: #1/18 chance of switching out available ministers
             removed_ministers.append(current_minister)
         elif (random.randrange(1, 7) == 1 and random.randrange(1, 7) <= 2 and random.randrange(1, 7) <= 2 and (random.randrange(1, 7) <= 3 or global_manager.get('evil') > random.randrange(0, 100))) or global_manager.get('effect_manager').effect_active('farm_upstate'):
