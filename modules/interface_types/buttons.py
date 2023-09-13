@@ -2,18 +2,18 @@
 
 import pygame
 import time
-from .. import images
-from .. import text_tools
-from .. import scaling
-from .. import main_loop_tools
-from .. import actor_utility
-from .. import utility
-from .. import turn_management_tools
-from .. import market_tools
-from .. import notification_tools
-from .. import game_transitions
-from .. import minister_utility
-from .. import trial_utility
+from ..constructs import images
+from ..util import text_utility
+from ..util import scaling
+from ..util import main_loop_utility
+from ..util import actor_utility
+from ..util import utility
+from ..util import turn_management_utility
+from ..util import market_utility
+from ..util import notification_utility
+from ..util import game_transitions
+from ..util import minister_utility
+from ..util import trial_utility
 from . import interface_elements
 
 class button(interface_elements.interface_element):
@@ -739,8 +739,8 @@ class button(interface_elements.interface_element):
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
         tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
@@ -826,7 +826,7 @@ class button(interface_elements.interface_element):
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
     def on_rmb_click(self):
@@ -861,7 +861,7 @@ class button(interface_elements.interface_element):
             elif self.button_type == 'move down':
                 y_change = -1
             selected_list = actor_utility.get_selected_list(self.global_manager)
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
                     if len(selected_list) == 1:
                         if self.global_manager.get('current_game_mode') == 'strategic':
@@ -874,16 +874,16 @@ class button(interface_elements.interface_element):
                                     mob.set_sentry_mode(False)
                                 mob.clear_automatic_route()
                         else:
-                            text_tools.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
+                            text_utility.print_to_screen('You cannot move while in the European HQ screen.', self.global_manager)
                     elif len(selected_list) < 1:
-                        text_tools.print_to_screen('There are no selected units to move.', self.global_manager)
+                        text_utility.print_to_screen('There are no selected units to move.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('You can only move one unit at a time.', self.global_manager)
+                        text_utility.print_to_screen('You can only move one unit at a time.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot move.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot move.', self.global_manager)
         elif self.button_type == 'toggle grid lines':
             self.global_manager.get('effect_manager').set_effect('hide_grid_lines', utility.toggle(self.global_manager.get('effect_manager').effect_active('hide_grid_lines')))
 
@@ -897,7 +897,7 @@ class button(interface_elements.interface_element):
                 self.global_manager.set('text_box_height', self.global_manager.get('default_text_box_height'))
 
         elif self.button_type == 'execute movement routes':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 if minister_utility.positions_filled(self.global_manager):
                     if not self.global_manager.get('current_game_mode') == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
@@ -962,14 +962,14 @@ class button(interface_elements.interface_element):
                     else:
                         transportation_minister.display_message('There were no units with designated movement routes. /n /n')
                 else:
-                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot move units.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot move units.', self.global_manager)
                 
 
         elif self.button_type == 'do something':
-            text_tools.get_input('do something', 'Placeholder do something message', self.global_manager)
+            text_utility.get_input('do something', 'Placeholder do something message', self.global_manager)
 
         elif self.button_type == 'exploration':
             self.expedition.start_exploration(self.x_change, self.y_change)
@@ -979,8 +979,8 @@ class button(interface_elements.interface_element):
             self.battalion.move(self.x_change, self.y_change, True)
 
         elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
-            if main_loop_tools.action_possible(self.global_manager):
-                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
+                if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_mob.get_held_commodities()[self.attached_label.commodity_index]
@@ -992,25 +992,25 @@ class button(interface_elements.interface_element):
                             can_drop_off = True
                             if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
                                 can_drop_off = False
-                                text_tools.print_to_screen('A train can only drop off cargo at a train station.', self.global_manager)
+                                text_utility.print_to_screen('A train can only drop off cargo at a train station.', self.global_manager)
                             if can_drop_off:
                                 if displayed_mob.sentry_mode:
                                     displayed_mob.set_sentry_mode(False)
                                 displayed_mob.change_inventory(commodity, -1 * num_commodity)
                                 displayed_tile.change_inventory(commodity, num_commodity)
                                 if displayed_tile.get_inventory_remaining() < 0 and not displayed_tile.can_hold_infinite_commodities:
-                                    text_tools.print_to_screen('This tile cannot hold this many commodities.', self.global_manager)
-                                    text_tools.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
+                                    text_utility.print_to_screen('This tile cannot hold this many commodities.', self.global_manager)
+                                    text_utility.print_to_screen('Any commodities exceeding this tile\'s inventory capacity of ' + str(displayed_tile.inventory_capacity) + ' will disappear at the end of the turn.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
+                            text_utility.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
+                        text_utility.print_to_screen('There is no tile to transfer this commodity to.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
                 
         elif self.button_type == 'pick up commodity' or self.button_type == 'pick up all commodity':
-            if main_loop_tools.action_possible(self.global_manager):
-                if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
+                if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['transportation'], self.global_manager):
                     displayed_mob = self.global_manager.get('displayed_mob')
                     displayed_tile = self.global_manager.get('displayed_tile')
                     commodity = displayed_tile.get_held_commodities()[self.attached_label.commodity_index]
@@ -1023,13 +1023,13 @@ class button(interface_elements.interface_element):
                                 can_pick_up = True
                                 if displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not displayed_mob.images[0].current_cell.has_intact_building('train_station'):
                                     can_pick_up = False
-                                    text_tools.print_to_screen('A train can only pick up cargo at a train station.', self.global_manager)
+                                    text_utility.print_to_screen('A train can only pick up cargo at a train station.', self.global_manager)
                                 if can_pick_up:
                                     if displayed_mob.get_inventory_remaining(num_commodity) >= 0: #see if adding commodities would exceed inventory capacity
                                         amount_transferred = num_commodity
                                     else:
                                         amount_transferred = displayed_mob.get_inventory_remaining()
-                                        text_tools.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.', self.global_manager)
+                                        text_utility.print_to_screen('This unit can currently only pick up ' + str(amount_transferred) + ' units of ' + commodity + '.', self.global_manager)
                                     if displayed_mob.sentry_mode:
                                         displayed_mob.set_sentry_mode(False)
                                     displayed_mob.change_inventory(commodity, amount_transferred)
@@ -1039,30 +1039,30 @@ class button(interface_elements.interface_element):
                                             tab_button.on_click()
                                             continue
                             else:
-                                text_tools.print_to_screen('This unit cannot hold commodities.', self.global_manager)
+                                text_utility.print_to_screen('This unit cannot hold commodities.', self.global_manager)
                         else:
-                            text_tools.print_to_screen('This unit is not in this tile.', self.global_manager)
+                            text_utility.print_to_screen('This unit is not in this tile.', self.global_manager)
                     else:
-                        text_tools.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
+                        text_utility.print_to_screen('There is no unit to transfer this commodity to.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot transfer commodities.', self.global_manager)
 
         elif self.button_type == 'remove worker':
             if not self.attached_label.attached_building == 'none':
                 if not len(self.attached_label.attached_building.contained_workers) == 0:
                     self.attached_label.attached_building.contained_workers[0].leave_building(self.attached_label.attached_building)
                 else:
-                    text_tools.print_to_screen('There are no workers to remove from this building.', self.global_manager)
+                    text_utility.print_to_screen('There are no workers to remove from this building.', self.global_manager)
 
         elif self.button_type == 'start end turn':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 stopping = False
                 for current_position in self.global_manager.get('minister_types'):
                     if self.global_manager.get('current_ministers')[current_position] == 'none':
                         stopping = True
                 if stopping:
-                    text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                    text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                    text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                    text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
                 else:
                     if not self.global_manager.get('current_game_mode') == 'strategic':
                         game_transitions.set_game_mode('strategic', self.global_manager)
@@ -1074,17 +1074,17 @@ class button(interface_elements.interface_element):
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
                             text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
                             text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'
-                            notification_tools.display_zoom_notification(text, current_cell.tile, self.global_manager)
+                            notification_utility.display_zoom_notification(text, current_cell.tile, self.global_manager)
                     choice_info_dict = {'type': 'end turn'}
-                    notification_tools.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    notification_utility.display_choice_notification('Are you sure you want to end your turn? ', ['end turn', 'none'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
             else:
-                text_tools.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot end your turn.', self.global_manager)
     
         elif self.button_type == 'end turn':
-            turn_management_tools.end_turn(self.global_manager)
+            turn_management_utility.end_turn(self.global_manager)
 
         elif self.button_type == 'sell commodity' or self.button_type == 'sell all commodity':
-            if main_loop_tools.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
+            if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager):
                 commodity_list = self.attached_label.actor.get_held_commodities()
                 commodity = commodity_list[self.attached_label.commodity_index]
                 num_present = self.attached_label.actor.get_inventory(commodity)
@@ -1093,29 +1093,29 @@ class button(interface_elements.interface_element):
                     num_sold = 1
                 else:
                     num_sold = num_present
-                market_tools.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
+                market_utility.sell(self.attached_label.actor, commodity, num_sold, self.global_manager)
 
         elif self.button_type == 'cycle units':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 game_transitions.cycle_player_turn(self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot cycle through units.', self.global_manager)
 
         elif self.button_type == 'new game':
             if self.global_manager.get('current_game_mode') == 'new_game_setup':
                 if not self.global_manager.get('displayed_country') == 'none':
                     self.global_manager.get('save_load_manager').new_game(self.global_manager.get('displayed_country'))
                 else:
-                    text_tools.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
+                    text_utility.print_to_screen('You cannot start a game without selecting a country.', self.global_manager)
             else:
                 game_transitions.set_game_mode('new_game_setup', self.global_manager)
 
         elif self.button_type == 'save game':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 self.global_manager.get('save_load_manager').save_game('save1.pickle')
-                notification_tools.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
+                notification_utility.display_notification('Game successfully saved to save1.pickle /n /n', 'default', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot save the game', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot save the game', self.global_manager)
 
         elif self.button_type == 'load game':
             self.global_manager.get('save_load_manager').load_game('save1.pickle')
@@ -1147,9 +1147,9 @@ class button(interface_elements.interface_element):
             if num_freed > 0:
                 message = 'A total of ' + str(num_freed) + ' unit' + utility.generate_plural(num_freed) + ' of slaves ' + utility.conjugate('be', num_freed, 'preterite') + ' freed and converted to workers'
                 message += ', increasing public opinion by a total of ' + str(public_opinion_increase) + '. /n /n'
-                notification_tools.display_notification(message, 'default', self.global_manager)
+                notification_utility.display_notification(message, 'default', self.global_manager)
             else:
-                text_tools.print_to_screen('Your company has no slaves to free.', self.global_manager)
+                text_utility.print_to_screen('Your company has no slaves to free.', self.global_manager)
 
         elif self.button_type == 'stop exploration':
             actor_utility.stop_exploration(self.global_manager)
@@ -1234,21 +1234,21 @@ class button(interface_elements.interface_element):
             if self.notification.choice_info_dict['corrupt']:
                 self.global_manager.get('displayed_mob').controlling_minister.steal_money(20, 'loan_interest')
 
-            new_loan = market_tools.loan(False, input_dict, self.global_manager)
+            new_loan = market_utility.loan(False, input_dict, self.global_manager)
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
 
         elif self.button_type == 'launch trial':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 if self.global_manager.get('money') >= self.global_manager.get('action_prices')['trial']:
                     if self.global_manager.get('displayed_defense').corruption_evidence > 0:
                         trial_utility.start_trial(self.global_manager)
                     else:
-                        text_tools.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
+                        text_utility.print_to_screen('No real or fabricated evidence currently exists, so the trial has no chance of success.', self.global_manager)
                 else:
-                    text_tools.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
+                    text_utility.print_to_screen('You do not have the ' + str(self.global_manager.get('action_prices')['trial']) + ' money needed to start a trial.', self.global_manager)
             else:
-                text_tools.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot start a trial.', self.global_manager)
 
         elif self.button_type == 'confirm main menu':
             self.global_manager.set('game_over', False)
@@ -1258,13 +1258,13 @@ class button(interface_elements.interface_element):
             self.global_manager.set('crashed', True)
 
         elif self.button_type == 'wake up all':
-            if main_loop_tools.action_possible(self.global_manager):
+            if main_loop_utility.action_possible(self.global_manager):
                 for current_pmob in self.global_manager.get('pmob_list'):
                     if current_pmob.sentry_mode:
                         current_pmob.set_sentry_mode(False)
                 actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self.global_manager.get('displayed_mob'))
             else:
-                text_tools.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot disable sentry mode.', self.global_manager)
 
         elif self.button_type == 'confirm remove minister':
             removed_minister = self.global_manager.get('displayed_minister')
@@ -1467,7 +1467,7 @@ class cycle_same_tile_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             cycled_tile = self.global_manager.get('displayed_tile')
             moved_mob = cycled_tile.cell.contained_mobs.pop(0)
             cycled_tile.cell.contained_mobs.append(moved_mob)
@@ -1476,7 +1476,7 @@ class cycle_same_tile_button(button):
                 cycled_tile.cell.contained_mobs[0].selection_sound()
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), cycled_tile) #updates mob info display list to show changed passenger order
         else:
-            text_tools.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot cycle units.', self.global_manager)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1554,7 +1554,7 @@ class same_tile_icon(button):
             None
         '''
         if (not self.is_last) and self.attached_mob != 'none':
-            if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+            if main_loop_utility.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
                 self.attached_mob.select()
                 if self.attached_mob.is_pmob:
                     self.attached_mob.selection_sound()
@@ -1563,7 +1563,7 @@ class same_tile_icon(button):
                         while not self.attached_mob == current_image.current_cell.contained_mobs[0]:
                             current_image.current_cell.contained_mobs.append(current_image.current_cell.contained_mobs.pop(0))
             else:
-                text_tools.print_to_screen('You are busy and cannot select a different unit', self.global_manager)
+                text_utility.print_to_screen('You are busy and cannot select a different unit', self.global_manager)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1694,7 +1694,7 @@ class fire_unit_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
+        if main_loop_utility.action_possible(self.global_manager): #when clicked, calibrate minimap to attached mob and move it to the front of each stack
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
                 message = 'Are you sure you want to fire this unit? Firing this unit would remove it, any units attached to it, and any associated upkeep from the game. /n /n '
                 if self.attached_mob.is_worker:
@@ -1709,9 +1709,9 @@ class fire_unit_button(button):
                         message += 'Fired workers will enter the labor pool and wander, eventually settling in slums where they may be hired again.'
                     elif self.attached_mob.worker_type == 'slave':
                         message += 'Firing slaves frees them, increasing public opinion and entering them into the labor pool. Freed slaves will wander and eventually settle in slums, where they may be hired as workers.'
-                notification_tools.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
+                notification_utility.display_choice_notification(message, ['fire', 'cancel'], {}, self.global_manager)
         else:
-            text_tools.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot fire a unit', self.global_manager)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1786,12 +1786,12 @@ class free_unit_slaves_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             if not(self.attached_mob.is_vehicle and self.attached_mob.vehicle_type == 'ship' and not self.attached_mob.can_leave()):
                 message = 'Are you sure you want to free the slaves in this unit? This would convert them to free African workers with any associated upkeep. /n /n '
-                notification_tools.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
+                notification_utility.display_choice_notification(message, ['free', 'cancel'], {}, self.global_manager)
         else:
-            text_tools.print_to_screen('You are busy and cannot free slaves', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot free slaves', self.global_manager)
 
     def can_show(self, skip_parent_collection=False):
         '''
@@ -1871,30 +1871,30 @@ class switch_game_mode_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             if self.to_mode in ['ministers', 'main_menu', 'new_game_setup'] or (self.global_manager.get('minister_appointment_tutorial_completed') and minister_utility.positions_filled(self.global_manager)):
                 if self.to_mode == 'ministers' and 'trial' in self.modes:
                     defense = self.global_manager.get('displayed_defense')
                     if defense.fabricated_evidence > 0:
                         text = 'WARNING: Your ' + str(defense.fabricated_evidence) + ' piece' + utility.generate_plural(defense.fabricated_evidence) + ' of fabricated evidence against ' + defense.current_position + ' '
                         text += defense.name + ' will disappear at the end of the turn if left unused. /n /n'
-                        notification_tools.display_notification(text, 'default', self.global_manager)
+                        notification_utility.display_notification(text, 'default', self.global_manager)
                     if self.global_manager.get('prosecution_bribed_judge'):
                         text = 'WARNING: The effect of bribing the judge will disappear at the end of the turn if left unused. /n /n'
-                        notification_tools.display_notification(text, 'default', self.global_manager)
+                        notification_utility.display_notification(text, 'default', self.global_manager)
                 
                 if self.to_mode == 'main_menu':
-                    notification_tools.display_choice_notification('Are you sure you want to exit to the main menu without saving? /n /n', ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
+                    notification_utility.display_choice_notification('Are you sure you want to exit to the main menu without saving? /n /n', ['confirm main menu', 'none'], {}, self.global_manager) #message, choices, choice_info_dict, global_manager
                 elif not self.to_mode == 'previous':
                     game_transitions.set_game_mode(self.to_mode, self.global_manager)
                 else:
                     self.global_manager.set('exit_minister_screen_tutorial_completed', True)
                     game_transitions.set_game_mode(self.global_manager.get('previous_game_mode'), self.global_manager)
             else:
-                text_tools.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
-                text_tools.print_to_screen('Press Q to view the minister interface.', self.global_manager)
+                text_utility.print_to_screen('You have not yet appointed a minister in each office.', self.global_manager)
+                text_utility.print_to_screen('Press Q to view the minister interface.', self.global_manager)
         else:
-            text_tools.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot switch screens.', self.global_manager)
 
     def update_tooltip(self):
         '''
@@ -2000,7 +2000,7 @@ class minister_portrait_image(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             if self.global_manager.get('current_game_mode') == 'ministers' and not self.current_minister == 'none':
                 if self.current_minister != 'none':
                     self.current_minister.play_voice_line('acknowledgement')
@@ -2011,7 +2011,7 @@ class minister_portrait_image(button):
                 else: #if cabinet portrait
                     minister_utility.calibrate_minister_info_display(self.global_manager, self.current_minister)
         else:
-            text_tools.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
 
     def calibrate(self, new_minister):
         '''
@@ -2104,10 +2104,10 @@ class country_selection_image(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('country_info_display'), self.current_country)
         else:
-            text_tools.print_to_screen('You are busy and cannot select another country.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot select another country.', self.global_manager)
 
     def calibrate(self, new_country):
         '''
@@ -2199,7 +2199,7 @@ class cycle_available_ministers_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             if self.direction == 'left':
                 self.global_manager.set('available_minister_left_index', self.global_manager.get('available_minister_left_index') - 1)
             if self.direction == 'right':
@@ -2207,7 +2207,7 @@ class cycle_available_ministers_button(button):
             minister_utility.update_available_minister_display(self.global_manager)
             self.global_manager.get('available_minister_portrait_list')[2].on_click() #select new middle portrait
         else:
-            text_tools.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot select other ministers.', self.global_manager)
 
 class commodity_button(button):
     '''
@@ -2254,7 +2254,7 @@ class commodity_button(button):
         '''
         if self.global_manager.get('choosing_advertised_commodity'):
             if self.commodity == 'consumer goods':
-                text_tools.print_to_screen('You cannot advertise consumer goods.', self.global_manager)
+                text_utility.print_to_screen('You cannot advertise consumer goods.', self.global_manager)
             else:
                 can_advertise = False
                 for current_commodity in self.global_manager.get('collectable_resources'):
@@ -2265,7 +2265,7 @@ class commodity_button(button):
                     self.global_manager.get('displayed_mob').start_advertising_campaign(self.commodity)
                     self.global_manager.set('choosing_advertised_commodity', False)
                 else:
-                    text_tools.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
+                    text_utility.print_to_screen('You cannot advertise ' + self.commodity + ' because all other commodities are already at the minimum price.', self.global_manager)
 
     def can_show_tooltip(self):
         '''
@@ -2328,10 +2328,10 @@ class show_previous_financial_report_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
-            notification_tools.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
+        if main_loop_utility.action_possible(self.global_manager):
+            notification_utility.display_notification(self.global_manager.get('previous_financial_report'), 'default', self.global_manager)
         else:
-            text_tools.print_to_screen('You are busy and cannot view the last turn\'s financial report', self.global_manager)
+            text_utility.print_to_screen('You are busy and cannot view the last turn\'s financial report', self.global_manager)
 
 class tab_button(button):
     '''
@@ -2464,7 +2464,7 @@ class reorganize_unit_button(button):
         Output:
             None
         '''
-        if main_loop_tools.action_possible(self.global_manager):
+        if main_loop_utility.action_possible(self.global_manager):
             procedure_actors = self.parent_collection.autofill_actors
             if procedure_actors['procedure'] in self.allowed_procedures:
                 procedure_type = 'none'
@@ -2485,19 +2485,19 @@ class reorganize_unit_button(button):
 
                 if procedure_type == 'merge':
                     if procedure_actors['worker'].worker_type == 'religious' and procedure_actors['officer'].officer_type != 'evangelist':
-                        text_tools.print_to_screen('Church volunteers can only be combined with evangelists.', self.global_manager)
+                        text_utility.print_to_screen('Church volunteers can only be combined with evangelists.', self.global_manager)
                     elif procedure_actors['officer'].officer_type == 'evangelist' and procedure_actors['worker'].worker_type != 'religious':
-                        text_tools.print_to_screen('Evangelists can only be combined with church volunteers.', self.global_manager)
+                        text_utility.print_to_screen('Evangelists can only be combined with church volunteers.', self.global_manager)
                     else:
                         self.global_manager.get('actor_creation_manager').create_group(procedure_actors['worker'], procedure_actors['officer'], self.global_manager)
 
                 elif procedure_type == 'crew':
                     if procedure_actors['worker'].worker_type == 'religious':
-                        text_tools.print_to_screen('Church volunteers cannot crew vehicles.', self.global_manager)
+                        text_utility.print_to_screen('Church volunteers cannot crew vehicles.', self.global_manager)
                     elif procedure_actors['worker'].worker_type == 'slave':
-                        text_tools.print_to_screen('Slave workers cannot crew vehicles.', self.global_manager)
+                        text_utility.print_to_screen('Slave workers cannot crew vehicles.', self.global_manager)
                     elif procedure_actors['worker'].worker_type == 'African' and procedure_actors['officer'].vehicle_type == 'ship' and procedure_actors['officer'].can_swim_ocean:
-                        text_tools.print_to_screen('Only European workers can crew steamships.', self.global_manager)
+                        text_utility.print_to_screen('Only European workers can crew steamships.', self.global_manager)
                     else:
                         procedure_actors['worker'].crew_vehicle(procedure_actors['officer'])
 
@@ -2506,13 +2506,13 @@ class reorganize_unit_button(button):
 
                 elif procedure_type == 'uncrew':
                     if procedure_actors['group'].contained_mobs or procedure_actors['group'].get_held_commodities():
-                        text_tools.print_to_screen('You cannot remove the crew from a ' + procedure_actors['group'].vehicle_type + ' with passengers or cargo.', self.global_manager)
+                        text_utility.print_to_screen('You cannot remove the crew from a ' + procedure_actors['group'].vehicle_type + ' with passengers or cargo.', self.global_manager)
                     else:
                         procedure_actors['group'].crew.uncrew_vehicle(procedure_actors['group'])
             elif 'merge' in self.allowed_procedures:
-                text_tools.print_to_screen('This button does merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile', self.global_manager)
+                text_utility.print_to_screen('This button does merge and crew procedures, which require workers and an officer/uncrewed vehicle in the same tile', self.global_manager)
             elif 'split' in self.allowed_procedures:
-                text_tools.print_to_screen('This button does split and uncrew procedures, which require a group or crewed vehicle to be selected', self.global_manager)
+                text_utility.print_to_screen('This button does split and uncrew procedures, which require a group or crewed vehicle to be selected', self.global_manager)
 
     def create_dummy_copy(self, unit, dummy_input_dict, required_dummy_attributes, override_values={}):
         '''

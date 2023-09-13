@@ -2,9 +2,9 @@
 
 import random
 from ..groups import group
-from .... import actor_utility
-from .... import dice_utility
-from .... import notification_tools
+from ....util import actor_utility
+from ....util import dice_utility
+from ....util import notification_utility
 
 class missionaries(group):
     '''
@@ -101,11 +101,11 @@ class missionaries(group):
         self.current_roll_modifier = 0
         if self.current_min_success > 6:
             message += 'As a ' + str(self.current_min_success) + '+ would be required to succeed this roll, it is impossible and may not be attempted. Build a mission to reduce the roll\'s difficulty. /n /n'
-            notification_tools.display_notification(message, 'default', self.global_manager)
+            notification_utility.display_notification(message, 'default', self.global_manager)
         else:
             self.global_manager.set('ongoing_action', True)
             self.global_manager.set('ongoing_action_type', 'conversion')
-            notification_tools.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
+            notification_utility.display_choice_notification(message, ['start converting', 'stop converting'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager+
 
     def convert(self):
         '''
@@ -131,12 +131,12 @@ class missionaries(group):
         text += 'The missionaries try to convert the natives to reduce their aggressiveness. /n /n'
 
         if not self.veteran:    
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'conversion', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'conversion', self.global_manager, num_dice)
         else:
             text += ('The veteran evangelist can roll twice and pick the higher result. /n /n')
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'conversion', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'conversion', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -170,7 +170,7 @@ class missionaries(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + 'Click to continue.', 'conversion', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Click to continue.', 'conversion', self.global_manager, num_dice)
             
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -192,10 +192,10 @@ class missionaries(group):
             public_opinion_increase = random.randrange(0, 2)
             if public_opinion_increase > 0:
                 text += '/nWorking to fulfill your company\'s proclaimed mission of enlightening the heathens of Africa has increased your public opinion by ' + str(public_opinion_increase) + '. /n'
-            notification_tools.display_notification(text + '/nClick to remove this notification.', 'final_conversion', self.global_manager)
+            notification_utility.display_notification(text + '/nClick to remove this notification.', 'final_conversion', self.global_manager)
             success = True
         else:
-            notification_tools.display_notification(text, 'default', self.global_manager)
+            notification_utility.display_notification(text, 'default', self.global_manager)
             success = False
         self.global_manager.set('conversion_result', [self, roll_result, village, public_opinion_increase, success])
 

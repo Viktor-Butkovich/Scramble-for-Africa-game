@@ -2,7 +2,7 @@
 
 import random
 from ..npmobs import npmob
-from .... import utility
+from ....util import utility
 
 class native_warriors(npmob):
     '''

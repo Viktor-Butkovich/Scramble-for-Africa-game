@@ -2,8 +2,8 @@
 
 from .labels import label
 from .buttons import button
-from .. import scaling
-from .. import text_tools
+from ..util import scaling
+from ..util import text_utility
 
 class instructions_button(button):
     '''
@@ -82,8 +82,8 @@ class instructions_page(label):
         self.message = new_message
         self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name) + 10
+            if text_utility.message_width(text_line, self.font_size, self.font_name) + 10 > self.minimum_width: #self.ideal_width:
+                self.width = text_utility.message_width(text_line, self.font_size, self.font_name) + 10
 
     def draw(self):
         '''
@@ -98,7 +98,7 @@ class instructions_page(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + 10, self.global_manager.get('display_height') - (self.y + self.height - (text_line_index * self.font_size))))
 
     def format_message(self):
         '''
@@ -116,7 +116,7 @@ class instructions_page(label):
         for index in range(len(self.message)):
             next_word += self.message[index]
             if self.message[index] == ' ':
-                if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+                if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word

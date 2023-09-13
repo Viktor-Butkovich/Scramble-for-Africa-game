@@ -2,10 +2,10 @@
 
 import pygame
 from .buttons import button
-from .. import scaling
-from .. import text_tools
-from .. import utility
-from .. import market_tools
+from ..util import scaling
+from ..util import text_utility
+from ..util import utility
+from ..util import market_utility
 
 class label(button):
     '''
@@ -52,8 +52,8 @@ class label(button):
             None
         '''
         self.message = new_message
-        if text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width:
-            self.width = text_tools.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
+        if text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.minimum_width:
+            self.width = text_utility.message_width(self.message, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager)
         else:
             self.width = self.minimum_width
         self.image.width = self.width
@@ -94,7 +94,7 @@ class label(button):
         '''
         if self.showing:
             super().draw(allow_show_outline=False)
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 
 class value_label(label):
@@ -123,7 +123,7 @@ class value_label(label):
         self.value_name = input_dict['value_name']
         input_dict['message'] = 'none'
         super().__init__(input_dict, global_manager)
-        self.display_name = text_tools.remove_underscores(self.value_name) #public_opinion to public opinion
+        self.display_name = text_utility.remove_underscores(self.value_name) #public_opinion to public opinion
         self.tracker = self.global_manager.get(self.value_name + '_tracker')
         self.tracker.value_label = self
         self.update_label(self.tracker.get())
@@ -198,7 +198,7 @@ class money_label(value_label):
         Output:
             None
         '''
-        end_turn_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)
+        end_turn_money_change = market_utility.calculate_end_turn_money_change(self.global_manager)
         if end_turn_money_change >= 0:
             sign = '+'
         else:
@@ -264,7 +264,7 @@ class money_label(value_label):
             tooltip_text.append('    Any church volunteers would not need to be paid.')
 
         tooltip_text.append('')
-        num_available_workers = market_tools.count_available_workers(self.global_manager)
+        num_available_workers = market_utility.count_available_workers(self.global_manager)
         tooltip_text.append('Between workers in slums and villages and recently fired wandering workers, the free labor pool consists of ' + str(num_available_workers) + ' African worker' + utility.generate_plural(num_available_workers) + '.')
         
         if len(self.global_manager.get('loan_list')) > 0:
@@ -274,15 +274,15 @@ class money_label(value_label):
                 tooltip_text.append('    ' + current_loan.get_description())
 
         tooltip_text.append('')
-        tooltip_text.append('While public opinion and government subsidies are not entirely predictable, your company is estimated to receive ' + str(market_tools.calculate_subsidies(self.global_manager, True)) + ' money in subsidies this turn')
+        tooltip_text.append('While public opinion and government subsidies are not entirely predictable, your company is estimated to receive ' + str(market_utility.calculate_subsidies(self.global_manager, True)) + ' money in subsidies this turn')
 
-        total_sale_revenue = market_tools.calculate_total_sale_revenue(self.global_manager)
+        total_sale_revenue = market_utility.calculate_total_sale_revenue(self.global_manager)
         if total_sale_revenue > 0:
             tooltip_text.append('')
             tooltip_text.append('Your ' + self.global_manager.get('type_minister_dict')['trade'] + ' has been ordered to sell commodities at the end of the turn for an estimated total of ' + str(total_sale_revenue) + ' money')
 
         tooltip_text.append('')
-        estimated_money_change = market_tools.calculate_end_turn_money_change(self.global_manager)
+        estimated_money_change = market_utility.calculate_end_turn_money_change(self.global_manager)
         if estimated_money_change > 0:
             tooltip_text.append('Between these revenues and expenses, your company is expected to gain about ' + str(estimated_money_change) + ' money at the end of the turn.')
         elif estimated_money_change < 0:
@@ -335,12 +335,12 @@ class commodity_prices_label(label):
         message = ['Prices: ']
         widest_commodity_width = 0
         for current_commodity in self.global_manager.get('commodity_types'):
-            current_message_width = text_tools.message_width(current_commodity, self.font_size, self.font_name)
+            current_message_width = text_utility.message_width(current_commodity, self.font_size, self.font_name)
             if current_message_width > widest_commodity_width:
                 widest_commodity_width = current_message_width
         for current_commodity in self.global_manager.get('commodity_types'):
             current_line = ''
-            while text_tools.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
+            while text_utility.message_width(current_line + current_commodity, self.font_size, self.font_name) < widest_commodity_width:
                 current_line += ' '
             current_line += current_commodity + ': ' +  str(self.global_manager.get('commodity_prices')[current_commodity])
             message.append(current_line)
@@ -357,8 +357,8 @@ class commodity_prices_label(label):
         '''
         self.message = new_message
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10, self.global_manager) and text_tools.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.width:
-                self.width = scaling.scale_width(text_tools.message_width(text_line, self.font_size, self.font_name), self.global_manager) + scaling.scale_width(20, self.global_manager)# + 20
+            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width - scaling.scale_width(10, self.global_manager) and text_utility.message_width(text_line, self.font_size, self.font_name) + scaling.scale_width(10, self.global_manager) > self.width:
+                self.width = scaling.scale_width(text_utility.message_width(text_line, self.font_size, self.font_name), self.global_manager) + scaling.scale_width(20, self.global_manager)# + 20
                 self.image.width = self.width
                 self.Rect.width = self.width
                 self.image.set_image(self.image.image_id) #update width scaling
@@ -377,7 +377,7 @@ class commodity_prices_label(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
@@ -433,7 +433,7 @@ class multi_line_label(label):
             self.image.draw()
             for text_line_index in range(len(self.message)):
                 text_line = self.message[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                     (self.y + self.height - (text_line_index * self.font_size))))
 
     def update_tooltip(self):
@@ -462,7 +462,7 @@ class multi_line_label(label):
                 if not (index > 0 and self.message[index - 1] + self.message[index] == '/n'): #if on n after /, skip
                     next_word += self.message[index]
             if self.message[index] == ' ':
-                if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+                if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word
@@ -472,7 +472,7 @@ class multi_line_label(label):
                 next_line = ''
                 next_line += next_word
                 next_word = ''
-        if text_tools.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
+        if text_utility.message_width(next_line + next_word, self.font_size, self.font_name) > self.ideal_width:
             new_message.append(next_line)
             next_line = ''
         next_line += next_word
@@ -494,6 +494,6 @@ class multi_line_label(label):
         self.message = new_message
         self.format_message()
         for text_line in self.message:
-            if text_tools.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
-                self.width = text_tools.message_width(text_line, self.font_size, self.font_name)
+            if text_utility.message_width(text_line, self.font_size, self.font_name) > self.ideal_width:
+                self.width = text_utility.message_width(text_line, self.font_size, self.font_name)
         self.image.update_state(self.x, self.y, self.width, self.height)

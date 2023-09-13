@@ -3,9 +3,9 @@
 import pygame
 
 from ..interface_types.labels import label
-from ..images import minister_type_image
-from .. import utility
-from .. import scaling
+from ..constructs.images import minister_type_image
+from ..util import utility
+from ..util import scaling
 from . import images
 
 class actor_display_label(label):

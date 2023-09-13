@@ -1,9 +1,9 @@
 #Contains functions used when switching between parts of the game, like loading screen display
 
 import time
-from . import main_loop_tools
-from . import text_tools
-from .actor_types import tiles
+from . import main_loop_utility
+from . import text_utility
+from ..actor_types import tiles
 from . import actor_utility
 from . import minister_utility
 from . import scaling
@@ -21,12 +21,12 @@ def cycle_player_turn(global_manager, start_of_turn = False):
     turn_queue = global_manager.get('player_turn_queue')
     if len(turn_queue) == 0:
         if not start_of_turn: #print no units message if there are no units in turn queue
-            text_tools.print_to_screen('There are no units left to move this turn.', global_manager)
+            text_utility.print_to_screen('There are no units left to move this turn.', global_manager)
             actor_utility.deselect_all(global_manager)
             actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
     else:
         if len(turn_queue) == 1 and (not start_of_turn) and turn_queue[0].selected: #only print no other units message if there is only 1 unit in turn queue and it is already selected
-            text_tools.print_to_screen('There are no other units left to move this turn.', global_manager)
+            text_utility.print_to_screen('There are no other units left to move this turn.', global_manager)
         if global_manager.get('current_game_mode') == 'europe' and not global_manager.get('europe_grid') in turn_queue[0].grids:
             set_game_mode('strategic', global_manager)
         if not turn_queue[0].selected:
@@ -123,7 +123,7 @@ def create_strategic_map(global_manager):
         None
     '''
     #text_tools.print_to_screen('Creating map...', global_manager)
-    main_loop_tools.update_display(global_manager)
+    main_loop_utility.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
         if current_grid in global_manager.get('abstract_grid_list'): #if europe/slave traders grid
@@ -156,7 +156,7 @@ def start_loading(global_manager):
     '''
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', time.time())
-    main_loop_tools.update_display(global_manager)
+    main_loop_utility.update_display(global_manager)
 
 def to_main_menu(global_manager, override = False):
     '''

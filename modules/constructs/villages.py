@@ -2,9 +2,9 @@
 
 import random
 
-from . import village_name_generator
-from . import actor_utility
-from . import utility
+from ..util import village_name_generator
+from ..util import actor_utility
+from ..util import utility
 
 class village():
     '''

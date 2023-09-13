@@ -1,24 +1,24 @@
 #Contains functionality for creating new instances of mobs, buildings, dice, and ministers
 
 import random
-from .actor_types.mob_types import workers
-from .actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
-from .actor_types.mob_types.officer_types import evangelists, merchants
-from .actor_types.mob_types.npmob_types import native_warriors, beasts
-from .actor_types.mob_types import vehicles, officers
-from .actor_types.mob_types import dummy
-from .actor_types import mobs
-from .actor_types import buildings
-from . import ministers
-from . import lore_missions
-from . import notification_tools
-from . import utility
-from . import actor_utility
-from . import market_tools
-from . import europe_transactions
-from .interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons
-from .actor_display_tools import buttons as actor_display_buttons
-from .actor_display_tools import labels as actor_display_labels
+from ..actor_types.mob_types import workers
+from ..actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
+from ..actor_types.mob_types.officer_types import evangelists, merchants
+from ..actor_types.mob_types.npmob_types import native_warriors, beasts
+from ..actor_types.mob_types import vehicles, officers
+from ..actor_types.mob_types import dummy
+from ..actor_types import mobs
+from ..actor_types import buildings
+from ..constructs import ministers
+from ..constructs import lore_missions
+from ..util import notification_utility
+from ..util import utility
+from ..util import actor_utility
+from ..util import market_utility
+from ..interface_types import europe_transactions
+from ..interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons
+from ..actor_display_tools import buttons as actor_display_buttons
+from ..actor_display_tools import labels as actor_display_labels
 
 class actor_creation_manager_template(): #can get instance from anywhere and create actors with it without importing respective actor module
     '''
@@ -114,7 +114,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
 
         #loans
         elif init_type == 'loan':
-            new_actor = market_tools.loan(from_save, input_dict, global_manager)
+            new_actor = market_utility.loan(from_save, input_dict, global_manager)
 
         return(new_actor)
 
@@ -436,7 +436,7 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
         actor_utility.update_recruitment_descriptions(global_manager, recruitment_type)
         message += global_manager.get('recruitment_string_descriptions')[recruitment_type]
         
-        notification_tools.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
+        notification_utility.display_choice_notification(message, ['recruitment', 'none'], choice_info_dict, global_manager) #message, choices, choice_info_dict, global_manager
 
     def create_group(self, worker, officer, global_manager): #use when merging groups. At beginning of game, instead of using this, create a group which creates its worker and officer and merges them
         '''

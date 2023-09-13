@@ -2,7 +2,7 @@
 
 import time
 from .labels import multi_line_label
-from .. import actor_utility
+from ..util import actor_utility
 
 class notification(multi_line_label):
     '''

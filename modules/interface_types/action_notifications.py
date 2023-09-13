@@ -1,10 +1,10 @@
 #Contains functionality for multi-step notifications
 
-from ..images import free_image
+from ..constructs.images import free_image
 from .notifications import notification
-from .. import scaling
-from .. import actor_utility
-from .. import trial_utility
+from ..util import scaling
+from ..util import actor_utility
+from ..util import trial_utility
 
 class action_notification(notification):
     '''

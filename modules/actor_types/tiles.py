@@ -3,11 +3,11 @@
 import pygame
 import random
 
-from .. import images
-from .. import utility
-from .. import actor_utility
-from .. import villages
-from .. import main_loop_tools
+from ..constructs import images
+from ..util import utility
+from ..util import actor_utility
+from ..constructs import villages
+from ..util import main_loop_utility
 from .actors import actor
 
 class tile(actor): #to do: make terrain tiles a subclass
@@ -402,7 +402,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         Output:
             None
         '''
-        if self.global_manager.get('player_turn') and main_loop_tools.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
+        if self.global_manager.get('player_turn') and main_loop_utility.action_possible(self.global_manager): #(not self.global_manager.get('choosing_destination')):
             if self.name == 'Slave traders' and self.global_manager.get('slave_traders_strength') > 0:
                 if not self.global_manager.get('sound_manager').previous_state == 'slave traders':
                     self.global_manager.get('event_manager').clear()

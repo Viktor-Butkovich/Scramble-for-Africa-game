@@ -3,10 +3,10 @@
 import pygame
 from . import buttons
 from . import notifications
-from .. import text_tools
-from .. import scaling
-from .. import market_tools
-from .. import utility
+from ..util import text_utility
+from ..util import scaling
+from ..util import market_utility
+from ..util import utility
 
 class choice_notification(notifications.notification):
     '''
@@ -230,7 +230,7 @@ class choice_button(buttons.button):
         '''
         super().draw()
         if self.showing:
-            self.global_manager.get('game_display').blit(text_tools.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
+            self.global_manager.get('game_display').blit(text_utility.text(self.message, self.font, self.global_manager), (self.x + scaling.scale_width(10, self.global_manager), self.global_manager.get('display_height') -
                 (self.y + self.height)))
 
     def update_tooltip(self):
@@ -348,7 +348,7 @@ class recruitment_choice_button(choice_button):
             input_dict['worker_type'] = 'African'
             self.global_manager.get('money_tracker').change(-1 * self.notification.choice_info_dict['cost'], 'unit_recruitment')
             self.notification.choice_info_dict['village'].change_population(-1)
-            market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
+            market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager) #adds 1 worker to the pool
             worker = self.global_manager.get('actor_creation_manager').create(False, input_dict, self.global_manager)
             if recruiter.is_vehicle:
                 recruiter.set_movement_points(0)

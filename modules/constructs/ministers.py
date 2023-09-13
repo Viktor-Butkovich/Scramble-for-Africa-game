@@ -3,12 +3,12 @@
 import random
 import os
 
-from . import utility
-from . import actor_utility
-from . import minister_utility
-from . import notification_tools
+from ..util import utility
+from ..util import actor_utility
+from ..util import minister_utility
+from ..util import notification_utility
 from . import images
-from . import scaling
+from ..util import scaling
 
 class minister():
     '''
@@ -231,7 +231,7 @@ class minister():
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
             self, 'portrait', self.global_manager, True)
         self.global_manager.get('notification_manager').minister_message_queue.append(self)
-        notification_tools.display_notification(text, 'minister', self.global_manager, 0, audio)
+        notification_utility.display_notification(text, 'minister', self.global_manager, 0, audio)
 
     def steal_money(self, value, theft_type = 'none'):
         '''
@@ -511,7 +511,7 @@ class minister():
                     completed = False
             if completed:
                 self.global_manager.set('minister_appointment_tutorial_completed', True)
-                notification_tools.show_tutorial_notifications(self.global_manager)
+                notification_utility.show_tutorial_notifications(self.global_manager)
 
     def skill_setup(self):
         '''

@@ -3,9 +3,9 @@
 import pygame
 import time
 import random
-from .. import images
-from .. import utility
-from .. import actor_utility
+from ..constructs import images
+from ..util import utility
+from ..util import actor_utility
 from .actors import actor
 
 class mob(actor):

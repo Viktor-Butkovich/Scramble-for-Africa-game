@@ -3,16 +3,16 @@
 import random
 import pickle
 
-from . import scaling
-from . import notification_tools
-from . import game_transitions
-from .interface_types import grids
+from ..util import scaling
+from ..util import notification_utility
+from ..util import game_transitions
+from ..interface_types import grids
 from . import data_managers
-from . import turn_management_tools
-from . import text_tools
-from . import market_tools
-from . import minister_utility
-from . import actor_utility
+from ..util import turn_management_utility
+from ..util import text_utility
+from ..util import market_utility
+from ..util import minister_utility
+from ..util import actor_utility
 
 class save_load_manager_template():
     '''
@@ -164,9 +164,9 @@ class save_load_manager_template():
                 elif current_commodity == 'diamond':
                     increase = random.randrange(1, 7) + random.randrange(1, 7)
                 price += increase    
-                market_tools.set_price(current_commodity, price, self.global_manager) #2-5
+                market_utility.set_price(current_commodity, price, self.global_manager) #2-5
             else:
-                market_tools.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
+                market_utility.set_price(current_commodity, self.global_manager.get('consumer_goods_starting_price'), self.global_manager)
 
         self.global_manager.get('money_tracker').reset_transaction_history()
         self.global_manager.get('money_tracker').set(500)
@@ -200,16 +200,16 @@ class save_load_manager_template():
             self.global_manager.get('sold_commodities')[current_commodity] = 0
 
         for i in range(1, random.randrange(5, 8)):
-            turn_management_tools.manage_villages(self.global_manager)
+            turn_management_utility.manage_villages(self.global_manager)
             actor_utility.spawn_beast(self.global_manager)
         
         minister_utility.update_available_minister_display(self.global_manager)
 
-        turn_management_tools.start_player_turn(self.global_manager, True)
+        turn_management_utility.start_player_turn(self.global_manager, True)
         if not self.global_manager.get('effect_manager').effect_active('skip_intro'):
             self.global_manager.set('minister_appointment_tutorial_completed', False)
             self.global_manager.set('exit_minister_screen_tutorial_completed', False)
-            notification_tools.show_tutorial_notifications(self.global_manager)
+            notification_utility.show_tutorial_notifications(self.global_manager)
         else:
             self.global_manager.set('minister_appointment_tutorial_completed', True)
             self.global_manager.set('exit_minister_screen_tutorial_completed', True)
@@ -272,7 +272,7 @@ class save_load_manager_template():
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
             pickle.dump(saved_lore_mission_dicts, handle)
-        text_tools.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
+        text_utility.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
         '''
@@ -285,8 +285,8 @@ class save_load_manager_template():
         '''
         self.global_manager.set('loading_save', True)
         
-        text_tools.print_to_screen('', self.global_manager)
-        text_tools.print_to_screen('Loading ' + file_path, self.global_manager)
+        text_utility.print_to_screen('', self.global_manager)
+        text_utility.print_to_screen('Loading ' + file_path, self.global_manager)
         game_transitions.start_loading(self.global_manager)
         #load file
         try:
@@ -298,7 +298,7 @@ class save_load_manager_template():
                 saved_minister_dicts = pickle.load(handle)
                 saved_lore_mission_dicts = pickle.load(handle)
         except:
-            text_tools.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
+            text_utility.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
 
         #load variables
@@ -313,8 +313,8 @@ class save_load_manager_template():
         self.global_manager.get('fear_tracker').set(new_global_manager.get('fear'))
         self.global_manager.get(self.global_manager.get('current_country_name')).select() #selects the country object with the same identifier as the saved country name
 
-        text_tools.print_to_screen('', self.global_manager)
-        text_tools.print_to_screen('Turn ' + str(self.global_manager.get('turn')), self.global_manager)
+        text_utility.print_to_screen('', self.global_manager)
+        text_utility.print_to_screen('Turn ' + str(self.global_manager.get('turn')), self.global_manager)
 
         #load grids
         strategic_grid_height = 300
@@ -405,6 +405,6 @@ class save_load_manager_template():
         for current_completed_lore_type in self.global_manager.get('completed_lore_mission_types'):
             self.global_manager.get('lore_types_effects_dict')[current_completed_lore_type].apply()
 
-        notification_tools.show_tutorial_notifications(self.global_manager)
+        notification_utility.show_tutorial_notifications(self.global_manager)
 
         self.global_manager.set('loading_save', False)

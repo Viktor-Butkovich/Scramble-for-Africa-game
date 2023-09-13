@@ -2,8 +2,8 @@
 import random
 import math
 from .pmobs import pmob
-from ... import actor_utility
-from ... import notification_tools
+from ...util import actor_utility
+from ...util import notification_utility
 
 class group(pmob):
     '''
@@ -207,7 +207,7 @@ class group(pmob):
                 officer.attrition_death(False)
                 if self.in_vehicle:
                     worker.embark_vehicle(zoom_destination)
-            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
+            notification_utility.display_zoom_notification(text, zoom_destination, self.global_manager)
 
         elif target == 'worker':
             text = 'The ' + self.worker.name + destination_message + 'have died from attrition. /n /n '
@@ -226,7 +226,7 @@ class group(pmob):
                 worker.attrition_death(False)
                 if self.in_vehicle:
                     officer.embark_vehicle(zoom_destination)
-            notification_tools.display_zoom_notification(text, zoom_destination, self.global_manager)
+            notification_utility.display_zoom_notification(text, zoom_destination, self.global_manager)
 
     def fire(self):
         '''

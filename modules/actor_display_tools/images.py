@@ -1,6 +1,6 @@
 #Contains functionality for actor display images
 
-from ..images import free_image
+from ..constructs.images import free_image
 
 class actor_display_free_image(free_image):
     '''

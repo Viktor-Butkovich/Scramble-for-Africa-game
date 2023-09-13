@@ -1,6 +1,6 @@
 #Contains functionality for global effects
 
-from . import utility
+from ..util import utility
 
 class effect():
     def __init__(self, effect_id, effect_type, global_manager):

@@ -2,10 +2,10 @@
 
 import random
 from ..groups import group
-from .... import actor_utility
-from .... import utility
-from .... import market_tools
-from .... import notification_tools
+from ....util import actor_utility
+from ....util import utility
+from ....util import market_utility
+from ....util import notification_utility
 
 class work_crew(group):
     '''
@@ -108,10 +108,10 @@ class work_crew(group):
                             self.promote()
                             message = 'The work crew working in the ' + building.name + ' at (' + str(building.cell.x) + ', ' + str(building.cell.y)
                             message += ') has become a veteran and will be more successful in future production attempts.'
-                            notification_tools.display_zoom_notification(message, building.cell.tile, self.global_manager)
+                            notification_utility.display_zoom_notification(message, building.cell.tile, self.global_manager)
                     else:
                         value_stolen += self.global_manager.get('commodity_prices')[building.resource_type]
             if value_stolen > 0:
                 self.controlling_minister.steal_money(value_stolen, 'production') #minister steals value of commodities
                 if random.randrange(1, 7) <= 1: #1/6 chance
-                    market_tools.change_price(building.resource_type, -1, self.global_manager)
+                    market_utility.change_price(building.resource_type, -1, self.global_manager)

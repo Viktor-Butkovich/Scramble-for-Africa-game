@@ -1,6 +1,6 @@
 #Contains functionality for timed function call events
 
-from . import utility
+from ..util import utility
 
 class event():
     def __init__(self, function, inputs, activation_time, event_manager):

@@ -2,11 +2,11 @@
 
 import time
 import pygame
-from . import main_loop_tools
-from . import utility
-from . import text_tools
-from . import turn_management_tools
-from . import actor_utility
+from .util import main_loop_utility
+from .util import utility
+from .util import text_utility
+from .util import turn_management_utility
+from .util import actor_utility
 
 def main_loop(global_manager):
     '''
@@ -34,7 +34,7 @@ def main_loop(global_manager):
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and global_manager.get('effect_manager').effect_active('debug_print'):
-                    main_loop_tools.debug_print(global_manager)
+                    main_loop_utility.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
                     if current_button.showing and not global_manager.get('typing'):
                         if current_button.has_keybind:
@@ -109,9 +109,9 @@ def main_loop(global_manager):
                     if global_manager.get('typing'):
                         if global_manager.get('input_manager').taking_input:
                             global_manager.get('input_manager').taking_input = False
-                            text_tools.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
                         else:
-                            text_tools.print_to_screen(global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen(global_manager.get('message'), global_manager)
                         global_manager.set('typing', False)
                         global_manager.set('message', '')
                     else:
@@ -151,7 +151,7 @@ def main_loop(global_manager):
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
-                main_loop_tools.manage_rmb_down(clicked_button, global_manager)
+                main_loop_utility.manage_rmb_down(clicked_button, global_manager)
 
         if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'): #if lmb changes
             if not global_manager.get('lmb_down'): #if user just released lmb
@@ -185,7 +185,7 @@ def main_loop(global_manager):
                             current_button.on_release()
                             clicked_button = True
                             #break
-                main_loop_tools.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
+                main_loop_utility.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):
@@ -199,9 +199,9 @@ def main_loop(global_manager):
                     current_button.showing_outline = False
 
         if not global_manager.get('loading'):
-            main_loop_tools.update_display(global_manager)
+            main_loop_utility.update_display(global_manager)
         else:
-            main_loop_tools.draw_loading_screen(global_manager)
+            main_loop_utility.draw_loading_screen(global_manager)
         global_manager.set('current_time', time.time())
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
@@ -216,7 +216,7 @@ def main_loop(global_manager):
             if enemy_turn_done:
                 global_manager.set('player_turn', True)
                 global_manager.set('enemy_combat_phase', True)
-                turn_management_tools.manage_combat(global_manager)
+                turn_management_utility.manage_combat(global_manager)
             else:
                 current_enemy = global_manager.get('enemy_turn_queue')[0]
                 removed = False

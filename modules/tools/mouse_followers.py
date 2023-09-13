@@ -2,7 +2,7 @@
 
 import pygame
 
-from .images import free_image
+from ..constructs.images import free_image
 
 class mouse_follower(free_image):
     '''

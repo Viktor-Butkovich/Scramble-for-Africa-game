@@ -1,6 +1,6 @@
 #Contains functionality for porters
 from ..groups import group
-from .... import actor_utility
+from ....util import actor_utility
 
 class porters(group):
     '''

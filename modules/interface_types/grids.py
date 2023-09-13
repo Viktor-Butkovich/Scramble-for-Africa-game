@@ -3,8 +3,8 @@
 import random
 import pygame
 from . import cells
-from .. import actor_utility
-from .. import utility
+from ..util import actor_utility
+from ..util import utility
 
 class grid():
     '''

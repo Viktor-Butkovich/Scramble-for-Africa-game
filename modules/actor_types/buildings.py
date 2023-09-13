@@ -4,10 +4,10 @@ import pygame
 import random
 
 from .actors import actor
-from .. import utility
-from .. import scaling
-from .. import actor_utility
-from .. import text_tools
+from ..util import utility
+from ..util import scaling
+from ..util import actor_utility
+from ..util import text_utility
 
 class building(actor):
     '''
@@ -119,7 +119,7 @@ class building(actor):
         Output:
             None
         '''
-        tooltip_text = [text_tools.remove_underscores(self.name.capitalize())]
+        tooltip_text = [text_utility.remove_underscores(self.name.capitalize())]
         if self.building_type == 'resource':
             tooltip_text.append('Work crews: ' + str(len(self.contained_work_crews)) + '/' + str(self.scale))
             for current_work_crew in self.contained_work_crews:
@@ -174,8 +174,8 @@ class building(actor):
         font_size = self.global_manager.get('font_size')
         font_name = self.global_manager.get('font_name')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
         tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.cell.tile.x, self.cell.y, tooltip_width, tooltip_height)
         self.tooltip_outline_width = 1

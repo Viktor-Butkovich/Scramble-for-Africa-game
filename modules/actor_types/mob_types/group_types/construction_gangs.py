@@ -1,9 +1,9 @@
 #Contains functionality for construction gangs
 
 from ..groups import group
-from .... import actor_utility
-from .... import dice_utility
-from .... import notification_tools
+from ....util import actor_utility
+from ....util import dice_utility
+from ....util import notification_utility
 
 class construction_gang(group):
     '''
@@ -83,7 +83,7 @@ class construction_gang(group):
             message += 'Placeholder upgrade description'
         message += ' /n /n'
             
-        notification_tools.display_choice_notification(message, ['start upgrade', 'stop upgrade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        notification_utility.display_choice_notification(message, ['start upgrade', 'stop upgrade'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def upgrade(self):
         '''
@@ -111,12 +111,12 @@ class construction_gang(group):
         else:
             text += 'The ' + self.name + ' attempts to upgrade the ' + self.building_name + '\'s ' + self.upgrade_type + '. /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'construction', self.global_manager, num_dice)
         else:
             text += ('The ' + self.officer.name + ' can roll twice and pick the higher result. /n /n')
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'construction', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -150,7 +150,7 @@ class construction_gang(group):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Click to continue.', 'construction', self.global_manager, num_dice)
             
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for upgrade
@@ -166,10 +166,10 @@ class construction_gang(group):
             text += ' /nThe ' + self.officer.name + ' managed the construction well enough to become a veteran. /n'
         if roll_result >= 4:
             success = True
-            notification_tools.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
+            notification_utility.display_notification(text + ' /nClick to remove this notification.', 'final_construction', self.global_manager)
         else:
             success = False
-            notification_tools.display_notification(text, 'default', self.global_manager)
+            notification_utility.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('construction_result', [self, roll_result, success, self.building_name])  
 
         

@@ -2,9 +2,9 @@
 
 import random
 from ..mobs import mob
-from ... import utility
-from ... import turn_management_tools
-from ... import notification_tools
+from ...util import utility
+from ...util import turn_management_utility
+from ...util import notification_utility
 
 class npmob(mob): #if enemy.turn_done
     '''
@@ -141,7 +141,7 @@ class npmob(mob): #if enemy.turn_done
             if len(self.global_manager.get('attacker_queue')) > 0:
                 self.global_manager.get('attacker_queue').pop(0).attempt_local_combat()
             elif self.global_manager.get('enemy_combat_phase'): #if enemy combat phase done, go to player turn
-                turn_management_tools.start_player_turn(self.global_manager)
+                turn_management_utility.start_player_turn(self.global_manager)
 
     def kill_noncombatants(self):
         '''
@@ -159,7 +159,7 @@ class npmob(mob): #if enemy.turn_done
             
         noncombatants = current_cell.get_noncombatants('pmob')
         for current_noncombatant in noncombatants:
-            notification_tools.display_notification('The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+            notification_utility.display_notification('The undefended ' + current_noncombatant.name + ' has been killed by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
             current_noncombatant.die()
 
     def damage_buildings(self):
@@ -178,7 +178,7 @@ class npmob(mob): #if enemy.turn_done
         
         for current_building in current_cell.get_intact_buildings():
             if current_building.can_damage():
-                notification_tools.display_notification('The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
+                notification_utility.display_notification('The undefended ' + current_building.name + ' has been damaged by ' + self.name + ' at (' + str(self.x) + ', ' + str(self.y) + ').', 'default', self.global_manager)
                 current_building.set_damaged(True)
             
     def end_turn_move(self):

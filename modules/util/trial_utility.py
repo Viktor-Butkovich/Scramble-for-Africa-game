@@ -1,6 +1,6 @@
 import random
 from . import utility
-from . import notification_tools
+from . import notification_utility
 from . import scaling
 from . import game_transitions
 from . import minister_utility
@@ -26,7 +26,7 @@ def start_trial(global_manager): #called by launch trial button in middle of tri
     choice_info_dict = {}
     global_manager.set('ongoing_action', True)
     global_manager.set('ongoing_action_type', 'trial')
-    notification_tools.display_choice_notification(message, ['start trial', 'stop trial'], choice_info_dict, global_manager) #creates choice notification to verify starting trial
+    notification_utility.display_choice_notification(message, ['start trial', 'stop trial'], choice_info_dict, global_manager) #creates choice notification to verify starting trial
 
 def manage_defense(corruption_evidence, prosecutor_corrupt, global_manager):
     '''
@@ -198,7 +198,7 @@ def trial(global_manager): #called by choice notification button
         text += '+ 0 judge bias '
     text += '= ' + str(effective_evidence) + ' evidence rolls /n /n'
     global_manager.get('sound_manager').play_sound('trial starting')
-    notification_tools.display_notification(text, 'default', global_manager)
+    notification_utility.display_notification(text, 'default', global_manager)
     
     global_manager.set('trial_rolls', [])
 
@@ -211,7 +211,7 @@ def trial(global_manager): #called by choice notification button
         global_manager.get('trial_rolls').append(current_roll)
 
     if len(global_manager.get('trial_rolls')) == 0:
-        notification_tools.display_notification('As you have no evidence rolls remaining, you automatically lose the trial. /n /n', 'default', global_manager)
+        notification_utility.display_notification('As you have no evidence rolls remaining, you automatically lose the trial. /n /n', 'default', global_manager)
         complete_trial(1, global_manager)
     else:
         display_evidence_roll(global_manager)
@@ -233,10 +233,10 @@ def display_evidence_roll(global_manager):
     outcome_color_dict = {'success': 'dark green', 'fail': 'dark red', 'crit_success': 'bright green', 'crit_fail': 'bright red', 'default': 'black'}
     global_manager.get('actor_creation_manager').display_die(scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 140, 440, global_manager), scaling.scale_width(100, global_manager),
         scaling.scale_height(100, global_manager), ['trial'], 6, result_outcome_dict, outcome_color_dict, result, global_manager)
-    notification_tools.display_notification(text + 'Click to roll. 5+ required on at least 1 die to succeed.', 'default', global_manager, 1)
-    notification_tools.display_notification(text + 'Rolling... ', 'roll', global_manager, 1)
+    notification_utility.display_notification(text + 'Click to roll. 5+ required on at least 1 die to succeed.', 'default', global_manager, 1)
+    notification_utility.display_notification(text + 'Rolling... ', 'roll', global_manager, 1)
     results = dice_utility.roll_to_list(6, 'Evidence roll', 5, 5, 0, global_manager, result)
-    notification_tools.display_notification(text + results[1], 'trial', global_manager)
+    notification_utility.display_notification(text + results[1], 'trial', global_manager)
 
 def complete_trial(final_roll, global_manager):
     '''
@@ -262,7 +262,7 @@ def complete_trial(final_roll, global_manager):
         else:
             text += 'Authorities searched ' + defense.name + '\'s properties but were not able to find any stolen money with which to compensate your company. Perhaps it remains hidden, had already been spent, or had never been stolen. '
             text += ' /n /n'
-        notification_tools.display_notification(text, 'default', global_manager)
+        notification_utility.display_notification(text, 'default', global_manager)
         
         defense.appoint('none')
         minister_utility.calibrate_minister_info_display(global_manager, 'none')
@@ -270,7 +270,7 @@ def complete_trial(final_roll, global_manager):
         defense.remove()
         global_manager.get('fear_tracker').change(1)
         
-        notification_tools.display_notification('Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n', 'default', global_manager)
+        notification_utility.display_notification('Whether or not the defendant was truly guilty, this vigilant show of force may make your ministers reconsider any attempts to steal money for the time being. /n /n', 'default', global_manager)
 
     else:
         global_manager.get('sound_manager').play_sound('not guilty')
@@ -303,7 +303,7 @@ def complete_trial(final_roll, global_manager):
 
         defense.fabricated_evidence = 0
         defense.corruption_evidence = remaining_evidence
-        notification_tools.display_notification(text, 'default', global_manager)
+        notification_utility.display_notification(text, 'default', global_manager)
         minister_utility.calibrate_minister_info_display(global_manager, defense)
     global_manager.set('prosecution_bribed_judge', False)
     global_manager.set('ongoing_action', False)

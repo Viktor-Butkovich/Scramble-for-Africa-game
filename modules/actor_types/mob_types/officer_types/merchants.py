@@ -2,12 +2,12 @@
 
 import random
 from ..officers import officer
-from .... import actor_utility
-from .... import notification_tools
-from .... import dice_utility
-from .... import market_tools
-from .... import scaling
-from .... import images
+from ....util import actor_utility
+from ....util import notification_utility
+from ....util import dice_utility
+from ....util import market_utility
+from ....util import scaling
+from ....constructs import images
 
 class merchant(officer):
     '''
@@ -74,7 +74,7 @@ class merchant(officer):
         
         message = 'Are you sure you want to search for a 100 money loan? A loan will always be available, but the merchant\'s success will determine the interest rate found. /n /n'
         message += 'The search will cost ' + str(self.global_manager.get('action_prices')['loan_search']) + ' money. /n /n '
-        notification_tools.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        notification_utility.display_choice_notification(message, ['start loan search', 'stop loan search'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def loan_search(self):
         '''
@@ -117,7 +117,7 @@ class merchant(officer):
             just_promoted = True
                     
         if just_promoted:
-            notification_tools.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager, num_dice)
+            notification_utility.display_notification('The merchant negotiated the loan offer well enough to become a veteran.', 'default', self.global_manager, num_dice)
             self.promote()
             
         choice_info_dict = {}
@@ -132,7 +132,7 @@ class merchant(officer):
         message += 'The company will be provided an immediate sum of ' + str(principal) + ' money, which it may spend as it sees fit. /n'
         message += 'In return, the company will be obligated to pay back ' + str(interest) + ' money per turn for 10 turns, for a total of ' + str(total_paid) + ' money. /n /n'
         message += 'Do you accept this exchange? /n'
-        notification_tools.display_choice_notification(message, ['accept loan offer', 'decline loan offer'], choice_info_dict, self.global_manager)
+        notification_utility.display_choice_notification(message, ['accept loan offer', 'decline loan offer'], choice_info_dict, self.global_manager)
 
     def start_advertising_campaign(self, target_commodity):
         '''
@@ -175,7 +175,7 @@ class merchant(officer):
         self.current_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
         while (self.current_unadvertised_commodity == 'consumer goods') or (self.current_unadvertised_commodity == self.current_advertised_commodity) or (self.global_manager.get('commodity_prices')[self.current_unadvertised_commodity] == 1):
             self.current_unadvertised_commodity = random.choice(self.global_manager.get('commodity_types'))
-        notification_tools.display_choice_notification(message, ['start advertising campaign', 'stop advertising campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
+        notification_utility.display_choice_notification(message, ['start advertising campaign', 'stop advertising campaign'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
 
     def advertising_campaign(self): #called when start commodity icon clicked
         '''
@@ -206,12 +206,12 @@ class merchant(officer):
         self.global_manager.set('current_sound_file_index', index)
         text += advertising_message + ' /n /n'
         if not self.veteran:    
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'advertising_campaign', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required to succeed.', 'advertising_campaign', self.global_manager, num_dice)
         else:
             text += ('The veteran merchant can roll twice and pick the higher result. /n /n')
-            notification_tools.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'advertising_campaign', self.global_manager, num_dice)
+            notification_utility.display_notification(text + 'Click to roll. ' + str(self.current_min_success) + '+ required on at least 1 die to succeed.', 'advertising_campaign', self.global_manager, num_dice)
 
-        notification_tools.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Rolling... ', 'roll', self.global_manager, num_dice)
 
         die_x = self.global_manager.get('notification_manager').notification_x - 140
 
@@ -245,7 +245,7 @@ class merchant(officer):
             text += roll_list[1]
             roll_result = roll_list[0]
 
-        notification_tools.display_notification(text + 'Click to continue.', 'advertising_campaign', self.global_manager, num_dice)
+        notification_utility.display_notification(text + 'Click to continue.', 'advertising_campaign', self.global_manager, num_dice)
             
         text += '/n'
         if roll_result >= self.current_min_success: #4+ required on D6 for exploration
@@ -271,10 +271,10 @@ class merchant(officer):
             text += 'The advertising campaign was so popular that the value of ' + self.current_advertised_commodity + ' increased by 2 instead of 1. /n /n'
         if roll_result >= self.current_min_success:
             success = True
-            notification_tools.display_notification(text + 'Click to remove this notification.', 'final_advertising_campaign', self.global_manager)
+            notification_utility.display_notification(text + 'Click to remove this notification.', 'final_advertising_campaign', self.global_manager)
         else:
             success = False
-            notification_tools.display_notification(text, 'default', self.global_manager)
+            notification_utility.display_notification(text, 'default', self.global_manager)
         self.global_manager.set('advertising_campaign_result', [self, roll_result, success])
 
     def complete_advertising_campaign(self):
@@ -293,8 +293,8 @@ class merchant(officer):
             increase = 1
             if roll_result >= self.current_min_crit_success:
                 increase += 1
-            market_tools.change_price(self.current_advertised_commodity, increase, self.global_manager)
-            market_tools.change_price(self.current_unadvertised_commodity, -1 * increase, self.global_manager)
+            market_utility.change_price(self.current_advertised_commodity, increase, self.global_manager)
+            market_utility.change_price(self.current_unadvertised_commodity, -1 * increase, self.global_manager)
             if roll_result >= self.current_min_crit_success and not self.veteran:
                 self.promote()
             self.select()

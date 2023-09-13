@@ -3,9 +3,9 @@
 import random
 
 from .pmobs import pmob
-from ... import text_tools
-from ... import actor_utility
-from ... import notification_tools
+from ...util import text_utility
+from ...util import actor_utility
+from ...util import notification_utility
 
 class vehicle(pmob):
     '''
@@ -157,7 +157,7 @@ class vehicle(pmob):
                                 current_sub_mob.death_sound('violent')
                             else:
                                 non_replaced_attrition.append(current_sub_mob)
-                            notification_tools.display_zoom_notification(text, self, self.global_manager)
+                            notification_utility.display_zoom_notification(text, self, self.global_manager)
         for current_mob in non_replaced_attrition:
             current_sub_mob.disembark_vehicle(self)
             current_sub_mob.attrition_death(False)
@@ -179,7 +179,7 @@ class vehicle(pmob):
             self.temp_disable_movement()
         else:
             crew.attrition_death(False)
-        notification_tools.display_zoom_notification(text, self, self.global_manager)
+        notification_utility.display_zoom_notification(text, self, self.global_manager)
         crew.death_sound('violent')
 
 
@@ -335,10 +335,10 @@ class vehicle(pmob):
                 return(super().can_move(x_change, y_change, can_print))
             else:
                 if can_print:
-                    text_tools.print_to_screen('This ' + self.name + ' is still having its crew replaced and cannot move this turn.', self.global_manager)
+                    text_utility.print_to_screen('This ' + self.name + ' is still having its crew replaced and cannot move this turn.', self.global_manager)
         else:
             if can_print:
-                text_tools.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.', self.global_manager)
+                text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot move without crew.', self.global_manager)
             return(False)
 
     def go_to_grid(self, new_grid, new_coordinates):
@@ -420,7 +420,7 @@ class train(vehicle):
         if result:
             if not (self.images[0].current_cell.has_intact_building('railroad') and self.grids[0].find_cell(self.x + x_change, self.y + y_change).has_intact_building('railroad')):
                 if can_print:
-                    text_tools.print_to_screen('Trains can only move along railroads.', self.global_manager)
+                    text_utility.print_to_screen('Trains can only move along railroads.', self.global_manager)
                 return(False)
         return(result)
 
@@ -497,7 +497,7 @@ class ship(vehicle):
             if self.images[0].current_cell.terrain == 'water':
                 for current_mob in self.images[0].current_cell.contained_mobs:
                     if current_mob.is_pmob and not current_mob.can_swim_at(self.images[0].current_cell):
-                        text_tools.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.', self.global_manager)
+                        text_utility.print_to_screen('A ' + self.vehicle_type + ' cannot leave without taking unaccompanied units as passengers.', self.global_manager)
                         return(False)
         return(True)
 

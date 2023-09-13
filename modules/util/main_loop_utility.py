@@ -3,7 +3,7 @@
 import pygame
 import time
 from . import scaling
-from . import text_tools
+from . import text_utility
 from . import actor_utility
 from . import minister_utility
 from . import utility
@@ -111,9 +111,9 @@ def minister_appointed(minister_type, global_manager):
         return(True)
     else:
         keyword = global_manager.get('minister_type_dict')[minister_type]
-        text_tools.print_to_screen('', global_manager)
-        text_tools.print_to_screen('You cannot do ' + keyword + ' actions because a ' + minister_type + ' has not been appointed', global_manager)
-        text_tools.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', global_manager)
+        text_utility.print_to_screen('', global_manager)
+        text_utility.print_to_screen('You cannot do ' + keyword + ' actions because a ' + minister_type + ' has not been appointed', global_manager)
+        text_utility.print_to_screen('Press q or the button in the upper left corner of the screen to manage your ministers', global_manager)
         return(False)
 
 def action_possible(global_manager):
@@ -259,14 +259,14 @@ def draw_text_box(global_manager):
     font_size = global_manager.get('font_size')
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
-            if text_tools.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
-                greatest_width = text_tools.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
+            if text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) > greatest_width:
+                greatest_width = text_utility.message_width(global_manager.get('text_list')[-text_index - 1], font_size, font_name) #manages the width of already printed text lines
     if global_manager.get('input_manager').taking_input:
-        if text_tools.message_width('Response: ' + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width('Response: ' + global_manager.get('message'), font_size, font_name)
+        if text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_utility.message_width('Response: ' + global_manager.get('message'), font_size, font_name)
     else:
-        if text_tools.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
-            greatest_width = text_tools.message_width(global_manager.get('message'), font_size, font_name)
+        if text_utility.message_width(global_manager.get('message'), font_size, font_name) > greatest_width: #manages width of user input
+            greatest_width = text_utility.message_width(global_manager.get('message'), font_size, font_name)
     text_box_width = greatest_width + scaling.scale_width(10, global_manager)
     x, y = (0, global_manager.get('display_height') - global_manager.get('text_box_height'))
     pygame.draw.rect(global_manager.get('game_display'), global_manager.get('color_dict')['white'], (x, y, text_box_width, global_manager.get('text_box_height'))) #draws white rect to prevent overlapping
@@ -278,7 +278,7 @@ def draw_text_box(global_manager):
     pygame.draw.line(global_manager.get('game_display'), global_manager.get('color_dict')[color], (0, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))), #input line
         (text_box_width, global_manager.get('display_height') - (font_size + scaling.scale_height(5, global_manager))))
 
-    global_manager.set('text_list', text_tools.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
+    global_manager.set('text_list', text_utility.manage_text_list(global_manager.get('text_list'), max_screen_lines)) #number of lines
     
     for text_index in range(len(global_manager.get('text_list'))):
         if text_index < max_text_box_lines:
@@ -328,13 +328,13 @@ def manage_rmb_down(clicked_button, global_manager):
             destination_coordinates = (global_manager.get('displayed_mob').base_automatic_route[-1][0], global_manager.get('displayed_mob').base_automatic_route[-1][1])
             if global_manager.get('displayed_mob').is_vehicle and global_manager.get('displayed_mob').vehicle_type == 'train' and not global_manager.get('strategic_map_grid').find_cell(destination_coordinates[0], destination_coordinates[1]).has_intact_building('train_station'):
                 global_manager.get('displayed_mob').clear_automatic_route()
-                text_tools.print_to_screen('A train\'s automatic route must start and end at a train station.', global_manager)
-                text_tools.print_to_screen('The invalid route has been erased.', global_manager)
+                text_utility.print_to_screen('A train\'s automatic route must start and end at a train station.', global_manager)
+                text_utility.print_to_screen('The invalid route has been erased.', global_manager)
             else:
-                text_tools.print_to_screen('Route saved', global_manager)
+                text_utility.print_to_screen('Route saved', global_manager)
         else:
             global_manager.get('displayed_mob').clear_automatic_route()
-            text_tools.print_to_screen('The created route must go between at least 2 tiles', global_manager)
+            text_utility.print_to_screen('The created route must go between at least 2 tiles', global_manager)
         global_manager.get('minimap_grid').calibrate(global_manager.get('displayed_mob').x, global_manager.get('displayed_mob').y)
         actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('displayed_mob').images[0].current_cell.tile)
     if not stopping:
@@ -405,7 +405,7 @@ def manage_lmb_down(clicked_button, global_manager):
                             if not current_grid.is_abstract_grid: #if grid has more than 1 cell, check if correct part of grid
                                 destination_x, destination_y = target_cell.tile.get_main_grid_coordinates()
                                 if (not (destination_y == 0 or (destination_y == 1 and target_cell.has_intact_building('port')))) and destination_x >= 0 and destination_x < global_manager.get('strategic_map_grid').coordinate_width: #or is harbor
-                                    text_tools.print_to_screen('You can only send ships to coastal waters and coastal ports.', global_manager)
+                                    text_utility.print_to_screen('You can only send ships to coastal waters and coastal ports.', global_manager)
                                     stopping = True
                             chose_destination = True
                             if not stopping:
@@ -416,7 +416,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), chooser)
                                 actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), chooser.images[0].current_cell.tile)
                         else: #cannot move to same continent
-                            text_tools.print_to_screen('You can only send ships to other theatres.', global_manager)
+                            text_utility.print_to_screen('You can only send ships to other theatres.', global_manager)
             global_manager.set('choosing_destination', False)
             global_manager.set('choosing_destination_info_dict', {})
             
@@ -430,7 +430,7 @@ def manage_lmb_down(clicked_button, global_manager):
                     if current_cell.touching_mouse():
                         #target_cell = 'none'
                         if current_cell.grid.is_abstract_grid:
-                            text_tools.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
+                            text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
                         else:
                             displayed_mob = global_manager.get('displayed_mob')
                             if current_cell.grid.is_mini_grid:
@@ -446,24 +446,24 @@ def manage_lmb_down(clicked_button, global_manager):
                             if utility.find_coordinate_distance((destination_x, destination_y), (previous_destination_x, previous_destination_y)) == 1:
                                 destination_infrastructure = target_cell.get_building('infrastructure')
                                 if not target_cell.visible:
-                                    text_tools.print_to_screen('Movement routes cannot be created through unexplored tiles.', global_manager)
+                                    text_utility.print_to_screen('Movement routes cannot be created through unexplored tiles.', global_manager)
                                     return()
                                 elif displayed_mob.is_vehicle and displayed_mob.vehicle_type == 'train' and not target_cell.has_building('railroad'):
-                                    text_tools.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
+                                    text_utility.print_to_screen('Trains can only create movement routes along railroads.', global_manager)
                                     return()
                                 elif (target_cell.terrain == 'water' and not displayed_mob.can_swim) and (displayed_mob.is_vehicle and destination_infrastructure == 'none'): 
                                     #non-train units can still move slowly through water, even w/o canoes or a bridge
                                     #railroad bridge allows anything to move through
-                                    text_tools.print_to_screen('This unit cannot create movement routes through water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_ocean) and destination_y == 0:
-                                    text_tools.print_to_screen('This unit cannot create movement routes through ocean water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through ocean water.', global_manager)
                                     return()
                                 elif target_cell.terrain == 'water' and displayed_mob.can_swim and (not displayed_mob.can_swim_river) and destination_y > 0:
-                                    text_tools.print_to_screen('This unit cannot create movement routes through river water.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes through river water.', global_manager)
                                     return()
                                 elif (not target_cell.terrain == 'water') and (not displayed_mob.can_walk) and not target_cell.has_intact_building('port'):
-                                    text_tools.print_to_screen('This unit cannot create movement routes on land, except through ports.', global_manager)
+                                    text_utility.print_to_screen('This unit cannot create movement routes on land, except through ports.', global_manager)
                                     return()
                                                                      
                                 displayed_mob.add_to_automatic_route((destination_x, destination_y))
@@ -471,7 +471,7 @@ def manage_lmb_down(clicked_button, global_manager):
                                 global_manager.set('show_selection_outlines', True)
                                 global_manager.set('last_selection_outline_switch', time.time())
                             else:
-                                text_tools.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
+                                text_utility.print_to_screen('Only tiles adjacent to the most recently chosen destination can be added to the movement route.', global_manager)
                                 
         elif not clicked_button:
             click_move_minimap(global_manager)

@@ -1,7 +1,7 @@
 #Runs setup and main loop on program start
 
 import modules.main_loop as main_loop
-import modules.data_managers as data_managers
+import modules.tools.data_managers as data_managers
 from modules.setup import *
 
 try:
@@ -15,10 +15,11 @@ try:
 except Exception: #displays error message and records error message in crash log file   
     manage_crash(Exception)
 
-#find some solution to reorganization interface overlap, especially with construction gang
-#fix overlapping voicelines for 0 evidence trials - court in session and not guilty playing simultaneously
-#exploration direction icons not showing correctly, probably for not being an interface element - same issue probably for attack icons
+# find some solution to reorganization interface overlap, especially with construction gang
+# fix overlapping voicelines for 0 evidence trials - court in session and not guilty playing simultaneously
+# exploration direction icons not showing correctly, probably for not being an interface element - same issue probably for attack icons
 # ^ exploration marks are currently implemented as tiles that exist in cells but are only accessed through the owning expedition - this means that they are not interface elements
 # it is useful to implement it as a tile so that it appears on both grids at once, but the current implementation as a hardcoded global exploration_mark_list is definitely
 # not ideal - maybe make a special grid free image that can exist in all versions of a tile? Should not have to edit the tile's get_image_id_list, as the exploration mark
 # list isn't a characteristic of the tile
+# continue work on cell_icons

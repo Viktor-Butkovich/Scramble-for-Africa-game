@@ -1,0 +1,20 @@
+__pycache__
+configuration
+graphics
+modules
+    actor_display_tools: Interface elements related to the left-hand displays, closely connected to actors
+    actor_types: Actors that occupy cells, including mobs, tiles, and buildings
+    constructs: Non-actor, non-interface entities, such as countries, images, and ministers
+    interface_types: Interface elements
+    tools: Utility classes, such as manager objects
+    util: Utility functions
+    main_loop.py: Utility functions to controls game's main loop
+    setup.py: Utility functions for game's initial setup
+notes
+save_games
+sounds
+__init__.py
+.gitignore
+Instructions.docx
+README.txt
+Scramble_for_Africa.py: Main executable file

@@ -1,10 +1,10 @@
 #Contains functionality for images
 
 import pygame
-from . import utility
-from . import drawing_tools
-from . import text_tools
-from . import scaling
+from ..util import utility
+from ..util import drawing_utility
+from ..util import text_utility
+from ..util import scaling
 
 class image():
     '''
@@ -39,7 +39,7 @@ class image():
         if self.contains_bundle:
             self.image.complete_draw()
         elif self.image_id != 'misc/empty.png':
-            drawing_tools.display_image(self.image, self.x, self.y - self.height, self.global_manager)
+            drawing_utility.display_image(self.image, self.x, self.y - self.height, self.global_manager)
 
     def touching_mouse(self):
         '''
@@ -232,7 +232,7 @@ class image_bundle(image):
         Output:
             None
         '''
-        drawing_tools.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
+        drawing_utility.display_image(self.combined_surface, self.parent_image.x, self.parent_image.y - self.height, self.global_manager)
 
     def remove_member(self, member_type):
         '''
@@ -602,8 +602,8 @@ class tooltip_free_image(free_image):
         font_name = self.global_manager.get('font_name')
         font_size = self.global_manager.get('font_size')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
         tooltip_height = (len(self.tooltip_text) * font_size) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.x, self.y, tooltip_width, tooltip_height)   
         self.tooltip_outline_width = 1
@@ -663,7 +663,7 @@ class tooltip_free_image(free_image):
             pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], self.tooltip_box)
             for text_line_index in range(len(self.tooltip_text)):
                 text_line = self.tooltip_text[text_line_index]
-                self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
+                self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (self.tooltip_box.x + scaling.scale_width(10, self.global_manager), self.tooltip_box.y +
                     (text_line_index * self.global_manager.get('font_size'))))
 
 class indicator_image(tooltip_free_image):
@@ -1114,8 +1114,8 @@ class actor_image(image):
         font_size = self.global_manager.get('font_size')
         font_name = self.global_manager.get('font_name')
         for text_line in tooltip_text:
-            if text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
-                tooltip_width = text_tools.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
+            if text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager) > tooltip_width:
+                tooltip_width = text_utility.message_width(text_line, font_size, font_name) + scaling.scale_width(10, self.global_manager)
         tooltip_height = (font_size * len(tooltip_text)) + scaling.scale_height(5, self.global_manager)
         self.tooltip_box = pygame.Rect(self.actor.x, self.actor.y, tooltip_width, tooltip_height)
         self.actor.tooltip_box = self.tooltip_box

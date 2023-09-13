@@ -2,9 +2,9 @@
 import random
 
 from .pmobs import pmob
-from ... import actor_utility
-from ... import market_tools
-from ... import text_tools
+from ...util import actor_utility
+from ...util import market_utility
+from ...util import text_utility
 
 class worker(pmob):
     '''
@@ -42,12 +42,12 @@ class worker(pmob):
         if self.worker_type == 'European': #European church volunteers don't count for this because they have no upkeep
             self.global_manager.set('num_european_workers', self.global_manager.get('num_european_workers') + 1)
             if not from_save:
-                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
             
         elif self.worker_type == 'African':
             self.global_manager.set('num_african_workers', self.global_manager.get('num_african_workers') + 1)
             if not from_save:
-                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
                 
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
 
@@ -82,46 +82,46 @@ class worker(pmob):
             if self.worker_type == 'African': #get worker from nearest slum or village
                 new_worker_source = actor_utility.find_closest_available_worker(destination, self.global_manager)
                 if not new_worker_source == 'none':
-                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
                     if new_worker_source in self.global_manager.get('village_list'): #both village and slum have change_population, but slum change population automatically changes number of workers while village does not
                         new_worker_source.available_workers -= 1
                     new_worker_source.change_population(-1)
 
                     if new_worker_source in self.global_manager.get('village_list'):
-                        text_tools.print_to_screen('Replacement workers have been automatically hired from ' + new_worker_source.name + ' village at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.',
+                        text_utility.print_to_screen('Replacement workers have been automatically hired from ' + new_worker_source.name + ' village at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.',
                             self.global_manager)
                     elif new_worker_source in self.global_manager.get('slums_list'):
-                        text_tools.print_to_screen('Replacement workers have been automatically hired from the slums at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.', self.global_manager)
+                        text_utility.print_to_screen('Replacement workers have been automatically hired from the slums at (' + str(new_worker_source.x) + ', ' + str(new_worker_source.y) + ')' + destination_message + '.', self.global_manager)
                     
                 else: #if no villages or slums with available workers, recruit abstract African workers and give bigger upkeep penalty to compensate
-                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                    market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                    text_tools.print_to_screen('As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony' + destination_message + ', incurring an increased penalty on African worker upkeep.',
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                    text_utility.print_to_screen('As there were no available workers in nearby slums and villages, replacement workers were automatically hired from a nearby colony' + destination_message + ', incurring an increased penalty on African worker upkeep.',
                         self.global_manager)
                     
             elif self.worker_type == 'European':
-                market_tools.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
-                text_tools.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
+                market_utility.attempt_worker_upkeep_change('increase', self.worker_type, self.global_manager)
+                text_utility.print_to_screen('Replacement workers have been automatically hired from Europe' + destination_message + '.', self.global_manager)
                 
         elif self.worker_type == 'slave':
             self.global_manager.get('money_tracker').change(self.global_manager.get('recruitment_costs')['slave workers'] * -1, 'attrition_replacements')
             actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
             #self.global_manager.set('slave_traders_strength', self.global_manager.get('slave_traders_strength') + 1)
-            text_tools.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
-            market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+            text_utility.print_to_screen('Replacement slave workers were automatically purchased' + destination_message + ', costing ' + str(self.global_manager.get('recruitment_costs')['slave workers']) + ' money.', self.global_manager)
+            market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
 
             if self.global_manager.get('effect_manager').effect_active('no_slave_trade_penalty'):
-                text_tools.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
+                text_utility.print_to_screen('Your country\'s prolonged involvement with the slave trade prevented any public opinion penalty.', self.global_manager)
             else:
                 public_opinion_penalty = 5 + random.randrange(-3, 4) #2-8
                 current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                 self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
                 resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                 if not resulting_public_opinion == current_public_opinion:
-                    text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                    text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
 
         elif self.worker_type == 'religious':
-            text_tools.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.', self.global_manager)
+            text_utility.print_to_screen('Replacement religious volunteers have been automatically found among nearby colonists.', self.global_manager)
 
     def to_save_dict(self):
         '''
@@ -150,16 +150,16 @@ class worker(pmob):
         '''
         super().fire()
         if self.worker_type in ['African', 'European']: #not religious volunteers
-            market_tools.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
+            market_utility.attempt_worker_upkeep_change('decrease', self.worker_type, self.global_manager)
         if self.worker_type == 'African' and wander:
-            text_tools.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
+            text_utility.print_to_screen('These fired workers will wander and eventually settle down in one of your slums.', self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
         elif self.worker_type in ['European', 'religious']:
             current_public_opinion = self.global_manager.get('public_opinion')
             self.global_manager.get('public_opinion_tracker').change(-1)
             resulting_public_opinion = self.global_manager.get('public_opinion')
             if not current_public_opinion == resulting_public_opinion:
-                text_tools.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                text_utility.print_to_screen('Firing ' + self.name + ' reflected poorly on your company and reduced your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
 
     def can_show_tooltip(self):
         '''
@@ -343,8 +343,8 @@ class slave_worker(worker):
                     self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
                     resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                     if not resulting_public_opinion == current_public_opinion:
-                        text_tools.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
-                market_tools.attempt_slave_recruitment_cost_change('increase', self.global_manager)
+                        text_utility.print_to_screen('Participating in the slave trade has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                market_utility.attempt_slave_recruitment_cost_change('increase', self.global_manager)
                 self.global_manager.get('evil_tracker').change(6)
                 actor_utility.set_slave_traders_strength(self.global_manager.get('slave_traders_strength') + 1, self.global_manager)
             else:
@@ -353,7 +353,7 @@ class slave_worker(worker):
                 self.global_manager.get('public_opinion_tracker').change(-1 * public_opinion_penalty)
                 resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
                 if not resulting_public_opinion == current_public_opinion:
-                    text_tools.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+                    text_utility.print_to_screen('Your use of captured slaves has decreased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
                 self.global_manager.get('evil_tracker').change(6)
         self.global_manager.set('num_slave_workers', self.global_manager.get('num_slave_workers') + 1)
         self.set_controlling_minister_type(self.global_manager.get('type_minister_dict')['production'])
@@ -381,15 +381,15 @@ class slave_worker(worker):
             Frees this slave, increasing public opinion and adding them to the labor pool, followed by either re-recruiting them as African workers or allowing them to wander and settle in 
                 slums
         '''
-        market_tools.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
+        market_utility.attempt_worker_upkeep_change('decrease', 'African', self.global_manager)
         public_opinion_bonus = 4 + random.randrange(-3, 4) #1-7, less bonus than penalty for buying slaves on average
         current_public_opinion = self.global_manager.get('public_opinion_tracker').get()
         self.global_manager.get('public_opinion_tracker').change(public_opinion_bonus)
         resulting_public_opinion = self.global_manager.get('public_opinion_tracker').get()
         if not resulting_public_opinion == current_public_opinion:
-            text_tools.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
+            text_utility.print_to_screen('Freeing slaves has increased your public opinion from ' + str(current_public_opinion) + ' to ' + str(resulting_public_opinion) + '.', self.global_manager)
         if wander:
-            text_tools.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
+            text_utility.print_to_screen('These freed slaves will wander and eventually settle down in one of your slums', self.global_manager)
             self.global_manager.set('num_wandering_workers', self.global_manager.get('num_wandering_workers') + 1)
         self.global_manager.get('evil_tracker').change(-2)
 

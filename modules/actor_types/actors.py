@@ -3,12 +3,12 @@
 import pygame
 import random
 
-from .. import text_tools
-from .. import notification_tools
-from .. import utility
-from .. import actor_utility
-from .. import scaling
-from .. import market_tools
+from ..util import text_utility
+from ..util import notification_utility
+from ..util import utility
+from ..util import actor_utility
+from ..util import scaling
+from ..util import market_utility
 
 class actor():
     '''
@@ -297,7 +297,7 @@ class actor():
             #this part of function only reached if no inventory attrition was triggered
             if self.actor_type == 'mob' and self.is_pmob and self.is_group and self.group_type == 'porters' and (not self.veteran) and random.randrange(1, 7) == 6 and random.randrange(1, 7) == 6: #1/36 chance of porters promoting on successful inventory attrition roll
                 self.promote()
-                notification_tools.display_notification('By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.', 'default', self.global_manager)
+                notification_utility.display_notification('By avoiding losses and damage to the carried commodities, the porters\' driver is now a veteran and will have more movement points each turn.', 'default', self.global_manager)
 
     def trigger_inventory_attrition(self, transportation_minister, stealing = False): #later add input to see if corruption or real attrition to change how much minister has stolen
         '''
@@ -327,7 +327,7 @@ class actor():
                     value_stolen += (self.global_manager.get('commodity_prices')[current_commodity] * amount_lost)
                     for i in range(amount_lost):
                         if random.randrange(1, 7) <= 1: #1/6 chance
-                            market_tools.change_price(current_commodity, -1, self.global_manager)
+                            market_utility.change_price(current_commodity, -1, self.global_manager)
         for current_index in range(0, len(types_lost_list)):
             lost_commodity = types_lost_list[current_index]
             amount_lost = amounts_lost_list[current_index]
@@ -503,7 +503,7 @@ class actor():
         pygame.draw.rect(self.global_manager.get('game_display'), self.global_manager.get('color_dict')['white'], tooltip_image.tooltip_box)
         for text_line_index in range(len(tooltip_image.tooltip_text)):
             text_line = tooltip_image.tooltip_text[text_line_index]
-            self.global_manager.get('game_display').blit(text_tools.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
+            self.global_manager.get('game_display').blit(text_utility.text(text_line, self.global_manager.get('myfont'), self.global_manager), (tooltip_image.tooltip_box.x + scaling.scale_width(10, self.global_manager),
                 tooltip_image.tooltip_box.y + (text_line_index * self.global_manager.get('font_size'))))
 
     def get_image_id_list(self, override_values={}):

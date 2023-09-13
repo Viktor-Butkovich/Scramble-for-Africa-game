@@ -3,9 +3,9 @@
 import random
 import pygame
 
-from . import csv_tools
-from . import scaling
-from . import text_tools
+from ..util import csv_tools
+from ..util import scaling
+from ..util import text_utility
 from . import events
 
 class global_manager_template():
@@ -101,7 +101,7 @@ class input_manager_template():
         Output:
             None
         '''
-        text_tools.print_to_screen(message, self.global_manager)
+        text_utility.print_to_screen(message, self.global_manager)
         self.send_input_to = solicitant
         self.taking_input = True
         
@@ -129,7 +129,7 @@ class input_manager_template():
             if received_input == 'done':
                 self.global_manager.set('crashed', True)
             else:
-                text_tools.print_to_screen('I didn\'t understand that.')
+                text_utility.print_to_screen('I didn\'t understand that.')
 
 class effect_manager_template():
     '''
@@ -605,7 +605,7 @@ class notification_manager_template():
                 if not (index > 0 and message[index - 1] + message[index] == '/n'): #if on n after /, skip
                     next_word += message[index]
             if message[index] == ' ':
-                if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+                if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
                     new_message.append(next_line)
                     next_line = ''
                 next_line += next_word
@@ -615,7 +615,7 @@ class notification_manager_template():
                 next_line = ''
                 next_line += next_word
                 next_word = ''
-        if text_tools.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
+        if text_utility.message_width(next_line + next_word, font_size, font_name) > self.notification_width:
             new_message.append(next_line)
             next_line = ''
         next_line += next_word

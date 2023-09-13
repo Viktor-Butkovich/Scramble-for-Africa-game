@@ -1,6 +1,6 @@
 #Contains functionality for officer units
 from .pmobs import pmob
-from ... import actor_utility
+from ...util import actor_utility
 
 class officer(pmob):
     '''
