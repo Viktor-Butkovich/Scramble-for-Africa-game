@@ -2,12 +2,12 @@
 
 import random
 from ..officers import officer
-from ... import actor_utility
-from ... import notification_tools
-from ... import dice_utility
-from ... import market_tools
-from ... import scaling
-from ... import images
+from .... import actor_utility
+from .... import notification_tools
+from .... import dice_utility
+from .... import market_tools
+from .... import scaling
+from .... import images
 
 class merchant(officer):
     '''

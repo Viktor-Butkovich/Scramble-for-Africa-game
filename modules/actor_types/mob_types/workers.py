@@ -2,10 +2,9 @@
 import random
 
 from .pmobs import pmob
-from .. import actor_utility
-from .. import utility
-from .. import market_tools
-from .. import text_tools
+from ... import actor_utility
+from ... import market_tools
+from ... import text_tools
 
 class worker(pmob):
     '''

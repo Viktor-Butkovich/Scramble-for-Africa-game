@@ -1,4 +1,4 @@
-from ..actors import actor
+from ..actor_types.actors import actor
 
 class cell_icon(actor):
     '''

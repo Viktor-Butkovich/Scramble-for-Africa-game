@@ -3,9 +3,9 @@
 import random
 
 from .pmobs import pmob
-from .. import text_tools
-from .. import actor_utility
-from .. import notification_tools
+from ... import text_tools
+from ... import actor_utility
+from ... import notification_tools
 
 class vehicle(pmob):
     '''

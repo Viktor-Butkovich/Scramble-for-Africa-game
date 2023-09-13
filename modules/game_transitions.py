@@ -3,7 +3,7 @@
 import time
 from . import main_loop_tools
 from . import text_tools
-from . import tiles
+from .actor_types import tiles
 from . import actor_utility
 from . import minister_utility
 from . import scaling

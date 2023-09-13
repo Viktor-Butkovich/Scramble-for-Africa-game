@@ -1,14 +1,14 @@
 #Contains functionality for creating new instances of mobs, buildings, dice, and ministers
 
 import random
-from .mob_types import workers
-from .mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
-from .mob_types.officer_types import evangelists, merchants
-from .mob_types.npmob_types import native_warriors, beasts
-from .mob_types import vehicles, officers
-from . import dummy
-from . import mobs
-from . import buildings
+from .actor_types.mob_types import workers
+from .actor_types.mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
+from .actor_types.mob_types.officer_types import evangelists, merchants
+from .actor_types.mob_types.npmob_types import native_warriors, beasts
+from .actor_types.mob_types import vehicles, officers
+from .actor_types.mob_types import dummy
+from .actor_types import mobs
+from .actor_types import buildings
 from . import ministers
 from . import lore_missions
 from . import notification_tools

@@ -4,15 +4,15 @@ import pygame
 import random
 
 from ..mobs import mob
-from .. import text_tools
-from .. import utility
-from .. import actor_utility
-from .. import notification_tools
-from .. import scaling
-from .. import images
-from .. import dice_utility
-from .. import turn_management_tools
-from .. import minister_utility
+from ... import text_tools
+from ... import utility
+from ... import actor_utility
+from ... import notification_tools
+from ... import scaling
+from ... import images
+from ... import dice_utility
+from ... import turn_management_tools
+from ... import minister_utility
 
 class pmob(mob):
     '''

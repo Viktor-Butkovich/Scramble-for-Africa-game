@@ -2,9 +2,8 @@
 import random
 import math
 from .pmobs import pmob
-from .. import actor_utility
-from .. import utility
-from .. import notification_tools
+from ... import actor_utility
+from ... import notification_tools
 
 class group(pmob):
     '''

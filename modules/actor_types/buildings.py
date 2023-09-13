@@ -4,10 +4,10 @@ import pygame
 import random
 
 from .actors import actor
-from . import utility
-from . import scaling
-from . import actor_utility
-from . import text_tools
+from .. import utility
+from .. import scaling
+from .. import actor_utility
+from .. import text_tools
 
 class building(actor):
     '''

@@ -3,11 +3,11 @@
 import pygame
 import random
 
-from . import images
-from . import utility
-from . import actor_utility
-from . import villages
-from . import main_loop_tools
+from .. import images
+from .. import utility
+from .. import actor_utility
+from .. import villages
+from .. import main_loop_tools
 from .actors import actor
 
 class tile(actor): #to do: make terrain tiles a subclass

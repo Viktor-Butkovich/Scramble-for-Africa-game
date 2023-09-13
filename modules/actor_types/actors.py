@@ -3,12 +3,12 @@
 import pygame
 import random
 
-from . import text_tools
-from . import notification_tools
-from . import utility
-from . import actor_utility
-from . import scaling
-from . import market_tools
+from .. import text_tools
+from .. import notification_tools
+from .. import utility
+from .. import actor_utility
+from .. import scaling
+from .. import market_tools
 
 class actor():
     '''
