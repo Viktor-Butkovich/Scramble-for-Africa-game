@@ -2,19 +2,10 @@
 
 import random
 from .mob_types import workers
-from .mob_types.group_types import battalions
-from .mob_types.group_types import caravans
-from .mob_types.group_types import construction_gangs
-from .mob_types.group_types import expeditions
-from .mob_types.group_types import missionaries
-from .mob_types.group_types import porters
-from .mob_types.group_types import work_crews
-from .mob_types.officer_types import evangelists
-from .mob_types.officer_types import merchants
-from .mob_types.npmob_types import native_warriors
-from .mob_types.npmob_types import beasts
-from .mob_types import vehicles
-from .mob_types import officers
+from .mob_types.group_types import battalions, caravans, construction_gangs, expeditions, missionaries, porters, work_crews
+from .mob_types.officer_types import evangelists, merchants
+from .mob_types.npmob_types import native_warriors, beasts
+from .mob_types import vehicles, officers
 from . import dummy
 from . import mobs
 from . import buildings
@@ -24,16 +15,8 @@ from . import notification_tools
 from . import utility
 from . import actor_utility
 from . import market_tools
-from . import dice
-from . import buttons
-from . import labels
-from . import panels
-from . import notifications
-from . import choice_notifications
-from . import instructions
-from . import action_notifications
 from . import europe_transactions
-from . import interface_elements
+from .interface_types import dice, buttons, labels, panels, notifications, choice_notifications, instructions, action_notifications, interface_elements, cell_icons
 from .actor_display_tools import buttons as actor_display_buttons
 from .actor_display_tools import labels as actor_display_labels
 
@@ -328,6 +311,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = dice.die(input_dict, global_manager)
         elif init_type == 'panel':
             new_element = panels.panel(input_dict, global_manager)
+        elif init_type == 'cell_icon':
+            new_element = cell_icons.cell_icon(input_dict, global_manager)
 
         elif init_type.endswith('label'):
             base = init_type.removesuffix('label')

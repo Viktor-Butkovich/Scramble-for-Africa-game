@@ -1,7 +1,7 @@
 #Contains functionality for actor display buttons
 
 import random
-from ..buttons import button
+from ..interface_types.buttons import button
 from .. import main_loop_tools
 from .. import utility
 from .. import actor_utility

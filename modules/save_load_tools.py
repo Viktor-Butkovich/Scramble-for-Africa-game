@@ -6,7 +6,7 @@ import pickle
 from . import scaling
 from . import notification_tools
 from . import game_transitions
-from . import grids
+from .interface_types import grids
 from . import data_managers
 from . import turn_management_tools
 from . import text_tools

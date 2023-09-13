@@ -2,8 +2,8 @@
 
 from .labels import label
 from .buttons import button
-from . import scaling
-from . import text_tools
+from .. import scaling
+from .. import text_tools
 
 class instructions_button(button):
     '''

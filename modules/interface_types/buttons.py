@@ -2,18 +2,18 @@
 
 import pygame
 import time
-from . import images
-from . import text_tools
-from . import scaling
-from . import main_loop_tools
-from . import actor_utility
-from . import utility
-from . import turn_management_tools
-from . import market_tools
-from . import notification_tools
-from . import game_transitions
-from . import minister_utility
-from . import trial_utility
+from .. import images
+from .. import text_tools
+from .. import scaling
+from .. import main_loop_tools
+from .. import actor_utility
+from .. import utility
+from .. import turn_management_tools
+from .. import market_tools
+from .. import notification_tools
+from .. import game_transitions
+from .. import minister_utility
+from .. import trial_utility
 from . import interface_elements
 
 class button(interface_elements.interface_element):

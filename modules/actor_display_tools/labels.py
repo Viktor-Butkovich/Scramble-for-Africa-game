@@ -2,7 +2,7 @@
 
 import pygame
 
-from ..labels import label
+from ..interface_types.labels import label
 from ..images import minister_type_image
 from .. import utility
 from .. import scaling

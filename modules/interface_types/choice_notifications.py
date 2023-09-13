@@ -3,10 +3,10 @@
 import pygame
 from . import buttons
 from . import notifications
-from . import text_tools
-from . import scaling
-from . import market_tools
-from . import utility
+from .. import text_tools
+from .. import scaling
+from .. import market_tools
+from .. import utility
 
 class choice_notification(notifications.notification):
     '''

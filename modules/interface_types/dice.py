@@ -4,7 +4,7 @@ import pygame
 import time
 import random
 from .buttons import button
-from . import utility
+from .. import utility
 
 class die(button):
     '''

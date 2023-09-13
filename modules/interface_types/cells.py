@@ -2,7 +2,7 @@
 
 import pygame
 import random
-from . import actor_utility
+from .. import actor_utility
 
 class cell():
     '''

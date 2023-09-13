@@ -1,11 +1,10 @@
 #Contains functionality for multi-step notifications
 
-from .images import free_image
+from ..images import free_image
 from .notifications import notification
-from . import utility
-from . import scaling
-from . import actor_utility
-from . import trial_utility
+from .. import scaling
+from .. import actor_utility
+from .. import trial_utility
 
 class action_notification(notification):
     '''
@@ -604,7 +603,7 @@ class advertising_campaign_notification(action_notification):
         '''
         self.is_last = input_dict['is_last']
         if self.is_last: #if last, show result
-            current_merchant = global_manager.get('displayed_mob')#actor_utility.get_selected_list(global_manager)[0]
+            current_merchant = global_manager.get('displayed_mob')
             self.notification_images = []
             self.notification_images.append(free_image('scenery/resources/' + current_merchant.current_advertised_commodity + '.png', scaling.scale_coordinates(global_manager.get('notification_manager').notification_x - 225, 500,
                 global_manager), scaling.scale_width(200, global_manager), scaling.scale_height(200, global_manager), input_dict['modes'], global_manager, True))
