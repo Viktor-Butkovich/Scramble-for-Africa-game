@@ -24,3 +24,4 @@ except Exception: #displays error message and records error message in crash log
 # list isn't a characteristic of the tile
 # continue work on cell_icons
 # make grid an actual interface element subclass, maybe even with interface customization buttons - probably the best place to have those
+# ^make sure grid doesn't try to change position every frame if it is in a collection - would probably be an expensive process

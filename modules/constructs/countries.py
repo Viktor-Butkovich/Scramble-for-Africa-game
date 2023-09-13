@@ -20,7 +20,6 @@ class country:
                 'allow_double_last_names': boolean value - Whether ministers of this country are allowed to have hyphenated last names, like Dupont-Rouvier
                 'background_set': string list value - Weighted list of backgrounds available to ministers of this country, like ['lowborn', 'lowborn', 'aristocrat']
                 'country_effect': effect value - Effect that is applied when this country is selected and vice versa
-                'music_list': string/string dictionary value - List of songs to add to the Europe songs for this country
             global_manager_template global_manager: Object that accesses shared variables
         Output:
             None
@@ -40,7 +39,6 @@ class country:
         self.flag_image_id = 'locations/flags/' + self.adjective + '.png'
         self.background_set = input_dict['background_set']
         self.country_effect = input_dict['country_effect']
-        self.music_list = input_dict['music_list']
         if 'has_aristocracy' in input_dict:
             self.has_aristocracy = input_dict['has_aristocracy']
         else:

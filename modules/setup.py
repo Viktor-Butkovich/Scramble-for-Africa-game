@@ -615,7 +615,6 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-        'music_list': ['Rule Britannia']
     }
     global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
@@ -642,7 +641,6 @@ def def_countries(global_manager):
         'allow_double_last_names': True,
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
-        'music_list': ['La Marseillaise'],
         'has_aristocracy': False
     }
     global_manager.set('France', countries.country(french_input_dict, global_manager))
@@ -668,7 +666,6 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-        'music_list': ['Das lied der deutschen']
     }
     global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
@@ -691,7 +688,6 @@ def def_countries(global_manager):
         'religion': 'catholic',
         'background_set': belgian_weighted_backgrounds,
         'country_effect': belgian_country_effect,
-        'music_list': []
     }
     global_manager.set('Belgium', countries.hybrid_country(belgian_input_dict, global_manager)) 
 
@@ -716,7 +712,6 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
         'country_effect': portuguese_country_effect,
-        'music_list': ['Portuguese theme']
     }
     global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
@@ -742,7 +737,6 @@ def def_countries(global_manager):
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
         'country_effect': italian_country_effect,
-        'music_list': ['Prince of Tuscany']
     }
     global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     

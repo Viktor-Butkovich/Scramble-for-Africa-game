@@ -2,6 +2,7 @@
 
 import random
 import pygame
+import os
 
 from ..util import csv_utility
 from ..util import scaling
@@ -821,16 +822,16 @@ class sound_manager_template():
         '''
         self.global_manager = global_manager
         self.default_music_dict = {
-            'europe': ['French theme', 'French generic song', 'French generic song 2', 'German generic song', 'Over the hills and far away', 'Italian theme',
-                       'German generic violin', 'Italian generic violin', 'French generic violin', 'French generic violin 2', 'Prince of Tuscany', 'Portuguese theme',
-                       'Das lied der deutschen', 'La Marseillaise', 'Rule Britannia', 'religious 1', 'spirited French 1', 'spirited Portuguese 1', 'Santa Lucia',
-                       'original waltz 1', 'original waltz 2'],
+            'europe': [('generic/' + current_song[:-4]) for current_song in os.listdir('sounds/music/generic')], #remove file extensions
             'main menu': ['main theme'],
-            'village peaceful': ['village peaceful'],
-            'village neutral': ['village neutral'],
-            'village aggressive': ['village aggressive'],
-            'slave traders': ['slave traders theme']
+            'village peaceful': ['natives/village peaceful'],
+            'village neutral': ['natives/village neutral'],
+            'village aggressive': ['natives/village aggressive'],
+            'slave traders': ['slave traders/slave traders theme']
         }
+        for adjective in ['british', 'french', 'german', 'belgian', 'italian', 'portuguese']:
+            self.default_music_dict['europe'] += [(adjective + '/' + current_song)[:-4] for current_song in os.listdir('sounds/music/' + adjective)]
+            #add music for each country into rotation
         self.previous_state = 'none'
         self.previous_song = 'none'
 
@@ -944,11 +945,13 @@ class sound_manager_template():
             state_changed = False
         self.previous_state = current_state
         current_country = self.global_manager.get('current_country')
-        if current_state == 'europe' and not current_country == 'none':
-            if self.global_manager.get('creating_new_game') and len(self.global_manager.get('current_country').music_list) > 0:
-                possible_songs = self.global_manager.get('current_country').music_list
+        if current_state == 'europe' and current_country != 'none':
+            adjective = self.global_manager.get('current_country').adjective
+            country_songs = [(adjective + '/' + current_song)[:-4] for current_song in os.listdir('sounds/music/' + adjective)] #remove file extensions
+            if self.global_manager.get('creating_new_game') and country_songs:
+                possible_songs = country_songs #ensures that country song plays when starting a game as that country
             else:
-                possible_songs = self.default_music_dict[current_state] + self.global_manager.get('current_country').music_list
+                possible_songs = self.default_music_dict[current_state]# + country_songs - country songs are alredy in rotation
         else:
             possible_songs = self.default_music_dict[current_state]
         if len(possible_songs) == 1:
