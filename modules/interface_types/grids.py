@@ -3,10 +3,11 @@
 import random
 import pygame
 from . import cells
+from . import interface_elements
 from ..util import actor_utility
 from ..util import utility
 
-class grid():
+class grid(interface_elements.interface_element):
     '''
     Grid of cells of the same size with different positions based on the grid's size and the number of cells. Each cell contains various actors, terrain, and resources
     '''
@@ -17,9 +18,9 @@ class grid():
         Input:
             boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-                'pixel_width': int value - Pixel width of this grid
-                'pixel_height': int value - Pixel height of this grid
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'width': int value - Pixel width of this grid
+                'height': int value - Pixel height of this grid
                 'coordinate_width': int value - Number of columns in this grid
                 'coordinate_height': int value - Number of rows in this grid
                 'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
@@ -32,7 +33,7 @@ class grid():
         Output:
             None
         '''
-        self.global_manager = global_manager
+        super().__init__(input_dict, global_manager)
         self.global_manager.get('grid_list').append(self)
         self.grid_line_width = input_dict['grid_line_width']
         self.from_save = from_save
@@ -40,55 +41,14 @@ class grid():
         self.is_abstract_grid = False
         self.attached_grid = 'none'
         self.modes = input_dict['modes']
-        self.origin_x, self.origin_y = input_dict['origin_coordinates']
         self.coordinate_width = input_dict['coordinate_width']
         self.coordinate_height = input_dict['coordinate_height']
-        self.pixel_width = input_dict['pixel_width']
-        self.pixel_height = input_dict['pixel_height']
-        self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
         self.internal_line_color = input_dict['internal_line_color']
         self.external_line_color = input_dict['external_line_color']
         self.cell_list = []
         self.mini_grid = 'none'
-        self.showing = False
-        #self.global_manager.get('terrain_list').append('water') #to generate water normally
-        self.global_manager.get('independent_interface_elements').append(self)
-        if not from_save:
+        if not from_save: #terrain created after grid initialization by create_strategic_map in game_transitions
             self.create_cells()
-            if input_dict['strategic_grid']:
-                area = self.coordinate_width * self.coordinate_height
-                num_worms = area // 5
-                if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
-                    self.global_manager.get('terrain_list').append('water')
-                for i in range(num_worms):
-                    self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
-                #if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
-                #    for i in range(num_worms // 6): #range(num_worms / 3):
-                #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
-                if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
-                    for cell in self.cell_list:
-                        if cell.y == 0:
-                            terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
-                            cell.set_terrain('water', terrain_variant)
-                    num_rivers = random.randrange(2, 4)
-                    valid = False
-                    while not valid:
-                        valid = True
-                        start_x_list = []
-                        for i in range(num_rivers):
-                            start_x_list.append(random.randrange(0, self.coordinate_width))
-                        for index in range(len(start_x_list)):
-                            for other_index in range(len(start_x_list)):
-                                if not index == other_index:
-                                    if abs(start_x_list[index] - start_x_list[other_index]) < 3:
-                                        valid = False
-                
-                    for start_x in start_x_list:
-                        self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
-                    
-                for cell in self.cell_list:
-                    if cell.y == 0 or cell.y == 1:
-                        cell.set_visibility(True)
         else:
             self.saved_cell_list = input_dict['cell_list']
             self.load_cells(input_dict['cell_list'])
@@ -109,11 +69,48 @@ class grid():
             save_dict['grid_type'] = 'strategic_map_grid'
         else:
             save_dict['grid_type'] = 'default'
-        save_dict['cell_list'] = []
-        for current_cell in self.cell_list:
-            save_dict['cell_list'].append(current_cell.to_save_dict())
+        save_dict['cell_list'] = [current_cell.to_save_dict() for current_cell in self.cell_list]
         return(save_dict)
-                    
+
+    def generate_terrain(self):
+        '''
+        Description:
+            Randomly creates the strategic map with biomes, rivers, and bottom row of ocean, but without resources - resources require that tiles and the mini grid are set
+                up first, which occurs later in setup than grid initialization
+        Input:
+            None
+        Output:
+            None
+        '''
+        area = self.coordinate_width * self.coordinate_height
+        num_worms = area // 5
+        if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+            self.global_manager.get('terrain_list').append('water')
+        for i in range(num_worms):
+            self.make_random_terrain_worm(round(area/24), round(area/12), self.global_manager.get('terrain_list'))
+        #if self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+        #    for i in range(num_worms // 6): #range(num_worms / 3):
+        #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
+        if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
+            for cell in self.cell_list:
+                if cell.y == 0:
+                    terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                    cell.set_terrain('water', terrain_variant)
+            num_rivers = random.randrange(2, 4)
+            valid = False
+            while not valid:
+                valid = True
+                start_x_list = []
+                for i in range(num_rivers):
+                    start_x_list.append(random.randrange(0, self.coordinate_width))
+                for index in range(len(start_x_list)):
+                    for other_index in range(len(start_x_list)):
+                        if index != other_index and abs(start_x_list[index] - start_x_list[other_index]) < 3:
+                            valid = False
+        
+            for start_x in start_x_list:
+                self.make_random_river_worm(round(self.coordinate_height * 0.75), round(self.coordinate_height * 1.25), start_x)
+
     def draw(self):
         '''
         Description:
@@ -174,7 +171,7 @@ class grid():
             int tuple: Two values representing x and y pixel coordinates of the center of the requested cell
         '''
         x, y = coordinates
-        return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x + int(self.get_cell_width()/2)), (self.global_manager.get('display_height') - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y + int(self.get_cell_height()/2))))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x + int(self.get_cell_width()/2)), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y + int(self.get_cell_height()/2))))
 
     def convert_coordinates(self, coordinates):
         '''
@@ -186,7 +183,7 @@ class grid():
             int tuple: Two values representing x and y pixel coordinates of the bottom left corner of the requested cell
         '''
         x, y = coordinates
-        return((int((self.pixel_width/(self.coordinate_width)) * x) + self.origin_x), (self.global_manager.get('display_height') - (int((self.pixel_height/(self.coordinate_height)) * y) + self.origin_y )))
+        return((int((self.width/(self.coordinate_width)) * x) + self.x), (self.global_manager.get('display_height') - (int((self.height/(self.coordinate_height)) * y) + self.y )))
     
     def get_height(self):
         '''
@@ -219,7 +216,7 @@ class grid():
         Output:
             int: Pixel width of one of this grid's cells
         '''
-        return(int(self.pixel_width/self.coordinate_width) + 1)
+        return(int(self.width/self.coordinate_width) + 1)
 
     def get_cell_height(self):
         '''
@@ -230,7 +227,7 @@ class grid():
         Output:
             int: Pixel height of one of this grid's cells
         '''
-        return(int(self.pixel_height/self.coordinate_height) + 1)
+        return(int(self.height/self.coordinate_height) + 1)
 
     def find_cell(self, x, y):
         '''
@@ -550,18 +547,6 @@ class grid():
         '''
         return(self.showing)
 
-    def remove_complete(self):
-        '''
-        Description:
-            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
-        Input:
-            None
-        Output:
-            None
-        '''
-        self.remove()
-        del self
-
     def remove(self):
         '''
         Description:
@@ -571,8 +556,8 @@ class grid():
         Output:
             None
         '''
+        super().remove()
         self.global_manager.set('grid_list', utility.remove_from_list(self.global_manager.get('grid_list'), self))
-
         
 class mini_grid(grid):
     '''
@@ -585,9 +570,9 @@ class mini_grid(grid):
         Input:
             boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-                'pixel_width': int value - Pixel width of this grid
-                'pixel_height': int value - Pixel height of this grid
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'width': int value - Pixel width of this grid
+                'height': int value - Pixel height of this grid
                 'coordinate_width': int value - Number of columns in this grid
                 'coordinate_height': int value - Number of rows in this grid
                 'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
@@ -637,7 +622,7 @@ class mini_grid(grid):
                     current_cell.set_resource('none', update_image_bundle=False)
                     current_cell.reset_buildings()
                     current_cell.tile.update_image_bundle()
-            self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.pixel_height, self.pixel_width, self.pixel_height)
+            #self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.height, self.width, self.height)
             for current_mob in self.global_manager.get('mob_list'):
                 if not (current_mob.images[0].current_cell == 'none'):
                     for current_image in current_mob.images:
@@ -754,9 +739,9 @@ class abstract_grid(grid):
         Input:
             boolean from_save: True if this object is being recreated from a save file, False if it is being newly created
             dictionary input_dict: Keys corresponding to the values needed to initialize this object
-                'origin_coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
-                'pixel_width': int value - Pixel width of this grid
-                'pixel_height': int value - Pixel height of this grid
+                'coordinates': int tuple value - Two values representing x and y coordinates for the pixel location of the bottom left corner of this grid
+                'width': int value - Pixel width of this grid
+                'height': int value - Pixel height of this grid
                 'internal_line_color': string value - Color in the color_dict dictionary for lines between cells, like 'bright blue'
                 'external_line_color': string value - Color in the color_dict dictionary for lines on the outside of the grid, like 'bright blue'
                 'list modes': string list value - Game modes during which this grid can appear
@@ -774,7 +759,6 @@ class abstract_grid(grid):
         super().__init__(from_save, input_dict, global_manager)
         self.is_abstract_grid = True
         self.name = input_dict['name']
-        self.global_manager.get('abstract_grid_list').append(self)
         self.tile_image_id = input_dict['tile_image_id']
         self.cell_list[0].set_visibility(True)
 

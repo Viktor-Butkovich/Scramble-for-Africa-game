@@ -303,7 +303,7 @@ def manage_rmb_down(clicked_button, global_manager):
     stopping = False
     if (not clicked_button) and action_possible(global_manager):
         for current_grid in global_manager.get('grid_list'):
-            if global_manager.get('current_game_mode') in current_grid.modes:
+            if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
                 for current_cell in current_grid.cell_list:
                     if current_cell.touching_mouse():
                         stopping = True #if doesn't reach this point, do same as lmb
@@ -356,7 +356,7 @@ def manage_lmb_down(clicked_button, global_manager):
         if (not clicked_button and (not (global_manager.get('choosing_destination') or global_manager.get('choosing_advertised_commodity') or global_manager.get('drawing_automatic_route')))):#do not do selecting operations if user was trying to click a button #and action_possible(global_manager)
             selected_mob = False
             for current_grid in global_manager.get('grid_list'):
-                if global_manager.get('current_game_mode') in current_grid.modes:
+                if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
                     for current_cell in current_grid.cell_list:
                         if current_cell.touching_mouse():
                             if current_cell.visible:

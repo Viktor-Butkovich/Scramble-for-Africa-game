@@ -142,7 +142,6 @@ def misc(global_manager):
     global_manager.set('flag_icon_list', [])
     global_manager.set('grid_list', [])
     global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
-    global_manager.set('abstract_grid_list', [])
     global_manager.set('text_list', [])
     global_manager.set('free_image_list', [])
     global_manager.set('minister_image_list', [])
@@ -232,7 +231,7 @@ def misc(global_manager):
     strategic_grid_width = 320
     mini_grid_width = 640
 
-    global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
+    global_manager.set('minimap_grid_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
 
     global_manager.set('europe_grid_x', global_manager.get('default_display_width') - (strategic_grid_width + 100 + 120 + 25)) 
     #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids

@@ -630,7 +630,7 @@ class pmob(mob):
         transportation_minister = self.global_manager.get('current_ministers')[self.global_manager.get('type_minister_dict')['transportation']]
         if not transportation_minister == 'none':
             if self.can_leave():
-                if not self.grid in self.global_manager.get('abstract_grid_list'):
+                if not self.grid.is_abstract_grid:
                     if future_x >= 0 and future_x < self.grid.coordinate_width and future_y >= 0 and future_y < self.grid.coordinate_height:
                         future_cell = self.grid.find_cell(future_x, future_y)
                         if future_cell.visible or self.can_explore:

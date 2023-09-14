@@ -113,10 +113,10 @@ def set_game_mode(new_game_mode, global_manager):
     if global_manager.get('startup_complete') and not new_game_mode in ['main_menu', 'new_game_setup']:
         global_manager.get('notification_manager').update_notification_layout()
 
-def create_strategic_map(global_manager):
+def create_strategic_map(global_manager, from_save=False):
     '''
     Description:
-        Creates a tile attached to each cell of each grid and randomly sets resources and villages when applicable
+        Generates grid terrains/resources/villages if not from save, and sets up tiles attached to each grid cell
     Input:
         global_manager_template global_manager: Object that accesses shared variables
     Output:
@@ -126,7 +126,7 @@ def create_strategic_map(global_manager):
     main_loop_utility.update_display(global_manager)
 
     for current_grid in global_manager.get('grid_list'):
-        if current_grid in global_manager.get('abstract_grid_list'): #if europe/slave traders grid
+        if current_grid.is_abstract_grid: #if europe/slave traders grid
             input_dict = {}
             input_dict['grid'] = current_grid
             input_dict['image'] = current_grid.tile_image_id
@@ -140,8 +140,12 @@ def create_strategic_map(global_manager):
             input_dict['name'] = 'default'
             input_dict['modes'] = ['strategic']
             input_dict['show_terrain'] = True
-            for current_cell in current_grid.cell_list:
-                input_dict['coordinates'] = (current_cell.x, current_cell.y)
+            if (not from_save) and current_grid == global_manager.get('strategic_map_grid'):
+                current_grid.generate_terrain()
+            for cell in current_grid.cell_list:
+                if (not from_save) and current_grid == global_manager.get('strategic_map_grid') and (cell.y == 0 or cell.y == 1):
+                    cell.set_visibility(True)
+                input_dict['coordinates'] = (cell.x, cell.y)
                 tiles.tile(False, input_dict, global_manager)
             current_grid.set_resources()
 
