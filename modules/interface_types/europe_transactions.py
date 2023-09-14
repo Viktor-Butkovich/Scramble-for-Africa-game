@@ -1,13 +1,8 @@
 #Contains functionality for buttons relating to the European headquarters screen
+
 import random
-
-
 from .buttons import button
-from ..util import main_loop_utility
-from ..util import text_utility
-from ..util import market_utility
-from ..util import utility
-from ..util import actor_utility
+from ..util import main_loop_utility, text_utility, market_utility, utility, actor_utility
 
 class recruitment_button(button):
     '''

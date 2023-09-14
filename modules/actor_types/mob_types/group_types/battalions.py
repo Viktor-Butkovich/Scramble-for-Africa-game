@@ -1,14 +1,10 @@
 #Contains functionality for battalions
+
 import time
 import random
 from ..groups import group
 from ...tiles import tile
-from ....util import actor_utility
-from ....util import utility
-from ....util import notification_utility
-from ....util import text_utility
-from ....util import dice_utility
-from ....util import market_utility
+from ....util import actor_utility, utility, notification_utility, text_utility, dice_utility, market_utility
 
 class battalion(group):
     '''

@@ -2,12 +2,7 @@
 
 import pygame
 import time
-from . import scaling
-from . import text_utility
-from . import actor_utility
-from . import minister_utility
-from . import utility
-from . import traversal_utility
+from . import scaling, text_utility, actor_utility, minister_utility, utility, traversal_utility
 
 def update_display(global_manager):
     '''

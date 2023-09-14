@@ -1,19 +1,20 @@
+#Manages initial game setup in a semi-modular order
+
 import pygame
 import time
 import os
 import logging
 import json
-
 import modules.util.scaling as scaling
-import modules.constructs.images as images
+import modules.util.actor_utility as actor_utility
 import modules.util.game_transitions as game_transitions
-import modules.tools.data_managers as data_managers
 import modules.actor_display_tools.images as actor_display_images
+import modules.tools.actor_creation_tools as actor_creation_tools
+import modules.constructs.images as images
+import modules.constructs.countries as countries
+import modules.tools.data_managers as data_managers
 import modules.tools.mouse_followers as mouse_followers
 import modules.tools.save_load_tools as save_load_tools
-import modules.tools.actor_creation_tools as actor_creation_tools
-import modules.util.actor_utility as actor_utility
-import modules.constructs.countries as countries
 import modules.tools.effects as effects
 
 def setup(global_manager, *args):

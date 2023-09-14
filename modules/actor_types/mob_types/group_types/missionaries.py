@@ -2,9 +2,7 @@
 
 import random
 from ..groups import group
-from ....util import actor_utility
-from ....util import dice_utility
-from ....util import notification_utility
+from ....util import actor_utility, dice_utility, notification_utility
 
 class missionaries(group):
     '''

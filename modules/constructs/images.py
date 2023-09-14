@@ -1,10 +1,7 @@
 #Contains functionality for images
 
 import pygame
-from ..util import utility
-from ..util import drawing_utility
-from ..util import text_utility
-from ..util import scaling
+from ..util import utility, drawing_utility, text_utility, scaling
 
 class image():
     '''

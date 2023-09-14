@@ -4,7 +4,6 @@ import random
 import os
 import pygame
 import math
-
 from . import utility
 
 def reset_action_prices(global_manager):

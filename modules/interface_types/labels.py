@@ -2,10 +2,7 @@
 
 import pygame
 from .buttons import button
-from ..util import scaling
-from ..util import text_utility
-from ..util import utility
-from ..util import market_utility
+from ..util import scaling, text_utility, utility, market_utility
 
 class label(button):
     '''

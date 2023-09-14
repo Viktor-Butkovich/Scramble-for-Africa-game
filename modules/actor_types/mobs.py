@@ -4,8 +4,7 @@ import pygame
 import time
 import random
 from ..constructs import images
-from ..util import utility
-from ..util import actor_utility
+from ..util import utility, actor_utility
 from .actors import actor
 
 class mob(actor):

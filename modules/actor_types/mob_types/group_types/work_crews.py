@@ -2,10 +2,7 @@
 
 import random
 from ..groups import group
-from ....util import actor_utility
-from ....util import utility
-from ....util import market_utility
-from ....util import notification_utility
+from ....util import actor_utility, utility, market_utility, notification_utility
 
 class work_crew(group):
     '''

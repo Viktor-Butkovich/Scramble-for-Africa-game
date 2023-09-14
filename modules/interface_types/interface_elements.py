@@ -1,10 +1,8 @@
 #Contains functionality for interface elements and collections
 
 import pygame
-from ..util import scaling
 from ..constructs import images
-from ..util import dummy_utility
-from ..util import utility
+from ..util import scaling, dummy_utility, utility
 
 class interface_element():
     '''

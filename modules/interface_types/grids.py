@@ -3,10 +3,8 @@
 import random
 import pygame
 import itertools
-from . import cells
-from . import interface_elements
-from ..util import actor_utility
-from ..util import utility
+from . import cells, interface_elements
+from ..util import actor_utility, utility
 
 class grid(interface_elements.interface_element):
     '''

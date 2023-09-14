@@ -1,4 +1,5 @@
 #Contains functionality for different player countries
+
 from ..util import actor_utility
 
 class country:

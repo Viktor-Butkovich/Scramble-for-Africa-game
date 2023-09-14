@@ -2,10 +2,7 @@
 
 import random
 from ..officers import officer
-from ....util import actor_utility
-from ....util import notification_utility
-from ....util import dice_utility
-
+from ....util import actor_utility, notification_utility, dice_utility
 
 class evangelist(officer):
     '''

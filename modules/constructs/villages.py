@@ -1,10 +1,7 @@
 #Contains functionality for villages
 
 import random
-
-from ..util import village_name_generator
-from ..util import actor_utility
-from ..util import utility
+from ..util import village_name_generator, actor_utility, utility
 
 class village():
     '''

@@ -2,9 +2,7 @@
 
 from ..constructs.images import free_image
 from .notifications import notification
-from ..util import scaling
-from ..util import actor_utility
-from ..util import trial_utility
+from ..util import scaling, actor_utility, trial_utility
 
 class action_notification(notification):
     '''

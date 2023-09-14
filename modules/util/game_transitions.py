@@ -1,12 +1,8 @@
 #Contains functions used when switching between parts of the game, like loading screen display
 
 import time
-from . import main_loop_utility
-from . import text_utility
+from . import main_loop_utility, text_utility, actor_utility, minister_utility, scaling
 from ..actor_types import tiles
-from . import actor_utility
-from . import minister_utility
-from . import scaling
 
 def cycle_player_turn(global_manager, start_of_turn = False):
     '''

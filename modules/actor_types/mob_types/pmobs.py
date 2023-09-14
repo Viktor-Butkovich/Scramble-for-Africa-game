@@ -2,17 +2,9 @@
 
 import pygame
 import random
-
 from ..mobs import mob
-from ...util import text_utility
-from ...util import utility
-from ...util import actor_utility
-from ...util import notification_utility
-from ...util import scaling
+from ...util import text_utility, utility, actor_utility, notification_utility, scaling, dice_utility, turn_management_utility, minister_utility
 from ...constructs import images
-from ...util import dice_utility
-from ...util import turn_management_utility
-from ...util import minister_utility
 
 class pmob(mob):
     '''

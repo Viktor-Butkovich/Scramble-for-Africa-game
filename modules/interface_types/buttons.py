@@ -3,17 +3,8 @@
 import pygame
 import time
 from ..constructs import images
-from ..util import text_utility
-from ..util import scaling
-from ..util import main_loop_utility
-from ..util import actor_utility
-from ..util import utility
-from ..util import turn_management_utility
-from ..util import market_utility
-from ..util import notification_utility
-from ..util import game_transitions
-from ..util import minister_utility
-from ..util import trial_utility
+from ..util import text_utility, scaling, main_loop_utility, actor_utility, utility, turn_management_utility, market_utility, notification_utility, game_transitions, \
+    minister_utility, trial_utility
 from . import interface_elements
 
 class button(interface_elements.interface_element):

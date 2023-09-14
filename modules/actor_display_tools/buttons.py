@@ -2,14 +2,7 @@
 
 import random
 from ..interface_types.buttons import button
-from ..util import main_loop_utility
-from ..util import utility
-from ..util import actor_utility
-from ..util import minister_utility
-from ..util import trial_utility
-from ..util import text_utility
-from ..util import game_transitions
-from ..util import notification_utility
+from ..util import main_loop_utility, utility, actor_utility, minister_utility, trial_utility, text_utility, game_transitions, notification_utility
 
 class embark_all_passengers_button(button):
     '''

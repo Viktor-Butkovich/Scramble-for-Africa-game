@@ -1,4 +1,5 @@
 #Contains functions to manage interface collection traversal, doing particular actions for each element with simple decision-making
+
 def draw_interface_elements(interface_elements, global_manager):
     '''
     Description:

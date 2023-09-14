@@ -2,11 +2,7 @@
 
 import time
 import pygame
-from .util import main_loop_utility
-from .util import utility
-from .util import text_utility
-from .util import turn_management_utility
-from .util import actor_utility
+from .util import main_loop_utility, utility, text_utility, turn_management_utility, actor_utility
 
 def main_loop(global_manager):
     '''

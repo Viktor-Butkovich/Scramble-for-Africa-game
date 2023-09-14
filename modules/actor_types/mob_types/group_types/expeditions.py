@@ -4,10 +4,7 @@ import time
 import random
 from ..groups import group
 from ...tiles import tile
-from ....util import actor_utility
-from ....util import text_utility
-from ....util import dice_utility
-from ....util import notification_utility
+from ....util import actor_utility, text_utility, dice_utility, notification_utility
 
 class expedition(group):
     '''

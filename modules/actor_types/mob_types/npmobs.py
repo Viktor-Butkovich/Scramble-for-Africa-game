@@ -2,9 +2,7 @@
 
 import random
 from ..mobs import mob
-from ...util import utility
-from ...util import turn_management_utility
-from ...util import notification_utility
+from ...util import utility, turn_management_utility, notification_utility
 
 class npmob(mob): #if enemy.turn_done
     '''

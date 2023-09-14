@@ -2,13 +2,7 @@
 
 import pygame
 import random
-
-from ..util import text_utility
-from ..util import notification_utility
-from ..util import utility
-from ..util import actor_utility
-from ..util import scaling
-from ..util import market_utility
+from ..util import text_utility, notification_utility, utility, actor_utility, scaling, market_utility
 
 class actor():
     '''

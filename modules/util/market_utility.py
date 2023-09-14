@@ -1,8 +1,7 @@
 #Contains functions that manage market prices and sale of commodities
 
 import random
-from . import text_utility
-from . import utility
+from . import text_utility, utility
 
 def adjust_prices(global_manager):
     '''

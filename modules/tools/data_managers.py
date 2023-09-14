@@ -3,10 +3,7 @@
 import random
 import pygame
 import os
-
-from ..util import csv_utility
-from ..util import scaling
-from ..util import text_utility
+from ..util import csv_utility, scaling, text_utility
 from . import events
 
 class global_manager_template():

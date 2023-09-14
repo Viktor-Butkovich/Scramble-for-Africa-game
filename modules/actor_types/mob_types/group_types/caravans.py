@@ -3,11 +3,7 @@
 import random
 import math
 from ..groups import group
-from ....util import utility
-from ....util import actor_utility
-from ....util import dice_utility
-from ....util import notification_utility
-from ....util import market_utility
+from ....util import utility, actor_utility, dice_utility, notification_utility, market_utility
 
 class caravan(group):
     '''

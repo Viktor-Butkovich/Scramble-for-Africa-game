@@ -1,12 +1,8 @@
 #Contains functionality for choice notifications
 
 import pygame
-from . import buttons
-from . import notifications
-from ..util import text_utility
-from ..util import scaling
-from ..util import market_utility
-from ..util import utility
+from . import buttons, notifications
+from ..util import text_utility, scaling, market_utility, utility
 
 class choice_notification(notifications.notification):
     '''

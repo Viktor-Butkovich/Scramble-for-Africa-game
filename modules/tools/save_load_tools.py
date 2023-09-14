@@ -2,17 +2,9 @@
 
 import random
 import pickle
-
-from ..util import scaling
-from ..util import notification_utility
-from ..util import game_transitions
+from ..util import scaling, notification_utility, game_transitions, turn_management_utility, text_utility, market_utility, minister_utility, actor_utility
 from ..interface_types import grids
 from . import data_managers
-from ..util import turn_management_utility
-from ..util import text_utility
-from ..util import market_utility
-from ..util import minister_utility
-from ..util import actor_utility
 
 class save_load_manager_template():
     '''

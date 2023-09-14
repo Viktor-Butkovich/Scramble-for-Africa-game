@@ -1,8 +1,7 @@
 #Contains functionality for lore missions
 
 import random
-from ..util import utility
-from ..util import notification_utility
+from ..util import utility, notification_utility
 
 class lore_mission():
     '''

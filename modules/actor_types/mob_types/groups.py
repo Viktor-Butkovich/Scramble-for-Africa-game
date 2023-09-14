@@ -1,9 +1,9 @@
 #Contains functionality for group units
+
 import random
 import math
 from .pmobs import pmob
-from ...util import actor_utility
-from ...util import notification_utility
+from ...util import actor_utility, notification_utility
 
 class group(pmob):
     '''

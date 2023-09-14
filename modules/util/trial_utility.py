@@ -1,11 +1,5 @@
 import random
-from . import utility
-from . import notification_utility
-from . import scaling
-from . import game_transitions
-from . import minister_utility
-from . import dice_utility
-from . import actor_utility
+from . import utility, notification_utility, scaling, game_transitions, minister_utility, dice_utility, actor_utility
 
 def start_trial(global_manager): #called by launch trial button in middle of trial screen
     '''

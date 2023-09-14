@@ -2,13 +2,8 @@
 
 import random
 import os
-
-from ..util import utility
-from ..util import actor_utility
-from ..util import minister_utility
-from ..util import notification_utility
+from ..util import utility, actor_utility, minister_utility, notification_utility, scaling
 from . import images
-from ..util import scaling
 
 class minister():
     '''

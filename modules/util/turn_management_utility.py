@@ -1,14 +1,7 @@
 #Contains functions that manage what happens at the end of each turn, like worker upkeep and price changes
 
 import random
-
-from . import text_utility
-from . import actor_utility
-from . import trial_utility
-from . import market_utility
-from . import notification_utility
-from . import utility
-from . import game_transitions
+from . import text_utility, actor_utility, trial_utility, market_utility, notification_utility, utility, game_transitions
 
 def end_turn(global_manager):
     '''
