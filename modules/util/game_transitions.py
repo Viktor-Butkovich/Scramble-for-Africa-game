@@ -76,7 +76,7 @@ def set_game_mode(new_game_mode, global_manager):
                 #calibrate tile info to minimap center
         elif new_game_mode == 'europe':
             global_manager.set('current_game_mode', 'europe')
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'main_menu':
             global_manager.set('current_game_mode', 'main_menu')
             global_manager.set('default_text_box_height', scaling.scale_height(90, global_manager))#global_manager.set('default_text_box_height', 185)
@@ -84,7 +84,7 @@ def set_game_mode(new_game_mode, global_manager):
             global_manager.set('text_list', []) #clear text box when going to main menu
         elif new_game_mode == 'ministers':
             global_manager.set('current_game_mode', 'ministers')
-            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0].tile) #calibrate tile info to Europe
+            actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), global_manager.get('europe_grid').cell_list[0][0].tile) #calibrate tile info to Europe
         elif new_game_mode == 'trial':
             global_manager.set('current_game_mode', 'trial')
         elif new_game_mode == 'new_game_setup':
@@ -142,7 +142,7 @@ def create_strategic_map(global_manager, from_save=False):
             input_dict['show_terrain'] = True
             if (not from_save) and current_grid == global_manager.get('strategic_map_grid'):
                 current_grid.generate_terrain()
-            for cell in current_grid.cell_list:
+            for cell in current_grid.get_flat_cell_list():
                 if (not from_save) and current_grid == global_manager.get('strategic_map_grid') and (cell.y == 0 or cell.y == 1):
                     cell.set_visibility(True)
                 input_dict['coordinates'] = (cell.x, cell.y)

@@ -35,7 +35,7 @@ class cell():
         self.pixel_x, self.pixel_y = self.grid.convert_coordinates((self.x, self.y))
         self.Rect = pygame.Rect(self.pixel_x, self.pixel_y - self.height, self.width, self.height) #(left, top, width, height)
         self.corners = [(self.Rect.left, self.Rect.top ), (self.Rect.left + self.Rect.width, self.Rect.top), (self.Rect.left, self.Rect.top - self.Rect.height), (self.Rect.left + self.Rect.width, self.Rect.top - self.Rect.height)]
-        self.grid.cell_list.append(self)
+        self.grid.cell_list[x][y] = self
         self.tile = 'none'
         self.resource = 'none'
         self.village = 'none'

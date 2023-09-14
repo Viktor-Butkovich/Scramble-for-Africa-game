@@ -146,7 +146,7 @@ def manage_attrition(global_manager):
     for current_pmob in global_manager.get('pmob_list'):
         current_pmob.manage_inventory_attrition()
 
-    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    terrain_cells = global_manager.get('strategic_map_grid').get_flat_cell_list() + [global_manager.get('slave_traders_grid').cell_list[0][0]] + [global_manager.get('europe_grid').cell_list[0][0]]
     for current_cell in terrain_cells:
         current_tile = current_cell.tile
         if len(current_tile.get_held_commodities()) > 0:
@@ -161,7 +161,7 @@ def remove_excess_inventory(global_manager):
     Output:
         None
     '''
-    terrain_cells = global_manager.get('strategic_map_grid').cell_list + global_manager.get('slave_traders_grid').cell_list + global_manager.get('europe_grid').cell_list
+    terrain_cells = global_manager.get('strategic_map_grid').get_flat_cell_list() + [global_manager.get('slave_traders_grid').cell_list[0][0]] + [global_manager.get('europe_grid').cell_list[0][0]]
     for current_cell in terrain_cells:
         current_tile = current_cell.tile
         if len(current_tile.get_held_commodities()) > 0:

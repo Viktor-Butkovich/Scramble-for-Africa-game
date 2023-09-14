@@ -322,7 +322,7 @@ class recruitment_choice_button(choice_button):
         if self.recruitment_type == 'slave workers':
             self.global_manager.get('money_tracker').change(-1 * self.cost, 'unit_recruitment')
             input_dict['grids'] = [self.global_manager.get('slave_traders_grid')]
-            attached_cell = input_dict['grids'][0].cell_list[0]
+            attached_cell = input_dict['grids'][0].cell_list[0][0]
             input_dict['coordinates'] = (attached_cell.x, attached_cell.y)
             input_dict['image'] = 'mobs/slave workers/default.png'
             input_dict['modes'] = ['strategic']

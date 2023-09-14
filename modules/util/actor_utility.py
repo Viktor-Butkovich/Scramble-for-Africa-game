@@ -526,7 +526,7 @@ def set_slave_traders_strength(new_strength, global_manager):
         new_strength = 0
     global_manager.set('slave_traders_strength', new_strength)
     if global_manager.has('slave_traders_grid'):
-        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0].tile
+        slave_traders_tile = global_manager.get('slave_traders_grid').cell_list[0][0].tile
         slave_traders_tile.update_image_bundle()
 
 def generate_unit_component_image_id(base_image, component, to_front=False):

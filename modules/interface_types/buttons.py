@@ -1070,7 +1070,7 @@ class button(interface_elements.interface_element):
                         if current_minister.just_removed and current_minister.current_position == 'none':
                             text = 'If you do not reappoint ' + current_minister.name + ' by the end of the turn, they will be considered fired, leaving the candidate pool and incurring a large public opinion penalty. /n /n'
                             current_minister.display_message(text)
-                    for current_cell in self.global_manager.get('strategic_map_grid').cell_list:
+                    for current_cell in self.global_manager.get('strategic_map_grid').get_flat_cell_list():
                         if current_cell.visible and current_cell.tile.get_inventory_used() > current_cell.tile.inventory_capacity:
                             text = 'The warehouses at (' + str(current_cell.x) + ', ' + str(current_cell.y) + ') are not sufficient to hold the commodities stored there. /n /n'
                             text += 'Any commodities exceeding the tile\'s storage capacity will be lost at the end of the turn. /n /n'

@@ -304,7 +304,7 @@ def manage_rmb_down(clicked_button, global_manager):
     if (not clicked_button) and action_possible(global_manager):
         for current_grid in global_manager.get('grid_list'):
             if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
-                for current_cell in current_grid.cell_list:
+                for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         stopping = True #if doesn't reach this point, do same as lmb
                         if len(current_cell.contained_mobs) > 1:
@@ -357,7 +357,7 @@ def manage_lmb_down(clicked_button, global_manager):
             selected_mob = False
             for current_grid in global_manager.get('grid_list'):
                 if current_grid.showing: #if global_manager.get('current_game_mode') in current_grid.modes:
-                    for current_cell in current_grid.cell_list:
+                    for current_cell in current_grid.get_flat_cell_list():
                         if current_cell.touching_mouse():
                             if current_cell.visible:
                                 if len(current_cell.contained_mobs) > 0:
@@ -392,7 +392,7 @@ def manage_lmb_down(clicked_button, global_manager):
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere
             chooser = global_manager.get('choosing_destination_info_dict')['chooser']
             for current_grid in global_manager.get('grid_list'): #destination_grids:
-                for current_cell in current_grid.cell_list:
+                for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         click_move_minimap(global_manager)
                         target_cell = 'none'
@@ -426,7 +426,7 @@ def manage_lmb_down(clicked_button, global_manager):
             
         elif (not clicked_button) and global_manager.get('drawing_automatic_route'):
             for current_grid in global_manager.get('grid_list'): #destination_grids:
-                for current_cell in current_grid.cell_list:
+                for current_cell in current_grid.get_flat_cell_list():
                     if current_cell.touching_mouse():
                         #target_cell = 'none'
                         if current_cell.grid.is_abstract_grid:
@@ -485,11 +485,10 @@ def click_move_minimap(global_manager):
     Output:
         None
     '''
-    mouse_x, mouse_y = pygame.mouse.get_pos()
     breaking = False
     for current_grid in global_manager.get('grid_list'): #if grid clicked, move minimap to location clicked
         if current_grid.showing:
-            for current_cell in current_grid.cell_list:
+            for current_cell in current_grid.get_flat_cell_list():
                 if current_cell.touching_mouse():
                     if current_grid == global_manager.get('minimap_grid'): #if minimap clicked, calibrate to corresponding place on main map
                         if not current_cell.terrain == 'none': #if off map, do not move minimap there
@@ -498,7 +497,7 @@ def click_move_minimap(global_manager):
                     elif current_grid == global_manager.get('strategic_map_grid'):
                         global_manager.get('minimap_grid').calibrate(current_cell.x, current_cell.y)
                     else: #if abstract grid, show the inventory of the tile clicked without calibrating minimap
-                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_grid.cell_list[0].tile)
+                        actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), current_grid.cell_list[0][0].tile)
                     breaking = True
                     break
                 if breaking:

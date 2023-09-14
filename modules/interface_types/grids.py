@@ -2,6 +2,7 @@
 
 import random
 import pygame
+import itertools
 from . import cells
 from . import interface_elements
 from ..util import actor_utility
@@ -45,12 +46,12 @@ class grid(interface_elements.interface_element):
         self.coordinate_height = input_dict['coordinate_height']
         self.internal_line_color = input_dict['internal_line_color']
         self.external_line_color = input_dict['external_line_color']
-        self.cell_list = []
         self.mini_grid = 'none'
+        self.cell_list = [[None] * self.coordinate_height for y in range(self.coordinate_width)]
+        #printed list would be inverted - each row corresponds to an x value and each column corresponds to a y value, but can be indexed by cell_list[x][y]
         if not from_save: #terrain created after grid initialization by create_strategic_map in game_transitions
             self.create_cells()
         else:
-            self.saved_cell_list = input_dict['cell_list']
             self.load_cells(input_dict['cell_list'])
 
     def to_save_dict(self):
@@ -69,7 +70,7 @@ class grid(interface_elements.interface_element):
             save_dict['grid_type'] = 'strategic_map_grid'
         else:
             save_dict['grid_type'] = 'default'
-        save_dict['cell_list'] = [current_cell.to_save_dict() for current_cell in self.cell_list]
+        save_dict['cell_list'] = [current_cell.to_save_dict() for current_cell in self.get_flat_cell_list()]
         return(save_dict)
 
     def generate_terrain(self):
@@ -92,10 +93,9 @@ class grid(interface_elements.interface_element):
         #    for i in range(num_worms // 6): #range(num_worms / 3):
         #        self.make_random_terrain_worm(round(area/24), round(area/12), ['water'])
         if not self.global_manager.get('effect_manager').effect_active('enable_oceans'):
-            for cell in self.cell_list:
-                if cell.y == 0:
-                    terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
-                    cell.set_terrain('water', terrain_variant)
+            for row in self.cell_list:
+                terrain_variant = random.randrange(0, self.global_manager.get('terrain_variant_dict')['ocean_water'])
+                row[0].set_terrain('water', terrain_variant)
             num_rivers = random.randrange(2, 4)
             valid = False
             while not valid:
@@ -120,7 +120,7 @@ class grid(interface_elements.interface_element):
         Output:
             None
         '''
-        for cell in self.cell_list:
+        for cell in self.get_flat_cell_list():
             cell.draw()
         self.draw_grid_lines()
 
@@ -239,10 +239,10 @@ class grid(interface_elements.interface_element):
         Output:
             string/cell: Returns this grid's cell that occupies the inputted coordinates, or 'none' if there are no cells at the inputted coordinates
         '''
-        for cell in self.cell_list:
-            if cell.x == x and cell.y == y:
-                return(cell)
-        return('none')
+        if x >= 0 and x < self.coordinate_width and y >= 0 and y < self.coordinate_height:
+            return(self.cell_list[x][y])
+        else:
+            return('none')
 
     def choose_cell(self, requirements_dict):
         '''
@@ -257,7 +257,7 @@ class grid(interface_elements.interface_element):
         ocean_allowed = requirements_dict['ocean_allowed']
         nearby_buildings_allowed = requirements_dict['nearby_buildings_allowed']
         possible_cells = []
-        for current_cell in self.cell_list:
+        for current_cell in self.get_flat_cell_list():
             if not current_cell.terrain in allowed_terrains:
                 continue
             if (not ocean_allowed) and current_cell.y == 0:
@@ -279,11 +279,22 @@ class grid(interface_elements.interface_element):
         Output:
             None
         '''
-        for x in range(0, self.coordinate_width):
-            for y in range(0, self.coordinate_height):
+        for x in range(len(self.cell_list)):
+            for y in range(len(self.cell_list[x])):
                 self.create_cell(x, y)
-        for current_cell in self.cell_list:
+        for current_cell in self.get_flat_cell_list():
             current_cell.find_adjacent_cells()
+
+    def get_flat_cell_list(self):
+        '''
+        Description:
+            Generates and returns a flattened version of this grid's 2-dimensional cell list
+        Input:
+            None
+        Output:
+            cell list: Returns a flattened version of this grid's 2-dimensional cell list
+        '''
+        return(itertools.chain.from_iterable(self.cell_list))
 
     def load_cells(self, cell_list):
         '''
@@ -296,12 +307,12 @@ class grid(interface_elements.interface_element):
         '''
         for current_cell_dict in cell_list:
             x, y = current_cell_dict['coordinates']
-            new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], current_cell_dict, self.global_manager)
-        for current_cell in self.cell_list:
+            self.create_cell(x, y, save_dict=current_cell_dict)
+        for current_cell in self.get_flat_cell_list():
             current_cell.find_adjacent_cells()
             current_cell.set_terrain(current_cell.save_dict['terrain'])
             
-    def create_cell(self, x, y):
+    def create_cell(self, x, y, save_dict='none'):
         '''
         Description:
             Creates a cell at the inputted coordinates
@@ -309,9 +320,9 @@ class grid(interface_elements.interface_element):
             int x: x coordinate at which to create a cell
             int y: y coordinate at which to create a cell
         Output:
-            None
+            cell: Returns created cell
         '''
-        new_cell = cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], 'none', self.global_manager)
+        return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], save_dict, self.global_manager))
 
     def make_resource_list(self, terrain): #should be changed to return dictionary with frequencies of each resource and a list of each resource present, avoiding unnecessary 100+ item lists
         '''
@@ -416,14 +427,14 @@ class grid(interface_elements.interface_element):
             None
         '''
         if self.from_save:
-            for cell in self.cell_list:
+            for cell in self.get_flat_cell_list():
                 cell.set_resource(cell.save_dict['resource'])
         else:
             resource_list_dict = {}
             for terrain in self.global_manager.get('terrain_list'):
                 resource_list_dict[terrain] = self.make_resource_list(terrain)
             resource_list_dict['water'] = self.make_resource_list('water')
-            for cell in self.cell_list:
+            for cell in self.get_flat_cell_list():
                 cell.set_resource(random.choice(resource_list_dict[cell.terrain]))
             
     def make_random_terrain_worm(self, min_len, max_len, possible_terrains):
@@ -610,7 +621,7 @@ class mini_grid(grid):
             self.center_x = center_x
             self.center_y = center_y
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
-            for current_cell in self.cell_list:
+            for current_cell in self.get_flat_cell_list():
                 attached_x, attached_y = self.get_main_grid_coordinates(current_cell.x, current_cell.y)
                 if attached_x >= 0 and attached_y >= 0 and attached_x < self.attached_grid.coordinate_width and attached_y < self.attached_grid.coordinate_height:
                     attached_cell = self.attached_grid.find_cell(attached_x, attached_y)
@@ -659,7 +670,7 @@ class mini_grid(grid):
             int: x coordinate of this grid corresponding to the inputted x coordinate
             int: y coordinate of this grid corresponding to the inputted y coordinate
         '''
-        return(original_x - self.center_x + (round(self.coordinate_width - 1) / 2), original_y - self.center_y + round((self.coordinate_height - 1) / 2))
+        return(int(original_x - self.center_x + (round(self.coordinate_width - 1) / 2)), int(original_y - self.center_y + round((self.coordinate_height - 1) / 2)))
 
     def is_on_mini_grid(self, original_x, original_y):
         '''
@@ -760,7 +771,7 @@ class abstract_grid(grid):
         self.is_abstract_grid = True
         self.name = input_dict['name']
         self.tile_image_id = input_dict['tile_image_id']
-        self.cell_list[0].set_visibility(True)
+        self.cell_list[0][0].set_visibility(True)
 
     def to_save_dict(self):
         '''

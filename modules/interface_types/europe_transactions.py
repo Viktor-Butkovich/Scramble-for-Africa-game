@@ -166,7 +166,7 @@ class buy_commodity_button(button):
             self.cost = self.global_manager.get('commodity_prices')[self.commodity_type]
             if self.global_manager.get('money_tracker').get() >= self.cost:
                 if main_loop_utility.minister_appointed(self.global_manager.get('type_minister_dict')['trade'], self.global_manager): #requires trade minister
-                    self.global_manager.get('europe_grid').cell_list[0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
+                    self.global_manager.get('europe_grid').cell_list[0][0].tile.change_inventory(self.commodity_type, 1) #adds 1 of commodity type to
                     self.global_manager.get('money_tracker').change(-1 * self.cost, 'consumer_goods')
                     text_utility.print_to_screen('You have lost ' + str(self.cost) + ' money from buying 1 unit of consumer goods.', self.global_manager)
                     if random.randrange(1, 7) == 1: #1/6 chance

@@ -477,7 +477,7 @@ class mob(actor):
         if new_grid == self.global_manager.get('europe_grid'):
             self.modes.append('europe')
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), 'none')
-            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), new_grid.cell_list[0].tile)
+            actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), new_grid.cell_list[0][0].tile)
         else: #if mob was spawned in Europe, make it so that it does not appear in the Europe screen after leaving
             self.modes = utility.remove_from_list(self.modes, 'europe')
         self.x, self.y = new_coordinates
