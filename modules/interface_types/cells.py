@@ -769,19 +769,19 @@ class cell():
             None
         '''
         adjacent_list = []
-        if not self.x == 0:
+        if self.x != 0:
             adjacent_cell = self.grid.find_cell(self.x - 1, self.y)
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['left'] = adjacent_cell
-        if not self.x == self.grid.coordinate_width - 1:
+        if self.x != self.grid.coordinate_width - 1:
             adjacent_cell = self.grid.find_cell(self.x + 1, self.y)
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['right'] = adjacent_cell
-        if not self.y == 0:
+        if self.y != 0:
             adjacent_cell = self.grid.find_cell(self.x, self.y - 1)
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['down'] = adjacent_cell
-        if not self.y == self.grid.coordinate_height - 1:
+        if self.y != self.grid.coordinate_height - 1:
             adjacent_cell = self.grid.find_cell(self.x, self.y + 1)
             adjacent_list.append(adjacent_cell)
             self.adjacent_cells['up'] = adjacent_cell
