@@ -26,3 +26,4 @@ except Exception: #displays error message and records error message in crash log
 #change resource frequencies to be an external .json file rather than hardcoded in grid
 #modify can_show recursion to not go through each element if the controlling collection's can_show is false and stayed false
 #workers uncrewing steamship and going onto shore incorrectly only spending 1 movement point, probably checking origin cell and seeing there are no crewed ships
+#minimize button broken - configuration buttons should still be visible if minimized
