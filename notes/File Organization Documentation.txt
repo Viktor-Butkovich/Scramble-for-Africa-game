@@ -12,6 +12,7 @@ modules
     setup.py: Utility functions for game's initial setup
 notes
 save_games
+scripts
 sounds
 __init__.py
 .gitignore
