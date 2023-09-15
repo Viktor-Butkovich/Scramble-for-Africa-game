@@ -124,14 +124,13 @@ class interface_element():
         Output:
             boolean: Returns True if this button can appear during the current game mode, otherwise returns False
         '''
-        #self.global_manager.set('can_show_counter', self.global_manager.get('can_show_counter') + 1)
         if self.can_show_override == 'none':
             if (not self.has_parent_collection) or skip_parent_collection:
                 if skip_parent_collection and self.has_parent_collection and self.parent_collection.has_parent_collection:
                     #skip_parent_collection ignores the immediate parent collection to avoid recursion, but can still check grandparent collection in most cases
-                    return(self.parent_collection.parent_collection.allow_show(self, self.ignore_minimized) and self.global_manager.get('current_game_mode') in self.modes)
+                    return(self.parent_collection.parent_collection.allow_show(self) and self.global_manager.get('current_game_mode') in self.modes)
                 return(self.global_manager.get('current_game_mode') in self.modes)
-            elif self.parent_collection.allow_show(self, self.ignore_minimized):
+            elif self.parent_collection.allow_show(self):
                 return(self.global_manager.get('current_game_mode') in self.modes)
             return(False)
         else:
@@ -282,42 +281,45 @@ class interface_collection(interface_element):
         self.move_with_mouse_config = {'moving': False}
         customize_button_x_offset = 0
         customize_button_size = 20
-        if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
-            member_input_dict = {
-                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                'width': scaling.scale_width(customize_button_size, global_manager),
-                'height': scaling.scale_height(customize_button_size, global_manager),
-                'parent_collection': self,
-                'init_type': 'minimize interface collection button',
-                'image_id': 'buttons/minimize_button.png',
-                'member_config': {'order_exempt': True, 'ignore_minimized': True}
-            }
-            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
-            customize_button_x_offset += customize_button_size + 5
-        if 'allow_move' in input_dict and input_dict['allow_move']:
-            member_input_dict = {
-                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                'width': scaling.scale_width(customize_button_size, global_manager),
-                'height': scaling.scale_height(customize_button_size, global_manager),
-                'parent_collection': self,
-                'init_type': 'move interface collection button',
-                'image_id': 'buttons/reposition_button.png',
-                'member_config': {'order_exempt': True, 'ignore_minimized': True}
-            }
-            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
-            customize_button_x_offset += customize_button_size + 5
-            
-            member_input_dict = {
-                'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
-                'width': scaling.scale_width(customize_button_size, global_manager),
-                'height': scaling.scale_height(customize_button_size, global_manager),
-                'parent_collection': self,
-                'init_type': 'reset interface collection button',
-                'image_id': 'buttons/reset_button.png',
-                'member_config': {'order_exempt': True, 'ignore_minimized': True}
-            }
-            global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
-            customize_button_x_offset += customize_button_size + 5
+        if ('allow_minimize' in input_dict and input_dict['allow_minimize']) or ('allow_move' in input_dict and input_dict['allow_move']):
+            self.insert_collection_above()
+            if 'allow_minimize' in input_dict and input_dict['allow_minimize']:
+                member_input_dict = {
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'width': scaling.scale_width(customize_button_size, global_manager),
+                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'parent_collection': self.parent_collection,
+                    'attached_collection': self,
+                    'init_type': 'minimize interface collection button',
+                    'image_id': 'buttons/minimize_button.png',
+                    'member_config': {'order_exempt': True}
+                }
+                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                customize_button_x_offset += customize_button_size + 5
+            if 'allow_move' in input_dict and input_dict['allow_move']:
+                member_input_dict = {
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'width': scaling.scale_width(customize_button_size, global_manager),
+                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'parent_collection': self.parent_collection,
+                    'init_type': 'move interface collection button',
+                    'image_id': 'buttons/reposition_button.png',
+                    'member_config': {'order_exempt': True}
+                }
+                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                customize_button_x_offset += customize_button_size + 5
+                
+                member_input_dict = {
+                    'coordinates': scaling.scale_coordinates(customize_button_x_offset, 5, global_manager),
+                    'width': scaling.scale_width(customize_button_size, global_manager),
+                    'height': scaling.scale_height(customize_button_size, global_manager),
+                    'parent_collection': self.parent_collection,
+                    'init_type': 'reset interface collection button',
+                    'image_id': 'buttons/reset_button.png',
+                    'member_config': {'order_exempt': True}
+                }
+                global_manager.get('actor_creation_manager').create_interface_element(member_input_dict, global_manager)
+                customize_button_x_offset += customize_button_size + 5
 
     def create_image(self, image_id):
         '''
@@ -361,8 +363,6 @@ class interface_collection(interface_element):
             member_config['x_offset'] = 0
         if not 'y_offset' in member_config:
             member_config['y_offset'] = 0
-        if not 'ignore_minimized' in member_config:
-            member_config['ignore_minimized'] = False
         if not 'calibrate_exempt' in member_config:
             member_config['calibrate_exempt'] = False
 
@@ -376,7 +376,6 @@ class interface_collection(interface_element):
             self.members.insert(member_config['index'], new_member)
         if self.resize_with_contents and new_member.Rect != 'none':
             self.member_rects.append(new_member.Rect)
-        new_member.ignore_minimized = member_config['ignore_minimized']
         new_member.set_origin(self.x + member_config['x_offset'], self.y + member_config['y_offset'])
 
         if member_config['calibrate_exempt'] and hasattr(self, 'calibrate_exempt_list'):
@@ -398,8 +397,6 @@ class interface_collection(interface_element):
             removed_member.x_offset = None
         if hasattr(removed_member, 'y_offset'):
             removed_member.y_offset = None
-        if hasattr(removed_member, 'ignore_minimized'):
-            removed_member.ignore_minimized = None
         self.members.remove(removed_member)
 
     def set_origin(self, new_x, new_y):
@@ -429,11 +426,11 @@ class interface_collection(interface_element):
         for member in self.members:
             member.set_modes(new_modes)
 
-    def allow_show(self, member, ignore_minimized):
+    def allow_show(self, member):
         '''
         Description:
-            Returns whether this collection would allow the inputted member to be shown, given an ignore minimized value - allows collection to have control over whether 
-                members are shown without modifying either can_show logic - 
+            Returns whether this collection would allow the inputted member to be shown - allows collection to have control over whether 
+                members are shown without modifying either can_show logic
                 for example, for a tabbed collection, the collection wants control over whether a member is shown based on which tab is selected but doesn't want this logic
                 to interfere with its own can_show logic, since the overall tabbed collection should show regardless of which tab is selected
         Input:
@@ -443,10 +440,10 @@ class interface_collection(interface_element):
         '''
         return(self.showing)
 
-    def can_show(self, ignore_minimized=False, skip_parent_collection=False):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
-            Returns whether this collection can be shown. A collection can be shown if it is not minimized and could otherwise be shown
+            Returns whether this collection can be shown
         Input:
             None
         Output:
@@ -455,8 +452,6 @@ class interface_collection(interface_element):
         result = super().can_show(skip_parent_collection=skip_parent_collection)
         if self.is_info_display and self.global_manager.get('displayed_' + self.actor_type) == 'none':
             return(False)
-        elif ignore_minimized:
-            return(result)
         else:
             return(result and not self.minimized)
 
@@ -551,10 +546,10 @@ class tabbed_collection(interface_collection):
         }
         self.tabs_collection = global_manager.get('actor_creation_manager').create_interface_element(tabs_collection_input_dict, global_manager)
 
-    def allow_show(self, member, ignore_minimized):
+    def allow_show(self, member):
         '''
         Description:
-            Returns whether this collection would allow the inputted member to be shown, given an ignore minimized value - allows collection to have control over whether 
+            Returns whether this collection would allow the inputted member to be shown - allows collection to have control over whether 
                 members are shown without modifying either can_show logic - 
                 for example, for a tabbed collection, the collection wants control over whether a member is shown based on which tab is selected but doesn't want this logic
                 to interfere with its own can_show logic, since the overall tabbed collection should show regardless of which tab is selected
@@ -565,7 +560,7 @@ class tabbed_collection(interface_collection):
         '''
         if member in self.tabbed_members and member != self.current_tabbed_member:
             return(False)
-        return(super().allow_show(member, ignore_minimized))
+        return(super().allow_show(member))
 
     def add_member(self, new_member, member_config={}):
         '''

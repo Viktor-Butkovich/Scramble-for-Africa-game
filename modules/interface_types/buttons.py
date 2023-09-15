@@ -38,6 +38,8 @@ class button(interface_elements.interface_element):
         self.outline = pygame.Rect(0, 0, input_dict['width'] + (2 * self.outline_width), input_dict['height'] + (self.outline_width * 2))
         if 'attached_label' in input_dict:
             self.attached_label = input_dict['attached_label']
+        if 'attached_collection' in input_dict:
+            self.attached_collection = input_dict['attached_collection']
         super().__init__(input_dict, global_manager)
         self.has_released = True
         self.button_type = input_dict['button_type']
@@ -1268,10 +1270,10 @@ class button(interface_elements.interface_element):
             print(1/0)
 
         elif self.button_type == 'minimize interface collection':
-            self.parent_collection.minimized = utility.toggle(self.parent_collection.minimized)
-            if not self.parent_collection.minimized:
+            self.attached_collection.minimized = utility.toggle(self.attached_collection.minimized)
+            if not self.attached_collection.minimized:
                 #If any movement within the collection occurred while minimized, makes sure all newly shown elements are at their correct locations
-                self.parent_collection.set_origin(self.parent_collection.x, self.parent_collection.y)
+                self.attached_collection.set_origin(self.parent_collection.x, self.parent_collection.y)
 
         elif self.button_type == 'move interface collection':
             if self.parent_collection.move_with_mouse_config['moving']:

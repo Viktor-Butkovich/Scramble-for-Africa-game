@@ -25,7 +25,7 @@ def collection_traversal(current_element, global_manager, **kwargs):
     Input:
         interface_element current_element: Element being traversed through
         global_manager_template global_manager: Object that accesses shared variables
-        kwargs: All keyword arguments expected to be present besides posttraversal action - increases readability of function calls
+        dictionary kwargs: All keyword arguments expected to be present besides posttraversal action - increases readability of function calls
             function pretraversal_action(interface_element)=None: Called before traversing through a particular element's members
             function alternative_action(interface_element)=None: Given as pretraversal action for lower recursive calls if condition was false for a collection
             function condition(interface_element)=None: Checked before traversing through a particular element's members - determines whether that element will continue

@@ -1760,7 +1760,6 @@ def inventory_interface(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': mob_inventory_collection,
-        'member_config': {'ignore_minimized': True}
     }
     mob_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     
@@ -1788,7 +1787,6 @@ def inventory_interface(global_manager):
         'actor_type': 'tile',
         'init_type': 'actor display label',
         'parent_collection': tile_inventory_collection,
-        'member_config': {'ignore_minimized': True}
     }
     tile_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
