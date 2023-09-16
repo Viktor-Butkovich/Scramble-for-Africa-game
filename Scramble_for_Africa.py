@@ -15,16 +15,15 @@ try:
 except Exception: #displays error message and records error message in crash log file   
     manage_crash(Exception)
 
-# find some solution to reorganization interface overlap, especially with construction gang
-# fix overlapping voicelines for 0 evidence trials - court in session and not guilty playing simultaneously
-# exploration direction icons not showing correctly, probably for not being an interface element - same issue probably for attack icons
-# ^ exploration marks are currently implemented as tiles that exist in cells but are only accessed through the owning expedition - this means that they are not interface elements
-# it is useful to implement it as a tile so that it appears on both grids at once, but the current implementation as a hardcoded global exploration_mark_list is definitely
-# not ideal - maybe make a special grid free image that can exist in all versions of a tile? Should not have to edit the tile's get_image_id_list, as the exploration mark
-# list isn't a characteristic of the tile
-# continue work on cell_icons
-#change resource frequencies to be an external .json file rather than hardcoded in grid
-#modify can_show recursion to not go through each element if the controlling collection's can_show is false and stayed false
-#workers uncrewing steamship and going onto shore incorrectly only spending 1 movement point, probably checking origin cell and seeing there are no crewed ships
-#minimize button broken - configuration buttons should still be visible if minimized
-#make image for safe-click panel
+# tasks:
+# fix reorganization interface overlap, especially with construction gang
+# fix overlapping voicelines for 0 evidence trials - court is in session and not guilty playing simultaneously
+# it would be better practice to implement resource frequencies as an external .json file rather than being hardcoded in grid
+# workers uncrewing steamship are incorrectly only spending the normal movement for the tile entered, rather than using all of their movement - probably checking the origin
+#   cell and seeing there are no crewed ships, or possibly related to the new canoe/can_swim changes
+# the safe-click panel on the lhs of the screen should have an image to make it clearer where the player can click to deselect/not deselect the current unit
+# need an alternative to cell icons that are intrinsically linked to the tile and show up with it on the lhs and for exploration images, rather than acting as an
+#   independent interface element - like lore mission locations, similar to a tile but part of the image_id_list instead
+#   Maybe tiles can have an attached object list with objects that they will include in their image id lists and can be removed by the object's owner
+#   lore mission would create an attached location object for the relevant main grid tile, which would include it in its image id list - when calibrating, mini grid tiles
+#   will copy the other tile's attached images

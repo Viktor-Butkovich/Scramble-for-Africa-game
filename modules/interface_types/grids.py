@@ -540,10 +540,7 @@ class grid(interface_elements.interface_element):
         Output:
             boolean: Returns True if this grid can appear during the current game mode, otherwise returns False
         '''
-        if self.global_manager.get('current_game_mode') in self.modes:
-            return(True)
-        else:
-            return(False)
+        return(self.global_manager.get('current_game_mode') in self.modes)
 
     def can_draw(self):
         '''
@@ -613,9 +610,6 @@ class mini_grid(grid):
             None
         '''
         if self.global_manager.get('current_game_mode') in self.modes:
-            for current_exploration_mark in self.global_manager.get('exploration_mark_list'):
-                if self in current_exploration_mark.grids:
-                    current_exploration_mark.main_x, current_exploration_mark.main_y = self.get_main_grid_coordinates(current_exploration_mark.x, current_exploration_mark.y)
             self.center_x = center_x
             self.center_y = center_y
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('tile_info_display'), self.attached_grid.find_cell(self.center_x, self.center_y).tile) #calibrate tile display information to centered tile
@@ -637,10 +631,6 @@ class mini_grid(grid):
                     for current_image in current_mob.images:
                         if current_image.grid == self:
                             current_image.add_to_cell()
-        if self.global_manager.get('current_game_mode') in self.modes:
-            for current_exploration_mark in self.global_manager.get('exploration_mark_list'):
-                if self in current_exploration_mark.grids:
-                    current_exploration_mark.x, current_exploration_mark.y = self.get_mini_grid_coordinates(current_exploration_mark.main_x, current_exploration_mark.main_y)
 
     def get_main_grid_coordinates(self, mini_x, mini_y):
         '''

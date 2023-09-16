@@ -162,7 +162,6 @@ def misc(global_manager):
     global_manager.set('attacker_queue', [])
     global_manager.set('enemy_turn_queue', [])
     global_manager.set('player_turn_queue', [])
-    global_manager.set('exploration_mark_list', [])
     global_manager.set('interface_collection_list', [])
     global_manager.set('independent_interface_elements', [])
     global_manager.set('dice_list', [])

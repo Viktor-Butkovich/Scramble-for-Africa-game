@@ -235,7 +235,6 @@ def find_closest_available_worker(destination, global_manager):
             max_workers = current_workers
         elif max_workers == current_workers:
             max_workers_sources.append(possible_source)
-            
     return(random.choice(max_workers_sources)) #randomly choose from ['none'] or the list of tied closest sources w/ most workers
 
 def stop_exploration(global_manager):
@@ -247,16 +246,9 @@ def stop_exploration(global_manager):
     Output:
         None
     '''
-    for current_exploration_mark in global_manager.get('exploration_mark_list'):
-        current_exploration_mark.remove_complete()
-    global_manager.set('exploration_mark_list', [])
-    for current_mob in global_manager.get('mob_list'):
-        if current_mob.can_explore:
-            current_mob.exploration_mark_list = []
-    exploration_mark_list = []
+    global_manager.get('displayed_mob').clear_attached_cell_icons()
     global_manager.set('ongoing_action', False)
     global_manager.set('ongoing_action_type', 'none')
-
 def create_image_dict(stem):
     '''
     Description:

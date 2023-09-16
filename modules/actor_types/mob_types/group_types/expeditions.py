@@ -36,7 +36,6 @@ class expedition(group):
             None
         '''
         super().__init__(from_save, input_dict, global_manager)
-        self.exploration_mark_list = []
         self.exploration_cost = self.global_manager.get('action_prices')['exploration']
         self.can_explore = True
         self.set_has_canoes(True)
@@ -110,20 +109,7 @@ class expedition(group):
                         choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_action', True)
                     self.global_manager.set('ongoing_action_type', 'exploration')
-                    for current_grid in self.grids:
-                        coordinates = (0, 0)
-                        if current_grid.is_mini_grid:
-                            coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-                        else:
-                            coordinates = (self.x + x_change, self.y + y_change)
-                        input_dict = {}
-                        input_dict['coordinates'] = coordinates
-                        input_dict['grid'] = current_grid
-                        input_dict['image'] = 'misc/exploration_x/' + direction + '_x.png'
-                        input_dict['name'] = 'exploration mark'
-                        input_dict['modes'] = ['strategic']
-                        input_dict['show_terrain'] = False
-                        self.global_manager.get('exploration_mark_list').append(tile(False, input_dict, self.global_manager))
+                    self.create_cell_icon(self.x + x_change, self.y + y_change, 'misc/exploration_x/' + direction + '_x.png')
             else:
                 text_utility.print_to_screen('You do not have enough money to attempt an exploration.', self.global_manager)
         else: #if moving to explored area, move normally
@@ -287,11 +273,11 @@ class expedition(group):
                 notification_utility.display_notification('This unit\'s ' + str(self.movement_points) + ' remaining movement points are not enough to move into the newly explored tile. /n /n', 'default', self.global_manager)
                 self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         self.set_movement_points(0)
+        actor_utility.stop_exploration(self.global_manager)
         if self.just_promoted:
             self.promote()
         elif roll_result <= self.current_max_crit_fail:
             self.die()
-        actor_utility.stop_exploration(self.global_manager) #make function that sets ongoing exploration to false and destroys exploration marks
 
     def resolve_off_tile_exploration(self):
         '''

@@ -968,7 +968,7 @@ class button(interface_elements.interface_element):
             self.expedition.start_exploration(self.x_change, self.y_change)
 
         elif self.button_type == 'attack':
-            self.battalion.remove_attack_marks()
+            self.battalion.clear_attached_cell_icons()
             self.battalion.move(self.x_change, self.y_change, True)
 
         elif self.button_type == 'drop commodity' or self.button_type == 'drop all commodity':
@@ -1214,7 +1214,7 @@ class button(interface_elements.interface_element):
             self.global_manager.set('ongoing_action', False)
             self.global_manager.set('ongoing_action_type', 'none')
             if self.button_type == 'stop attack':
-                self.notification.choice_info_dict['battalion'].remove_attack_marks()
+                self.notification.choice_info_dict['battalion'].clear_attached_cell_icons()
             elif self.button_type in ['stop loan search', 'decline loan offer']:
                 for current_minister_image in self.global_manager.get('dice_roll_minister_images'):
                     current_minister_image.remove_complete()

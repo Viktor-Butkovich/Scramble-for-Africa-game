@@ -41,7 +41,6 @@ class battalion(group):
         else:
             self.battalion_type = 'colonial'
         self.attack_cost = self.global_manager.get('action_prices')['attack']
-        self.attack_mark_list = []
         self.set_group_type('battalion')
         if not from_save:
             actor_utility.calibrate_actor_info_display(self.global_manager, self.global_manager.get('mob_info_display'), self) #updates label to show new combat strength
@@ -158,20 +157,7 @@ class battalion(group):
                             ['attack', 'stop attack'], choice_info_dict, self.global_manager) #message, choices, choice_info_dict, global_manager
                     self.global_manager.set('ongoing_action', True)
                     self.global_manager.set('ongoing_action_type', 'combat')
-                    for current_grid in self.grids:
-                        coordinates = (0, 0)
-                        if current_grid.is_mini_grid:
-                            coordinates = current_grid.get_mini_grid_coordinates(self.x + x_change, self.y + y_change)
-                        else:
-                            coordinates = (self.x + x_change, self.y + y_change)
-                        input_dict = {}
-                        input_dict['coordinates'] = coordinates
-                        input_dict['grid'] = current_grid
-                        input_dict['image'] = 'misc/attack_mark/' + direction + '.png'
-                        input_dict['name'] = 'exploration mark'
-                        input_dict['modes'] = ['strategic']
-                        input_dict['show_terrain'] = False
-                        self.attack_mark_list.append(tile(False, input_dict, self.global_manager))
+                    self.create_cell_icon(self.x + x_change, self.y + y_change, 'misc/attack_mark/' + direction + '.png')
             else:
                 if defender.npmob_type == 'beast':
                     text_utility.print_to_screen('You do not have enough money to supply a hunt.', self.global_manager)
@@ -207,19 +193,6 @@ class battalion(group):
         if not defender == 'none':
             self.global_manager.get('money_tracker').change(self.attack_cost * -1, 'attack')
             self.start_combat('attacking', defender)
-
-    def remove_attack_marks(self):
-        '''
-        Description:
-            Removes all of the attack marks used to show the direction of a proposed attack during its confirmation
-        Input:
-            None
-        Output:
-            None
-        '''
-        for attack_mark in self.attack_mark_list:
-            attack_mark.remove_complete()
-        self.attack_mark_list = []
 
     def start_capture_slaves(self):
         '''

@@ -42,7 +42,6 @@ class pmob(mob):
         self.selection_outline_color = 'bright green'
         global_manager.get('pmob_list').append(self)
         self.is_pmob = True
-
         self.set_controlling_minister_type('none')
         if from_save:
             if not input_dict['end_turn_destination'] == 'none': #end turn destination is a tile and can't be pickled, need to find it again after loading
@@ -77,6 +76,7 @@ class pmob(mob):
         self.default_max_crit_fail = 1
         self.default_min_crit_success = 6
         self.attached_dice_list = []
+        self.attached_cell_icon_list = []
 
     def to_save_dict(self):
         '''
@@ -112,6 +112,39 @@ class pmob(mob):
         save_dict['in_progress_automatic_route'] = self.in_progress_automatic_route
         save_dict['automatically_replace'] = self.automatically_replace
         return(save_dict)
+
+    def clear_attached_cell_icons(self):
+        '''
+        Description:
+            Removes all of this unit's cell icons
+        Input:
+            None
+        Output:
+            None
+        '''
+        for current_cell_icon in self.attached_cell_icon_list:
+            current_cell_icon.remove_complete()
+        self.attached_cell_icon_list = []
+
+    def create_cell_icon(self, x, y, image_id):
+        '''
+        Description:
+            Creates a cell icon managed by this mob with the inputted image at the inputted coordinates
+        Input:
+            int x: cell icon's x coordinate on main grid
+            int y: cell icon's y coordinate on main grid
+            string image_id: cell icon's image_id
+            string init_type='cell icon': init type of actor to create
+            dictionary extra_parameters=None: dictionary of any extra parameters to pass to the created actor
+        '''
+        input_dict = {}
+        input_dict['coordinates'] = (x, y)
+        input_dict['grids'] = self.grids
+        input_dict['image'] = image_id
+        input_dict['modes'] = ['strategic']
+        input_dict['init_type'] = 'cell icon'
+        from_save = False
+        self.attached_cell_icon_list.append(self.global_manager.get('actor_creation_manager').create(from_save, input_dict, self.global_manager))
 
     def add_to_automatic_route(self, new_coordinates):
         '''

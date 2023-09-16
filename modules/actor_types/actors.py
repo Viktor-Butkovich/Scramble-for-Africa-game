@@ -24,14 +24,12 @@ class actor():
         '''
         self.global_manager = global_manager
         self.from_save = from_save
-        if 'init_type' in input_dict:
-            self.init_type = input_dict['init_type']
         global_manager.get('actor_list').append(self)
         self.modes = input_dict['modes']
         if self.from_save:
             self.grid = self.global_manager.get(input_dict['grid_type'])
             self.grids = [self.grid]
-            if not self.grid.mini_grid == 'none':
+            if self.grid.mini_grid != 'none':
                 self.grids.append(self.grid.mini_grid)
             self.set_name(input_dict['name'])
         else:
