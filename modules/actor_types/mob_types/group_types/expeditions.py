@@ -486,13 +486,12 @@ class expedition(group):
                 coordinates = (location.x, location.y)
                 self.destination_cells = [self.global_manager.get('strategic_map_grid').find_cell(coordinates[0], coordinates[1])]
                 self.public_opinion_increases = [0]
-                location.revealed = True
+                location.set_revealed(True)
                 village.found_rumors = True
 
                 text = 'The villagers tell rumors that the ' + self.global_manager.get('current_lore_mission').name + ' may be located at (' + str(coordinates[0]) + ', ' + str(coordinates[1]) + '). /n /n'
                 self.global_manager.set('ongoing_action', True)
                 self.global_manager.set('ongoing_action_type', 'rumor_search')
-                self.destination_cells[0].tile.update_image_bundle()
                 notification_utility.display_notification(text, 'off_tile_exploration', self.global_manager)
 
             if roll_result >= self.current_min_crit_success and not self.veteran:

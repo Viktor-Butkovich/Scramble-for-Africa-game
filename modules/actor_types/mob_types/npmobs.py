@@ -122,7 +122,7 @@ class npmob(mob): #if enemy.turn_done
             current_cell = self.grids[0].find_cell(self.x, self.y)
         else:
             current_cell = self.images[0].current_cell
-            
+        self.global_manager.get('minimap_grid').calibrate(self.x, self.y)
         for current_mob in current_cell.contained_mobs:
             if current_mob.is_vehicle:
                 current_mob.eject_passengers()

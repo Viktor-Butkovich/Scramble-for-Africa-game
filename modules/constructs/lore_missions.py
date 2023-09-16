@@ -135,7 +135,7 @@ class lore_mission():
         self.global_manager.set('current_lore_mission', 'none')
         self.global_manager.set('lore_mission_list', utility.remove_from_list(self.global_manager.get('lore_mission_list'), self))
         for current_possible_artifact_location in self.possible_artifact_locations:
-            self.global_manager.get('strategic_map_grid').find_cell(current_possible_artifact_location.x, current_possible_artifact_location.y).tile.update_image_bundle()
+            current_possible_artifact_location.remove_complete()
         self.possible_artifact_locations = []
 
     def get_num_revealed_possible_artifact_locations(self):
@@ -222,12 +222,27 @@ class possible_artifact_location():
         self.lore_mission = input_dict['lore_mission']
         self.lore_mission.possible_artifact_locations.append(self)
         self.x, self.y = input_dict['coordinates']
-        self.revealed = input_dict['revealed']
-        self.proven_false = input_dict['proven_false']
-        self.grids = [self.global_manager.get('strategic_map_grid'), self.global_manager.get('minimap_grid')]
-        self.modes = ['strategic'] 
         self.image_dict = {'default': ['misc/possible_artifact_location_icon.png']}
+        self.set_revealed(input_dict['revealed'])
         self.set_proven_false(input_dict['proven_false'])
+
+    def set_revealed(self, new_revealed):
+        '''
+        Description:
+            Sets this location's revealed value and updates images as needed
+        Input:
+            boolean new_proven_false: New proven_false value
+        Output:
+            None
+        '''
+        if (not hasattr(self, 'revealed')) or new_revealed != self.revealed:
+            self.revealed = new_revealed
+            host_tile = self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile
+            if self.revealed:
+                host_tile.hosted_images.append(self)
+            else:
+                host_tile.hosted_images = utility.remove_from_list(host_tile.hosted_images, self)
+            host_tile.update_image_bundle()
 
     def set_proven_false(self, new_proven_false):
         '''
@@ -239,7 +254,20 @@ class possible_artifact_location():
             None
         '''
         self.proven_false = new_proven_false
-        self.global_manager.get('strategic_map_grid').find_cell(self.x, self.y).tile.update_image_bundle()
+        if self.proven_false:
+            self.set_revealed(False)
+
+    def remove_complete(self):
+        '''
+        Description:
+            Removes this object and deallocates its memory - defined for any removable object w/o a superclass
+        Input:
+            None
+        Output:
+            None
+        '''
+        self.set_revealed(False)
+        del self
 
     def get_image_id_list(self, override_values={}):
         '''

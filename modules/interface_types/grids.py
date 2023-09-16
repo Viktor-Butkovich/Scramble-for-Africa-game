@@ -625,9 +625,8 @@ class mini_grid(grid):
                     current_cell.set_resource('none', update_image_bundle=False)
                     current_cell.reset_buildings()
                     current_cell.tile.update_image_bundle()
-            #self.Rect = pygame.Rect(self.origin_x, self.origin_y - self.height, self.width, self.height)
             for current_mob in self.global_manager.get('mob_list'):
-                if not (current_mob.images[0].current_cell == 'none'):
+                if current_mob.images[0].current_cell != 'none':
                     for current_image in current_mob.images:
                         if current_image.grid == self:
                             current_image.add_to_cell()

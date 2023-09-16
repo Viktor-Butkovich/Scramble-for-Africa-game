@@ -278,7 +278,7 @@ class mob(actor):
             boolean: Returns True if this image can appear during the current game mode, otherwise returns False
         '''
         if not (self.in_vehicle or self.in_group or self.in_building):
-            if (not self.images[0].current_cell == 'none') and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
+            if self.images[0].current_cell != 'none' and self.images[0].current_cell.contained_mobs[0] == self and self.global_manager.get('current_game_mode') in self.modes:
                 if self.images[0].current_cell.visible:
                     return(True)
         return(False)
@@ -766,7 +766,7 @@ class mob(actor):
 
         if self.is_pmob: #do an inventory attrition check when moving, using the destination's terrain
             self.manage_inventory_attrition()
-            if previous_cell.terrain == 'water' and previous_cell.has_vehicle('ship') and not self.is_vehicle: #if disembarking from ship, use all of movement points
+            if previous_cell.terrain == 'water' and ((previous_cell.y > 0 and not self.can_swim_river) or (previous_cell.y == 0 and not self.can_swim_ocean)): #if landing without port, use all of movement points
                 if previous_cell.y == 0 and not (self.can_swim and self.can_swim_ocean): #if came from ship in ocean
                     self.set_movement_points(0)
                 elif previous_cell.y > 0 and not (self.can_swim and self.can_swim_river): #if came from boat in river

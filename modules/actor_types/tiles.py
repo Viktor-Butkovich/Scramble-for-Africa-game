@@ -38,6 +38,7 @@ class tile(actor): #to do: make terrain tiles a subclass
         self.images = [self.image] #tiles only appear on 1 grid, but have a list of images defined to be more consistent with other actor subclasses
         self.show_terrain = input_dict['show_terrain']
         self.cell = self.grid.find_cell(self.x, self.y)
+        self.hosted_images = []
         if self.show_terrain:
             self.cell.tile = self
             self.image_dict['hidden'] = 'scenery/paper_hidden.png'
@@ -230,9 +231,8 @@ class tile(actor): #to do: make terrain tiles a subclass
                 image_id_list.append(self.image_dict['hidden'])
             else:
                 image_id_list.append(self.image_dict['default'])
-            if self.global_manager.get('current_lore_mission') != 'none':
-                if self.global_manager.get('current_lore_mission').has_revealed_possible_artifact_location(self.cell.x, self.cell.y) and self.cell.grid == self.global_manager.get('strategic_map_grid'):
-                    image_id_list += self.global_manager.get('current_lore_mission').get_possible_artifact_location(self.cell.x, self.cell.y).get_image_id_list()
+            for current_image in self.hosted_images:
+                image_id_list += current_image.get_image_id_list()
         return(image_id_list)
 
     def update_image_bundle(self, override_image=None):
