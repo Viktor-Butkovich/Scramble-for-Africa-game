@@ -15,5 +15,5 @@ def read_csv(file_path):
     
     for current_line in csv_reader:
         line_list.append(current_line)
-    
+    file.close()
     return(line_list)

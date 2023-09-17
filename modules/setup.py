@@ -2093,10 +2093,12 @@ def debug_tools(global_manager):
     # Iterating through the json list
     for current_effect in debug_config['effects']:
         effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
+    file.close()
 
     try: #for testing/development, use active effects of local version of config file that is not uploaded to GitHub
         file = open('configuration/dev_config.json')
         active_effects_config = json.load(file)
+        file.close()
     except:
         active_effects_config = debug_config
     for current_effect in active_effects_config['active_effects']:

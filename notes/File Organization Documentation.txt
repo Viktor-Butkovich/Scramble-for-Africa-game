@@ -13,6 +13,7 @@ modules
 notes
 save_games
 scripts
+SFA_exe
 sounds
 __init__.py
 .gitignore

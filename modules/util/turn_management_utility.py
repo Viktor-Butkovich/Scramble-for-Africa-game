@@ -637,6 +637,14 @@ def manage_ministers(global_manager):
     manage_minister_rumors(global_manager)
 
 def manage_minister_rumors(global_manager):
+    '''
+    Description:
+        Passively checks for rumors on each minister each turn
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+    Output:
+        None
+    '''
     for current_minister in global_manager.get('minister_list'):
         if random.randrange(1, 7) == 1 and random.randrange(1, 7) == 1:
             current_minister.attempt_rumor('loyalty', 'none')

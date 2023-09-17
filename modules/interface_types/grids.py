@@ -3,6 +3,7 @@
 import random
 import pygame
 import itertools
+import json
 from . import cells, interface_elements
 from ..util import actor_utility, utility
 
@@ -322,98 +323,28 @@ class grid(interface_elements.interface_element):
         '''
         return(cells.cell(x, y, self.get_cell_width(), self.get_cell_height(), self, self.global_manager.get('color_dict')['bright green'], save_dict, self.global_manager))
 
-    def make_resource_list(self, terrain): #should be changed to return dictionary with frequencies of each resource and a list of each resource present, avoiding unnecessary 100+ item lists
+    def create_resource_list_dict(self):
         '''
         Description:
-            Creates and returns a weighted list of the possible resources, villages, or lack thereof that could spawn in the inputted terrain
+            Creates and returns dictionary containing entries for each terrain type with the frequency of each resource type in that terrain
         Input:
-            string terrain: Type of terrain for which to make a resource list, like 'swamp'
+            None
         Output:
-            string list: Weighted list of the possible resources, villages, or lack thereof that could spawn in the inputted terrain
+            dictionary: Returns a dictionary in the format
+                {'clear': [('none', 140), ('diamond', 142)]}
+                for resource_frequencies.json {'clear': {'none': 140, 'diamond': 2}}
         '''
-        resource_list = []
-        if terrain == 'clear':
-            for i in range(135):
-                resource_list.append('none')
-            for i in range(5):
-                resource_list.append('ivory')
-            for i in range(20):
-                resource_list.append('natives')
-                
-        elif terrain == 'mountain':
-            for i in range(135):
-                resource_list.append('none')
-            resource_list.append('diamond')
-            for i in range(2):
-                resource_list.append('gold')
-            for i in range(4):
-                resource_list.append('coffee')
-            for i in range(4):
-                resource_list.append('copper')
-            for i in range(4):
-                resource_list.append('iron')
-            for i in range(10):
-                resource_list.append('natives')
-                
-        elif terrain == 'hills':
-            for i in range(135):
-                resource_list.append('none')
-            resource_list.append('diamond')
-            for i in range(2):
-                resource_list.append('gold')
-            for i in range(4):
-                resource_list.append('coffee')
-            for i in range(4):
-                resource_list.append('copper')
-            for i in range(4):
-                resource_list.append('iron')
-            for i in range(10):
-                resource_list.append('natives')
-        elif terrain == 'jungle':
-            for i in range(125):
-                resource_list.append('none')
-            resource_list.append('diamond')
-            for i in range(6):
-                resource_list.append('rubber')
-            resource_list.append('coffee')
-            for i in range(6):
-                resource_list.append('exotic wood')
-            for i in range(6):
-                resource_list.append('fruit')
-            for i in range(15):
-                resource_list.append('natives')
-        elif terrain == 'swamp':
-            for i in range(130):
-                resource_list.append('none')
-            for i in range(4):
-                resource_list.append('ivory')
-            for i in range(4):
-                resource_list.append('rubber')
-            resource_list.append('coffee')
-            for i in range(4):
-                resource_list.append('exotic wood')
-            for i in range(2):
-                resource_list.append('fruit')
-            for i in range(15):
-                resource_list.append('natives')
-        elif terrain == 'desert':
-            for i in range(140):
-                resource_list.append('none')
-            for i in range(2):
-                resource_list.append('diamond')
-            resource_list.append('gold')
-            resource_list.append('ivory')
-            for i in range(2):
-                resource_list.append('fruit')
-            for i in range(2):
-                resource_list.append('copper')
-            for i in range(2):
-                resource_list.append('iron')
-            for i in range(10):
-                resource_list.append('natives')
-        else:
-            resource_list.append('none')
-        return(resource_list)
+        file = open('configuration/resource_frequencies.json')
+        resource_frequencies = json.load(file)
+        resource_list_dict = {}
+        for current_terrain in resource_frequencies:
+            resource_list_dict[current_terrain] = []
+            total_frequency = 0
+            for current_resource in resource_frequencies[current_terrain]:
+                total_frequency += resource_frequencies[current_terrain][current_resource]
+                resource_list_dict[current_terrain].append((current_resource, total_frequency))
+        file.close()
+        return(resource_list_dict)
 
     def set_resources(self):
         '''
@@ -428,12 +359,14 @@ class grid(interface_elements.interface_element):
             for cell in self.get_flat_cell_list():
                 cell.set_resource(cell.save_dict['resource'])
         else:
-            resource_list_dict = {}
-            for terrain in self.global_manager.get('terrain_list'):
-                resource_list_dict[terrain] = self.make_resource_list(terrain)
-            resource_list_dict['water'] = self.make_resource_list('water')
+            resource_list_dict = self.create_resource_list_dict()
             for cell in self.get_flat_cell_list():
-                cell.set_resource(random.choice(resource_list_dict[cell.terrain]))
+                terrain_number = random.randrange(resource_list_dict[cell.terrain][-1][1]) #number between 0 and terrain's max frequency
+                set_resource = False
+                for current_resource in resource_list_dict[cell.terrain]: #if random number falls in resource's frequency range for that terrain, set cell to that resource
+                    if (not set_resource) and terrain_number < current_resource[1]:
+                        cell.set_resource(current_resource[0])
+                        break
             
     def make_random_terrain_worm(self, min_len, max_len, possible_terrains):
         '''

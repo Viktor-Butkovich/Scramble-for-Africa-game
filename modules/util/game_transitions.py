@@ -143,7 +143,8 @@ def create_strategic_map(global_manager, from_save=False):
                     cell.set_visibility(True)
                 input_dict['coordinates'] = (cell.x, cell.y)
                 tiles.tile(False, input_dict, global_manager)
-            current_grid.set_resources()
+            if current_grid == global_manager.get('strategic_map_grid'):
+                current_grid.set_resources()
 
 def start_loading(global_manager):
     '''

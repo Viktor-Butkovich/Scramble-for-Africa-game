@@ -18,5 +18,4 @@ except Exception: #displays error message and records error message in crash log
 # tasks:
 # fix reorganization interface overlap, especially with construction gang
 # fix overlapping voicelines for 0 evidence trials - court is in session and not guilty playing simultaneously
-# it would be better practice to implement resource frequencies as an external .json file rather than being hardcoded in grid
 # the safe-click panel on the lhs of the screen should have an image to make it clearer where the player can click to deselect/not deselect the current unit

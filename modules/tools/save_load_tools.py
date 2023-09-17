@@ -193,6 +193,7 @@ class save_load_manager_template():
 
         for i in range(1, random.randrange(5, 8)):
             turn_management_utility.manage_villages(self.global_manager)
+            turn_management_utility.manage_warriors(self.global_manager)
             actor_utility.spawn_beast(self.global_manager)
         
         minister_utility.update_available_minister_display(self.global_manager)
@@ -264,6 +265,7 @@ class save_load_manager_template():
             pickle.dump(saved_actor_dicts, handle)
             pickle.dump(saved_minister_dicts, handle)
             pickle.dump(saved_lore_mission_dicts, handle)
+            handle.close()
         text_utility.print_to_screen('Game successfully saved to ' + file_path, self.global_manager)
 
     def load_game(self, file_path):
@@ -289,6 +291,7 @@ class save_load_manager_template():
                 saved_actor_dicts = pickle.load(handle)
                 saved_minister_dicts = pickle.load(handle)
                 saved_lore_mission_dicts = pickle.load(handle)
+                handle.close()
         except:
             text_utility.print_to_screen('The ' + file_path + ' file does not exist.', self.global_manager)
             return()
