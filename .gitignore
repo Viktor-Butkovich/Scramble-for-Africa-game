@@ -1,5 +1,6 @@
 *.pickle
-notes/Crash Log.txt
-*.pyc
-configuration/dev_config.json
 *.pptx
+*.pyc
+notes/Crash Log.txt
+configuration/dev_config.json
+SFA_exe

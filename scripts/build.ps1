@@ -1,6 +1,9 @@
 # Creates a folder containing an executable version of the program with all unnecessary files removed
 # Run with powershell.exe -noprofile -executionpolicy Bypass -file .\scripts/build.ps1
 
+if (Test-Path SFA_exe) {
+    rm SFA_exe -force -Recurse
+}
 mkdir SFA_exe
 Copy-Item -Path $PWD\*  -Destination "SFA_exe" -Recurse -Exclude @("*SFA_exe", ".git", "__pycache__", ".gitignore", "__init__.py", "Instructions.docx", "README.txt", "scripts")
 cd SFA_exe
