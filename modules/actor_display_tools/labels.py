@@ -2,10 +2,9 @@
 
 import pygame
 
-from ..labels import label
-from ..images import minister_type_image
-from .. import utility
-from .. import scaling
+from ..interface_types.labels import label
+from ..constructs.images import minister_type_image
+from ..util import utility, scaling
 from . import images
 
 class actor_display_label(label):
@@ -33,7 +32,7 @@ class actor_display_label(label):
             None
         '''
         self.attached_buttons = []
-        self.attached_images = []
+        self.has_label_collection = False
         self.actor = 'none'
         self.actor_label_type = input_dict['actor_label_type'] #name, terrain, resource, etc
         self.actor_type = input_dict['actor_type'] #mob or tile, none if does not scale with shown labels, like tooltip labels
@@ -44,10 +43,7 @@ class actor_display_label(label):
         s_increment = scaling.scale_width(6, self.global_manager)
         m_increment = scaling.scale_width(11, self.global_manager)
         l_increment = scaling.scale_width(30, self.global_manager)
-        
-        #if (not 'trial' in self.modes) and (not self.actor_label_type in ['tooltip', 'commodity', 'mob inventory capacity', 'tile inventory capacity']):
-        #    #certain types of labels, like inventory capacity or trial labels, are not ordered on the side of the screen and stay at set positions
-        #    self.global_manager.get(self.actor_type + '_ordered_label_list').append(self) #like mob_ordered_label_list
+
         s_size = self.height + s_increment
         m_size = self.height + m_increment
         l_size = self.height + l_increment
@@ -60,197 +56,175 @@ class actor_display_label(label):
         }
         if self.actor_label_type == 'name':
             self.message_start = 'Name: '
-            input_dict['init_type'] = 'merge button'
-            input_dict['image_id'] = 'buttons/merge_button.png'
-            input_dict['keybind_id'] = pygame.K_m
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['init_type'] = 'split button'
-            input_dict['image_id'] = 'buttons/split_button.png'
-            input_dict['keybind_id'] = pygame.K_n
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
             input_dict['init_type'] = 'labor broker button'
             input_dict['image_id'] = 'buttons/labor_broker_button.png'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'embark vehicle button'
             input_dict['image_id'] = 'buttons/embark_ship_button.png'
             input_dict['keybind_id'] = pygame.K_b
             input_dict['vehicle_type'] = 'ship'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'embark vehicle button'
             input_dict['image_id'] = 'buttons/embark_train_button.png'
             input_dict['keybind_id'] = pygame.K_b
             input_dict['vehicle_type'] = 'train'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['init_type'] = 'worker crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_m
-            input_dict['vehicle_type'] = 'ship'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['init_type'] = 'worker crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_train_button.png'
-            input_dict['keybind_id'] = pygame.K_m
-            input_dict['vehicle_type'] = 'train'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'work crew to building button'
             input_dict['image_id'] = 'buttons/work_crew_to_building_button.png'
             input_dict['keybind_id'] = pygame.K_g
             input_dict['building_type'] = 'resource'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'switch theatre button'
             input_dict['image_id'] = 'buttons/switch_theatre_button.png'
             input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (m_size, m_size)
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             del input_dict['image_id']
             input_dict['init_type'] = 'construction button'
             input_dict['building_type'] = 'resource'
             input_dict['keybind_id'] = pygame.K_g
             input_dict['width'], input_dict['height'] = (s_size, s_size)
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'port'
             input_dict['keybind_id'] = pygame.K_p
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'infrastructure'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'train_station'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'trading_post'
             input_dict['keybind_id'] = pygame.K_y
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'mission'
             input_dict['keybind_id'] = pygame.K_y
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'fort'
             input_dict['keybind_id'] = pygame.K_v
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
             input_dict['init_type'] = 'repair button'
             input_dict['building_type'] = 'resource'
             input_dict['keybind_id'] = pygame.K_g
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'port'
             input_dict['keybind_id'] = pygame.K_p
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'train_station'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['building_type'] = 'trading_post'
             input_dict['keybind_id'] = pygame.K_y
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
             input_dict['building_type'] = 'mission'
             input_dict['keybind_id'] = pygame.K_y
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
             input_dict['building_type'] = 'fort'
             input_dict['keybind_id'] = pygame.K_v
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             del input_dict['building_type']
             del input_dict['keybind_id']
             
             input_dict['init_type'] = 'upgrade button'
             input_dict['base_building_type'] = 'resource'
             input_dict['upgrade_type'] = 'scale'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['upgrade_type'] = 'efficiency'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['base_building_type'] = 'warehouses'
             input_dict['upgrade_type'] = 'warehouse_level'
             input_dict['keybind_id'] = pygame.K_k
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             del input_dict['base_building_type']
             del input_dict['upgrade_type']
             
             input_dict['init_type'] = 'build train button'
-            input_dict['image_id'] = 'mobs/train/button.png'
+            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/train/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
             input_dict['keybind_id'] = pygame.K_y
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'build steamboat button'
-            input_dict['image_id'] = 'mobs/steamboat/button.png'
+            input_dict['image_id'] = ['mobs/default/button.png', {'image_id': 'mobs/steamboat/default.png', 'size': 0.95, 'x_offset': 0, 'y_offset': 0, 'level': 1}]
             input_dict['keybind_id'] = pygame.K_u
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'trade button'
             input_dict['image_id'] = 'buttons/trade_button.png'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'convert button'
             input_dict['image_id'] = 'buttons/convert_button.png'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'rumor search button'
             input_dict['image_id'] = 'buttons/rumor_search_button.png'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'artifact search button'
             input_dict['image_id'] = 'buttons/artifact_search_button.png'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'evangelist campaign button'
             input_dict['image_id'] = 'buttons/public_relations_campaign_button.png'
             input_dict['campaign_type'] = 'public relations campaign'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'evangelist campaign button'
             input_dict['image_id'] = 'buttons/religious_campaign_button.png'
             input_dict['campaign_type'] = 'religious campaign'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'advertising campaign button'
             input_dict['image_id'] = 'ministers/icons/trade.png'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'take loan button'
             input_dict['image_id'] = 'buttons/take_loan_button.png'
             input_dict['keybind_id'] = pygame.K_l
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'track beasts button'
             input_dict['image_id'] = 'buttons/track_beasts_button.png'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'capture slaves button'
             input_dict['image_id'] = 'buttons/capture_slaves_button.png'
             input_dict['keybind_id'] = pygame.K_t
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'suppress slave trade button'
             input_dict['image_id'] = 'buttons/suppress_slave_trade_button.png'
             input_dict['keybind_id'] = pygame.K_r
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
         elif self.actor_label_type == 'movement':
             self.message_start = 'Movement points: '
@@ -258,100 +232,89 @@ class actor_display_label(label):
             input_dict['init_type'] = 'enable automatic replacement button'
             input_dict['target_type'] = 'unit'
             input_dict['image_id'] = 'buttons/enable_automatic_replacement_officer_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
             input_dict['init_type'] = 'disable automatic replacement button'
             input_dict['image_id'] = 'buttons/disable_automatic_replacement_officer_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'enable automatic replacement button'
             input_dict['image_id'] = 'buttons/enable_automatic_replacement_worker_button.png'
             input_dict['target_type'] = 'worker'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'disable automatic replacement button'
             input_dict['image_id'] = 'buttons/disable_automatic_replacement_worker_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'enable automatic replacement button'
             input_dict['image_id'] = 'buttons/enable_automatic_replacement_officer_button.png'
             input_dict['target_type'] = 'officer'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'disable automatic replacement button'
             input_dict['image_id'] = 'buttons/disable_automatic_replacement_officer_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
             del input_dict['target_type']
             
             input_dict['init_type'] = 'enable sentry mode button'
             input_dict['image_id'] = 'buttons/enable_sentry_mode_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'disable sentry mode button'
             input_dict['image_id'] = 'buttons/disable_sentry_mode_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'end unit turn button'
             input_dict['image_id'] = 'buttons/end_unit_turn_button.png'
             input_dict['keybind_id'] = pygame.K_f
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             del input_dict['keybind_id']
 
             input_dict['init_type'] = 'automatic route button'
             input_dict['image_id'] = 'buttons/clear_automatic_route_button.png'
             input_dict['button_type'] = 'clear automatic route'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['image_id'] = 'buttons/draw_automatic_route_button.png'
             input_dict['button_type'] = 'draw automatic route'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['image_id'] = 'buttons/follow_automatic_route_button.png'
             input_dict['button_type'] = 'follow automatic route'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
         elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
             input_dict['init_type'] = 'cycle work crews button'
             input_dict['image_id'] = 'buttons/cycle_passengers_down_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
-        elif self.actor_label_type == 'building work crew':
+        elif self.actor_label_type == 'current building work crew':
             self.message_start = ''
             self.attached_building = 'none'
             input_dict['init_type'] = 'remove work crew button'
             input_dict['image_id'] = 'buttons/remove_work_crew_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-        elif self.actor_label_type == 'crew':
-            self.message_start = 'Crew: '
-            input_dict['init_type'] = 'crew vehicle button'
-            input_dict['image_id'] = 'buttons/crew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_m
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
-            input_dict['init_type'] = 'uncrew vehicle button'
-            input_dict['image_id'] = 'buttons/uncrew_ship_button.png'
-            input_dict['keybind_id'] = pygame.K_n
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            input_dict['building_type'] = 'resource'
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'passengers':
             self.message_start = 'Passengers: '
             input_dict['init_type'] = 'cycle passengers button'
             input_dict['image_id'] = 'buttons/cycle_passengers_down_button.png'
             input_dict['keybind_id'] = pygame.K_4
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'embark all passengers button'
             input_dict['image_id'] = 'buttons/embark_ship_button.png'
             input_dict['keybind_id'] = pygame.K_z
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
             input_dict['init_type'] = 'disembark all passengers button'
             input_dict['image_id'] = 'buttons/disembark_ship_button.png'
             input_dict['keybind_id'] = pygame.K_x
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'current passenger':
             self.message_start = ''
@@ -364,7 +327,7 @@ class actor_display_label(label):
                 input_dict['keybind_id'] = pygame.K_3
             input_dict['init_type'] = 'disembark vehicle button'
             input_dict['image_id'] = 'buttons/disembark_ship_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'tooltip':
             self.message_start = ''
@@ -394,7 +357,7 @@ class actor_display_label(label):
             input_dict['image_id'] = african_workers_image_id_list
             input_dict['hire_source_type'] = 'village'
             input_dict['width'], input_dict['height'] = (l_size, l_size)
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type in ['mob inventory capacity', 'tile inventory capacity']:
             self.message_start = 'Inventory: '
@@ -417,17 +380,21 @@ class actor_display_label(label):
             input_dict['init_type'] = 'buy slaves button'
             input_dict['image_id'] = buy_slaves_image_id_list
             input_dict['width'], input_dict['height'] = (l_size, l_size)
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'minister':
             self.message_start = 'Minister: '
             input_dict['width'], input_dict['height'] = (m_size, m_size)
             attached_minister_type_image = minister_type_image((self.x - self.height - m_increment, self.y), self.height + m_increment, self.height + m_increment, self.modes, 'none', self, global_manager)
             self.insert_collection_above().add_member(attached_minister_type_image, {'x_offset': -1 * attached_minister_type_image.height, 'y_offset': -0.5 * m_increment}) #offsets are being ignored
+            self.parent_collection.can_show_override = self #parent collection is considered showing when this label can show, allowing ordered collection to work correctly
             self.image_y_displacement = 5
 
         elif self.actor_label_type in ['minister_name', 'country_name']:
             self.message_start = 'Name: '
+            if self.actor_label_type == 'minister_name':
+                input_dict['init_type'] = 'active investigation button'
+                self.add_attached_button(input_dict)
         
         elif self.actor_label_type == 'country_effect':
             self.message_start = 'Effect: '
@@ -435,25 +402,25 @@ class actor_display_label(label):
         elif self.actor_label_type == 'minister_office':
             self.message_start = 'Office: '
             input_dict['init_type'] = 'remove minister button'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             input_dict['init_type'] = 'appoint minister button'
             for current_position in global_manager.get('minister_types'):
                 input_dict['appoint_type'] = current_position
-                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'evidence':
             self.message_start = 'Evidence: '
             if 'ministers' in self.modes:
                 input_dict['init_type'] = 'to trial button'
                 input_dict['width'], input_dict['height'] = (m_size, m_size)
-                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                self.add_attached_button(input_dict)
             if 'trial' in self.modes:
                 input_dict['init_type'] = 'fabricate evidence button'
                 input_dict['width'], input_dict['height'] = (m_size, m_size)
-                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                self.add_attached_button(input_dict)
                 
                 input_dict['init_type'] = 'bribe judge button'
-                self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+                self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'slums':
             self.message_start = 'Slums population: '
@@ -474,7 +441,7 @@ class actor_display_label(label):
             input_dict['image_id'] = african_workers_image_id_list
             input_dict['width'], input_dict['height'] = (l_size, l_size)
             input_dict['hire_source_type'] = 'slums'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
         elif self.actor_label_type == 'combat_strength':
             self.message_start = 'Combat strength: '
@@ -482,12 +449,35 @@ class actor_display_label(label):
         elif self.actor_label_type == 'preferred_terrains':
             self.message_start = 'Preferred terrain: '
 
-        elif self.actor_label_type == 'building workers':
+        elif self.actor_label_type == 'building work crews':
             self.message_start = 'Work crews: '
 
         else:
             self.message_start = utility.capitalize(self.actor_label_type) + ': ' #'worker' -> 'Worker: '
         self.calibrate('none')
+
+    def add_attached_button(self, input_dict, member_config=None):
+        '''
+        Description:
+            Adds a button created by the inputted input_dict to this label's interface collection, creating the collection if it does not already exist
+        Input:
+            dictionary input_dict: Input dict of button to create
+            dictionary member_config=None: Optional member config of button to create
+        Output:
+            None
+        '''
+        if not self.has_label_collection:
+            self.has_label_collection = True
+            self.insert_collection_above(override_input_dict={
+                'init_type': 'ordered collection',
+                'direction': 'horizontal',
+            })
+            self.parent_collection.can_show_override = self #uses this label's can_show as the collection's can_show, so any members require this label to be showing
+        if not member_config: #avoids issue with same default {} being used across multiple calls
+            member_config = {}
+        if not 'order_y_offset' in member_config:
+            member_config['order_y_offset'] = abs(input_dict['height'] - self.height) / -2
+        self.parent_collection.add_member(self.global_manager.get('actor_creation_manager').create_interface_element(input_dict, self.global_manager), member_config)
 
     def update_tooltip(self):
         '''
@@ -608,8 +598,24 @@ class actor_display_label(label):
             tooltip_text = [self.message]
             tooltip_text.append('While some interests are derived from a minister\'s legitimate talent or experience in a particular field, others are mere fancies')
             self.set_tooltip(tooltip_text)
+
+        elif self.actor_label_type == 'ability':
+            tooltip_text = [self.message]
+            rank = 0
+            if not self.actor == 'none':
+                for skill_value in range(6, 0, -1): #iterates backwards from 6 to 1
+                    for skill_type in self.actor.apparent_skills:
+                        if self.actor.apparent_skills[skill_type] == skill_value:
+                            rank += 1
+                            skill_name = self.global_manager.get('minister_type_dict')[skill_type] #like General to military
+                            tooltip_text.append('    ' + str(rank) + '. ' + skill_name.capitalize() + ': ' + self.actor.apparent_skill_descriptions[skill_type])
+            self.set_tooltip(tooltip_text)
+
+        elif self.actor_label_type == 'loyalty':
+            tooltip_text = [self.message]
+            self.set_tooltip(tooltip_text)
             
-        elif self.actor_label_type == 'building workers':
+        elif self.actor_label_type == 'building work crews':
             tooltip_text = []
             tooltip_text.append('Increase work crew capacity by upgrading the building\'s scale with a construction gang')
             if (not self.attached_building == 'none'):
@@ -709,7 +715,7 @@ class actor_display_label(label):
                     self.set_label('Village name: ' + new_actor.cell.get_building('village').name)
 
             elif self.actor_label_type == 'movement':
-                if self.actor.controllable:
+                if self.actor.is_pmob:
                     if (new_actor.is_vehicle and new_actor.has_crew and (not new_actor.has_infinite_movement) and not new_actor.temp_movement_disabled) or not new_actor.is_vehicle: #if riverboat/train with crew or normal unit
                         self.set_label(self.message_start + str(new_actor.movement_points) + '/' + str(new_actor.max_movement_points))
                     else: #if ship or riverboat/train without crew
@@ -726,7 +732,7 @@ class actor_display_label(label):
 
 
             elif self.actor_label_type == 'attitude':
-                if not self.actor.controllable:
+                if not self.actor.is_pmob:
                     if self.actor.hostile:
                         self.set_label(self.message_start + 'hostile')
                     else:
@@ -740,10 +746,10 @@ class actor_display_label(label):
                     self.set_label(self.message_start + ' ' + self.actor.preferred_terrains[0] + ', ' + self.actor.preferred_terrains[1] + ', ' + self.actor.preferred_terrains[2])
 
             elif self.actor_label_type == 'controllable':
-                if not self.actor.controllable:
+                if not self.actor.is_pmob:
                     self.set_label('You do not control this unit')
                             
-            elif self.actor_label_type == 'building work crew':
+            elif self.actor_label_type == 'current building work crew': # or self.actor_label_type == 'building list item':
                 if self.list_type == 'resource building':
                     if new_actor.cell.has_building('resource'):
                         self.attached_building = new_actor.cell.get_building('resource')
@@ -806,9 +812,8 @@ class actor_display_label(label):
                     self.set_label(self.message_start + str(self.actor.get_inventory_used()) + '/' + str(self.actor.inventory_capacity))
                     
             elif self.actor_label_type == 'minister':
-                if self.actor.controllable:
-                    if not self.actor.controlling_minister == 'none':
-                        self.set_label(self.message_start + self.actor.controlling_minister.name)
+                if self.actor.is_pmob and self.actor.controlling_minister != 'none':
+                    self.set_label(self.message_start + self.actor.controlling_minister.name)
                     
             elif self.actor_label_type == 'evidence':
                 if new_actor.fabricated_evidence == 0:
@@ -824,6 +829,24 @@ class actor_display_label(label):
 
             elif self.actor_label_type == 'interests':
                 self.set_label(self.message_start + new_actor.interests[0] + ' and ' + new_actor.interests[1])
+
+            elif self.actor_label_type == 'ability':
+                message = ''
+                if new_actor.current_position == 'none':
+                    displayed_skill = new_actor.get_max_apparent_skill()
+                    message += 'Highest ability: '
+                else:
+                    displayed_skill = new_actor.current_position
+                    message += 'Current ability: '
+                if displayed_skill != 'unknown':
+                    displayed_skill_name = self.global_manager.get('minister_type_dict')[displayed_skill] #like General to military
+                    message += new_actor.apparent_skill_descriptions[displayed_skill] + ' (' + displayed_skill_name + ')'
+                else:
+                    message += displayed_skill
+                self.set_label(message)
+
+            elif self.actor_label_type == 'loyalty':
+                self.set_label(self.message_start + new_actor.apparent_corruption_description)
             
             elif self.actor_label_type in ['minister_name', 'country_name']:
                 self.set_label(self.message_start + new_actor.name)
@@ -848,42 +871,7 @@ class actor_display_label(label):
         else:
             self.set_label(self.message_start + 'n/a')
 
-    def set_label(self, new_message):
-        '''
-        Description:
-            Sets this label's text to the inputted string. Also changes locations of attached buttons since the length of the label may change.
-        Input:
-            string new_message: New text to set this label to
-        Output:
-            None
-        '''
-        super().set_label(new_message)
-        self.update_label_button_locations()
-
-    def set_origin(self, new_x, new_y):
-        '''
-        Description:
-            Sets this interface element's location at the inputted coordinates
-        Input:
-            int new_x: New x coordinate for this element's origin
-            int new_y: New y coordinate for this element's origin
-        Output:
-            None
-        '''
-        super().set_origin(new_x, new_y)
-        self.update_label_button_locations()
-        for current_image in self.attached_images:
-            current_image.set_origin(current_image.x, new_y)
-
-    def update_label_button_locations(self):
-        x_displacement = 0
-        for current_button in self.attached_buttons:
-            if current_button.can_show():
-                current_button.set_origin(self.x + self.width + 5 + x_displacement, self.y - ((current_button.height - self.height) / 2))
-                x_displacement += (current_button.width + 5)
-
-
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -892,7 +880,7 @@ class actor_display_label(label):
         Output:
             boolean: False if no actor displayed or if various conditions are present depending on label type, otherwise returns same value as superclass
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result ==  False:
             return(False)
         elif self.actor == 'none':
@@ -911,9 +899,9 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'slums' and not self.actor.cell.has_building('slums'):
             return(False)
-        elif self.actor_label_type == 'minister' and not self.actor.controllable:
+        elif self.actor_label_type == 'minister' and not self.actor.is_pmob:
             return(False)
-        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.controllable:
+        elif self.actor_label_type in ['attitude', 'controllable'] and self.actor.is_pmob:
             return(False)
         elif self.actor_label_type == 'preferred_terrains' and not (self.actor.is_npmob and self.actor.npmob_type == 'beast'):
             return(False)
@@ -921,6 +909,17 @@ class actor_display_label(label):
             return(False)
         elif self.actor_label_type == 'slave_traders_strength' and self.actor.grid != self.global_manager.get('slave_traders_grid'):
             return(False)
+        elif self.actor_label_type == 'loyalty' and self.actor.apparent_corruption_description == 'unknown':
+            return(False)
+        elif self.actor_label_type == 'ability':
+            empty = True
+            for skill_type in self.actor.apparent_skills:
+                if self.actor.apparent_skill_descriptions[skill_type] != 'unknown':
+                    empty = False
+            if empty:
+                return(False)
+            else:
+                return(result)
         else:
             return(result)
 
@@ -953,6 +952,7 @@ class list_item_label(actor_display_label):
         '''
         self.list_index = input_dict['list_index']
         self.list_type = input_dict['list_type']
+        #input_dict['actor_label_type'] = self.list_type + ' list item'
         self.attached_list = []
         super().__init__(input_dict, global_manager)
 
@@ -966,9 +966,10 @@ class list_item_label(actor_display_label):
             None
         '''
         self.attached_list = []
+        #print(self.actor_label_type)
         super().calibrate(new_actor)
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -978,7 +979,7 @@ class list_item_label(actor_display_label):
             boolean: Returns same value as superclass as long as this label's list is long enough to contain this label's index, otherwise returns False
         '''
         if len(self.attached_list) > self.list_index:
-            return(super().can_show())
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         return(False)
 
 class building_work_crews_label(actor_display_label):
@@ -1006,9 +1007,9 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
-        self.showing = False
+        self.show_label = False
         self.attached_building = 'none'
-        input_dict['actor_label_type'] = 'building workers'
+        input_dict['actor_label_type'] = 'building work crews'
         super().__init__(input_dict, global_manager)
         self.building_type = input_dict['building_type']
 
@@ -1022,14 +1023,14 @@ class building_work_crews_label(actor_display_label):
             None
         '''
         self.actor = new_actor
-        self.showing = False
+        self.show_label = False
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label(self.message_start + str(len(self.attached_building.contained_work_crews)) + '/' + str(self.attached_building.scale))
-                self.showing = True
+                self.show_label = True
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1038,8 +1039,8 @@ class building_work_crews_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
         '''
-        if self.showing:
-            return(super().can_show())
+        if self.show_label:
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         else:
             return(False)
 
@@ -1068,7 +1069,7 @@ class building_efficiency_label(actor_display_label):
             None
         '''
         self.remove_work_crew_button = 'none'
-        self.showing = False
+        self.show_label = False
         input_dict['actor_label_type'] = 'building efficiency'
         super().__init__(input_dict, global_manager)
         self.building_type = input_dict['building_type']
@@ -1084,14 +1085,14 @@ class building_efficiency_label(actor_display_label):
             None
         '''
         self.actor = new_actor
-        self.showing = False
+        self.show_label = False
         if not new_actor == 'none':
             self.attached_building = new_actor.cell.get_building(self.building_type)
             if not self.attached_building == 'none':
                 self.set_label('Efficiency: ' + str(self.attached_building.efficiency))
-                self.showing = True
+                self.show_label = True
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1100,8 +1101,8 @@ class building_efficiency_label(actor_display_label):
         Output:
             boolean: Returns same value as superclass as long as the displayed tile has a building of this label's building_type, otherwise returns False
         '''
-        if self.showing:
-            return(super().can_show())
+        if self.show_label:
+            return(super().can_show(skip_parent_collection=skip_parent_collection))
         else:
             return(False)
 
@@ -1109,7 +1110,7 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
     '''
     Label that shows the population, aggressiveness, or number of available workers in a displayed tile's village
     '''
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1118,7 +1119,7 @@ class native_info_label(actor_display_label): #possible actor_label_types: nativ
         Output:
             boolean: Returns same value as superclass as long as the displayed tile is explored and has a village, otherwise returns False
         '''
-        result = super().can_show()
+        result = super().can_show(skip_parent_collection=skip_parent_collection)
         if result:
             if self.actor.cell.has_building('village') and self.actor.cell.visible:
                 return(True)
@@ -1155,7 +1156,7 @@ class commodity_display_label(actor_display_label):
         super().__init__(input_dict, global_manager)
         self.showing_commodity = False
         self.commodity_index = input_dict['commodity_index']
-        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager) #self, coordinates, width, height, modes, attached_label, global_manager
+        self.commodity_image = images.label_image((self.x - self.height, self.y), self.height, self.height, self.modes, self, self.global_manager)
         input_dict = {
             'coordinates': (self.x, self.y + 200),
             'width': self.height,
@@ -1169,30 +1170,30 @@ class commodity_display_label(actor_display_label):
         self.parent_collection.add_member(self.commodity_image, {'x_offset': -1 * self.height - 5})
         input_dict['coordinates'] = (0, 0)
         if self.actor_type == 'mob':
-            input_dict['button_type'] = 'drop commodity'
+            input_dict['init_type'] = 'drop commodity button'
             input_dict['image_id'] = 'buttons/commodity_drop_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'drop all commodity'
+            input_dict['init_type'] = 'drop all commodity button'
             input_dict['image_id'] = 'buttons/commodity_drop_all_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
         elif self.actor_type == 'tile':
-            input_dict['button_type'] = 'pick up commodity'
+            input_dict['init_type'] = 'pick up commodity button'
             input_dict['image_id'] = 'buttons/commodity_pick_up_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
-            input_dict['button_type'] = 'pick up all commodity'
+            input_dict['init_type'] = 'pick up all commodity button'
             input_dict['image_id'] = 'buttons/commodity_pick_up_all_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'sell commodity'
+            input_dict['init_type'] = 'sell commodity button'
             input_dict['image_id'] = 'buttons/commodity_sell_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
             
-            input_dict['button_type'] = 'sell all commodity'
+            input_dict['init_type'] = 'sell all commodity button'
             input_dict['image_id'] = 'buttons/commodity_sell_all_button.png'
-            self.attached_buttons.append(global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+            self.add_attached_button(input_dict)
 
     def set_label(self, new_message):
         '''
@@ -1234,7 +1235,7 @@ class commodity_display_label(actor_display_label):
             self.showing_commodity = False
             self.set_label('n/a')
 
-    def can_show(self):
+    def can_show(self, skip_parent_collection=False):
         '''
         Description:
             Returns whether this label should be drawn
@@ -1246,4 +1247,4 @@ class commodity_display_label(actor_display_label):
         if not self.showing_commodity:
             return(False)
         else:
-            return(super().can_show())
+            return(super().can_show(skip_parent_collection=skip_parent_collection))

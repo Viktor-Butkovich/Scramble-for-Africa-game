@@ -1,22 +1,39 @@
+#Manages initial game setup in a semi-modular order
+
 import pygame
 import time
 import os
 import logging
 import json
-
-import modules.scaling as scaling
-import modules.images as images
-import modules.game_transitions as game_transitions
-import modules.data_managers as data_managers
+import modules.util.scaling as scaling
+import modules.util.actor_utility as actor_utility
+import modules.util.game_transitions as game_transitions
 import modules.actor_display_tools.images as actor_display_images
-import modules.mouse_followers as mouse_followers
-import modules.save_load_tools as save_load_tools
-import modules.actor_creation_tools as actor_creation_tools
-import modules.actor_utility as actor_utility
-import modules.countries as countries
-import modules.effects as effects
+import modules.tools.actor_creation_tools as actor_creation_tools
+import modules.constructs.images as images
+import modules.constructs.countries as countries
+import modules.tools.data_managers as data_managers
+import modules.tools.mouse_followers as mouse_followers
+import modules.tools.save_load_tools as save_load_tools
+import modules.tools.effects as effects
 
-def fundamental_setup(global_manager):
+def setup(global_manager, *args):
+    '''
+    Description:
+        Runs the inputted setup functions in order
+    Input:
+        global_manager_template global_manager: Object that accesses shared variables
+        function list args: List of setup functions to run
+    Output:
+        None 
+    '''
+    global_manager.set('startup_complete', False)
+    for setup_function in args:
+        setup_function(global_manager)
+    global_manager.set('startup_complete', True)
+    global_manager.set('creating_new_game', False)
+
+def fundamental(global_manager):
     '''
     Description:
         Initializes pygame and most manager objects and defines screen size, times, fonts, and colors
@@ -27,7 +44,7 @@ def fundamental_setup(global_manager):
     '''
     pygame.init()
     pygame.mixer.init()
-    global_manager.set('startup_complete', False)
+    pygame.display.set_icon(pygame.image.load('graphics/misc/SFA.png'))
     global_manager.set('sound_manager', data_managers.sound_manager_template(global_manager))
     #global_manager.get('sound_manager').play_music('La Marseillaise 1')
     global_manager.set('save_load_manager', save_load_tools.save_load_manager_template(global_manager))
@@ -46,7 +63,6 @@ def fundamental_setup(global_manager):
     global_manager.set('loading', True)
     global_manager.set('loading_start_time', start_time)
     global_manager.set('previous_turn_time', start_time)
-    global_manager.set('start_time', start_time)
     global_manager.set('current_time', start_time)
     global_manager.set('last_selection_outline_switch', start_time)
     global_manager.set('mouse_moved_time', start_time)
@@ -63,7 +79,7 @@ def fundamental_setup(global_manager):
     global_manager.set('font_size', scaling.scale_height(15, global_manager))
     global_manager.set('myfont', pygame.font.SysFont(global_manager.get('font_name'), global_manager.get('font_size')))
 
-    global_manager.set('default_music_volume', 1)
+    global_manager.set('default_music_volume', 0.5)
 
     global_manager.set('game_display', pygame.display.set_mode((global_manager.get('display_width'), global_manager.get('display_height'))))
 
@@ -89,7 +105,8 @@ def fundamental_setup(global_manager):
         'yellow': (255, 255, 0),
         'brown': (85, 53, 22),
         'blonde': (188, 175, 123),
-        'purple': (127, 0, 170)
+        'purple': (127, 0, 170),
+        'transparent': (1, 1, 1)
         }
     )
     global_manager.set('green_screen_colors', 
@@ -99,7 +116,8 @@ def fundamental_setup(global_manager):
         (110, 107, 3)
         ]
     )
-def misc_setup(global_manager):
+
+def misc(global_manager):
     '''
     Description:
         Initializes object lists, current object variables, current status booleans, and other misc. values
@@ -109,7 +127,6 @@ def misc_setup(global_manager):
         None
     '''
     global_manager.set('rendered_images', {})
-    global_manager.get('game_display').fill(global_manager.get('color_dict')['white'])
     global_manager.set('button_list', [])
     global_manager.set('recruitment_button_list', [])
     global_manager.set('current_instructions_page', 'none')
@@ -126,9 +143,7 @@ def misc_setup(global_manager):
     global_manager.set('flag_icon_list', [])
     global_manager.set('grid_list', [])
     global_manager.set('grid_types_list', ['strategic_map_grid', 'europe_grid', 'slave_traders_grid'])
-    global_manager.set('abstract_grid_list', [])
     global_manager.set('text_list', [])
-    global_manager.set('image_list', [])
     global_manager.set('free_image_list', [])
     global_manager.set('minister_image_list', [])
     global_manager.set('available_minister_portrait_list', [])
@@ -143,19 +158,16 @@ def misc_setup(global_manager):
     global_manager.set('building_list', [])
     global_manager.set('slums_list', [])
     global_manager.set('resource_building_list', [])
-    global_manager.set('officer_list', [])
-    global_manager.set('worker_list', [])
     global_manager.set('loan_list', [])
     global_manager.set('attacker_queue', [])
     global_manager.set('enemy_turn_queue', [])
     global_manager.set('player_turn_queue', [])
-    global_manager.set('group_list', [])
-    global_manager.set('tile_list', [])
-    global_manager.set('exploration_mark_list', [])
-    global_manager.set('overlay_tile_list', [])
-    global_manager.set('notification_list', [])
-    global_manager.set('label_list', [])
     global_manager.set('interface_collection_list', [])
+    global_manager.set('independent_interface_elements', [])
+    global_manager.set('dice_list', [])
+    global_manager.set('dice_roll_minister_images', [])
+    global_manager.set('combatant_images', [])
+    global_manager.set('draw_list', [])
 
     global_manager.set('displayed_mob', 'none')
     global_manager.set('displayed_tile', 'none')
@@ -163,10 +175,8 @@ def misc_setup(global_manager):
     global_manager.set('displayed_country', 'none')
     global_manager.set('displayed_defense', 'none')
     global_manager.set('displayed_prosecution', 'none')
+    global_manager.set('displayed_notification', 'none')
 
-    global_manager.set('dice_list', [])
-    global_manager.set('dice_roll_minister_images', [])
-    global_manager.set('combatant_images', [])
     pygame.key.set_repeat(300, 200)
     global_manager.set('crashed', False)
     global_manager.set('lmb_down', False)
@@ -205,14 +215,24 @@ def misc_setup(global_manager):
     global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
     global_manager.set('current_game_mode', 'none')
 
-    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
+    strategic_background_image = images.background_image(['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
+
+    input_dict = {
+        'width': global_manager.get('display_width') / 2 - scaling.scale_width(35, global_manager),
+        'height': global_manager.get('display_height'),
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
+        'image_id': 'misc/empty.png', #make a good image for this
+        'init_type': 'safe click panel',
+    }
+    global_manager.set('safe_click_area', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+    #safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
+
     strategic_grid_height = 300
     strategic_grid_width = 320
-    mini_grid_height = 600
     mini_grid_width = 640
 
-    global_manager.set('minimap_grid_origin_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
+    global_manager.set('minimap_grid_x', global_manager.get('default_display_width') - (mini_grid_width + 100))
 
     global_manager.set('europe_grid_x', global_manager.get('default_display_width') - (strategic_grid_width + 100 + 120 + 25)) 
     #100 for gap on right side of screen, 120 for width of europe grid, 25 for gap between europe and strategic grids
@@ -244,30 +264,23 @@ def misc_setup(global_manager):
     global_manager.set('SONG_END_EVENT', pygame.USEREVENT+1)
     pygame.mixer.music.set_endevent(global_manager.get('SONG_END_EVENT'))
 
-    #actor_display_top_y = global_manager.get('default_display_height') - 205 + 125 + 10
-    #actor_display_current_y = actor_display_top_y
-    #global_manager.set('mob_ordered_list_start_y', actor_display_current_y)
-
     input_dict = {
         'coordinates': scaling.scale_coordinates(0, global_manager.get('default_display_height') - 205 + 125, global_manager),
         'width': scaling.scale_width(10, global_manager), #scaling.scale_width(800, global_manager),
         'height': scaling.scale_height(10, global_manager),
         'modes': ['strategic', 'europe'],
         'init_type': 'ordered collection',
-        #'is_info_display': True,
-        #'actor_type': 'mob',
         'allow_minimize': True,
         'allow_move': True,
         'description': 'general information panel',
         'resize_with_contents': True,
-        #'image_id': 'misc/paper_less_busy.png', #'misc/default_instruction.png'#'misc/default_notification.png'
     }
     global_manager.set('info_displays_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
     anchor = global_manager.get('actor_creation_manager').create_interface_element(
         {'width': 1, 'height': 1, 'init_type': 'interface element', 'parent_collection': global_manager.get('info_displays_collection')}, 
         global_manager) #rect at original location prevents collection from moving unintentionally when resizing
 
-def terrains_setup(global_manager):
+def terrains(global_manager):
     '''
     Description:
         Defines terrains and beasts
@@ -343,7 +356,7 @@ def terrains_setup(global_manager):
         current_index -= 1 #back up from index that didn't work
         global_manager.get('terrain_variant_dict')[current_terrain] = current_index + 1 #number of variants, variants in format 'mountain_0', 'mountain_1', etc.
 
-def commodities_setup(global_manager):
+def commodities(global_manager):
     '''
     Description:
         Defines commodities with associated buildings and icons, along with buildings
@@ -399,7 +412,7 @@ def commodities_setup(global_manager):
 
     global_manager.set('resource_types', global_manager.get('commodity_types') + ['natives'])
 
-def ministers_setup(global_manager):
+def def_ministers(global_manager):
     '''
     Description:
         Defines minister positions, backgrounds, and associated units
@@ -526,9 +539,34 @@ def ministers_setup(global_manager):
         'battalion': type_minister_dict['military']
         }
     )
+
+    global_manager.set('minister_skill_to_description_dict', #not literally a dict, but index of skill number can be used like a dictionary
+        [
+            ['unknown'],
+            ['brainless', 'moronic', 'stupid', 'idiotic'],
+            ['incompetent', 'dull', 'slow', 'bad'],
+            ['incapable', 'poor', 'ineffective', 'lacking'],
+            ['able', 'capable', 'effective', 'competent'],
+            ['smart', 'clever', 'quick', 'good'],
+            ['expert', 'genius', 'brilliant', 'superior'],
+        ]
+    )
+
+    global_manager.set('minister_corruption_to_description_dict', #not literally a dict, but index of corruption number can be used like a dictionary
+        [
+            ['unknown'],
+            ['absolute', 'fanatic', 'pure', 'saintly'],
+            ['steadfast', 'honest', 'straight', 'solid'],
+            ['decent', 'obedient', 'dependable', 'trustworthy'],
+            ['opportunist', 'questionable', 'undependable', 'untrustworthy'],
+            ['shady', 'dishonest', 'slippery', 'mercurial'],
+            ['corrupt', 'crooked', 'rotten', 'treacherous'],
+        ]
+    )
+
     global_manager.set('minister_limit', 15)
 
-def countries_setup(global_manager):
+def def_countries(global_manager):
     '''
     Description:
         Defines countries with associated passive effects and background, name, and unit sets
@@ -577,7 +615,6 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': british_weighted_backgrounds,
         'country_effect': british_country_effect,
-        'music_list': ['Rule Britannia']
     }
     global_manager.set('Britain', countries.country(british_input_dict, global_manager))
 
@@ -604,7 +641,6 @@ def countries_setup(global_manager):
         'allow_double_last_names': True,
         'background_set': french_weighted_backgrounds,
         'country_effect': french_country_effect,
-        'music_list': ['La Marseillaise'],
         'has_aristocracy': False
     }
     global_manager.set('France', countries.country(french_input_dict, global_manager))
@@ -630,7 +666,6 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': german_weighted_backgrounds,
         'country_effect': german_country_effect,
-        'music_list': ['Das lied der deutschen']
     }
     global_manager.set('Germany', countries.country(german_input_dict, global_manager))
 
@@ -653,7 +688,6 @@ def countries_setup(global_manager):
         'religion': 'catholic',
         'background_set': belgian_weighted_backgrounds,
         'country_effect': belgian_country_effect,
-        'music_list': []
     }
     global_manager.set('Belgium', countries.hybrid_country(belgian_input_dict, global_manager)) 
 
@@ -678,7 +712,6 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': portuguese_weighted_backgrounds,
         'country_effect': portuguese_country_effect,
-        'music_list': ['Portuguese theme']
     }
     global_manager.set('Portugal', countries.country(portuguese_input_dict, global_manager))
 
@@ -704,11 +737,10 @@ def countries_setup(global_manager):
         'allow_double_last_names': False,
         'background_set': italian_weighted_backgrounds,
         'country_effect': italian_country_effect,
-        'music_list': ['Prince of Tuscany']
     }
     global_manager.set('Italy', countries.country(italian_input_dict, global_manager)) 
     
-def transactions_setup(global_manager):
+def transactions(global_manager):
     '''
     Description:
         Defines recruitment, upkeep, building, and action costs, along with action and financial transaction types
@@ -783,6 +815,7 @@ def transactions_setup(global_manager):
         'slave_capture': 5,
         'suppress_slave_trade': 5,
         'trial': 5,
+        'active_investigation': 5,
         'hunting': 5,
         'rumor_search': 5,
         'artifact_search': 5,
@@ -810,6 +843,7 @@ def transactions_setup(global_manager):
         'slave_capture': 'capturing slaves',
         'suppress_slave_trade': 'slave trade suppression',
         'trial': 'trial fees',
+        'active_investigation': 'investigations',
         'hunting': 'hunting supplies',
         'rumor_search': 'artifact rumor searches',
         'artifact_search': 'artifact searches',
@@ -838,7 +872,7 @@ def transactions_setup(global_manager):
     global_manager.set('slave_traders_natural_max_strength', 0) #regenerates to natural strength, can increase indefinitely when slaves are purchased
     actor_utility.set_slave_traders_strength(0, global_manager)
 
-def lore_setup(global_manager):
+def lore(global_manager):
     '''
     Description:
         Defines the types of lore missions, artifacts within each one, and the current lore mission
@@ -892,7 +926,7 @@ def lore_setup(global_manager):
     global_manager.set('lore_mission_list', [])
     global_manager.set('completed_lore_mission_types', [])
 
-def value_trackers_setup(global_manager):
+def value_trackers(global_manager):
     '''
     Description:
         Defines important global values and initializes associated tracker labels
@@ -975,7 +1009,7 @@ def value_trackers_setup(global_manager):
     
     global_manager.set('fear_tracker', data_managers.value_tracker('fear', 1, 1, 6, global_manager))
 
-def buttons_setup(global_manager):
+def buttons(global_manager):
     '''
     Description:
         Initializes static buttons
@@ -1160,7 +1194,7 @@ def buttons_setup(global_manager):
     input_dict['init_type'] = 'generate crash button'
     generate_crash_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def europe_screen_setup(global_manager):
+def europe_screen(global_manager):
     '''
     Description:
         Initializes static interface of Europe screen
@@ -1193,7 +1227,7 @@ def europe_screen_setup(global_manager):
     }
     new_consumer_goods_buy_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def ministers_screen_setup(global_manager):
+def ministers_screen(global_manager):
     '''
     Description:
         Initializes static interface of ministers screen
@@ -1263,7 +1297,7 @@ def ministers_screen_setup(global_manager):
     cycle_input_dict['direction'] = 'right'
     cycle_right_button = global_manager.get('actor_creation_manager').create_interface_element(cycle_input_dict, global_manager)
 
-def trial_screen_setup(global_manager):
+def trial_screen(global_manager):
     '''
     Description:
         Initializes static interface of trial screen
@@ -1406,7 +1440,7 @@ def trial_screen_setup(global_manager):
 
     global_manager.set('evidence_just_found', False)
 
-def new_game_setup_screen_setup(global_manager):
+def new_game_setup_screen(global_manager):
     '''
     Description:
         Initializes new game setup screen interface
@@ -1432,7 +1466,7 @@ def new_game_setup_screen_setup(global_manager):
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         current_country_index += 1
 
-def mob_interface_setup(global_manager):
+def mob_interface(global_manager):
     '''
     Description:
         Initializes mob selection interface
@@ -1498,7 +1532,8 @@ def mob_interface_setup(global_manager):
 
 
     #mob info labels setup
-    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew', 'passengers', 'current passenger'] #order of mob info display labels
+    mob_info_display_labels = ['name', 'minister', 'officer', 'workers', 'movement', 'canoes', 'combat_strength', 'preferred_terrains', 'attitude', 'controllable', 'crew',
+                               'passengers', 'current passenger'] #order of mob info display labels
     for current_actor_label_type in mob_info_display_labels:
         if current_actor_label_type == 'minister': #how far from edge of screen
             x_displacement = 40
@@ -1527,7 +1562,20 @@ def mob_interface_setup(global_manager):
                 input_dict['list_index'] = i
                 global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def tile_interface_setup(global_manager):
+    tab_collection_relative_coordinates = (450, -30)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('mob_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'unit information tabs'
+    }
+    global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+def tile_interface(global_manager):
     '''
     Description:
         Initializes tile selection interface
@@ -1537,7 +1585,7 @@ def tile_interface_setup(global_manager):
         None
     '''
     input_dict = {
-        'coordinates': scaling.scale_coordinates(0, 0, global_manager),#
+        'coordinates': scaling.scale_coordinates(0, 0, global_manager),
         'width': scaling.scale_width(775, global_manager),
         'height': scaling.scale_height(10, global_manager),
         'modes': ['strategic', 'europe'],
@@ -1617,13 +1665,14 @@ def tile_interface_setup(global_manager):
         else:
             x_displacement = 0
         input_dict = { #should declare here to reinitialize dict and prevent extra parameters from being incorrectly retained between iterations
-            'coordinates': scaling.scale_coordinates(x_displacement, 0, global_manager),
+            #'coordinates': scaling.scale_coordinates(0, 0, global_manager),
             'minimum_width': scaling.scale_width(10, global_manager),
             'height': scaling.scale_height(30, global_manager),
             'image_id': 'misc/default_label.png', #'misc/underline.png',
             'actor_label_type': current_actor_label_type,
             'actor_type': 'tile',
-            'parent_collection': tile_info_display
+            'parent_collection': tile_info_display,
+            'member_config': {'order_x_offset': scaling.scale_width(x_displacement, global_manager)}
         }
         if not current_actor_label_type in ['building efficiency', 'building work crews', 'current building work crew', 'native population', 'native available workers', 'native aggressiveness']:
             input_dict['init_type'] = 'actor display label'
@@ -1638,7 +1687,7 @@ def tile_interface_setup(global_manager):
             global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
         elif current_actor_label_type == 'current building work crew':
             input_dict['init_type'] = 'list item label'
-            input_dict['list_type'] = 'building'
+            input_dict['list_type'] = 'resource building'
             for i in range(0, 3):
                 input_dict['list_index'] = i
                 global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
@@ -1646,7 +1695,20 @@ def tile_interface_setup(global_manager):
             input_dict['init_type'] = current_actor_label_type + ' label'
             global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def inventory_interface_setup(global_manager):
+    tab_collection_relative_coordinates = (450, -30)
+
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
+        'width': scaling.scale_width(10, global_manager),
+        'height': scaling.scale_height(30, global_manager),
+        'init_type': 'tabbed collection',
+        'parent_collection': global_manager.get('tile_info_display'),
+        'member_config': {'order_exempt': True},
+        'description': 'tile information tabs'
+    }
+    global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+
+def inventory_interface(global_manager):
     '''
     Description:
         Initializes the commodity prices display and both mob/tile tabbed collections and inventory interfaces
@@ -1679,28 +1741,16 @@ def inventory_interface_setup(global_manager):
         input_dict['commodity'] = global_manager.get('commodity_types')[current_index]
         new_commodity_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    tab_collection_relative_coordinates = (450, -30)
-
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
-        'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('mob_info_display'),
-        'member_config': {'order_exempt': True},
-        'description': 'unit information tabs'
-    }
-    global_manager.set('mob_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
-
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'ordered collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
-        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png'},
-        'description': 'unit inventory panel',
+        'member_config': {'tabbed': True, 'button_image_id': 'scenery/resources/buttons/consumer goods.png', 'identifier': 'inventory'},
+        'description': 'unit inventory panel'
     }
     mob_inventory_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    global_manager.set('mob_inventory_collection', mob_inventory_collection)
 
     input_dict = {
         'minimum_width': scaling.scale_width(10, global_manager),
@@ -1710,7 +1760,6 @@ def inventory_interface_setup(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': mob_inventory_collection,
-        'member_config': {'ignore_minimized': True}
     }
     mob_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     
@@ -1719,17 +1768,6 @@ def inventory_interface_setup(global_manager):
         input_dict['commodity_index'] = current_index
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    input_dict = {
-        'coordinates': scaling.scale_coordinates(tab_collection_relative_coordinates[0], tab_collection_relative_coordinates[1], global_manager),
-        'width': scaling.scale_width(10, global_manager),
-        'height': scaling.scale_height(30, global_manager),
-        'init_type': 'tabbed collection',
-        'parent_collection': global_manager.get('tile_info_display'),
-        'member_config': {'order_exempt': True},
-        'description': 'tile information tabs'
-    }
-    global_manager.set('tile_tabbed_collection', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
 
     input_dict = {
         'width': scaling.scale_width(10, global_manager),
@@ -1749,7 +1787,6 @@ def inventory_interface_setup(global_manager):
         'actor_type': 'tile',
         'init_type': 'actor display label',
         'parent_collection': tile_inventory_collection,
-        'member_config': {'ignore_minimized': True}
     }
     tile_inventory_capacity_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1759,7 +1796,7 @@ def inventory_interface_setup(global_manager):
         input_dict['init_type'] = 'commodity display label'
         new_commodity_display_label = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def unit_organization_interface_setup(global_manager):
+def unit_organization_interface(global_manager):
     '''
     Description:
         Initializes the unit organization interface as part of the mob tabbed collection
@@ -1773,14 +1810,15 @@ def unit_organization_interface_setup(global_manager):
     rhs_x_offset = image_height + 80
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-30, -1 * image_height, global_manager),
+        'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115, global_manager),
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'init_type': 'interface collection',
+        'init_type': 'autofill collection',
         'parent_collection': global_manager.get('mob_tabbed_collection'),
-        'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png'},
+        'member_config': {'tabbed': True, 'button_image_id': 'buttons/merge_button.png', 'identifier': 'reorganization'},
         'description': 'unit organization panel',
-        'direction': 'horizontal'
+        'direction': 'horizontal',
+        'autofill_targets': {'officer': [], 'worker': [], 'group': []}
     }
     unit_organization_collection = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
@@ -1797,12 +1835,13 @@ def unit_organization_interface_setup(global_manager):
     }
     #mob background image's tooltip
     lhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    unit_organization_collection.autofill_targets['officer'].append(lhs_top_tooltip)
 
     #mob image
     lhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    #unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id='mobs/default/mock_officer.png')
     unit_organization_collection.add_member(lhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager)})
+    unit_organization_collection.autofill_targets['officer'].append(lhs_top_mob_free_image)
 
     input_dict = {
         'coordinates': scaling.scale_coordinates(lhs_x_offset, -1 * (image_height - 5), global_manager),
@@ -1817,12 +1856,14 @@ def unit_organization_interface_setup(global_manager):
     }
     #mob background image's tooltip
     lhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_tooltip)
 
     #mob image
+    default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'left', to_front=True), actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'right', to_front=True)]
     lhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id=default_image_id)
     unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
-    #unit_organization_collection.add_member(lhs_bottom_mob_free_image, {'calibrate_exempt': True, 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
+    unit_organization_collection.autofill_targets['worker'].append(lhs_bottom_mob_free_image)
 
     #right side
     input_dict = {
@@ -1834,106 +1875,72 @@ def unit_organization_interface_setup(global_manager):
         'actor_type': 'mob',
         'init_type': 'actor display label',
         'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)}
+        'member_config': {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)}
     }
     #mob background image's tooltip
     rhs_top_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    unit_organization_collection.autofill_targets['group'].append(rhs_top_tooltip)
 
     #mob image
+    default_image_id = [actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group left', to_front=True)]
+    default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_worker.png', 'group right', to_front=True))
+    default_image_id.append(actor_utility.generate_unit_component_image_id('mobs/default/mock_officer.png', 'center', to_front=True))
     rhs_top_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    #unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
-    unit_organization_collection.add_member(rhs_top_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager)})
+        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager, default_image_id=default_image_id)
+    unit_organization_collection.add_member(rhs_top_mob_free_image, {'calibrate_exempt': True, 'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': -0.5 * (image_height - 5)})
+    unit_organization_collection.autofill_targets['group'].append(rhs_top_mob_free_image)
 
+    #reorganize unit to right button
     input_dict = {
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset, -1 * (image_height - 5), global_manager),
-        'minimum_width': scaling.scale_width(image_height - 10, global_manager),
-        'height': scaling.scale_height(image_height - 10, global_manager),
-        'image_id': 'misc/empty.png',
-        'actor_label_type': 'tooltip',
-        'actor_type': 'mob',
-        'init_type': 'actor display label',
-        'parent_collection': unit_organization_collection,
-        'member_config': {'calibrate_exempt': True},
-    }
-    #mob background image's tooltip
-    rhs_bottom_tooltip = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    #mob image
-    rhs_bottom_mob_free_image = actor_display_images.actor_display_free_image(scaling.scale_coordinates(0, 0, global_manager), scaling.scale_width(image_height - 10, global_manager),
-        scaling.scale_height(image_height - 10, global_manager), ['strategic', 'europe'], 'default', global_manager) #coordinates, width, height, modes, global_manager
-    #unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
-    unit_organization_collection.add_member(rhs_bottom_mob_free_image, {'x_offset': scaling.scale_width(lhs_x_offset + rhs_x_offset, global_manager), 'y_offset': scaling.scale_height(-1 * (image_height - 5), global_manager)})
-
-    input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60, -1 * (image_height - 15) + 40, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15 + 30, global_manager),
         'width': scaling.scale_width(60, global_manager),
-        'height': scaling.scale_height(60, global_manager),
+        'height': scaling.scale_height(25, global_manager),
         'init_type': 'reorganize unit button',
         'parent_collection': unit_organization_collection,
         'image_id': 'buttons/cycle_units_button.png',
-        'input_sources': [lhs_top_mob_free_image, lhs_bottom_mob_free_image, lhs_top_tooltip, lhs_bottom_tooltip],
-        'output_destinations': [rhs_top_mob_free_image, rhs_bottom_mob_free_image, rhs_top_tooltip, rhs_bottom_tooltip],
-        'member_config': {'calibrate_exempt': False}
+        'allowed_procedures': ['merge', 'crew'],
+        'keybind_id': pygame.K_m,
+        'enable_shader': True
     }
-    reorganize_unit_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    reorganize_unit_right_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+
+    #reorganize unit to left button
+    input_dict = {
+        'coordinates': scaling.scale_coordinates(lhs_x_offset + rhs_x_offset - 60 - 15, -1 * (image_height - 15) + 40 - 15, global_manager),
+        'width': scaling.scale_width(60, global_manager),
+        'height': scaling.scale_height(25, global_manager),
+        'init_type': 'reorganize unit button',
+        'parent_collection': unit_organization_collection,
+        'image_id': 'buttons/cycle_units_reverse_button.png',
+        'allowed_procedures': ['split', 'uncrew'],
+        'keybind_id': pygame.K_n,
+        'enable_shader': True
+    }
+    reorganize_unit_left_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95, global_manager),
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35/2, global_manager),
         'width': scaling.scale_width(30, global_manager),
         'height': scaling.scale_height(30, global_manager),
-        'init_type': 'manually calibrate button',
+        'init_type': 'cycle autofill button',
         'parent_collection': unit_organization_collection,
-        'image_id': 'buttons/cycle_units_button.png',
-        'input_source': 'displayed_mob',
-        'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
-        'reorganize_button': reorganize_unit_button,
+        'image_id': 'buttons/reset_button.png',
+        'autofill_target_type': 'officer'
     }
-    manually_calibrate_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    cycle_autofill_officer_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
     input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 95 - 35, global_manager),
-        'width': scaling.scale_width(30, global_manager),
-        'height': scaling.scale_height(30, global_manager),
-        'init_type': 'manually calibrate button',
-        'parent_collection': unit_organization_collection,
-        'image_id': 'buttons/remove_minister_button.png',
-        'input_source': 'none',
-        'output_destinations': [lhs_top_mob_free_image, lhs_top_tooltip, reorganize_unit_button],
-    }
-    manually_calibrate_none_top_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-    input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25, global_manager),
-        'width': input_dict['width'],
+        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35/2, global_manager),
+        'width': input_dict['width'], #copies most attributes from previous button
         'height': input_dict['height'],
         'init_type': input_dict['init_type'],
         'parent_collection': input_dict['parent_collection'],
-        'image_id': 'buttons/cycle_units_button.png',
-        'input_source': 'displayed_mob',
-        'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
-        'reorganize_button': reorganize_unit_button,
+        'image_id': input_dict['image_id'],
+        'autofill_target_type': 'worker'
     }
-    manually_calibrate_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    cycle_autofill_worker_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-    input_dict = {
-        #'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
-        'coordinates': scaling.scale_coordinates(lhs_x_offset - 35, -1 * (image_height - 15) + 25 - 35, global_manager),
-        'width': input_dict['width'],
-        'height': input_dict['height'],
-        'init_type': input_dict['init_type'],
-        'parent_collection': input_dict['parent_collection'],
-        'image_id': 'buttons/remove_minister_button.png',
-        'input_source': 'none',
-        'output_destinations': [lhs_bottom_mob_free_image, lhs_bottom_tooltip, reorganize_unit_button],
-    }
-    manually_calibrate_none_bottom_button = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
-
-def minister_interface_setup(global_manager):
+def minister_interface(global_manager):
     '''
     Description:
         Initializes minister selection interface
@@ -1997,7 +2004,7 @@ def minister_interface_setup(global_manager):
         'parent_collection': minister_info_display
     }
     #minister info labels setup
-    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'evidence']
+    minister_info_display_labels = ['minister_name', 'minister_office', 'background', 'social status', 'interests', 'loyalty', 'ability', 'evidence']
     for current_actor_label_type in minister_info_display_labels:
         x_displacement = 0
         input_dict['coordinates'] = scaling.scale_coordinates(x_displacement, minister_display_current_y, global_manager)
@@ -2005,7 +2012,7 @@ def minister_interface_setup(global_manager):
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
     #minister info labels setup
 
-def country_interface_setup(global_manager):
+def country_interface(global_manager):
     '''
     Description:
         Initializes country selection interface
@@ -2068,7 +2075,7 @@ def country_interface_setup(global_manager):
         input_dict['actor_label_type'] = current_actor_label_type
         global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
 
-def debug_tools_setup(global_manager):
+def debug_tools(global_manager):
     '''
     Description:
         Initializes toggleable effects for debugging
@@ -2087,10 +2094,12 @@ def debug_tools_setup(global_manager):
     # Iterating through the json list
     for current_effect in debug_config['effects']:
         effects.effect('DEBUG_' + current_effect, current_effect, global_manager)
+    file.close()
 
     try: #for testing/development, use active effects of local version of config file that is not uploaded to GitHub
         file = open('configuration/dev_config.json')
         active_effects_config = json.load(file)
+        file.close()
     except:
         active_effects_config = debug_config
     for current_effect in active_effects_config['active_effects']:

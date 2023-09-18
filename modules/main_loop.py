@@ -2,11 +2,7 @@
 
 import time
 import pygame
-from . import main_loop_tools
-from . import utility
-from . import text_tools
-from . import turn_management_tools
-from . import actor_utility
+from .util import main_loop_utility, utility, text_utility, turn_management_utility, actor_utility
 
 def main_loop(global_manager):
     '''
@@ -18,11 +14,9 @@ def main_loop(global_manager):
         None
     '''
     while not global_manager.get('crashed'):
-        if len(global_manager.get('notification_list')) == 0:
+        if global_manager.get('displayed_notification') == 'none':
             stopping = False
         global_manager.get('input_manager').update_input()
-        if global_manager.get('input_manager').taking_input:
-            typing = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 global_manager.set('crashed', True)
@@ -36,16 +30,17 @@ def main_loop(global_manager):
                 global_manager.set('ctrl', False)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and global_manager.get('effect_manager').effect_active('debug_print'):
-                    main_loop_tools.debug_print(global_manager)
+                    main_loop_utility.debug_print(global_manager)
                 for current_button in global_manager.get('button_list'):
-                    if current_button.can_show() and not global_manager.get('typing'):
+                    if current_button.showing and not global_manager.get('typing'):
                         if current_button.has_keybind:
                             if event.key == current_button.keybind_id:
-                                if current_button.has_released:
-                                    current_button.on_click()
+                                if current_button.has_released: #if stuck on loading, don't want multiple 'key down' events to repeat on_click - shouldn't on_click again until released
                                     current_button.has_released = False
                                     current_button.being_pressed = True
-                                    break
+                                    current_button.on_click()
+                                    current_button.showing_outline = True
+                                break
                             else:#stop confirming an important button press if user starts doing something else
                                 current_button.confirming = False
                                 current_button.being_pressed = False
@@ -94,9 +89,10 @@ def main_loop(global_manager):
                 for current_button in global_manager.get('button_list'):
                     if not global_manager.get('typing') or current_button.keybind_id == pygame.K_TAB or current_button.keybind_id == pygame.K_e:
                         if current_button.has_keybind:
-                            if event.key == current_button.keybind_id:
+                            if event.key == current_button.keybind_id:# and current_button.showing:
                                 current_button.on_release()
                                 current_button.has_released = True
+                                current_button.being_pressed = False
                 if event.key == pygame.K_RSHIFT:
                     global_manager.set('r_shift', 'up')
                 if event.key == pygame.K_LSHIFT:
@@ -109,9 +105,9 @@ def main_loop(global_manager):
                     if global_manager.get('typing'):
                         if global_manager.get('input_manager').taking_input:
                             global_manager.get('input_manager').taking_input = False
-                            text_tools.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen('Response: ' + global_manager.get('message'), global_manager)
                         else:
-                            text_tools.print_to_screen(global_manager.get('message'), global_manager)
+                            text_utility.print_to_screen(global_manager.get('message'), global_manager)
                         global_manager.set('typing', False)
                         global_manager.set('message', '')
                     else:
@@ -133,74 +129,81 @@ def main_loop(global_manager):
                 clicked_button = False
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
-                    for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show() and current_button in global_manager.get('notification_list') and not stopping:
-                            current_button.on_rmb_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
+                    for current_button in global_manager.get('button_list'):#here
+                        if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
+                            current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
                             stopping = True
+                            break
                 else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show():
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing:
                         global_manager.get('current_instructions_page').on_rmb_click()
                         clicked_button = True
                         stopping = True
                 if not stopping:
                     for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show():
+                        if current_button.touching_mouse() and current_button.showing:
                             current_button.on_rmb_click()
                             current_button.on_rmb_release()
                             clicked_button = True
-                main_loop_tools.manage_rmb_down(clicked_button, global_manager)
+                main_loop_utility.manage_rmb_down(clicked_button, global_manager)
 
         if not global_manager.get('old_lmb_down') == global_manager.get('lmb_down'): #if lmb changes
             if not global_manager.get('lmb_down'): #if user just released lmb
-                clicked_button = False
+                clicked_button = False #if any button, including a panel, is clicked, do not deselect units
+                allow_on_click = True #certain buttons, like panels, allow clicking on another button at the same time
                 stopping = False
                 if global_manager.get('current_instructions_page') == 'none':
                     for current_button in global_manager.get('button_list'):#here
-                        if current_button.touching_mouse() and current_button.can_show() and (current_button.in_notification) and not stopping: #if notification, click before other buttons
-                            current_button.on_click() #prioritize clicking buttons that appear above other buttons and don't press the ones 
-                            current_button.on_release()
-                            clicked_button = True
-                            stopping = True
-                            break
-                else:
-                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').can_show(): #if instructions, click before other buttons
-                        global_manager.get('current_instructions_page').on_click()
-                        clicked_button = True
-                        stopping = True
-                        break
-                if not stopping:
-                    for current_button in global_manager.get('button_list'):
-                        if current_button.touching_mouse() and current_button.can_show() and not clicked_button: #only click 1 button at a time
+                        if current_button.touching_mouse() and current_button.showing and (current_button.in_notification) and not stopping: #if notification, click before other buttons
                             current_button.on_click()
                             current_button.on_release()
                             clicked_button = True
+                            allow_on_click = False
+                            stopping = True
                             break
-                main_loop_tools.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
+                else:
+                    if global_manager.get('current_instructions_page').touching_mouse() and global_manager.get('current_instructions_page').showing: #if instructions, click before other buttons
+                        global_manager.get('current_instructions_page').on_click()
+                        clicked_button = True
+                        allow_on_click = False
+                        stopping = True
+                        break
+
+                if not stopping:
+                    for current_button in global_manager.get('button_list'):
+                        if current_button.touching_mouse() and current_button.showing and allow_on_click: #only click 1 button at a time
+                            if current_button.on_click(): #if on_click has return value, nothing happened - allow other buttons to click but do not deselect units
+                                allow_on_click = True
+                            else:
+                                allow_on_click = False
+                            current_button.on_release()
+                            clicked_button = True
+                            #break
+                main_loop_utility.manage_lmb_down(clicked_button, global_manager) #whether button was clicked or not determines whether characters are deselected
 
         if (global_manager.get('lmb_down') or global_manager.get('rmb_down')):
             for current_button in global_manager.get('button_list'):
-                if current_button.touching_mouse() and current_button.can_show():
+                if current_button.touching_mouse() and current_button.showing:
                     current_button.showing_outline = True
                 elif not current_button.being_pressed:
                     current_button.showing_outline = False
         else:
             for current_button in global_manager.get('button_list'):
-                if not current_button.being_pressed:
+                if current_button.has_released:
                     current_button.showing_outline = False
 
         if not global_manager.get('loading'):
-            main_loop_tools.update_display(global_manager)
+            main_loop_utility.update_display(global_manager)
         else:
-            main_loop_tools.draw_loading_screen(global_manager)
-        current_time = time.time()
-        global_manager.set('current_time', current_time)
+            main_loop_utility.draw_loading_screen(global_manager)
+        global_manager.set('current_time', time.time())
         if global_manager.get('current_time') - global_manager.get('last_selection_outline_switch') > 1:
             global_manager.set('show_selection_outlines', utility.toggle(global_manager.get('show_selection_outlines')))
-            global_manager.set('last_selection_outline_switch', time.time())
+            global_manager.set('last_selection_outline_switch', global_manager.get('current_time'))
         global_manager.get('event_manager').update(global_manager.get('current_time'))
-        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= time.time(): #if enough time has passed based on delay from previous movement
+        if not global_manager.get('player_turn') and global_manager.get('previous_turn_time') + global_manager.get('end_turn_wait_time') <= global_manager.get('current_time'): #if enough time has passed based on delay from previous movement
             enemy_turn_done = True
             for enemy in global_manager.get('npmob_list'):
                 if not enemy.turn_done:
@@ -209,18 +212,16 @@ def main_loop(global_manager):
             if enemy_turn_done:
                 global_manager.set('player_turn', True)
                 global_manager.set('enemy_combat_phase', True)
-                turn_management_tools.manage_combat(global_manager)
+                turn_management_utility.manage_combat(global_manager)
             else:
                 current_enemy = global_manager.get('enemy_turn_queue')[0]
-
-                enemy_coordinates = (current_enemy.x, current_enemy.y)
                 removed = False
                 spawning = False
                 did_nothing = False
                 moving = False
                 if current_enemy.npmob_type == 'native_warriors' and current_enemy.despawning:
                     if current_enemy.selected or not current_enemy.visible():
-                        current_enemy.remove()
+                        current_enemy.remove_complete()
                         removed = True
                         
                 elif current_enemy.npmob_type == 'native_warriors' and current_enemy.creation_turn == global_manager.get('turn'): #if unit just created
@@ -286,7 +287,6 @@ def main_loop(global_manager):
                     global_manager.get('enemy_turn_queue').pop(0)
                     
                 else: #If unit visible, have short delay depending on action taken to let user see it
-                    new_enemy_coordinates = (current_enemy.x, current_enemy.y)
                     if (not spawning) and (did_nothing or not current_enemy.visible()): #do not wait if not visible or nothing to show, exception for spawning units, which may not be visible as user watches them spawn
                         global_manager.set('end_turn_wait_time', 0)
                     elif spawning and not current_enemy.grids[0].find_cell(current_enemy.x, current_enemy.y).visible: #do not wait if spawning unit won't be visible even after it spawns
@@ -301,9 +301,4 @@ def main_loop(global_manager):
             if global_manager.get('effect_manager').effect_active('fast_turn'):
                 global_manager.set('end_turn_wait_time', 0)
             global_manager.set('previous_turn_time', time.time())
-        start_time = time.time()
-        global_manager.set('start_time', start_time)
-        global_manager.set('current_time', time.time())
-        #use to test interface collection set origin - entire collection should follow mouse while retaining relative positions
-        #mouse_x, mouse_y = pygame.mouse.get_pos()
-        #global_manager.get('prosecution_info_display').set_origin(mouse_x, global_manager.get('display_height') -  mouse_y)
+    pygame.quit()
