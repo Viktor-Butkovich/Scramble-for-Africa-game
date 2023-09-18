@@ -308,6 +308,8 @@ class actor_creation_manager_template(): #can get instance from anywhere and cre
             new_element = dice.die(input_dict, global_manager)
         elif init_type == 'panel':
             new_element = panels.panel(input_dict, global_manager)
+        elif init_type == 'safe click panel':
+            new_element = panels.safe_click_panel(input_dict, global_manager)
         elif init_type == 'cell_icon':
             new_element = cell_icons.cell_icon(input_dict, global_manager)
 

@@ -215,17 +215,18 @@ def misc(global_manager):
     global_manager.set('loading_image', images.loading_image_template('misc/loading.png', global_manager))
     global_manager.set('current_game_mode', 'none')
 
-    strategic_background_image = images.free_image('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), ['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
+    strategic_background_image = images.background_image(['strategic', 'europe', 'main_menu', 'ministers', 'trial', 'new_game_setup'], global_manager)
     global_manager.get('background_image_list').append(strategic_background_image)
 
     input_dict = {
         'width': global_manager.get('display_width') / 2 - scaling.scale_width(35, global_manager),
         'height': global_manager.get('display_height'),
-        'modes': ['strategic', 'europe', 'ministers'],
+        'modes': ['strategic', 'europe', 'ministers', 'new_game_setup'],
         'image_id': 'misc/empty.png', #make a good image for this
-        'init_type': 'panel',
+        'init_type': 'safe click panel',
     }
-    safe_click_area = global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager)
+    global_manager.set('safe_click_area', global_manager.get('actor_creation_manager').create_interface_element(input_dict, global_manager))
+    #safe click area has empty image but is managed with panel to create correct behavior - its intended image is in the background image's bundle to blit more efficiently
 
     strategic_grid_height = 300
     strategic_grid_width = 320
@@ -1809,7 +1810,7 @@ def unit_organization_interface(global_manager):
     rhs_x_offset = image_height + 80
 
     input_dict = {
-        'coordinates': scaling.scale_coordinates(-30, -1 * image_height, global_manager),
+        'coordinates': scaling.scale_coordinates(-30, -1 * image_height - 115, global_manager),
         'width': scaling.scale_width(10, global_manager),
         'height': scaling.scale_height(30, global_manager),
         'init_type': 'autofill collection',

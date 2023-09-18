@@ -382,6 +382,7 @@ def manage_lmb_down(clicked_button, global_manager):
                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('country_info_display'), 'none', override_exempt=True)
                 else:
                     actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('mob_info_display'), 'none', override_exempt=True)
+                    actor_utility.calibrate_actor_info_display(global_manager, global_manager.get('tile_info_display'), 'none', override_exempt=True)
                 click_move_minimap(global_manager)
                 
         elif (not clicked_button) and global_manager.get('choosing_destination'): #if clicking to move somewhere

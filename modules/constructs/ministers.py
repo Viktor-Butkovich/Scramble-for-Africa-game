@@ -226,7 +226,7 @@ class minister():
         minister_portrait_icon = images.dice_roll_minister_image(minister_icon_coordinates, scaling.scale_width(100, self.global_manager), scaling.scale_height(100, self.global_manager), ['strategic', 'ministers', 'europe'],
             self, 'portrait', self.global_manager, True)
         self.global_manager.get('notification_manager').minister_message_queue.append(self)
-        notification_utility.display_notification(text, 'minister', self.global_manager, 0, audio)
+        notification_utility.display_notification(text, 'minister', self.global_manager, 0, audio=audio)
 
     def steal_money(self, value, theft_type = 'none'):
         '''

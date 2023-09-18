@@ -224,8 +224,7 @@ class image_bundle(image):
         for member in self.members:
             if member.image_id != 'misc/empty.png':
                 if member.is_offset:
-                    blit_sequence.append((member.image, (((self.width * member.x_offset) - (member.width / 2) + (self.width / 2), 
-                                                            ((self.height * member.y_offset * -1) - (member.height / 2) + (self.height / 2))))))
+                    blit_sequence.append((member.image, ((member.get_blit_x_offset(), member.get_blit_y_offset()))))
                 else:
                     blit_sequence.append((member.image, (0, 0)))
         if blit_sequence:
@@ -349,6 +348,8 @@ class bundle_image():
                 self.y_offset = image_id['y_offset']
             else:
                 self.y_offset = 0
+            if 'override_width' in image_id:
+                self.override_width = image_id['override_width']
             if 'level' in image_id:
                 self.level = image_id['level']
             else:
@@ -370,6 +371,31 @@ class bundle_image():
             self.load()
         self.scale()
 
+    def get_blit_x_offset(self):
+        '''
+        Description:
+            Calculates and returns the final x offset of this member image when blitted to bundle's combined surface
+        Input:
+            None
+        Output:
+            double: Returns final x offset of this member image when blitted to bundle's combined surface
+        '''
+        if hasattr(self, 'override_width'):
+            return(0)
+        else:
+            return((self.bundle.width * self.x_offset) - (self.width / 2) + (self.bundle.width / 2))
+
+    def get_blit_y_offset(self):
+        '''
+        Description:
+            Calculates and returns the final y offset of this member image when blitted to bundle's combined surface
+        Input:
+            None
+        Output:
+            double: Returns final y offset of this member image when blitted to bundle's combined surface
+        '''
+        return((self.bundle.height * self.y_offset * -1) - (self.height / 2) + (self.bundle.height / 2))
+
     def scale(self):
         '''
         Description:
@@ -380,7 +406,10 @@ class bundle_image():
             None
         '''
         if self.is_offset:
-            self.width = self.bundle.width * self.size
+            if hasattr(self, 'override_width'):
+                self.width = self.override_width
+            else:
+                self.width = self.bundle.width * self.size
             self.height = self.bundle.height * self.size
         else:
             self.width = self.bundle.width
@@ -570,6 +599,22 @@ class free_image(image):
         Output:
             Returns whether this image's tooltip can currently be shown
         '''
+        return(False)
+
+class background_image(free_image):
+    def __init__(self, modes, global_manager, to_front = False):
+        super().__init__('misc/background.png', (0, 0), global_manager.get('display_width'), global_manager.get('display_height'), modes, global_manager, to_front=to_front)
+        self.previous_safe_click_area_showing = False
+
+    def can_show(self):
+        if super().can_show():
+            if self.global_manager.get('safe_click_area').showing != self.previous_safe_click_area_showing:
+                self.previous_safe_click_area_showing = self.global_manager.get('safe_click_area').showing
+                if self.previous_safe_click_area_showing:
+                    self.set_image(['misc/background.png', {'image_id': 'misc/safe_click_area.png', 'override_width': self.global_manager.get('safe_click_area').width}])
+                else:
+                    self.set_image('misc/background.png')
+            return(True)
         return(False)
 
 class tooltip_free_image(free_image):

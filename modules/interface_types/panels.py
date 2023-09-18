@@ -83,3 +83,22 @@ class panel(button):
         '''
         if self.showing:
             super().draw(allow_show_outline=False)
+
+class safe_click_panel(panel):
+    '''
+    Panel that prevents selected units/ministers/countries from being deselected when its area is clicked
+    '''
+    def can_show(self):
+        '''
+        Description:
+            Returns whether this panel should be drawn - it is drawn when a unit/minister/country is selected
+        Input:
+            None
+        Output:
+            boolean: Returns False if the selected vehicle has no crew, otherwise returns same as superclass
+        '''
+        if super().can_show():
+            for parameter in ['displayed_mob', 'displayed_tile', 'displayed_minister', 'displayed_country']:
+                if self.global_manager.get(parameter) != 'none':
+                    return(True)
+        return(False)
